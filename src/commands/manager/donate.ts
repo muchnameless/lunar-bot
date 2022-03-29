@@ -65,7 +65,7 @@ export default class DonateCommand extends ApplicationCommand {
 			}),
 		);
 
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed //
 				.setTitle('Guild Donations')
 				.addFields({

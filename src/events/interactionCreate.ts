@@ -427,7 +427,7 @@ export default class InteractionCreateEvent extends Event {
 
 			// error reply
 			if (interaction.isRepliable()) {
-				InteractionUtil.reply(interaction, {
+				void InteractionUtil.reply(interaction, {
 					content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
 					ephemeral: true,
 					allowedMentions: { parse: [], repliedUser: true },

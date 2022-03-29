@@ -136,12 +136,11 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * DMs the message author with the content if they have not been DMed in the last hour
-	 * @param message
-	 * @param player
+	 * @param user
 	 * @param content
 	 */
 	static _dmMuteInfo(user: User, content: string) {
-		UserUtil.sendDM(user, {
+		return UserUtil.sendDM(user, {
 			content,
 			redisKey: `dm:${user.id}:chatbridge:muted`,
 		});
@@ -230,7 +229,7 @@ export class DiscordChatManager extends ChatManager {
 					reason: 'no Webhooks in Chat Bridge Channel found',
 				});
 
-				this.client.log(
+				void this.client.log(
 					new Embed()
 						.setColor(this.client.config.get('EMBED_GREEN'))
 						.setTitle(`${this.hypixelGuild} Chat Bridge`)
@@ -247,7 +246,7 @@ export class DiscordChatManager extends ChatManager {
 			if (error instanceof WebhookError) {
 				this.chatBridge.shouldRetryLinking = false;
 
-				this.client.log(
+				void this.client.log(
 					new Embed()
 						.setColor(this.client.config.get('EMBED_RED'))
 						.setTitle(`${error.hypixelGuild} Chat Bridge`)
@@ -391,7 +390,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (this.hypixelGuild!.checkMute(player)) {
-			DiscordChatManager._dmMuteInfo(
+			void DiscordChatManager._dmMuteInfo(
 				message.author,
 				`your mute expires ${Formatters.time(
 					new Date(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
@@ -403,13 +402,13 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if the player is auto muted
 		if (player?.infractions! >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
-			DiscordChatManager._dmMuteInfo(message.author, 'you are currently muted due to continues infractions');
+			void DiscordChatManager._dmMuteInfo(message.author, 'you are currently muted due to continues infractions');
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild!.muted && (!player || !this.hypixelGuild!.checkStaff(player))) {
-			DiscordChatManager._dmMuteInfo(
+			void DiscordChatManager._dmMuteInfo(
 				message.author,
 				`${this.hypixelGuild!.name}'s guild chat mute expires ${Formatters.time(
 					new Date(this.hypixelGuild!.mutedTill),
@@ -421,7 +420,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if the chatBridge bot is muted
 		if (this.hypixelGuild!.checkMute(this.minecraft.botPlayer)) {
-			DiscordChatManager._dmMuteInfo(
+			void DiscordChatManager._dmMuteInfo(
 				message.author,
 				`the bot's mute expires ${Formatters.time(
 					new Date(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid)!),
@@ -484,7 +483,7 @@ export class DiscordChatManager extends ChatManager {
 		if (message.interaction && !message.editedTimestamp) {
 			const interaction = this.client.chatBridges.interactionCache.get(message.interaction.id);
 
-			this.minecraft.chat({
+			void this.minecraft.chat({
 				content: `${this.client.config.get('PREFIXES')[0]}${
 					interaction
 						?.toString()

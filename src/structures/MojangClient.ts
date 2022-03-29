@@ -68,8 +68,8 @@ export class MojangClient {
 
 		if (options?.cache) {
 			for (const response of responses) {
-				this.cache?.set(`ign:${response.ign.toLowerCase()}`, response);
-				this.cache?.set(`uuid:${response.uuid}`, response);
+				void this.cache?.set(`ign:${response.ign.toLowerCase()}`, response);
+				void this.cache?.set(`uuid:${response.uuid}`, response);
 			}
 		}
 
@@ -181,8 +181,8 @@ export class MojangClient {
 				const response = { uuid, ign };
 
 				if (cache) {
-					this.cache?.set(`ign:${ign.toLowerCase()}`, response);
-					this.cache?.set(`uuid:${uuid}`, response);
+					void this.cache?.set(`ign:${ign.toLowerCase()}`, response);
+					void this.cache?.set(`uuid:${uuid}`, response);
 				}
 
 				return response;
@@ -194,7 +194,7 @@ export class MojangClient {
 			// invalid ign
 			// case 204: {
 			// 	if (queryType === 'ign') {
-			// 		consumeBody(res);
+			// 		void consumeBody(res);
 
 			// 		// retry a past date if name was queried
 			// 		let timestamp = Date.now();
@@ -209,24 +209,24 @@ export class MojangClient {
 
 			// 				if (cache) {
 			// 					// only cache ign -> uuid for outdated igns
-			// 					this.cache?.set(`ign:${ign.toLowerCase()}`, response);
+			// 					void this.cache?.set(`ign:${ign.toLowerCase()}`, response);
 			// 				}
 
 			// 				return response;
 			// 			}
 
-			// 			consumeBody(res);
+			// 			void consumeBody(res);
 			// 		}
 			// 	}
 			// }
 			// falls through
 
 			default:
-				consumeBody(res);
+				void consumeBody(res);
 
 				// only check cache if force === true, because otherwise cache is already checked before the request
 				if (cache && (!force || !(await this.cache?.get(CACHE_KEY)))) {
-					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText }, true);
+					void this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText }, true);
 				}
 
 				throw new MojangAPIError(res, queryType, query);

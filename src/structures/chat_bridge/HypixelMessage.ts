@@ -270,7 +270,7 @@ export class HypixelMessage {
 
 				// DM author the message if sending to gchat failed
 				if (!result[0]) {
-					this.author!.send(_options.content);
+					void this.author!.send(_options.content);
 				}
 
 				return result;
@@ -320,11 +320,11 @@ export class HypixelMessage {
 
 			// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 			if (/<@&\d{17,19}>/.test(discordMessage.content)) {
-				this.author.send('you do not have permission to ping roles from in-game chat');
-				MessageUtil.react(discordMessage, NO_PING_EMOJI);
+				void this.author.send('you do not have permission to ping roles from in-game chat');
+				void MessageUtil.react(discordMessage, NO_PING_EMOJI);
 			} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content)) {
-				this.author.send('you do not have permission to ping users from in-game chat');
-				MessageUtil.react(discordMessage, NO_PING_EMOJI);
+				void this.author.send('you do not have permission to ping users from in-game chat');
+				void MessageUtil.react(discordMessage, NO_PING_EMOJI);
 			}
 
 			return discordMessage;
@@ -368,7 +368,7 @@ export class HypixelMessage {
 			..._options
 		} = typeof options === 'string' ? ({ question: options } as AwaitConfirmationOptions) : options;
 
-		this.reply({
+		await this.reply({
 			content: question,
 			..._options,
 		});

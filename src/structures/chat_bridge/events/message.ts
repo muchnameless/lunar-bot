@@ -60,7 +60,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				// react to latest message from 'sender' with that content
 				for (const { channel } of this.chatBridge.discord.channels.values()) {
-					MessageUtil.react(
+					void MessageUtil.react(
 						(
 							await asyncFilter(
 								[...(channel?.messages.cache.values() ?? [])],
@@ -78,7 +78,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			}
 
 			// DM owner to add the blocked content to the filter
-			this.client.dmOwner(`${this.chatBridge.logInfo}: blocked message: ${hypixelMessage.rawContent}`);
+			void this.client.dmOwner(`${this.chatBridge.logInfo}: blocked message: ${hypixelMessage.rawContent}`);
 
 			return logger.error(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: blocked message: ${hypixelMessage.rawContent}`);
 		}
@@ -89,9 +89,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HYPIXEL_RANK] IGN joined the guild!
 		 */
 		if (hypixelMessage.content.includes('joined the guild')) {
-			this.chatBridge.hypixelGuild?.updateData();
-			hypixelMessage.forwardToDiscord();
-			return this.chatBridge.broadcast('welcome');
+			void this.chatBridge.hypixelGuild?.updateData();
+			void hypixelMessage.forwardToDiscord();
+			return void this.chatBridge.broadcast('welcome');
 		}
 
 		/**
@@ -107,9 +107,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			hypixelMessage.content.includes('disbanded the guild')
 		) {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: no more guild`);
-			this.chatBridge.hypixelGuild?.updateData();
+			void this.chatBridge.hypixelGuild?.updateData();
 			await hypixelMessage.forwardToDiscord();
-			return this.chatBridge.unlink();
+			return void this.chatBridge.unlink();
 		}
 
 		/**
@@ -126,8 +126,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			hypixelMessage.content.includes('renamed the guild to') ||
 			kickSuccess.test(hypixelMessage.content)
 		) {
-			this.chatBridge.hypixelGuild?.updateData();
-			return hypixelMessage.forwardToDiscord();
+			void this.chatBridge.hypixelGuild?.updateData();
+			return void hypixelMessage.forwardToDiscord();
 		}
 
 		/**
@@ -144,7 +144,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			hypixelMessage.content.includes('set the guild tag to') ||
 			/^the guild has (?:completed|reached|unlocked)|^guild quest tier \d+ completed!?$/i.test(hypixelMessage.content)
 		) {
-			return hypixelMessage.forwardToDiscord();
+			return void hypixelMessage.forwardToDiscord();
 		}
 
 		/**
@@ -155,7 +155,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const muteMatched = hypixelMessage.content.match(muteSuccess);
 
 		if (muteMatched) {
-			hypixelMessage.forwardToDiscord();
+			void hypixelMessage.forwardToDiscord();
 
 			const { target, duration, executor } = muteMatched.groups!;
 
@@ -178,15 +178,15 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const MS_DURATION = stringToMS(duration);
 
 			// update db and timeout discord member
-			this.chatBridge.hypixelGuild!.syncMute(
+			void this.chatBridge.hypixelGuild!.syncMute(
 				player,
 				Number.isNaN(MS_DURATION) ? Number.POSITIVE_INFINITY : Date.now() + MS_DURATION,
 			);
-			(async () => {
+			void (async () => {
 				if (Number.isNaN(MS_DURATION)) return;
 				const discordMember = await player.fetchDiscordMember();
 				if (!discordMember) return;
-				return GuildMemberUtil.timeout(
+				return void GuildMemberUtil.timeout(
 					discordMember,
 					MS_DURATION,
 					`${executor}: \`/guild mute ${target} ${duration}\``,
@@ -204,7 +204,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const unmuteMatched = hypixelMessage.content.match(unmuteSuccess);
 
 		if (unmuteMatched) {
-			hypixelMessage.forwardToDiscord();
+			void hypixelMessage.forwardToDiscord();
 
 			const { target, executor } = unmuteMatched.groups!;
 
@@ -219,11 +219,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			if (!player) return;
 
 			// update db and remove timeout from discord member
-			this.chatBridge.hypixelGuild!.syncMute(player, null);
-			(async () => {
+			void this.chatBridge.hypixelGuild!.syncMute(player, null);
+			void (async () => {
 				const discordMember = await player.fetchDiscordMember();
 				if (!discordMember) return;
-				return GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``);
+				return void GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``);
 			})();
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was unmuted`);
@@ -236,7 +236,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const promoteMatched = hypixelMessage.content.match(promoteSuccess);
 
 		if (promoteMatched) {
-			hypixelMessage.forwardToDiscord();
+			void hypixelMessage.forwardToDiscord();
 
 			const { target, newRank } = promoteMatched.groups!;
 			const player = this.client.players.findByIgn(target);
@@ -269,7 +269,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const demotedMatched = hypixelMessage.content.match(demoteSuccess);
 
 		if (demotedMatched) {
-			hypixelMessage.forwardToDiscord();
+			void hypixelMessage.forwardToDiscord();
 
 			const { target, newRank } = demotedMatched.groups!;
 			const player = this.client.players.findByIgn(target);
@@ -379,10 +379,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (guildJoinMatched) {
 			const [guildName] = guildJoinMatched;
 
-			this.client.hypixelGuilds.findByName(guildName)?.updateData();
+			void this.client.hypixelGuilds.findByName(guildName)?.updateData();
 
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: joined ${guildName}`);
-			return this.chatBridge.link(guildName);
+			return void this.chatBridge.link(guildName);
 		}
 
 		/**
@@ -400,7 +400,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			}
 
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepting f request from ${ign}`);
-			return this.chatBridge.minecraft.sendToChat(`/friend add ${ign}`);
+			return void this.chatBridge.minecraft.sendToChat(`/friend add ${ign}`);
 		}
 	}
 
@@ -412,7 +412,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const { player } = hypixelMessage;
 
 		// player activity
-		player?.update({ lastActivityAt: new Date() });
+		void player?.update({ lastActivityAt: new Date() });
 
 		// must use prefix for commands in guild
 		if (!hypixelMessage.commandData.prefix) {
@@ -430,7 +430,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 					// filter out stuff like +8 = 8, 1 7 = 17
 					if (!Number.isNaN(output) && output !== Number(hypixelMessage.content.replaceAll(' ', ''))) {
-						hypixelMessage.reply(`${input} = ${formattedOutput}`);
+						void hypixelMessage.reply(`${input} = ${formattedOutput}`);
 					}
 				} catch (error) {
 					logger.error(error);
@@ -439,7 +439,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (this.config.get('CHATBRIDGE_CHATTRIGGERS_ENABLED')) {
 				for (const trigger of this.client.chatTriggers.cache.values()) {
-					trigger.testMessage(hypixelMessage);
+					void trigger.testMessage(hypixelMessage);
 				}
 			}
 
@@ -466,7 +466,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				channel: hypixelMessage.type,
 				status: 'guild-chat-only command in whispers',
 			});
-			return hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
+			return void hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
 		}
 
 		// message author not the bot owner
@@ -485,7 +485,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 						channel: hypixelMessage.type,
 						status: `unable to find linked discord member in ${discordGuild?.name ?? 'currently unavailable'}`,
 					});
-					return hypixelMessage.author.send(
+					return void hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(
 							(roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
 						)}) from the ${discordGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in
@@ -503,7 +503,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 						requiredRoles,
 						status: 'missing required role',
 					});
-					return hypixelMessage.author.send(
+					return void hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(
 							(roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId,
 						)}) from the ${member.guild.name} Discord Server
@@ -541,7 +541,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 							status: `on cooldown for ${TIME_LEFT}`,
 						});
 
-						return hypixelMessage.author.send(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
+						return void hypixelMessage.author.send(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
 					}
 				}
 
@@ -573,7 +573,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				status: 'missing mandatory arguments',
 			});
 
-			return hypixelMessage.author.send(reply.join('\n'));
+			return void hypixelMessage.author.send(reply.join('\n'));
 		}
 
 		// execute command
@@ -594,7 +594,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				channel: hypixelMessage.type,
 			});
 
-			hypixelMessage.author.send(
+			void hypixelMessage.author.send(
 				typeof error === 'string' ? error : `an error occured while executing the '${command.name}' command:\n${error}`,
 			);
 		}
@@ -622,7 +622,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			case HypixelMessageType.Officer: {
 				if (!this.chatBridge.isEnabled()) return;
 
-				hypixelMessage.forwardToDiscord();
+				void hypixelMessage.forwardToDiscord();
 
 				return this._handleUserMessage(hypixelMessage);
 			}

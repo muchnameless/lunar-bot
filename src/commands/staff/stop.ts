@@ -18,6 +18,6 @@ export default class StopCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: ChatInputCommandInteraction) {
 		await InteractionUtil.reply(interaction, 'stopping the bot');
-		this.client.exit();
+		void this.client.exit();
 	}
 }

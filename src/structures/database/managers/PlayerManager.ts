@@ -84,7 +84,7 @@ export class PlayerManager extends ModelManager<Player> {
 		const player = this.resolve(idOrPlayer);
 		if (!player) throw new Error(`[PLAYERS DELETE]: invalid input: ${idOrPlayer}`);
 
-		player.uncache();
+		void player.uncache();
 		return this;
 	}
 
@@ -130,9 +130,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (isAddingSingleEntry) {
 			this.sortAlphabetically();
 
-			newPlayer.updateData({
-				reason: `joined ${newPlayer.guildName}`,
-			});
+			void newPlayer.updateData({ reason: `joined ${newPlayer.guildName}` });
 		}
 
 		return newPlayer;
@@ -207,7 +205,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	uncacheDiscordMembers() {
 		for (const player of this.cache.values()) {
-			player.setDiscordMember(null, false);
+			void player.setDiscordMember(null, false);
 		}
 	}
 
@@ -248,7 +246,7 @@ export class PlayerManager extends ModelManager<Player> {
 					return this;
 				}
 
-				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+				void this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
 			}
 
 			for (const player of this.cache.values()) {
@@ -291,7 +289,7 @@ export class PlayerManager extends ModelManager<Player> {
 				return this;
 			}
 
-			this.client.config.set('MOJANG_API_ERROR', false);
+			void this.client.config.set('MOJANG_API_ERROR', false);
 		}
 
 		const log = new Collection<
@@ -383,7 +381,7 @@ export class PlayerManager extends ModelManager<Player> {
 			}
 		}
 
-		this.client.log(...embeds);
+		void this.client.log(...embeds);
 
 		return this;
 	}
@@ -413,7 +411,7 @@ export class PlayerManager extends ModelManager<Player> {
 				return this;
 			}
 
-			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+			void this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
 		}
 
 		const log = new Collection<HypixelGuild, string[]>();
@@ -508,7 +506,7 @@ export class PlayerManager extends ModelManager<Player> {
 			}
 		}
 
-		this.client.log(...embeds);
+		void this.client.log(...embeds);
 
 		return this;
 	}
@@ -531,7 +529,7 @@ export class PlayerManager extends ModelManager<Player> {
 		await safePromiseAll(this.cache.map((player) => player.resetXp(options)));
 
 		if (options?.offsetToReset) {
-			this.client.config.set(
+			void this.client.config.set(
 				XP_OFFSETS_TIME[options.offsetToReset as keyof typeof XP_OFFSETS_TIME],
 				time ?? Date.now(),
 			);
@@ -559,7 +557,7 @@ export class PlayerManager extends ModelManager<Player> {
 					}),
 				);
 			} else if (!config.get('COMPETITION_RUNNING')) {
-				this._startCompetition();
+				void this._startCompetition();
 			}
 		}
 
@@ -575,7 +573,7 @@ export class PlayerManager extends ModelManager<Player> {
 				}),
 			);
 		} else if (config.get('COMPETITION_RUNNING')) {
-			this._endCompetition();
+			void this._endCompetition();
 		}
 
 		// mayor change reset
@@ -590,13 +588,15 @@ export class PlayerManager extends ModelManager<Player> {
 				}),
 			);
 		} else {
-			this._performMayorXpReset();
+			void this._performMayorXpReset();
 		}
 
 		const now = new Date();
 
 		// daily reset
-		if (new Date(config.get(XP_OFFSETS_TIME[Offset.Day])).getUTCDay() !== now.getUTCDay()) this._performDailyXpReset();
+		if (new Date(config.get(XP_OFFSETS_TIME[Offset.Day])).getUTCDay() !== now.getUTCDay()) {
+			void this._performDailyXpReset();
+		}
 
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
@@ -610,7 +610,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// weekly reset
 		if (getWeekOfYear(new Date(config.get(XP_OFFSETS_TIME[Offset.Week]))) !== getWeekOfYear(now)) {
-			this._performWeeklyXpReset();
+			void this._performWeeklyXpReset();
 		}
 
 		// each monday at 00:00:00
@@ -625,7 +625,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// monthly reset
 		if (new Date(config.get(XP_OFFSETS_TIME[Offset.Month])).getUTCMonth() !== now.getUTCMonth()) {
-			this._performMonthlyXpReset();
+			void this._performMonthlyXpReset();
 		}
 
 		// the first of each month at 00:00:00
@@ -651,7 +651,7 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('COMPETITION_SCHEDULED', false),
 		]);
 
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed //
 				.setTitle('Guild Competition')
 				.setDescription('started'),
@@ -669,7 +669,7 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('COMPETITION_RUNNING', false),
 		]);
 
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed //
 				.setTitle('Guild Competition')
 				.setDescription('ended'),
@@ -688,7 +688,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		await this.resetXp({ offsetToReset: Offset.Mayor }, currentMayorTime);
 
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Current Mayor XP Tracking')
 				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
@@ -711,7 +711,7 @@ export class PlayerManager extends ModelManager<Player> {
 	private async _performDailyXpReset() {
 		await this.resetXp({ offsetToReset: Offset.Day });
 
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Daily XP Tracking')
 				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
@@ -726,7 +726,7 @@ export class PlayerManager extends ModelManager<Player> {
 	private async _performWeeklyXpReset() {
 		await this.resetXp({ offsetToReset: Offset.Week });
 
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Weekly XP Tracking')
 				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
@@ -741,7 +741,7 @@ export class PlayerManager extends ModelManager<Player> {
 	private async _performMonthlyXpReset() {
 		await this.resetXp({ offsetToReset: Offset.Month });
 
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Monthly XP Tracking')
 				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),

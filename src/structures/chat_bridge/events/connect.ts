@@ -14,7 +14,7 @@ export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
 	 */
 	override /* async */ run() {
 		// link chatBridge to the bot account's guild
-		this.chatBridge.link();
+		void this.chatBridge.link();
 
 		// send bot to limbo (forbidden character in chat)
 		// let counter = 5;

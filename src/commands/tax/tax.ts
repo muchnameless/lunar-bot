@@ -111,7 +111,7 @@ export default class TaxCommand extends ApplicationCommand {
 						}
 
 						await this.client.taxCollectors.add(player);
-						if (!player.paid) player.setToPaid(); // let collector collect their own tax if they have not paid already
+						if (!player.paid) await player.setToPaid(); // let collector collect their own tax if they have not paid already
 						log = `\`${player}\` is now a tax collector`;
 						break;
 
@@ -142,7 +142,7 @@ export default class TaxCommand extends ApplicationCommand {
 						throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 				}
 
-				this.client.log(
+				void this.client.log(
 					this.client.defaultEmbed //
 						.setTitle('Guild Tax')
 						.setDescription(log),
@@ -173,7 +173,7 @@ export default class TaxCommand extends ApplicationCommand {
 						]);
 
 						// logging
-						this.client.log(
+						void this.client.log(
 							this.client.defaultEmbed
 								.setTitle('Guild Tax')
 								.setDescription(`${interaction.user.tag} | ${interaction.user} changed the guild tax amount`)
@@ -230,7 +230,7 @@ export default class TaxCommand extends ApplicationCommand {
 							collectedBy: collector.minecraftUuid,
 						});
 
-						this.client.log(
+						void this.client.log(
 							this.client.defaultEmbed //
 								.setTitle('Guild Tax')
 								.addFields({
@@ -410,13 +410,13 @@ export default class TaxCommand extends ApplicationCommand {
 							await safePromiseAll(taxCollectors.cache.map(({ player }) => player?.setToPaid()));
 
 							// delete players who left the guild
-							players.sweepDb();
+							void players.sweepDb();
 
 							result = 'reset the tax database. All auctions up until now will be ignored';
 						}
 
 						// logging
-						(async () => {
+						void (async () => {
 							try {
 								let logMessage = await this.client.log(
 									currentTaxEmbed,

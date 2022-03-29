@@ -78,7 +78,7 @@ export class ChatBridgeManager {
 		if (typeof index === 'number' && index >= 0 && index < ChatBridgeManager._accounts.length) {
 			const chatBridge = this.cache[index];
 
-			chatBridge.connect();
+			await chatBridge.connect();
 			await once(chatBridge, ChatBridgeEvent.Ready);
 
 			return this;
@@ -86,8 +86,8 @@ export class ChatBridgeManager {
 
 		// all
 		await Promise.all(
-			this.cache.map((chatBridge) => {
-				chatBridge.connect();
+			this.cache.map(async (chatBridge) => {
+				await chatBridge.connect();
 				return once(chatBridge, ChatBridgeEvent.Ready);
 			}),
 		);
@@ -158,7 +158,7 @@ export class ChatBridgeManager {
 					.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
 			}
 		} else {
-			MessageUtil.react(message, X_EMOJI);
+			void MessageUtil.react(message, X_EMOJI);
 		}
 	}
 
@@ -191,10 +191,10 @@ export class ChatBridgeManager {
 			}
 
 			// no ChatBridge for the message's channel found
-			MessageUtil.react(message, X_EMOJI);
+			void MessageUtil.react(message, X_EMOJI);
 		} catch (error) {
 			logger.error(error, '[CHAT BRIDGES]: handleDiscordMessage');
-			MessageUtil.react(message, X_EMOJI);
+			void MessageUtil.react(message, X_EMOJI);
 		}
 	}
 }

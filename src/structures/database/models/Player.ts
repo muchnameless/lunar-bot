@@ -45,6 +45,7 @@ import {
 	hours,
 	logger,
 	minutes,
+	safePromiseAll,
 	seconds,
 	trim,
 	uuidToBustURL,
@@ -126,6 +127,15 @@ export type PlayerInGuild = Player & {
 const enum NickChangeReason {
 	NoIGN,
 	NotUnique,
+}
+
+interface MakeNickAPICallOptions {
+	/** new nickname, null to remove the current nickname */
+	newNick?: string | null;
+	/** whether to dm the user that they should include their ign somewhere in their nickname */
+	shouldSendDm?: boolean;
+	/** reason for discord's audit logs and the DM */
+	reason?: string | NickChangeReason;
 }
 
 export class Player extends Model<InferAttributes<Player>, InferCreationAttributes<Player>> {
@@ -439,7 +449,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 					allowNull: false,
 					set(value: boolean) {
 						this.setDataValue('inDiscord', value);
-						if (!value) (this as Player).uncacheMember();
+						if (!value) void (this as Player).uncacheMember();
 					},
 				},
 				guildId: {
@@ -605,13 +615,13 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			const discordMember = (await guild.members.fetch(this.discordId)) ?? null;
 
-			this.setDiscordMember(discordMember);
+			void this.setDiscordMember(discordMember);
 
 			return discordMember;
 		} catch (error) {
 			// prevent further fetches and try to link via cache in the next updateDiscordMember calls
 			logger.error(error, `[FETCH DISCORD MEMBER]: ${this.logInfo}`);
-			this.setDiscordMember(null, error instanceof DiscordAPIError);
+			void this.setDiscordMember(null, error instanceof DiscordAPIError);
 			return null;
 		}
 	}
@@ -639,7 +649,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			return this;
 		}
 
-		if (this.hypixelGuild?.discordId !== member.guild.id) return;
+		if (this.hypixelGuild?.discordId !== member.guild.id) return this;
 
 		if (this._discordMember) {
 			GuildMemberUtil.setPlayer(this._discordMember, null);
@@ -778,13 +788,15 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	}: PlayerUpdateOptions = {}) {
 		if (!this.guildId) {
 			// uncache non guild members if no activity in the last hour
-			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncache();
+			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) void this.uncache();
 			return;
 		}
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
 		if (shouldOnlyAwaitUpdateXp) {
-			this.updateDiscordMember({ reason, shouldSendDm });
+			this.updateDiscordMember({ reason, shouldSendDm }).catch((error) =>
+				logger.error(error, `[UPDATE DATA]: ${this.logInfo}`),
+			);
 		} else {
 			await this.updateDiscordMember({ reason, shouldSendDm });
 		}
@@ -938,7 +950,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			}
 
 			logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
-			if (!(error instanceof RateLimitError)) this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', true);
+			if (!(error instanceof RateLimitError)) void this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', true);
 			if (rejectOnAPIError) throw error;
 			return this;
 		}
@@ -946,6 +958,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * updates discord roles and nickname
+	 * can only reject if `this.guildId === GUILD_ID_ERROR`
 	 * @param options
 	 * @param options.reason role update reason for discord's audit logs
 	 * @param options.shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
@@ -966,7 +979,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		const TIMEOUT_LEFT = (member.communicationDisabledUntilTimestamp ?? 0) - Date.now();
 
 		if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= 2 * this.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1)) {
-			this.hypixelGuild?.unmute(this, member.communicationDisabledUntilTimestamp! - Date.now() + seconds(1));
+			void this.hypixelGuild?.unmute(this, member.communicationDisabledUntilTimestamp! - Date.now() + seconds(1));
 		}
 
 		// abort if the member is missing the mandatory role (if existant)
@@ -1262,12 +1275,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			if (this.hypixelGuild?.discordId === idOrDiscordMember.guild.id) {
 				this.update({ inDiscord: true }).catch((error) => logger.error(error, `[LINK]: ${this.logInfo}`));
-				this.setDiscordMember(idOrDiscordMember);
+				void this.setDiscordMember(idOrDiscordMember);
+
+				if (reason) await this.updateData({ reason });
 			}
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
-
-			if (reason) await this.updateData({ reason });
 
 			return this;
 		}
@@ -1398,7 +1411,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// was not successful
 			logger.error(error, '[ROLE API CALL]');
 
-			this.setDiscordMember(null, error instanceof DiscordAPIError);
+			void this.setDiscordMember(null, error instanceof DiscordAPIError);
 
 			loggingEmbed //
 				.setColor(config.get('EMBED_RED'))
@@ -1433,7 +1446,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			return false;
 		} finally {
 			// logging
-			this.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
+			void this.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
 		}
 	}
 
@@ -1463,7 +1476,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			}
 
 			// keep entry in cache but uncache discord member
-			this.uncacheMember();
+			void this.uncacheMember();
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 
@@ -1536,15 +1549,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * sets a nickname for the player's discord member
-	 * @param newNick new nickname, null to remove the current nickname
-	 * @param shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
-	 * @param reason reason for discord's audit logs and the DM
+	 * @param options
 	 */
-	async makeNickAPICall({
-		newNick = null,
-		shouldSendDm = false,
-		reason,
-	}: { newNick?: string | null; shouldSendDm?: boolean; reason?: string | NickChangeReason } = {}) {
+	async makeNickAPICall({ newNick = null, shouldSendDm = false, reason }: MakeNickAPICallOptions = {}) {
 		const member = await this.fetchDiscordMember();
 		if (!member) return false;
 
@@ -1579,7 +1586,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			await member.setNickname(newNick, auditLogReason);
 
-			this.client.log(
+			void this.client.log(
 				this.client.defaultEmbed
 					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: this.url })
 					.setThumbnail(this.imageURL)
@@ -1606,7 +1613,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			if (shouldSendDm) {
 				switch (reason) {
 					case NickChangeReason.NoIGN:
-						GuildMemberUtil.sendDM(member, {
+						void GuildMemberUtil.sendDM(member, {
 							content: stripIndents`
 								include your ign \`${this.ign}\` somewhere in your nickname.
 								If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${
@@ -1618,7 +1625,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						break;
 
 					case NickChangeReason.NotUnique:
-						GuildMemberUtil.sendDM(member, {
+						void GuildMemberUtil.sendDM(member, {
 							content: stripIndents`
 								the name \`${PREV_NAME}\` is already taken by another guild member.
 								Your name should be unique to allow staff members to easily identify you
@@ -1637,7 +1644,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			return true;
 		} catch (error) {
 			logger.error(error, `[SYNC IGN DISPLAYNAME]: ${this.logInfo}`);
-			this.setDiscordMember(null, error instanceof DiscordAPIError);
+			void this.setDiscordMember(null, error instanceof DiscordAPIError);
 			return false;
 		}
 	}
@@ -1669,8 +1676,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		const mainProfile = findSkyblockProfile(profiles, this.minecraftUuid, FindProfileStrategy.MaxWeight);
 
 		if (!mainProfile) {
-			this.update({ mainProfileId: null, xpUpdatesDisabled: true }).catch((error) => logger.error(error));
-			this.resetXp({ offsetToReset: Offset.Current });
+			void safePromiseAll([
+				this.update({ mainProfileId: null, xpUpdatesDisabled: true }),
+				this.resetXp({ offsetToReset: Offset.Current }),
+			]);
 
 			throw 'no SkyBlock profiles';
 		}
@@ -1713,7 +1722,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
 			}
 
-			this.syncIgnWithDisplayName(false);
+			void this.syncIgnWithDisplayName(false);
 
 			return {
 				oldIgn: OLD_IGN,
@@ -1729,7 +1738,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			}
 
 			// prevent further auto updates
-			this.client.config.set('MOJANG_API_ERROR', true);
+			void this.client.config.set('MOJANG_API_ERROR', true);
 
 			if ((error as any)?.code === ErrorCode.AbortErr) {
 				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
@@ -1828,11 +1837,22 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			attributes: ['to', 'amount'],
 			raw: true,
 		});
-		if (result.length) {
-			this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, TransactionType.Tax);
-		}
 
-		return this.update({ paid: false });
+		if (!result.length) return this.update({ paid: false });
+
+		const transaction = await this.sequelize.transaction();
+
+		try {
+			await this.client.taxCollectors.cache
+				.get(result[0].to)
+				?.addAmount(-result[0].amount, TransactionType.Tax, { transaction });
+			await this.update({ paid: false }, { transaction });
+
+			await transaction.commit();
+		} catch (error) {
+			await transaction.rollback();
+			throw error;
+		}
 	}
 
 	/**
@@ -1865,8 +1885,6 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * set the player to paid
 	 * @param options
-	 * @param options.type
-	 * @param options.notes
 	 */
 	addTransfer({
 		amount,
@@ -1963,7 +1981,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		try {
 			return await this.save();
 		} catch (error) {
-			return logger.error({ err: error, data: { expHistory, rank } }, `[SYNC WITH GUILD DATA]: ${this.logInfo}`);
+			logger.error({ err: error, data: { expHistory, rank } }, `[SYNC WITH GUILD DATA]: ${this.logInfo}`);
+			return this;
 		}
 	}
 
@@ -2185,11 +2204,17 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * adds the current timestamp to infractions
 	 */
-	addInfraction() {
+	async addInfraction() {
 		this._infractions ??= []; // create infractions array if non-existent
 		this._infractions.push(Date.now()); // add current time
 		this.changed('_infractions', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
-		return this.save();
+
+		try {
+			return await this.save();
+		} catch (error) {
+			logger.error(error);
+			return this;
+		}
 	}
 
 	/**

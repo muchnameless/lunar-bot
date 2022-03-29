@@ -17,6 +17,6 @@ export default class ShardDisconnectEvent extends Event {
 	override run(closeEvent: CloseEvent, id: number) {
 		logger.error(closeEvent, `[SHARD #${id} DISCONNECT]`);
 
-		this.client.exit(-1);
+		void this.client.exit(-1);
 	}
 }

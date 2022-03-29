@@ -92,7 +92,7 @@ process
 	})
 	.on('uncaughtException', (error) => {
 		logger.fatal(error, '[UNCAUGHT EXCEPTION]');
-		client.exit(-1);
+		void client.exit(-1);
 	})
 	.on('SIGINT', () => client.exit(0));
 

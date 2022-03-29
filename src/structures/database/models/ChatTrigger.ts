@@ -97,8 +97,9 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 			if (
 				this.timestamps.has(hypixelMessage.author.ign) &&
 				Date.now() < this.timestamps.get(hypixelMessage.author.ign)! + this.cooldown!
-			)
+			) {
 				return;
+			}
 
 			this.timestamps.set(hypixelMessage.author.ign, Date.now());
 			setTimeout(() => this.timestamps!.delete(hypixelMessage.author.ign), this.cooldown!);

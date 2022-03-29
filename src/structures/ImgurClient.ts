@@ -112,7 +112,7 @@ export class ImgurClient {
 		this.rateLimitedWaitTime = rateLimitedWaitTime ?? seconds(10);
 
 		// restore cached rateLimit data
-		(async () => {
+		void (async () => {
 			try {
 				const data = (await cache?.get('ratelimits')) as { rateLimit: RateLimitData; postRateLimit: PostRateLimitData };
 
@@ -246,7 +246,7 @@ export class ImgurClient {
 
 			// check response
 			if (res.status !== 200) {
-				consumeBody(res);
+				void consumeBody(res);
 				throw new FetchError('ImgurAPIError', res);
 			}
 

@@ -35,7 +35,7 @@ export default class GuildMemberRemoveEvent extends Event {
 		// uncaches the member as well
 		player.update({ inDiscord: false }).catch((error) => logger.error(error));
 
-		this.client.log(
+		void this.client.log(
 			MessageEmbedUtil.padFields(
 				new Embed()
 					.setColor(this.config.get('EMBED_RED'))

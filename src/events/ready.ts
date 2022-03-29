@@ -28,7 +28,7 @@ export default class ReadyEvent extends Event {
 				const INTERVAL = this.config.get('DATABASE_UPDATE_INTERVAL');
 
 				if (INTERVAL - (new Date().getMinutes() % INTERVAL) > 1) {
-					this.client.hypixelGuilds.updateData({ syncRanks: false });
+					void this.client.hypixelGuilds.updateData({ syncRanks: false });
 				}
 			}
 		}

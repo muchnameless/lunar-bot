@@ -67,7 +67,7 @@ export default class XpResetCommand extends ApplicationCommand {
 		}
 
 		// logging
-		this.client.log(
+		void this.client.log(
 			this.client.defaultEmbed
 				.setTitle('XP Tracking')
 				.setDescription(`${interaction.user.tag} | ${interaction.user} ${result}`),

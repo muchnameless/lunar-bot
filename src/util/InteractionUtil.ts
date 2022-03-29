@@ -151,7 +151,7 @@ export class InteractionUtil extends null {
 						`[INTERACTION UTIL]: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`,
 					);
 
-					this.defer(interaction);
+					void this.defer(interaction);
 
 					interactionData.autoDeferTimeout = null;
 				},
@@ -740,7 +740,7 @@ export class InteractionUtil extends null {
 
 				// wrong user
 				if (i.user.id !== interaction.user.id) {
-					this.reply(interaction, {
+					void this.reply(interaction, {
 						content: 'that is not up to you to decide',
 						ephemeral: true,
 					});
@@ -762,7 +762,7 @@ export class InteractionUtil extends null {
 
 						for (const component of row.components) component.setDisabled(true);
 
-						this.update(buttonInteraction, {
+						void this.update(buttonInteraction, {
 							embeds: [
 								new Embed()
 									.setColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
@@ -803,7 +803,7 @@ export class InteractionUtil extends null {
 							await this.editReply(interaction, editOptions, message ?? '@original');
 						} catch (error) {
 							logger.error({ err: error, interaction, data: _options }, '[INTERACTION AWAIT CONFIRMATION]');
-							this.reply(interaction, editOptions);
+							void this.reply(interaction, editOptions);
 						}
 						break;
 					}

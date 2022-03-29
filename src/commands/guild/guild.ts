@@ -829,7 +829,7 @@ export default class GuildCommand extends ApplicationCommand {
 				});
 
 				// add to ban list
-				(async () => {
+				void (async () => {
 					switch (interaction.options.getBoolean('add-to-ban-list')) {
 						case false: // option false choosen
 							return;
@@ -852,13 +852,13 @@ export default class GuildCommand extends ApplicationCommand {
 									_reason: reason,
 								});
 
-								InteractionUtil.reply(interaction, {
+								void InteractionUtil.reply(interaction, {
 									content: `\`${target}\` was added to the ban list for \`${reason}\``,
 								});
 							} catch (error) {
 								logger.error(error);
 
-								InteractionUtil.reply(interaction, {
+								void InteractionUtil.reply(interaction, {
 									content: `error adding \`${target}\` to the ban list: ${error}`,
 								});
 							}

@@ -324,7 +324,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	) {
 		if (!discordMessage) return;
 
-		MessageUtil.react(discordMessage, STOP_EMOJI);
+		void MessageUtil.react(discordMessage, STOP_EMOJI);
 
 		let content: string | undefined;
 
@@ -343,14 +343,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 						})
 					)[0];
 
-				player.addInfraction();
+				void player.addInfraction();
 
 				const { infractions } = player;
 
 				if (infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 					const MUTE_DURATION = ms(this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION'), { long: true });
 
-					this.client.log(
+					void this.client.log(
 						new Embed()
 							.setColor(this.client.config.get('EMBED_RED'))
 							.setAuthor({
@@ -399,7 +399,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 		}
 
-		UserUtil.sendDM(
+		void UserUtil.sendDM(
 			discordMessage.author,
 			reason === ForwardRejectionReason.HypixelBlocked
 				? content
@@ -461,7 +461,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		if (!this.isReady()) {
 			this.abortLoginTimeout = setTimeout(() => {
 				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-				this.reconnect(0);
+				this.reconnect(0).catch((error) => logger.error(error));
 			}, seconds(60));
 		}
 
@@ -809,14 +809,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		if (!success) {
 			// messageParts blocked
-			this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
+			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
 		}
 
 		if (!contentParts.size) return false;
 
 		if (contentParts.size > maxParts) {
-			this._handleForwardRejection(discordMessage, ForwardRejectionReason.MessageCount, { maxParts });
+			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.MessageCount, { maxParts });
 			return false;
 		}
 
@@ -892,7 +892,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			this.bot.write('chat', { message });
 		} catch (error) {
 			logger.error(error, '[CHATBRIDGE _SEND TO CHAT]');
-			MessageUtil.react(discordMessage, X_EMOJI);
+			void MessageUtil.react(discordMessage, X_EMOJI);
 
 			this._resetFilter();
 
@@ -910,7 +910,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.isReady()) {
-					MessageUtil.react(discordMessage, X_EMOJI);
+					void MessageUtil.react(discordMessage, X_EMOJI);
 					logger.error(`timeout while sending '${message}'`);
 					throw response;
 				}
@@ -926,7 +926,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 				// max retries reached
 				if (++this._retries === MinecraftChatManager.MAX_RETRIES) {
-					MessageUtil.react(discordMessage, X_EMOJI);
+					void MessageUtil.react(discordMessage, X_EMOJI);
 					await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					throw `unable to send '${message}', anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}
@@ -937,7 +937,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// hypixel filter blocked message
 			case ChatResponse.Blocked: {
-				this._handleForwardRejection(discordMessage, ForwardRejectionReason.HypixelBlocked);
+				void this._handleForwardRejection(discordMessage, ForwardRejectionReason.HypixelBlocked);
 				await sleep(this.delay);
 				throw `unable to send '${message}', hypixel's filter blocked it`;
 			}

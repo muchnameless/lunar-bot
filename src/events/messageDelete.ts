@@ -20,7 +20,7 @@ export default class MessageDeleteEvent extends Event {
 	protected _handleDelete(message: Message) {
 		MessageUtil.DELETE_TIMEOUT_CACHE.delete(message.id);
 		MessageUtil.DELETED_MESSAGES.add(message);
-		if (message.id === this.config.get('TAX_MESSAGE_ID')) this.config.set('TAX_MESSAGE_ID', null);
+		if (message.id === this.config.get('TAX_MESSAGE_ID')) void this.config.set('TAX_MESSAGE_ID', null);
 	}
 
 	/**

@@ -87,11 +87,12 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	events = new EventCollection(this, new URL('./events/', import.meta.url));
 
 	constructor(client: LunarClient, mcAccount: number) {
-		super();
+		// @ts-expect-error
+		super({ captureRejections: true });
 
 		this.client = client;
 		this.mcAccount = mcAccount;
-		this.events.loadAll();
+		void this.events.loadAll();
 	}
 
 	/**

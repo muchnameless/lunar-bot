@@ -67,12 +67,7 @@ export default class PollCommand extends DualCommand {
 
 	/**
 	 * create a poll for both in-game chat and the chatBridge channel
-	 * @param param0
-	 * @param param0.chatBridge
-	 * @param param0.question
-	 * @param param0.pollOptionNames
-	 * @param param0.duration
-	 * @param param0.ign
+	 * @param options
 	 */
 	private async _run({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
 		if (chatBridge.pollUntil) {
@@ -107,7 +102,7 @@ export default class PollCommand extends DualCommand {
 			});
 
 			// post message to both chats
-			chatBridge.broadcast(stripIndents`
+			await chatBridge.broadcast(stripIndents`
 				poll by ${escapeIgn(ign)}: type a number to vote (${ms(DURATION, { long: true })})
 				${question}
 				${pollOptions.map(({ number, option }) => `${INVISIBLE_CHARACTERS[0]}${number}: ${option}`).join('\n')}
@@ -146,7 +141,7 @@ export default class PollCommand extends DualCommand {
 			);
 
 			// reply with result
-			ChannelUtil.send(discordChannel, {
+			void ChannelUtil.send(discordChannel, {
 				embeds: [
 					this.client.defaultEmbed
 						.setTitle(question)
@@ -157,7 +152,7 @@ export default class PollCommand extends DualCommand {
 
 			resultString.unshift(question);
 
-			chatBridge.minecraft.gchat({
+			void chatBridge.minecraft.gchat({
 				content: resultString.join('\n'),
 				maxParts: Number.POSITIVE_INFINITY,
 			});
@@ -171,7 +166,7 @@ export default class PollCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: ChatInputCommandInteraction) {
-		InteractionUtil.deferReply(interaction, {
+		void InteractionUtil.deferReply(interaction, {
 			ephemeral: true,
 		});
 

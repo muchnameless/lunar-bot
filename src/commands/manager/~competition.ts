@@ -47,7 +47,7 @@ export class CompetitionCommand extends ApplicationCommand {
 		let retries = 0;
 
 		try {
-			InteractionUtil.reply(interaction, commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`);
+			void InteractionUtil.reply(interaction, commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`);
 
 			do {
 				const collected = await next();
@@ -59,11 +59,11 @@ export class CompetitionCommand extends ApplicationCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
-					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid type`);
+					void InteractionUtil.reply(interaction, `\`${collected}\` is not a valid type`);
 				}
 			} while (!type);
 
-			InteractionUtil.reply(interaction, 'starting time?');
+			void InteractionUtil.reply(interaction, 'starting time?');
 
 			do {
 				const collected = await next();
@@ -75,11 +75,11 @@ export class CompetitionCommand extends ApplicationCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
-					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
+					void InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
 				}
 			} while (!startingTime);
 
-			InteractionUtil.reply(interaction, 'ending time?');
+			void InteractionUtil.reply(interaction, 'ending time?');
 
 			do {
 				const collected = await next();
@@ -92,11 +92,11 @@ export class CompetitionCommand extends ApplicationCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
-					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
+					void InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
 				}
 			} while (!endingTime);
 
-			InteractionUtil.reply(
+			void InteractionUtil.reply(
 				interaction,
 				`type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
 			);

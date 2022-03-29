@@ -25,7 +25,7 @@ export default class GuildUnavailableEvent extends Event {
 
 			// sweep discord member cache
 			for (const player of hypixelGuild.players.values()) {
-				player.setDiscordMember(null, false);
+				void player.setDiscordMember(null, false);
 			}
 		}
 

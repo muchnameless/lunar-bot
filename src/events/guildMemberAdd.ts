@@ -26,7 +26,7 @@ export default class GuildMemberAddEvent extends Event {
 		player.link(member, 'linked player joined discord server').catch((error) => logger.error(error));
 
 		// member is not from the hypixel guild's discord guild
-		if (player?.hypixelGuild?.discordId !== member.guild.id) return;
+		if (player.hypixelGuild?.discordId !== member.guild.id) return;
 
 		let description = stripIndents`
 			${member} joined the discord server
@@ -39,7 +39,7 @@ export default class GuildMemberAddEvent extends Event {
 			description += `\n\nwaiting for ${member.guild.roles.cache.get(MANDATORY_ROLE_ID) ?? MANDATORY_ROLE_ID} role`;
 		}
 
-		this.client.log(
+		void this.client.log(
 			new Embed()
 				.setColor(this.config.get('EMBED_GREEN'))
 				.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: player.url })

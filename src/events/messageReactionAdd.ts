@@ -34,7 +34,7 @@ export default class MessageReactionAddEvent extends Event {
 		}
 
 		if (userId === reaction.message.author?.id) {
-			this.client.chatBridges.handleAnnouncementMessage(reaction.message as Message);
+			void this.client.chatBridges.handleAnnouncementMessage(reaction.message as Message);
 		}
 	}
 }

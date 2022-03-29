@@ -495,7 +495,7 @@ async function getLeaderboardMessageOptions(
 		);
 	}
 
-	redis.psetex(CACHE_KEY, client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1), JSON.stringify(embeds));
+	void redis.psetex(CACHE_KEY, client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1), JSON.stringify(embeds));
 
 	if (leaderboardArgs.page < 1) {
 		leaderboardArgs.page = 1;

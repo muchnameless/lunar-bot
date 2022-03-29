@@ -27,11 +27,11 @@ export default class MessageCreateEvent extends Event {
 		if (
 			this.client.hypixelGuilds.cache.some(({ announcementsChannelId }) => announcementsChannelId === message.channelId)
 		) {
-			MessageUtil.react(message, BROADCAST_EMOJI);
+			void MessageUtil.react(message, BROADCAST_EMOJI);
 		}
 
 		// player activity
-		UserUtil.getPlayer(message.author)?.update({ lastActivityAt: new Date() });
+		void UserUtil.getPlayer(message.author)?.update({ lastActivityAt: new Date() });
 	}
 
 	/**

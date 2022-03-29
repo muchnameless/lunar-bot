@@ -37,3 +37,5 @@ export const db = {
 for (const model of Object.values(models) as any[]) {
 	model.associate?.(db);
 }
+
+export { sequelize };

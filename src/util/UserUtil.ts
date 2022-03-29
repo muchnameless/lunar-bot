@@ -110,11 +110,11 @@ export class UserUtil extends null {
 			if (error instanceof DiscordAPIError) {
 				switch (error.code) {
 					case RESTJSONErrorCodes.CannotSendMessagesToThisUser:
-						redis.psetex(`dm:${user.id}:closed`, hours(1), 1);
+						void redis.psetex(`dm:${user.id}:closed`, hours(1), 1);
 						break;
 
 					case RESTJSONErrorCodes.OpeningDirectMessagesTooFast:
-						redis.psetex('dm:channel:creation:error', hours(1), 1);
+						void redis.psetex('dm:channel:creation:error', hours(1), 1);
 						break;
 				}
 			}
@@ -123,7 +123,7 @@ export class UserUtil extends null {
 			logger.error(error, `[USER SEND DM]: ${user.tag} | ${user.id}`);
 			return null;
 		} finally {
-			if (redisKey) redis.psetex(redisKey, cooldown ?? hours(1), 1);
+			if (redisKey) void redis.psetex(redisKey, cooldown ?? hours(1), 1);
 		}
 	}
 }

@@ -26,7 +26,8 @@
 		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/no-dupe-class-members": "error",
 		"@typescript-eslint/no-explicit-any": "off",
-		"@typescript-eslint/no-floating-promises": "off",
+		"@typescript-eslint/no-floating-promises": "error",
+		"@typescript-eslint/no-misused-promises": ["error", { "checksVoidReturn": false }],
 		"@typescript-eslint/no-non-null-asserted-optional-chain": "off",
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/no-shadow": "error",
@@ -63,6 +64,7 @@
 			}
 		],
 		"unicorn/prefer-at": "error",
+		"unicorn/prefer-export-from": ["error", { "ignoreUsedVariables": true }],
 		"unicorn/prefer-object-has-own": "error",
 		"unicorn/prefer-string-replace-all": "error",
 		"unicorn/prefer-top-level-await": "error",

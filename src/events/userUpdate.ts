@@ -18,7 +18,7 @@ export default class UserUpdateEvent extends Event {
 	override run(oldUser: User, newUser: User) {
 		// changed username -> check if new name includes ign
 		if (oldUser.username !== newUser.username) {
-			UserUtil.getPlayer(newUser)?.syncIgnWithDisplayName(false);
+			void UserUtil.getPlayer(newUser)?.syncIgnWithDisplayName(false);
 		}
 	}
 }

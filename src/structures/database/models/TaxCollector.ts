@@ -1,10 +1,12 @@
 import { Model, DataTypes } from 'sequelize';
 import { TransactionType } from './Transaction';
 import type {
+	Attributes,
 	CreationOptional,
 	InferAttributes,
 	InferCreationAttributes,
 	InstanceDestroyOptions,
+	InstanceUpdateOptions,
 	ModelStatic,
 	NonAttribute,
 	Sequelize,
@@ -66,20 +68,28 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 	 * adds the amount to the taxCollector's collected amount
 	 * @param amount
 	 * @param type
+	 * @param options
 	 */
-	addAmount(amount: number, type = TransactionType.Tax) {
+	// eslint-disable-next-line default-param-last
+	addAmount(amount: number, type = TransactionType.Tax, options?: InstanceUpdateOptions<Attributes<TaxCollector>>) {
+		let data;
+
 		switch (type) {
 			case TransactionType.Tax:
-				return this.update({ collectedTax: this.collectedTax + amount });
+				data = { collectedTax: this.collectedTax + amount };
+				break;
 
 			case TransactionType.Donation:
-				return this.update({ collectedDonations: this.collectedDonations + amount });
+				data = { collectedDonations: this.collectedDonations + amount };
+				break;
 
 			default: {
 				const e: never = type;
 				throw new Error(`[ADD AMOUNT]: ${this}: unknown type '${e}'`);
 			}
 		}
+
+		return this.update(data, options);
 	}
 
 	/**

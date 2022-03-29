@@ -22,6 +22,6 @@ export default class ShardReadyEvent extends Event {
 			logger.info(`[SHARD #${id} READY]`);
 		}
 
-		this.client.fetchAllMembers();
+		void this.client.fetchAllMembers();
 	}
 }

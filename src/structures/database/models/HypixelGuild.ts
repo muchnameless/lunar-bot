@@ -489,7 +489,7 @@ export class HypixelGuild extends Model<
 			this._unmuteTimeouts.delete(target.minecraftUuid);
 		} catch (error) {
 			logger.error({ err: error, data: { target: `${target}` } }, `[UNMUTE]: ${this.name}`);
-			this.unmute(target, minutes(1));
+			void this.unmute(target, minutes(1));
 		}
 	}
 
@@ -498,10 +498,10 @@ export class HypixelGuild extends Model<
 	 * @param player
 	 * @param mutedTill
 	 */
-	syncMute(player: Player, mutedTill: number | null) {
+	async syncMute(player: Player, mutedTill: number | null) {
 		if (mutedTill == null) {
 			// delete returns false if the element has not been deleted, true if it has been deleted
-			if (!this.mutedPlayers.delete(player.minecraftUuid)) return;
+			if (!this.mutedPlayers.delete(player.minecraftUuid)) return this;
 
 			const existing = this._unmuteTimeouts.get(player.minecraftUuid);
 			if (existing) {
@@ -516,9 +516,12 @@ export class HypixelGuild extends Model<
 
 			this.changed('_mutedPlayers', true);
 
-			return this.save().catch((error) =>
-				logger.error({ err: error, data: { player: player.ign, mutedTill } }, `[SYNC MUTE]: ${this.name}`),
-			);
+			try {
+				return await this.save();
+			} catch (error) {
+				logger.error({ err: error, data: { player: player.ign, mutedTill } }, `[SYNC MUTE]: ${this.name}`);
+				return this;
+			}
 		}
 
 		this.mutedPlayers.set(player.minecraftUuid, mutedTill);
@@ -532,9 +535,12 @@ export class HypixelGuild extends Model<
 
 		this.changed('_mutedPlayers', true);
 
-		return this.save().catch((error) =>
-			logger.error({ err: error, data: { player: player.ign, mutedTill } }, `[SYNC MUTE]: ${this.name}`),
-		);
+		try {
+			return await this.save();
+		} catch (error) {
+			logger.error({ err: error, data: { player: player.ign, mutedTill } }, `[SYNC MUTE]: ${this.name}`);
+			return this;
+		}
 	}
 
 	/**
@@ -547,7 +553,7 @@ export class HypixelGuild extends Model<
 			if (Date.now() < this.mutedPlayers.get(player!.minecraftUuid)!) return true;
 
 			// mute has expired
-			this.syncMute(player!, null);
+			void this.syncMute(player!, null);
 		}
 
 		return false;
@@ -556,7 +562,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * removes mutes from players that have expired. useful since the map can still hold mutes of players who left the guild
 	 */
-	removeExpiredMutes() {
+	async removeExpiredMutes() {
 		let changed = false;
 
 		for (const [minecraftUuid, mutedTill] of this.mutedPlayers) {
@@ -570,10 +576,16 @@ export class HypixelGuild extends Model<
 			changed = true;
 		}
 
-		if (!changed) return;
+		if (!changed) return this;
 
 		this.changed('_mutedPlayers', true);
-		return this.save();
+
+		try {
+			return await this.save();
+		} catch (error) {
+			logger.error(error);
+			return this;
+		}
 	}
 
 	/**
@@ -587,14 +599,19 @@ export class HypixelGuild extends Model<
 	/**
 	 * shifts the daily stats history
 	 */
-	saveDailyStats() {
+	async saveDailyStats() {
 		// append current xp to the beginning of the statsHistory-Array and pop of the last value
 		const { statsHistory } = this;
 		statsHistory.shift();
 		statsHistory.push({ playerCount: this.playerCount, ...this.stats });
 		this.changed('statsHistory', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
 
-		return this.save();
+		try {
+			return await this.save();
+		} catch (error) {
+			logger.error(error);
+			return this;
+		}
 	}
 
 	/**
@@ -762,7 +779,7 @@ export class HypixelGuild extends Model<
 							}
 
 							player.update({ ign }).catch((error) => logger.error(error));
-							player.updateData({ reason: `joined ${this.name}` });
+							void player.updateData({ reason: `joined ${this.name}` });
 						}, 0);
 
 						// player already in the db
@@ -815,7 +832,7 @@ export class HypixelGuild extends Model<
 							}
 						}
 
-						if (discordMember) player.link(discordMember);
+						if (discordMember) player.link(discordMember).catch((error) => logger.error(error));
 
 						// update player
 						setTimeout(async () => {
@@ -851,31 +868,33 @@ export class HypixelGuild extends Model<
 								),
 							]);
 
-							player.updateData({
-								reason: `joined ${this.name}`,
-							});
+							void player.updateData({ reason: `joined ${this.name}` });
 						}, 0);
 					}
 
 					players.set(minecraftUuid, player);
 
 					// log if a banned player joins (by accident)
-					(async () => {
-						const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(minecraftUuid);
-						if (!existingBan) return;
+					void (async () => {
+						try {
+							const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(minecraftUuid);
+							if (!existingBan) return;
 
-						this.client.log(
-							new Embed()
-								.setColor(this.client.config.get('EMBED_RED'))
-								.setAuthor({
-									name: discordMember?.user.tag ?? player.ign,
-									iconURL: discordMember?.displayAvatarURL(),
-									url: player.url,
-								})
-								.setThumbnail(player.imageURL)
-								.setDescription(`${player.info} is on the ban list for \`${existingBan.reason}\``)
-								.setTimestamp(),
-						);
+							void this.client.log(
+								new Embed()
+									.setColor(this.client.config.get('EMBED_RED'))
+									.setAuthor({
+										name: discordMember?.user.tag ?? player.ign,
+										iconURL: discordMember?.displayAvatarURL(),
+										url: player.url,
+									})
+									.setThumbnail(player.imageURL)
+									.setDescription(`${player.info} is on the ban list for \`${existingBan.reason}\``)
+									.setTimestamp(),
+							);
+						} catch (error) {
+							logger.error(error);
+						}
 					})();
 				}),
 
@@ -900,11 +919,11 @@ export class HypixelGuild extends Model<
 					continue;
 				}
 
-				this.syncMute(player, NOW < (hypixelGuildMember.mutedTill ?? 0) ? hypixelGuildMember.mutedTill! : null);
-				player.syncWithGuildData(hypixelGuildMember, this);
+				void this.syncMute(player, NOW < (hypixelGuildMember.mutedTill ?? 0) ? hypixelGuildMember.mutedTill! : null);
+				void player.syncWithGuildData(hypixelGuildMember, this);
 			}
 
-			if (syncRanks) this.syncRanks();
+			if (syncRanks) void this.syncRanks();
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 
@@ -974,7 +993,7 @@ export class HypixelGuild extends Model<
 				}
 			}
 
-			this.client.log(...loggingEmbeds);
+			void this.client.log(...loggingEmbeds);
 			return await this.save();
 		} catch (error) {
 			if (typeof error === 'string') {
@@ -991,7 +1010,7 @@ export class HypixelGuild extends Model<
 			}
 
 			logger.error(error, `[UPDATE DATA]: ${this.name}`);
-			if (!(error instanceof RateLimitError)) this.client.config.set('HYPIXEL_API_ERROR', true);
+			if (!(error instanceof RateLimitError)) void this.client.config.set('HYPIXEL_API_ERROR', true);
 			if (rejectOnAPIError) throw error;
 			return this;
 		}
@@ -1111,7 +1130,7 @@ export class HypixelGuild extends Model<
 				);
 			}
 
-			this.client.log(...setRankLog);
+			void this.client.log(...setRankLog);
 			return this;
 		} catch (error) {
 			logger.error(error, '[SYNC GUILD RANKS]');

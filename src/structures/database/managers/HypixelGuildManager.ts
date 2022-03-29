@@ -82,7 +82,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			return this;
 		} catch (error) {
 			if (error instanceof Error && !error.name.startsWith('Sequelize')) {
-				this.client.config.set('HYPIXEL_API_ERROR', true);
+				void this.client.config.set('HYPIXEL_API_ERROR', true);
 			}
 			logger.error(error, '[GUILDS UPDATE]');
 			return this;
@@ -176,9 +176,9 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 * shifts the daily stats array and updates the config
 	 */
 	performDailyStatsSave() {
-		this.client.config.set('LAST_DAILY_STATS_SAVE_TIME', Date.now());
+		void this.client.config.set('LAST_DAILY_STATS_SAVE_TIME', Date.now());
 
-		for (const hypixelGuild of this.cache.values()) hypixelGuild.saveDailyStats();
+		for (const hypixelGuild of this.cache.values()) void hypixelGuild.saveDailyStats();
 
 		logger.info('[GUILD DAILY STATS]: performed daily stats saves');
 
@@ -190,7 +190,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	removeExpiredMutes() {
 		for (const hypixelGuild of this.cache.values()) {
-			hypixelGuild.removeExpiredMutes();
+			void hypixelGuild.removeExpiredMutes();
 		}
 	}
 

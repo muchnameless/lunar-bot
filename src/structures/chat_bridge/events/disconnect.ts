@@ -13,7 +13,7 @@ export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {
 	 * event listener callback
 	 * @param reason
 	 */
-	override run(reason: string | null) {
+	override async run(reason: string | null) {
 		this.chatBridge.minecraft.botReady = false;
 
 		logger.error(
@@ -25,6 +25,6 @@ export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {
 		// prevent this event from being emitted multiple times
 		this.chatBridge.minecraft.bot?.removeAllListeners('end');
 
-		this.chatBridge.minecraft.reconnect();
+		await this.chatBridge.minecraft.reconnect();
 	}
 }

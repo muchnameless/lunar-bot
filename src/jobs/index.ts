@@ -33,7 +33,7 @@ export function startJobs(client: LunarClient) {
 
 			switch (message.op) {
 				case JobType.HypixelForumLastGUIDUpdate:
-					client.config.set('HYPIXEL_FORUM_LAST_GUID', message.d);
+					void client.config.set('HYPIXEL_FORUM_LAST_GUID', message.d);
 					break;
 
 				case JobType.SkyblockAuctionPriceUpdate:

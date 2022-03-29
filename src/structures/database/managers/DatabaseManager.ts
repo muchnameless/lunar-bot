@@ -278,21 +278,18 @@ export class DatabaseManager {
 
 		// update database
 		if (dbPromises.length) {
-			setTimeout(
-				(() => async () => {
-					const taxPaidLog = (await Promise.all(dbPromises)).filter((x) => x != null) as EmbedFieldData[];
+			setTimeout(async () => {
+				const taxPaidLog = (await Promise.all(dbPromises)).filter((x) => x != null) as EmbedFieldData[];
 
-					// logging
-					if (taxPaidLog.length) {
-						this.client.log(
-							this.client.defaultEmbed //
-								.setTitle('Guild Tax')
-								.addFields(...taxPaidLog),
-						);
-					}
-				})(),
-				0,
-			);
+				// logging
+				if (taxPaidLog.length) {
+					void this.client.log(
+						this.client.defaultEmbed //
+							.setTitle('Guild Tax')
+							.addFields(...taxPaidLog),
+					);
+				}
+			}, 0);
 		}
 
 		return availableAuctionsLog
@@ -419,14 +416,14 @@ export class DatabaseManager {
 					await players.updateIgns();
 
 					for (const hypixelGuild of hypixelGuilds.cache.values()) {
-						hypixelGuild.syncRanks();
+						void hypixelGuild.syncRanks();
 					}
 
 					logger.warn('[DB UPDATE]: auto updates disabled');
 					return this;
 				}
 
-				config.set('HYPIXEL_API_ERROR', false);
+				void config.set('HYPIXEL_API_ERROR', false);
 			}
 
 			// update player db
@@ -436,7 +433,7 @@ export class DatabaseManager {
 			const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED') ? await this._updateTaxDatabase() : null;
 
 			// update Xp
-			if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
+			if (config.get('XP_TRACKING_ENABLED')) void players.updateXp();
 
 			// update IGNs
 			await players.updateIgns();
@@ -467,7 +464,7 @@ export class DatabaseManager {
 					embeds: [this.createTaxEmbed(this._createTaxEmbedDescription(availableAuctionsLog))],
 				});
 
-				config.set('TAX_MESSAGE_ID', id);
+				void config.set('TAX_MESSAGE_ID', id);
 				logger.info('[TAX MESSAGE]: created new taxMessage');
 				return this;
 			}

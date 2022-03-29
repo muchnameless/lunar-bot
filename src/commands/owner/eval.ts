@@ -142,7 +142,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param content
 	 */
 	private _getFiles(interaction: RepliableInteraction, content: string) {
-		InteractionUtil.defer(interaction);
+		void InteractionUtil.defer(interaction);
 		return [new MessageAttachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
 	}
 
@@ -194,7 +194,7 @@ export default class EvalCommand extends ApplicationCommand {
 		const type = (x: unknown) => new Type(x).toString();
 		const inspect = (x: unknown) => util.inspect(x, { depth: inspectDepth, getters: true, showHidden: true });
 		const saveHeapdump = () => {
-			InteractionUtil.defer(interaction);
+			void InteractionUtil.defer(interaction);
 			return fs.writeFile(`${Date.now()}.heapsnapshot`, v8.getHeapSnapshot());
 		};
 		const i = interaction;
