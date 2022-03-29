@@ -186,6 +186,7 @@ async function updateAuctionPrices() {
 
 	// fetch remaining auction pages
 	const BINAuctions = new Collection<string, number[]>();
+
 	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem, price: number) => {
 		const [item] = await transformItemData(auction.item_bytes);
 
@@ -262,9 +263,19 @@ async function updateAuctionPrices() {
 
 		BINAuctions.get(itemId)?.push(price / count) ?? BINAuctions.set(itemId, [price / count]);
 	};
+
 	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
 		Promise.all(_auctions.map((auction) => auction.bin && processAuction(auction, auction.starting_bid)));
-	const fetchAndProcessAuctions = async (page: number) => processAuctions((await fetchAuctionPage(page)).auctions);
+
+	const fetchAndProcessAuctions = async (page: number) => {
+		const { auctions: _auctions, lastUpdated: _lastUpdated } = await fetchAuctionPage(page);
+
+		if (_lastUpdated !== lastUpdated) {
+			throw `page ${page}/${totalPages}'s lastUpdated does not match: ${lastUpdated} <> ${_lastUpdated}`;
+		}
+
+		return processAuctions(_auctions);
+	};
 	const fetchAndProcessEndedAuctions = async () => {
 		const res = await fetch('https://api.hypixel.net/skyblock/auctions_ended', {
 			// @ts-expect-error
