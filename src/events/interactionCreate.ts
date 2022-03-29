@@ -401,23 +401,23 @@ export default class InteractionCreateEvent extends Event {
 				InteractionUtil.add(interaction);
 			} else if (interaction.isAutocomplete()) {
 				// autocomplete
-				return await this._handleAutocompleteInteraction(interaction);
+				return void (await this._handleAutocompleteInteraction(interaction));
 			}
 
 			// commands
-			if (interaction.isChatInputCommand()) return await this._handleCommandInteraction(interaction);
+			if (interaction.isChatInputCommand()) return void (await this._handleCommandInteraction(interaction));
 
 			// buttons
-			if (interaction.isButton()) return await this._handleButtonInteraction(interaction);
+			if (interaction.isButton()) return void (await this._handleButtonInteraction(interaction));
 
 			// select menus
-			if (interaction.isSelectMenu()) return await this._handleSelectMenuInteraction(interaction);
+			if (interaction.isSelectMenu()) return void (await this._handleSelectMenuInteraction(interaction));
 
 			// context menu
-			if (interaction.isContextMenuCommand()) return await this._handleContextMenuInteraction(interaction);
+			if (interaction.isContextMenuCommand()) return void (await this._handleContextMenuInteraction(interaction));
 
 			// modals
-			if (interaction.isModalSubmit()) return await this._handleModalSubmitInteraction(interaction);
+			if (interaction.isModalSubmit()) return void (await this._handleModalSubmitInteraction(interaction));
 
 			throw `unknown interaction type '${interaction.type}'`;
 		} catch (error) {

@@ -12,8 +12,8 @@ export default class InvalidatedEvent extends Event {
 	/**
 	 * event listener callback
 	 */
-	override async run() {
+	override run() {
 		logger.warn('[INVALIDATED]: the client became invalidated');
-		await this.client.exit(1);
+		void this.client.exit(1);
 	}
 }

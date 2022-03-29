@@ -24,8 +24,9 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 			Date.now() - newMessage.createdTimestamp >= minutes(10) || // original message is older than 10 min
 			(oldMessage.content === newMessage.content && newMessage.content) || // pinned or embed added
 			!ChannelUtil.botPermissions(newMessage.channel).has(PermissionFlagsBits.ViewChannel) // slash cmd response edits
-		)
+		) {
 			return;
+		}
 
 		if (newMessage.partial) {
 			try {

@@ -49,9 +49,8 @@ export class BaseEvent {
 	/**
 	 * event listener callback
 	 */
-	run(...args: unknown[]): void;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, require-await
-	async run(...args: unknown[]) {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	run(...args: unknown[]): void | Promise<void> {
 		throw new Error('no run function specified');
 	}
 }

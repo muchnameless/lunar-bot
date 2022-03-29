@@ -18,11 +18,7 @@ export default class GuildMemberAvailableEvent extends Event {
 	override async run(member: GuildMember) {
 		if (!this.client.options.fetchAllMembers) return;
 
-		try {
-			const members = await GuildUtil.fetchAllMembers(member.guild);
-			logger.info(`[GUILD MEMBER AVAILABLE]: fetched ${members.size} members`);
-		} catch (error) {
-			logger.error(error, '[GUILD MEMBER AVAILABLE]');
-		}
+		const { size } = await GuildUtil.fetchAllMembers(member.guild);
+		logger.info(`[GUILD MEMBER AVAILABLE]: fetched ${size} members`);
 	}
 }

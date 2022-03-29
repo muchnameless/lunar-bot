@@ -23,8 +23,9 @@ export default class MessageReactionAddEvent extends Event {
 			!this.client.hypixelGuilds.cache.some(
 				({ announcementsChannelId }) => announcementsChannelId === reaction.message.channelId,
 			)
-		)
+		) {
 			return;
+		}
 
 		try {
 			if (reaction.partial) await reaction.fetch();

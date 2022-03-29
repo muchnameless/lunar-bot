@@ -15,7 +15,7 @@ export default class MessageDeleteEvent extends Event {
 	}
 
 	/**
-	 * @param messageId
+	 * @param message
 	 */
 	protected _handleDelete(message: Message) {
 		MessageUtil.DELETE_TIMEOUT_CACHE.delete(message.id);
