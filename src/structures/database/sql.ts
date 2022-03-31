@@ -1,8 +1,8 @@
-import postgres, { BigInt } from 'postgres';
+import postgres from 'postgres';
 
 export const sql = postgres({
 	types: {
-		bigint: BigInt,
+		bigint: postgres.BigInt,
 		date: {
 			to: 1_184,
 			from: [1_082, 1_083, 1_114, 1_184],
