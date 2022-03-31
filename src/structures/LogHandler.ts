@@ -6,6 +6,7 @@ import ms from 'ms';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
+import type { Dir } from 'node:fs';
 import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { LunarClient } from './LunarClient';
 
@@ -265,16 +266,24 @@ export class LogHandler {
 	 * read all files from 'cwd/log_buffer' and log their parsed content in the logging channel
 	 */
 	private async _postFileLogs() {
+		let dir: Dir;
 		try {
-			await this._createLogBufferFolder();
+			dir = await opendir(this.logURL);
+		} catch {
+			// directory doesn't exist
+			return;
+		}
 
-			for await (const { name } of await opendir(this.logURL)) {
+		try {
+			for await (const { name } of dir) {
 				const FILE_PATH = new URL(name, this.logURL);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
 				await this._log({ embeds: JSON.parse(FILE_CONTENT) });
 				await rm(FILE_PATH);
 			}
+
+			await rm(this.logURL, { recursive: true });
 		} catch (error) {
 			logger.error(error, '[POST FILE LOGS]');
 		}
