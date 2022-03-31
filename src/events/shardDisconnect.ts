@@ -1,4 +1,5 @@
 import { logger } from '../functions';
+import { exitProcess } from '../process';
 import { Event, type EventContext } from '../structures/events/Event';
 
 export default class ShardDisconnectEvent extends Event {
@@ -17,6 +18,6 @@ export default class ShardDisconnectEvent extends Event {
 	override run(closeEvent: CloseEvent, id: number) {
 		logger.error(closeEvent, `[SHARD #${id} DISCONNECT]`);
 
-		void this.client.exit(-1);
+		void exitProcess(-1);
 	}
 }

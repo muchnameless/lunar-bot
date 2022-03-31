@@ -36,7 +36,6 @@ declare module 'discord.js' {
 
 		dmOwner(options: string | MessageOptions): Promise<Message<boolean> | null>;
 		fetchAllMembers(): Promise<void> | undefined;
-		exit(code?: number): Promise<never>;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface

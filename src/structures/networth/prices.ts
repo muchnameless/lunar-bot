@@ -1,5 +1,5 @@
 import { logger } from '../../functions';
-import { sql } from '../database/sql';
+import { sql } from '../database';
 
 export const prices = new Map<string, number>();
 export const getPrice = (item: string) => prices.get(item) ?? 0;

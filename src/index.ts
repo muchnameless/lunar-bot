@@ -1,14 +1,11 @@
-import process from 'node:process';
 import { ActivityType, GatewayIntentBits, Options, Partials, Sweepers } from 'discord.js';
 import { RequestMethod } from '@discordjs/rest';
-import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
-import { logger, seconds } from './functions';
+import { seconds } from './functions';
 import { startJobs } from './jobs';
 
 const client = new LunarClient({
 	// custom options
-	db,
 	fetchAllMembers: true,
 
 	// default options
@@ -84,17 +81,6 @@ const client = new LunarClient({
 });
 
 startJobs(client);
-
-// catch rejections
-process
-	.on('unhandledRejection', (error) => {
-		logger.error(error, '[UNCAUGHT PROMISE REJECTION]');
-	})
-	.on('uncaughtException', (error) => {
-		logger.fatal(error, '[UNCAUGHT EXCEPTION]');
-		void client.exit(-1);
-	})
-	.on('SIGINT', () => client.exit(0));
 
 // connect to Discord
 await client.login();

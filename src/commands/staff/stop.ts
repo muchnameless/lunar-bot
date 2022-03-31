@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { exitProcess } from '../../process';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -18,6 +19,6 @@ export default class StopCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: ChatInputCommandInteraction) {
 		await InteractionUtil.reply(interaction, 'stopping the bot');
-		void this.client.exit();
+		void exitProcess();
 	}
 }

@@ -1,28 +1,26 @@
 import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
-import { env, exit } from 'node:process';
+import { env } from 'node:process';
 import { Client, Embed } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
-import { redis, imgur } from '../api';
 import { hours, logger, safePromiseAll } from '../functions';
+import { exitProcess } from '../process';
 import { DatabaseManager } from './database/managers/DatabaseManager';
 import { LogHandler } from './LogHandler';
 import { CronJobManager } from './CronJobManager';
 import { ChatBridgeManager } from './chat_bridge/ChatBridgeManager';
 import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
 import { EventCollection } from './events/EventCollection';
-import { sql } from './database/sql';
+import { db } from './database';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
-import type { db } from './database';
 
 export interface LunarClientOptions {
-	db: typeof db;
 	fetchAllMembers?: boolean;
 }
 
 export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> {
 	override ownerId: Snowflake;
-	override db: DatabaseManager;
+	override db: DatabaseManager = new DatabaseManager(this, db);
 	override logHandler: LogHandler = new LogHandler(this, new URL('../../log_buffer/', import.meta.url));
 	override cronJobs: CronJobManager = new CronJobManager(this);
 	override chatBridges: ChatBridgeManager = new ChatBridgeManager(this);
@@ -37,7 +35,6 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 		super(options);
 
 		this.ownerId = env.OWNER as Snowflake;
-		this.db = new DatabaseManager(this, options.db);
 	}
 
 	override get config() {
@@ -103,7 +100,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 			return res;
 		} catch (error) {
 			logger.error(error, '[CLIENT LOGIN]');
-			return this.exit(1);
+			return exitProcess(1);
 		}
 	}
 
@@ -132,30 +129,5 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 				logger.info(`[FETCH ALL MEMBERS]: ${guild.name}: fetched ${size} members`);
 			}),
 		);
-	}
-
-	/**
-	 * closes all db connections and exits the process
-	 * @param code exit code
-	 */
-	override async exit(code = 0): Promise<never> {
-		let hasError = false;
-
-		try {
-			await imgur.cacheRateLimits();
-		} catch (error) {
-			logger.fatal(error);
-		}
-
-		for (const output of await Promise.allSettled([this.db.sequelize.close(), sql.end(), redis.quit()])) {
-			if (output.status === 'rejected') {
-				logger.fatal(output.reason);
-				hasError = true;
-			} else if (typeof output.value !== 'undefined') {
-				logger.info(output.value);
-			}
-		}
-
-		exit(hasError ? 1 : code);
 	}
 }

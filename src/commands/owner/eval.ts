@@ -61,7 +61,8 @@ import { prices } from '../../structures/networth/prices';
 prices;
 import { bree } from '../../jobs';
 bree;
-import { sql } from '../../structures/database/sql';
+import { sequelize, sql } from '../../structures/database';
+sequelize;
 sql;
 import type {
 	ChatInputCommandInteraction,

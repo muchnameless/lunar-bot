@@ -1,4 +1,5 @@
 import { logger } from '../functions';
+import { exitProcess } from '../process';
 import { Event, type EventContext } from '../structures/events/Event';
 
 export default class InvalidatedEvent extends Event {
@@ -14,6 +15,6 @@ export default class InvalidatedEvent extends Event {
 	 */
 	override run() {
 		logger.warn('[INVALIDATED]: the client became invalidated');
-		void this.client.exit(1);
+		void exitProcess(1);
 	}
 }

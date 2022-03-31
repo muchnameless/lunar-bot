@@ -1,0 +1,19 @@
+[Unit]
+Description=lunar bot
+After=network.target
+After=redis-server.service
+After=postgresql.service
+
+[Service]
+Type=simple
+User=USER
+WorkingDirectory=HOME/lunar-bot
+EnvironmentFile=HOME/lunar-bot/.env
+StandardOutput=append:HOME/lunar-bot/logs/lunar-bot-out.log
+StandardError=append:HOME/lunar-bot/logs/lunar-bot-error.log
+ExecStart=NODE HOME/lunar-bot/dist/index.js
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target

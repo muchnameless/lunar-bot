@@ -16,8 +16,9 @@ for await (const path of readJSFiles(new URL('./models/', import.meta.url))) {
 				model.initialise
 			) === 'function'
 		)
-	)
+	) {
 		logger.error(`${model.name} is missing an initialise function`);
+	}
 
 	Reflect.set(
 		models,
@@ -39,3 +40,4 @@ for (const model of Object.values(models) as any[]) {
 }
 
 export { sequelize };
+export { sql } from './sql';

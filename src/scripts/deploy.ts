@@ -1,6 +1,5 @@
 import { argv, env, exit } from 'node:process';
 import { Routes } from 'discord-api-types/v9';
-import { db } from '../structures/database';
 import { LunarClient } from '../structures/LunarClient';
 import { logger } from '../functions';
 import type {
@@ -10,7 +9,6 @@ import type {
 
 const GUILD_ID = argv[2];
 const client = new LunarClient({
-	db,
 	intents: 0,
 });
 
