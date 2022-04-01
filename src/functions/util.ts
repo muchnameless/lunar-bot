@@ -129,6 +129,7 @@ export async function asyncReplace(
 
 	for (const match of string.matchAll(regex)) {
 		promises.push(
+			// eslint-disable-next-line unicorn/no-unreadable-iife
 			(async () => ({
 				start: match.index!,
 				length: match[0].length,
