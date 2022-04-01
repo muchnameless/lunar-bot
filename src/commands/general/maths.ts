@@ -1,11 +1,14 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import BigDecimal from 'js-big-decimal';
 import Lexer from 'lex';
-import { Util } from 'discord.js';
+import { ActionRow, Modal, TextInputComponent, TextInputStyle, Util } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import { formatNumber } from '../../functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
+import { formatNumber, logger, trim } from '../../functions';
+import { MAX_PLACEHOLDER_LENGTH } from '../../constants';
+import type { ModalActionRowComponent } from '@discordjs/builders';
+import type { RepliableInteraction, ModalRepliableInteraction } from '../../util';
+import type { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
@@ -90,6 +93,7 @@ class Parser {
 					output.push(token);
 
 					// check if token is followed by a unary operator
+					// TODO: replace with Array#findLast when updating to node v18
 					let nonBracketIndex = -1;
 					for (let i = stack.length; i !== 0; --i) {
 						if (stack[i] !== '(') {
@@ -386,10 +390,12 @@ export default class MathsCommand extends DualCommand {
 	 */
 	static formatNumberString = (x: string) => x.replace(/(?<!\..*)\B(?=(?:\d{3})+(?!\d))/gs, '\u{202F}');
 
+	/**
+	 * lexes, parses and evaluates the input
+	 * @param rawInput
+	 */
 	calculate(rawInput: string) {
-		/**
-		 * generate input string
-		 */
+		// generate input string
 		const INPUT = rawInput
 			.replaceAll(' ', '') // remove spaces
 			.replaceAll('_', '') // 1_000 -> 1000
@@ -458,15 +464,52 @@ export default class MathsCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 * @param interaction
 	 * @param rawInput
 	 */
-	private _generateReply(rawInput: string) {
+	private async _run(interaction: RepliableInteraction | ModalRepliableInteraction, rawInput: string) {
 		try {
 			const { input, formattedOutput } = this.calculate(rawInput);
 
-			return `${input} = ${formattedOutput}`;
+			return InteractionUtil.reply(
+				interaction,
+				Util.escapeMarkdown(`${input} = ${formattedOutput}`, { inlineCode: false }),
+			);
 		} catch (error) {
-			return `${error}`;
+			if (interaction.isModalSubmit()) {
+				return InteractionUtil.reply(interaction, Util.escapeMarkdown(`${error}`, { inlineCode: false }));
+			}
+
+			try {
+				return await InteractionUtil.showModal(
+					interaction as ModalRepliableInteraction,
+					new Modal()
+						.setTitle('Maths')
+						.setCustomId(this.baseCustomId)
+						.addComponents(
+							new ActionRow<ModalActionRowComponent>().addComponents(
+								new TextInputComponent()
+									.setCustomId('input')
+									.setStyle(TextInputStyle.Short)
+									.setLabel('New input')
+									.setPlaceholder(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
+									.setRequired(true),
+							),
+							new ActionRow<ModalActionRowComponent>().addComponents(
+								new TextInputComponent()
+									.setCustomId('error')
+									.setStyle(TextInputStyle.Paragraph)
+									.setLabel('Error')
+									.setPlaceholder(trim(`${error}`, MAX_PLACEHOLDER_LENGTH))
+									.setMaxLength(1)
+									.setRequired(false),
+							),
+						),
+				);
+			} catch (_error) {
+				logger.error(_error, '[MATHS]: modal');
+				return InteractionUtil.reply(interaction, Util.escapeMarkdown(`${error}`, { inlineCode: false }));
+			}
 		}
 	}
 
@@ -474,11 +517,16 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
+	override runModal(interaction: ModalSubmitInteraction) {
+		return this._run(interaction, interaction.fields.getTextInputValue('input'));
+	}
+
+	/**
+	 * execute the command
+	 * @param interaction
+	 */
 	override runSlash(interaction: ChatInputCommandInteraction) {
-		return InteractionUtil.reply(
-			interaction,
-			Util.escapeMarkdown(this._generateReply(interaction.options.getString('input', true)), { inlineCode: false }),
-		);
+		return this._run(interaction, interaction.options.getString('input', true));
 	}
 
 	/**
@@ -486,6 +534,12 @@ export default class MathsCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(this._generateReply(hypixelMessage.commandData.args.join('')));
+		try {
+			const { input, formattedOutput } = this.calculate(hypixelMessage.commandData.args.join(''));
+
+			return hypixelMessage.reply(`${input} = ${formattedOutput}`);
+		} catch (error) {
+			return hypixelMessage.reply(`${error}`);
+		}
 	}
 }
