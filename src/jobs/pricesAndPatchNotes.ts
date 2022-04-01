@@ -416,7 +416,7 @@ async function updatePatchNotes() {
 	if (parentPort) {
 		parentPort.postMessage({
 			op: JobType.HypixelForumLastGUIDUpdate,
-			d: { HYPIXEL_FORUM_LAST_GUID: Math.max(...newPosts.map(({ guid }) => guid)) },
+			d: Math.max(...newPosts.map(({ guid }) => guid)),
 		});
 	} else {
 		await sql`
