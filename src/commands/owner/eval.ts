@@ -77,7 +77,7 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
 const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, EYES_EMOJI, MAX_PLACEHOLDER_LENGTH, RELOAD_EMOJI } = constants;
-const { logger, splitForEmbedFields } = functions;
+const { logger, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
 	/**
@@ -395,9 +395,11 @@ export default class EvalCommand extends ApplicationCommand {
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Input')
 									.setPlaceholder(
-										interaction.message.embeds[0]?.fields?.[0].value
-											.replace(/^```[a-z]*\n|```$/g, '')
-											.slice(0, MAX_PLACEHOLDER_LENGTH) ?? 'code to evaluate',
+										trim(
+											interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ??
+												'code to evaluate',
+											MAX_PLACEHOLDER_LENGTH,
+										),
 									)
 									.setRequired(false),
 							),
@@ -467,6 +469,7 @@ export default class EvalCommand extends ApplicationCommand {
 				throw new Error(`unknown subcommand '${subcommand}'`);
 		}
 	}
+
 	/**
 	 * execute the command
 	 * @param interaction
