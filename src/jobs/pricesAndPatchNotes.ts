@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/prefer-top-level-await */
 import { exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
@@ -267,11 +268,19 @@ async function updateAuctionPrices() {
 	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
 		Promise.all(_auctions.map((auction) => auction.bin && processAuction(auction, auction.starting_bid)));
 
-	const fetchAndProcessAuctions = async (page: number) => {
+	const fetchAndProcessAuctions = async (page: number): Promise<unknown> => {
 		const { auctions: _auctions, lastUpdated: _lastUpdated } = await fetchAuctionPage(page);
 
 		if (_lastUpdated !== lastUpdated) {
-			throw `page ${page}/${totalPages}'s lastUpdated does not match: ${lastUpdated} <> ${_lastUpdated}`;
+			if (_lastUpdated < lastUpdated) {
+				logger.warn(`[FETCH AUCTIONS]: refetching page ${page}/${totalPages}: ${lastUpdated} <> ${_lastUpdated}`);
+				await sleep(5_000);
+				return fetchAndProcessAuctions(page);
+			}
+
+			logger.error(
+				`[FETCH AUCTIONS]: page ${page}/${totalPages}'s lastUpdated does not match: ${lastUpdated} <> ${_lastUpdated}`,
+			);
 		}
 
 		return processAuctions(_auctions);
