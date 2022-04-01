@@ -462,10 +462,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/async-queue@npm:^1.2.0, @sapphire/async-queue@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@sapphire/async-queue@npm:1.3.0"
-  checksum: 267a3970ac93aaffc9886582c39ca23a345e8d472042200635044d7e5c48f615d389623de5e6679c4fa335b554357faf872e1e32098b33e5d700099345d29559
+"@sapphire/async-queue@npm:^1.2.0, @sapphire/async-queue@npm:^1.3.1":
+  version: 1.3.1
+  resolution: "@sapphire/async-queue@npm:1.3.1"
+  checksum: 4016010a8b6f2896ce7694eb04c1839b613387cbfb104028a4a1bea471afb1dc4d569b66d3c9770319c47be55035dc786c072c32656d467fc2cded4347055d92
   languageName: node
   linkType: hard
 
@@ -3728,7 +3728,7 @@ __metadata:
     "@discordjs/builders": "*"
     "@discordjs/collection": "*"
     "@discordjs/rest": "*"
-    "@sapphire/async-queue": ^1.3.0
+    "@sapphire/async-queue": ^1.3.1
     "@sapphire/stopwatch": ^1.4.0
     "@sapphire/time-utilities": ^1.7.3
     "@sapphire/type": ^2.2.0
