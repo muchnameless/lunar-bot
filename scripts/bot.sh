@@ -1,7 +1,7 @@
 #!/bin/tcsh -f
 
 if ($#argv == 0) then
-	echo "missing args"
+	systemctl status lunar-bot.service
 else
 	switch($argv[1])
 		case 'start':
