@@ -505,7 +505,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/utilities@npm:^3.6.1, @sapphire/utilities@npm:^3.6.2":
+"@sapphire/utilities@npm:^3.6.2":
   version: 3.6.2
   resolution: "@sapphire/utilities@npm:3.6.2"
   checksum: 71210753b446f3f2835dd9d28fb10767f4c6f005b465eea179082d9f2c071acb7dcd2aebdf7c4974b26aad3ab2374a1dd168a66371b06bd65f248bbca4a90cda
@@ -3784,7 +3784,7 @@ __metadata:
     timezonecomplete: ^5.12.4
     tiny-typed-emitter: ^2.1.0
     tslib: ^2.3.1
-    typescript: ^4.7.0-dev.20220401
+    typescript: ^4.7.0-dev.20220402
     undici: ^5.0.0
     utf-8-validate: ^5.0.9
   languageName: unknown
@@ -6076,13 +6076,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.7.0-dev.20220401":
-  version: 4.7.0-dev.20220401
-  resolution: "typescript@npm:4.7.0-dev.20220401"
+"typescript@npm:^4.7.0-dev.20220402":
+  version: 4.7.0-dev.20220402
+  resolution: "typescript@npm:4.7.0-dev.20220402"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: f1c37e32d8ab41da17eaf24b69cbfc1faa9af7f4c7ca2b5e32cb319d33a6f884d0036346131a6810464a19669ad3564fce6cf36fbc97928aab9baba397b9f79c
+  checksum: f989747490968d8d81fda64427652118a625558abed2e971315b08f4a77b8bf1bb61806f3dcd97b96efed797718f586d69bc1246aa5aba17b7188041bab6205d
   languageName: node
   linkType: hard
 
@@ -6096,13 +6096,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.7.0-dev.20220401#~builtin<compat/typescript>":
-  version: 4.7.0-dev.20220401
-  resolution: "typescript@patch:typescript@npm%3A4.7.0-dev.20220401#~builtin<compat/typescript>::version=4.7.0-dev.20220401&hash=bda367"
+"typescript@patch:typescript@^4.7.0-dev.20220402#~builtin<compat/typescript>":
+  version: 4.7.0-dev.20220402
+  resolution: "typescript@patch:typescript@npm%3A4.7.0-dev.20220402#~builtin<compat/typescript>::version=4.7.0-dev.20220402&hash=bda367"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: fa4369d1ee24f027afc915b0414efcbdc35880727231dba92b8083435a9aa71e6553f53d86cdca34895c00e3728a81bc5a2da4dfa6c3a72782b765d50e0bd3d2
+  checksum: d66a9f275f630a9cd71a3924f6eaea3e5a045b98091dc0d5890ff743034bbb7e1aa99d3beb74f29c9a19a2c317f6f35dd0819d4613ab96cac88791748f909978
   languageName: node
   linkType: hard
 
