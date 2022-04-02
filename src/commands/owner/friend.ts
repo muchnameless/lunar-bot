@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { buildPaginationButtons } from '../../functions';
+import { buildPaginationActionRow } from '../../functions';
 import type { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -46,7 +46,7 @@ export default class FriendCommand extends ApplicationCommand {
 					.setDescription(Formatters.codeBlock(response)),
 			],
 			components: [
-				buildPaginationButtons(
+				buildPaginationActionRow(
 					`${this.baseCustomId}:list:${hypixelGuild.guildId}`,
 					Number(pageMatched?.groups!.current),
 					Number(pageMatched?.groups!.total),

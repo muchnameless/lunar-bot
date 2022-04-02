@@ -38,7 +38,7 @@ type PaginationButtonOptions = Partial<{
  * @param totalPages
  * @param options
  */
-export function buildPaginationButtons(
+export function buildPaginationActionRow(
 	baseCustomId: string,
 	currentPage: number,
 	totalPages: number,

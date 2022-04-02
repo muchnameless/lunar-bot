@@ -3,7 +3,7 @@ import { Embed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
-import { buildPaginationButtons, escapeIgn, logger } from '../../functions';
+import { buildPaginationActionRow, escapeIgn, logger } from '../../functions';
 import { InteractionUtil } from '../../util';
 import { STATS_URL_BASE } from '../../constants';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -105,7 +105,7 @@ export default class BanListCommand extends ApplicationCommand {
 					`),
 			],
 			components: [
-				buildPaginationButtons(
+				buildPaginationActionRow(
 					`${this.baseCustomId}:view:${interaction.user.id}`,
 					count >= OFFSET ? page : TOTAL_PAGES, // reset to total pages in case of page overflow
 					TOTAL_PAGES,

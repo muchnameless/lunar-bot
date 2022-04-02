@@ -13,7 +13,7 @@ import {
 } from '../constants';
 import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
-import { buildPaginationButtons, days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
+import { buildPaginationActionRow, days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { APIEmbed } from 'discord-api-types/v9';
 import type { Player } from '../structures/database/models/Player';
@@ -235,7 +235,7 @@ function createActionRows(
 
 	rows.push(
 		new ActionRow().addComponents(guildSelectMenu),
-		buildPaginationButtons(cacheKey, page, totalPages, {
+		buildPaginationActionRow(cacheKey, page, totalPages, {
 			disablePages: isExpired,
 			pageStyle: isExpired ? ButtonStyle.Secondary : ButtonStyle.Primary,
 			reloadStyle: isExpired ? ButtonStyle.Danger : ButtonStyle.Primary,

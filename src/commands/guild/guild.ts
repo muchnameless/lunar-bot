@@ -31,7 +31,7 @@ import { mojang } from '../../api';
 import { GuildMemberUtil, InteractionUtil, UserUtil } from '../../util';
 import {
 	autocorrect,
-	buildPaginationButtons,
+	buildPaginationActionRow,
 	escapeIgn,
 	getIdFromString,
 	getInlineFieldLineCount,
@@ -645,7 +645,7 @@ export default class GuildCommand extends ApplicationCommand {
 		)(interaction as ButtonInteraction, {
 			embeds: [embed],
 			components: [
-				buildPaginationButtons(
+				buildPaginationActionRow(
 					`${this.baseCustomId}:${subcommand}:${hypixelGuild.guildId}:${interaction.user.id}`,
 					currentPage,
 					totalPages,

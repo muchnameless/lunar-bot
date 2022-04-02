@@ -1,5 +1,5 @@
 export * from './logger';
-export * from './buttons';
+export * from './components';
 export * from './fetch';
 export * from './image';
 export * from './input';
