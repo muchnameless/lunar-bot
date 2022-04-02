@@ -3732,7 +3732,7 @@ __metadata:
     "@sapphire/stopwatch": ^1.4.1
     "@sapphire/time-utilities": ^1.7.4
     "@sapphire/type": ^2.2.0
-    "@sapphire/utilities": ^3.6.1
+    "@sapphire/utilities": ^3.6.2
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^1.7.3
