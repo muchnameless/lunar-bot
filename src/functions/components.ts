@@ -53,6 +53,7 @@ export function buildPaginationActionRow(
 	const DEC_DISABLED = currentPage === firstPage || INVALID_PAGES;
 	const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;
 
+	// emojis are added to customIds to ensure they are unique, e.g. "firstPage" could equal "currentPage - 1"
 	return new ActionRow().addComponents(
 		new ButtonComponent()
 			.setCustomId(`${baseCustomId}:${firstPage}:${DOUBLE_LEFT_EMOJI}`)
