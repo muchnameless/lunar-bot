@@ -6,7 +6,7 @@ import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
 import { hypixel, imgur } from '../../api';
 import { InteractionUtil } from '../../util';
-import { escapeIgn, formatNumber, trim } from '../../functions';
+import { escapeIgn, formatNumber, buildDeleteButton, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type {
 	Collection,
@@ -207,7 +207,7 @@ export default class DebugCommand extends ApplicationCommand {
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
-			components: [new ActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
+			components: [new ActionRow().addComponents(buildDeleteButton(interaction.user))],
 		});
 	}
 }

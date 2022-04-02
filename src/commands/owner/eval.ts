@@ -77,7 +77,7 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
 const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, EYES_EMOJI, MAX_PLACEHOLDER_LENGTH, RELOAD_EMOJI } = constants;
-const { logger, splitForEmbedFields, trim } = functions;
+const { buildDeleteButton, logger, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
 	/**
@@ -349,7 +349,7 @@ export default class EvalCommand extends ApplicationCommand {
 						.setCustomId(`${this.baseCustomId}:visibility:${inspectDepth}`)
 						.setEmoji({ name: EYES_EMOJI })
 						.setStyle(ButtonStyle.Secondary),
-					InteractionUtil.getDeleteButton(interaction),
+					buildDeleteButton(interaction.user),
 				),
 			],
 			files,

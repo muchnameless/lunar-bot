@@ -14,7 +14,7 @@ import {
 	SnowflakeUtil,
 } from 'discord.js';
 import { stripIndent } from 'common-tags';
-import { DELETE_EMOJI, DELETE_KEY, GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
+import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
@@ -316,17 +316,6 @@ export class InteractionUtil extends null {
 	 */
 	static checkForce(interaction: ChatInputCommandInteraction | AutocompleteInteraction) {
 		return interaction.options.getBoolean('force') ?? false;
-	}
-
-	/**
-	 * returns a MessageButton which triggers deleting the Message it is attached to
-	 * @param interaction
-	 */
-	static getDeleteButton(interaction: Interaction) {
-		return new ButtonComponent()
-			.setCustomId(`${DELETE_KEY}:${interaction.user.id}`)
-			.setEmoji({ name: DELETE_EMOJI })
-			.setStyle(ButtonStyle.Danger);
 	}
 
 	/**

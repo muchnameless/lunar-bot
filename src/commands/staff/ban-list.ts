@@ -1,18 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, ButtonComponent, ButtonStyle, Embed, Formatters } from 'discord.js';
+import { Embed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
-import { escapeIgn, logger } from '../../functions';
+import { buildPaginationButtons, escapeIgn, logger } from '../../functions';
 import { InteractionUtil } from '../../util';
-import {
-	DOUBLE_LEFT_EMOJI,
-	LEFT_EMOJI,
-	RIGHT_EMOJI,
-	DOUBLE_RIGHT_EMOJI,
-	RELOAD_EMOJI,
-	STATS_URL_BASE,
-} from '../../constants';
+import { STATS_URL_BASE } from '../../constants';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ButtonInteraction, ChatInputCommandInteraction, Snowflake } from 'discord.js';
@@ -54,47 +47,6 @@ export default class BanListCommand extends ApplicationCommand {
 				),
 			cooldown: 0,
 		});
-	}
-
-	/**
-	 * @param userId
-	 * @param currentPage
-	 * @param totalPages
-	 */
-	private _getPaginationButtons(userId: Snowflake, currentPage: number, totalPages: number) {
-		const CUSTOM_ID = `${this.baseCustomId}:view:${userId}`;
-		const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
-		const DEC_DISABLED = currentPage === 1 || INVALID_PAGES;
-		const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;
-
-		return [
-			new ActionRow().addComponents(
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:1:${DOUBLE_LEFT_EMOJI}`)
-					.setEmoji({ name: DOUBLE_LEFT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(DEC_DISABLED),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${currentPage - 1}:${LEFT_EMOJI}`)
-					.setEmoji({ name: LEFT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(DEC_DISABLED),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${currentPage + 1}:${RIGHT_EMOJI}`)
-					.setEmoji({ name: RIGHT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(INC_DISABLED),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
-					.setEmoji({ name: DOUBLE_RIGHT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(INC_DISABLED),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${currentPage}:${RELOAD_EMOJI}`)
-					.setEmoji({ name: RELOAD_EMOJI })
-					.setStyle(ButtonStyle.Primary),
-			),
-		];
 	}
 
 	/**
@@ -152,11 +104,13 @@ export default class BanListCommand extends ApplicationCommand {
 						Page: ${page} / ${TOTAL_PAGES}
 					`),
 			],
-			components: this._getPaginationButtons(
-				interaction.user.id,
-				count >= OFFSET ? page : TOTAL_PAGES, // reset to total pages in case of page overflow
-				TOTAL_PAGES,
-			),
+			components: [
+				buildPaginationButtons(
+					`${this.baseCustomId}:view:${interaction.user.id}`,
+					count >= OFFSET ? page : TOTAL_PAGES, // reset to total pages in case of page overflow
+					TOTAL_PAGES,
+				),
+			],
 		});
 	}
 

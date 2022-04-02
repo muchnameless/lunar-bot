@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, ButtonComponent, ButtonStyle, Formatters, SnowflakeUtil } from 'discord.js';
+import { Formatters, SnowflakeUtil } from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
 import { commaListsOr } from 'common-tags';
@@ -16,16 +16,7 @@ import {
 	unmute,
 	unknownIgn,
 } from '../../structures/chat_bridge/constants';
-import {
-	DOUBLE_LEFT_EMOJI,
-	DOUBLE_RIGHT_EMOJI,
-	EMBED_DESCRIPTION_MAX_CHARS,
-	LEFT_EMOJI,
-	MAX_CHOICES,
-	RELOAD_EMOJI,
-	RIGHT_EMOJI,
-	UNKNOWN_IGN,
-} from '../../constants';
+import { EMBED_DESCRIPTION_MAX_CHARS, MAX_CHOICES, UNKNOWN_IGN } from '../../constants';
 import {
 	forceOption,
 	hypixelGuildOption,
@@ -40,6 +31,7 @@ import { mojang } from '../../api';
 import { GuildMemberUtil, InteractionUtil, UserUtil } from '../../util';
 import {
 	autocorrect,
+	buildPaginationButtons,
 	escapeIgn,
 	getIdFromString,
 	getInlineFieldLineCount,
@@ -577,71 +569,6 @@ export default class GuildCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * @param hypixelGuildId
-	 * @param userId
-	 * @param currentPage
-	 * @param totalPages
-	 */
-	private _getPaginationButtons(
-		subcommand: string,
-		hypixelGuildId: string,
-		userId: Snowflake,
-		currentPage: number,
-		totalPages: number,
-		isParsedPages: boolean,
-	) {
-		const CUSTOM_ID = `${this.baseCustomId}:${subcommand}:${hypixelGuildId}:${userId}` as const;
-
-		let currentPage_ = currentPage;
-		let totalPages_ = totalPages;
-		let decDisabled: boolean;
-		let incDisabled: boolean;
-
-		if (isParsedPages) {
-			const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
-
-			decDisabled = currentPage === 1 || INVALID_PAGES;
-			incDisabled = currentPage === totalPages || INVALID_PAGES;
-		} else {
-			// not parsed
-			if (Number.isNaN(currentPage)) currentPage_ = 0;
-			if (Number.isNaN(totalPages)) totalPages_ = currentPage_ + 7;
-
-			decDisabled = currentPage_ === 0;
-			incDisabled = currentPage_ === totalPages_;
-		}
-
-		return [
-			new ActionRow().addComponents(
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${isParsedPages ? 1 : 0}:${DOUBLE_LEFT_EMOJI}`)
-					.setEmoji({ name: DOUBLE_LEFT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(decDisabled),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${currentPage_ - 1}:${LEFT_EMOJI}`)
-					.setEmoji({ name: LEFT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(decDisabled),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${currentPage_ + 1}:${RIGHT_EMOJI}`)
-					.setEmoji({ name: RIGHT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(incDisabled),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${totalPages_}:${DOUBLE_RIGHT_EMOJI}`)
-					.setEmoji({ name: DOUBLE_RIGHT_EMOJI })
-					.setStyle(ButtonStyle.Primary)
-					.setDisabled(incDisabled),
-				new ButtonComponent()
-					.setCustomId(`${CUSTOM_ID}:${currentPage_}:${RELOAD_EMOJI}`)
-					.setEmoji({ name: RELOAD_EMOJI })
-					.setStyle(ButtonStyle.Primary),
-			),
-		];
-	}
-
-	/**
 	 * @param interaction
 	 * @param hypixelGuild
 	 * @param subcommand
@@ -707,6 +634,9 @@ export default class GuildCommand extends ApplicationCommand {
 			);
 		}
 
+		const currentPage = Number(pageMatched?.groups!.current ?? page) || 0;
+		const totalPages = Number(pageMatched?.groups!.total ?? 0) || currentPage + 7;
+
 		// send reply
 		return (
 			InteractionUtil[
@@ -714,14 +644,14 @@ export default class GuildCommand extends ApplicationCommand {
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction, {
 			embeds: [embed],
-			components: this._getPaginationButtons(
-				subcommand,
-				hypixelGuild.guildId,
-				interaction.user.id,
-				Number(pageMatched?.groups!.current ?? page),
-				Number(pageMatched?.groups!.total),
-				pageMatched !== null,
-			),
+			components: [
+				buildPaginationButtons(
+					`${this.baseCustomId}:${subcommand}:${hypixelGuild.guildId}:${interaction.user.id}`,
+					currentPage,
+					totalPages,
+					{ firstPage: pageMatched !== null ? 1 : 0 },
+				),
+			],
 		});
 	}
 

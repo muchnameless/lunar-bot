@@ -1,23 +1,11 @@
-import {
-	ActionRow,
-	ButtonComponent,
-	ButtonStyle,
-	Embed,
-	Formatters,
-	SelectMenuComponent,
-	SelectMenuOption,
-} from 'discord.js';
+import { ActionRow, ButtonStyle, Embed, Formatters, SelectMenuComponent, SelectMenuOption } from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
-	DOUBLE_LEFT_EMOJI,
-	DOUBLE_RIGHT_EMOJI,
 	GUILD_ID_ALL,
 	LB_KEY,
 	LEADERBOARD_XP_TYPES,
-	LEFT_EMOJI,
 	Offset,
 	RELOAD_EMOJI,
-	RIGHT_EMOJI,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_SHORT,
 	XP_OFFSETS_TIME,
@@ -25,7 +13,7 @@ import {
 } from '../constants';
 import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
-import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
+import { buildPaginationButtons, days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { APIEmbed } from 'discord-api-types/v9';
 import type { Player } from '../structures/database/models/Player';
@@ -34,11 +22,15 @@ import type { LunarClient } from '../structures/LunarClient';
 import type { ConfigManager } from '../structures/database/managers/ConfigManager';
 import type { RepliableInteraction } from '../util';
 import type {
-	DungeonTypes,
-	SkillTypes,
 	COSMETIC_SKILLS,
+	DOUBLE_LEFT_EMOJI,
+	DOUBLE_RIGHT_EMOJI,
 	DUNGEON_TYPES_AND_CLASSES,
+	DungeonTypes,
+	LEFT_EMOJI,
+	RIGHT_EMOJI,
 	SKILLS,
+	SkillTypes,
 	SLAYERS,
 } from '../constants';
 import type { ArrayElement } from '../types/util';
@@ -169,22 +161,6 @@ function createActionRows(
 	totalPages: number,
 	isExpired = false,
 ) {
-	let decDisabled: boolean;
-	let incDisabled: boolean;
-	let pageStyle: ButtonStyle;
-	let reloadStyle: ButtonStyle;
-
-	if (isExpired) {
-		decDisabled = true;
-		incDisabled = true;
-		pageStyle = ButtonStyle.Secondary;
-		reloadStyle = ButtonStyle.Danger;
-	} else {
-		decDisabled = page === 1;
-		incDisabled = page === totalPages;
-		pageStyle = reloadStyle = ButtonStyle.Primary;
-	}
-
 	const rows: ActionRow[] = [];
 	const guildSelectMenu = new SelectMenuComponent()
 		.setCustomId(`${cacheKey}:guild`)
@@ -259,32 +235,11 @@ function createActionRows(
 
 	rows.push(
 		new ActionRow().addComponents(guildSelectMenu),
-		new ActionRow().addComponents(
-			new ButtonComponent()
-				.setCustomId(`${cacheKey}:1:${DOUBLE_LEFT_EMOJI}`)
-				.setEmoji({ name: DOUBLE_LEFT_EMOJI })
-				.setStyle(pageStyle)
-				.setDisabled(decDisabled),
-			new ButtonComponent()
-				.setCustomId(`${cacheKey}:${page - 1}:${LEFT_EMOJI}`)
-				.setEmoji({ name: LEFT_EMOJI })
-				.setStyle(pageStyle)
-				.setDisabled(decDisabled),
-			new ButtonComponent()
-				.setCustomId(`${cacheKey}:${page + 1}:${RIGHT_EMOJI}`)
-				.setEmoji({ name: RIGHT_EMOJI })
-				.setStyle(pageStyle)
-				.setDisabled(incDisabled),
-			new ButtonComponent()
-				.setCustomId(`${cacheKey}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
-				.setEmoji({ name: DOUBLE_RIGHT_EMOJI })
-				.setStyle(pageStyle)
-				.setDisabled(incDisabled),
-			new ButtonComponent()
-				.setCustomId(`${cacheKey}:${page}:${RELOAD_EMOJI}`)
-				.setEmoji({ name: RELOAD_EMOJI })
-				.setStyle(reloadStyle),
-		),
+		buildPaginationButtons(cacheKey, page, totalPages, {
+			disablePages: isExpired,
+			pageStyle: isExpired ? ButtonStyle.Secondary : ButtonStyle.Primary,
+			reloadStyle: isExpired ? ButtonStyle.Danger : ButtonStyle.Primary,
+		}),
 	);
 
 	return rows;
