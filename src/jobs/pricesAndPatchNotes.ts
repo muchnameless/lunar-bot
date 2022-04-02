@@ -22,6 +22,8 @@ import type { Components } from '@zikeji/hypixel';
 type SkyBlockAuctionItem = Components.Schemas.SkyBlockAuctionsResponse['auctions'][0];
 type SkyBlockAuctionEndedItem = Components.Schemas.SkyBlockAuctionsEndedResponse['auctions'][0];
 
+const MAX_RETRIES = 3;
+
 /**
  * updates the database and the prices map with the median of the buy price
  * @param itemId
@@ -93,9 +95,9 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
 }
 
 /**
- * fetches and processes bazaar products
+ * fetches bazaar products
  */
-async function updateBazaarPrices() {
+async function fetchBazaarPrices() {
 	const res = await fetch('https://api.hypixel.net/skyblock/bazaar', {
 		// @ts-expect-error
 		signal: AbortSignal.timeout(30_000),
@@ -103,7 +105,14 @@ async function updateBazaarPrices() {
 
 	if (res.status !== 200) throw new FetchError('FetchBazaarError', res);
 
-	const { lastUpdated, products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
+	return res.json() as Promise<Components.Schemas.SkyBlockBazaarResponse>;
+}
+
+/**
+ * fetches and processes bazaar products
+ */
+async function updateBazaarPrices() {
+	let { lastUpdated, products } = await fetchBazaarPrices();
 
 	// check if API data is updated
 	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
@@ -111,8 +120,19 @@ async function updateBazaarPrices() {
 		FROM "Config"
 		WHERE key = 'HYPIXEL_BAZAAR_LAST_UPDATED'
 	`;
-	if (lastUpdatedEntry && lastUpdated <= JSON.parse(lastUpdatedEntry.value)) {
-		return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntry.value }, '[UPDATE BAZAAR PRICES]');
+
+	if (lastUpdatedEntry) {
+		const lastUpdatedEntryParsed: number = JSON.parse(lastUpdatedEntry.value);
+
+		let retries = 0;
+
+		while (lastUpdated <= lastUpdatedEntryParsed && ++retries <= MAX_RETRIES) {
+			logger.warn(`[FETCH AUCTIONS]: refetching Bazaar: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
+			await sleep(5_000);
+
+			// fetch first auction page
+			({ lastUpdated, products } = await fetchBazaarPrices());
+		}
 	}
 
 	// update database and prices map
@@ -170,7 +190,7 @@ async function updateAuctionPrices() {
 	 * fetches all auction pages
 	 */
 	// fetch first auction page
-	const { success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(0);
+	let { success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(0);
 
 	// abort on error
 	if (!success) return logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
@@ -181,8 +201,22 @@ async function updateAuctionPrices() {
 		FROM "Config"
 		WHERE key = 'HYPIXEL_AUCTIONS_LAST_UPDATED'
 	`;
-	if (lastUpdatedEntry && lastUpdated <= JSON.parse(lastUpdatedEntry.value)) {
-		return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntry.value }, '[UPDATE AUCTION PRICES]');
+
+	if (lastUpdatedEntry) {
+		const lastUpdatedEntryParsed: number = JSON.parse(lastUpdatedEntry.value);
+
+		let retries = 0;
+
+		while (lastUpdated <= lastUpdatedEntryParsed && ++retries <= MAX_RETRIES) {
+			logger.warn(`[FETCH AUCTIONS]: refetching page 0/${totalPages}: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
+			await sleep(5_000);
+
+			// fetch first auction page
+			({ success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(0));
+
+			// abort on error
+			if (!success) return logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+		}
 	}
 
 	// fetch remaining auction pages
@@ -268,13 +302,16 @@ async function updateAuctionPrices() {
 	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
 		Promise.all(_auctions.map((auction) => auction.bin && processAuction(auction, auction.starting_bid)));
 
+	let retries = 0;
+
 	const fetchAndProcessAuctions = async (page: number): Promise<unknown> => {
 		const { auctions: _auctions, lastUpdated: _lastUpdated } = await fetchAuctionPage(page);
 
 		if (_lastUpdated !== lastUpdated) {
-			if (_lastUpdated < lastUpdated) {
+			if (_lastUpdated < lastUpdated && ++retries <= MAX_RETRIES) {
 				logger.warn(`[FETCH AUCTIONS]: refetching page ${page}/${totalPages}: ${lastUpdated} <> ${_lastUpdated}`);
 				await sleep(5_000);
+
 				return fetchAndProcessAuctions(page);
 			}
 
@@ -285,6 +322,7 @@ async function updateAuctionPrices() {
 
 		return processAuctions(_auctions);
 	};
+
 	const fetchAndProcessEndedAuctions = async () => {
 		const res = await fetch('https://api.hypixel.net/skyblock/auctions_ended', {
 			// @ts-expect-error
