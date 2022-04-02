@@ -126,8 +126,12 @@ async function updateBazaarPrices() {
 
 		let retries = 0;
 
-		while (lastUpdated <= lastUpdatedEntryParsed && ++retries <= MAX_RETRIES) {
-			logger.warn(`[FETCH AUCTIONS]: refetching Bazaar: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
+		while (lastUpdated <= lastUpdatedEntryParsed) {
+			if (++retries > MAX_RETRIES) {
+				return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE BAZAAR PRICES]');
+			}
+
+			logger.warn(`[UPDATE BAZAAR PRICES]: refetching Bazaar: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
 			await sleep(5_000);
 
 			// fetch first auction page
@@ -207,8 +211,14 @@ async function updateAuctionPrices() {
 
 		let retries = 0;
 
-		while (lastUpdated <= lastUpdatedEntryParsed && ++retries <= MAX_RETRIES) {
-			logger.warn(`[FETCH AUCTIONS]: refetching page 0/${totalPages}: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
+		while (lastUpdated <= lastUpdatedEntryParsed) {
+			if (++retries > MAX_RETRIES) {
+				return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE AUCTION PRICES]');
+			}
+
+			logger.warn(
+				`[UPDATE AUCTION PRICES]: refetching page 0/${totalPages}: ${lastUpdatedEntryParsed} <> ${lastUpdated}`,
+			);
 			await sleep(5_000);
 
 			// fetch first auction page
