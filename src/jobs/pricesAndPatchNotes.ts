@@ -6,6 +6,7 @@ import { fetch } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
 import { logger } from '../functions/logger'; // no index imports to not import unused files in the worker
+import { consumeBody } from '../functions/fetch';
 import { FetchError } from '../structures/errors/FetchError';
 import { getEnchantment } from '../structures/networth/functions/enchantments'; // separate imports to not import unused files in the worker
 import { transformItemData } from '../structures/networth/functions/nbt';
@@ -103,9 +104,10 @@ async function fetchBazaarPrices() {
 		signal: AbortSignal.timeout(30_000),
 	});
 
-	if (res.status !== 200) throw new FetchError('FetchBazaarError', res);
+	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockBazaarResponse>;
 
-	return res.json() as Promise<Components.Schemas.SkyBlockBazaarResponse>;
+	void consumeBody(res);
+	throw new FetchError('FetchBazaarError', res);
 }
 
 /**
@@ -178,6 +180,8 @@ async function fetchAuctionPage(
 	});
 
 	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
+
+	void consumeBody(res);
 
 	// page does not exist -> no-op
 	if (res.status === 404) return { success: false, lastUpdated: -1, totalPages: -1, auctions: [] };
@@ -339,13 +343,16 @@ async function updateAuctionPrices() {
 			signal: AbortSignal.timeout(30_000),
 		});
 
-		if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
+		if (res.status === 200) {
+			return Promise.all(
+				((await res.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions.map((auction) =>
+					processAuction(auction, auction.price),
+				),
+			);
+		}
 
-		return Promise.all(
-			((await res.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions.map((auction) =>
-				processAuction(auction, auction.price),
-			),
-		);
+		void consumeBody(res);
+		throw new FetchError('FetchAuctionError', res);
 	};
 
 	const promises: Promise<unknown>[] = [processAuctions(auctions), fetchAndProcessEndedAuctions()];
@@ -417,9 +424,10 @@ async function fetchForumEntries(forum: string) {
 		signal: AbortSignal.timeout(30_000),
 	});
 
-	if (res.status !== 200) throw new FetchError('FetchError', res);
+	if (res.status === 200) return (xmlParser.parse(await res.text()) as HypixelForumResponse).rss.channel.item;
 
-	return (xmlParser.parse(await res.text()) as HypixelForumResponse).rss.channel.item;
+	void consumeBody(res);
+	throw new FetchError('FetchError', res);
 }
 
 /**
