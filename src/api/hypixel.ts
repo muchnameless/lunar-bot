@@ -1,7 +1,8 @@
 import { env } from 'node:process';
 import { Client } from '@zikeji/hypixel';
-import { HYPIXEL_KEY } from '../constants';
-import { days, logger, minutes, seconds } from '../functions';
+import { days, minutes, seconds } from '../functions';
+import { RedisKey } from '../constants';
+import { logger } from '../logger';
 import { redis } from '.';
 import type { DefaultMeta } from '@zikeji/hypixel';
 
@@ -13,7 +14,7 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 	retries: 1,
 	cache: {
 		async get<T>(key: string): Promise<(T & DefaultMeta) | null> {
-			return JSON.parse((await redis.get(`${HYPIXEL_KEY}:${key}`))!);
+			return JSON.parse((await redis.get(`${RedisKey.Hypixel}:${key}`))!);
 		},
 		set(key, value) {
 			let ttl = minutes(5); // default 5 minute ttl
@@ -37,7 +38,7 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 				ttl = minutes(1); // this endpoint is cached by cloudflare and updates every 60 seconds
 			}
 
-			return redis.psetex(`${HYPIXEL_KEY}:${key}`, ttl, JSON.stringify(value));
+			return redis.psetex(`${RedisKey.Hypixel}:${key}`, ttl, JSON.stringify(value));
 		},
 	},
 });

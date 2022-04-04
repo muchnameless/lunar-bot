@@ -1,5 +1,5 @@
 import { mojang } from '../../api';
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import type { GuildMember } from 'discord.js';
 import type { ChatBridge, ChatOptions } from './ChatBridge';
 import type { Player } from '../database/models/Player';

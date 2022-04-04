@@ -1,4 +1,4 @@
-import { BROADCAST_EMOJI } from '../constants';
+import { UnicodeEmoji } from '../constants';
 import { MessageUtil, UserUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
 import type { Message } from 'discord.js';
@@ -27,7 +27,7 @@ export default class MessageCreateEvent extends Event {
 		if (
 			this.client.hypixelGuilds.cache.some(({ announcementsChannelId }) => announcementsChannelId === message.channelId)
 		) {
-			void MessageUtil.react(message, BROADCAST_EMOJI);
+			void MessageUtil.react(message, UnicodeEmoji.Broadcast);
 		}
 
 		// player activity

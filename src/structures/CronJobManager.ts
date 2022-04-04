@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js';
 import { CronJob } from 'cron';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import type { LunarClient } from './LunarClient';
 
 export class CronJobManager {

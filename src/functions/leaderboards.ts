@@ -9,14 +9,13 @@ import {
 import { stripIndent, oneLine } from 'common-tags';
 import {
 	GUILD_ID_ALL,
-	LB_KEY,
 	LEADERBOARD_XP_TYPES,
 	Offset,
-	RELOAD_EMOJI,
+	RedisKey,
+	UnicodeEmoji,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_SHORT,
 	XP_OFFSETS_TIME,
-	Y_EMOJI_ALT,
 } from '../constants';
 import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
@@ -38,12 +37,8 @@ import type { ConfigManager } from '../structures/database/managers/ConfigManage
 import type { RepliableInteraction } from '../util';
 import type {
 	COSMETIC_SKILLS,
-	DOUBLE_LEFT_EMOJI,
-	DOUBLE_RIGHT_EMOJI,
 	DUNGEON_TYPES_AND_CLASSES,
 	DungeonTypes,
-	LEFT_EMOJI,
-	RIGHT_EMOJI,
 	SKILLS,
 	SkillTypes,
 	SLAYERS,
@@ -131,7 +126,7 @@ type CacheKeyParsed = [
 type ButtonCustomIdParsed = [
 	...CacheKeyParsed,
 	number, // new page
-	typeof DOUBLE_LEFT_EMOJI | typeof LEFT_EMOJI | typeof RIGHT_EMOJI | typeof DOUBLE_RIGHT_EMOJI | typeof RELOAD_EMOJI, // emoji
+	UnicodeEmoji.DoubleLeft | UnicodeEmoji.Left | UnicodeEmoji.Right | UnicodeEmoji.DoubleRight | UnicodeEmoji.Reload, // emoji
 ];
 
 type SelectMenuCustomIdParsed = [
@@ -146,7 +141,7 @@ type CacheKey = ReturnType<typeof createCacheKey>;
  * @param leaderboardArgs
  */
 const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, offset }: LeaderboardArgs) =>
-	`${LB_KEY}:${USER_ID}:${
+	`${RedisKey.Leaderboard}:${USER_ID}:${
 		typeof hypixelGuild === 'string' ? hypixelGuild : hypixelGuild.guildId
 	}:${lbType}:${xpType}:${offset}` as const;
 
@@ -298,7 +293,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 	const { embeds, components } = await getLeaderboardMessageOptions(
 		interaction.client,
 		leaderboardArgs,
-		EMOJI === RELOAD_EMOJI,
+		EMOJI === UnicodeEmoji.Reload,
 	);
 
 	if (!embeds.length) {
@@ -307,7 +302,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 		});
 
 		return InteractionUtil.reply(interaction, {
-			content: `leaderboard timed out, use ${`[${RELOAD_EMOJI}](${
+			content: `leaderboard timed out, use ${`[${UnicodeEmoji.Reload}](${
 				(interaction.message as Message).url
 			})`} to refresh the data`,
 			ephemeral: true,
@@ -434,7 +429,7 @@ async function getLeaderboardMessageOptions(
 			if (index < PLAYER_COUNT) {
 				const player = playerData[index];
 				playerList += `\n${stripIndent`
-					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}${
+					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${UnicodeEmoji.VarY}` : ''}${
 					player.isStaff ? ' [STAFF]' : ''
 				}
 						 > ${getEntry(player)}`}`; // needs to be in one line or entries are separated by a newline
@@ -811,7 +806,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			'ada',
 			stripIndent`
 				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${
-				IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''
+				IS_COMPETITION_LB && playerRequesting.paid ? ` ${UnicodeEmoji.VarY}` : ''
 			}
 					 > ${getEntry(playerRequesting)}
 			`,
@@ -828,7 +823,9 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequestingConverted.sortingStat) + 1}`.padStart(
 						3,
 						'0',
-					)} : ${playerRequestingConverted.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+					)} : ${playerRequestingConverted.ign}${
+					IS_COMPETITION_LB && playerRequesting.paid ? ` ${UnicodeEmoji.VarY}` : ''
+				}
 						 > ${getEntry(playerRequestingConverted)}
 				`,
 			);

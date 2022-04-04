@@ -1,7 +1,7 @@
 import { ChannelType, PermissionFlagsBits, PermissionsBitField } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
 import { EmbedUtil } from './EmbedUtil';
 import type { AnyChannel, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';

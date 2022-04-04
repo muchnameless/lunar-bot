@@ -4,10 +4,11 @@ import {
 	includeAuctionsOptionName,
 	skyblockFindProfileOptionName,
 } from '../../structures/commands/commonOptions';
-import { formatError, logger, seconds, shortenNumber } from '../../functions';
+import { formatError, seconds, shortenNumber } from '../../functions';
 import { getNetworth } from '../../structures/networth/networth';
-import { X_EMOJI } from '../../constants';
+import { UnicodeEmoji } from '../../constants';
 import { InteractionUtil } from '../../util';
+import { logger } from '../../logger';
 import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { FindProfileStrategy } from '../../constants';
@@ -41,8 +42,8 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 		});
 
 		const reply = [`${ign} (${profile.cute_name}): ${shortenNumber(networth)}`];
-		if (!bankingAPIEnabled) reply.push(`${X_EMOJI} Banking API disabled`);
-		if (!inventoryAPIEnabled) reply.push(`${X_EMOJI} Inventory API disabled`);
+		if (!bankingAPIEnabled) reply.push(`${UnicodeEmoji.X} Banking API disabled`);
+		if (!inventoryAPIEnabled) reply.push(`${UnicodeEmoji.X} Inventory API disabled`);
 
 		return reply.join(' | ');
 	}

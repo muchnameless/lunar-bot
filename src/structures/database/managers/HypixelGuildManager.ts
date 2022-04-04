@@ -1,5 +1,6 @@
 import { CronJob } from 'cron';
-import { autocorrect, compareAlphabetically, logger } from '../../../functions';
+import { autocorrect, compareAlphabetically } from '../../../functions';
+import { logger } from '../../../logger';
 import { ModelManager } from './ModelManager';
 import type { ModelResovable } from './ModelManager';
 import type { GuildResolvable, Snowflake } from 'discord.js';

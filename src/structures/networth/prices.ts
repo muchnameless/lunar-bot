@@ -1,4 +1,4 @@
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import { sql } from '../database';
 
 export const prices = new Map<string, number>();

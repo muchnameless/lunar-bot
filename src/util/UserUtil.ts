@@ -1,7 +1,8 @@
 import { DiscordAPIError, RESTJSONErrorCodes } from 'discord.js';
-import { hours, logger } from '../functions';
+import { hours } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
 import { redis } from '../api';
+import { logger } from '../logger';
 import { EmbedUtil } from '.';
 import type { Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';

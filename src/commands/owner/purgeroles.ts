@@ -2,9 +2,10 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import ms from 'ms';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
-import { logger, seconds } from '../../functions';
+import { seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { hypixelGuildOption } from '../../structures/commands/commonOptions';
+import { logger } from '../../logger';
 import type { ChatInputCommandInteraction, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 

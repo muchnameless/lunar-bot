@@ -1,4 +1,4 @@
-import { logger } from '../../../functions/logger';
+import { logger } from '../../../logger';
 
 /**
  * returns the enchantment id (name_level) and count

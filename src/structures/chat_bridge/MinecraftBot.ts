@@ -1,7 +1,8 @@
 import { basename } from 'node:path';
 import { URL } from 'node:url';
 import { createClient } from 'minecraft-protocol';
-import { logger, readJSFiles } from '../../functions';
+import { readJSFiles } from '../../functions';
+import { logger } from '../../logger';
 import { SPAWN_EVENTS } from './constants';
 import type { ClientOptions } from 'minecraft-protocol';
 import type { ChatBridge } from './ChatBridge';

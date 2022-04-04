@@ -6,7 +6,7 @@ import ms from 'ms';
 import { embedLength, isJSONEncodable } from '@discordjs/builders';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import type { Dir } from 'node:fs';
 import type { JSONEncodable } from '@discordjs/builders';
 import type { APIEmbed } from 'discord-api-types/v10';

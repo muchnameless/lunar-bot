@@ -1,13 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import {
-	DELETE_EMOJI,
-	DELETE_KEY,
-	DOUBLE_LEFT_EMOJI,
-	DOUBLE_RIGHT_EMOJI,
-	LEFT_EMOJI,
-	RELOAD_EMOJI,
-	RIGHT_EMOJI,
-} from '../constants';
+import { CustomIdKey, UnicodeEmoji } from '../constants';
 import type { User } from 'discord.js';
 
 /**
@@ -16,9 +8,19 @@ import type { User } from 'discord.js';
  */
 export const buildDeleteButton = (user: User) =>
 	new ButtonBuilder()
-		.setCustomId(`${DELETE_KEY}:${user.id}`)
-		.setEmoji({ name: DELETE_EMOJI })
+		.setCustomId(`${CustomIdKey.Delete}:${user.id}`)
+		.setEmoji({ name: UnicodeEmoji.Delete })
 		.setStyle(ButtonStyle.Danger);
+
+/**
+ * returns a MessageButton which triggers (un)pinning the Message it is attached to
+ * @param user
+ */
+export const buildPinButton = (user: User) =>
+	new ButtonBuilder()
+		.setCustomId(`${CustomIdKey.Pin}:${user.id}`)
+		.setEmoji({ name: UnicodeEmoji.Pin })
+		.setStyle(ButtonStyle.Secondary);
 
 type PaginationButtonOptions = Partial<{
 	/** disable all but the reload button */
@@ -56,28 +58,28 @@ export function buildPaginationActionRow(
 	// emojis are added to customIds to ensure they are unique, e.g. "firstPage" could equal "currentPage - 1"
 	return new ActionRowBuilder<ButtonBuilder>().addComponents(
 		new ButtonBuilder()
-			.setCustomId(`${baseCustomId}:${firstPage}:${DOUBLE_LEFT_EMOJI}`)
-			.setEmoji({ name: DOUBLE_LEFT_EMOJI })
+			.setCustomId(`${baseCustomId}:${firstPage}:${UnicodeEmoji.DoubleLeft}`)
+			.setEmoji({ name: UnicodeEmoji.DoubleLeft })
 			.setStyle(pageStyle)
 			.setDisabled(DEC_DISABLED),
 		new ButtonBuilder()
-			.setCustomId(`${baseCustomId}:${currentPage - 1}:${LEFT_EMOJI}`)
-			.setEmoji({ name: LEFT_EMOJI })
+			.setCustomId(`${baseCustomId}:${currentPage - 1}:${UnicodeEmoji.Left}`)
+			.setEmoji({ name: UnicodeEmoji.Left })
 			.setStyle(pageStyle)
 			.setDisabled(DEC_DISABLED),
 		new ButtonBuilder()
-			.setCustomId(`${baseCustomId}:${currentPage + 1}:${RIGHT_EMOJI}`)
-			.setEmoji({ name: RIGHT_EMOJI })
+			.setCustomId(`${baseCustomId}:${currentPage + 1}:${UnicodeEmoji.Right}`)
+			.setEmoji({ name: UnicodeEmoji.Right })
 			.setStyle(pageStyle)
 			.setDisabled(INC_DISABLED),
 		new ButtonBuilder()
-			.setCustomId(`${baseCustomId}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
-			.setEmoji({ name: DOUBLE_RIGHT_EMOJI })
+			.setCustomId(`${baseCustomId}:${totalPages}:${UnicodeEmoji.DoubleRight}`)
+			.setEmoji({ name: UnicodeEmoji.DoubleRight })
 			.setStyle(pageStyle)
 			.setDisabled(INC_DISABLED),
 		new ButtonBuilder()
-			.setCustomId(`${baseCustomId}:${currentPage}:${RELOAD_EMOJI}`)
-			.setEmoji({ name: RELOAD_EMOJI })
+			.setCustomId(`${baseCustomId}:${currentPage}:${UnicodeEmoji.Reload}`)
+			.setEmoji({ name: UnicodeEmoji.Reload })
 			.setStyle(reloadStyle),
 	);
 }

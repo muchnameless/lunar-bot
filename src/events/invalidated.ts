@@ -1,4 +1,4 @@
-import { logger } from '../functions';
+import { logger } from '../logger';
 import { exitProcess } from '../process';
 import { Event, type EventContext } from '../structures/events/Event';
 

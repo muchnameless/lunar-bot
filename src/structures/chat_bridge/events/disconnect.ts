@@ -1,4 +1,4 @@
-import { logger } from '../../../functions';
+import { logger } from '../../../logger';
 import { ChatBridgeEvent, type ChatBridgeEventContext } from '../ChatBridgeEvent';
 
 export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {

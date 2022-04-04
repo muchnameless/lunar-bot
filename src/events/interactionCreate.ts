@@ -1,16 +1,16 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
 import { ApplicationCommandType, ComponentType, Formatters, InteractionType } from 'discord.js';
-import { COMMAND_KEY, DELETE_KEY, GUILD_ID_ALL, LB_KEY, MAX_CHOICES } from '../constants';
+import { CustomIdKey, GUILD_ID_ALL, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil } from '../util';
 import {
 	handleLeaderboardButtonInteraction,
 	handleLeaderboardSelectMenuInteraction,
-	logger,
 	minutes,
 	sortCache,
 } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
+import { logger } from '../logger';
 import type {
 	ApplicationCommandOptionChoice,
 	AutocompleteInteraction,
@@ -110,12 +110,16 @@ export default class InteractionCreateEvent extends Event {
 		const TYPE = args.shift();
 
 		switch (TYPE) {
+			// InteractionUtil.awaitConfirmation, handled by a collector
+			case CustomIdKey.Confirm:
+				return;
+
 			// leaderboards edit
-			case LB_KEY:
+			case CustomIdKey.Leaderboard:
 				return handleLeaderboardButtonInteraction(interaction, args);
 
 			// message delete
-			case DELETE_KEY:
+			case CustomIdKey.Delete:
 				// check if button press is from the user that invoked the original interaction
 				if (interaction.user.id !== args[0]) {
 					return InteractionUtil.reply(interaction, {
@@ -127,7 +131,7 @@ export default class InteractionCreateEvent extends Event {
 				return InteractionUtil.deleteMessage(interaction);
 
 			// command message buttons
-			case COMMAND_KEY: {
+			case CustomIdKey.Command: {
 				const commandName = args.shift();
 				const command = this.client.commands.get(commandName!);
 
@@ -172,11 +176,11 @@ export default class InteractionCreateEvent extends Event {
 
 		switch (type) {
 			// leaderboards edit
-			case LB_KEY:
+			case CustomIdKey.Leaderboard:
 				return handleLeaderboardSelectMenuInteraction(interaction, args);
 
 			// command message buttons
-			case COMMAND_KEY: {
+			case CustomIdKey.Command: {
 				const commandName = args.shift();
 				const command = this.client.commands.get(commandName!);
 
@@ -370,7 +374,7 @@ export default class InteractionCreateEvent extends Event {
 
 		switch (TYPE) {
 			// command message buttons
-			case COMMAND_KEY: {
+			case CustomIdKey.Command: {
 				const commandName = args.shift();
 				const command = this.client.commands.get(commandName!);
 

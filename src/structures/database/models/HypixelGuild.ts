@@ -24,11 +24,11 @@ import {
 	formatNumber,
 	getInlineFieldLineCount,
 	hours,
-	logger,
 	minutes,
 	safePromiseAll,
 	seconds,
 } from '../../../functions';
+import { logger } from '../../../logger';
 import type { APIEmbed } from 'discord-api-types/v10';
 import type { JSONEncodable } from '@discordjs/builders';
 import type {

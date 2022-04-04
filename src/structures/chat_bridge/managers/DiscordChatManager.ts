@@ -1,11 +1,12 @@
 import { DiscordAPIError, EmbedBuilder, Formatters, MessageCollector, PermissionFlagsBits } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
-import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
+import { UnicodeEmoji, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { imgur } from '../../../api';
-import { asyncReplace, logger } from '../../../functions';
+import { asyncReplace } from '../../../functions';
 import { TimeoutAsyncQueue } from '../../TimeoutAsyncQueue';
+import { logger } from '../../../logger';
 import { ChatManager } from './ChatManager';
 import type {
 	Collection,
@@ -380,7 +381,7 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	async forwardToMinecraft(message: Message, { player: playerInput, isEdit = false }: MessageForwardOptions = {}) {
 		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
-		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, X_EMOJI);
+		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, UnicodeEmoji.X);
 
 		const player =
 			playerInput ??
@@ -396,13 +397,13 @@ export class DiscordChatManager extends ChatManager {
 					Formatters.TimestampStyles.RelativeTime,
 				)}`,
 			);
-			return MessageUtil.react(message, MUTED_EMOJI);
+			return MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if the player is auto muted
 		if (player?.infractions! >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			void DiscordChatManager._dmMuteInfo(message.author, 'you are currently muted due to continues infractions');
-			return MessageUtil.react(message, MUTED_EMOJI);
+			return MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if guild chat is muted
@@ -414,7 +415,7 @@ export class DiscordChatManager extends ChatManager {
 					Formatters.TimestampStyles.RelativeTime,
 				)}`,
 			);
-			return MessageUtil.react(message, MUTED_EMOJI);
+			return MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if the chatBridge bot is muted
@@ -426,7 +427,7 @@ export class DiscordChatManager extends ChatManager {
 					Formatters.TimestampStyles.RelativeTime,
 				)}`,
 			);
-			return MessageUtil.react(message, MUTED_EMOJI);
+			return MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// build content
@@ -462,7 +463,7 @@ export class DiscordChatManager extends ChatManager {
 		if (message.attachments.size) contentParts.push(...(await this._uploadAttachments(message.attachments)));
 
 		// empty message (e.g. only embeds)
-		if (!contentParts.length) return MessageUtil.react(message, STOP_EMOJI);
+		if (!contentParts.length) return MessageUtil.react(message, UnicodeEmoji.Stop);
 
 		// @referencedMessageAuthor if normal reply
 		if (MessageUtil.isNormalReplyMessage(message)) {

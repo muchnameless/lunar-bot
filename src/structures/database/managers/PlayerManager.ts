@@ -16,11 +16,11 @@ import {
 	autocorrect,
 	compareAlphabetically,
 	getWeekOfYear,
-	logger,
 	safePromiseAll,
 	seconds,
 	upperCaseFirstChar,
 } from '../../../functions';
+import { logger } from '../../../logger';
 import { ModelManager } from './ModelManager';
 import type { APIEmbed } from 'discord-api-types/v10';
 import type { JSONEncodable } from '@discordjs/builders';

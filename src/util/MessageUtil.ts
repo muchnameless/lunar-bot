@@ -2,8 +2,9 @@ import { setTimeout, clearTimeout } from 'node:timers';
 import { DiscordAPIError, MessageFlags, MessageType, PermissionFlagsBits, RESTJSONErrorCodes, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
-import { logger, seconds } from '../functions';
+import { seconds } from '../functions';
 import { MESSAGE_MAX_CHARS, EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS } from '../constants';
+import { logger } from '../logger';
 import { ChannelUtil, EmbedUtil } from '.';
 import type {
 	EmojiIdentifierResolvable,

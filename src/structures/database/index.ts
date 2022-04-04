@@ -1,5 +1,6 @@
 import { URL } from 'node:url';
-import { logger, readJSFiles } from '../../functions';
+import { readJSFiles } from '../../functions';
+import { logger } from '../../logger';
 import { sequelize } from './sequelize';
 import type { Model } from 'sequelize';
 import type { Models } from './managers/DatabaseManager';

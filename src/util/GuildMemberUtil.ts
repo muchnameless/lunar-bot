@@ -11,8 +11,9 @@ import {
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
 } from '../constants';
-import { logger, seconds } from '../functions';
+import { seconds } from '../functions';
 import { toUpperCase } from '../types/util';
+import { logger } from '../logger';
 import { GuildUtil, UserUtil } from '.';
 import type { GuildMember, Message, Snowflake, Role } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
@@ -149,13 +150,13 @@ export class GuildMemberUtil extends null {
 			return member;
 		}
 
-		const { me } = member.guild;
-		if (!me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
+		const me = member.guild.me!;
+		if (!me.permissions.has(PermissionFlagsBits.ManageRoles)) {
 			logger.warn(`[GUILDMEMBER SET ROLES] ${this.logInfo(member)}: missing 'MANAGE_ROLES' permission`);
 			return member;
 		}
 
-		const { highest } = me!.roles;
+		const { highest } = me.roles;
 		if (difference.some((role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0)) {
 			logger.warn(
 				commaListsAnd`[GUILDMEMBER SET ROLES] ${this.logInfo(member)}: unable to add / remove '${difference

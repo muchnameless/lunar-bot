@@ -1,4 +1,4 @@
-import { logger } from '../functions';
+import { logger } from '../logger';
 import type { Role, Collection, Guild, GuildMember, Snowflake } from 'discord.js';
 
 export type RoleCollection = Collection<Snowflake, Role>;

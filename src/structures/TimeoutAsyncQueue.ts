@@ -24,7 +24,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 import { setTimeout, clearTimeout } from 'node:timers';
-import { logger, minutes } from '../functions';
+import { minutes } from '../functions';
+import { logger } from '../logger';
 
 /**
  * The TimeoutAsyncQueue class used to sequentialize burst requests

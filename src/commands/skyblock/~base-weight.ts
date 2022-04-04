@@ -1,4 +1,4 @@
-import { X_EMOJI } from '../../constants';
+import { UnicodeEmoji } from '../../constants';
 import { hypixel } from '../../api';
 import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn, upperCaseFirstChar } from '../../functions';
 import BaseSkyBlockCommand from './~base-skyblock-command';
@@ -80,7 +80,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 		)} (${this.formatNumber(overflow, totalWeight > 1_000 ? 2 : 1)} Overflow) | Skill: ${this.formatNumber(
 			skill,
 		)} (${formatPercent(skill / totalWeight)})${
-			skillAPIEnabled ? '' : ` ${X_EMOJI} API disabled`
+			skillAPIEnabled ? '' : ` ${UnicodeEmoji.X} API disabled`
 		} | Dungeons: ${this.formatNumber(dungeons)} (${formatPercent(
 			dungeons / totalWeight,
 		)}) | Slayer: ${this.formatNumber(slayer)} (${formatPercent(slayer / totalWeight)}) | ${this.weightType}`;

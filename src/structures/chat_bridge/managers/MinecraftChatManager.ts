@@ -18,7 +18,7 @@ import {
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
 } from '../constants';
-import { MC_CLIENT_VERSION, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
+import { MC_CLIENT_VERSION, UnicodeEmoji, UNKNOWN_IGN } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvent } from '../MessageCollector';
@@ -26,13 +26,13 @@ import {
 	asyncReplace,
 	cleanFormattedNumber,
 	hours,
-	logger,
 	minutes,
 	replaceSmallLatinCapitalLetters,
 	seconds,
 	splitMessage,
 	trim,
 } from '../../../functions';
+import { logger } from '../../../logger';
 import { ChatManager } from './ChatManager';
 import type { GuildChannel, Message, Snowflake } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
@@ -326,7 +326,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	) {
 		if (!discordMessage) return;
 
-		void MessageUtil.react(discordMessage, STOP_EMOJI);
+		void MessageUtil.react(discordMessage, UnicodeEmoji.Stop);
 
 		let content: string | undefined;
 
@@ -867,7 +867,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		isMessage,
 		discordMessage = null,
 	}: SendToChatOptions): Promise<unknown> {
-		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, X_EMOJI);
+		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
 		let message = `${prefix}${content}`;
 
@@ -894,7 +894,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			this.bot.write('chat', { message });
 		} catch (error) {
 			logger.error(error, '[CHATBRIDGE _SEND TO CHAT]');
-			void MessageUtil.react(discordMessage, X_EMOJI);
+			void MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
 			this._resetFilter();
 
@@ -912,7 +912,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.isReady()) {
-					void MessageUtil.react(discordMessage, X_EMOJI);
+					void MessageUtil.react(discordMessage, UnicodeEmoji.X);
 					logger.error(`timeout while sending '${message}'`);
 					throw response;
 				}
@@ -928,7 +928,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 				// max retries reached
 				if (++this._retries === MinecraftChatManager.MAX_RETRIES) {
-					void MessageUtil.react(discordMessage, X_EMOJI);
+					void MessageUtil.react(discordMessage, UnicodeEmoji.X);
 					await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					throw `unable to send '${message}', anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}

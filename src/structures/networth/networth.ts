@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { parse, simplify } from 'prismarine-nbt';
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import { hypixel } from '../../api';
 import {
 	CRAFTING_RECIPES,

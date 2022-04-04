@@ -3,8 +3,9 @@ import { SlashCommandBooleanOption, SlashCommandBuilder } from '@discordjs/build
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { InteractionUtil } from '../../util';
-import { logger, readJSFiles } from '../../functions';
+import { readJSFiles } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
+import { logger } from '../../logger';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandType } from '../../structures/commands/BaseCommandCollection';
 import type { CommandContext } from '../../structures/commands/BaseCommand';

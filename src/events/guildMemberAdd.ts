@@ -2,7 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import type { GuildMember } from 'discord.js';
 
 export default class GuildMemberAddEvent extends Event {

@@ -1,6 +1,7 @@
 import { dirname, basename } from 'node:path';
 import { Collection } from 'discord.js';
-import { autocorrect, logger, readJSFiles } from '../../functions';
+import { autocorrect, readJSFiles } from '../../functions';
+import { logger } from '../../logger';
 import type { URL } from 'node:url';
 import type { LunarClient } from '../LunarClient';
 import type { DualCommand } from './DualCommand';

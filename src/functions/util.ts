@@ -1,7 +1,8 @@
 import { URL } from 'node:url';
 import { opendir } from 'node:fs/promises';
 import { MAX_CHOICES } from '../constants';
-import { days, jaroWinklerSimilarity, logger } from '.';
+import { logger } from '../logger';
+import { days, jaroWinklerSimilarity } from '.';
 import type { Collection } from 'discord.js';
 import type { KeysByType } from '../types/util';
 

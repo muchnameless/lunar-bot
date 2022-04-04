@@ -1,7 +1,7 @@
 import { env } from 'node:process';
-import { IMGUR_KEY } from '../constants';
 import { ImgurClient } from '../structures/ImgurClient';
 import { hours, seconds } from '../functions';
+import { RedisKey } from '../constants';
 import { redis } from '.';
 
 export const imgur = new ImgurClient(env.IMGUR_CLIENT_ID!, {
@@ -10,10 +10,10 @@ export const imgur = new ImgurClient(env.IMGUR_CLIENT_ID!, {
 	rateLimitedWaitTime: seconds(1),
 	cache: {
 		async get(key) {
-			return JSON.parse((await redis.get(`${IMGUR_KEY}:${key}`))!) as unknown;
+			return JSON.parse((await redis.get(`${RedisKey.Imgur}:${key}`))!) as unknown;
 		},
 		set(key, value) {
-			return redis.psetex(`${IMGUR_KEY}:${key}`, hours(24), JSON.stringify(value));
+			return redis.psetex(`${RedisKey.Imgur}:${key}`, hours(24), JSON.stringify(value));
 		},
 	},
 });

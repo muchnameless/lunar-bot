@@ -35,7 +35,6 @@ import {
 	escapeIgn,
 	getIdFromString,
 	getInlineFieldLineCount,
-	logger,
 	removeMcFormatting,
 	seconds,
 	sortCache,
@@ -43,6 +42,7 @@ import {
 	trim,
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { logger } from '../../logger';
 import type {
 	ButtonInteraction,
 	ChatInputCommandInteraction,

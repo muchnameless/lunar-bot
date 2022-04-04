@@ -7,9 +7,10 @@ import {
 	requiredPlayerOption,
 } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil } from '../../util';
-import { escapeIgn, formatNumber, logger, safePromiseAll, validateNumber } from '../../functions';
+import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { logger } from '../../logger';
 import type { APIEmbed } from 'discord-api-types/v10';
 import type { JSONEncodable } from '@discordjs/builders';
 import type { ChatInputCommandInteraction, TextChannel } from 'discord.js';

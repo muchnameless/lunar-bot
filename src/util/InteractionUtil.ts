@@ -14,8 +14,9 @@ import {
 	SnowflakeUtil,
 } from 'discord.js';
 import { stripIndent } from 'common-tags';
-import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
-import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
+import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '../constants';
+import { makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
+import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	AutocompleteInteraction,
@@ -676,17 +677,17 @@ export class InteractionUtil extends null {
 			errorMessage = 'the command has been cancelled',
 			..._options
 		} = typeof options === 'string' ? { question: options } : options;
-		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
-		const CANCEL_ID = `confirm:${SnowflakeUtil.generate()}`;
+		const SUCCESS_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
+		const CANCEL_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder() //
 				.setCustomId(SUCCESS_ID)
 				.setStyle(ButtonStyle.Success)
-				.setEmoji({ name: Y_EMOJI }),
+				.setEmoji({ name: UnicodeEmoji.Y }),
 			new ButtonBuilder() //
 				.setCustomId(CANCEL_ID)
 				.setStyle(ButtonStyle.Danger)
-				.setEmoji({ name: X_EMOJI }),
+				.setEmoji({ name: UnicodeEmoji.X }),
 		);
 
 		let channel: TextBasedChannel | null;

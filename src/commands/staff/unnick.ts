@@ -1,6 +1,6 @@
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import { UNKNOWN_IGN } from '../../constants';
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import { GuildMemberUtil, InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, GuildMember, User } from 'discord.js';

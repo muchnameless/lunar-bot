@@ -11,11 +11,12 @@ import {
 	promoteSuccess,
 	unmuteSuccess,
 } from '../constants';
-import { STOP_EMOJI } from '../../../constants';
+import { UnicodeEmoji } from '../../../constants';
 import { GuildMemberUtil, MessageUtil } from '../../../util';
-import { asyncFilter, getLilyWeight, logger, stringToMS } from '../../../functions';
+import { asyncFilter, getLilyWeight, stringToMS } from '../../../functions';
 import { ChatBridgeEvent, type ChatBridgeEventContext } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
+import { logger } from '../../../logger';
 import type { SkyBlockProfile } from '../../../functions';
 import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
@@ -72,7 +73,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent),
 							)
 						).sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a)[0] ?? null,
-						STOP_EMOJI,
+						UnicodeEmoji.Stop,
 					);
 				}
 			}

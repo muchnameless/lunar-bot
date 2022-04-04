@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import PingMute from './pingmute';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';

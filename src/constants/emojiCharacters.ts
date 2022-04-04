@@ -1,25 +1,28 @@
-// basic
-export const X_EMOJI = '❌';
-export const Y_EMOJI = '✅';
-export const Y_EMOJI_ALT = '✔️';
+export const enum UnicodeEmoji {
+	// basic
+	X = '❌',
+	Y = '✅',
+	VarY = '✔️',
 
-// arrows
-export const DOUBLE_LEFT_EMOJI = '⏮️';
-export const DOUBLE_RIGHT_EMOJI = '⏭️';
-export const LEFT_EMOJI = '◀️';
-export const RELOAD_EMOJI = '🔄';
-export const RIGHT_EMOJI = '▶️';
+	// pagination
+	DoubleLeft = '⏮️',
+	DoubleRight = '⏭️',
+	Left = '◀️',
+	Reload = '🔄',
+	Right = '▶️',
 
-// bridge
-export const BROADCAST_EMOJI = '📣';
-export const MUTED_EMOJI = '🔇';
-export const NO_PING_EMOJI = '🔕';
-export const STOP_EMOJI = '🛑';
+	// chat bridge
+	Broadcast = '📣',
+	Muted = '🔇',
+	NoPing = '🔕',
+	Stop = '🛑',
 
-// commands
-export const DELETE_EMOJI = '🗑️';
-export const EDIT_MESSAGE_EMOJI = '⌨️';
-export const EYES_EMOJI = '👀';
+	// commands
+	Delete = '🗑️',
+	EditMessage = '⌨️',
+	Eyes = '👀',
+	Pin = '📌',
+}
 
 // SkyBlock profile emojis
 export const PROFILE_EMOJIS = {

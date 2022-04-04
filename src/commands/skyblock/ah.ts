@@ -14,13 +14,13 @@ import {
 	formatError,
 	findSkyblockProfile,
 	getUuidAndIgn,
-	logger,
 	seconds,
 	shortenNumber,
 	upperCaseFirstChar,
 	uuidToBustURL,
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { logger } from '../../logger';
 import type { FindProfileStrategy } from '../../constants';
 import type {
 	APISelectMenuOption,

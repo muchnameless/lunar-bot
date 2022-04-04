@@ -3,10 +3,11 @@ import { EmbedBuilder, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
-import { buildPaginationActionRow, escapeIgn, logger } from '../../functions';
+import { buildPaginationActionRow, escapeIgn } from '../../functions';
 import { InteractionUtil } from '../../util';
 import { STATS_URL_BASE } from '../../constants';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { logger } from '../../logger';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ButtonInteraction, ChatInputCommandInteraction, Snowflake } from 'discord.js';
 

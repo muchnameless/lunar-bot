@@ -1,9 +1,10 @@
 import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
-import { MC_CLIENT_VERSION, NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
+import { MC_CLIENT_VERSION, NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '../../constants';
 import { MessageUtil } from '../../util';
-import { logger, seconds, uuidToBustURL } from '../../functions';
+import { seconds, uuidToBustURL } from '../../functions';
 import { mojang } from '../../api';
+import { logger } from '../../logger';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, HypixelMessageType, spamMessages } from './constants';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
@@ -321,10 +322,10 @@ export class HypixelMessage {
 			// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 			if (/<@&\d{17,19}>/.test(discordMessage.content)) {
 				void this.author.send('you do not have permission to ping roles from in-game chat');
-				void MessageUtil.react(discordMessage, NO_PING_EMOJI);
+				void MessageUtil.react(discordMessage, UnicodeEmoji.NoPing);
 			} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content)) {
 				void this.author.send('you do not have permission to ping users from in-game chat');
-				void MessageUtil.react(discordMessage, NO_PING_EMOJI);
+				void MessageUtil.react(discordMessage, UnicodeEmoji.NoPing);
 			}
 
 			return discordMessage;

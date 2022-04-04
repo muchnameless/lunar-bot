@@ -43,7 +43,6 @@ import {
 	getSkillLevel,
 	getSlayerLevel,
 	hours,
-	logger,
 	minutes,
 	safePromiseAll,
 	seconds,
@@ -53,6 +52,7 @@ import {
 	validateNumber,
 } from '../../../functions';
 import { toUpperCase } from '../../../types/util';
+import { logger } from '../../../logger';
 import { TransactionType } from './Transaction';
 import type LilyWeight from 'lilyweight';
 import type {

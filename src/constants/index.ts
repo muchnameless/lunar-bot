@@ -1,6 +1,7 @@
 export * from './bot';
 export * from './discord';
 export * from './emojiCharacters';
+export * from './interactions';
 export * from './minecraft';
 export * from './node';
 export * from './redis';

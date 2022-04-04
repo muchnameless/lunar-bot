@@ -1,7 +1,7 @@
 import { argv, env, exit } from 'node:process';
 import { Routes } from 'discord-api-types/v10';
 import { LunarClient } from '../structures/LunarClient';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import type {
 	RESTPutAPIApplicationCommandsResult,
 	RESTPutAPIGuildApplicationCommandsPermissionsJSONBody,

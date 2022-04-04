@@ -2,7 +2,7 @@ import process, { exit } from 'node:process';
 import { imgur, redis } from './api';
 import { bree } from './jobs';
 import { sequelize, sql } from './structures/database';
-import { logger } from './functions/logger';
+import { logger } from './logger';
 
 process
 	.on('unhandledRejection', (error) => {

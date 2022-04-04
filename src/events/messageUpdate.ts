@@ -1,6 +1,7 @@
 import { PermissionFlagsBits } from 'discord.js';
 import { ChannelUtil } from '../util';
-import { logger, minutes } from '../functions';
+import { minutes } from '../functions';
+import { logger } from '../logger';
 import MessageCreateEvent from './messageCreate';
 import type { Message } from 'discord.js';
 import type { EventContext } from '../structures/events/Event';

@@ -1,5 +1,5 @@
 import { Collection } from 'discord.js';
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import { ApplicationCommand } from './ApplicationCommand';
 import type {

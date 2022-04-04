@@ -1,4 +1,4 @@
-import { logger } from '../functions';
+import { logger } from '../logger';
 import { Event, type EventContext } from '../structures/events/Event';
 import type { Snowflake } from 'discord.js';
 

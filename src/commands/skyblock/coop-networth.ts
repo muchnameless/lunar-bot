@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { seconds, shortenNumber } from '../../functions';
 import { getAuctionNetworth, getNetworth } from '../../structures/networth/networth';
-import { X_EMOJI } from '../../constants';
+import { UnicodeEmoji } from '../../constants';
 import { includeAuctionsOption } from '../../structures/commands/commonOptions';
 import NetworthCommand from './networth';
 import type { FetchedData } from './~base-skyblock-command';
@@ -50,9 +50,9 @@ export default class CoopNetworthCommand extends NetworthCommand {
 		}
 
 		const reply = [`${ign}'s Co-op (${profile.cute_name}): ${shortenNumber(totalNetworth)}`];
-		if (!bankingAPIEnabled) reply.push(`${X_EMOJI} Banking API disabled`);
+		if (!bankingAPIEnabled) reply.push(`${UnicodeEmoji.X} Banking API disabled`);
 		if (inventoryAPIDisabled) {
-			reply.push(`${X_EMOJI} ${inventoryAPIDisabled}/${memberUuids.length} Inventory APIs disabled`);
+			reply.push(`${UnicodeEmoji.X} ${inventoryAPIDisabled}/${memberUuids.length} Inventory APIs disabled`);
 		}
 
 		return reply.join(' | ');

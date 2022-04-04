@@ -1,5 +1,5 @@
 import ms from 'ms';
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import { RESTEvent } from '../../structures/events/RESTEvent';
 import type { EventContext } from '../../structures/events/Event';
 import type { RateLimitData } from '@discordjs/rest';

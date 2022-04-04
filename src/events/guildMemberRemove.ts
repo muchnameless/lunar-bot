@@ -1,6 +1,6 @@
 import { EmbedBuilder, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import { EmbedUtil, GuildMemberUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
 import type { GuildMember } from 'discord.js';

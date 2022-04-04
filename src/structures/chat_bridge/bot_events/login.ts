@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS } from '../constants';
-import { logger } from '../../../functions';
+import { logger } from '../../../logger';
 import { ChatBridgeEvent } from '../ChatBridge';
 import type { ChatBridge } from '../ChatBridge';
 

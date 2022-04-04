@@ -3,9 +3,10 @@ import { Formatters } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { mojang } from '../../api';
 import { EmbedUtil, InteractionUtil } from '../../util';
-import { formatNumber, logger } from '../../functions';
+import { formatNumber } from '../../functions';
 import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { logger } from '../../logger';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 

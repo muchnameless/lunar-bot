@@ -1,4 +1,3 @@
-export * from './logger';
 export * from './components';
 export * from './fetch';
 export * from './image';

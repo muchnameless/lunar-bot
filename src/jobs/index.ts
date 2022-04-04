@@ -1,8 +1,9 @@
 import { fileURLToPath, URL } from 'node:url';
 import { execArgv } from 'node:process';
 import Bree from 'bree';
-import { logger, minutes, seconds } from '../functions';
+import { minutes, seconds } from '../functions';
 import { prices } from '../structures/networth/prices';
+import { logger } from '../logger';
 import type { LunarClient } from '../structures/LunarClient';
 
 export const enum JobType {

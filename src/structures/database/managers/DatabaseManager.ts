@@ -3,11 +3,12 @@ import { Formatters, PermissionFlagsBits } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
 import { Model } from 'sequelize';
-import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants';
+import { DEFAULT_CONFIG, UnicodeEmoji } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';
-import { asyncFilter, compareAlphabetically, formatNumber, logger } from '../../../functions';
+import { asyncFilter, compareAlphabetically, formatNumber } from '../../../functions';
 import { entries } from '../../../types/util';
+import { logger } from '../../../logger';
 import { ConfigManager } from './ConfigManager';
 import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';
@@ -342,7 +343,7 @@ export class DatabaseManager {
 
 				for (const player of hypixelGuild.players.values()) {
 					values[Math.trunc(++index / ENTRIES_PER_ROW)] += `\n${
-						player.paid ? Y_EMOJI_ALT : X_EMOJI
+						player.paid ? UnicodeEmoji.VarY : UnicodeEmoji.X
 					}\u00A0${player.ign.slice(0, 15)}`;
 				}
 			} else {

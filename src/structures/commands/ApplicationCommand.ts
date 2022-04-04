@@ -1,8 +1,8 @@
 import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { ApplicationCommandPermissionType, ApplicationCommandType } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError';
-import { COMMAND_KEY } from '../../constants';
-import { logger } from '../../functions';
+import { CustomIdKey } from '../../constants';
+import { logger } from '../../logger';
 import { InteractionUtil } from '../../util';
 import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
@@ -164,7 +164,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * component customId to identify this command in the handler. everything after it gets provided as args split by ':'
 	 */
 	get baseCustomId() {
-		return `${COMMAND_KEY}:${this.name}` as const;
+		return `${CustomIdKey.Command}:${this.name}` as const;
 	}
 
 	/**

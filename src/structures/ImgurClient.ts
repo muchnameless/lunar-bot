@@ -2,9 +2,10 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { fetch, FormData } from 'undici';
 import ms from 'ms';
-import { consumeBody, logger, seconds } from '../functions';
+import { consumeBody, seconds } from '../functions';
 import { keys } from '../types/util';
 import { ErrorCode } from '../constants';
+import { logger } from '../logger';
 import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'undici';
 

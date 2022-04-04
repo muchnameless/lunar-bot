@@ -1,5 +1,5 @@
 import { env } from 'node:process';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import { Event, type EventContext } from '../structures/events/Event';
 
 export default class DebugEvent extends Event {

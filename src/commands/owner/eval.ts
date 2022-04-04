@@ -63,6 +63,7 @@ bree;
 import { sequelize, sql } from '../../structures/database';
 sequelize;
 sql;
+import { logger } from '../../logger';
 import type {
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
@@ -74,8 +75,8 @@ import type {
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
-const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, EYES_EMOJI, MAX_PLACEHOLDER_LENGTH, RELOAD_EMOJI } = constants;
-const { buildDeleteButton, logger, splitForEmbedFields, trim } = functions;
+const { EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, UnicodeEmoji } = constants;
+const { buildDeleteButton, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
 	/**
@@ -335,15 +336,15 @@ export default class EvalCommand extends ApplicationCommand {
 				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
-						.setEmoji({ name: EDIT_MESSAGE_EMOJI })
+						.setEmoji({ name: UnicodeEmoji.EditMessage })
 						.setStyle(ButtonStyle.Secondary),
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:repeat:${inspectDepth}`)
-						.setEmoji({ name: RELOAD_EMOJI })
+						.setEmoji({ name: UnicodeEmoji.Reload })
 						.setStyle(ButtonStyle.Secondary),
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:visibility:${inspectDepth}`)
-						.setEmoji({ name: EYES_EMOJI })
+						.setEmoji({ name: UnicodeEmoji.Eyes })
 						.setStyle(ButtonStyle.Secondary),
 					buildDeleteButton(interaction.user),
 				),

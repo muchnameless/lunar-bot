@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { formatDecimalNumber, getSkillLevel, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
-import { SKILLS, SKILL_ACHIEVEMENTS, SKILL_XP_TOTAL, X_EMOJI } from '../../constants';
+import { SKILLS, SKILL_ACHIEVEMENTS, SKILL_XP_TOTAL, UnicodeEmoji } from '../../constants';
 import { hypixel } from '../../api';
 import BaseSkyBlockCommand from './~base-skyblock-command';
 import type { FetchedData } from './~base-skyblock-command';
@@ -55,7 +55,7 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 				reply.push(`${upperCaseFirstChar(skill)} ${progressLevel}`);
 			}
 
-			reply.push(`${X_EMOJI} API disabled`);
+			reply.push(`${UnicodeEmoji.X} API disabled`);
 		}
 
 		reply[0] += `${formatDecimalNumber(totalLevel / SKILLS.length)} Skill Average (${shortenNumber(totalXp)} Total XP)`;

@@ -1,7 +1,8 @@
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
-import { formatDecimalNumber, formatError, getUuidAndIgn, logger } from '../../functions';
+import { formatDecimalNumber, formatError, getUuidAndIgn } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
+import { logger } from '../../logger';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { Awaited } from '../../types/util';

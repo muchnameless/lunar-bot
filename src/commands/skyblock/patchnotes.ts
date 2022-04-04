@@ -1,9 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { InteractionUtil } from '../../util';
-import { logger, seconds } from '../../functions';
+import { seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { sql } from '../../structures/database';
+import { logger } from '../../logger';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';

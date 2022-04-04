@@ -1,4 +1,4 @@
-import { logger } from '../../../functions';
+import { logger } from '../../../logger';
 import { ModelManager } from './ModelManager';
 import type { Config } from '../models/Config';
 import type { ConfigValues } from '../../../constants';

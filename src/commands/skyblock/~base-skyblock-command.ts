@@ -5,7 +5,6 @@ import {
 	formatError,
 	findSkyblockProfile,
 	getUuidAndIgn,
-	logger,
 	seconds,
 	upperCaseFirstChar,
 } from '../../functions';
@@ -17,6 +16,7 @@ import {
 	skyblockFindProfileOptionName,
 	skyblockProfileOption,
 } from '../../structures/commands/commonOptions';
+import { logger } from '../../logger';
 import type { FindProfileStrategy } from '../../constants';
 import type { SkyBlockProfile } from '../../functions';
 import type { ChatInputCommandInteraction } from 'discord.js';

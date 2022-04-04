@@ -1,5 +1,5 @@
 import { GuildUtil } from '../util';
-import { logger } from '../functions';
+import { logger } from '../logger';
 import { Event, type EventContext } from '../structures/events/Event';
 import type { Guild } from 'discord.js';
 

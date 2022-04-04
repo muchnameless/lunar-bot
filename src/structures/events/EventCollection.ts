@@ -1,6 +1,7 @@
 import { basename } from 'node:path';
 import { Collection } from 'discord.js';
-import { logger, readJSFiles } from '../../functions';
+import { readJSFiles } from '../../functions';
+import { logger } from '../../logger';
 import type { EventEmitter } from 'node:events';
 import type { URL } from 'node:url';
 import type { BaseEvent } from './BaseEvent';

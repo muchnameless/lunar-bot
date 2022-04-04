@@ -3,8 +3,9 @@ import { exec } from 'node:child_process';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { ActionRowBuilder, Formatters } from 'discord.js';
 import { InteractionUtil } from '../../util';
-import { buildDeleteButton, logger } from '../../functions';
+import { buildDeleteButton } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { logger } from '../../logger';
 import type { ButtonBuilder, ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 

@@ -5,8 +5,8 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
-import { logger } from '../functions/logger'; // no index imports to not import unused files in the worker
-import { consumeBody } from '../functions/fetch';
+import { logger } from '../logger';
+import { consumeBody } from '../functions/fetch'; // no index imports to not import unused files in the worker
 import { FetchError } from '../structures/errors/FetchError';
 import { getEnchantment } from '../structures/networth/functions/enchantments'; // separate imports to not import unused files in the worker
 import { transformItemData } from '../structures/networth/functions/nbt';

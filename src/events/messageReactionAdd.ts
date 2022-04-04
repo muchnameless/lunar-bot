@@ -1,5 +1,5 @@
-import { BROADCAST_EMOJI } from '../constants';
-import { logger } from '../functions';
+import { UnicodeEmoji } from '../constants';
+import { logger } from '../logger';
 import { Event, type EventContext } from '../structures/events/Event';
 import type { Message, MessageReaction, User } from 'discord.js';
 
@@ -19,7 +19,7 @@ export default class MessageReactionAddEvent extends Event {
 	override async run(reaction: MessageReaction, { id: userId }: User) {
 		// reaction.message is not from the announcement channel or not the broadcast emoji
 		if (
-			reaction.emoji.name !== BROADCAST_EMOJI ||
+			reaction.emoji.name !== UnicodeEmoji.Broadcast ||
 			!this.client.hypixelGuilds.cache.some(
 				({ announcementsChannelId }) => announcementsChannelId === reaction.message.channelId,
 			)

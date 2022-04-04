@@ -3,10 +3,10 @@ import { once } from 'node:events';
 import { env } from 'node:process';
 import { stripIndents } from 'common-tags';
 import { MessageFlags } from 'discord.js';
-import { STOP_EMOJI, X_EMOJI } from '../../constants';
+import { UnicodeEmoji } from '../../constants';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
 import { MessageUtil } from '../../util';
-import { logger } from '../../functions';
+import { logger } from '../../logger';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import type { ChatInputCommandInteraction, Message, Snowflake } from 'discord.js';
@@ -118,7 +118,7 @@ export class ChatBridgeManager {
 	 * @param message
 	 */
 	async handleAnnouncementMessage(message: Message) {
-		if (!message.content) return MessageUtil.react(message, STOP_EMOJI);
+		if (!message.content) return MessageUtil.react(message, UnicodeEmoji.Stop);
 
 		const res: boolean[] = [];
 
@@ -151,14 +151,14 @@ export class ChatBridgeManager {
 		// handle results
 		if (res.length && !res.includes(false)) {
 			// remove :x: reaction from bot if existant
-			if (message.reactions.cache.get(X_EMOJI)?.me) {
+			if (message.reactions.cache.get(UnicodeEmoji.X)?.me) {
 				message.reactions.cache
-					.get(X_EMOJI)!
+					.get(UnicodeEmoji.X)!
 					.users.remove(this.client.user!)
 					.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
 			}
 		} else {
-			void MessageUtil.react(message, X_EMOJI);
+			void MessageUtil.react(message, UnicodeEmoji.X);
 		}
 	}
 
@@ -191,10 +191,10 @@ export class ChatBridgeManager {
 			}
 
 			// no ChatBridge for the message's channel found
-			void MessageUtil.react(message, X_EMOJI);
+			void MessageUtil.react(message, UnicodeEmoji.X);
 		} catch (error) {
 			logger.error(error, '[CHAT BRIDGES]: handleDiscordMessage');
-			void MessageUtil.react(message, X_EMOJI);
+			void MessageUtil.react(message, UnicodeEmoji.X);
 		}
 	}
 }
