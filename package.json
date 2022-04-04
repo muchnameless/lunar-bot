@@ -40,7 +40,7 @@
 		"common-tags": "^1.8.2",
 		"cron": "^1.8.2",
 		"discord-api-types": "*",
-		"discord.js": "14.0.0-dev.1646914074.dcd4797",
+		"discord.js": "14.0.0-dev.1649030898-5748dbe",
 		"emoji-regex": "9.2.2",
 		"fast-xml-parser": "^4.0.7",
 		"ioredis": "^5.0.3",
@@ -96,9 +96,9 @@
 	},
 	"packageManager": "yarn@3.2.0",
 	"resolutions": {
-		"@discordjs/builders": "0.13.0-dev.1646913825.dcd4797",
-		"@discordjs/collection": "0.6.0-dev.1646914071.dcd4797",
-		"@discordjs/rest": "0.4.0-dev.1646913818.dcd4797",
+		"@discordjs/builders": "0.13.0-dev.1649030892-5748dbe",
+		"@discordjs/collection": "0.6.0-dev.1649030901-5748dbe",
+		"@discordjs/rest": "0.4.0-dev.1649030897-5748dbe",
 		"discord-api-types": "0.30.0"
 	}
 }

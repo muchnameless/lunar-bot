@@ -3,11 +3,11 @@ import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
-import type { AnyChannel, Embed, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';
+import { EmbedUtil } from './EmbedUtil';
+import type { AnyChannel, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
-	embeds?: Embed[];
 }
 
 export class ChannelUtil extends null {
@@ -137,7 +137,7 @@ export class ChannelUtil extends null {
 				return null;
 			}
 
-			const TOTAL_LENGTH = _options.embeds!.reduce((acc, cur) => acc + cur.length, 0);
+			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
 				const MESSAGE = `[CHANNEL SEND]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;

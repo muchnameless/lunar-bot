@@ -1,21 +1,19 @@
 import { mkdir, opendir, readFile, rm, writeFile } from 'node:fs/promises';
 import { URL } from 'node:url';
 import { commaListsAnd } from 'common-tags';
-import { Embed, MessageAttachment, PermissionFlagsBits, SnowflakeUtil } from 'discord.js';
+import { PermissionFlagsBits, SnowflakeUtil } from 'discord.js';
 import ms from 'ms';
+import { embedLength, isJSONEncodable } from '@discordjs/builders';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
 import type { Dir } from 'node:fs';
+import type { JSONEncodable } from '@discordjs/builders';
+import type { APIEmbed } from 'discord-api-types/v10';
 import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { LunarClient } from './LunarClient';
 
-type LogInput = Embed | MessageAttachment | string | undefined | null;
-
-interface LogOptions {
-	embeds: Embed[];
-	files?: MessageAttachment[];
-}
+type LogInput = JSONEncodable<APIEmbed> | APIEmbed | string | number | null | undefined;
 
 export class LogHandler {
 	client: LunarClient;
@@ -117,26 +115,29 @@ export class LogHandler {
 	log(input: LogInput): Promise<void | Message>;
 	log(...input: LogInput[]): Promise<void | Message> | Promise<(void | Message)[]>;
 	log(...input: LogInput[]) {
-		const { embeds, files } = this._transformInput(input);
+		const embeds = this._transformInput(input);
 
 		if (!embeds.length) return null; // nothing to log
 
 		// send 1 message
-		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) {
-			return this._log({ embeds, files });
+		if (
+			embeds.length <= EMBEDS_MAX_AMOUNT &&
+			embeds.reduce((acc, cur) => acc + embedLength(cur), 0) <= EMBED_MAX_CHARS
+		) {
+			return this._log(embeds);
 		}
 
 		// split into multiple messages
 		const returnValue: Promise<Message | void>[] = [];
 
 		for (let total = 0; total < embeds.length; ++total) {
-			const embedChunk: Embed[] = [];
+			const embedChunk: APIEmbed[] = [];
 
 			let embedChunkLength = 0;
 
 			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < embeds.length; ++current, ++total)
 				inner: {
-					embedChunkLength += embeds[total].length;
+					embedChunkLength += embedLength(embeds[total]);
 
 					// adding the new embed would exceed the max char count
 					if (embedChunkLength > EMBED_MAX_CHARS) {
@@ -147,7 +148,7 @@ export class LogHandler {
 					embedChunk.push(embeds[total]);
 				}
 
-			returnValue.push(this._log({ embeds: embedChunk, files }));
+			returnValue.push(this._log(embedChunk));
 		}
 
 		return Promise.all(returnValue);
@@ -158,35 +159,32 @@ export class LogHandler {
 	 * @param input
 	 */
 	private _transformInput(input: LogInput[]) {
-		const embeds: Embed[] = [];
-		const files: MessageAttachment[] = [];
+		const embeds: APIEmbed[] = [];
 
 		for (const i of input) {
 			if (i == null) continue; // filter out null & undefined
 
-			if (i instanceof Embed) {
-				embeds.push(i);
-			} else if (i instanceof MessageAttachment) {
-				files.push(i);
-			} else if (typeof i === 'string' || typeof i === 'number') {
-				embeds.push(this.client.defaultEmbed.setDescription(`${i}`));
-			} else if (typeof i !== 'object') {
+			if (isJSONEncodable(i)) {
+				embeds.push(i.toJSON());
+			} else if (typeof i === 'object') {
+				embeds.push(this.client.options.jsonTransformer!(i) as APIEmbed);
+			} else if (['string', 'number'].includes(typeof i)) {
+				embeds.push(this.client.defaultEmbed.setDescription(`${i}`).toJSON());
+			} else {
 				throw new TypeError(
 					`[TRANSFORM INPUT]: provided argument '${i}' is a '${typeof i}' instead of an Object or String`,
 				);
-			} else {
-				embeds.push(new Embed(i));
 			}
 		}
 
-		return { embeds, files };
+		return embeds;
 	}
 
 	/**
 	 * log to console and send in the logging channel
-	 * @param options
+	 * @param embeds
 	 */
-	private async _log({ embeds, files }: LogOptions) {
+	private async _log(embeds: APIEmbed[]) {
 		// log to console
 		for (const embed of embeds) {
 			logger.info(
@@ -211,7 +209,7 @@ export class LogHandler {
 
 		// API call
 		try {
-			return await channel.send({ embeds, files });
+			return await channel.send({ embeds });
 		} catch (error) {
 			logger.error(error, '[CLIENT LOG]');
 
@@ -237,7 +235,7 @@ export class LogHandler {
 	 * write data in 'cwd/log_buffer'
 	 * @param embeds file content
 	 */
-	private async _logToFile(embeds: Embed[]) {
+	private async _logToFile(embeds: (JSONEncodable<APIEmbed> | APIEmbed)[]) {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(
@@ -279,7 +277,7 @@ export class LogHandler {
 				const FILE_PATH = new URL(name, this.logURL);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this._log({ embeds: JSON.parse(FILE_CONTENT) });
+				await this._log(JSON.parse(FILE_CONTENT));
 				await rm(FILE_PATH);
 			}
 

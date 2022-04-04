@@ -1,14 +1,14 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import {
-	ActionRow,
+	ActionRowBuilder,
 	ApplicationCommandType,
-	ButtonComponent,
+	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
 	Colors,
 	ComponentType,
 	DiscordAPIError,
-	Embed,
+	EmbedBuilder,
 	InteractionType,
 	RESTJSONErrorCodes,
 	SnowflakeUtil,
@@ -34,7 +34,7 @@ import type {
 	Message,
 	MessagePayload,
 	MessageResolvable,
-	Modal,
+	ModalBuilder,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
@@ -76,12 +76,10 @@ export interface InteractionUtilReplyOptions extends InteractionReplyOptions {
 	split?: SplitOptions | boolean;
 	code?: string | boolean;
 	rejectOnError?: boolean;
-	embeds?: Embed[];
 }
 
 interface EditReplyOptions extends WebhookEditMessageOptions {
 	rejectOnError?: boolean;
-	embeds?: Embed[];
 }
 
 interface DeferUpdateOptions extends InteractionDeferUpdateOptions {
@@ -90,7 +88,6 @@ interface DeferUpdateOptions extends InteractionDeferUpdateOptions {
 
 interface UpdateOptions extends InteractionUpdateOptions {
 	rejectOnError?: boolean;
-	embeds?: Embed[];
 }
 
 interface GetPlayerOptions {
@@ -111,7 +108,6 @@ interface AwaitReplyOptions extends InteractionReplyOptions {
 	question?: string;
 	/** time in milliseconds to wait for a response */
 	time?: number;
-	embeds?: Embed[];
 }
 
 interface AwaitConfirmationOptions extends Omit<InteractionReplyOptions, 'fetchReply' | 'rejectOnError'> {
@@ -119,7 +115,6 @@ interface AwaitConfirmationOptions extends Omit<InteractionReplyOptions, 'fetchR
 	/** time in milliseconds to wait for a response */
 	time?: number;
 	errorMessage?: string;
-	embeds?: Embed[];
 }
 
 export class InteractionUtil extends null {
@@ -485,7 +480,6 @@ export class InteractionUtil extends null {
 		message?: MessageResolvable,
 	) {
 		try {
-			// @ts-expect-error will be resolved with d.js #7597
 			if (message) return (await interaction.webhook.editMessage(message, options)) as Message;
 
 			const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
@@ -561,7 +555,6 @@ export class InteractionUtil extends null {
 
 			// replied
 			if (interaction.replied) {
-				// @ts-expect-error
 				return (await interaction.webhook.editMessage(
 					interaction.message as Message,
 					_options as WebhookEditMessageOptions,
@@ -625,7 +618,7 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param modal
 	 */
-	static showModal(interaction: ModalRepliableInteraction, modal: Modal) {
+	static showModal(interaction: ModalRepliableInteraction, modal: ModalBuilder) {
 		clearTimeout(this.CACHE.get(interaction)!.autoDeferTimeout!);
 
 		return interaction.showModal(modal);
@@ -685,12 +678,12 @@ export class InteractionUtil extends null {
 		} = typeof options === 'string' ? { question: options } : options;
 		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const CANCEL_ID = `confirm:${SnowflakeUtil.generate()}`;
-		const row = new ActionRow().addComponents(
-			new ButtonComponent() //
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder() //
 				.setCustomId(SUCCESS_ID)
 				.setStyle(ButtonStyle.Success)
 				.setEmoji({ name: Y_EMOJI }),
-			new ButtonComponent() //
+			new ButtonBuilder() //
 				.setCustomId(CANCEL_ID)
 				.setStyle(ButtonStyle.Danger)
 				.setEmoji({ name: X_EMOJI }),
@@ -753,7 +746,7 @@ export class InteractionUtil extends null {
 
 						void this.update(buttonInteraction, {
 							embeds: [
-								new Embed()
+								new EmbedBuilder()
 									.setColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
 									.setDescription(
 										stripIndent`
@@ -775,7 +768,7 @@ export class InteractionUtil extends null {
 
 						const editOptions = {
 							embeds: [
-								new Embed()
+								new EmbedBuilder()
 									.setColor(Colors.NotQuiteBlack)
 									.setDescription(
 										stripIndent`

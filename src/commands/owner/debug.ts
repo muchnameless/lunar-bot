@@ -1,6 +1,6 @@
 import { memoryUsage, version as processVersion } from 'node:process';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, Formatters, SnowflakeUtil, version as djsVersion } from 'discord.js';
+import { ActionRowBuilder, Formatters, SnowflakeUtil, version as djsVersion } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -9,6 +9,7 @@ import { InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, buildDeleteButton, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type {
+	ButtonBuilder,
 	Collection,
 	ChatInputCommandInteraction,
 	DMChannel,
@@ -207,7 +208,7 @@ export default class DebugCommand extends ApplicationCommand {
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
-			components: [new ActionRow().addComponents(buildDeleteButton(interaction.user))],
+			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user))],
 		});
 	}
 }

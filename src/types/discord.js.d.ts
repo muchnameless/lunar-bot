@@ -1,4 +1,4 @@
-import type { Embed, Snowflake } from 'discord.js';
+import type { EmbedBuilder, Snowflake } from 'discord.js';
 import type { ChatBridgeManager } from '../structures/chat_bridge/ChatBridgeManager';
 import type { ApplicationCommandCollection } from '../structures/commands/ApplicationCommandCollection';
 import type { CronJobManager } from '../structures/CronJobManager';
@@ -32,7 +32,7 @@ declare module 'discord.js' {
 		taxCollectors: TaxCollectorManager;
 		chatTriggers: ModelManager<ChatTrigger>;
 
-		defaultEmbed: Embed;
+		defaultEmbed: EmbedBuilder;
 
 		dmOwner(options: string | MessageOptions): Promise<Message<boolean> | null>;
 		fetchAllMembers(): Promise<void> | undefined;

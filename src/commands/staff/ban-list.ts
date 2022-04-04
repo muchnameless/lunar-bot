@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Embed, Formatters } from 'discord.js';
+import { EmbedBuilder, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
@@ -188,7 +188,7 @@ export default class BanListCommand extends ApplicationCommand {
 				if (!existingBan) {
 					return InteractionUtil.reply(interaction, {
 						embeds: [
-							new Embed()
+							new EmbedBuilder()
 								.setColor(this.config.get('EMBED_GREEN'))
 								.setDescription(
 									`${Formatters.bold(
@@ -202,7 +202,7 @@ export default class BanListCommand extends ApplicationCommand {
 
 				return InteractionUtil.reply(interaction, {
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setColor(this.config.get('EMBED_RED'))
 							.setDescription(
 								stripIndents`

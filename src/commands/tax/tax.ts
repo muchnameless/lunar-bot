@@ -10,7 +10,9 @@ import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, logger, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { ChatInputCommandInteraction, Embed, TextChannel } from 'discord.js';
+import type { APIEmbed } from 'discord-api-types/v10';
+import type { JSONEncodable } from '@discordjs/builders';
+import type { ChatInputCommandInteraction, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
@@ -311,8 +313,8 @@ export default class TaxCommand extends ApplicationCommand {
 						const { players, taxCollectors } = this.client;
 						const PLAYER_INPUT = interaction.options.getString('player');
 
-						let currentTaxEmbed: Embed | null = null;
-						let currentTaxCollectedEmbed!: Embed;
+						let currentTaxEmbed: JSONEncodable<APIEmbed> | null = null;
+						let currentTaxCollectedEmbed!: JSONEncodable<APIEmbed>;
 						let result: string;
 
 						// individual player

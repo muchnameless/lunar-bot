@@ -1,12 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import BigDecimal from 'js-big-decimal';
 import Lexer from 'lex';
-import { ActionRow, Modal, TextInputComponent, TextInputStyle, Util } from 'discord.js';
+import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Util } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { formatNumber, logger, trim } from '../../functions';
 import { MAX_PLACEHOLDER_LENGTH } from '../../constants';
-import type { ModalActionRowComponent } from '@discordjs/builders';
 import type { RepliableInteraction, ModalRepliableInteraction } from '../../util';
 import type { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -483,20 +482,20 @@ export default class MathsCommand extends DualCommand {
 			try {
 				return await InteractionUtil.showModal(
 					interaction as ModalRepliableInteraction,
-					new Modal()
+					new ModalBuilder()
 						.setTitle('Maths')
 						.setCustomId(this.baseCustomId)
 						.addComponents(
-							new ActionRow<ModalActionRowComponent>().addComponents(
-								new TextInputComponent()
+							new ActionRowBuilder<TextInputBuilder>().addComponents(
+								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Short)
 									.setLabel('New input')
 									.setPlaceholder(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(true),
 							),
-							new ActionRow<ModalActionRowComponent>().addComponents(
-								new TextInputComponent()
+							new ActionRowBuilder<TextInputBuilder>().addComponents(
+								new TextInputBuilder()
 									.setCustomId('error')
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Error')

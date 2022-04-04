@@ -10,7 +10,7 @@ const client = new LunarClient({
 
 	// default options
 	makeCache: Options.cacheWithLimits({
-		...Options.defaultMakeCacheSettings,
+		...Options.DefaultMakeCacheSettings,
 		ApplicationCommandManager: 0,
 		GuildBanManager: 0,
 		GuildInviteManager: 0,
@@ -25,7 +25,7 @@ const client = new LunarClient({
 		VoiceStateManager: 0,
 	}),
 	sweepers: {
-		...Options.defaultSweeperSettings,
+		...Options.DefaultSweeperSettings,
 		messages: {
 			interval: 600,
 			filter: Sweepers.filterByLifetime({
@@ -72,12 +72,14 @@ const client = new LunarClient({
 		GatewayIntentBits.GuildEmojisAndStickers, // to keep the cache updated for the chat bridge
 		GatewayIntentBits.GuildMessages, // chat bridge
 		GatewayIntentBits.GuildMessageReactions, // forward announcements to guild chat
+		GatewayIntentBits.MessageContent, // chat bridge
 	],
 	rest: {
 		// don't await channel name and topic edits
 		rejectOnRateLimit: ({ method, route, timeToReset }) =>
 			method === RequestMethod.Patch && route === '/channels/:id' && timeToReset > seconds(30),
 	},
+	jsonTransformer: (x) => x,
 });
 
 startJobs(client);

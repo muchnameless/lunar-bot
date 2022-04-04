@@ -4,9 +4,8 @@ import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
 import { logger, seconds } from '../functions';
 import { MESSAGE_MAX_CHARS, EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS } from '../constants';
-import { ChannelUtil } from '.';
+import { ChannelUtil, EmbedUtil } from '.';
 import type {
-	Embed,
 	EmojiIdentifierResolvable,
 	Message,
 	MessageEditOptions,
@@ -22,12 +21,10 @@ interface AwaitReplyOptions extends MessageOptions {
 	question?: string;
 	/** time in milliseconds to wait for a response */
 	time?: number;
-	embeds?: Embed[];
 }
 
 export interface EditOptions extends MessageEditOptions {
 	rejectOnError?: boolean;
-	embeds?: Embed[];
 }
 
 interface QueuedDeletionTimeout {
@@ -358,7 +355,7 @@ export class MessageUtil extends null {
 				return message;
 			}
 
-			const TOTAL_LENGTH = _options.embeds!.reduce((acc, cur) => acc + cur.length, 0);
+			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
 				const MESSAGE = `[MESSAGE EDIT]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;

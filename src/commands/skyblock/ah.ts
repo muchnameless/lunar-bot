@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, Formatters, SelectMenuComponent, SelectMenuOption } from 'discord.js';
+import { ActionRowBuilder, Formatters, SelectMenuBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
@@ -22,7 +22,13 @@ import {
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { FindProfileStrategy } from '../../constants';
-import type { ChatInputCommandInteraction, Embed, SelectMenuInteraction, Snowflake } from 'discord.js';
+import type {
+	APISelectMenuOption,
+	ChatInputCommandInteraction,
+	EmbedBuilder,
+	SelectMenuInteraction,
+	Snowflake,
+} from 'discord.js';
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -36,7 +42,7 @@ interface GenerateReplyOptions {
 	ign: string;
 	uuid: string;
 	profileId: string;
-	profiles: SelectMenuOption[];
+	profiles: APISelectMenuOption[];
 	userId: Snowflake;
 }
 
@@ -80,8 +86,8 @@ export default class AhCommand extends ApplicationCommand {
 				return {
 					embeds: [embed.setDescription('no unclaimed auctions')],
 					components: [
-						new ActionRow().addComponents(
-							new SelectMenuComponent()
+						new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+							new SelectMenuBuilder()
 								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 								.addOptions(...profiles),
@@ -143,8 +149,8 @@ export default class AhCommand extends ApplicationCommand {
 					`),
 				],
 				components: [
-					new ActionRow().addComponents(
-						new SelectMenuComponent()
+					new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+						new SelectMenuBuilder()
 							.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 							.addOptions(...profiles),
@@ -166,13 +172,13 @@ export default class AhCommand extends ApplicationCommand {
 
 	// eslint-disable-next-line class-methods-use-this
 	private _generateProfileOptions(profiles: SkyBlockProfile[]) {
-		return profiles.map(({ cute_name, profile_id }) =>
-			new SelectMenuOption()
-				.setLabel(cute_name)
-				.setValue(profile_id)
-				// eslint-disable-next-line camelcase
-				.setEmoji({ name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] }),
-		);
+		return profiles.map(({ cute_name, profile_id }) => ({
+			/* eslint-disable camelcase */
+			label: cute_name,
+			value: profile_id,
+			emoji: { name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] },
+			/* eslint-enable camelcase */
+		}));
 	}
 
 	/**
@@ -182,7 +188,7 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param ign player ign
 	 * @param uuid player minecraft uuid
 	 */
-	private _handleNoProfiles(interaction: ChatInputCommandInteraction, embed: Embed, ign: string, uuid: string) {
+	private _handleNoProfiles(interaction: ChatInputCommandInteraction, embed: EmbedBuilder, ign: string, uuid: string) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed
@@ -194,8 +200,8 @@ export default class AhCommand extends ApplicationCommand {
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
-				new ActionRow().addComponents(
-					new SelectMenuComponent()
+				new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+					new SelectMenuBuilder()
 						.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 						.setDisabled(true)
 						.setPlaceholder('Profile: None'),
@@ -212,7 +218,7 @@ export default class AhCommand extends ApplicationCommand {
 	override async runSelect(interaction: SelectMenuInteraction, args: string[]) {
 		const [uuid, ign, userId] = args;
 		const [profileId] = interaction.values;
-		const profiles = (interaction.component as SelectMenuComponent).options;
+		const profiles = interaction.component.options;
 
 		if (!profiles) {
 			await InteractionUtil.update(interaction, { components: [] });
@@ -275,8 +281,8 @@ export default class AhCommand extends ApplicationCommand {
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [
-							new ActionRow().addComponents(
-								new SelectMenuComponent()
+							new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+								new SelectMenuBuilder()
 									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
 									.addOptions(...this._generateProfileOptions(profiles)),

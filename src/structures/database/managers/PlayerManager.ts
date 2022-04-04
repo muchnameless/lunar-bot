@@ -1,7 +1,8 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { Collection, Embed, Formatters, Util } from 'discord.js';
+import { Collection, EmbedBuilder, Formatters, Util } from 'discord.js';
 import { Op } from 'sequelize';
 import { CronJob } from 'cron';
+import { embedLength } from '@discordjs/builders';
 import {
 	EMBED_FIELD_MAX_CHARS,
 	EMBED_MAX_CHARS,
@@ -21,6 +22,8 @@ import {
 	upperCaseFirstChar,
 } from '../../../functions';
 import { ModelManager } from './ModelManager';
+import type { APIEmbed } from 'discord-api-types/v10';
+import type { JSONEncodable } from '@discordjs/builders';
 import type { Attributes, CreationAttributes, FindOptions } from 'sequelize';
 import type { ModelResovable } from './ModelManager';
 import type { Player, PlayerInGuild, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
@@ -333,7 +336,7 @@ export class PlayerManager extends ModelManager<Player> {
 		this.sortAlphabetically();
 
 		// logging
-		const embeds: Embed[] = [];
+		const embeds: JSONEncodable<APIEmbed>[] = [];
 
 		/**
 		 * @param guildName
@@ -361,7 +364,7 @@ export class PlayerManager extends ModelManager<Player> {
 			});
 
 			let embed = createEmbed(guildName, playerCount, ignChanges.length);
-			let currentLength = embed.length;
+			let currentLength = embedLength(embed.data);
 
 			while (logParts.length) {
 				const name = `${'new ign'.padEnd(150, '\u00A0')}\u200B`;
@@ -369,14 +372,14 @@ export class PlayerManager extends ModelManager<Player> {
 
 				if (
 					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
-					(embed.fields?.length ?? 0) < EMBED_MAX_FIELDS
+					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
 				) {
 					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
 				} else {
 					embed = createEmbed(guildName, playerCount, ignChanges.length);
 					embed.addFields({ name, value });
-					currentLength = embed.length;
+					currentLength = embedLength(embed.data);
 				}
 			}
 		}
@@ -455,14 +458,14 @@ export class PlayerManager extends ModelManager<Player> {
 
 		if (!log.size) return this;
 
-		const embeds: Embed[] = [];
+		const embeds: JSONEncodable<APIEmbed>[] = [];
 
 		/**
 		 * @param guild
 		 * @param mainProfileChangesAmount
 		 */
 		const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
-			const embed = new Embed()
+			const embed = new EmbedBuilder()
 				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(
 					`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${
@@ -486,7 +489,7 @@ export class PlayerManager extends ModelManager<Player> {
 			);
 
 			let embed = createEmbed(guild, mainProfileUpdate.length);
-			let currentLength = embed.length;
+			let currentLength = embedLength(embed.data);
 
 			while (logParts.length) {
 				const name = `${'main profile update'.padEnd(150, '\u00A0')}\u200B`;
@@ -494,14 +497,14 @@ export class PlayerManager extends ModelManager<Player> {
 
 				if (
 					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
-					(embed.fields?.length ?? 0) < EMBED_MAX_FIELDS
+					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
 				) {
 					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
 				} else {
 					embed = createEmbed(guild, mainProfileUpdate.length);
 					embed.addFields({ name, value });
-					currentLength = embed.length;
+					currentLength = embedLength(embed.data);
 				}
 			}
 		}
