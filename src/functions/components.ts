@@ -14,11 +14,10 @@ export const buildDeleteButton = (user: User) =>
 
 /**
  * returns a MessageButton which triggers (un)pinning the Message it is attached to
- * @param user
  */
-export const buildPinButton = (user: User) =>
-	new ButtonBuilder()
-		.setCustomId(`${CustomIdKey.Pin}:${user.id}`)
+export const buildPinButton = () =>
+	new ButtonBuilder() //
+		.setCustomId(CustomIdKey.Pin)
 		.setEmoji({ name: UnicodeEmoji.Pin })
 		.setStyle(ButtonStyle.Secondary);
 

@@ -76,7 +76,7 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
 const { EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, UnicodeEmoji } = constants;
-const { buildDeleteButton, splitForEmbedFields, trim } = functions;
+const { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
 	/**
@@ -342,6 +342,7 @@ export default class EvalCommand extends ApplicationCommand {
 						.setCustomId(`${this.baseCustomId}:repeat:${inspectDepth}`)
 						.setEmoji({ name: UnicodeEmoji.Reload })
 						.setStyle(ButtonStyle.Secondary),
+					buildPinButton(),
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:visibility:${inspectDepth}`)
 						.setEmoji({ name: UnicodeEmoji.Eyes })

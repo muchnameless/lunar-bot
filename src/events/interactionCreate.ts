@@ -1,8 +1,8 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
-import { ApplicationCommandType, ComponentType, Formatters, InteractionType } from 'discord.js';
+import { ApplicationCommandType, ComponentType, Formatters, InteractionType, PermissionFlagsBits } from 'discord.js';
 import { CustomIdKey, GUILD_ID_ALL, MAX_CHOICES } from '../constants';
-import { GuildMemberUtil, InteractionUtil } from '../util';
+import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import {
 	handleLeaderboardButtonInteraction,
 	handleLeaderboardSelectMenuInteraction,
@@ -129,6 +129,18 @@ export default class InteractionCreateEvent extends Event {
 				}
 
 				return InteractionUtil.deleteMessage(interaction);
+
+			// message pin
+			case CustomIdKey.Pin:
+				if (!interaction.channel?.isDM() && !interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
+					return InteractionUtil.reply(interaction, {
+						content: 'you need `ManageMessage` permissions to (un)pin messages in this channel',
+						ephemeral: false,
+					});
+				}
+
+				void InteractionUtil.deferUpdate(interaction);
+				return MessageUtil[interaction.message.pinned ? 'unpin' : 'pin'](interaction.message as Message);
 
 			// command message buttons
 			case CustomIdKey.Command: {

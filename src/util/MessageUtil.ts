@@ -424,12 +424,45 @@ export class MessageUtil extends null {
 			return message;
 		}
 
+		if (message.pinned) return message;
+
 		try {
 			return await message.pin();
 		} catch (error) {
 			logger.error(
 				error,
 				`[MESSAGE PIN]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+			);
+			return message;
+		}
+	}
+
+	/**
+	 * unpins a message
+	 * @param message
+	 */
+	static async unpin(message: Message) {
+		if (!message.pinnable) {
+			logger.warn(
+				`[MESSAGE UNPIN]: can't unpin message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+			);
+			return message;
+		}
+
+		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
+		if (this.isEphemeral(message)) {
+			logger.warn(`[MESSAGE UNPIN]: unable to unpin ephemeral message in ${this.channelLogInfo(message)}`);
+			return message;
+		}
+
+		if (!message.pinned) return message;
+
+		try {
+			return await message.unpin();
+		} catch (error) {
+			logger.error(
+				error,
+				`[MESSAGE UNPIN]: unpin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
 			);
 			return message;
 		}
