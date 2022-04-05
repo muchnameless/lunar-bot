@@ -65,6 +65,8 @@ import { sequelize, sql } from '../../structures/database';
 sequelize;
 sql;
 import { logger } from '../../logger';
+import { IGNORED_ERRORS } from '../../process';
+IGNORED_ERRORS;
 import type {
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,

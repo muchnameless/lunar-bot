@@ -4,11 +4,21 @@ import { bree } from './jobs';
 import { sequelize, sql } from './structures/database';
 import { logger } from './logger';
 
+/**
+ * error messages which will only be logged when not being caught
+ */
+export const IGNORED_ERRORS: string[] = [
+	// TODO: remove once discord.js fixes tiv
+	"Cannot read properties of undefined (reading '_add')",
+];
+
 process
 	.on('unhandledRejection', (error) => {
 		logger.error(error, '[UNCAUGHT PROMISE REJECTION]');
 	})
 	.once('uncaughtException', (error) => {
+		if (IGNORED_ERRORS.includes(error?.message ?? error)) return logger.error(error, '[UNCAUGHT EXCEPTION]');
+
 		logger.fatal(error, '[UNCAUGHT EXCEPTION]');
 		void exitProcess(-1);
 	})
