@@ -97,7 +97,7 @@ export class GuildUtil extends null {
 		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
 
 		if (guild.memberCount === guild.members.cache.size) {
-			logger.debug(this.logInfo(guild), `[GUILD FETCH ALL MEMBERS]: ${guild.name}: already cached`);
+			logger.debug(this.logInfo(guild), '[GUILD FETCH ALL MEMBERS]: already cached');
 			return guild.members.cache;
 		}
 
