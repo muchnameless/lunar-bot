@@ -163,12 +163,17 @@ export default class InteractionCreateEvent extends Event {
 
 				// send new message
 				return InteractionUtil.reply(interaction, {
+					rejectOnError: true,
 					content: interaction.message.content || null,
 					embeds: interaction.message.embeds,
 					files: (interaction.message as Message).attachments.map(({ url }) => url),
 					// TODO: remove manual map after d.js fixes resending
 					// @ts-expect-error
-					components: interaction.message.components?.map(({ components, data }) => ({ ...data, components })),
+					components: interaction.message.components?.map(({ components, data }) => ({
+						...data,
+						// @ts-expect-error
+						components: components.map((c) => c.toJSON()),
+					})),
 					ephemeral: isNotEphemeral,
 				});
 			}
