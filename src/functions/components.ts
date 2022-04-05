@@ -23,6 +23,7 @@ export const buildPinButton = () =>
 
 /**
  * returns a MessageButton which triggers changing the ephemeral state of the Message it is attached to
+ * @param user
  */
 export const buildVisibilityButton = (user: User) =>
 	new ButtonBuilder()
