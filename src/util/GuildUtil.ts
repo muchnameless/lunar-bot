@@ -16,7 +16,7 @@ export class GuildUtil extends null {
 	static logInfo(guild: Guild) {
 		return {
 			id: guild.id,
-			name: guild.name,
+			guildName: guild.name,
 			memberCount: guild.memberCount,
 			memberCacheSize: guild.members.cache.size,
 		};
