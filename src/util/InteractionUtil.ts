@@ -315,6 +315,13 @@ export class InteractionUtil extends null {
 	}
 
 	/**
+	 * whether the interaction was triggered by the original user
+	 */
+	static isOriginalUser(interaction: FromMessageInteraction) {
+		return interaction.user.id === interaction.message.interaction!.user.id;
+	}
+
+	/**
 	 * whether the interaction has a message attached
 	 * @param interaction
 	 */

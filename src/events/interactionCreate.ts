@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
-import { ApplicationCommandType, ComponentType, Formatters, InteractionType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandType, ComponentType, InteractionType, PermissionFlagsBits } from 'discord.js';
 import { CustomIdKey, GUILD_ID_ALL, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import {
@@ -121,9 +121,9 @@ export default class InteractionCreateEvent extends Event {
 			// delete message
 			case CustomIdKey.Delete:
 				// check if button press is from the user that invoked the original interaction
-				if (interaction.user.id !== args[0]) {
+				if (!InteractionUtil.isOriginalUser(interaction)) {
 					return InteractionUtil.reply(interaction, {
-						content: `you cannot delete messages from ${Formatters.userMention(args[0])}`,
+						content: `you cannot delete messages from ${interaction.message.interaction!.user}`,
 						ephemeral: true,
 					});
 				}
@@ -151,9 +151,9 @@ export default class InteractionCreateEvent extends Event {
 				// delete old message
 				if (isNotEphemeral) {
 					// user id check
-					if (interaction.user.id !== args[0]) {
+					if (!InteractionUtil.isOriginalUser(interaction)) {
 						return InteractionUtil.reply(interaction, {
-							content: `you cannot hide messages from ${Formatters.userMention(args[0])}`,
+							content: `you cannot hide messages from ${interaction.message.interaction!.user}`,
 							ephemeral: true,
 						});
 					}

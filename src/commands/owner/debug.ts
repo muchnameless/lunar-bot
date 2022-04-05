@@ -208,7 +208,7 @@ export default class DebugCommand extends ApplicationCommand {
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
-			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user))],
+			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton())],
 		});
 	}
 }

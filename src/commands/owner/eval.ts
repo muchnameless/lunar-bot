@@ -344,8 +344,8 @@ export default class EvalCommand extends ApplicationCommand {
 						.setEmoji({ name: UnicodeEmoji.Reload })
 						.setStyle(ButtonStyle.Secondary),
 					buildPinButton(),
-					buildVisibilityButton(interaction.user),
-					buildDeleteButton(interaction.user),
+					buildVisibilityButton(),
+					buildDeleteButton(),
 				),
 			],
 			files,
