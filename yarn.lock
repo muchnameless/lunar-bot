@@ -1837,9 +1837,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@npm:14.0.0-dev.1649030898-5748dbe":
-  version: 14.0.0-dev.1649030898-5748dbe
-  resolution: "discord.js@npm:14.0.0-dev.1649030898-5748dbe"
+"discord.js@npm:14.0.0-dev.1649117283-905a6a1":
+  version: 14.0.0-dev.1649117283-905a6a1
+  resolution: "discord.js@npm:14.0.0-dev.1649117283-905a6a1"
   dependencies:
     "@discordjs/builders": ^0.13.0-dev
     "@discordjs/collection": ^0.6.0-dev
@@ -1851,7 +1851,7 @@ __metadata:
     lodash.snakecase: ^4.1.1
     undici: ^4.14.1
     ws: ^8.5.0
-  checksum: dee08104c89b9013dc87485d1b9da23d6794aade8bba3131a95c60a1ee147d51348008569154c878dbc1b82b0023ac05e13df146260f9b3dea5498d1bde33400
+  checksum: a568fe91c9b976e30994cfbc7a9c5e08eb977537fe3f2e76e168950c55e1f8b57cd84d8011f9a8a7e6c73288b3d805cbea8c42a1a6dc51bb53826fd2dba76842
   languageName: node
   linkType: hard
 
@@ -3760,7 +3760,7 @@ __metadata:
     common-tags: ^1.8.2
     cron: ^1.8.2
     discord-api-types: "*"
-    discord.js: 14.0.0-dev.1649030898-5748dbe
+    discord.js: 14.0.0-dev.1649117283-905a6a1
     emoji-regex: 9.2.2
     env-cmd: ^10.1.0
     eslint: ^8.12.0
