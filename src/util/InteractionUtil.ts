@@ -369,9 +369,9 @@ export class InteractionUtil extends null {
 
 		if (interaction.replied) {
 			if (options?.rejectOnError) {
-				throw new Error(`[INTERACTION UTIL]: ${Object.entries(this.logInfo(interaction))}: already replied`);
+				throw new Error(`${Object.entries(this.logInfo(interaction))}: already replied`);
 			}
-			return logger.warn(this.logInfo(interaction), '[INTERACTION DEFER REPLY]: already replied');
+			return logger.warn({ ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER REPLY]: already replied');
 		}
 
 		clearTimeout(cached.autoDeferTimeout!);
@@ -380,7 +380,7 @@ export class InteractionUtil extends null {
 			return await (cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options }));
 		} catch (error) {
 			if (options?.rejectOnError) throw error;
-			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION DEFER REPLY]');
+			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER REPLY]');
 		}
 	}
 
@@ -447,13 +447,13 @@ export class InteractionUtil extends null {
 			return await interaction.reply(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
-				logger.error({ err: error, interaction, data: _options }, '[INTERACTION REPLY]');
+				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION REPLY]');
 				if (_options.ephemeral) return UserUtil.sendDM(interaction.user, _options as SendDMOptions);
 				return ChannelUtil.send(interaction.channel!, _options as SendDMOptions);
 			}
 
 			if (_options.rejectOnError) throw error;
-			logger.error({ err: error, interaction, data: _options }, '[INTERACTION REPLY]');
+			logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION REPLY]');
 		}
 	}
 
@@ -491,19 +491,19 @@ export class InteractionUtil extends null {
 			return (await interaction.editReply(options)) as Message;
 		} catch (error) {
 			if (this.isInteractionError(error)) {
-				logger.error({ err: error, interaction, options }, '[INTERACTION EDIT REPLY]');
+				logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION EDIT REPLY]');
 
 				try {
 					return MessageUtil.edit((await interaction.fetchReply()) as Message, options as EditOptions);
-				} catch (error_) {
-					if (typeof options !== 'string' && options.rejectOnError) throw error_;
-					logger.error({ err: error_, interaction, options }, '[INTERACTION EDIT REPLY]');
+				} catch (_error) {
+					if (typeof options !== 'string' && options.rejectOnError) throw _error;
+					logger.error({ err: _error, ...this.logInfo(interaction), data: options }, '[INTERACTION EDIT REPLY]');
 					return null;
 				}
 			}
 
 			if (typeof options !== 'string' && options.rejectOnError) throw error;
-			logger.error({ err: error, interaction, options }, '[INTERACTION EDIT REPLY]');
+			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION EDIT REPLY]');
 			return null;
 		}
 	}
@@ -522,7 +522,10 @@ export class InteractionUtil extends null {
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
 		if (interaction.replied) {
-			return logger.warn(this.logInfo(interaction), '[INTERACTION DEFER UPDATE]: already replied');
+			return logger.warn(
+				{ ...this.logInfo(interaction), data: options },
+				'[INTERACTION DEFER UPDATE]: already replied',
+			);
 		}
 
 		clearTimeout(cached.autoDeferTimeout!);
@@ -531,7 +534,7 @@ export class InteractionUtil extends null {
 			return await (cached.deferUpdatePromise = interaction.deferUpdate(options));
 		} catch (error) {
 			if (options?.rejectOnError) throw error;
-			logger.error({ err: error, interaction, ...this.logInfo(interaction) }, '[INTERACTION DEFER UPDATE]');
+			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER UPDATE]');
 		}
 	}
 
@@ -573,12 +576,12 @@ export class InteractionUtil extends null {
 			return await interaction.update(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
-				logger.error({ err: error, interaction, data: _options }, '[INTERACTION UPDATE]');
+				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION UPDATE]');
 				return MessageUtil.edit(interaction.message as Message, _options);
 			}
 
 			if (_options.rejectOnError) throw error;
-			logger.error({ err: error, interaction, data: _options }, '[INTERACTION UPDATE]');
+			logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION UPDATE]');
 		}
 	}
 
@@ -599,6 +602,7 @@ export class InteractionUtil extends null {
 
 			if (MessageUtil.isEphemeral(interaction.message as Message)) {
 				logger.warn(
+					this.logInfo(interaction),
 					`[INTERACTION DELETE MESSAGE]: unable to delete ephemeral message in ${MessageUtil.channelLogInfo(
 						interaction.message as Message,
 					)}`,
@@ -610,7 +614,7 @@ export class InteractionUtil extends null {
 
 			return interaction.message as Message;
 		} catch (error) {
-			logger.error({ err: error, interaction, ...this.logInfo(interaction) }, '[INTERACTION DELETE MESSAGE]');
+			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION DELETE MESSAGE]');
 			return MessageUtil.delete(interaction.message as Message);
 		}
 	}
@@ -660,7 +664,7 @@ export class InteractionUtil extends null {
 
 			return collected.first()?.content ?? null;
 		} catch (error) {
-			logger.error({ err: error, interaction, options }, '[INTERACTION AWAIT REPLY]');
+			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION AWAIT REPLY]');
 			return null;
 		}
 	}
@@ -710,7 +714,7 @@ export class InteractionUtil extends null {
 				..._options,
 			});
 		} catch (error) {
-			logger.error({ err: error, interaction, data: _options }, '[INTERACTION AWAIT CONFIRMATION]');
+			logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION AWAIT CONFIRMATION]');
 			throw errorMessage;
 		}
 
@@ -785,7 +789,10 @@ export class InteractionUtil extends null {
 						try {
 							await this.editReply(interaction, editOptions, message ?? '@original');
 						} catch (error) {
-							logger.error({ err: error, interaction, data: _options }, '[INTERACTION AWAIT CONFIRMATION]');
+							logger.error(
+								{ err: error, ...this.logInfo(interaction), data: _options },
+								'[INTERACTION AWAIT CONFIRMATION]',
+							);
 							void this.reply(interaction, editOptions);
 						}
 						break;
@@ -808,7 +815,7 @@ export class InteractionUtil extends null {
 		try {
 			return MessageUtil.react((await interaction.fetchReply()) as Message, ...emojis);
 		} catch (error) {
-			return logger.error({ err: error, interaction, data: emojis }, '[INTERACTION REACT]');
+			return logger.error({ err: error, ...this.logInfo(interaction), data: emojis }, '[INTERACTION REACT]');
 		}
 	}
 

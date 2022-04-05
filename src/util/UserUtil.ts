@@ -57,10 +57,10 @@ export class UserUtil extends null {
 
 		// can't DM bots
 		if (user.bot) {
-			const MESSAGE = `[USER SEND DM]: ${user.tag} | ${user.id} is a bot and can't be DMed`;
+			const MESSAGE = `${user.tag} | ${user.id} is a bot and can't be DMed`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(_options, MESSAGE);
+			logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -70,38 +70,38 @@ export class UserUtil extends null {
 
 		// user had DMs closed or has already been DMed recently
 		if (await redis.exists(...keysToCheck)) {
-			const MESSAGE = `[USER SEND DM]: aborted DMing ${user.tag} | ${user.id}`;
+			const MESSAGE = `aborted DMing ${user.tag} | ${user.id}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(_options, MESSAGE);
+			logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 			return null;
 		}
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `[USER SEND DM]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+				const MESSAGE = `embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(_options, MESSAGE);
+				logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 				return null;
 			}
 
 			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `[USER SEND DM]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(_options, MESSAGE);
+				logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 				return null;
 			}
 		}
 
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `[USER SEND DM]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(_options, MESSAGE);
+			logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -121,7 +121,7 @@ export class UserUtil extends null {
 			}
 
 			if (_options.rejectOnError) throw error;
-			logger.error(error, `[USER SEND DM]: ${user.tag} | ${user.id}`);
+			logger.error({ user, err: error, data: _options }, '[USER SEND DM]');
 			return null;
 		} finally {
 			if (redisKey) void redis.psetex(redisKey, cooldown ?? hours(1), 1);

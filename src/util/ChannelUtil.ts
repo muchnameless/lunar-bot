@@ -68,7 +68,7 @@ export class ChannelUtil extends null {
 	 */
 	static async deleteMessages(channel: TextBasedChannel | null, IdOrIds: Snowflake | Snowflake[]) {
 		if (!channel?.isTextBased()) {
-			return logger.warn(`[CHANNEL DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
+			return logger.warn({ channel, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]: not a text based channel');
 		}
 
 		try {
@@ -103,7 +103,7 @@ export class ChannelUtil extends null {
 				}
 			}
 		} catch (error) {
-			return logger.error(error, '[CHANNEL DELETE MESSAGES]');
+			return logger.error({ channel, err: error, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]');
 		}
 	}
 
@@ -120,9 +120,10 @@ export class ChannelUtil extends null {
 		let requiredChannelPermissions = this.DEFAULT_SEND_PERMISSIONS;
 
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `[CHANNEL SEND]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(_options, MESSAGE);
+			logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -130,20 +131,20 @@ export class ChannelUtil extends null {
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `[CHANNEL SEND]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+				const MESSAGE = `embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(_options, MESSAGE);
+				logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 				return null;
 			}
 
 			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `[CHANNEL SEND]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(_options, MESSAGE);
+				logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 				return null;
 			}
 
@@ -157,24 +158,23 @@ export class ChannelUtil extends null {
 			const missingChannelPermissions = this.botPermissions(channel)
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
-			const MESSAGE = commaListsAnd`[CHANNEL SEND]: missing ${missingChannelPermissions} permission${
+			const MESSAGE = commaListsAnd`missing ${missingChannelPermissions} permission${
 				missingChannelPermissions?.length === 1 ? '' : 's'
-			} in ${this.logInfo(channel)}
-			`;
+			} in ${this.logInfo(channel)}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(_options, MESSAGE);
+			logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 			return null;
 		}
 
 		if ((channel as TextChannel).guild?.me!.isCommunicationDisabled()) {
-			const MESSAGE = `[CHANNEL SEND]: bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
+			const MESSAGE = `bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
 				(channel as TextChannel).guild.me!.communicationDisabledUntilTimestamp! - Date.now(),
 				{ long: true },
 			)}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(_options, MESSAGE);
+			logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -182,7 +182,7 @@ export class ChannelUtil extends null {
 			return await channel.send(_options);
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
-			logger.error(error);
+			logger.error({ channel, err: error, data: _options }, '[CHANNEL SEND]');
 			return null;
 		}
 	}

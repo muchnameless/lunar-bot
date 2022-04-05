@@ -27,12 +27,12 @@ export class GuildUtil extends null {
 			const role = guild.roles.resolve(roleOrId);
 
 			if (!role) {
-				logger.warn(`[GUILD RESOLVE ROLES]: '${roleOrId}' is not a valid role id`);
+				logger.warn({ guild, data: roleOrId }, '[GUILD RESOLVE ROLES]: not a valid role id');
 				continue;
 			}
 
 			if (role.managed || guild.roles.comparePositions(role, (highest ??= guild.me!.roles.highest)) >= 0) {
-				logger.warn(`[GUILD RESOLVE ROLES]: can't edit '@${role.name}'`);
+				logger.warn({ guild, data: role }, '[GUILD RESOLVE ROLES]: missing permissions to edit');
 				continue;
 			}
 
@@ -50,6 +50,7 @@ export class GuildUtil extends null {
 	static async fetchMemberByTag(guild: Guild | null, tagInput: string) {
 		if (!guild?.available) {
 			logger.warn(
+				{ guild, data: tagInput },
 				`[GUILD FETCH MEMBER BY TAG]: ${tagInput}: guild ${guild ? `'${guild?.name}' unavailable` : 'uncached'}`,
 			);
 			return null;
@@ -65,7 +66,7 @@ export class GuildUtil extends null {
 				) ?? null
 			);
 		} catch (error) {
-			logger.error(error, `[GUILD FETCH MEMBER BY TAG]: ${tagInput}`);
+			logger.error({ guild, err: error, data: tagInput }, `[GUILD FETCH MEMBER BY TAG]: ${tagInput}`);
 			return null;
 		}
 	}
@@ -78,7 +79,7 @@ export class GuildUtil extends null {
 		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
 
 		if (guild.memberCount === guild.members.cache.size) {
-			logger.debug(`[GUILD FETCH ALL MEMBERS]: ${guild.name}: already cached`);
+			logger.debug({ guild }, `[GUILD FETCH ALL MEMBERS]: ${guild.name}: already cached`);
 			return guild.members.cache;
 		}
 

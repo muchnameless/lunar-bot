@@ -44,15 +44,6 @@ export class MessageUtil extends null {
 	/**
 	 * @param message
 	 */
-	static logInfo(message: Message) {
-		return `${message.author?.tag ?? 'unknown author'}${
-			message.inGuild() ? ` | ${message.member?.displayName ?? 'unknown member'}` : ''
-		}`;
-	}
-
-	/**
-	 * @param message
-	 */
 	static channelLogInfo(message: Message) {
 		const { channel } = message;
 		if (!channel) return message.channelId;
@@ -99,6 +90,19 @@ export class MessageUtil extends null {
 	}
 
 	/**
+	 * @param message
+	 * @param emojiIndetifier
+	 */
+	private static _reactSingle(message: Message, emojiIndetifier: EmojiIdentifierResolvable) {
+		const emoji = Util.resolvePartialEmoji(emojiIndetifier);
+		const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
+
+		return reaction?.me
+			? Promise.resolve(reaction) // reaction from bot already exists
+			: message.react(emojiIndetifier); // new reaction
+	}
+
+	/**
 	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
 	 * @param message
 	 * @param emojis
@@ -114,12 +118,16 @@ export class MessageUtil extends null {
 				PermissionFlagsBits.AddReactions | PermissionFlagsBits.ViewChannel | PermissionFlagsBits.ReadMessageHistory,
 			)
 		) {
-			logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
+			logger.warn(
+				{ message, data: emojis },
+				`[MESSAGE REACT]: missing permissions to react in ${this.channelLogInfo(message)}`,
+			);
 			return null;
 		}
 
 		if ((channel as TextChannel).guild?.me!.isCommunicationDisabled()) {
 			logger.warn(
+				{ message, data: emojis },
 				`[MESSAGE REACT]: bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
 					(channel as TextChannel).guild.me!.communicationDisabledUntilTimestamp! - Date.now(),
 					{ long: true },
@@ -129,26 +137,32 @@ export class MessageUtil extends null {
 		}
 
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE REACT]: unable to react to ephemeral message in ${this.channelLogInfo(message)}`);
+			logger.warn(
+				{ message, data: emojis },
+				`[MESSAGE REACT]: unable to react to ephemeral message in ${this.channelLogInfo(message)}`,
+			);
 			return null;
 		}
 
-		// api call(s)
+		// single reaction
+		if (emojis.length === 1) {
+			try {
+				return await this._reactSingle(message, emojis[0]);
+			} catch (error) {
+				logger.error({ message, err: error, data: emojis }, `[MESSAGE REACT]: in ${this.channelLogInfo(message)}`);
+				return null;
+			}
+		}
+
+		// multiple reactions
 		const res: MessageReaction[] = [];
 
 		try {
 			for (const emojiIndetifier of emojis) {
-				const emoji = Util.resolvePartialEmoji(emojiIndetifier);
-				const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
-
-				res.push(
-					reaction?.me
-						? reaction // reaction from bot already exists
-						: await message.react(emojiIndetifier), // new reaction
-				);
+				res.push(await this._reactSingle(message, emojiIndetifier));
 			}
 		} catch (error) {
-			logger.error(error, '[MESSAGE REACT]');
+			logger.error({ message, err: error, data: emojis }, `[MESSAGE REACT]: in ${this.channelLogInfo(message)}`);
 		}
 
 		return res;
@@ -163,14 +177,18 @@ export class MessageUtil extends null {
 		if (!message.deletable) {
 			// permission check
 			logger.warn(
-				`[MESSAGE DELETE]: message from ${this.logInfo(message)} in ${this.channelLogInfo(message)} is not deletable`,
+				{ message, data: { timeout } },
+				`[MESSAGE DELETE]: missing permissions to delete message in ${this.channelLogInfo(message)}`,
 			);
 			return message;
 		}
 
 		// TODO: remove once discord.js Message#deletable checks for ephemeral state
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE DELETE]: unable to delete ephemeral message in ${this.channelLogInfo(message)}`);
+			logger.warn(
+				{ message, data: { timeout } },
+				`[MESSAGE DELETE]: unable to delete ephemeral message in ${this.channelLogInfo(message)}`,
+			);
 			return message;
 		}
 
@@ -182,8 +200,8 @@ export class MessageUtil extends null {
 				return await message.delete();
 			} catch (error) {
 				logger.error(
-					error,
-					`[MESSAGE DELETE]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+					{ message, err: error, data: { timeout } },
+					`[MESSAGE DELETE]: in ${this.channelLogInfo(message)}`,
 				);
 				return message;
 			}
@@ -273,7 +291,7 @@ export class MessageUtil extends null {
 				error.code === RESTJSONErrorCodes.InvalidFormBodyOrContentType &&
 				((error.rawError as DiscordErrorData).errors as Record<string, unknown>)?.message_reference
 			) {
-				logger.error({ err: error, data: _options }, '[MESSAGE REPLY]');
+				logger.error({ err: error, data: _options }, `[MESSAGE REPLY]: in ${this.channelLogInfo(message)}`);
 
 				// don't change pinging behaviour and don't modify allowedMentions.users ref
 				const allowedMentions = _options.allowedMentions ?? message.client.options.allowedMentions ?? {};
@@ -301,8 +319,8 @@ export class MessageUtil extends null {
 				});
 			}
 
-			if (_options.rejectOnError) throw error instanceof Error ? new Error('[MESSAGE REPLY]', { cause: error }) : error;
-			logger.error({ err: error, data: _options }, '[MESSAGE REPLY]');
+			if (_options.rejectOnError) throw error;
+			logger.error({ err: error, data: _options }, `[MESSAGE REPLY]: in ${this.channelLogInfo(message)}`);
 			return null;
 		}
 	}
@@ -324,12 +342,7 @@ export class MessageUtil extends null {
 				const MESSAGE = 'missing permissions to edit message';
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(
-					_options,
-					`[MESSAGE EDIT]: ${MESSAGE} by ${this.logInfo(message)} in ${this.channelLogInfo(
-						message,
-					)} with ${Object.entries(_options)}`,
-				);
+				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 				return message;
 			}
 
@@ -338,7 +351,10 @@ export class MessageUtil extends null {
 
 		// TODO: remove once discord.js Message#editable checks for ephemeral state
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE EDIT]: unable to edit ephemeral message in ${this.channelLogInfo(message)}`);
+			logger.warn(
+				{ message, data: _options },
+				`[MESSAGE EDIT]: unable to edit ephemeral message in ${this.channelLogInfo(message)}`,
+			);
 			return message;
 		}
 
@@ -346,7 +362,7 @@ export class MessageUtil extends null {
 			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(options, `[MESSAGE EDIT]: ${MESSAGE}`);
+			logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
@@ -355,7 +371,7 @@ export class MessageUtil extends null {
 				const MESSAGE = `embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(options, `[MESSAGE EDIT]: ${MESSAGE}`);
+				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 				return message;
 			}
 
@@ -365,7 +381,7 @@ export class MessageUtil extends null {
 				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(_options, `[MESSAGE EDIT]: ${MESSAGE}`);
+				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 				return message;
 			}
 
@@ -380,22 +396,12 @@ export class MessageUtil extends null {
 			const missingChannelPermissions = ChannelUtil.botPermissions(channel)
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
+			const MESSAGE = commaListsAnd`missing ${missingChannelPermissions} permission${
+				missingChannelPermissions?.length === 1 ? '' : 's'
+			}`;
 
-			if (_options.rejectOnError) {
-				throw new Error(
-					commaListsAnd`[MESSAGE EDIT]: missing ${missingChannelPermissions} permission${
-						missingChannelPermissions?.length === 1 ? '' : 's'
-					} in ${ChannelUtil.logInfo(channel)}
-					`,
-				);
-			}
-
-			logger.warn(
-				commaListsAnd`[MESSAGE EDIT]: missing ${missingChannelPermissions} permission${
-					missingChannelPermissions?.length === 1 ? '' : 's'
-				} in ${ChannelUtil.logInfo(channel)}
-				`,
-			);
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(`[MESSAGE EDIT]: ${MESSAGE} in ${ChannelUtil.logInfo(channel)}`);
 			return message;
 		}
 
@@ -403,10 +409,7 @@ export class MessageUtil extends null {
 			return await message.edit(_options);
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
-			logger.error(
-				error,
-				`[MESSAGE EDIT]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
-			);
+			logger.error({ message, err: error }, `[MESSAGE EDIT]: in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 	}
@@ -446,7 +449,7 @@ export class MessageUtil extends null {
 			return await message.unpin();
 		} catch (error) {
 			if (rejectOnError) throw error;
-			logger.error({ err: error, message }, `[MESSAGE PIN]: in ${this.channelLogInfo(message)}`);
+			logger.error({ message, err: error }, `[MESSAGE PIN]: in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 	}
@@ -477,7 +480,7 @@ export class MessageUtil extends null {
 			return await message.unpin();
 		} catch (error) {
 			if (rejectOnError) throw error;
-			logger.error({ err: error, message }, `[MESSAGE UNPIN]: in ${this.channelLogInfo(message)}`);
+			logger.error({ message, err: error }, `[MESSAGE UNPIN]: in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 	}

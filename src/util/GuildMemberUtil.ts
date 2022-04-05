@@ -1,5 +1,4 @@
 import { Collection, PermissionFlagsBits } from 'discord.js';
-import { commaListsAnd } from 'common-tags';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
@@ -146,23 +145,27 @@ export class GuildMemberUtil extends null {
 				: roles
 		).difference(member.roles.cache);
 		if (!difference.size) {
-			logger.warn(`[GUILDMEMBER SET ROLES] ${this.logInfo(member)}: nothing to change`);
+			logger.warn({ member, data: roles }, '[GUILDMEMBER SET ROLES]: nothing to change');
 			return member;
 		}
 
 		const me = member.guild.me!;
 		if (!me.permissions.has(PermissionFlagsBits.ManageRoles)) {
-			logger.warn(`[GUILDMEMBER SET ROLES] ${this.logInfo(member)}: missing 'MANAGE_ROLES' permission`);
+			logger.warn({ member, data: roles }, "[GUILDMEMBER SET ROLES]: missing 'MANAGE_ROLES' permission");
 			return member;
 		}
 
 		const { highest } = me.roles;
 		if (difference.some((role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0)) {
 			logger.warn(
-				commaListsAnd`[GUILDMEMBER SET ROLES] ${this.logInfo(member)}: unable to add / remove '${difference
-					.filter((role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0)
-					.map(({ name }) => `@${name}`)}'
-				`,
+				{
+					member,
+					data: roles,
+					filtered: difference.filter(
+						(role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0,
+					),
+				},
+				'[GUILDMEMBER SET ROLES]: missing permissions to add / remove',
 			);
 			return member;
 		}
@@ -170,7 +173,7 @@ export class GuildMemberUtil extends null {
 		try {
 			return await member.roles.set(Array.isArray(roles) ? (roles.filter(Boolean) as (Snowflake | Role)[]) : roles);
 		} catch (error) {
-			logger.error(error, `[GUILDMEMBER SET ROLES] ${this.logInfo(member)}`);
+			logger.error({ member, err: error, data: roles }, '[GUILDMEMBER SET ROLES]');
 			return member;
 		}
 	}
@@ -197,7 +200,7 @@ export class GuildMemberUtil extends null {
 		try {
 			return await member.roles.set(rolesToAdd);
 		} catch (error) {
-			logger.error(error, '[GUILDMEMBER EDIT ROLES]');
+			logger.error({ member, err: error, data: { add, remove } }, '[GUILDMEMBER EDIT ROLES]');
 			return member;
 		}
 	}
@@ -219,21 +222,21 @@ export class GuildMemberUtil extends null {
 	 */
 	static async timeout(member: GuildMember, duration: number | null, reason?: string) {
 		if (!member.moderatable) {
-			logger.warn(`[GUILDMEMBER TIMEOUT] ${this.logInfo(member)}: missing permissions`);
+			logger.warn({ member, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]: missing permissions');
 			return member;
 		}
 
 		const DURATION = duration !== null ? Math.min(duration, MAX_TIMEOUT_DURATION) : null;
 
 		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - DURATION!) < seconds(1)) {
-			logger.debug(`[GUILDMEMBER TIMEOUT] ${this.logInfo(member)}: is already in (similar) timeout`);
+			logger.debug({ member, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]: is already in (similar) timeout');
 			return member;
 		}
 
 		try {
 			return await member.timeout(DURATION, reason);
 		} catch (error) {
-			logger.error(error, `[GUILDMEMBER TIMEOUT] ${this.logInfo(member)}`);
+			logger.error({ member, err: error, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]');
 			return member;
 		}
 	}
