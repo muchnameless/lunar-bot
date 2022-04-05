@@ -1165,9 +1165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bree@npm:^8.0.2":
-  version: 8.0.2
-  resolution: "bree@npm:8.0.2"
+"bree@npm:^8.0.3":
+  version: 8.0.3
+  resolution: "bree@npm:8.0.3"
   dependencies:
     "@breejs/later": ^4.1.0
     boolean: ^3.1.4
@@ -1180,7 +1180,7 @@ __metadata:
     ms: ^2.1.3
     p-wait-for: 3
     safe-timers: ^1.1.0
-  checksum: 102c7a5dda60dc63c08d1fcf78cb125a1d774081cc2552e38391af8bde24e86a00a840e37233c16824182e690b802dbdccf39c7ef9d30f0873fb98a82e1da3f9
+  checksum: b5302532edc505cbbfe2b5ae3468e76e7ee233368cdf81e603db85dcad0031de3b06db14dc408487d390d692419c3985f364b0dc2854d749bf5d7db6027fcd9f
   languageName: node
   linkType: hard
 
@@ -3753,7 +3753,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.18.0
     "@typescript-eslint/parser": ^5.18.0
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#6da21ece522ea8dd61f44b5c74ab64b2f0e8be82"
-    bree: ^8.0.2
+    bree: ^8.0.3
     bufferutil: ^4.0.6
     chart.js: ^3.7.1
     chartjs-node-canvas: ^4.1.6
