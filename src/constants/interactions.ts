@@ -4,4 +4,5 @@ export const enum CustomIdKey {
 	Delete = 'delete',
 	Leaderboard = 'lb',
 	Pin = 'pin',
+	Visibility = 'visibility',
 }

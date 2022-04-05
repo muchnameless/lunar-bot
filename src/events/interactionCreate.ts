@@ -118,7 +118,7 @@ export default class InteractionCreateEvent extends Event {
 			case CustomIdKey.Leaderboard:
 				return handleLeaderboardButtonInteraction(interaction, args);
 
-			// message delete
+			// delete message
 			case CustomIdKey.Delete:
 				// check if button press is from the user that invoked the original interaction
 				if (interaction.user.id !== args[0]) {
@@ -130,7 +130,7 @@ export default class InteractionCreateEvent extends Event {
 
 				return InteractionUtil.deleteMessage(interaction);
 
-			// message pin
+			// (un)pin message
 			case CustomIdKey.Pin:
 				if (!interaction.channel?.isDM() && !interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
 					return InteractionUtil.reply(interaction, {
@@ -143,6 +143,35 @@ export default class InteractionCreateEvent extends Event {
 				return MessageUtil[interaction.message.pinned ? 'unpin' : 'pin'](interaction.message as Message, {
 					rejectOnError: true,
 				});
+
+			// change message visibility
+			case CustomIdKey.Visibility: {
+				const isNotEphemeral = !MessageUtil.isEphemeral(interaction.message as Message);
+
+				// delete old message
+				if (isNotEphemeral) {
+					// user id check
+					if (interaction.user.id !== args[0]) {
+						return InteractionUtil.reply(interaction, {
+							content: `you cannot hide messages from ${Formatters.userMention(args[0])}`,
+							ephemeral: true,
+						});
+					}
+
+					await InteractionUtil.deleteMessage(interaction);
+				}
+
+				// send new message
+				return InteractionUtil.reply(interaction, {
+					content: interaction.message.content || null,
+					embeds: interaction.message.embeds,
+					files: (interaction.message as Message).attachments.map(({ url }) => url),
+					// TODO: remove manual map after d.js fixes resending
+					// @ts-expect-error
+					components: interaction.message.components?.map(({ components, data }) => ({ ...data, components })),
+					ephemeral: isNotEphemeral,
+				});
+			}
 
 			// command message buttons
 			case CustomIdKey.Command: {

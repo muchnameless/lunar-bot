@@ -21,6 +21,15 @@ export const buildPinButton = () =>
 		.setEmoji({ name: UnicodeEmoji.Pin })
 		.setStyle(ButtonStyle.Secondary);
 
+/**
+ * returns a MessageButton which triggers changing the ephemeral state of the Message it is attached to
+ */
+export const buildVisibilityButton = (user: User) =>
+	new ButtonBuilder()
+		.setCustomId(`${CustomIdKey.Visibility}:${user.id}`)
+		.setEmoji({ name: UnicodeEmoji.Eyes })
+		.setStyle(ButtonStyle.Secondary);
+
 type PaginationButtonOptions = Partial<{
 	/** disable all but the reload button */
 	disablePages: boolean;

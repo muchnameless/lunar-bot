@@ -50,6 +50,7 @@ EmbedUtil;
 GuildMemberUtil;
 GuildUtil;
 LeaderboardUtil;
+MessageUtil;
 import * as functions from '../../functions';
 import * as nwFunctions from '../../structures/networth/functions';
 nwFunctions;
@@ -76,7 +77,7 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
 const { EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, UnicodeEmoji } = constants;
-const { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } = functions;
+const { buildDeleteButton, buildPinButton, buildVisibilityButton, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
 	/**
@@ -343,10 +344,7 @@ export default class EvalCommand extends ApplicationCommand {
 						.setEmoji({ name: UnicodeEmoji.Reload })
 						.setStyle(ButtonStyle.Secondary),
 					buildPinButton(),
-					new ButtonBuilder()
-						.setCustomId(`${this.baseCustomId}:visibility:${inspectDepth}`)
-						.setEmoji({ name: UnicodeEmoji.Eyes })
-						.setStyle(ButtonStyle.Secondary),
+					buildVisibilityButton(interaction.user),
 					buildDeleteButton(interaction.user),
 				),
 			],
@@ -376,7 +374,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override async runButton(interaction: ButtonInteraction, args: string[]) {
+	override runButton(interaction: ButtonInteraction, args: string[]) {
 		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
@@ -415,23 +413,6 @@ export default class EvalCommand extends ApplicationCommand {
 			case 'repeat': {
 				const input = this._getInputFromMessage(interaction.message);
 				return this._run(interaction, input, { inspectDepth: Number(inspectDepth) });
-			}
-
-			case 'visibility': {
-				const isNotEphemeral = !MessageUtil.isEphemeral(interaction.message as Message);
-
-				// delete old message
-				if (isNotEphemeral) await InteractionUtil.deleteMessage(interaction);
-
-				// send new message
-				return InteractionUtil.reply(interaction, {
-					content: interaction.message.content || null,
-					embeds: interaction.message.embeds,
-					files: (interaction.message as Message).attachments.map(({ url }) => url),
-					// @ts-expect-error
-					components: interaction.message.components,
-					ephemeral: isNotEphemeral,
-				});
 			}
 
 			default:
