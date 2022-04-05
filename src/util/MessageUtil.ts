@@ -321,12 +321,15 @@ export class MessageUtil extends null {
 		if (!message.editable) {
 			// message was not sent by the bot user -> can only remove attachments
 			if (Object.keys(_options).some((key) => key !== 'attachments') || _options.attachments?.length !== 0) {
-				const MESSAGE = `[MESSAGE EDIT]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(
-					message,
-				)} with ${Object.entries(_options)}`;
+				const MESSAGE = 'missing permissions to edit message';
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(_options, MESSAGE);
+				logger.warn(
+					_options,
+					`[MESSAGE EDIT]: ${MESSAGE} by ${this.logInfo(message)} in ${this.channelLogInfo(
+						message,
+					)} with ${Object.entries(_options)}`,
+				);
 				return message;
 			}
 
@@ -340,29 +343,29 @@ export class MessageUtil extends null {
 		}
 
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `[MESSAGE EDIT]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(options, MESSAGE);
+			logger.warn(options, `[MESSAGE EDIT]: ${MESSAGE}`);
 			return message;
 		}
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `[MESSAGE EDIT]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+				const MESSAGE = `embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(options, MESSAGE);
+				logger.warn(options, `[MESSAGE EDIT]: ${MESSAGE}`);
 				return message;
 			}
 
 			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `[MESSAGE EDIT]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn(_options, MESSAGE);
+				logger.warn(_options, `[MESSAGE EDIT]: ${MESSAGE}`);
 				return message;
 			}
 
@@ -411,28 +414,39 @@ export class MessageUtil extends null {
 	/**
 	 * pins a message
 	 * @param message
+	 * @param options
 	 */
-	static async pin(message: Message) {
+	static async pin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
 		if (!message.pinnable) {
-			logger.warn(`[MESSAGE PIN]: can't pin message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+			const MESSAGE = 'missing permissions to pin message';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
 		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE PIN]: unable to pin ephemeral message in ${this.channelLogInfo(message)}`);
+			const MESSAGE = 'unable to pin ephemeral message';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
-		if (message.pinned) return message;
+		if (message.pinned) {
+			const MESSAGE = 'message is already pinned';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			return message;
+		}
 
 		try {
-			return await message.pin();
+			return await message.unpin();
 		} catch (error) {
-			logger.error(
-				error,
-				`[MESSAGE PIN]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
-			);
+			if (rejectOnError) throw error;
+			logger.error({ err: error, message }, `[MESSAGE PIN]: in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 	}
@@ -440,30 +454,39 @@ export class MessageUtil extends null {
 	/**
 	 * unpins a message
 	 * @param message
+	 * @param options
 	 */
-	static async unpin(message: Message) {
+	static async unpin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
 		if (!message.pinnable) {
-			logger.warn(
-				`[MESSAGE UNPIN]: can't unpin message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
-			);
+			const MESSAGE = 'missing permissions to unpin message';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
 		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE UNPIN]: unable to unpin ephemeral message in ${this.channelLogInfo(message)}`);
+			const MESSAGE = 'unable to unpin ephemeral message';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
-		if (!message.pinned) return message;
+		if (!message.pinned) {
+			const MESSAGE = 'message is not pinned';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			return message;
+		}
 
 		try {
 			return await message.unpin();
 		} catch (error) {
-			logger.error(
-				error,
-				`[MESSAGE UNPIN]: unpin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
-			);
+			if (rejectOnError) throw error;
+			logger.error({ err: error, message }, `[MESSAGE UNPIN]: in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 	}

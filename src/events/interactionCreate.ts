@@ -140,7 +140,9 @@ export default class InteractionCreateEvent extends Event {
 				}
 
 				void InteractionUtil.deferUpdate(interaction);
-				return MessageUtil[interaction.message.pinned ? 'unpin' : 'pin'](interaction.message as Message);
+				return MessageUtil[interaction.message.pinned ? 'unpin' : 'pin'](interaction.message as Message, {
+					rejectOnError: true,
+				});
 
 			// command message buttons
 			case CustomIdKey.Command: {
