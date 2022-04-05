@@ -1,12 +1,14 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { CustomIdKey, UnicodeEmoji } from '../constants';
+import type { User } from 'discord.js';
 
 /**
  * returns a MessageButton which triggers deleting the Message it is attached to
+ * @param user
  */
-export const buildDeleteButton = () =>
+export const buildDeleteButton = (user: User) =>
 	new ButtonBuilder()
-		.setCustomId(CustomIdKey.Delete)
+		.setCustomId(`${CustomIdKey.Delete}:${user.id}`)
 		.setEmoji({ name: UnicodeEmoji.Delete })
 		.setStyle(ButtonStyle.Danger);
 
@@ -22,9 +24,9 @@ export const buildPinButton = () =>
 /**
  * returns a MessageButton which triggers changing the ephemeral state of the Message it is attached to
  */
-export const buildVisibilityButton = () =>
+export const buildVisibilityButton = (user: User) =>
 	new ButtonBuilder()
-		.setCustomId(CustomIdKey.Visibility)
+		.setCustomId(`${CustomIdKey.Visibility}:${user.id}`)
 		.setEmoji({ name: UnicodeEmoji.Eyes })
 		.setStyle(ButtonStyle.Secondary);
 

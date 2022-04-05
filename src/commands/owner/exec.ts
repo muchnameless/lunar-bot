@@ -63,14 +63,14 @@ export default class ExecCommand extends ApplicationCommand {
 
 			return InteractionUtil.reply(interaction, {
 				embeds: [responseEmbed],
-				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton())],
+				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user))],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
 			return InteractionUtil.reply(interaction, {
 				content: Formatters.codeBlock('xl', `${error}`),
-				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton())],
+				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user))],
 			});
 		}
 	}
