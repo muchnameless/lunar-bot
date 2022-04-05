@@ -86,7 +86,10 @@ export class MessageUtil extends null {
 	 * @param message
 	 */
 	static isNormalBotMessage(message: Message) {
-		return message.editable && (message.type === MessageType.Default || this.isNormalReplyMessage(message));
+		return (
+			message.author.id === message.client.user!.id &&
+			(message.type === MessageType.Default || this.isNormalReplyMessage(message))
+		);
 	}
 
 	/**

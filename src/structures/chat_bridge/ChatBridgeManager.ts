@@ -1,17 +1,54 @@
 import { URL } from 'node:url';
 import { once } from 'node:events';
 import { env } from 'node:process';
+import { clearTimeout, setTimeout } from 'node:timers';
 import { stripIndents } from 'common-tags';
 import { MessageFlags } from 'discord.js';
 import { UnicodeEmoji } from '../../constants';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
 import { MessageUtil } from '../../util';
 import { logger } from '../../logger';
+import { minutes } from '../../functions';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import type { ChatInputCommandInteraction, Message, Snowflake } from 'discord.js';
 import type { MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '../LunarClient';
+
+class InteractionCache {
+	private _cache = new Map<Snowflake, { interaction: ChatInputCommandInteraction; timeout: NodeJS.Timeout }>();
+	private _channelIds: ChatBridgeManager['channelIds'];
+
+	constructor({ channelIds }: ChatBridgeManager) {
+		this._channelIds = channelIds;
+	}
+
+	/**
+	 * adds the interaction to the cache if the channel is a chat bridge channel
+	 * @param interaction
+	 */
+	add(interaction: ChatInputCommandInteraction) {
+		if (!this._channelIds.has(interaction.channelId)) return;
+
+		this._cache.set(interaction.id, {
+			interaction,
+			timeout: setTimeout(() => this._cache.delete(interaction.id), minutes(15)),
+		});
+	}
+
+	/**
+	 * retrieves an interaction from the cache and deletes it from the cache if found
+	 * @param interactionId
+	 */
+	get(interactionId: Snowflake) {
+		const cached = this._cache.get(interactionId);
+		if (!cached) return null;
+
+		this._cache.delete(interactionId);
+		clearTimeout(cached.timeout);
+		return cached.interaction;
+	}
+}
 
 export class ChatBridgeManager {
 	/**
@@ -29,7 +66,7 @@ export class ChatBridgeManager {
 	/**
 	 * interaction cache
 	 */
-	interactionCache = new Map<Snowflake, ChatInputCommandInteraction>();
+	interactionCache = new InteractionCache(this);
 	/**
 	 * individual chat bridges
 	 */

@@ -383,10 +383,14 @@ export class DiscordChatManager extends ChatManager {
 		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, UnicodeEmoji.X);
 
+		const messageInteraction =
+			message.interaction ??
+			// followUp to an interaction
+			(message.reference && message.channel.messages.cache.get(message.reference.messageId!)?.interaction);
 		const player =
 			playerInput ??
-			UserUtil.getPlayer(message.interaction?.user ?? message.author) ?? // cached player
-			(await this.client.players.fetch({ discordId: message.interaction?.user.id ?? message.author.id })); // uncached player
+			UserUtil.getPlayer(messageInteraction?.user ?? message.author) ?? // cached player
+			(await this.client.players.fetch({ discordId: messageInteraction?.user.id ?? message.author.id })); // uncached player
 
 		// check if player is muted
 		if (this.hypixelGuild!.checkMute(player)) {
@@ -480,26 +484,31 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// send interaction "command" for initial application command reply
-		if (message.interaction && !message.editedTimestamp) {
-			const interaction = this.client.chatBridges.interactionCache.get(message.interaction.id);
+		if (messageInteraction) {
+			const interaction = this.client.chatBridges.interactionCache.get(messageInteraction.id);
 
-			void this.minecraft.chat({
-				content: `${this.client.config.get('PREFIXES')[0]}${
-					interaction
-						?.toString()
-						.slice(1)
-						.replace(/ visibility:[a-z]+/, '') ?? message.interaction.commandName
-				}`,
-				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
-					player?.ign ?? message.interaction.user.username,
-				)}: `,
-			});
+			// cached interaction from the bot or interaction from another bot
+			if (interaction || message.author.id !== message.client.user!.id) {
+				void this.minecraft.chat({
+					content: `${this.client.config.get('PREFIXES')[0]}${
+						interaction
+							?.toString()
+							.slice(1)
+							.replace(/ visibility:[a-z]+/, '') ?? messageInteraction.commandName
+					}`,
+					prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
+						player?.ign ?? messageInteraction.user.username,
+					)}: `,
+				});
+			}
 		}
 
 		// send content
 		return this.minecraft.chat({
 			content: contentParts.join(' '),
-			prefix: `${this.prefix} ${message.editable ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
+			prefix: `${this.prefix} ${
+				message.author.id !== message.client.user!.id ? `${DiscordChatManager.getPlayerName(message)}: ` : ''
+			}`,
 			discordMessage: message,
 		});
 	}

@@ -1,16 +1,17 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
 import { ApplicationCommandType, ComponentType, Formatters, InteractionType, PermissionFlagsBits } from 'discord.js';
+import { isJSONEncodable } from '@discordjs/builders';
 import { CustomIdKey, GUILD_ID_ALL, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
-import {
-	handleLeaderboardButtonInteraction,
-	handleLeaderboardSelectMenuInteraction,
-	minutes,
-	sortCache,
-} from '../functions';
+import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
+import type {
+	APIActionRowComponent,
+	APIMessageActionRowComponent,
+	APISelectMenuComponent,
+} from 'discord-api-types/v10';
 import type {
 	ApplicationCommandOptionChoice,
 	AutocompleteInteraction,
@@ -20,6 +21,7 @@ import type {
 	ContextMenuCommandInteraction,
 	GuildMember,
 	Interaction,
+	InteractionReplyOptions,
 	Message,
 	ModalSubmitInteraction,
 	SelectMenuInteraction,
@@ -53,10 +55,7 @@ export default class InteractionCreateEvent extends Event {
 			'INTERACTION_CREATE',
 		);
 
-		if (this.client.chatBridges.channelIds.has(interaction.channelId)) {
-			this.client.chatBridges.interactionCache.set(interaction.id, interaction);
-			setTimeout(() => this.client.chatBridges.interactionCache.delete(interaction.id), minutes(1));
-		}
+		this.client.chatBridges.interactionCache.add(interaction);
 
 		const command = this.client.commands.get(interaction.commandName);
 
@@ -146,19 +145,32 @@ export default class InteractionCreateEvent extends Event {
 
 			// change message visibility
 			case CustomIdKey.Visibility: {
-				const isNotEphemeral = !MessageUtil.isEphemeral(interaction.message as Message);
+				// remove visibility button from components
+				let components: InteractionReplyOptions['components'];
 
-				// delete old message
-				if (isNotEphemeral) {
-					// user id check
-					if (interaction.user.id !== args[0]) {
-						return InteractionUtil.reply(interaction, {
-							content: `you cannot hide messages from ${Formatters.userMention(args[0])}`,
-							ephemeral: true,
-						});
+				if (interaction.message.components) {
+					components = [];
+
+					for (let row of interaction.message.components) {
+						// TODO: replace map with toJSON on the row after d.js fix
+						row = (
+							isJSONEncodable(row)
+								? {
+										// @ts-expect-error
+										...row.toJSON(),
+										components: row.components.map((c) => (isJSONEncodable(c) ? c.toJSON() : c)),
+								  }
+								: row
+						) as APIActionRowComponent<APIMessageActionRowComponent>;
+
+						row.components = row.components.filter(
+							(c) => !(c as APISelectMenuComponent).custom_id?.startsWith(CustomIdKey.Visibility),
+						);
+
+						if (row.components.length) {
+							components.push(row);
+						}
 					}
-
-					await InteractionUtil.deleteMessage(interaction);
 				}
 
 				// send new message
@@ -167,14 +179,8 @@ export default class InteractionCreateEvent extends Event {
 					content: interaction.message.content || null,
 					embeds: interaction.message.embeds,
 					files: (interaction.message as Message).attachments.map(({ url }) => url),
-					// TODO: remove manual map after d.js fixes resending
-					// @ts-expect-error
-					components: interaction.message.components?.map(({ components, data }) => ({
-						...data,
-						// @ts-expect-error
-						components: components.map((c) => c.toJSON()),
-					})),
-					ephemeral: isNotEphemeral,
+					components,
+					ephemeral: false,
 				});
 			}
 

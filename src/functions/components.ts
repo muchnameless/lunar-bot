@@ -1,14 +1,14 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { CustomIdKey, UnicodeEmoji } from '../constants';
-import type { User } from 'discord.js';
+import type { Snowflake } from 'discord.js';
 
 /**
  * returns a MessageButton which triggers deleting the Message it is attached to
- * @param user
+ * @param userId
  */
-export const buildDeleteButton = (user: User) =>
+export const buildDeleteButton = (userId: Snowflake) =>
 	new ButtonBuilder()
-		.setCustomId(`${CustomIdKey.Delete}:${user.id}`)
+		.setCustomId(`${CustomIdKey.Delete}:${userId}`)
 		.setEmoji({ name: UnicodeEmoji.Delete })
 		.setStyle(ButtonStyle.Danger);
 
@@ -23,11 +23,11 @@ export const buildPinButton = () =>
 
 /**
  * returns a MessageButton which triggers changing the ephemeral state of the Message it is attached to
- * @param user
+ * @param userId
  */
-export const buildVisibilityButton = (user: User) =>
+export const buildVisibilityButton = (userId: Snowflake) =>
 	new ButtonBuilder()
-		.setCustomId(`${CustomIdKey.Visibility}:${user.id}`)
+		.setCustomId(`${CustomIdKey.Visibility}:${userId}`)
 		.setEmoji({ name: UnicodeEmoji.Eyes })
 		.setStyle(ButtonStyle.Secondary);
 

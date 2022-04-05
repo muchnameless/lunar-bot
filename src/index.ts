@@ -66,14 +66,13 @@ const client = new LunarClient({
 		],
 		status: 'online',
 	},
-	intents: [
-		GatewayIntentBits.Guilds, // to populate guild and channel caches
-		GatewayIntentBits.GuildMembers, // guildMemberAdd, remove
-		GatewayIntentBits.GuildEmojisAndStickers, // to keep the cache updated for the chat bridge
-		GatewayIntentBits.GuildMessages, // chat bridge
-		GatewayIntentBits.GuildMessageReactions, // forward announcements to guild chat
+	intents:
+		GatewayIntentBits.Guilds | // to populate guild and channel caches
+		GatewayIntentBits.GuildMembers | // guildMemberAdd, remove
+		GatewayIntentBits.GuildEmojisAndStickers | // to keep the cache updated for the chat bridge
+		GatewayIntentBits.GuildMessages | // chat bridge
+		GatewayIntentBits.GuildMessageReactions | // forward announcements to guild chat
 		GatewayIntentBits.MessageContent, // chat bridge
-	],
 	rest: {
 		// don't await channel name and topic edits
 		rejectOnRateLimit: ({ method, route, timeToReset }) =>
