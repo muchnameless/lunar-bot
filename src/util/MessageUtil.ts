@@ -417,6 +417,14 @@ export class MessageUtil extends null {
 	 * @param options
 	 */
 	static async pin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
+		if (message.pinned) {
+			const MESSAGE = 'message is already pinned';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			return message;
+		}
+
 		if (!message.pinnable) {
 			const MESSAGE = 'missing permissions to pin message';
 
@@ -428,14 +436,6 @@ export class MessageUtil extends null {
 		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
 		if (this.isEphemeral(message)) {
 			const MESSAGE = 'unable to pin ephemeral message';
-
-			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
-			return message;
-		}
-
-		if (message.pinned) {
-			const MESSAGE = 'message is already pinned';
 
 			if (rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
@@ -457,25 +457,16 @@ export class MessageUtil extends null {
 	 * @param options
 	 */
 	static async unpin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
-		if (!message.pinnable) {
-			const MESSAGE = 'missing permissions to unpin message';
-
-			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
-			return message;
-		}
-
-		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
-		if (this.isEphemeral(message)) {
-			const MESSAGE = 'unable to unpin ephemeral message';
-
-			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
-			return message;
-		}
-
 		if (!message.pinned) {
 			const MESSAGE = 'message is not pinned';
+
+			if (rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			return message;
+		}
+
+		if (!message.pinnable) {
+			const MESSAGE = 'missing permissions to unpin message';
 
 			if (rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
