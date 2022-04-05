@@ -1,5 +1,5 @@
 import {
-	DUNGEON_TYPES_AND_CLASSES,
+	DUNGEON_TYPES_AND_CLASSES_SET,
 	DUNGEON_XP,
 	FindProfileStrategy,
 	LEVEL_CAP,
@@ -16,9 +16,6 @@ import type { DungeonTypes, SkillTypes } from '../constants';
 export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string };
 
 type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
-
-// used for getSkillLevel to determine the xpTable
-const DUNGEON_TYPES_AND_CLASSES_SET = new Set(DUNGEON_TYPES_AND_CLASSES);
 
 /**
  * returns the true and progression level for the provided skill type

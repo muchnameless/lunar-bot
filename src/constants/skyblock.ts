@@ -265,6 +265,8 @@ export const DUNGEON_CLASSES = ['healer', 'mage', 'berserk', 'archer', 'tank'] a
 
 export const DUNGEON_TYPES_AND_CLASSES = [...DUNGEON_TYPES, ...DUNGEON_CLASSES] as const;
 
+export const DUNGEON_TYPES_AND_CLASSES_SET = new Set(DUNGEON_TYPES_AND_CLASSES);
+
 export type DungeonTypes = ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>;
 
 /**

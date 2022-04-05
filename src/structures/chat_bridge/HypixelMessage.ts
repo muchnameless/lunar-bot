@@ -1,12 +1,12 @@
 import { regExpEsc } from '@sapphire/utilities';
-import loader from 'prismarine-chat';
-import { MC_CLIENT_VERSION, NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '../../constants';
+import { NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '../../constants';
 import { MessageUtil } from '../../util';
 import { seconds, uuidToBustURL } from '../../functions';
 import { mojang } from '../../api';
 import { logger } from '../../logger';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, HypixelMessageType, spamMessages } from './constants';
+import { PrismarineMessage } from './PrismarineMessage';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
 import type { Player } from '../database/models/Player';
 import type { GuildMember, Message as DiscordMessage } from 'discord.js';
@@ -44,8 +44,6 @@ export interface HypixelUserMessage extends HypixelMessage {
 	spam: false;
 	commandData: NonNullable<HypixelMessage['commandData']>;
 }
-
-export const ChatMessage = loader(MC_CLIENT_VERSION);
 
 export class HypixelMessage {
 	/**
@@ -87,7 +85,7 @@ export class HypixelMessage {
 	 */
 	constructor(chatBridge: ChatBridge, { message, position }: ChatPacket) {
 		this.chatBridge = chatBridge;
-		this.prismarineMessage = ChatMessage.fromNotch(message);
+		this.prismarineMessage = PrismarineMessage.fromNotch(message);
 		this.position = MESSAGE_POSITIONS[position] ?? null;
 		this.rawContent = this.prismarineMessage.toString();
 		this.cleanedContent = this.rawContent.replace(INVISIBLE_CHARACTER_REGEXP, '').trim();
