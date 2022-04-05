@@ -446,7 +446,7 @@ export class MessageUtil extends null {
 		}
 
 		try {
-			return await message.unpin();
+			return await message.pin();
 		} catch (error) {
 			if (rejectOnError) throw error;
 			logger.error({ message, err: error }, `[MESSAGE PIN]: in ${this.channelLogInfo(message)}`);
