@@ -7,11 +7,7 @@ import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
-import type {
-	APIActionRowComponent,
-	APIMessageActionRowComponent,
-	APISelectMenuComponent,
-} from 'discord-api-types/v10';
+import type { APIActionRowComponent, APIMessageActionRowComponent } from 'discord-api-types/v10';
 import type {
 	ApplicationCommandOptionChoice,
 	AutocompleteInteraction,
@@ -152,7 +148,7 @@ export default class InteractionCreateEvent extends Event {
 					components = [];
 
 					for (let row of interaction.message.components) {
-						// TODO: replace map with toJSON on the row after d.js fix
+						// TODO: replace with ActionRowBuilder.from
 						row = (
 							isJSONEncodable(row)
 								? {
@@ -163,9 +159,8 @@ export default class InteractionCreateEvent extends Event {
 								: row
 						) as APIActionRowComponent<APIMessageActionRowComponent>;
 
-						row.components = row.components.filter(
-							(c) => !(c as APISelectMenuComponent).custom_id?.startsWith(CustomIdKey.Visibility),
-						);
+						// eslint-disable-next-line camelcase
+						row.components = row.components.filter(({ custom_id }: any) => custom_id !== CustomIdKey.Visibility);
 
 						if (row.components.length) {
 							components.push(row);
