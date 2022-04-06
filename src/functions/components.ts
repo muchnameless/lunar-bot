@@ -23,11 +23,10 @@ export const buildPinButton = () =>
 
 /**
  * returns a MessageButton which triggers changing the ephemeral state of the Message it is attached to
- * @param userId
  */
-export const buildVisibilityButton = (userId: Snowflake) =>
+export const buildVisibilityButton = () =>
 	new ButtonBuilder()
-		.setCustomId(`${CustomIdKey.Visibility}:${userId}`)
+		.setCustomId(CustomIdKey.Visibility)
 		.setEmoji({ name: UnicodeEmoji.Eyes })
 		.setStyle(ButtonStyle.Secondary);
 

@@ -36,7 +36,6 @@ import type {
 	MessagePayload,
 	MessageResolvable,
 	ModalBuilder,
-	Snowflake,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
@@ -388,23 +387,20 @@ export class InteractionUtil extends null {
 	/**
 	 * adds a "change visibility button" to the option's components
 	 * @param options
-	 * @param userId
 	 */
-	private static _addVisibilityButton(
-		options: Pick<InteractionReplyOptions, 'components' | 'ephemeral'>,
-		userId: Snowflake,
-	) {
+	private static _addVisibilityButton(options: Pick<InteractionReplyOptions, 'components' | 'ephemeral'>) {
 		if (!options.ephemeral) return;
 
 		switch (options.components?.length) {
 			case undefined:
 			case 0:
-				options.components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buildVisibilityButton(userId))];
+				options.components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buildVisibilityButton())];
 				break;
 
 			default: {
 				let addNewRow = options.components!.length !== 5;
 
+				// TODO: Array#prototype#findLast
 				for (let i = options.components!.length - 1; i >= 0; --i) {
 					if (
 						(options.components![i] as ActionRowBuilder).components.length === 5 ||
@@ -413,13 +409,14 @@ export class InteractionUtil extends null {
 						continue;
 					}
 
-					(options.components![i] as ActionRowBuilder).addComponents(buildVisibilityButton(userId));
+					// TODO: ActionRowBuilder.from
+					(options.components![i] as ActionRowBuilder).addComponents(buildVisibilityButton());
 					addNewRow = false;
 					break;
 				}
 
 				if (addNewRow) {
-					options.components!.push(new ActionRowBuilder<ButtonBuilder>().addComponents(buildVisibilityButton(userId)));
+					options.components!.push(new ActionRowBuilder<ButtonBuilder>().addComponents(buildVisibilityButton()));
 				}
 			}
 		}
@@ -462,7 +459,7 @@ export class InteractionUtil extends null {
 				return;
 			}
 
-			this._addVisibilityButton(_options, interaction.user.id);
+			this._addVisibilityButton(_options);
 
 			// replied
 			if (interaction.replied) return (await interaction.followUp(_options)) as Message;
@@ -525,7 +522,7 @@ export class InteractionUtil extends null {
 	) {
 		const _options = typeof options === 'string' ? { content: options } : { ...options };
 
-		this._addVisibilityButton(_options, interaction.user.id);
+		this._addVisibilityButton(_options);
 
 		try {
 			if (message) return (await interaction.webhook.editMessage(message, _options)) as Message;
@@ -601,7 +598,7 @@ export class InteractionUtil extends null {
 				? { ephemeral: cached.useEphemeral, content: options }
 				: { ephemeral: cached.useEphemeral, ...options };
 
-		this._addVisibilityButton(_options, interaction.user.id);
+		this._addVisibilityButton(_options);
 
 		try {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
