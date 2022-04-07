@@ -492,7 +492,7 @@ export default class MathsCommand extends DualCommand {
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Short)
 									.setLabel('New input')
-									.setPlaceholder(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
+									.setValue(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(true),
 							),
 							new ActionRowBuilder<TextInputBuilder>().addComponents(

@@ -391,7 +391,7 @@ export default class EvalCommand extends ApplicationCommand {
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Input')
-									.setPlaceholder(
+									.setValue(
 										trim(
 											interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ??
 												'code to evaluate',
@@ -405,7 +405,7 @@ export default class EvalCommand extends ApplicationCommand {
 									.setCustomId('inspectDepth')
 									.setStyle(TextInputStyle.Short)
 									.setLabel('Inspect depth')
-									.setPlaceholder(inspectDepth)
+									.setValue(inspectDepth)
 									.setRequired(false),
 							),
 						),
