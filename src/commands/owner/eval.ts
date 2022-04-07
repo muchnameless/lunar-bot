@@ -78,7 +78,7 @@ import type {
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
-const { EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, UnicodeEmoji } = constants;
+const { EMBED_MAX_CHARS, MAX_VALUE_LENGTH, UnicodeEmoji } = constants;
 const { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
@@ -395,7 +395,7 @@ export default class EvalCommand extends ApplicationCommand {
 										trim(
 											interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ??
 												'code to evaluate',
-											MAX_PLACEHOLDER_LENGTH,
+											MAX_VALUE_LENGTH,
 										),
 									)
 									.setRequired(false),
