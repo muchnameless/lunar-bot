@@ -78,7 +78,7 @@ import type {
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
-const { EMBED_MAX_CHARS, MAX_VALUE_LENGTH, UnicodeEmoji } = constants;
+const { EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, MAX_VALUE_LENGTH, UnicodeEmoji } = constants;
 const { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
@@ -379,7 +379,10 @@ export default class EvalCommand extends ApplicationCommand {
 		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
-			case 'edit':
+			case 'edit': {
+				const OLD_INPUT =
+					interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ?? 'code to evaluate';
+
 				return InteractionUtil.showModal(
 					interaction,
 					new ModalBuilder()
@@ -391,13 +394,8 @@ export default class EvalCommand extends ApplicationCommand {
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Input')
-									.setValue(
-										trim(
-											interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ??
-												'code to evaluate',
-											MAX_VALUE_LENGTH,
-										),
-									)
+									.setValue(trim(OLD_INPUT, MAX_VALUE_LENGTH))
+									.setPlaceholder(trim(OLD_INPUT, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(false),
 							),
 							new ActionRowBuilder<TextInputBuilder>().addComponents(
@@ -406,13 +404,16 @@ export default class EvalCommand extends ApplicationCommand {
 									.setStyle(TextInputStyle.Short)
 									.setLabel('Inspect depth')
 									.setValue(inspectDepth)
+									.setPlaceholder(inspectDepth)
 									.setRequired(false),
 							),
 						),
 				);
+			}
 
 			case 'repeat': {
 				const input = this._getInputFromMessage(interaction.message);
+
 				return this._run(interaction, input, { inspectDepth: Number(inspectDepth) });
 			}
 

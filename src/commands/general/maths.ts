@@ -5,7 +5,7 @@ import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Util 
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { formatNumber, trim } from '../../functions';
-import { MAX_VALUE_LENGTH } from '../../constants';
+import { MAX_PLACEHOLDER_LENGTH, MAX_VALUE_LENGTH } from '../../constants';
 import { logger } from '../../logger';
 import type { RepliableInteraction, ModalRepliableInteraction } from '../../util';
 import type { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js';
@@ -495,6 +495,7 @@ export default class MathsCommand extends DualCommand {
 									.setStyle(TextInputStyle.Short)
 									.setLabel('New input')
 									.setValue(trim(rawInput, MAX_VALUE_LENGTH))
+									.setPlaceholder(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(true),
 							),
 							new ActionRowBuilder<TextInputBuilder>().addComponents(
@@ -502,8 +503,9 @@ export default class MathsCommand extends DualCommand {
 									.setCustomId('error')
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Error')
-									.setValue(ERROR_MESSAGE)
-									.setMaxLength(ERROR_MESSAGE.length)
+									.setValue(trim(ERROR_MESSAGE, MAX_VALUE_LENGTH))
+									.setPlaceholder(trim(ERROR_MESSAGE, MAX_PLACEHOLDER_LENGTH))
+									.setMaxLength(Math.min(ERROR_MESSAGE.length, MAX_VALUE_LENGTH))
 									.setRequired(false),
 							),
 						),
