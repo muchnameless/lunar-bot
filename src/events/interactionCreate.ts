@@ -141,12 +141,13 @@ export default class InteractionCreateEvent extends Event {
 
 			// change message visibility
 			case CustomIdKey.Visibility: {
+				// deferUpdate to be able to edit the epehemeral message
+				void InteractionUtil.deferUpdate(interaction);
+
 				// remove visibility button from components
-				let components: InteractionReplyOptions['components'];
+				const components: InteractionReplyOptions['components'] = [];
 
 				if (interaction.message.components) {
-					components = [];
-
 					for (let row of interaction.message.components) {
 						// TODO: replace with ActionRowBuilder.from
 						row = (
@@ -168,8 +169,8 @@ export default class InteractionCreateEvent extends Event {
 					}
 				}
 
-				// send new message
-				return InteractionUtil.reply(interaction, {
+				// send new non-ephemeral message
+				await InteractionUtil.reply(interaction, {
 					rejectOnError: true,
 					content: interaction.message.content || null,
 					embeds: interaction.message.embeds,
@@ -177,6 +178,9 @@ export default class InteractionCreateEvent extends Event {
 					components,
 					ephemeral: false,
 				});
+
+				// remove the button from the epehemeral message
+				return InteractionUtil.editReply(interaction, { components });
 			}
 
 			// command message buttons
