@@ -96,7 +96,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param value input value
 	 */
-	override runAutocomplete(interaction: AutocompleteInteraction, value: string) {
+	override autocompleteRun(interaction: AutocompleteInteraction<'cachedOrDM'>, value: string) {
 		if (!value) {
 			return interaction.respond(this.config.cache.map(({ key }) => ({ name: key, value: key })).slice(0, MAX_CHOICES));
 		}
@@ -121,7 +121,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
 				const KEY = ConfigCommand._transformKey(interaction.options.getString('key', true));

@@ -99,14 +99,15 @@ export class DualCommand
 		return super.unload();
 	}
 
+	/* eslint-disable @typescript-eslint/no-unused-vars */
+
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	runMinecraft(hypixelMessage: HypixelUserMessage): unknown;
-	async runMinecraft(hypixelMessage: HypixelUserMessage): Promise<unknown>;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, require-await
-	async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		throw new Error('no run function specified');
+	minecraftRun(hypixelMessage: HypixelUserMessage): unknown | Promise<unknown> {
+		throw new Error('no run function specified for minecraft');
 	}
+
+	/* eslint-enable @typescript-eslint/no-unused-vars */
 }

@@ -49,7 +49,7 @@ export default class PatchnotesCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(interaction, await this._generateReply());
 	}
 
@@ -57,7 +57,7 @@ export default class PatchnotesCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(await this._generateReply());
 	}
 }

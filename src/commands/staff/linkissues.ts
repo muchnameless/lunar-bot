@@ -26,7 +26,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		// discord members with wrong roles
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const guild = hypixelGuild.discordGuild;

@@ -96,7 +96,7 @@ export default class ReloadCommand extends DualCommand {
 	 * @param reload
 	 * @param force
 	 */
-	private async _run(subcommand: string, input: string | null, reload = false, force = false) {
+	private async _sharedRun(subcommand: string, input: string | null, reload = true, force = true) {
 		switch (subcommand) {
 			case 'command': {
 				let commandName = input!.toLowerCase();
@@ -266,14 +266,14 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(
 			interaction,
-			await this._run(
+			await this._sharedRun(
 				interaction.options.getSubcommand(),
 				interaction.options.getString('name'),
-				interaction.options.getBoolean('reload') ?? true,
-				interaction.options.getBoolean('force') ?? false,
+				interaction.options.getBoolean('reload') ?? undefined,
+				interaction.options.getBoolean('force') ?? undefined,
 			),
 		);
 	}
@@ -282,9 +282,9 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
-			await this._run(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]),
+			await this._sharedRun(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]),
 		);
 	}
 }

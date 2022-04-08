@@ -17,7 +17,7 @@ export default class PingBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply('o/');
 	}
 }

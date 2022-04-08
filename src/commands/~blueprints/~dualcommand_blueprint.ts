@@ -25,8 +25,8 @@ export default class MyCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+		interaction;
 		// do stuff
 	}
 
@@ -34,8 +34,8 @@ export default class MyCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override minecraftRun(hypixelMessage: HypixelUserMessage) {
+		hypixelMessage;
 		// do stuff
 	}
 }

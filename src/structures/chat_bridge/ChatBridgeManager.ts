@@ -16,7 +16,10 @@ import type { MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '../LunarClient';
 
 class InteractionCache {
-	private _cache = new Map<Snowflake, { interaction: ChatInputCommandInteraction; timeout: NodeJS.Timeout }>();
+	private _cache = new Map<
+		Snowflake,
+		{ interaction: ChatInputCommandInteraction<'cachedOrDM'>; timeout: NodeJS.Timeout }
+	>();
 	private _channelIds: ChatBridgeManager['channelIds'];
 
 	constructor({ channelIds }: ChatBridgeManager) {
@@ -27,7 +30,7 @@ class InteractionCache {
 	 * adds the interaction to the cache if the channel is a chat bridge channel
 	 * @param interaction
 	 */
-	add(interaction: ChatInputCommandInteraction) {
+	add(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		if (!this._channelIds.has(interaction.channelId)) return;
 
 		this._cache.set(interaction.id, {
@@ -206,7 +209,7 @@ export class ChatBridgeManager {
 	 */
 	handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
 		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return; // not a chat bridge message or bridge disabled
-		if (message.flags.any(MessageFlags.Loading | MessageFlags.Ephemeral)) return; // ignore deferReply and ephemeral messages
+		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
 		try {

@@ -1855,6 +1855,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"discord.js@patch:discord.js@npm:14.0.0-dev.1649160496-402514f#.yarn/patches/discord.js-npm-14.0.0-dev.1649160496-402514f-87ff18ab99.patch::locator=lunar-bot%40workspace%3A.":
+  version: 14.0.0-dev.1649160496-402514f
+  resolution: "discord.js@patch:discord.js@npm%3A14.0.0-dev.1649160496-402514f#.yarn/patches/discord.js-npm-14.0.0-dev.1649160496-402514f-87ff18ab99.patch::version=14.0.0-dev.1649160496-402514f&hash=00bd56&locator=lunar-bot%40workspace%3A."
+  dependencies:
+    "@discordjs/builders": ^0.13.0-dev
+    "@discordjs/collection": ^0.6.0-dev
+    "@discordjs/rest": ^0.4.0-dev
+    "@sapphire/snowflake": ^3.1.0
+    "@types/ws": ^8.2.2
+    discord-api-types: ^0.29.0
+    fast-deep-equal: ^3.1.3
+    lodash.snakecase: ^4.1.1
+    undici: ^4.14.1
+    ws: ^8.5.0
+  checksum: 24597a56b9e2d2176e22982bf9936f89df625429075c91d32c45e685d73f15acce25b76c8c9bfc1429748bd6e05c47214cabc7886e83144f120c5acb9f88e740
+  languageName: node
+  linkType: hard
+
 "doctrine@npm:^2.1.0":
   version: 2.1.0
   resolution: "doctrine@npm:2.1.0"

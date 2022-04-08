@@ -19,7 +19,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const targetInput = hypixelMessage.commandData.args.shift()!;
 		const hypixelGuild = hypixelMessage.hypixelGuild ?? hypixelMessage.player?.hypixelGuild;
 

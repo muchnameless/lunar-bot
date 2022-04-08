@@ -34,7 +34,7 @@ export default class DonateCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
 		if (!collector?.isCollecting) {

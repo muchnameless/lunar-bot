@@ -22,8 +22,8 @@ export default class TestCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+		interaction;
 		// do stuff
 	}
 }

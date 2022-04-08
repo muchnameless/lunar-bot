@@ -87,15 +87,15 @@
 			{
 				"exceptMethods": [
 					"run",
-					"runAutocomplete",
-					"runUser",
-					"runMessage",
-					"runButton",
-					"runSelect",
-					"runSlash",
-					"runModal",
-					"runMinecraft",
-					"_run",
+					"autocompleteRun",
+					"userContextMenuRun",
+					"messageContextMenuRun",
+					"buttonRun",
+					"selectMenuRun",
+					"chatInputRun",
+					"modalSubmitRun",
+					"minecraftRun",
+					"_sharedRun",
 					"_generateReply"
 				]
 			}
@@ -138,7 +138,6 @@
 		"no-console": "off",
 		"no-dupe-class-members": "off",
 		"no-else-return": "error",
-		"no-empty-function": "error",
 		"no-floating-decimal": "error",
 		"no-iterator": "error",
 		"no-lonely-if": "error",

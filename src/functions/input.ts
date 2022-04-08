@@ -9,7 +9,7 @@ import type { Interaction } from 'discord.js';
  * @param ctx
  * @param ignOrUuid
  */
-export async function getUuidAndIgn(ctx: Interaction | HypixelUserMessage, ignOrUuid?: string | null) {
+export async function getUuidAndIgn(ctx: Interaction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid?: string | null) {
 	// remove non-alphanumeric characters
 	const IGN_OR_UUID = ignOrUuid?.replace(/\W/g, '');
 

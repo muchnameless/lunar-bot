@@ -188,7 +188,12 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param ign player ign
 	 * @param uuid player minecraft uuid
 	 */
-	private _handleNoProfiles(interaction: ChatInputCommandInteraction, embed: EmbedBuilder, ign: string, uuid: string) {
+	private _handleNoProfiles(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
+		embed: EmbedBuilder,
+		ign: string,
+		uuid: string,
+	) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed
@@ -215,7 +220,7 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override async runSelect(interaction: SelectMenuInteraction, args: string[]) {
+	override async selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]) {
 		const [uuid, ign, userId] = args;
 		const [profileId] = interaction.values;
 		const profiles = interaction.component.options;
@@ -242,7 +247,7 @@ export default class AhCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
 			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];

@@ -57,7 +57,7 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param page
 	 */
 	private async _runView(
-		interaction: ChatInputCommandInteraction | ButtonInteraction,
+		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ButtonInteraction<'cachedOrDM'>,
 		userId: Snowflake,
 		page: number,
 	) {
@@ -93,7 +93,7 @@ export default class BanListCommand extends ApplicationCommand {
 			InteractionUtil[
 				interaction.isCommand() || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
-		)(interaction as ButtonInteraction, {
+		)(interaction as ButtonInteraction<'cachedOrDM'>, {
 			embeds: [
 				this.client.defaultEmbed //
 					.setTitle(`${'Ban list'.padEnd(166, '\u00A0')}\u200B`) //
@@ -120,7 +120,7 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override runButton(interaction: ButtonInteraction, args: string[]) {
+	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [SUBCOMMAND, USER_ID, PAGE] = args;
 
 		switch (SUBCOMMAND) {
@@ -136,7 +136,7 @@ export default class BanListCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommand()) {
 			case 'add': {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));

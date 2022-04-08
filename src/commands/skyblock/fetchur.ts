@@ -64,7 +64,7 @@ export default class FetchurCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(interaction, this._generateReply());
 	}
 
@@ -72,7 +72,7 @@ export default class FetchurCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(this._generateReply());
 	}
 }

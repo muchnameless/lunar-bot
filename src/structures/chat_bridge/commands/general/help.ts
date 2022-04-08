@@ -33,7 +33,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		// default help
 		if (!hypixelMessage.commandData.args.length) {
 			const reply = [

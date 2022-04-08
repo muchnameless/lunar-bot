@@ -59,7 +59,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	protected async _fetchData(
-		ctx: ChatInputCommandInteraction | HypixelUserMessage,
+		ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage,
 		ignOrUuid: string | null,
 		profileName?: string | null,
 		findProfileStrategy?: FindProfileStrategy | null,
@@ -99,7 +99,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		try {
 			return InteractionUtil.reply(
 				interaction,
@@ -122,7 +122,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const [IGN, PROFILE_NAME_INPUT] = hypixelMessage.commandData.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');

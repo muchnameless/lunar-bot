@@ -24,7 +24,7 @@ export default class PurgeListCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return handleLeaderboardCommandInteraction(interaction, {
 			lbType: 'gained',
 			xpType: 'purge',

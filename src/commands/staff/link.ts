@@ -7,7 +7,7 @@ import { InteractionUtil, UserUtil } from '../../util';
 import { seconds, validateNumber } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
-import type { ChatInputCommandInteraction, GuildMember, User } from 'discord.js';
+import type { ChatInputCommandInteraction, User } from 'discord.js';
 import type { Player } from '../../structures/database/models/Player';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -32,7 +32,7 @@ export default class LinkCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 
 		let uuid: string | undefined;
@@ -180,7 +180,7 @@ export default class LinkCommand extends ApplicationCommand {
 		// try to find the linked users member data
 		const guild = hypixelGuild?.discordGuild;
 		const discordMember =
-			(interaction.options.getMember('user') as GuildMember) ??
+			interaction.options.getMember('user') ??
 			(await guild?.members
 				.fetch(user)
 				.catch((error) => logger.error(error, '[LINK]: error fetching member to link'))) ??

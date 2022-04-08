@@ -48,7 +48,7 @@ export default class UnloadCommand extends DualCommand {
 	 * @param subcommand
 	 * @param input
 	 */
-	private _run(subcommand: string, input: string) {
+	private _sharedRun(subcommand: string, input: string) {
 		switch (subcommand) {
 			case 'command': {
 				const command = this.collection.getByName(input);
@@ -77,10 +77,10 @@ export default class UnloadCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(
 			interaction,
-			this._run(interaction.options.getSubcommand(), interaction.options.getString('name', true)),
+			this._sharedRun(interaction.options.getSubcommand(), interaction.options.getString('name', true)),
 		);
 	}
 
@@ -88,9 +88,9 @@ export default class UnloadCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
-			this._run(...(hypixelMessage.commandData.args.map((arg) => arg.toLowerCase()) as [string, string])),
+			this._sharedRun(...(hypixelMessage.commandData.args.map((arg) => arg.toLowerCase()) as [string, string])),
 		);
 	}
 }

@@ -175,7 +175,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param _input
 	 * @param options
 	 */
-	private async _run(
+	private async _sharedRun(
 		interaction: RepliableInteraction,
 		_input: string,
 		{ isAsync = /\bawait\b/.test(_input), inspectDepth = this.config.get('EVAL_INSPECT_DEPTH') } = {},
@@ -358,7 +358,10 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	override runMessage(interaction: ContextMenuCommandInteraction, { content, author }: Message) {
+	override messageContextMenuRun(
+		interaction: ContextMenuCommandInteraction<'cachedOrDM'>,
+		{ content, author }: Message,
+	) {
 		if (author.id !== this.client.ownerId) {
 			throw `cannot evaluate a message from ${author}`;
 		}
@@ -367,7 +370,7 @@ export default class EvalCommand extends ApplicationCommand {
 			throw 'no content to evaluate';
 		}
 
-		return this._run(interaction, content);
+		return this._sharedRun(interaction, content);
 	}
 
 	/**
@@ -375,7 +378,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override runButton(interaction: ButtonInteraction, args: string[]) {
+	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
@@ -414,7 +417,7 @@ export default class EvalCommand extends ApplicationCommand {
 			case 'repeat': {
 				const input = this._getInputFromMessage(interaction.message);
 
-				return this._run(interaction, input, { inspectDepth: Number(inspectDepth) });
+				return this._sharedRun(interaction, input, { inspectDepth: Number(inspectDepth) });
 			}
 
 			default:
@@ -427,12 +430,12 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override runModal(interaction: ModalSubmitInteraction, args: string[]) {
+	override modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]) {
 		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
 			case 'edit':
-				return this._run(
+				return this._sharedRun(
 					interaction,
 					interaction.fields.getTextInputValue('input') ||
 						// @ts-expect-error
@@ -455,8 +458,8 @@ export default class EvalCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
-		return this._run(interaction, interaction.options.getString('input', true), {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+		return this._sharedRun(interaction, interaction.options.getString('input', true), {
 			isAsync: interaction.options.getBoolean('async') ?? undefined,
 			inspectDepth: interaction.options.getInteger('inspect') ?? undefined,
 		});

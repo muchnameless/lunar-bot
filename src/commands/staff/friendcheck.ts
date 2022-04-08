@@ -24,7 +24,7 @@ export default class FriendCheckCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 		const friends = new Set(
 			(await hypixel.friends.uuid(uuid)).map((x) => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender)),

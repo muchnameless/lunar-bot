@@ -22,7 +22,7 @@ export default class UnlinkCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const PLAYER_INPUT = interaction.options.getString('player', true);
 		const player =
 			InteractionUtil.getPlayer(interaction) ??

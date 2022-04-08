@@ -30,8 +30,8 @@ export default class FriendCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param page
 	 */
-	private async _runPaginated(
-		interaction: ChatInputCommandInteraction | ButtonInteraction,
+	private async _paginatedRun(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ButtonInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		page: number | null,
 	) {
@@ -60,12 +60,12 @@ export default class FriendCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override runButton(interaction: ButtonInteraction, args: string[]) {
+	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [SUBCOMMAND, HYPIXEL_GUILD_ID, PAGE] = args;
 
 		switch (SUBCOMMAND) {
 			case 'list':
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
 						(() => {
@@ -83,10 +83,10 @@ export default class FriendCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommand()) {
 			case 'list':
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					InteractionUtil.getHypixelGuild(interaction),
 					interaction.options.getInteger('page'),

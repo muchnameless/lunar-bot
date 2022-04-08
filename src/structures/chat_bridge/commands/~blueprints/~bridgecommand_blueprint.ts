@@ -17,8 +17,8 @@ export default class MyCommand extends BridgeCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override minecraftRun(hypixelMessage: HypixelUserMessage) {
+		hypixelMessage;
 		// do stuff
 	}
 }

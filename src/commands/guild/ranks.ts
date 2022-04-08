@@ -21,7 +21,7 @@ export default class RanksCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true });
 		const embed = this.client.defaultEmbed.setFooter({ text: hypixelGuild.name });

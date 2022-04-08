@@ -107,7 +107,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const IGN = InteractionUtil.getIgn(interaction, {
 			fallbackToCurrentUser: !(
@@ -160,7 +160,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
 			await this._generateReply(
 				hypixelMessage.chatBridge,

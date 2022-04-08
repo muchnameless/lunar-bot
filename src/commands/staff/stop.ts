@@ -17,7 +17,7 @@ export default class StopCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		await InteractionUtil.reply(interaction, 'stopping the bot');
 		void exitProcess();
 	}

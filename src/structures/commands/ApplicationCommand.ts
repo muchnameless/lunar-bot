@@ -6,7 +6,12 @@ import { logger } from '../../logger';
 import { InteractionUtil } from '../../util';
 import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
-import type { HypixelGuild } from '../database/models/HypixelGuild';
+import type {
+	APIApplicationCommandPermission,
+	RESTPostAPIApplicationCommandsJSONBody,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	RESTPostAPIContextMenuApplicationCommandsJSONBody,
+} from 'discord-api-types/v10';
 import type {
 	ContextMenuCommandBuilder,
 	SlashCommandBooleanOption,
@@ -22,24 +27,20 @@ import type {
 	SlashCommandUserOption,
 } from '@discordjs/builders';
 import type {
-	RESTPostAPIApplicationCommandsJSONBody,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	RESTPostAPIContextMenuApplicationCommandsJSONBody,
-	APIApplicationCommandPermission,
-} from 'discord-api-types/v10';
-import type {
 	AutocompleteInteraction,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
-	ContextMenuCommandInteraction,
 	GuildMember,
 	Interaction,
 	Message,
+	MessageContextMenuCommandInteraction,
 	ModalSubmitInteraction,
 	SelectMenuInteraction,
 	Snowflake,
 	User,
+	UserContextMenuCommandInteraction,
 } from 'discord.js';
+import type { HypixelGuild } from '../database/models/HypixelGuild';
 import type { CommandContext, CommandData } from './BaseCommand';
 
 type Slash =
@@ -274,7 +275,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param options
 	 */
 	async assertPermissions(
-		interaction: Interaction,
+		interaction: Interaction<'cachedOrDM'>,
 		{
 			hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
 			roleIds = this.requiredRoles(hypixelGuild),
@@ -292,7 +293,7 @@ export class ApplicationCommand extends BaseCommand {
 
 		const member =
 			interaction.guildId === hypixelGuild.discordId
-				? (interaction.member as GuildMember)
+				? interaction.member
 				: await (async () => {
 						const { discordGuild } = hypixelGuild;
 
@@ -320,8 +321,8 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param value input value
 	 * @param name option name
 	 */
-	runAutocomplete(
-		interaction: AutocompleteInteraction,
+	autocompleteRun(
+		interaction: AutocompleteInteraction<'cachedOrDM'>,
 		value: string | number,
 		name: string,
 	): unknown | Promise<unknown> {
@@ -334,8 +335,8 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param user
 	 * @param member
 	 */
-	runUser(
-		interaction: ContextMenuCommandInteraction,
+	userContextMenuRun(
+		interaction: UserContextMenuCommandInteraction<'cachedOrDM'>,
 		user: User,
 		member: GuildMember | null,
 	): unknown | Promise<unknown> {
@@ -347,7 +348,10 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	runMessage(interaction: ContextMenuCommandInteraction, message: Message): unknown | Promise<unknown> {
+	messageContextMenuRun(
+		interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>,
+		message: Message,
+	): unknown | Promise<unknown> {
 		throw new Error('no run function specified for message context menus');
 	}
 
@@ -356,7 +360,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	runSelect(interaction: SelectMenuInteraction, args: string[]): unknown | Promise<unknown> {
+	selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for select menus');
 	}
 
@@ -365,7 +369,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	runButton(interaction: ButtonInteraction, args: string[]): unknown | Promise<unknown> {
+	buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 
@@ -374,7 +378,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	runModal(interaction: ModalSubmitInteraction, args: string[]): unknown | Promise<unknown> {
+	modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 
@@ -382,7 +386,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runSlash(interaction: ChatInputCommandInteraction): unknown | Promise<unknown> {
+	chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>): unknown | Promise<unknown> {
 		throw new Error('no run function specified for slash commands');
 	}
 

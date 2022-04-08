@@ -36,7 +36,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	 * @param ignOrUuid
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	override async _fetchData(ctx: ChatInputCommandInteraction | HypixelUserMessage, ignOrUuid: string) {
+	override async _fetchData(ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid: string) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 		const [playerData, guildData, friendsData] = await Promise.all([
 			hypixel.player.uuid(uuid),

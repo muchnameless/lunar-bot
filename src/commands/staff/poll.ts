@@ -7,7 +7,7 @@ import { hypixelGuildOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
 import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { ChatInputCommandInteraction, CommandInteractionOption, GuildMember } from 'discord.js';
+import type { ChatInputCommandInteraction, CommandInteractionOption } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
@@ -69,7 +69,7 @@ export default class PollCommand extends DualCommand {
 	 * create a poll for both in-game chat and the chatBridge channel
 	 * @param options
 	 */
-	private async _run({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
+	private async _sharedRun({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
 		if (chatBridge.pollUntil) {
 			return `poll already in progress, ends ${Formatters.time(
 				new Date(chatBridge.pollUntil),
@@ -165,12 +165,12 @@ export default class PollCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		void InteractionUtil.deferReply(interaction, {
 			ephemeral: true,
 		});
 
-		const result = await this._run({
+		const result = await this._sharedRun({
 			chatBridge: InteractionUtil.getHypixelGuild(interaction).chatBridge,
 			question: interaction.options.getString('question', true),
 			// @ts-expect-error
@@ -178,10 +178,7 @@ export default class PollCommand extends DualCommand {
 				.filter(({ name }) => name.startsWith('choice_'))
 				.map(({ value }) => value as string),
 			duration: interaction.options.getString('duration'),
-			ign:
-				UserUtil.getPlayer(interaction.user)?.ign ??
-				(interaction.member as GuildMember)?.displayName ??
-				interaction.user.tag,
+			ign: UserUtil.getPlayer(interaction.user)?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
 		});
 
 		return InteractionUtil.reply(interaction, {
@@ -194,7 +191,7 @@ export default class PollCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const inputMatched = hypixelMessage.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
 			?.map((x) => x.trim())
@@ -202,7 +199,7 @@ export default class PollCommand extends DualCommand {
 
 		if (!inputMatched || inputMatched.length < 2) return hypixelMessage.reply(this.usageInfo);
 
-		const result = await this._run({
+		const result = await this._sharedRun({
 			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()!),
 			pollOptionNames: inputMatched,

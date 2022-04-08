@@ -64,13 +64,15 @@ export class BridgeCommand extends BaseCommand {
 		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category!);
 	}
 
+	/* eslint-disable @typescript-eslint/no-unused-vars */
+
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	runMinecraft(hypixelMessage: HypixelUserMessage): unknown;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, require-await
-	async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		throw new Error('no run function specified');
+	minecraftRun(hypixelMessage: HypixelUserMessage): unknown | Promise<unknown> {
+		throw new Error('no run function specified for minecraft');
 	}
+
+	/* eslint-enable @typescript-eslint/no-unused-vars */
 }

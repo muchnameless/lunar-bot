@@ -467,7 +467,7 @@ export default class MathsCommand extends DualCommand {
 	 * @param interaction
 	 * @param rawInput
 	 */
-	private async _run(interaction: RepliableInteraction | ModalRepliableInteraction, rawInput: string) {
+	private async _sharedRun(interaction: RepliableInteraction | ModalRepliableInteraction, rawInput: string) {
 		try {
 			const { input, formattedOutput } = this.calculate(rawInput);
 
@@ -521,23 +521,23 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runModal(interaction: ModalSubmitInteraction) {
-		return this._run(interaction, interaction.fields.getTextInputValue('input'));
+	override modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>) {
+		return this._sharedRun(interaction, interaction.fields.getTextInputValue('input'));
 	}
 
 	/**
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
-		return this._run(interaction, interaction.options.getString('input', true));
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+		return this._sharedRun(interaction, interaction.options.getString('input', true));
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		try {
 			const { input, formattedOutput } = this.calculate(hypixelMessage.commandData.args.join(''));
 

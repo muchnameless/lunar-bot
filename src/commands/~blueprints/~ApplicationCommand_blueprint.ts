@@ -16,8 +16,8 @@ export default class MyCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+		interaction;
 		// do stuff
 	}
 }

@@ -20,12 +20,11 @@ import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	AutocompleteInteraction,
-	BaseGuildTextChannel,
 	CacheType,
+	ChatInputCommandInteraction as DJSChatInputCommandInteraction,
 	ChatInputCommandInteraction,
 	EmojiIdentifierResolvable,
 	GuildCacheMessage,
-	GuildMember,
 	Interaction,
 	InteractionDeferReplyOptions,
 	InteractionDeferUpdateOptions,
@@ -38,11 +37,13 @@ import type {
 	ModalBuilder,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
+	ButtonInteraction,
+	BaseGuildTextChannel,
 } from 'discord.js';
 import type { SplitOptions } from '../functions';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';
-import type { EditOptions, SendDMOptions } from '.';
+import type { SendDMOptions } from '.';
 
 interface InteractionData {
 	deferReplyPromise: Promise<void | Message> | null;
@@ -51,16 +52,16 @@ interface InteractionData {
 	autoDeferTimeout: NodeJS.Timeout | null;
 }
 
-export type RepliableInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
+export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
 	Omit<InteractionResponseFields<Cached>, 'showModal'>;
 
-export type ModalRepliableInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
+export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
 	InteractionResponseFields<Cached>;
 
-export type FromMessageInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
+export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
 	FromMessageInteractionResponseFields<Cached>;
 
-export interface FromMessageInteractionResponseFields<Cached extends CacheType = CacheType>
+export interface FromMessageInteractionResponseFields<Cached extends CacheType = 'cachedOrDM'>
 	extends InteractionResponseFields<Cached> {
 	message: GuildCacheMessage<Cached>;
 	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
@@ -122,14 +123,14 @@ export class InteractionUtil extends null {
 	/**
 	 * cache
 	 */
-	static CACHE = new WeakMap<Interaction, InteractionData>();
+	static CACHE = new WeakMap<Interaction<'cachedOrDM'>, InteractionData>();
 
 	static AUTO_DEFER_TIMEOUT = seconds(1);
 
 	/**
 	 * @param interaction
 	 */
-	static add(interaction: RepliableInteraction) {
+	static add(interaction: RepliableInteraction<'cachedOrDM'>) {
 		const { channel } = interaction;
 		const interactionData: InteractionData = {
 			deferReplyPromise: null,
@@ -164,7 +165,7 @@ export class InteractionUtil extends null {
 	 * checks the command options for the ephemeral option
 	 * @param interaction
 	 */
-	static checkEphemeralOption(interaction: Interaction) {
+	static checkEphemeralOption(interaction: Interaction<'cachedOrDM'>) {
 		if (!interaction.isChatInputCommand()) return null;
 
 		switch (interaction.options.getString('visibility')) {
@@ -201,14 +202,12 @@ export class InteractionUtil extends null {
 	/**
 	 * @param interaction
 	 */
-	static logInfo(interaction: Interaction) {
+	static logInfo(interaction: Interaction<'cachedOrDM'>) {
 		if (interaction.isChatInputCommand()) {
 			return {
 				type: InteractionType[interaction.type],
 				command: interaction.toString(),
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -220,9 +219,7 @@ export class InteractionUtil extends null {
 			return {
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -235,9 +232,7 @@ export class InteractionUtil extends null {
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				values: interaction.values,
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -249,9 +244,7 @@ export class InteractionUtil extends null {
 			return {
 				type: ApplicationCommandType[interaction.commandType],
 				command: interaction.commandName,
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -264,9 +257,7 @@ export class InteractionUtil extends null {
 				type: InteractionType[interaction.type],
 				command: interaction.commandName,
 				focused: interaction.options.getFocused(true),
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -278,9 +269,7 @@ export class InteractionUtil extends null {
 
 		return {
 			type: InteractionType[interaction.type],
-			user: interaction.member
-				? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-				: interaction.user.tag,
+			user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 			channel: interaction.guildId
 				? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 				: 'DM',
@@ -298,9 +287,9 @@ export class InteractionUtil extends null {
 		}
 
 		return [
-			(interaction as ChatInputCommandInteraction).commandName,
-			(interaction as ChatInputCommandInteraction).options.getSubcommandGroup(),
-			(interaction as ChatInputCommandInteraction).options.getSubcommand(false),
+			(interaction as DJSChatInputCommandInteraction).commandName,
+			(interaction as DJSChatInputCommandInteraction).options.getSubcommandGroup(),
+			(interaction as DJSChatInputCommandInteraction).options.getSubcommand(false),
 		]
 			.filter((x) => x !== null)
 			.join(' ');
@@ -310,17 +299,27 @@ export class InteractionUtil extends null {
 	 * whether the force option was set to true
 	 * @param interaction
 	 */
-	static checkForce(interaction: ChatInputCommandInteraction | AutocompleteInteraction) {
+	static checkForce(interaction: DJSChatInputCommandInteraction<'cachedOrDM'> | AutocompleteInteraction<'cachedOrDM'>) {
 		return interaction.options.getBoolean('force') ?? false;
+	}
+
+	/**
+	 * whether the interaction is from a cached guild or DM	channel
+	 * @param interaction
+	 */
+	static inCachedGuildOrDM(interaction: Interaction): interaction is Interaction<'cachedOrDM'> {
+		return interaction.guildId
+			? interaction.client.guilds.cache.has(interaction.guildId)
+			: interaction.client.channels.cache.has(interaction.channelId!);
 	}
 
 	/**
 	 * whether the interaction has a message attached
 	 * @param interaction
 	 */
-	static isFromMessage<C extends CacheType, T extends Interaction<C>>(
+	static isFromMessage<T extends Interaction<'cachedOrDM'>>(
 		interaction: T,
-	): interaction is T & FromMessageInteractionResponseFields<C> {
+	): interaction is T & FromMessageInteractionResponseFields {
 		return Boolean((interaction as any).message);
 	}
 
@@ -462,7 +461,7 @@ export class InteractionUtil extends null {
 			this._addVisibilityButton(_options);
 
 			// replied
-			if (interaction.replied) return (await interaction.followUp(_options)) as Message;
+			if (interaction.replied) return await interaction.followUp(_options);
 
 			// await defers
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
@@ -479,7 +478,7 @@ export class InteractionUtil extends null {
 					}
 				}
 
-				return (await interaction.followUp(_options)) as Message;
+				return await interaction.followUp(_options);
 			}
 
 			// initial reply
@@ -525,20 +524,20 @@ export class InteractionUtil extends null {
 		this._addVisibilityButton(_options);
 
 		try {
-			if (message) return (await interaction.webhook.editMessage(message, _options)) as Message;
+			if (message) return await interaction.webhook.editMessage(message, _options);
 
 			const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
 
 			if (deferReplyPromise) await deferReplyPromise;
 			if (deferUpdatePromise) await deferUpdatePromise;
 
-			return (await interaction.editReply(_options)) as Message;
+			return await interaction.editReply(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION EDIT REPLY]');
 
 				try {
-					return MessageUtil.edit((await interaction.fetchReply()) as Message, options as EditOptions);
+					return MessageUtil.edit(await interaction.fetchReply(), options);
 				} catch (_error) {
 					if (_options.rejectOnError) throw _error;
 					logger.error({ err: _error, ...this.logInfo(interaction), data: _options }, '[INTERACTION EDIT REPLY]');
@@ -606,7 +605,7 @@ export class InteractionUtil extends null {
 			// replied
 			if (interaction.replied) {
 				return (await interaction.webhook.editMessage(
-					interaction.message as Message,
+					interaction.message,
 					_options as WebhookEditMessageOptions,
 				)) as Message;
 			}
@@ -615,7 +614,7 @@ export class InteractionUtil extends null {
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred) return (await interaction.editReply(_options as WebhookEditMessageOptions)) as Message;
+			if (interaction.deferred) return await interaction.editReply(_options as WebhookEditMessageOptions);
 
 			// initial reply
 			clearTimeout(cached.autoDeferTimeout!);
@@ -623,7 +622,7 @@ export class InteractionUtil extends null {
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION UPDATE]');
-				return MessageUtil.edit(interaction.message as Message, _options);
+				return MessageUtil.edit(interaction.message, _options);
 			}
 
 			if (_options.rejectOnError) throw error;
@@ -642,15 +641,15 @@ export class InteractionUtil extends null {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
 
 			// replied
-			if (interaction.replied) return MessageUtil.delete(interaction.message as Message);
+			if (interaction.replied) return MessageUtil.delete(interaction.message);
 
 			await this.deferUpdate(interaction, { rejectOnError: true });
 
-			if (MessageUtil.isEphemeral(interaction.message as Message)) {
+			if (MessageUtil.isEphemeral(interaction.message)) {
 				logger.warn(
 					this.logInfo(interaction),
 					`[INTERACTION DELETE MESSAGE]: unable to delete ephemeral message in ${MessageUtil.channelLogInfo(
-						interaction.message as Message,
+						interaction.message,
 					)}`,
 				);
 				return null;
@@ -658,10 +657,10 @@ export class InteractionUtil extends null {
 
 			await interaction.deleteReply();
 
-			return interaction.message as Message;
+			return interaction.message;
 		} catch (error) {
 			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION DELETE MESSAGE]');
-			return MessageUtil.delete(interaction.message as Message);
+			return MessageUtil.delete(interaction.message);
 		}
 	}
 
@@ -790,7 +789,7 @@ export class InteractionUtil extends null {
 			collector.once('end', async (collected, reason) => {
 				switch (reason) {
 					case 'limit': {
-						const buttonInteraction = collected.first()!;
+						const buttonInteraction = collected.first() as ButtonInteraction<'cachedOrDM'>;
 						const success = buttonInteraction.customId === SUCCESS_ID;
 
 						for (const component of row.components) component.setDisabled(true);
@@ -855,11 +854,11 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param emojis
 	 */
-	static async react(interaction: ChatInputCommandInteraction, ...emojis: EmojiIdentifierResolvable[]) {
+	static async react(interaction: ChatInputCommandInteraction<'cachedOrDM'>, ...emojis: EmojiIdentifierResolvable[]) {
 		if (interaction.ephemeral) return null;
 
 		try {
-			return MessageUtil.react((await interaction.fetchReply()) as Message, ...emojis);
+			return MessageUtil.react(await interaction.fetchReply(), ...emojis);
 		} catch (error) {
 			return logger.error({ err: error, ...this.logInfo(interaction), data: emojis }, '[INTERACTION REACT]');
 		}
@@ -871,12 +870,12 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static getPlayer(
-		interaction: ChatInputCommandInteraction,
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		options: GetPlayerOptions & { throwIfNotFound: true },
 	): Player;
-	static getPlayer(interaction: ChatInputCommandInteraction, options?: GetPlayerOptions): Player | null;
+	static getPlayer(interaction: ChatInputCommandInteraction<'cachedOrDM'>, options?: GetPlayerOptions): Player | null;
 	static getPlayer(
-		interaction: ChatInputCommandInteraction,
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		{ fallbackToCurrentUser = false, throwIfNotFound = false } = {},
 	) {
 		if (
@@ -932,11 +931,11 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static getIgn(
-		interaction: ChatInputCommandInteraction,
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		options: GetPlayerOptions & { throwIfNotFound: true },
 	): string;
-	static getIgn(interaction: ChatInputCommandInteraction, options?: GetPlayerOptions): string | null;
-	static getIgn(interaction: ChatInputCommandInteraction, options?: GetPlayerOptions) {
+	static getIgn(interaction: ChatInputCommandInteraction<'cachedOrDM'>, options?: GetPlayerOptions): string | null;
+	static getIgn(interaction: ChatInputCommandInteraction<'cachedOrDM'>, options?: GetPlayerOptions) {
 		if (this.checkForce(interaction)) {
 			const IGN =
 				(interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase() ??
@@ -953,26 +952,26 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static getHypixelGuild(
-		interaction: Interaction,
+		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput?: true; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL;
 	static getHypixelGuild(
-		interaction: Interaction,
+		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL | null;
 	static getHypixelGuild(
-		interaction: Interaction,
+		interaction: Interaction<'cachedOrDM'>,
 		options?: { fallbackIfNoInput?: true; includeAll?: false },
 	): HypixelGuild;
 	static getHypixelGuild(
-		interaction: Interaction,
+		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll?: false },
 	): HypixelGuild | null;
 	static getHypixelGuild(
-		interaction: Interaction,
+		interaction: Interaction<'cachedOrDM'>,
 		{ fallbackIfNoInput = true, includeAll = false }: GetHypixelGuildOptions = {},
 	) {
-		const INPUT = (interaction as ChatInputCommandInteraction).options?.getString('guild');
+		const INPUT = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getString('guild');
 
 		if (INPUT) {
 			if (includeAll && INPUT.toUpperCase() === GUILD_ID_ALL) return GUILD_ID_ALL;

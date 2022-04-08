@@ -30,8 +30,8 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param member
 	 */
-	private async _run(
-		interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction,
+	private async _sharedRun(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ContextMenuCommandInteraction<'cachedOrDM'>,
 		member: GuildMember | null,
 	) {
 		// input validation
@@ -91,16 +91,19 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runUser(interaction: ContextMenuCommandInteraction, _: User, member: GuildMember | null) {
-		return this._run(interaction, member);
+	override userContextMenuRun(
+		interaction: ContextMenuCommandInteraction<'cachedOrDM'>,
+		_: User,
+		member: GuildMember | null,
+	) {
+		return this._sharedRun(interaction, member);
 	}
 
 	/**
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
-		// eslint-disable-line @typescript-eslint/no-unused-vars
-		return this._run(interaction, interaction.options.getMember('user') as GuildMember | null);
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+		return this._sharedRun(interaction, interaction.options.getMember('user'));
 	}
 }

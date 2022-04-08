@@ -272,7 +272,7 @@ export async function handleLeaderboardCommandInteraction(
  * @param interaction
  * @param args parsed customId, split by ':'
  */
-export async function handleLeaderboardButtonInteraction(interaction: ButtonInteraction, args: string[]) {
+export async function handleLeaderboardButtonInteraction(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 	const [USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, EMOJI] = args as ButtonCustomIdParsed;
 	const leaderboardArgs: LeaderboardArgsWithPage = {
 		lbType: LB_TYPE,
@@ -320,7 +320,10 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
  * @param interaction
  * @param args parsed customId, split by ':'
  */
-export async function handleLeaderboardSelectMenuInteraction(interaction: SelectMenuInteraction, args: string[]) {
+export async function handleLeaderboardSelectMenuInteraction(
+	interaction: SelectMenuInteraction<'cachedOrDM'>,
+	args: string[],
+) {
 	const [USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE] = args as SelectMenuCustomIdParsed;
 	const leaderboardArgs: LeaderboardArgsWithPage = {
 		lbType: LB_TYPE,

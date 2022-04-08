@@ -28,7 +28,7 @@ export default class ExecCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		try {
 			const me = interaction.guild?.me ?? null;
 			const INPUT = interaction.options.getString('input', true);

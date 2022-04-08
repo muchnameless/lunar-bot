@@ -586,7 +586,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				command: command.name,
 			});
 
-			await command.runMinecraft(hypixelMessage);
+			await command.minecraftRun(hypixelMessage);
 		} catch (error) {
 			logger.error({
 				err: error,

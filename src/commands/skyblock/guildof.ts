@@ -50,7 +50,7 @@ export default class GuildOfCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(interaction, await this._generateReply(interaction.options.getString('ign', true)));
 	}
 
@@ -58,7 +58,7 @@ export default class GuildOfCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(await this._generateReply(hypixelMessage.commandData.args[0]));
 	}
 }

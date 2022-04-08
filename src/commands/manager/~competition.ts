@@ -30,7 +30,7 @@ export class CompetitionCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const collector = interaction.channel!.createMessageCollector({
 			filter: (msg) => msg.author.id === interaction.user.id,
 			idle: seconds(30),

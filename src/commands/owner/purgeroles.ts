@@ -30,7 +30,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
 
 		if (!guild) {

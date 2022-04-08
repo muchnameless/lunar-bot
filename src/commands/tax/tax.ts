@@ -100,7 +100,7 @@ export default class TaxCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommandGroup()) {
 			case 'ah': {
 				const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });

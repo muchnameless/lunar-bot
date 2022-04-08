@@ -1,12 +1,19 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
-import { ApplicationCommandType, ComponentType, Formatters, InteractionType, PermissionFlagsBits } from 'discord.js';
-import { isJSONEncodable } from '@discordjs/builders';
+import {
+	ActionRowBuilder,
+	ApplicationCommandType,
+	ComponentType,
+	Formatters,
+	InteractionType,
+	PermissionFlagsBits,
+} from 'discord.js';
 import { CustomIdKey, GUILD_ID_ALL, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
+import type { JSONEncodable, MessageActionRowComponentBuilder } from '@discordjs/builders';
 import type { APIActionRowComponent, APIMessageActionRowComponent } from 'discord-api-types/v10';
 import type {
 	ApplicationCommandOptionChoice,
@@ -14,13 +21,11 @@ import type {
 	BaseGuildTextChannel,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
-	ContextMenuCommandInteraction,
-	GuildMember,
 	Interaction,
-	InteractionReplyOptions,
-	Message,
+	MessageContextMenuCommandInteraction,
 	ModalSubmitInteraction,
 	SelectMenuInteraction,
+	UserContextMenuCommandInteraction,
 } from 'discord.js';
 import type LeaderboardCommand from '../commands/guild/leaderboard';
 
@@ -35,14 +40,12 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	private async _handleCommandInteraction(interaction: ChatInputCommandInteraction) {
+	private async _handleChatInputCommandInteraction(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		logger.info(
 			{
 				type: InteractionType[interaction.type],
 				command: interaction.toString(),
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -79,20 +82,18 @@ export default class InteractionCreateEvent extends Event {
 			setTimeout(() => command.timestamps!.delete(interaction.user.id), COOLDOWN_TIME);
 		}
 
-		return command.runSlash(interaction);
+		return command.chatInputRun(interaction);
 	}
 
 	/**
 	 * @param interaction
 	 */
-	private async _handleButtonInteraction(interaction: ButtonInteraction) {
+	private async _handleButtonInteraction(interaction: ButtonInteraction<'cachedOrDM'>) {
 		logger.info(
 			{
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -135,36 +136,29 @@ export default class InteractionCreateEvent extends Event {
 				}
 
 				void InteractionUtil.deferUpdate(interaction);
-				return MessageUtil[interaction.message.pinned ? 'unpin' : 'pin'](interaction.message as Message, {
+				return MessageUtil[interaction.message.pinned ? 'unpin' : 'pin'](interaction.message, {
 					rejectOnError: true,
 				});
 
 			// change message visibility
 			case CustomIdKey.Visibility: {
-				// deferUpdate to be able to edit the epehemeral message
+				// deferUpdate to be able to edit the epehemeral message later after replying
 				void InteractionUtil.deferUpdate(interaction);
 
 				// remove visibility button from components
-				const components: InteractionReplyOptions['components'] = [];
+				const components: JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>[] = [];
 
 				if (interaction.message.components) {
-					for (let row of interaction.message.components) {
+					for (const row of interaction.message.components) {
 						// TODO: replace with ActionRowBuilder.from
-						row = (
-							isJSONEncodable(row)
-								? {
-										// @ts-expect-error
-										...row.toJSON(),
-										components: row.components.map((c) => (isJSONEncodable(c) ? c.toJSON() : c)),
-								  }
-								: row
-						) as APIActionRowComponent<APIMessageActionRowComponent>;
+						const newRow = new ActionRowBuilder<MessageActionRowComponentBuilder>({
+							components: row.components
+								.filter(({ customId }) => customId !== CustomIdKey.Visibility)
+								.map((c) => c.toJSON()),
+						});
 
-						// eslint-disable-next-line camelcase
-						row.components = row.components.filter(({ custom_id }: any) => custom_id !== CustomIdKey.Visibility);
-
-						if (row.components.length) {
-							components.push(row);
+						if (newRow.components.length) {
+							components.push(newRow);
 						}
 					}
 				}
@@ -174,12 +168,12 @@ export default class InteractionCreateEvent extends Event {
 					rejectOnError: true,
 					content: interaction.message.content || null,
 					embeds: interaction.message.embeds,
-					files: (interaction.message as Message).attachments.map(({ url }) => url),
+					files: interaction.message.attachments.map(({ url }) => url),
 					components,
 					ephemeral: false,
 				});
 
-				// remove the button from the epehemeral message
+				// remove the button from the ephemeral message
 				return InteractionUtil.editReply(interaction, { components });
 			}
 
@@ -199,7 +193,7 @@ export default class InteractionCreateEvent extends Event {
 				// role permissions
 				await command.assertPermissions(interaction);
 
-				return command.runButton(interaction, args);
+				return command.buttonRun(interaction, args);
 			}
 		}
 	}
@@ -207,15 +201,13 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	private async _handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
+	private async _handleSelectMenuInteraction(interaction: SelectMenuInteraction<'cachedOrDM'>) {
 		logger.info(
 			{
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				values: interaction.values,
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -248,7 +240,7 @@ export default class InteractionCreateEvent extends Event {
 				// role permissions
 				await command.assertPermissions(interaction);
 
-				return command.runSelect(interaction, args);
+				return command.selectMenuRun(interaction, args);
 			}
 		}
 	}
@@ -257,7 +249,7 @@ export default class InteractionCreateEvent extends Event {
 	 * respond to autocomplete interactions
 	 * @param interaction
 	 */
-	private async _handleAutocompleteInteraction(interaction: AutocompleteInteraction) {
+	private async _handleAutocompleteInteraction(interaction: AutocompleteInteraction<'cachedOrDM'>) {
 		const { name, value } = interaction.options.getFocused(true) as { name: string; value: string };
 
 		switch (name) {
@@ -359,7 +351,7 @@ export default class InteractionCreateEvent extends Event {
 				// role permissions
 				await command.assertPermissions(interaction);
 
-				return command.runAutocomplete(interaction, value, name);
+				return command.autocompleteRun(interaction, value, name);
 			}
 		}
 	}
@@ -367,14 +359,12 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	private async _handleContextMenuInteraction(interaction: ContextMenuCommandInteraction) {
+	private async _handleMessageContextMenuInteraction(interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>) {
 		logger.info(
 			{
 				type: ApplicationCommandType[interaction.commandType],
 				command: interaction.commandName,
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -392,28 +382,49 @@ export default class InteractionCreateEvent extends Event {
 		// role permissions
 		await command.assertPermissions(interaction);
 
-		switch (interaction.commandType) {
-			case ApplicationCommandType.Message:
-				return command.runMessage(interaction, interaction.options.getMessage('message') as Message);
-
-			case ApplicationCommandType.User: {
-				const { user, member } = interaction.options.get('user')!;
-				return command.runUser(interaction, user!, (member as GuildMember) ?? null);
-			}
-		}
+		return command.messageContextMenuRun(interaction, interaction.targetMessage);
 	}
 
 	/**
 	 * @param interaction
 	 */
-	private async _handleModalSubmitInteraction(interaction: ModalSubmitInteraction) {
+	private async _handleUserContextMenuInteraction(interaction: UserContextMenuCommandInteraction<'cachedOrDM'>) {
+		logger.info(
+			{
+				type: ApplicationCommandType[interaction.commandType],
+				command: interaction.commandName,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+				guild: interaction.guild?.name ?? null,
+			},
+			'INTERACTION_CREATE',
+		);
+
+		const command = this.client.commands.get(interaction.commandName);
+
+		if (!command) {
+			throw `the \`${interaction.commandName}\` command is currently disabled`;
+		}
+
+		// role permissions
+		await command.assertPermissions(interaction);
+
+		const { user, member } = interaction.options.get('user')!;
+
+		return command.userContextMenuRun(interaction, user!, member ?? null);
+	}
+
+	/**
+	 * @param interaction
+	 */
+	private async _handleModalSubmitInteraction(interaction: ModalSubmitInteraction<'cachedOrDM'>) {
 		logger.info(
 			{
 				type: InteractionType[interaction.type],
 				customId: interaction.customId,
-				user: interaction.member
-					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
-					: interaction.user.tag,
+				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
@@ -442,7 +453,7 @@ export default class InteractionCreateEvent extends Event {
 				// role permissions
 				await command.assertPermissions(interaction);
 
-				return command.runModal(interaction, args);
+				return command.modalSubmitRun(interaction, args);
 			}
 		}
 	}
@@ -452,6 +463,8 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	override async run(interaction: Interaction) {
+		if (!InteractionUtil.inCachedGuildOrDM(interaction)) return;
+
 		try {
 			// add interaction to the WeakMap which holds InteractionData and schedules deferring
 			if (interaction.isRepliable()) {
@@ -462,19 +475,34 @@ export default class InteractionCreateEvent extends Event {
 			}
 
 			// commands
-			if (interaction.isChatInputCommand()) return void (await this._handleCommandInteraction(interaction));
+			if (interaction.isChatInputCommand()) {
+				return void (await this._handleChatInputCommandInteraction(interaction));
+			}
 
 			// buttons
-			if (interaction.isButton()) return void (await this._handleButtonInteraction(interaction));
+			if (interaction.isButton()) {
+				return void (await this._handleButtonInteraction(interaction));
+			}
 
 			// select menus
-			if (interaction.isSelectMenu()) return void (await this._handleSelectMenuInteraction(interaction));
+			if (interaction.isSelectMenu()) {
+				return void (await this._handleSelectMenuInteraction(interaction));
+			}
 
-			// context menu
-			if (interaction.isContextMenuCommand()) return void (await this._handleContextMenuInteraction(interaction));
+			// message context menu
+			if (interaction.isMessageContextMenuCommand()) {
+				return void (await this._handleMessageContextMenuInteraction(interaction));
+			}
+
+			// user context menu
+			if (interaction.isUserContextMenuCommand()) {
+				return void (await this._handleUserContextMenuInteraction(interaction));
+			}
 
 			// modals
-			if (interaction.isModalSubmit()) return void (await this._handleModalSubmitInteraction(interaction));
+			if (interaction.isModalSubmit()) {
+				return void (await this._handleModalSubmitInteraction(interaction));
+			}
 
 			throw `unknown interaction type '${interaction.type}'`;
 		} catch (error) {

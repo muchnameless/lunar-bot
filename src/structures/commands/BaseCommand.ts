@@ -37,9 +37,17 @@ export class BaseCommand {
 	 * null for a default, 0 for none
 	 */
 	cooldown: number | null;
+	/**
+	 * function to dynamically create a required roles array
+	 */
 	private _requiredRoles: RequiredRoles | null;
+	/**
+	 * user id -> last used timestamp, for cooldowns
+	 */
 	timestamps: Collection<Snowflake, number> | null;
-	/** command name aliases (lower case) */
+	/**
+	 * command name aliases (lower case)
+	 */
 	aliases: string[] | null = null;
 
 	/**

@@ -69,7 +69,7 @@ interface RunMuteOptions extends RunModerationOptions {
 }
 
 interface RunKickOptions extends RunModerationOptions {
-	ctx: ChatInputCommandInteraction | HypixelUserMessage;
+	ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage;
 	reason: string;
 }
 
@@ -241,7 +241,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param subcommand
 	 */
-	private _assertRequiredRoles(interaction: Interaction, hypixelGuild: HypixelGuild, subcommand: string) {
+	private _assertRequiredRoles(interaction: Interaction<'cachedOrDM'>, hypixelGuild: HypixelGuild, subcommand: string) {
 		const roleIds: Snowflake[] = [];
 
 		switch (subcommand) {
@@ -284,7 +284,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param targetInput
 	 * @param interaction
 	 */
-	async getMuteTarget(targetInput: string, interaction?: ChatInputCommandInteraction) {
+	async getMuteTarget(targetInput: string, interaction?: ChatInputCommandInteraction<'cachedOrDM'>) {
 		if (this.GUILD_IDENTIFIER.has(targetInput as any)) {
 			return 'everyone';
 		}
@@ -388,7 +388,11 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param duration
 	 */
-	async runMuteInteraction(interaction: ChatInputCommandInteraction, hypixelGuild: HypixelGuild, duration: number) {
+	async runMuteInteraction(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
+		hypixelGuild: HypixelGuild,
+		duration: number,
+	) {
 		const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 		const target = await this.getMuteTarget(TARGET_INPUT, interaction);
 
@@ -484,8 +488,8 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param commandOptions
 	 * @param hypixelGuild
 	 */
-	private async _run(
-		interaction: ChatInputCommandInteraction,
+	private async _sharedRun(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		commandOptions: CommandOptions,
 	) {
@@ -505,7 +509,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param commandOptions
 	 */
 	private async _runList(
-		interaction: ChatInputCommandInteraction,
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		commandOptions: CommandOptions,
 	) {
@@ -548,7 +552,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param value input value
 	 * @param name option name
 	 */
-	override runAutocomplete(interaction: AutocompleteInteraction, value: string, name: string) {
+	override autocompleteRun(interaction: AutocompleteInteraction<'cachedOrDM'>, value: string, name: string) {
 		switch (name) {
 			case 'rank':
 				if (!value) {
@@ -576,8 +580,8 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param userId
 	 * @param page
 	 */
-	private async _runPaginated(
-		interaction: ChatInputCommandInteraction | ButtonInteraction,
+	private async _paginatedRun(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ButtonInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		subcommand: string,
 		commandOptions: CommandOptions,
@@ -642,7 +646,7 @@ export default class GuildCommand extends ApplicationCommand {
 			InteractionUtil[
 				interaction.isCommand() || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
-		)(interaction as ButtonInteraction, {
+		)(interaction as ButtonInteraction<'cachedOrDM'>, {
 			embeds: [embed],
 			components: [
 				buildPaginationActionRow(
@@ -660,7 +664,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override async runButton(interaction: ButtonInteraction, args: string[]) {
+	override async buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT] = args;
 		const [SUBCOMMAND] = SUBCOMMAND_WITH_ARGS.split(' ', 1);
 		const hypixelGuild = this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID);
@@ -676,7 +680,7 @@ export default class GuildCommand extends ApplicationCommand {
 		// check only the part before the first space
 		switch (SUBCOMMAND) {
 			case 'history':
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -689,7 +693,7 @@ export default class GuildCommand extends ApplicationCommand {
 				);
 
 			case 'log':
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND_WITH_ARGS,
@@ -702,7 +706,7 @@ export default class GuildCommand extends ApplicationCommand {
 				);
 
 			case 'top':
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -723,7 +727,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const SUBCOMMAND = interaction.options.getSubcommand();
 
@@ -741,7 +745,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw `your guild rank needs to be higher than \`${target}\`'s`;
 				}
 
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: `guild demote ${target}`,
 					responseRegExp: demote(target.ign),
 				});
@@ -806,7 +810,7 @@ export default class GuildCommand extends ApplicationCommand {
 			}
 
 			case 'history':
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -820,17 +824,17 @@ export default class GuildCommand extends ApplicationCommand {
 
 			case 'info':
 			case 'quest':
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: `guild ${SUBCOMMAND}`,
 				});
 
 			case 'motd':
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: 'guild motd preview',
 				});
 
 			case 'top':
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -850,7 +854,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw `\`${ign}\` is on the ban list for \`${existingBan.reason}\``;
 				}
 
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: `guild invite ${ign}`,
 					responseRegExp: invite(ign),
 				});
@@ -866,7 +870,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'log': {
 				const COMMAND = `log ${InteractionUtil.getIgn(interaction) ?? ''}`.trimEnd();
 
-				return this._runPaginated(
+				return this._paginatedRun(
 					interaction,
 					hypixelGuild,
 					COMMAND,
@@ -882,7 +886,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'member': {
 				const target = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: `guild member ${target}`,
 					abortRegExp: unknownIgn(target.ign),
 				});
@@ -910,7 +914,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw 'you can only promote up to your own rank';
 				}
 
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: `guild promote ${target}`,
 					responseRegExp: promote(target.ign),
 				});
@@ -933,7 +937,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw 'you can only change ranks up to your own rank';
 				}
 
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: `guild setrank ${target} ${rank.name}`,
 					responseRegExp: setRank(target.ign, undefined, rank.name),
 				});
@@ -1006,7 +1010,7 @@ export default class GuildCommand extends ApplicationCommand {
 					await hypixelGuild.update({ mutedTill: 0 });
 				}
 
-				return this._run(interaction, hypixelGuild, {
+				return this._sharedRun(interaction, hypixelGuild, {
 					command: `guild unmute ${target}`,
 					responseRegExp: unmute(
 						target === 'everyone' ? 'the guild chat' : `${target}`,

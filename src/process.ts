@@ -44,7 +44,12 @@ export async function exitProcess(code = 0) {
 		logger.fatal(error);
 	}
 
-	for (const output of await Promise.allSettled([sequelize.close(), sql.end(), redis.quit(), bree?.stop()])) {
+	for (const output of await Promise.allSettled([
+		sequelize.close(),
+		sql.end({ timeout: 5 }),
+		redis.quit(),
+		bree?.stop(),
+	])) {
 		if (output.status === 'rejected') {
 			logger.fatal(output.reason);
 			hasError = true;

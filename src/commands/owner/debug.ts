@@ -31,7 +31,7 @@ export default class DebugCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { guilds, channels, players } = this.client;
 		const me = interaction.guild?.me ?? null;
 

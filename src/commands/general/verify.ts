@@ -7,7 +7,7 @@ import { InteractionUtil, UserUtil } from '../../util';
 import { formatError } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
-import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -25,7 +25,7 @@ export default class VerifyCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const IGN = interaction.options.getString('ign', true);
 		const playerLinkedToId =
 			UserUtil.getPlayer(interaction.user) ??
@@ -110,7 +110,7 @@ export default class VerifyCommand extends ApplicationCommand {
 
 		// link player
 		const discordMember =
-			(interaction.member as GuildMember | null) ??
+			interaction.member ??
 			(await InteractionUtil.getHypixelGuild(interaction)
 				.discordGuild?.members.fetch(interaction.user)
 				.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??

@@ -18,7 +18,7 @@ export default class PingCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const sent = await InteractionUtil.deferReply(interaction, {
 			fetchReply: true,
 			rejectOnError: true,

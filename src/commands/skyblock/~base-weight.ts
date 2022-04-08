@@ -35,7 +35,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 */
 	// @ts-expect-error
 	protected override async _fetchData(
-		ctx: ChatInputCommandInteraction | HypixelUserMessage,
+		ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage,
 		ignOrUuid?: string | null,
 		profileName?: string | null,
 	) {

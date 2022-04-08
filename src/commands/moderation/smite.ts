@@ -30,7 +30,7 @@ export default class SmiteCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: ChatInputCommandInteraction) {
+	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 
@@ -41,7 +41,7 @@ export default class SmiteCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 		const TARGET_INPUT = hypixelMessage.commandData.args[0].toLowerCase();
 		const target = await guildCommand.getMuteTarget(TARGET_INPUT);
