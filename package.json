@@ -47,7 +47,7 @@
 		"js-big-decimal": "^1.3.4",
 		"lex": "^1.7.9",
 		"lilyweight": "^2.5.0",
-		"minecraft-data": "^3.0.0",
+		"minecraft-data": "*",
 		"minecraft-protocol": "^1.32.2",
 		"ms": "^2.1.3",
 		"pg": "^8.7.3",
@@ -100,6 +100,7 @@
 		"@discordjs/collection": "0.6.0-dev.1649505807-3c0bbac",
 		"@discordjs/rest": "0.4.0-dev.1649505800-3c0bbac",
 		"discord-api-types": "0.31.0",
-		"discord.js@14.0.0-dev.1649505803-3c0bbac": "patch:discord.js@npm:14.0.0-dev.1649505803-3c0bbac#.yarn/patches/discord.js-npm-14.0.0-dev.1649505803-3c0bbac-b1c9ca5494.patch"
+		"discord.js@14.0.0-dev.1649505803-3c0bbac": "patch:discord.js@npm:14.0.0-dev.1649505803-3c0bbac#.yarn/patches/discord.js-npm-14.0.0-dev.1649505803-3c0bbac-b1c9ca5494.patch",
+		"minecraft-data": "^3.0.0"
 	}
 }
