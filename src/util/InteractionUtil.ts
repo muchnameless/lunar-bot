@@ -308,9 +308,8 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 */
 	static inCachedGuildOrDM(interaction: Interaction): interaction is Interaction<'cachedOrDM'> {
-		return interaction.guildId
-			? interaction.client.guilds.cache.has(interaction.guildId)
-			: interaction.client.channels.cache.has(interaction.channelId!);
+		// guilds are sent with all their channels -> cached channel implies cached guild
+		return interaction.client.channels.cache.has(interaction.channelId!);
 	}
 
 	/**
