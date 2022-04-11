@@ -3,7 +3,7 @@
 	"extends": [
 		"config:base",
 		":disableRateLimiting",
-		":semanticPrefixChore",
+		":semanticCommitTypeAll(chore)",
 		"helpers:followTypescriptNext",
 		"helpers:pinGitHubActionDigests"
 	],
