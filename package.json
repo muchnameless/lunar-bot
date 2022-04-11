@@ -54,7 +54,7 @@
 		"pg-hstore": "^2.3.4",
 		"pino": "^7.10.0",
 		"postgres": "3.0.5",
-		"prismarine-chat": "^1.6.0",
+		"prismarine-chat": "^1.6.1",
 		"prismarine-nbt": "^2.2.1",
 		"re2": "^1.17.4",
 		"sequelize": "6.18.0",
