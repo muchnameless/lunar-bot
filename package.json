@@ -99,7 +99,7 @@
 		"@discordjs/builders": "0.13.0-dev.1649505810-3c0bbac",
 		"@discordjs/collection": "0.6.0-dev.1649505807-3c0bbac",
 		"@discordjs/rest": "0.4.0-dev.1649505800-3c0bbac",
-		"discord-api-types": "0.31.0",
+		"discord-api-types": "0.31.1",
 		"discord.js@14.0.0-dev.1649505803-3c0bbac": "patch:discord.js@npm:14.0.0-dev.1649505803-3c0bbac#.yarn/patches/discord.js-npm-14.0.0-dev.1649505803-3c0bbac-b1c9ca5494.patch",
 		"minecraft-data": "^3.0.0"
 	}
