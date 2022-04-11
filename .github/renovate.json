@@ -1,6 +1,12 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["config:base", "helpers:pinGitHubActionDigests", ":semanticCommitTypeAll(chore)"],
+	"extends": [
+		"config:base",
+		":disableRateLimiting",
+		":semanticPrefixChore",
+		"helpers:followTypescriptNext",
+		"helpers:pinGitHubActionDigests"
+	],
 	"postUpdateOptions": ["yarnDedupeHighest"],
 	"labels": ["Meta: Dependencies"],
 	"npm": {
