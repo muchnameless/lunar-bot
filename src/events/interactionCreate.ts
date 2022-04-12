@@ -13,7 +13,7 @@ import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
-import type { JSONEncodable, MessageActionRowComponentBuilder } from '@discordjs/builders';
+import type { JSONEncodable } from '@discordjs/builders';
 import type { APIActionRowComponent, APIMessageActionRowComponent } from 'discord-api-types/v10';
 import type {
 	ApplicationCommandOptionChoice,
@@ -22,14 +22,18 @@ import type {
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	Interaction,
+	MessageActionRowComponentBuilder,
 	MessageContextMenuCommandInteraction,
 	ModalSubmitInteraction,
 	SelectMenuInteraction,
+	Snowflake,
 	UserContextMenuCommandInteraction,
 } from 'discord.js';
 import type LeaderboardCommand from '../commands/guild/leaderboard';
 
 export default class InteractionCreateEvent extends Event {
+	private _visibilityButtonMessages = new Set<Snowflake>();
+
 	constructor(context: EventContext) {
 		super(context, {
 			once: false,
@@ -141,41 +145,49 @@ export default class InteractionCreateEvent extends Event {
 				});
 
 			// change message visibility
-			case CustomIdKey.Visibility: {
+			case CustomIdKey.Visibility:
 				// deferUpdate to be able to edit the epehemeral message later after replying
 				void InteractionUtil.deferUpdate(interaction);
 
-				// remove visibility button from components
-				const components: JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>[] = [];
+				// no-op additional clicks on the same button
+				if (this._visibilityButtonMessages.has(interaction.message.id)) return;
 
-				if (interaction.message.components) {
-					for (const row of interaction.message.components) {
-						// TODO: replace with ActionRowBuilder.from
-						const newRow = new ActionRowBuilder<MessageActionRowComponentBuilder>({
-							components: row.components
-								.filter(({ customId }) => customId !== CustomIdKey.Visibility)
-								.map((c) => c.toJSON()),
-						});
+				try {
+					this._visibilityButtonMessages.add(interaction.message.id);
 
-						if (newRow.components.length) {
-							components.push(newRow);
+					// remove visibility button from components
+					const components: JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>[] = [];
+
+					if (interaction.message.components) {
+						for (const row of interaction.message.components) {
+							// TODO: replace with ActionRowBuilder.from
+							const newRow = new ActionRowBuilder<MessageActionRowComponentBuilder>({
+								components: row.components
+									.filter(({ customId }) => customId !== CustomIdKey.Visibility)
+									.map((c) => c.toJSON()),
+							});
+
+							if (newRow.components.length) {
+								components.push(newRow);
+							}
 						}
 					}
+
+					// send new non-ephemeral message
+					await InteractionUtil.reply(interaction, {
+						rejectOnError: true,
+						content: interaction.message.content || null,
+						embeds: interaction.message.embeds,
+						files: interaction.message.attachments.map(({ url }) => url),
+						components,
+						ephemeral: false,
+					});
+
+					// remove the button from the ephemeral message
+					return InteractionUtil.editReply(interaction, { components });
+				} finally {
+					this._visibilityButtonMessages.delete(interaction.message.id);
 				}
-
-				// send new non-ephemeral message
-				await InteractionUtil.reply(interaction, {
-					rejectOnError: true,
-					content: interaction.message.content || null,
-					embeds: interaction.message.embeds,
-					files: interaction.message.attachments.map(({ url }) => url),
-					components,
-					ephemeral: false,
-				});
-
-				// remove the button from the ephemeral message
-				return InteractionUtil.editReply(interaction, { components });
-			}
 
 			// command message buttons
 			case CustomIdKey.Command: {
