@@ -184,7 +184,7 @@ export default class InteractionCreateEvent extends Event {
 					});
 
 					// remove the button from the ephemeral message
-					return InteractionUtil.editReply(interaction, { components });
+					return await InteractionUtil.editReply(interaction, { components });
 				} finally {
 					this._visibilityButtonMessages.delete(interaction.message.id);
 				}
