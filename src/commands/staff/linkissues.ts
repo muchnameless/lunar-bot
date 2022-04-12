@@ -136,21 +136,23 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				: ['none'],
 		});
 
-		for (const { amount, values } of unlinkedPlayers)
+		for (const { amount, values } of unlinkedPlayers) {
 			for (const value of values) {
 				embed.addFields({
 					name: `${Formatters.bold('Unlinked Players:')}${amount ? ` [ign | tag] (${amount})` : ''}`,
 					value,
 				});
 			}
+		}
 
-		for (const { amount, values } of linkedAndNotInDiscord)
+		for (const { amount, values } of linkedAndNotInDiscord) {
 			for (const value of values) {
 				embed.addFields({
 					name: `${Formatters.bold('Linked and not in Discord:')}${amount ? ` (${amount})` : ''}`,
 					value,
 				});
 			}
+		}
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 

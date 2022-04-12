@@ -282,8 +282,9 @@ export default class TaxCommand extends ApplicationCommand {
 
 						let pingMessage = '';
 
-						for (const player of playersPingable.values())
+						for (const player of playersPingable.values()) {
 							pingMessage += ` ${Formatters.userMention(player.discordId!)}`;
+						}
 						for (const player of playersOnlyIgn.values()) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 						// send ping message and split between pings if too many chars

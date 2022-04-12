@@ -135,18 +135,17 @@ export class LogHandler {
 
 			let embedChunkLength = 0;
 
-			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < embeds.length; ++current, ++total)
-				inner: {
-					embedChunkLength += embedLength(embeds[total]);
+			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < embeds.length; ++current, ++total) {
+				embedChunkLength += embedLength(embeds[total]);
 
-					// adding the new embed would exceed the max char count
-					if (embedChunkLength > EMBED_MAX_CHARS) {
-						--total;
-						break inner;
-					}
-
-					embedChunk.push(embeds[total]);
+				// adding the new embed would exceed the max char count
+				if (embedChunkLength > EMBED_MAX_CHARS) {
+					--total;
+					break;
 				}
+
+				embedChunk.push(embeds[total]);
+			}
 
 			returnValue.push(this._log(embedChunk));
 		}

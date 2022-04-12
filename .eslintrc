@@ -109,6 +109,7 @@
 			}
 		],
 		"comma-style": "error",
+		"curly": ["error", "multi-line", "consistent"],
 		"default-param-last": "error",
 		"dot-location": ["error", "property"],
 		"dot-notation": "error",
@@ -230,6 +231,7 @@
 		"no-var": "error",
 		"no-warning-comments": "warn",
 		"no-whitespace-before-property": "error",
+		"nonblock-statement-body-position": "error",
 		"object-curly-spacing": ["error", "always"],
 		"object-shorthand": [
 			"error",

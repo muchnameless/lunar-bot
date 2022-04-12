@@ -297,8 +297,9 @@ export class ApplicationCommand extends BaseCommand {
 				: await (async () => {
 						const { discordGuild } = hypixelGuild;
 
-						if (!discordGuild)
+						if (!discordGuild) {
 							throw missingPermissionsError('discord server unreachable', interaction, discordGuild, roleIds);
+						}
 
 						try {
 							return await discordGuild.members.fetch(interaction.user);
