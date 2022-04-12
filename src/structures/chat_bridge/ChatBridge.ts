@@ -170,7 +170,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 			// link bot to db entry (create if non existant)
 			this.minecraft.botPlayer ??= await (async () => {
 				const [player, created] = await this.client.players.model.findCreateFind({
-					where: { minecraftUuid: this.minecraft.botUuid },
+					where: { minecraftUuid: this.minecraft.botUuid! },
 					defaults: {
 						minecraftUuid: this.minecraft.botUuid!,
 						ign: this.bot!.username,
