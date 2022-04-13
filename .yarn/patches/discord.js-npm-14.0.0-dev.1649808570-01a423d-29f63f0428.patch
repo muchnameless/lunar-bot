@@ -1,0 +1,90 @@
+diff --git a/src/structures/ButtonBuilder.js b/src/structures/ButtonBuilder.js
+index 2eab82803f2629c213aa07b144b45967425c0717..946daf68a7443a032180491712d689163e3b073a 100644
+--- a/src/structures/ButtonBuilder.js
++++ b/src/structures/ButtonBuilder.js
+@@ -5,7 +5,7 @@ const Transformers = require('../util/Transformers');
+ const Util = require('../util/Util');
+ 
+ class ButtonBuilder extends BuildersButtonComponent {
+-  constructor({ emoji, ...data }) {
++  constructor({ emoji, ...data } = {}) {
+     super(
+       Transformers.toSnakeCase({ ...data, emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji }),
+     );
+diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
+index 2cf0c116727309a203052affcb47d0fb775324bc..c46d1a04db4e9dc002dcff911616d53c17ba629d 100644
+--- a/src/structures/SelectMenuBuilder.js
++++ b/src/structures/SelectMenuBuilder.js
+@@ -5,10 +5,10 @@ const Transformers = require('../util/Transformers');
+ const Util = require('../util/Util');
+ 
+ class SelectMenuBuilder extends BuildersSelectMenuComponent {
+-  constructor({ options, ...data }) {
++  constructor({ options, ...data } = {}) {
+     super(
+       Transformers.toSnakeCase({
+-        options: options.map(({ emoji, ...option }) => ({
++        options: options?.map(({ emoji, ...option }) => ({
+           ...option,
+           emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+         })),
+diff --git a/typings/index.d.ts b/typings/index.d.ts
+index 0e828404ed461a0c3626e9e1f2670c1fbbd72d40..372a615164ced799906b27e9d4781412b448a361 100644
+--- a/typings/index.d.ts
++++ b/typings/index.d.ts
+@@ -1449,7 +1449,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+   public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
+ }
+ 
+-export type CacheType = 'cached' | 'raw' | undefined;
++export type CacheType = 'cached' | 'raw' | 'DM' | 'cachedOrDM' | undefined;
+ 
+ export type CacheTypeReducer<
+   State extends CacheType,
+@@ -1457,12 +1457,18 @@ export type CacheTypeReducer<
+   RawType = CachedType,
+   PresentType = CachedType | RawType,
+   Fallback = PresentType | null,
++  DMType = CachedType,
++  CachedOrDMType = CachedType | DMType,
+ > = [State] extends ['cached']
+   ? CachedType
+   : [State] extends ['raw']
+   ? RawType
+   : [State] extends ['raw' | 'cached']
+   ? PresentType
++  : [State] extends ['DM']
++  ? DMType
++  : [State] extends ['cachedOrDM']
++  ? CachedOrDMType
+   : Fallback;
+ 
+ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1475,7 +1481,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+     GuildTextBasedChannel | null,
+     GuildTextBasedChannel | null,
+     GuildTextBasedChannel | null,
+-    TextBasedChannel | null
++    TextBasedChannel | null,
++    DMChannel | null
+   >;
+   public channelId: Snowflake | null;
+   public get createdAt(): Date;
+@@ -1483,7 +1490,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+   public get guild(): CacheTypeReducer<Cached, Guild, null>;
+   public guildId: CacheTypeReducer<Cached, Snowflake>;
+   public id: Snowflake;
+-  public member: CacheTypeReducer<Cached, GuildMember, APIInteractionGuildMember>;
++  public member: CacheTypeReducer<Cached, GuildMember, APIInteractionGuildMember, GuildMember | APIInteractionGuildMember | null, null>;
+   public readonly token: string;
+   public type: InteractionType;
+   public user: User;
+@@ -1773,7 +1780,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+   public showModal(
+     modal: JSONEncodable<APIModalInteractionResponseCallbackData> | ModalData | APIModalInteractionResponseCallbackData,
+   ): Promise<void>;
+-  public awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction>;
++  public awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
+ }
+ 
+ export class MessageContextMenuCommandInteraction<

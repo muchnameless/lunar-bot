@@ -158,19 +158,23 @@ export default class InteractionCreateEvent extends Event {
 					// remove visibility button from components
 					const components: JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>[] = [];
 
-					if (interaction.message.components) {
-						for (const row of interaction.message.components) {
-							// TODO: replace with ActionRowBuilder.from
-							const newRow = new ActionRowBuilder<MessageActionRowComponentBuilder>({
-								components: row.components
-									.filter(({ customId }) => customId !== CustomIdKey.Visibility)
-									.map((c) => c.toJSON()),
-							});
-
-							if (newRow.components.length) {
-								components.push(newRow);
-							}
+					for (const row of interaction.message.components) {
+						// no visibility button
+						if (row.components.at(-1)!.customId !== CustomIdKey.Visibility) {
+							components.push(row);
+							continue;
 						}
+						// button found
+
+						// remove whole row if it only contains the visibility button
+						if (row.components.length === 1) continue;
+
+						// copy row and remove visibility button
+						components.push(
+							new ActionRowBuilder<MessageActionRowComponentBuilder>({
+								components: row.components.slice(0, -1).map((c) => c.toJSON()),
+							}),
+						);
 					}
 
 					// send new non-ephemeral message

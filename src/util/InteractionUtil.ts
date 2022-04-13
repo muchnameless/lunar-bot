@@ -20,6 +20,8 @@ import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	AutocompleteInteraction,
+	BaseGuildTextChannel,
+	ButtonInteraction,
 	CacheType,
 	ChatInputCommandInteraction as DJSChatInputCommandInteraction,
 	ChatInputCommandInteraction,
@@ -37,8 +39,6 @@ import type {
 	ModalBuilder,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
-	ButtonInteraction,
-	BaseGuildTextChannel,
 } from 'discord.js';
 import type { SplitOptions } from '../functions';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
@@ -53,7 +53,7 @@ interface InteractionData {
 }
 
 export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
-	Omit<InteractionResponseFields<Cached>, 'showModal'>;
+	Omit<InteractionResponseFields<Cached>, 'showModal' | 'awaitModalSubmit'>;
 
 export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
 	InteractionResponseFields<Cached>;
