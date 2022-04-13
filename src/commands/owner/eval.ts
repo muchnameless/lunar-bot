@@ -437,9 +437,7 @@ export default class EvalCommand extends ApplicationCommand {
 			case 'edit':
 				return this._sharedRun(
 					interaction,
-					interaction.fields.getTextInputValue('input') ||
-						// @ts-expect-error
-						this._getInputFromMessage(interaction.message),
+					interaction.fields.getTextInputValue('input') || this._getInputFromMessage(interaction.message),
 					{
 						// use parseInt over Number so that 12a is still a valid input
 						inspectDepth: Number.parseInt(
