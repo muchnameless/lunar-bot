@@ -7,10 +7,7 @@ import { logger } from './logger';
 /**
  * error messages which will only be logged when not being caught
  */
-export const IGNORED_ERRORS: string[] = [
-	// TODO: remove once discord.js fixes tiv
-	"Cannot read properties of undefined (reading '_add')",
-];
+export const IGNORED_ERRORS: string[] = [];
 
 process
 	.on('unhandledRejection', (error) => {
