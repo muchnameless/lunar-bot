@@ -45,7 +45,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 			PurgeRolesCommand.running.add(guild.id);
 
 			const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(guild.id)?.GUILD_ROLE_ID;
-			const toPurge: { id: Snowflake; rolesToPurge: Snowflake[] }[] = [];
+			const toPurge: { userId: Snowflake; rolesToPurge: Snowflake[] }[] = [];
 
 			for (const member of (await GuildUtil.fetchAllMembers(guild)).values()) {
 				if (member.roles.cache.has(GUILD_ROLE_ID!)) continue;
@@ -55,7 +55,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 				if (!rolesToPurge.length) continue;
 
 				toPurge.push({
-					id: member.id,
+					userId: member.id,
 					rolesToPurge,
 				});
 			}
@@ -74,10 +74,10 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 
 			let success = 0;
 
-			for (const { id, rolesToPurge } of toPurge) {
+			for (const { userId, rolesToPurge } of toPurge) {
 				await sleep(PurgeRolesCommand.TIMEOUT);
 
-				const member = guild.members.cache.get(id);
+				const member = guild.members.cache.get(userId);
 				if (!member) continue;
 
 				await member.roles.remove(rolesToPurge);
