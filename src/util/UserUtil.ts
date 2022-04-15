@@ -24,6 +24,18 @@ export class UserUtil extends null {
 	/**
 	 * @param user
 	 */
+	static logInfo(user: User) {
+		return {
+			userId: user.id,
+			tag: user.tag,
+			bot: user.bot,
+			flags: user.flags?.toArray(),
+		};
+	}
+
+	/**
+	 * @param user
+	 */
 	static getPlayer(user?: User) {
 		const player = this.PLAYER_CACHE.get(user!) ?? null;
 		if (player || !user) return player;
@@ -60,7 +72,7 @@ export class UserUtil extends null {
 			const MESSAGE = `${user.tag} | ${user.id} is a bot and can't be DMed`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
+			logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -73,7 +85,7 @@ export class UserUtil extends null {
 			const MESSAGE = `aborted DMing ${user.tag} | ${user.id}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
+			logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -82,7 +94,7 @@ export class UserUtil extends null {
 				const MESSAGE = `embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
+				logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 				return null;
 			}
 
@@ -92,7 +104,7 @@ export class UserUtil extends null {
 				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
+				logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 				return null;
 			}
 		}
@@ -101,7 +113,7 @@ export class UserUtil extends null {
 			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ user, data: _options }, `[USER SEND DM]: ${MESSAGE}`);
+			logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -121,7 +133,7 @@ export class UserUtil extends null {
 			}
 
 			if (_options.rejectOnError) throw error;
-			logger.error({ user, err: error, data: _options }, '[USER SEND DM]');
+			logger.error({ user: this.logInfo(user), err: error, data: _options }, '[USER SEND DM]');
 			return null;
 		} finally {
 			if (redisKey) void redis.psetex(redisKey, cooldown ?? hours(1), 1);
