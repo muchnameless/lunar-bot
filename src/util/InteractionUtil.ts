@@ -464,6 +464,8 @@ export class InteractionUtil extends null {
 				return await this.reply(interaction, { ..._options, content: lastPart, split: false, code: false });
 			}
 
+			this._addVisibilityButton(_options);
+
 			// replied
 			if (interaction.replied) return await interaction.followUp(_options);
 
