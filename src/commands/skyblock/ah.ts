@@ -25,6 +25,7 @@ import type {
 	APISelectMenuOption,
 	ChatInputCommandInteraction,
 	EmbedBuilder,
+	MessageActionRowComponentBuilder,
 	SelectMenuInteraction,
 	Snowflake,
 } from 'discord.js';
@@ -85,7 +86,7 @@ export default class AhCommand extends ApplicationCommand {
 				return {
 					embeds: [embed.setDescription('no unclaimed auctions')],
 					components: [
-						new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 							new SelectMenuBuilder()
 								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
@@ -148,7 +149,7 @@ export default class AhCommand extends ApplicationCommand {
 					`),
 				],
 				components: [
-					new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 						new SelectMenuBuilder()
 							.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
@@ -204,7 +205,7 @@ export default class AhCommand extends ApplicationCommand {
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
-				new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 					new SelectMenuBuilder()
 						.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 						.setDisabled(true)
@@ -285,7 +286,7 @@ export default class AhCommand extends ApplicationCommand {
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [
-							new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+							new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 								new SelectMenuBuilder()
 									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)

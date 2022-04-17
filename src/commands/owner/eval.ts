@@ -70,11 +70,13 @@ import { logger } from '../../logger';
 import { IGNORED_ERRORS } from '../../process';
 IGNORED_ERRORS;
 import type {
+	ButtonInteraction,
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
-	ButtonInteraction,
 	Message,
+	MessageActionRowComponentBuilder,
 	MessageComponentInteraction,
+	ModalActionRowComponentBuilder,
 	ModalSubmitInteraction,
 } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -338,7 +340,7 @@ export default class EvalCommand extends ApplicationCommand {
 		return InteractionUtil.replyOrUpdate(interaction, {
 			embeds: [responseEmbed],
 			components: [
-				new ActionRowBuilder<ButtonBuilder>().addComponents(
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
 						.setEmoji({ name: UnicodeEmoji.EditMessage })
@@ -394,7 +396,7 @@ export default class EvalCommand extends ApplicationCommand {
 						.setTitle(this.name)
 						.setCustomId(interaction.customId)
 						.addComponents(
-							new ActionRowBuilder<TextInputBuilder>().addComponents(
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Paragraph)
@@ -403,7 +405,7 @@ export default class EvalCommand extends ApplicationCommand {
 									.setPlaceholder(trim(OLD_INPUT, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(false),
 							),
-							new ActionRowBuilder<TextInputBuilder>().addComponents(
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('inspectDepth')
 									.setStyle(TextInputStyle.Short)

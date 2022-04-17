@@ -5,7 +5,7 @@ import { InteractionUtil } from '../../util';
 import { buildDeleteButton } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
-import type { ButtonBuilder, ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction, MessageActionRowComponentBuilder } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class ExecCommand extends ApplicationCommand {
@@ -62,14 +62,22 @@ export default class ExecCommand extends ApplicationCommand {
 
 			return InteractionUtil.reply(interaction, {
 				embeds: [responseEmbed],
-				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user.id))],
+				components: [
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+						buildDeleteButton(interaction.user.id),
+					),
+				],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
 			return InteractionUtil.reply(interaction, {
 				content: Formatters.codeBlock('xl', `${error}`),
-				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user.id))],
+				components: [
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+						buildDeleteButton(interaction.user.id),
+					),
+				],
 			});
 		}
 	}

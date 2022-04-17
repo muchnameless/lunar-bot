@@ -8,10 +8,10 @@ import { InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, buildDeleteButton, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type {
-	ButtonBuilder,
-	Collection,
 	ChatInputCommandInteraction,
+	Collection,
 	DMChannel,
+	MessageActionRowComponentBuilder,
 	Snowflake,
 	TextBasedChannel,
 	ThreadChannel,
@@ -207,7 +207,9 @@ export default class DebugCommand extends ApplicationCommand {
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
-			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user.id))],
+			components: [
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildDeleteButton(interaction.user.id)),
+			],
 		});
 	}
 }

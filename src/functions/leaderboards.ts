@@ -209,7 +209,7 @@ function createActionRows(
 		}
 
 		rows.push(
-			new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 				new SelectMenuBuilder()
 					.setCustomId(`${cacheKey}:lbType`)
 					.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
@@ -222,7 +222,7 @@ function createActionRows(
 							.setValue('gained'),
 					),
 			),
-			new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 				new SelectMenuBuilder()
 					.setCustomId(`${cacheKey}:xpType`)
 					.setPlaceholder(
@@ -239,12 +239,12 @@ function createActionRows(
 						),
 					),
 			),
-			new ActionRowBuilder<SelectMenuBuilder>().addComponents(offsetSelectMenu),
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(offsetSelectMenu),
 		);
 	}
 
 	rows.push(
-		new ActionRowBuilder<SelectMenuBuilder>().addComponents(guildSelectMenu),
+		new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(guildSelectMenu),
 		buildPaginationActionRow(cacheKey, page, totalPages, {
 			disablePages: isExpired,
 			pageStyle: isExpired ? ButtonStyle.Secondary : ButtonStyle.Primary,

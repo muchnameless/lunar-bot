@@ -504,7 +504,7 @@ export default class MathsCommand extends DualCommand {
 									.setPlaceholder(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(true),
 							),
-							new ActionRowBuilder<TextInputBuilder>().addComponents(
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('error')
 									.setStyle(TextInputStyle.Paragraph)

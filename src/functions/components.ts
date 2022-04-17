@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { CustomIdKey, UnicodeEmoji } from '../constants';
-import type { Snowflake } from 'discord.js';
+import type { MessageActionRowComponentBuilder, Snowflake } from 'discord.js';
 
 /**
  * returns a MessageButton which triggers deleting the Message it is attached to
@@ -64,7 +64,7 @@ export function buildPaginationActionRow(
 	const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;
 
 	// emojis are added to customIds to ensure they are unique, e.g. "firstPage" could equal "currentPage - 1"
-	return new ActionRowBuilder<ButtonBuilder>().addComponents(
+	return new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`${baseCustomId}:${firstPage}:${UnicodeEmoji.DoubleLeft}`)
 			.setEmoji({ name: UnicodeEmoji.DoubleLeft })
