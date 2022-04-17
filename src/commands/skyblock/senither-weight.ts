@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { getSenitherWeight, seconds } from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { CommandContext } from '../../structures/commands/BaseCommand';

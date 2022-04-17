@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { hypixelGuildOption, targetOption } from '../../structures/commands/commonOptions';
 import { minutes } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';

@@ -5,15 +5,17 @@ import { env } from 'node:process';
 import util from 'node:util';
 import fs from 'node:fs/promises';
 import v8 from 'node:v8';
-import { ContextMenuCommandBuilder, embedLength, SlashCommandBuilder } from '@discordjs/builders';
 import Discord, {
 	ActionRowBuilder,
+	Attachment,
 	ButtonBuilder,
 	ButtonStyle,
+	ContextMenuCommandBuilder,
 	EmbedBuilder,
+	embedLength,
 	Formatters,
-	MessageAttachment,
 	ModalBuilder,
+	SlashCommandBuilder,
 	TextInputBuilder,
 	TextInputStyle,
 	Util,
@@ -146,7 +148,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 */
 	private _getFiles(interaction: RepliableInteraction, content: string) {
 		void InteractionUtil.defer(interaction);
-		return [new MessageAttachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
+		return [new Attachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
 	}
 
 	/**
@@ -252,7 +254,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 		const stopwatch = new Stopwatch();
 
-		let files: MessageAttachment[] | undefined;
+		let files: Attachment[] | undefined;
 
 		try {
 			stopwatch.restart();

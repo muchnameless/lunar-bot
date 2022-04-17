@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { getSlayerLevel, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
 import { SLAYERS } from '../../constants';
 import BaseSkyBlockCommand from './~base-skyblock-command';

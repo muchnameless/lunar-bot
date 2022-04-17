@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants';
 import { hypixel, mojang } from '../../api';
 import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';

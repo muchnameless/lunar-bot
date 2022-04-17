@@ -1,14 +1,20 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+	ActionRowBuilder,
+	ModalBuilder,
+	SlashCommandBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+	Util,
+} from 'discord.js';
 import BigDecimal from 'js-big-decimal';
 import Lexer from 'lex';
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Util } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { formatNumber, trim } from '../../functions';
 import { MAX_PLACEHOLDER_LENGTH, MAX_VALUE_LENGTH } from '../../constants';
 import { logger } from '../../logger';
+import type { ChatInputCommandInteraction, ModalActionRowComponentBuilder, ModalSubmitInteraction } from 'discord.js';
 import type { RepliableInteraction, ModalRepliableInteraction } from '../../util';
-import type { ChatInputCommandInteraction, ModalSubmitInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
@@ -489,7 +495,7 @@ export default class MathsCommand extends DualCommand {
 						.setTitle('Maths')
 						.setCustomId(this.baseCustomId)
 						.addComponents(
-							new ActionRowBuilder<TextInputBuilder>().addComponents(
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Short)

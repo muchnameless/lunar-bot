@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';

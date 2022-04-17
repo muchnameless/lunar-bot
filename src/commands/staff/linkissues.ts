@@ -1,7 +1,6 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, Util } from 'discord.js';
+import { Formatters, SlashCommandBuilder, Util } from 'discord.js';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
-import { escapeIgn } from '../../functions';
+import { escapeIgn, splitMessage } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { hypixelGuildOption } from '../../structures/commands/commonOptions';
 import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
@@ -54,7 +53,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		const embed = this.client.defaultEmbed.setFooter({ text: hypixelGuild.name });
 
 		if (missingMandatoryRole.length) {
-			for (const value of Util.splitMessage(
+			for (const value of splitMessage(
 				missingMandatoryRole
 					.map((member) => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
 					.join('\n'),
@@ -75,7 +74,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		}
 
 		if (guildRoleAndNotInGuild.length) {
-			for (const value of Util.splitMessage(
+			for (const value of splitMessage(
 				guildRoleAndNotInGuild
 					.map((member) => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
 					.join('\n'),
@@ -112,7 +111,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		unlinkedPlayers.push({
 			amount: UNLINKED_AMOUNT,
 			values: UNLINKED_AMOUNT
-				? Util.splitMessage(
+				? splitMessage(
 						unlinkedGuildPlayers
 							.map(
 								({ ign, discordId }) =>
@@ -127,7 +126,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		linkedAndNotInDiscord.push({
 			amount: LINKED_NOT_DISCORD_AMOUNT,
 			values: LINKED_NOT_DISCORD_AMOUNT
-				? Util.splitMessage(
+				? splitMessage(
 						linkedAndNotInDiscordCurrentGuild
 							.map(({ discordId, ign }) => `${Formatters.userMention(discordId!)} | ${escapeIgn(ign)}`)
 							.join('\n'),

@@ -130,7 +130,9 @@ function concatMessageChunks(
 		msg += `${msg && msg !== prepend ? char : ''}${chunk}`;
 	}
 
-	return [...messages, msg].filter(Boolean);
+	messages.push(msg);
+
+	return messages.filter(Boolean);
 }
 
 export interface SplitOptions {

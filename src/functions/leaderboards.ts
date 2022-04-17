@@ -21,9 +21,9 @@ import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
 import { buildPaginationActionRow, days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
 import type { APIEmbed } from 'discord-api-types/v10';
-import type { JSONEncodable } from '@discordjs/builders';
 import type {
 	ButtonInteraction,
+	JSONEncodable,
 	Message,
 	MessageActionRowComponentBuilder,
 	SelectMenuInteraction,

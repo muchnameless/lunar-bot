@@ -9,9 +9,9 @@ import { TimeoutAsyncQueue } from '../../TimeoutAsyncQueue';
 import { logger } from '../../../logger';
 import { ChatManager } from './ChatManager';
 import type {
+	Attachment,
 	Collection,
 	Message,
-	MessageAttachment,
 	MessageCollectorOptions,
 	MessageOptions,
 	Snowflake,
@@ -103,7 +103,7 @@ export class DiscordChatManager extends ChatManager {
 	 * tries to upload all image attachments to imgur, replacing all successfully uploaded URLs with the imgur URLs
 	 * @param attachments
 	 */
-	private async _uploadAttachments(attachments: Collection<Snowflake, MessageAttachment>) {
+	private async _uploadAttachments(attachments: Collection<Snowflake, Attachment>) {
 		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
 
 		const urls: string[] = [];

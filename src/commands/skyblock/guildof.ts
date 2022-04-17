@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';

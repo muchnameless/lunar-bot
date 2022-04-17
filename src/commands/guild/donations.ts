@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { mojang } from '../../api';
 import { EmbedUtil, InteractionUtil } from '../../util';

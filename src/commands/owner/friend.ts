@@ -1,5 +1,4 @@
-import { Formatters } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';

@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageAttachment } from 'discord.js';
+import { Attachment, SlashCommandBuilder } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
@@ -167,7 +166,7 @@ export default class TrackCommand extends ApplicationCommand {
 				datasets,
 			},
 		});
-		const attachment = new MessageAttachment(image, 'file.jpg');
+		const attachment = new Attachment(image, 'file.jpg');
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [

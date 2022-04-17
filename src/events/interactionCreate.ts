@@ -13,8 +13,6 @@ import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
-import type { JSONEncodable } from '@discordjs/builders';
-import type { APIActionRowComponent, APIMessageActionRowComponent } from 'discord-api-types/v10';
 import type {
 	ApplicationCommandOptionChoice,
 	AutocompleteInteraction,
@@ -22,6 +20,7 @@ import type {
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	Interaction,
+	JSONEncodable,
 	MessageActionRowComponentBuilder,
 	MessageContextMenuCommandInteraction,
 	ModalSubmitInteraction,
@@ -29,6 +28,7 @@ import type {
 	Snowflake,
 	UserContextMenuCommandInteraction,
 } from 'discord.js';
+import type { APIActionRowComponent, APIMessageActionRowComponent } from 'discord-api-types/v10';
 import type LeaderboardCommand from '../commands/guild/leaderboard';
 
 export default class InteractionCreateEvent extends Event {

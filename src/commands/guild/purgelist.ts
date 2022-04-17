@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { handleLeaderboardCommandInteraction, seconds } from '../../functions';

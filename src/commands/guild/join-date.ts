@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import ms from 'ms';
 import { logErrors } from '../../structures/chat_bridge/constants';
 import { forceOption, hypixelGuildOption, optionalPlayerOption } from '../../structures/commands/commonOptions';

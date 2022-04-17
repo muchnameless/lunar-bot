@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { logger } from '../../logger';
 import PingMute from './pingmute';

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { Op } from 'sequelize';
 import { oneLine } from 'common-tags';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';

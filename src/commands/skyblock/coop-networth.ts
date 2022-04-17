@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { seconds, shortenNumber } from '../../functions';
 import { getAuctionNetworth, getNetworth } from '../../structures/networth/networth';
 import { UnicodeEmoji } from '../../constants';

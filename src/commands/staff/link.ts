@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { DiscordAPIError, RESTJSONErrorCodes } from 'discord.js';
+import { DiscordAPIError, RESTJSONErrorCodes, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { hypixel, mojang } from '../../api';
 import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';
