@@ -6,6 +6,10 @@
 		":disableRateLimiting",
 		":semanticCommitTypeAll(chore)",
 		"default:automergeDigest",
+		"followTag(@discordjs/builders, dev)",
+		"followTag(@discordjs/collection, dev)",
+		"followTag(@discordjs/rest, dev)",
+		"followTag(discord.js, dev)",
 		"helpers:followTypescriptNext",
 		"helpers:pinGitHubActionDigests"
 	],
