@@ -455,10 +455,13 @@ export class InteractionUtil extends null {
 			 * allow split option for ChatInputCommandInteraction#reply
 			 */
 			if (_options.split || _options.code) {
-				for (const content of makeContent(_options.content ?? '', { split: _options.split, code: _options.code })) {
+				const parts = makeContent(_options.content ?? '', { split: _options.split, code: _options.code });
+				const lastPart = parts.pop()!;
+
+				for (const content of parts) {
 					await this.reply(interaction, { ..._options, content, split: false, code: false });
 				}
-				return null;
+				return await this.reply(interaction, { ..._options, content: lastPart, split: false, code: false });
 			}
 
 			// replied
