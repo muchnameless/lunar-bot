@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { Type } from '@sapphire/type';
 import RE2 from 're2';
 import { formatNumber, sortCache } from '../../functions';

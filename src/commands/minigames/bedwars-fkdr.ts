@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
 import { escapeIgn, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';

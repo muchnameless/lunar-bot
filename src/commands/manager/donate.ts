@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { formatNumber, removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions';

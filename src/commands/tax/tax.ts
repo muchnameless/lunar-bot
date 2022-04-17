@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, PermissionFlagsBits } from 'discord.js';
+import { Formatters, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { Op } from 'sequelize';
 import {
 	hypixelGuildOption,
@@ -12,8 +11,7 @@ import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
 import type { APIEmbed } from 'discord-api-types/v10';
-import type { JSONEncodable } from '@discordjs/builders';
-import type { ChatInputCommandInteraction, TextChannel } from 'discord.js';
+import type { ChatInputCommandInteraction, JSONEncodable, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {

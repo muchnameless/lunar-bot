@@ -1,6 +1,5 @@
 import { basename } from 'node:path';
-import { SlashCommandBooleanOption, SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBooleanOption, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { InteractionUtil } from '../../util';
 import { readJSFiles } from '../../functions';

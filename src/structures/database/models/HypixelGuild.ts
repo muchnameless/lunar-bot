@@ -1,9 +1,8 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import { Model, DataTypes } from 'sequelize';
-import { EmbedBuilder, Formatters, Util } from 'discord.js';
+import { EmbedBuilder, Formatters, embedLength } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
 import ms from 'ms';
-import { embedLength } from '@discordjs/builders';
 import { mute, setRank, unmute } from '../../chat_bridge/constants';
 import {
 	EMBED_FIELD_MAX_CHARS,
@@ -27,10 +26,11 @@ import {
 	minutes,
 	safePromiseAll,
 	seconds,
+	splitMessage,
 } from '../../../functions';
 import { logger } from '../../../logger';
 import type { APIEmbed } from 'discord-api-types/v10';
-import type { JSONEncodable } from '@discordjs/builders';
+import type { Collection, Guild, GuildMember, JSONEncodable, Snowflake } from 'discord.js';
 import type {
 	CreationOptional,
 	InferAttributes,
@@ -40,7 +40,6 @@ import type {
 	NonAttribute,
 	Sequelize,
 } from 'sequelize';
-import type { Collection, GuildMember, Snowflake, Guild } from 'discord.js';
 import type { Player } from './Player';
 import type { ChatBridge } from '../../chat_bridge/ChatBridge';
 import type { LunarClient } from '../../LunarClient';
@@ -328,7 +327,7 @@ export class HypixelGuild extends Model<
 	static transformLogArray(logArray: string[]) {
 		if (!logArray.length) return logArray;
 
-		return Util.splitMessage(logArray.sort(compareAlphabetically).join('\n'), {
+		return splitMessage(logArray.sort(compareAlphabetically).join('\n'), {
 			maxLength: EMBED_FIELD_MAX_CHARS - 11,
 			char: '\n',
 		});

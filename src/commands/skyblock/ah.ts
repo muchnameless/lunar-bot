@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRowBuilder, Formatters, SelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, Formatters, SelectMenuBuilder, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';

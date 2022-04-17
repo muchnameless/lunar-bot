@@ -1,5 +1,9 @@
-import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { ApplicationCommandPermissionType, ApplicationCommandType } from 'discord.js';
+import {
+	ApplicationCommandPermissionType,
+	ApplicationCommandType,
+	SlashCommandSubcommandBuilder,
+	SlashCommandSubcommandGroupBuilder,
+} from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError';
 import { CustomIdKey } from '../../constants';
 import { logger } from '../../logger';
@@ -13,7 +17,16 @@ import type {
 	RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from 'discord-api-types/v10';
 import type {
+	AutocompleteInteraction,
+	ButtonInteraction,
+	ChatInputCommandInteraction,
 	ContextMenuCommandBuilder,
+	GuildMember,
+	Interaction,
+	Message,
+	MessageContextMenuCommandInteraction,
+	ModalSubmitInteraction,
+	SelectMenuInteraction,
 	SlashCommandBooleanOption,
 	SlashCommandBuilder,
 	SlashCommandChannelOption,
@@ -25,17 +38,6 @@ import type {
 	SlashCommandStringOption,
 	SlashCommandSubcommandsOnlyBuilder,
 	SlashCommandUserOption,
-} from '@discordjs/builders';
-import type {
-	AutocompleteInteraction,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	GuildMember,
-	Interaction,
-	Message,
-	MessageContextMenuCommandInteraction,
-	ModalSubmitInteraction,
-	SelectMenuInteraction,
 	Snowflake,
 	User,
 	UserContextMenuCommandInteraction,

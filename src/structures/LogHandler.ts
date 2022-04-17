@@ -1,16 +1,14 @@
 import { mkdir, opendir, readFile, rm, writeFile } from 'node:fs/promises';
 import { URL } from 'node:url';
 import { commaListsAnd } from 'common-tags';
-import { PermissionFlagsBits, SnowflakeUtil } from 'discord.js';
+import { PermissionFlagsBits, SnowflakeUtil, embedLength, isJSONEncodable } from 'discord.js';
 import ms from 'ms';
-import { embedLength, isJSONEncodable } from '@discordjs/builders';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../logger';
 import type { Dir } from 'node:fs';
-import type { JSONEncodable } from '@discordjs/builders';
+import type { GuildChannel, JSONEncodable, Message, TextChannel } from 'discord.js';
 import type { APIEmbed } from 'discord-api-types/v10';
-import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { LunarClient } from './LunarClient';
 
 type LogInput = JSONEncodable<APIEmbed> | APIEmbed | string | number | null | undefined;

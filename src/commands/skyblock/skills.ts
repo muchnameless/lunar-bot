@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { formatDecimalNumber, getSkillLevel, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
 import { SKILLS, SKILL_ACHIEVEMENTS, SKILL_XP_TOTAL, UnicodeEmoji } from '../../constants';
 import { hypixel } from '../../api';

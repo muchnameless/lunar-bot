@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { Op } from 'sequelize';
 import { Offset } from '../../constants';
 import { optionalPlayerOption } from '../../structures/commands/commonOptions';

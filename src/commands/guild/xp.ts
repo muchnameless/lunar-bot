@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { EmbedBuilder, Formatters } from 'discord.js';
+import { EmbedBuilder, Formatters, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import {
 	COSMETIC_SKILLS,
@@ -14,8 +13,7 @@ import { EmbedUtil, InteractionUtil } from '../../util';
 import { formatDecimalNumber, formatNumber, getDefaultOffset, upperCaseFirstChar } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { APIEmbed } from 'discord-api-types/v10';
-import type { JSONEncodable } from '@discordjs/builders';
-import type { ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction, JSONEncodable } from 'discord.js';
 import type { XPOffsets } from '../../constants';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 

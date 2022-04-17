@@ -1,4 +1,4 @@
-import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
+import { ContextMenuCommandBuilder, SlashCommandBuilder } from 'discord.js';
 import { UNKNOWN_IGN } from '../../constants';
 import { logger } from '../../logger';
 import { GuildMemberUtil, InteractionUtil } from '../../util';

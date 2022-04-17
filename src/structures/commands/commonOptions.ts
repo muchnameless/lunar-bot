@@ -1,4 +1,4 @@
-import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from '@discordjs/builders';
+import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from 'discord.js';
 import {
 	FindProfileStrategy,
 	LEADERBOARD_XP_TYPES,

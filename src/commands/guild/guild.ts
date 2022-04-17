@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, SnowflakeUtil } from 'discord.js';
+import { Formatters, SlashCommandBuilder, SnowflakeUtil } from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
 import { commaListsOr } from 'common-tags';
@@ -44,13 +43,13 @@ import {
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
 import type {
+	AutocompleteInteraction,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	Interaction,
+	SlashCommandStringOption,
 	Snowflake,
-	AutocompleteInteraction,
 } from 'discord.js';
-import type { SlashCommandStringOption } from '@discordjs/builders';
 import type { Attributes, WhereOptions } from 'sequelize';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';

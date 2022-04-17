@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { oneLine } from 'common-tags';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
 import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '../../functions';

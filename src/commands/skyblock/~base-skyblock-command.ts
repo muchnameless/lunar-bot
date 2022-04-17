@@ -17,14 +17,13 @@ import {
 	skyblockProfileOption,
 } from '../../structures/commands/commonOptions';
 import { logger } from '../../logger';
+import type { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import type { FindProfileStrategy } from '../../constants';
 import type { SkyBlockProfile } from '../../functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { BridgeCommandData } from '../../structures/commands/BridgeCommand';
 import type { ApplicationCommandData, SlashCommandOption } from '../../structures/commands/ApplicationCommand';
-import type { SlashCommandBuilder } from '@discordjs/builders';
 
 export type FetchedData = Awaited<ReturnType<BaseSkyBlockCommand['_fetchData']>>;
 

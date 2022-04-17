@@ -1,6 +1,5 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { Op } from 'sequelize';
-import { Formatters } from 'discord.js';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, UserUtil } from '../../util';

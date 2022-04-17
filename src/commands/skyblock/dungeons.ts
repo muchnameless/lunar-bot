@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { formatDecimalNumber, formatNumber, getSkillLevel, seconds, shortenNumber } from '../../functions';
 import { DUNGEON_CLASSES, DUNGEON_XP, LEVEL_CAP } from '../../constants';
 import { hypixel } from '../../api';

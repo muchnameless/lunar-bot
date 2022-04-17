@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { commaListsOr } from 'common-tags';
 import { DUNGEON_TYPES, SKILLS } from '../../constants';
 import { InteractionUtil } from '../../util';

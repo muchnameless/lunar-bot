@@ -1,8 +1,7 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { Collection, EmbedBuilder, Formatters, Util } from 'discord.js';
+import { Collection, EmbedBuilder, Formatters, embedLength } from 'discord.js';
 import { Op } from 'sequelize';
 import { CronJob } from 'cron';
-import { embedLength } from '@discordjs/builders';
 import {
 	EMBED_FIELD_MAX_CHARS,
 	EMBED_MAX_CHARS,
@@ -18,12 +17,13 @@ import {
 	getWeekOfYear,
 	safePromiseAll,
 	seconds,
+	splitMessage,
 	upperCaseFirstChar,
 } from '../../../functions';
 import { logger } from '../../../logger';
 import { ModelManager } from './ModelManager';
 import type { APIEmbed } from 'discord-api-types/v10';
-import type { JSONEncodable } from '@discordjs/builders';
+import type { JSONEncodable } from 'discord.js';
 import type { Attributes, CreationAttributes, FindOptions } from 'sequelize';
 import type { ModelResovable } from './ModelManager';
 import type { Player, PlayerInGuild, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
@@ -356,7 +356,7 @@ export class PlayerManager extends ModelManager<Player> {
 		for (const { guildName, playerCount, ignChanges } of log
 			.sort(({ guildName: a }, { guildName: b }) => compareAlphabetically(a, b))
 			.values()) {
-			const logParts = Util.splitMessage(Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')), {
+			const logParts = splitMessage(Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')), {
 				maxLength: EMBED_FIELD_MAX_CHARS,
 				char: '\n',
 				prepend: '```\n',
@@ -483,7 +483,7 @@ export class PlayerManager extends ModelManager<Player> {
 		for (const [guild, mainProfileUpdate] of log.sort((_, __, { name: a }, { name: b }) =>
 			compareAlphabetically(a, b),
 		)) {
-			const logParts = Util.splitMessage(
+			const logParts = splitMessage(
 				Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
 			);

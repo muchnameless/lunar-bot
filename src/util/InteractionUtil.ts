@@ -9,6 +9,7 @@ import {
 	ComponentType,
 	DiscordAPIError,
 	EmbedBuilder,
+	InteractionResponse,
 	InteractionType,
 	RESTJSONErrorCodes,
 	SnowflakeUtil,
@@ -21,6 +22,7 @@ import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	AutocompleteInteraction,
 	BaseGuildTextChannel,
+	BooleanCache,
 	ButtonInteraction,
 	CacheType,
 	ChatInputCommandInteraction as DJSChatInputCommandInteraction,
@@ -46,8 +48,8 @@ import type { Player } from '../structures/database/models/Player';
 import type { SendDMOptions } from '.';
 
 interface InteractionData {
-	deferReplyPromise: Promise<void | Message> | null;
-	deferUpdatePromise: Promise<void> | null;
+	deferReplyPromise: Promise<InteractionResponse | Message> | null;
+	deferUpdatePromise: Promise<InteractionResponse> | null;
 	useEphemeral: boolean;
 	autoDeferTimeout: NodeJS.Timeout | null;
 }
@@ -65,9 +67,11 @@ export interface FromMessageInteractionResponseFields<Cached extends CacheType =
 	extends InteractionResponseFields<Cached> {
 	message: GuildCacheMessage<Cached>;
 	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
-	deferUpdate(options?: InteractionDeferUpdateOptions): Promise<void>;
+	deferUpdate(options?: InteractionDeferUpdateOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
 	update(options: InteractionUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
-	update(options: string | MessagePayload | InteractionUpdateOptions): Promise<void>;
+	update(
+		options: string | MessagePayload | InteractionUpdateOptions,
+	): Promise<InteractionResponse<BooleanCache<Cached>>>;
 }
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
@@ -431,15 +435,15 @@ export class InteractionUtil extends null {
 	static async reply(
 		interaction: RepliableInteraction,
 		options: InteractionUtilReplyOptions & { rejectOnError: true },
-	): Promise<void | Message>;
+	): Promise<InteractionResponse | Message>;
 	static async reply(
 		interaction: RepliableInteraction,
 		options: string | InteractionUtilReplyOptions,
-	): Promise<void | null | Message>;
+	): Promise<null | InteractionResponse | Message>;
 	static async reply(
 		interaction: RepliableInteraction,
 		options: string | InteractionUtilReplyOptions,
-	): Promise<void | null | Message> {
+	): Promise<null | InteractionResponse | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		const _options =
 			typeof options === 'string'
@@ -454,10 +458,8 @@ export class InteractionUtil extends null {
 				for (const content of makeContent(_options.content ?? '', { split: _options.split, code: _options.code })) {
 					await this.reply(interaction, { ..._options, content, split: false, code: false });
 				}
-				return;
+				return null;
 			}
-
-			this._addVisibilityButton(_options);
 
 			// replied
 			if (interaction.replied) return await interaction.followUp(_options);
@@ -492,6 +494,7 @@ export class InteractionUtil extends null {
 
 			if (_options.rejectOnError) throw error;
 			logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION REPLY]');
+			return null;
 		}
 	}
 
@@ -558,16 +561,20 @@ export class InteractionUtil extends null {
 		interaction: FromMessageInteraction,
 		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
 	): Promise<Message>;
-	static async deferUpdate(interaction: FromMessageInteraction, options?: DeferReplyOptions): Promise<void | Message>;
-	static async deferUpdate(interaction: FromMessageInteraction, options?: DeferUpdateOptions): Promise<void | Message> {
+	static async deferUpdate(
+		interaction: FromMessageInteraction,
+		options?: DeferReplyOptions,
+	): Promise<InteractionResponse | Message>;
+	static async deferUpdate(
+		interaction: FromMessageInteraction,
+		options?: DeferUpdateOptions,
+	): Promise<InteractionResponse | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
 		if (interaction.replied) {
-			return logger.warn(
-				{ ...this.logInfo(interaction), data: options },
-				'[INTERACTION DEFER UPDATE]: already replied',
-			);
+			logger.warn({ ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER UPDATE]: already replied');
+			return Reflect.construct(InteractionResponse, [interaction]);
 		}
 
 		clearTimeout(cached.autoDeferTimeout!);
@@ -577,6 +584,7 @@ export class InteractionUtil extends null {
 		} catch (error) {
 			if (options?.rejectOnError) throw error;
 			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER UPDATE]');
+			return Reflect.construct(InteractionResponse, [interaction]);
 		}
 	}
 
@@ -588,13 +596,19 @@ export class InteractionUtil extends null {
 		interaction: FromMessageInteraction,
 		options: UpdateOptions & { rejectOnError: true },
 	): Promise<Message>;
-	static async update(interaction: FromMessageInteraction, options: string | UpdateOptions): Promise<void | Message>;
-	static async update(interaction: FromMessageInteraction, options: string | UpdateOptions): Promise<void | Message> {
+	static async update(
+		interaction: FromMessageInteraction,
+		options: string | UpdateOptions,
+	): Promise<InteractionResponse | Message>;
+	static async update(
+		interaction: FromMessageInteraction,
+		options: string | UpdateOptions,
+	): Promise<InteractionResponse | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		const _options =
 			typeof options === 'string'
-				? { ephemeral: cached.useEphemeral, content: options }
-				: { ephemeral: cached.useEphemeral, ...options };
+				? { ephemeral: MessageUtil.isEphemeral(interaction.message), content: options }
+				: { ephemeral: MessageUtil.isEphemeral(interaction.message), ...options };
 
 		this._addVisibilityButton(_options);
 
@@ -626,6 +640,7 @@ export class InteractionUtil extends null {
 
 			if (_options.rejectOnError) throw error;
 			logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION UPDATE]');
+			return Reflect.construct(InteractionResponse, [interaction]);
 		}
 	}
 
@@ -738,19 +753,10 @@ export class InteractionUtil extends null {
 				.setEmoji({ name: UnicodeEmoji.X }),
 		);
 
-		let channel: TextBasedChannel | null;
-		let message: Message | void;
+		let res: InteractionResponse | Message;
 
 		try {
-			channel =
-				interaction.channel ??
-				(interaction.channelId !== null
-					? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel)
-					: null);
-
-			if (!channel) throw `no channel with the id '${interaction.channelId}'`;
-
-			message = await this.reply(interaction, {
+			res = await this.reply(interaction, {
 				embeds: [interaction.client.defaultEmbed.setDescription(question)],
 				components: [row],
 				fetchReply: false,
@@ -762,9 +768,8 @@ export class InteractionUtil extends null {
 			throw errorMessage;
 		}
 
-		const collector = channel.createMessageComponentCollector({
+		const collector = res.createMessageComponentCollector({
 			componentType: ComponentType.Button,
-			message: message!,
 			filter: (i) => {
 				// wrong button
 				if (![SUCCESS_ID, CANCEL_ID].includes(i.customId)) return false;
@@ -831,7 +836,7 @@ export class InteractionUtil extends null {
 						};
 
 						try {
-							await this.editReply(interaction, editOptions, message ?? '@original');
+							await this.editReply(interaction, editOptions, (res as Message).id ?? '@original');
 						} catch (error) {
 							logger.error(
 								{ err: error, ...this.logInfo(interaction), data: _options },

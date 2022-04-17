@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { hypixel } from '../../api';

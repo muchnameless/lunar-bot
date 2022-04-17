@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { INVISIBLE_CHARACTERS, HypixelMessageType } from '../../structures/chat_bridge/constants';
