@@ -186,15 +186,6 @@ export class MessageUtil extends null {
 			return message;
 		}
 
-		// TODO: remove once discord.js Message#deletable checks for ephemeral state
-		if (this.isEphemeral(message)) {
-			logger.warn(
-				{ message, data: { timeout } },
-				`[MESSAGE DELETE]: unable to delete ephemeral message in ${this.channelLogInfo(message)}`,
-			);
-			return message;
-		}
-
 		// no timeout
 		if (timeout <= 0) {
 			this.DELETE_TIMEOUT_CACHE.delete(message.id);
@@ -352,15 +343,6 @@ export class MessageUtil extends null {
 			requiredChannelPermissions |= PermissionFlagsBits.ManageMessages; // removing attachments requires MANAGE_MESSAGES
 		}
 
-		// TODO: remove once discord.js Message#editable checks for ephemeral state
-		if (this.isEphemeral(message)) {
-			logger.warn(
-				{ message, data: _options },
-				`[MESSAGE EDIT]: unable to edit ephemeral message in ${this.channelLogInfo(message)}`,
-			);
-			return message;
-		}
-
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
 			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
@@ -433,15 +415,6 @@ export class MessageUtil extends null {
 
 		if (!message.pinnable) {
 			const MESSAGE = 'missing permissions to pin message';
-
-			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
-			return message;
-		}
-
-		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
-		if (this.isEphemeral(message)) {
-			const MESSAGE = 'unable to pin ephemeral message';
 
 			if (rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);

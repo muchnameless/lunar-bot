@@ -21,6 +21,7 @@ import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	AutocompleteInteraction,
+	AwaitModalSubmitOptions,
 	BaseGuildTextChannel,
 	BooleanCache,
 	ButtonInteraction,
@@ -35,14 +36,18 @@ import type {
 	InteractionReplyOptions,
 	InteractionResponseFields,
 	InteractionUpdateOptions,
+	JSONEncodable,
 	Message,
 	MessageActionRowComponentBuilder,
 	MessagePayload,
 	MessageResolvable,
 	ModalBuilder,
+	ModalData,
+	ModalSubmitInteraction,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
+import type { APIModalInteractionResponseCallbackData } from 'discord-api-types/v10';
 import type { SplitOptions } from '../functions';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';
@@ -56,10 +61,18 @@ interface InteractionData {
 }
 
 export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
-	Omit<InteractionResponseFields<Cached>, 'showModal' | 'awaitModalSubmit'>;
+	InteractionResponseFields<Cached>;
 
 export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
-	InteractionResponseFields<Cached>;
+	InteractionResponseFields<Cached> & {
+		showModal(
+			modal:
+				| JSONEncodable<APIModalInteractionResponseCallbackData>
+				| ModalData
+				| APIModalInteractionResponseCallbackData,
+		): Promise<void>;
+		awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
+	};
 
 export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
 	FromMessageInteractionResponseFields<Cached>;
@@ -584,7 +597,7 @@ export class InteractionUtil extends null {
 
 		if (interaction.replied) {
 			logger.warn({ ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER UPDATE]: already replied');
-			return Reflect.construct(InteractionResponse, [interaction]);
+			return Reflect.construct(InteractionResponse, [interaction, interaction.message.interaction?.id]);
 		}
 
 		clearTimeout(cached.autoDeferTimeout!);
@@ -594,7 +607,7 @@ export class InteractionUtil extends null {
 		} catch (error) {
 			if (options?.rejectOnError) throw error;
 			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER UPDATE]');
-			return Reflect.construct(InteractionResponse, [interaction]);
+			return Reflect.construct(InteractionResponse, [interaction, interaction.message.interaction?.id]);
 		}
 	}
 
@@ -650,7 +663,7 @@ export class InteractionUtil extends null {
 
 			if (_options.rejectOnError) throw error;
 			logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION UPDATE]');
-			return Reflect.construct(InteractionResponse, [interaction]);
+			return Reflect.construct(InteractionResponse, [interaction, interaction.message.interaction?.id]);
 		}
 	}
 

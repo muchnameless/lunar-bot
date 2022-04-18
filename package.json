@@ -40,7 +40,7 @@
 		"common-tags": "^1.8.2",
 		"cron": "^1.8.2",
 		"discord-api-types": "*",
-		"discord.js": "14.0.0-dev.1650197065-b94a876",
+		"discord.js": "14.0.0-dev.1650240532-9ef7ffd",
 		"emoji-regex": "9.2.2",
 		"fast-xml-parser": "^4.0.7",
 		"ioredis": "^5.0.4",
@@ -97,11 +97,11 @@
 	},
 	"packageManager": "yarn@3.2.0",
 	"resolutions": {
-		"@discordjs/builders": "0.14.0-dev.1650197026-b94a876",
-		"@discordjs/collection": "0.7.0-dev.1650197026-b94a876",
-		"@discordjs/rest": "0.5.0-dev.1650197025-b94a876",
+		"@discordjs/builders": "0.14.0-dev.1650240529-9ef7ffd",
+		"@discordjs/collection": "0.7.0-dev.1650240530-9ef7ffd",
+		"@discordjs/rest": "0.5.0-dev.1650240529-9ef7ffd",
 		"discord-api-types": "0.31.1",
-		"discord.js@14.0.0-dev.1650197065-b94a876": "patch:discord.js@npm:14.0.0-dev.1650197065-b94a876#.yarn/patches/discord.js-npm-14.0.0-dev.1650197065-b94a876-a9d40a4a42.patch",
+		"discord.js@14.0.0-dev.1650240532-9ef7ffd": "patch:discord.js@npm:14.0.0-dev.1650240532-9ef7ffd#.yarn/patches/discord.js-npm-14.0.0-dev.1650240532-9ef7ffd-6cb693d9b6.patch",
 		"minecraft-data": "^3.0.0"
 	}
 }
