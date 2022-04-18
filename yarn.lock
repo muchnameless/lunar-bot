@@ -3824,7 +3824,7 @@ __metadata:
     lilyweight: ^2.5.0
     lint-staged: ^12.3.8
     minecraft-data: "*"
-    minecraft-protocol: ^1.33.0
+    minecraft-protocol: ^1.34.0
     ms: ^2.1.3
     pg: ^8.7.3
     pg-hstore: ^2.3.4
@@ -4025,10 +4025,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:^1.33.0":
-  version: 1.33.0
-  resolution: "minecraft-protocol@npm:1.33.0"
+"minecraft-protocol@npm:^1.34.0":
+  version: 1.34.0
+  resolution: "minecraft-protocol@npm:1.34.0"
   dependencies:
+    "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
     buffer-equal: ^1.0.0
     debug: ^4.3.2
@@ -4045,7 +4046,7 @@ __metadata:
     readable-stream: ^3.0.6
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 72f8c4e94ecd7c887b3965fa4716eafb782fa11496f0b7b509d9e0256e1c6db054e49bf2b26c358fdc99e0431ada7e9c3a49572ddbf07bcf362990bb75472e41
+  checksum: bbf34916464ddde657bde758c10128d8338c8711391f221e8dc756e68b5b06e5672796ea1423b30dd1e4be97536109384872177a99f847076055e5d0ddf84a50
   languageName: node
   linkType: hard
 
