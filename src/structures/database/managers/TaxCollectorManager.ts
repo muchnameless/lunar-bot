@@ -1,4 +1,4 @@
-import { Formatters } from 'discord.js';
+import { bold } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { escapeIgn, formatNumber } from '../../../functions';
 import { ModelManager } from './ModelManager';
@@ -65,7 +65,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 		const embed = this.client.defaultEmbed //
 			.setTitle('Collected Guild Tax') //
 			.setDescription(stripIndents`
-				${Formatters.bold('combined')}
+				${bold('combined')}
 				tax: ${formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0))}
 				donations: ${formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0))}
 				total: ${formatNumber(

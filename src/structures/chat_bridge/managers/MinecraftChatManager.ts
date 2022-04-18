@@ -2,7 +2,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { URL } from 'node:url';
 import { env } from 'node:process';
-import { EmbedBuilder, Formatters, SnowflakeUtil } from 'discord.js';
+import { bold, EmbedBuilder, SnowflakeUtil, TimestampStyles } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import minecraftData from 'minecraft-data';
@@ -363,7 +363,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 							.setThumbnail(player.imageURL)
 							.setDescription(
 								stripIndents`
-									${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions
+									${bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions
 									${player.info}
 								`,
 							)
@@ -636,7 +636,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 					// https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
 					switch (p2) {
-						case Formatters.TimestampStyles.ShortTime:
+						case TimestampStyles.ShortTime:
 							return date.toLocaleString('en-GB', {
 								hour: '2-digit',
 								minute: '2-digit',
@@ -644,7 +644,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 								timeZone: 'UTC',
 							});
 
-						case Formatters.TimestampStyles.LongTime:
+						case TimestampStyles.LongTime:
 							return date.toLocaleString('en-GB', {
 								hour: '2-digit',
 								minute: '2-digit',
@@ -653,7 +653,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 								timeZone: 'UTC',
 							});
 
-						case Formatters.TimestampStyles.ShortDate:
+						case TimestampStyles.ShortDate:
 							return date.toLocaleString('en-GB', {
 								day: '2-digit',
 								month: '2-digit',
@@ -661,10 +661,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 								timeZone: 'UTC',
 							});
 
-						case Formatters.TimestampStyles.LongDate:
+						case TimestampStyles.LongDate:
 							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
-						case Formatters.TimestampStyles.ShortDateTime:
+						case TimestampStyles.ShortDateTime:
 							return date.toLocaleString('en-GB', {
 								day: '2-digit',
 								month: 'long',
@@ -675,7 +675,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 								timeZone: 'UTC',
 							});
 
-						case Formatters.TimestampStyles.LongDateTime:
+						case TimestampStyles.LongDateTime:
 							return date.toLocaleString('en-GB', {
 								weekday: 'long',
 								day: '2-digit',
@@ -687,7 +687,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 								timeZone: 'UTC',
 							});
 
-						case Formatters.TimestampStyles.RelativeTime: {
+						case TimestampStyles.RelativeTime: {
 							const TIME = date.getTime() - Date.now();
 							if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
 							return `${ms(Math.abs(TIME), { long: true })} ago`;

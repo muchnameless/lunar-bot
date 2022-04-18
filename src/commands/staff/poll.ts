@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { INVISIBLE_CHARACTERS, HypixelMessageType } from '../../structures/chat_bridge/constants';
@@ -70,10 +70,7 @@ export default class PollCommand extends DualCommand {
 	 */
 	private async _sharedRun({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
 		if (chatBridge.pollUntil) {
-			return `poll already in progress, ends ${Formatters.time(
-				new Date(chatBridge.pollUntil),
-				Formatters.TimestampStyles.RelativeTime,
-			)}`;
+			return `poll already in progress, ends ${time(new Date(chatBridge.pollUntil), TimestampStyles.RelativeTime)}`;
 		}
 
 		try {

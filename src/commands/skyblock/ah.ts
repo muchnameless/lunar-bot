@@ -1,4 +1,4 @@
-import { ActionRowBuilder, Formatters, SelectMenuBuilder, SlashCommandBuilder } from 'discord.js';
+import { ActionRowBuilder, SelectMenuBuilder, SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
@@ -135,7 +135,7 @@ export default class AhCommand extends ApplicationCommand {
 								? (++endedAuctions, (totalUnclaimedCoins += highestBid), 'sold')
 								: 'expired'
 							: 'ends'
-					} ${Formatters.time(new Date(end), Formatters.TimestampStyles.RelativeTime)}`,
+					} ${time(new Date(end), TimestampStyles.RelativeTime)}`,
 				});
 			}
 

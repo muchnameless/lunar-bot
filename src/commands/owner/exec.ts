@@ -1,6 +1,6 @@
 import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
-import { ActionRowBuilder, Formatters, SlashCommandBuilder } from 'discord.js';
+import { ActionRowBuilder, codeBlock, SlashCommandBuilder } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { buildDeleteButton } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -35,7 +35,7 @@ export default class ExecCommand extends ApplicationCommand {
 			const responseEmbed = this.client.defaultEmbed
 				.addFields({
 					name: 'Input',
-					value: Formatters.codeBlock('bash', INPUT),
+					value: codeBlock('bash', INPUT),
 				})
 				.setFooter({
 					text: me?.displayName ?? this.client.user!.username,
@@ -47,7 +47,7 @@ export default class ExecCommand extends ApplicationCommand {
 
 				responseEmbed.addFields({
 					name: 'Output',
-					value: Formatters.codeBlock('bash', stdout),
+					value: codeBlock('bash', stdout),
 				});
 			}
 
@@ -56,7 +56,7 @@ export default class ExecCommand extends ApplicationCommand {
 
 				responseEmbed.addFields({
 					name: stderr,
-					value: Formatters.codeBlock('xl', stderr),
+					value: codeBlock('xl', stderr),
 				});
 			}
 
@@ -72,7 +72,7 @@ export default class ExecCommand extends ApplicationCommand {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
 			return InteractionUtil.reply(interaction, {
-				content: Formatters.codeBlock('xl', `${error}`),
+				content: codeBlock('xl', `${error}`),
 				components: [
 					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 						buildDeleteButton(interaction.user.id),

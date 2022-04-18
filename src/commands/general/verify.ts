@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, userMention } from 'discord.js';
 import { Op } from 'sequelize';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
@@ -100,9 +100,7 @@ export default class VerifyCommand extends ApplicationCommand {
 				logger.error(error, '[VERIFY]: database');
 				return InteractionUtil.reply(
 					interaction,
-					`an error occurred while updating the guild player database. Contact ${Formatters.userMention(
-						this.client.ownerId,
-					)}`,
+					`an error occurred while updating the guild player database. Contact ${userMention(this.client.ownerId)}`,
 				);
 			}
 		}

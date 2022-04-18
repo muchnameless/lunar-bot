@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { mojang } from '../../api';
 import { EmbedUtil, InteractionUtil } from '../../util';
@@ -55,7 +55,7 @@ export default class DonationsCommand extends ApplicationCommand {
 
 					embed.addFields({
 						name: '\u200B',
-						value: Formatters.codeBlock(
+						value: codeBlock(
 							'ada',
 							stripIndent`
 								#${`${index + 1}`.padStart(3, '0')} : ${IGN}

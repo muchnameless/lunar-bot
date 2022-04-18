@@ -1,4 +1,12 @@
-import { DiscordAPIError, EmbedBuilder, Formatters, MessageCollector, PermissionFlagsBits } from 'discord.js';
+import {
+	bold,
+	DiscordAPIError,
+	EmbedBuilder,
+	MessageCollector,
+	PermissionFlagsBits,
+	time,
+	TimestampStyles,
+} from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { UnicodeEmoji, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
@@ -233,7 +241,7 @@ export class DiscordChatManager extends ChatManager {
 					new EmbedBuilder()
 						.setColor(this.client.config.get('EMBED_GREEN'))
 						.setTitle(`${this.hypixelGuild} Chat Bridge`)
-						.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
+						.setDescription(`${bold('Webhook')}: created in ${channel}`)
 						.setTimestamp(),
 				);
 			}
@@ -250,9 +258,7 @@ export class DiscordChatManager extends ChatManager {
 					new EmbedBuilder()
 						.setColor(this.client.config.get('EMBED_RED'))
 						.setTitle(`${error.hypixelGuild} Chat Bridge`)
-						.setDescription(
-							`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`,
-						)
+						.setDescription(`${bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
 						.setTimestamp(),
 				);
 			}
@@ -396,9 +402,9 @@ export class DiscordChatManager extends ChatManager {
 		if (this.hypixelGuild!.checkMute(player)) {
 			void DiscordChatManager._dmMuteInfo(
 				message.author,
-				`your mute expires ${Formatters.time(
+				`your mute expires ${time(
 					new Date(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
-					Formatters.TimestampStyles.RelativeTime,
+					TimestampStyles.RelativeTime,
 				)}`,
 			);
 			return MessageUtil.react(message, UnicodeEmoji.Muted);
@@ -414,9 +420,9 @@ export class DiscordChatManager extends ChatManager {
 		if (this.hypixelGuild!.muted && (!player || !this.hypixelGuild!.checkStaff(player))) {
 			void DiscordChatManager._dmMuteInfo(
 				message.author,
-				`${this.hypixelGuild!.name}'s guild chat mute expires ${Formatters.time(
+				`${this.hypixelGuild!.name}'s guild chat mute expires ${time(
 					new Date(this.hypixelGuild!.mutedTill),
-					Formatters.TimestampStyles.RelativeTime,
+					TimestampStyles.RelativeTime,
 				)}`,
 			);
 			return MessageUtil.react(message, UnicodeEmoji.Muted);
@@ -426,9 +432,9 @@ export class DiscordChatManager extends ChatManager {
 		if (this.hypixelGuild!.checkMute(this.minecraft.botPlayer)) {
 			void DiscordChatManager._dmMuteInfo(
 				message.author,
-				`the bot's mute expires ${Formatters.time(
+				`the bot's mute expires ${time(
 					new Date(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid)!),
-					Formatters.TimestampStyles.RelativeTime,
+					TimestampStyles.RelativeTime,
 				)}`,
 			);
 			return MessageUtil.react(message, UnicodeEmoji.Muted);

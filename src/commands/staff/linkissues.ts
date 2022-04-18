@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder, Util } from 'discord.js';
+import { bold, SlashCommandBuilder, userMention, Util } from 'discord.js';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { escapeIgn, splitMessage } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -60,15 +60,13 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				{ char: '\n', maxLength: 1_024 },
 			)) {
 				embed.addFields({
-					name: `${Formatters.bold(`Missing ${mandatoryRole!.name} Role:`)} [display name | tag] (${
-						missingMandatoryRole.length
-					})`,
+					name: `${bold(`Missing ${mandatoryRole!.name} Role:`)} [display name | tag] (${missingMandatoryRole.length})`,
 					value,
 				});
 			}
 		} else if (mandatoryRole) {
 			embed.addFields({
-				name: Formatters.bold(`Missing ${mandatoryRole.name} Role:`),
+				name: bold(`Missing ${mandatoryRole.name} Role:`),
 				value: 'none',
 			});
 		}
@@ -81,15 +79,13 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				{ char: '\n', maxLength: 1_024 },
 			)) {
 				embed.addFields({
-					name: `${Formatters.bold('Guild Role and no linked Player:')} [display name | tag] (${
-						guildRoleAndNotInGuild.length
-					})`,
+					name: `${bold('Guild Role and no linked Player:')} [display name | tag] (${guildRoleAndNotInGuild.length})`,
 					value,
 				});
 			}
 		} else {
 			embed.addFields({
-				name: Formatters.bold('Guild Role and no linked Player:'),
+				name: bold('Guild Role and no linked Player:'),
 				value: 'none',
 			});
 		}
@@ -128,7 +124,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 			values: LINKED_NOT_DISCORD_AMOUNT
 				? splitMessage(
 						linkedAndNotInDiscordCurrentGuild
-							.map(({ discordId, ign }) => `${Formatters.userMention(discordId!)} | ${escapeIgn(ign)}`)
+							.map(({ discordId, ign }) => `${userMention(discordId!)} | ${escapeIgn(ign)}`)
 							.join('\n'),
 						{ char: '\n', maxLength: 1_024 },
 				  )
@@ -138,7 +134,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		for (const { amount, values } of unlinkedPlayers) {
 			for (const value of values) {
 				embed.addFields({
-					name: `${Formatters.bold('Unlinked Players:')}${amount ? ` [ign | tag] (${amount})` : ''}`,
+					name: `${bold('Unlinked Players:')}${amount ? ` [ign | tag] (${amount})` : ''}`,
 					value,
 				});
 			}
@@ -147,7 +143,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		for (const { amount, values } of linkedAndNotInDiscord) {
 			for (const value of values) {
 				embed.addFields({
-					name: `${Formatters.bold('Linked and not in Discord:')}${amount ? ` (${amount})` : ''}`,
+					name: `${bold('Linked and not in Discord:')}${amount ? ` (${amount})` : ''}`,
 					value,
 				});
 			}

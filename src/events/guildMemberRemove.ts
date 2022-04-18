@@ -1,4 +1,4 @@
-import { EmbedBuilder, Formatters } from 'discord.js';
+import { codeBlock, EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { logger } from '../logger';
 import { EmbedUtil, GuildMemberUtil } from '../util';
@@ -49,7 +49,7 @@ export default class GuildMemberRemoveEvent extends Event {
 					)
 					.addFields({
 						name: 'Roles',
-						value: Formatters.codeBlock(
+						value: codeBlock(
 							member.roles?.cache
 								.filter(({ id }) => id !== member.guild.id)
 								.sort((a, b) => b.comparePositionTo(a))

@@ -1,5 +1,5 @@
 import { basename } from 'node:path';
-import { Formatters, SlashCommandBooleanOption, SlashCommandBuilder } from 'discord.js';
+import { codeBlock, SlashCommandBooleanOption, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { InteractionUtil } from '../../util';
 import { readJSFiles } from '../../functions';
@@ -153,7 +153,7 @@ export default class ReloadCommand extends DualCommand {
 
 					throw stripIndents`
 						an error occurred while reloading \`${commandName}\`:
-						${Formatters.codeBlock('xl', `${error}`)}
+						${codeBlock('xl', `${error}`)}
 					`;
 				}
 			}
@@ -168,7 +168,7 @@ export default class ReloadCommand extends DualCommand {
 
 					throw stripIndents`
 						an error occurred while reloading all commands:
-						${Formatters.codeBlock('xl', `${error}`)}
+						${codeBlock('xl', `${error}`)}
 					`;
 				}
 			}
@@ -202,7 +202,7 @@ export default class ReloadCommand extends DualCommand {
 
 					throw stripIndents`
 						an error occurred while reloading \`${eventName}\`:
-						${Formatters.codeBlock('xl', `${error}`)}
+						${codeBlock('xl', `${error}`)}
 					`;
 				}
 			}
@@ -219,7 +219,7 @@ export default class ReloadCommand extends DualCommand {
 
 					throw stripIndents`
 						an error occurred while reloading all events:
-						${Formatters.codeBlock('xl', `${error}`)}
+						${codeBlock('xl', `${error}`)}
 					`;
 				}
 			}
@@ -251,7 +251,7 @@ export default class ReloadCommand extends DualCommand {
 
 					throw stripIndents`
 						an error occurred while reloading the filter:
-						${Formatters.codeBlock('xl', `${error}`)}
+						${codeBlock('xl', `${error}`)}
 					`;
 				}
 			}

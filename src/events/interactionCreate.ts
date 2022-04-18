@@ -4,9 +4,9 @@ import {
 	ActionRowBuilder,
 	ApplicationCommandType,
 	ComponentType,
-	Formatters,
 	InteractionType,
 	PermissionFlagsBits,
+	userMention,
 } from 'discord.js';
 import { CustomIdKey, GUILD_ID_ALL, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
@@ -123,7 +123,7 @@ export default class InteractionCreateEvent extends Event {
 				// check if button press is from the user that invoked the original interaction
 				if (interaction.user.id !== args[0]) {
 					return InteractionUtil.reply(interaction, {
-						content: `you cannot delete messages from ${Formatters.userMention(args[0])}`,
+						content: `you cannot delete messages from ${userMention(args[0])}`,
 						ephemeral: true,
 					});
 				}

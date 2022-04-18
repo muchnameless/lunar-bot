@@ -1,4 +1,4 @@
-import { Formatters, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { codeBlock, PermissionFlagsBits, SlashCommandBuilder, userMention } from 'discord.js';
 import { Op } from 'sequelize';
 import {
 	hypixelGuildOption,
@@ -181,12 +181,12 @@ export default class TaxCommand extends ApplicationCommand {
 								.addFields(
 									{
 										name: 'Old amount',
-										value: Formatters.codeBlock(formatNumber(OLD_AMOUNT)),
+										value: codeBlock(formatNumber(OLD_AMOUNT)),
 										inline: true,
 									},
 									{
 										name: 'New amount',
-										value: Formatters.codeBlock(formatNumber(NEW_AMOUNT)),
+										value: codeBlock(formatNumber(NEW_AMOUNT)),
 										inline: true,
 									},
 								),
@@ -236,7 +236,7 @@ export default class TaxCommand extends ApplicationCommand {
 								.setTitle('Guild Tax')
 								.addFields({
 									name: `/ah ${collector}`,
-									value: Formatters.codeBlock(`${player}: ${formatNumber(AMOUNT)} (manually)`),
+									value: codeBlock(`${player}: ${formatNumber(AMOUNT)} (manually)`),
 								}),
 						);
 
@@ -281,7 +281,7 @@ export default class TaxCommand extends ApplicationCommand {
 						let pingMessage = '';
 
 						for (const player of playersPingable.values()) {
-							pingMessage += ` ${Formatters.userMention(player.discordId!)}`;
+							pingMessage += ` ${userMention(player.discordId!)}`;
 						}
 						for (const player of playersOnlyIgn.values()) pingMessage += ` ${escapeIgn(player.ign)}`;
 

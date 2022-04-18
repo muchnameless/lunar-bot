@@ -1,6 +1,6 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import { Model, DataTypes } from 'sequelize';
-import { EmbedBuilder, Formatters, embedLength } from 'discord.js';
+import { bold, codeBlock, EmbedBuilder, embedLength } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
 import ms from 'ms';
 import { mute, setRank, unmute } from '../../chat_bridge/constants';
@@ -969,12 +969,12 @@ export class HypixelGuild extends Model<
 				const newFields = [
 					{
 						name: `${'joined'.padEnd(125, '\u00A0')}\u200B`,
-						value: Formatters.codeBlock('diff', joinedLogElement),
+						value: codeBlock('diff', joinedLogElement),
 						inline: true,
 					},
 					{
 						name: `${'left'.padEnd(125, '\u00A0')}\u200B`,
-						value: Formatters.codeBlock('diff', leftLogElement),
+						value: codeBlock('diff', leftLogElement),
 						inline: true,
 					},
 					{
@@ -1119,7 +1119,7 @@ export class HypixelGuild extends Model<
 				setRankLog.push(
 					this.client.defaultEmbed
 						.setThumbnail(player.imageURL)
-						.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
+						.setDescription(`${bold('Auto Rank Sync')} for ${player.info}`)
 						.addFields(
 							{
 								name: 'Old',

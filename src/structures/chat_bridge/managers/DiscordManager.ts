@@ -1,4 +1,4 @@
-import { Collection, Util, Formatters } from 'discord.js';
+import { Collection, userMention, Util } from 'discord.js';
 import { Op } from 'sequelize';
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '../../../functions';
@@ -134,7 +134,7 @@ export class DiscordManager {
 
 								// player can be pinged
 								if (player?.inDiscord || (player?.discordId && !player.discordId.includes('#'))) {
-									return Formatters.userMention(player.discordId!);
+									return userMention(player.discordId!);
 								}
 							}
 						}

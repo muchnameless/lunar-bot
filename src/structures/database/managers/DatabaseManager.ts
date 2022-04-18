@@ -1,5 +1,5 @@
 import { setTimeout } from 'node:timers';
-import { Formatters, PermissionFlagsBits } from 'discord.js';
+import { codeBlock, PermissionFlagsBits } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
 import { Model } from 'sequelize';
@@ -261,7 +261,7 @@ export class DatabaseManager {
 							if (paidLog.length) {
 								return {
 									name: `/ah ${taxCollector}`,
-									value: Formatters.codeBlock(paidLog.join('\n')),
+									value: codeBlock(paidLog.join('\n')),
 								};
 							}
 						})(),
@@ -310,7 +310,7 @@ export class DatabaseManager {
 		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
 		const TOTAL_COINS = formatNumber(taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0));
 
-		return Formatters.codeBlock(
+		return codeBlock(
 			'cs',
 			stripIndents(commaLists`
 				Collectors: # /ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}
@@ -365,7 +365,7 @@ export class DatabaseManager {
 
 				fields.push({
 					name: index % 2 ? `${hypixelGuild} (${GUILD_PLAYER_COUNT})` : '\u200B',
-					value: Formatters.codeBlock(paddedValue),
+					value: codeBlock(paddedValue),
 					inline: true,
 				});
 			}

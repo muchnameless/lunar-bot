@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, time } from 'discord.js';
 import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { hypixel } from '../../api';
@@ -77,8 +77,8 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			level: ${level},
 			achievement points: ${formatNumber(achievementPoints)},
 			karma: ${formatNumber(karma)},
-			first joined: ${Formatters.time(Number.parseInt(_id.slice(0, 8), 16))},
-			last joined: ${lastLogin ? Formatters.time(new Date(lastLogin)) : 'unknown'}
+			first joined: ${time(Number.parseInt(_id.slice(0, 8), 16))},
+			last joined: ${lastLogin ? time(new Date(lastLogin)) : 'unknown'}
 		`;
 	}
 }

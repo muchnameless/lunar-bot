@@ -1,5 +1,5 @@
 import { jaroWinkler } from '@skyra/jaro-winkler';
-import { Formatters, Util } from 'discord.js';
+import { codeBlock, Util } from 'discord.js';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS, SMALL_LATIN_CAPITAL_LETTERS } from '../constants';
 import type { Merge } from '../types/util';
@@ -224,7 +224,7 @@ export function makeContent(text = '', options: MakeContentOptions = {}) {
 	if (isCode) {
 		const codeName = typeof options.code === 'string' ? options.code : '';
 
-		content = Formatters.codeBlock(codeName, Util.cleanCodeBlockContent(content));
+		content = codeBlock(codeName, Util.cleanCodeBlockContent(content));
 
 		if (splitOptions) {
 			splitOptions.prepend = `${splitOptions.prepend ?? ''}\`\`\`${codeName}\n`;
@@ -251,9 +251,9 @@ export function splitForEmbedFields(
 	const formattedInput = formatter(input);
 
 	// empty code blocks would display the language
-	if (!formattedInput) return [Formatters.codeBlock('\u200B')];
+	if (!formattedInput) return [codeBlock('\u200B')];
 
-	return splitMessage(Formatters.codeBlock(code, formattedInput), {
+	return splitMessage(codeBlock(code, formattedInput), {
 		maxLength: EMBED_FIELD_MAX_CHARS,
 		char: [char, ''],
 		prepend: `\`\`\`${code}\n`,

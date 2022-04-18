@@ -1,5 +1,13 @@
 import { memoryUsage, version as processVersion } from 'node:process';
-import { ActionRowBuilder, Formatters, SlashCommandBuilder, SnowflakeUtil, version as djsVersion } from 'discord.js';
+import {
+	ActionRowBuilder,
+	quote,
+	SlashCommandBuilder,
+	SnowflakeUtil,
+	time,
+	TimestampStyles,
+	version as djsVersion,
+} from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -41,7 +49,7 @@ export default class DebugCommand extends ApplicationCommand {
 						{
 							name: 'General',
 							value: stripIndents`
-								Ready at: ${Formatters.time(this.client.readyAt!, Formatters.TimestampStyles.LongDateTime)}
+								Ready at: ${time(this.client.readyAt!, TimestampStyles.LongDateTime)}
 								Uptime: ${ms(this.client.uptime!)}
 								Discord.js v${djsVersion}
 								Node.js ${processVersion}
@@ -61,24 +69,14 @@ export default class DebugCommand extends ApplicationCommand {
 									)
 									.sort(([, a], [, b]) => b - a)
 									.map(([name, timestamp]) =>
-										Formatters.quote(
-											`${name ?? 'unknown channel'}: ${Formatters.time(
-												new Date(timestamp),
-												Formatters.TimestampStyles.LongDateTime,
-											)}`,
-										),
+										quote(`${name ?? 'unknown channel'}: ${time(new Date(timestamp), TimestampStyles.LongDateTime)}`),
 									)
 									.join('\n')}
 								${(channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
 									.map((c) => [c, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const)
 									.sort(([, a], [, b]) => b - a)
 									.map(([c, timestamp]) =>
-										Formatters.quote(
-											`${c ?? 'unknown channel'}: ${Formatters.time(
-												new Date(timestamp),
-												Formatters.TimestampStyles.LongDateTime,
-											)}`,
-										),
+										quote(`${c ?? 'unknown channel'}: ${time(new Date(timestamp), TimestampStyles.LongDateTime)}`),
 									)
 									.join('\n')}
 								Members: ${formatNumber(guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
@@ -110,7 +108,7 @@ export default class DebugCommand extends ApplicationCommand {
 										) => b - a,
 									)
 									.map((c) =>
-										Formatters.quote(
+										quote(
 											`${!c.isDM() ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
 												c.messages.cache.size,
 											)}`,
@@ -120,14 +118,14 @@ export default class DebugCommand extends ApplicationCommand {
 								DiscordGuilds: ${formatNumber(this.client.discordGuilds.cache.size)}
 								HypixelGuilds: ${formatNumber(this.client.hypixelGuilds.cache.size)}
 								Players: ${formatNumber(players.cache.size)}
-								${Formatters.quote(`not inGuild: ${formatNumber(players.cache.filter((p) => !p.inGuild()).size)}`)}
-								${Formatters.quote(
+								${quote(`not inGuild: ${formatNumber(players.cache.filter((p) => !p.inGuild()).size)}`)}
+								${quote(
 									`cached DiscordMember: ${formatNumber(
 										// @ts-expect-error _discordMember is private
 										players.cache.filter((p) => p._discordMember).size,
 									)}`,
 								)}
-								${Formatters.quote(
+								${quote(
 									`incorrectly cached: ${formatNumber(
 										players.cache.filter(
 											(p) =>
@@ -157,10 +155,10 @@ export default class DebugCommand extends ApplicationCommand {
 								Rate Limits
 								${Object.entries(imgur.rateLimit)
 									.map(([key, value]: [string, number | null]) =>
-										Formatters.quote(
+										quote(
 											`${key}: ${
 												key.endsWith('reset') && value !== null
-													? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
+													? time(new Date(value), TimestampStyles.LongDateTime)
 													: value
 											}`,
 										),
@@ -168,10 +166,10 @@ export default class DebugCommand extends ApplicationCommand {
 									.join('\n')}
 								${Object.entries(imgur.postRateLimit)
 									.map(([key, value]: [string, number | null]) =>
-										Formatters.quote(
+										quote(
 											`post${key}: ${
 												key.endsWith('reset') && value !== null
-													? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
+													? time(new Date(value), TimestampStyles.LongDateTime)
 													: value
 											}`,
 										),
@@ -192,8 +190,8 @@ export default class DebugCommand extends ApplicationCommand {
 													HypixelGuild: ${cb.hypixelGuild?.name ?? 'not linked'}
 													Server: ${await cb.minecraft.server}
 													Queues:
-													${Formatters.quote(`Minecraft: ${cb.minecraft.queue.remaining}`)}
-													${cb.discord.channelsByType.map((c) => Formatters.quote(`${c.channel}: ${c.queue.remaining}`)).join('\n')}
+													${quote(`Minecraft: ${cb.minecraft.queue.remaining}`)}
+													${cb.discord.channelsByType.map((c) => quote(`${c.channel}: ${c.queue.remaining}`)).join('\n')}
 												`,
 											),
 										)

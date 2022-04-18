@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder, SnowflakeUtil } from 'discord.js';
+import { codeBlock, SlashCommandBuilder, SnowflakeUtil, time } from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
 import { commaListsOr } from 'common-tags';
@@ -410,7 +410,7 @@ export default class GuildCommand extends ApplicationCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/guild mute ${escapeIgn(`${target}`)} ${ms(duration)}`)
-					.setDescription(Formatters.codeBlock(result.replaceAll('`', '')))
+					.setDescription(codeBlock(result.replaceAll('`', '')))
 					.setFooter({ text: hypixelGuild.name }),
 			],
 		});
@@ -496,7 +496,7 @@ export default class GuildCommand extends ApplicationCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${escapeIgn(commandOptions.command)}`) // command can inclue a player IGN
-					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions)))
+					.setDescription(codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions)))
 					.setFooter({ text: hypixelGuild.name }),
 			],
 		});
@@ -517,7 +517,7 @@ export default class GuildCommand extends ApplicationCommand {
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
 					.setDescription(
-						Formatters.codeBlock(
+						codeBlock(
 							trim(
 								(
 									await hypixelGuild.chatBridge.minecraft.command({
@@ -615,14 +615,14 @@ export default class GuildCommand extends ApplicationCommand {
 				padding += '\n';
 			}
 
-			dates.push(`${Formatters.time(new Date(date))}${padding}`);
+			dates.push(`${time(new Date(date))}${padding}`);
 			events.push(event);
 		}
 
 		// build embed
 		const embed = this.client.defaultEmbed
 			.setTitle(`/${command}`)
-			.setDescription(Formatters.codeBlock(description.join('\n')))
+			.setDescription(codeBlock(description.join('\n')))
 			.setFooter({ text: hypixelGuild.name });
 
 		if (dates.length) {
@@ -633,7 +633,7 @@ export default class GuildCommand extends ApplicationCommand {
 					value: `\u200B\n${dates.join('')}`,
 					inline: true,
 				},
-				{ name: '\u200B', value: Formatters.codeBlock(events.join('\n\n')), inline: true },
+				{ name: '\u200B', value: codeBlock(events.join('\n\n')), inline: true },
 			);
 		}
 
@@ -802,7 +802,7 @@ export default class GuildCommand extends ApplicationCommand {
 					embeds: [
 						this.client.defaultEmbed
 							.setTitle(`/guild kick ${escapeIgn(typeof target === 'string' ? target : target.ign)} ${reason}`)
-							.setDescription(Formatters.codeBlock(result.replaceAll('`', '')))
+							.setDescription(codeBlock(result.replaceAll('`', '')))
 							.setFooter({ text: hypixelGuild.name }),
 					],
 				});

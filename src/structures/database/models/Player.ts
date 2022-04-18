@@ -1,4 +1,12 @@
-import { DiscordAPIError, EmbedBuilder, Formatters, GuildMember, PermissionFlagsBits } from 'discord.js';
+import {
+	bold,
+	codeBlock,
+	DiscordAPIError,
+	EmbedBuilder,
+	GuildMember,
+	hyperlink,
+	PermissionFlagsBits,
+} from 'discord.js';
 import { DataTypes, fn, Model, UniqueConstraintError } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
@@ -695,7 +703,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * returns a string with the ign and guild name
 	 */
 	get info(): NonAttribute<string> {
-		return `${Formatters.hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}` as const; // •
+		return `${hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}` as const; // •
 	}
 
 	/**
@@ -1363,17 +1371,13 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			.setThumbnail(this.imageURL)
 			.setDescription(
 				stripIndents`
-					${Formatters.bold('Role Update')} for ${member}
+					${bold('Role Update')} for ${member}
 					${this.info}
 				`,
 			)
 			.setTimestamp();
-		const NAMES_TO_ADD = _rolesToAdd.length
-			? Formatters.codeBlock(_rolesToAdd.map(({ name }) => name).join('\n'))
-			: null;
-		const NAMES_TO_REMOVE = _rolesToRemove.length
-			? Formatters.codeBlock(_rolesToRemove.map(({ name }) => name).join('\n'))
-			: null;
+		const NAMES_TO_ADD = _rolesToAdd.length ? codeBlock(_rolesToAdd.map(({ name }) => name).join('\n')) : null;
+		const NAMES_TO_REMOVE = _rolesToRemove.length ? codeBlock(_rolesToRemove.map(({ name }) => name).join('\n')) : null;
 		const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.GUILD_ROLE_ID;
 		const GUILD_2_ROLE_ID = this.hypixelGuild?.GUILD_ROLE_ID;
 		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === GUILD_ROLE_ID || id === GUILD_2_ROLE_ID);
@@ -1592,19 +1596,19 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 					.setThumbnail(this.imageURL)
 					.setDescription(
 						stripIndents`
-							${Formatters.bold('Nickname Update')} for ${member}
+							${bold('Nickname Update')} for ${member}
 							${this.info}
 						`,
 					)
 					.addFields(
 						{
 							name: 'Old nickname',
-							value: Formatters.codeBlock(PREV_NAME),
+							value: codeBlock(PREV_NAME),
 							inline: true,
 						},
 						{
 							name: 'New nickname',
-							value: Formatters.codeBlock(newNick ?? member.user.username),
+							value: codeBlock(newNick ?? member.user.username),
 							inline: true,
 						},
 					),

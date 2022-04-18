@@ -1,5 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { Collection, EmbedBuilder, Formatters, embedLength } from 'discord.js';
+import { codeBlock, Collection, EmbedBuilder, embedLength } from 'discord.js';
 import { Op } from 'sequelize';
 import { CronJob } from 'cron';
 import {
@@ -356,7 +356,7 @@ export class PlayerManager extends ModelManager<Player> {
 		for (const { guildName, playerCount, ignChanges } of log
 			.sort(({ guildName: a }, { guildName: b }) => compareAlphabetically(a, b))
 			.values()) {
-			const logParts = splitMessage(Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')), {
+			const logParts = splitMessage(codeBlock(ignChanges.sort(compareAlphabetically).join('\n')), {
 				maxLength: EMBED_FIELD_MAX_CHARS,
 				char: '\n',
 				prepend: '```\n',
@@ -483,10 +483,12 @@ export class PlayerManager extends ModelManager<Player> {
 		for (const [guild, mainProfileUpdate] of log.sort((_, __, { name: a }, { name: b }) =>
 			compareAlphabetically(a, b),
 		)) {
-			const logParts = splitMessage(
-				Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
-				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
-			);
+			const logParts = splitMessage(codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')), {
+				maxLength: EMBED_FIELD_MAX_CHARS,
+				char: '\n',
+				prepend: '```diff\n',
+				append: '```',
+			});
 
 			let embed = createEmbed(guild, mainProfileUpdate.length);
 			let currentLength = embedLength(embed.data);

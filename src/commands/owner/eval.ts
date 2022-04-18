@@ -13,11 +13,11 @@ import Discord, {
 	ContextMenuCommandBuilder,
 	EmbedBuilder,
 	embedLength,
-	Formatters,
 	ModalBuilder,
 	SlashCommandBuilder,
 	TextInputBuilder,
 	TextInputStyle,
+	userMention,
 	Util,
 } from 'discord.js';
 Util; // unused imports are 'used' so that tsc doesn't remove them
@@ -185,7 +185,7 @@ export default class EvalCommand extends ApplicationCommand {
 		{ isAsync = /\bawait\b/.test(_input), inspectDepth = this.config.get('EVAL_INSPECT_DEPTH') } = {},
 	) {
 		if (interaction.user.id !== this.client.ownerId) {
-			throw `eval is restricted to ${Formatters.userMention(this.client.ownerId)}`;
+			throw `eval is restricted to ${userMention(this.client.ownerId)}`;
 		}
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */

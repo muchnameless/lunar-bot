@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { formatNumber, removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions';
@@ -69,9 +69,7 @@ export default class DonateCommand extends ApplicationCommand {
 				.setTitle('Guild Donations')
 				.addFields({
 					name: `/ah ${collector}`,
-					value: Formatters.codeBlock(
-						`${player}: ${formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`,
-					),
+					value: codeBlock(`${player}: ${formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
 				}),
 		);
 

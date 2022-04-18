@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { hideLinkEmbed, SlashCommandBuilder } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
@@ -36,7 +36,7 @@ export default class PatchnotesCommand extends DualCommand {
 
 			if (!existing) return 'no patchnotes found';
 
-			return Formatters.hideLinkEmbed(existing.link);
+			return hideLinkEmbed(existing.link);
 		} catch (error) {
 			logger.error(error, '[PATCHNOTES CMD]');
 

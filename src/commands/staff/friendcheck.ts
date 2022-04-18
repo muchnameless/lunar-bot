@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants';
 import { hypixel, mojang } from '../../api';
 import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';
@@ -41,7 +41,7 @@ export default class FriendCheckCommand extends ApplicationCommand {
 				this.client.defaultEmbed
 					.setTitle(`${escapeIgn(IGN)}'s friends in ${hypixelGuild}`)
 					.setDescription(
-						Formatters.codeBlock(trim(friendsInGuild || '-- none --', EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)),
+						codeBlock(trim(friendsInGuild || '-- none --', EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)),
 					)
 					.setFooter({ text: hypixelGuild.name }),
 			],

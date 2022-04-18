@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -42,7 +42,7 @@ export default class FriendCommand extends ApplicationCommand {
 			embeds: [
 				this.client.defaultEmbed //
 					.setTitle(`/${command}`)
-					.setDescription(Formatters.codeBlock(response)),
+					.setDescription(codeBlock(response)),
 			],
 			components: [
 				buildPaginationActionRow(

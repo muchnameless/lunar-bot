@@ -1,4 +1,4 @@
-import { EmbedBuilder, Formatters, SlashCommandBuilder } from 'discord.js';
+import { bold, EmbedBuilder, hyperlink, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
@@ -74,14 +74,14 @@ export default class BanListCommand extends ApplicationCommand {
 					const { ign } = await mojang.uuid(minecraftUuid);
 
 					return stripIndents`
-						${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${minecraftUuid}`))}
+						${bold(hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${minecraftUuid}`))}
 						${reason}
 					`;
 				} catch (error) {
 					logger.error(error);
 
 					return stripIndents`
-						${Formatters.bold(Formatters.hyperlink(minecraftUuid, `${STATS_URL_BASE}${minecraftUuid}`))}
+						${bold(hyperlink(minecraftUuid, `${STATS_URL_BASE}${minecraftUuid}`))}
 						${reason}
 					`;
 				}
@@ -190,11 +190,7 @@ export default class BanListCommand extends ApplicationCommand {
 						embeds: [
 							new EmbedBuilder()
 								.setColor(this.config.get('EMBED_GREEN'))
-								.setDescription(
-									`${Formatters.bold(
-										Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`),
-									)} is not on the ban list`,
-								)
+								.setDescription(`${bold(hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is not on the ban list`)
 								.setTimestamp(),
 						],
 					});
@@ -206,7 +202,7 @@ export default class BanListCommand extends ApplicationCommand {
 							.setColor(this.config.get('EMBED_RED'))
 							.setDescription(
 								stripIndents`
-								${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is on the ban list for
+								${bold(hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is on the ban list for
 								${existingBan.reason}
 							`,
 							)

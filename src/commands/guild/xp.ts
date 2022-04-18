@@ -1,4 +1,4 @@
-import { EmbedBuilder, Formatters, SlashCommandBuilder } from 'discord.js';
+import { bold, codeBlock, EmbedBuilder, SlashCommandBuilder, time } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import {
 	COSMETIC_SKILLS,
@@ -58,7 +58,7 @@ export default class XpCommand extends ApplicationCommand {
 				url: player.url,
 			})
 			.setDescription(
-				`${`Δ: change since ${Formatters.time(
+				`${`Δ: change since ${time(
 					new Date(
 						Math.max(
 							this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]),
@@ -73,12 +73,12 @@ export default class XpCommand extends ApplicationCommand {
 			.addFields({
 				name: '\u200B',
 				value: stripIndents`
-					${Formatters.codeBlock('Skills')}
-					Average skill level: ${Formatters.bold(formatDecimalNumber(skillAverage))} [${Formatters.bold(
-					formatDecimalNumber(trueAverage),
-				)}] - ${Formatters.bold('Δ')}: ${Formatters.bold(
-					formatDecimalNumber(skillAverage - skillAverageOffset),
-				)} [${Formatters.bold(formatDecimalNumber(trueAverage - trueAverageOffset))}]
+					${codeBlock('Skills')}
+					Average skill level: ${bold(formatDecimalNumber(skillAverage))} [${bold(formatDecimalNumber(trueAverage))}] - ${bold(
+					'Δ',
+				)}: ${bold(formatDecimalNumber(skillAverage - skillAverageOffset))} [${bold(
+					formatDecimalNumber(trueAverage - trueAverageOffset),
+				)}]
 				`,
 			});
 
@@ -91,9 +91,9 @@ export default class XpCommand extends ApplicationCommand {
 			embed.addFields({
 				name: upperCaseFirstChar(skill),
 				value: stripIndents`
-					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
-					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT]))}
+					${bold('Lvl:')} ${progressLevel}
+					${bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
+					${bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT]))}
 				`,
 				inline: true,
 			});
@@ -108,9 +108,9 @@ export default class XpCommand extends ApplicationCommand {
 			embed.addFields({
 				name: upperCaseFirstChar(skill),
 				value: stripIndents`
-					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
-					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`]))}
+					${bold('Lvl:')} ${progressLevel}
+					${bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
+					${bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`]))}
 				`,
 				inline: true,
 			});
@@ -124,8 +124,8 @@ export default class XpCommand extends ApplicationCommand {
 		embed.addFields({
 			name: '\u200B',
 			value: stripIndents`
-				${Formatters.codeBlock('Slayer')}
-				Total slayer xp: ${Formatters.bold(formatNumber(TOTAL_SLAYER_XP))} - ${Formatters.bold('Δ')}: ${Formatters.bold(
+				${codeBlock('Slayer')}
+				Total slayer xp: ${bold(formatNumber(TOTAL_SLAYER_XP))} - ${bold('Δ')}: ${bold(
 				formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)),
 			)}
 			`,
@@ -138,9 +138,9 @@ export default class XpCommand extends ApplicationCommand {
 			embed.addFields({
 				name: upperCaseFirstChar(slayer),
 				value: stripIndents`
-					${Formatters.bold('Lvl:')} ${player.getSlayerLevel(slayer)}
-					${Formatters.bold('XP:')} ${formatNumber(player[SLAYER_ARGUMENT])}
-					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`]))}
+					${bold('Lvl:')} ${player.getSlayerLevel(slayer)}
+					${bold('XP:')} ${formatNumber(player[SLAYER_ARGUMENT])}
+					${bold('Δ:')} ${formatNumber(Math.round(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`]))}
 				`,
 				inline: true,
 			});
@@ -149,7 +149,7 @@ export default class XpCommand extends ApplicationCommand {
 		embeds.push(embed);
 
 		embed = this.client.defaultEmbed
-			.setDescription(`\u200B${''.padEnd(171, '\u00A0')}\u200B\n${Formatters.codeBlock('Dungeons')}`)
+			.setDescription(`\u200B${''.padEnd(171, '\u00A0')}\u200B\n${codeBlock('Dungeons')}`)
 			.setFooter({ text: '\u200B\nUpdated at' })
 			.setTimestamp(player.xpLastUpdatedAt);
 
@@ -161,9 +161,9 @@ export default class XpCommand extends ApplicationCommand {
 			embed.addFields({
 				name: upperCaseFirstChar(type),
 				value: stripIndents`
-					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT]))}
-					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`]))}
+					${bold('Lvl:')} ${progressLevel}
+					${bold('XP:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT]))}
+					${bold('Δ:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`]))}
 				`,
 				inline: true,
 			});
@@ -179,24 +179,24 @@ export default class XpCommand extends ApplicationCommand {
 		EmbedUtil.padFields(embed).addFields(
 			{
 				name: '\u200B',
-				value: `${Formatters.codeBlock('Miscellaneous')}\u200B`,
+				value: `${codeBlock('Miscellaneous')}\u200B`,
 				inline: false,
 			},
 			{
 				name: 'Hypixel Guild XP',
 				value: stripIndents`
-					${Formatters.bold('Total:')} ${formatNumber(player.guildXp)}
-					${Formatters.bold('Δ:')} ${formatNumber(player.guildXp - player[`guildXp${OFFSET}`])}
+					${bold('Total:')} ${formatNumber(player.guildXp)}
+					${bold('Δ:')} ${formatNumber(player.guildXp - player[`guildXp${OFFSET}`])}
 				`,
 				inline: true,
 			},
 			{
 				name: 'Lily Weight',
 				value: stripIndents`
-					${Formatters.bold('Total')}: ${formatDecimalNumber(totalWeight)} [ ${formatDecimalNumber(
-					weight,
-				)} + ${formatDecimalNumber(overflow)} ]
-					${Formatters.bold('Δ:')} ${formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${formatDecimalNumber(
+					${bold('Total')}: ${formatDecimalNumber(totalWeight)} [ ${formatDecimalNumber(weight)} + ${formatDecimalNumber(
+					overflow,
+				)} ]
+					${bold('Δ:')} ${formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${formatDecimalNumber(
 					weight - weightOffset,
 				)} + ${formatDecimalNumber(overflow - overflowOffset)} ]
 				`,

@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
 import { zone, TimeStruct, DateFunctions } from 'timezonecomplete';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
@@ -52,11 +52,13 @@ export default class FetchurCommand extends DualCommand {
 		const today = new Date();
 		today.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
 
-		const RESET_TIME = Math.min(...[tomorrow.getTime(), today.getTime()].filter((time) => time >= Date.now()));
+		const RESET_TIME = Math.min(
+			...[tomorrow.getTime(), today.getTime()].filter((timestamp) => timestamp >= Date.now()),
+		);
 
 		return `item: ${
 			FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]
-		}, changes ${Formatters.time(new Date(RESET_TIME), Formatters.TimestampStyles.RelativeTime)}`;
+		}, changes ${time(new Date(RESET_TIME), TimestampStyles.RelativeTime)}`;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-import { Formatters, SlashCommandBuilder } from 'discord.js';
+import { bold, SlashCommandBuilder, time } from 'discord.js';
 import ms from 'ms';
 import { logErrors } from '../../structures/chat_bridge/constants';
 import { forceOption, hypixelGuildOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
@@ -95,7 +95,7 @@ export default class JoinDateCommand extends DualCommand {
 		try {
 			const { ign, date, timestamp } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
 			return `${escapeIgn(ign)}: joined ${chatBridge.hypixelGuild} at ${
-				!Number.isNaN(timestamp) ? Formatters.time(date) : 'an unknown date'
+				!Number.isNaN(timestamp) ? time(date) : 'an unknown date'
 			}`;
 		} catch {
 			return `${escapeIgn(ignInput)}: never joined ${chatBridge.hypixelGuild}`;
@@ -141,11 +141,11 @@ export default class JoinDateCommand extends DualCommand {
 			}
 
 			return InteractionUtil.reply(interaction, {
-				content: `${Formatters.bold(hypixelGuild.name)} join dates:\n${joinInfos
+				content: `${bold(hypixelGuild.name)} join dates:\n${joinInfos
 					.sort(({ timestamp: a }, { timestamp: b }) => a - b)
 					.map(
 						({ ign, date, timestamp }) =>
-							`${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`,
+							`${!Number.isNaN(timestamp) ? time(date) : 'unknown date'}: ${escapeIgn(ign)}`,
 					)
 					.join('\n')}`,
 				split: true,
