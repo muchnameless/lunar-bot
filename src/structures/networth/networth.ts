@@ -3,6 +3,7 @@ import { parse, simplify } from 'prismarine-nbt';
 import { logger } from '../../logger';
 import { hypixel } from '../../api';
 import {
+	BLOCKED_ENCHANTS,
 	CRAFTING_RECIPES,
 	ESSENCE_PRICES,
 	ESSENCE_UPGRADES,
@@ -12,6 +13,7 @@ import {
 	MASTER_STARS,
 	MATERIALS_TO_ID,
 	PriceModifier,
+	REDUCED_VALUE_ENCHANTS,
 	REFORGES,
 	SKYBLOCK_INVENTORIES,
 	SPECIAL_GEMSTONES,
@@ -65,6 +67,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		drill_part_engine: string;
 		drill_part_fuel_tank: string;
 		drill_part_upgrade_module: string;
+		dye_item: string;
 		ethermerge: number;
 		farming_for_dummies_count: number;
 		gems: Record<string, string>;
@@ -135,10 +138,12 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// enchantments
 	if (ExtraAttributes.enchantments) {
-		let enchantmentPrice = 0;
-
 		// eslint-disable-next-line prefer-const
 		for (let [enchantment, level] of Object.entries(ExtraAttributes.enchantments)) {
+			if (BLOCKED_ENCHANTS[itemId as keyof typeof BLOCKED_ENCHANTS]?.includes(enchantment as any)) continue;
+
+			let enchantmentPrice = 0;
+
 			if (enchantment === 'efficiency' && level > 5) {
 				if (itemId === ItemId.Stonk) continue;
 				price += getPrice(ItemId.Silex) * PriceModifier.Silex * (level - 5);
@@ -146,12 +151,18 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			}
 
 			const { itemId: enchantmentId, count } = getEnchantment(enchantment, level);
-			enchantmentPrice += getPrice(enchantmentId) * count;
+
+			enchantmentPrice = getPrice(enchantmentId) * count;
+
+			// applied enchantments are worth less
+			if (itemId !== ItemId.EnchantedBook) {
+				enchantmentPrice *= PriceModifier.AppliedEnchantment;
+
+				if (REDUCED_VALUE_ENCHANTS.has(enchantment)) enchantmentPrice *= PriceModifier.AppliedEnchantmentReduced;
+			}
+
+			price += enchantmentPrice;
 		}
-
-		if (itemId !== ItemId.EnchantedBook) enchantmentPrice *= PriceModifier.AppliedEnchantment;
-
-		price += enchantmentPrice;
 	}
 
 	// runes
@@ -170,6 +181,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		} else {
 			price += getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook * ExtraAttributes.hot_potato_count;
 		}
+	}
+
+	// dyes
+	if (ExtraAttributes.dye_item) {
+		price += getPrice(ExtraAttributes.dye_item) * PriceModifier.Dye;
 	}
 
 	// art of war
@@ -350,9 +366,10 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 			price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinNoCandy;
 		}
 	} else {
-		if (pet.type !== ItemId.EnderDragon) {
+		if (![ItemId.EnderDragon, ItemId.GoldenDragon].includes(pet.type as ItemId)) {
 			price *= PriceModifier.PetWithCandy;
 		}
+
 		if (pet.skin) {
 			// candy and skin
 			price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinWithCandy;

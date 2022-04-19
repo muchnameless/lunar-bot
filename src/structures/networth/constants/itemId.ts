@@ -1,5 +1,7 @@
 export const enum ItemId {
 	ArtOfWar = 'THE_ART_OF_WAR',
+	Bonemerang = 'BONE_BOOMERANG',
+	DeathBow = 'DEATH_BOW',
 	EnchantedBook = 'ENCHANTED_BOOK',
 	EnderDragon = 'ENDER_DRAGON',
 	EtherwarpConduit = 'ETHERWARP_CONDUIT',
@@ -7,6 +9,7 @@ export const enum ItemId {
 	FarmingForDummies = 'FARMING_FOR_DUMMIES',
 	FumingPotatoBook = 'FUMING_POTATO_BOOK',
 	GemstoneChamber = 'GEMSTONE_CHAMBER',
+	GoldenDragon = 'GOLDEN_DRAGON',
 	HegemonyArtifact = 'HEGEMONY_ARTIFACT',
 	HotPotatoBook = 'HOT_POTATO_BOOK',
 	JacobsTicket = 'JACOBS_TICKET',
