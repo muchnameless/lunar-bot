@@ -124,20 +124,26 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param depth
 	 */
 	private _cleanOutput(input: unknown, depth: number) {
-		let inputString = (typeof input === 'string' ? input : util.inspect(input, { depth }))
-			// escape codeblock markdown
-			.replaceAll('`', '`\u200B')
-			// replace the client token
-			.replace(new RegExp(this.client.token!, 'gi'), '***');
-
-		// replace other .env values
-		for (const [key, value] of Object.entries(env)) {
-			if (!value || !/key|token|password|uri/i.test(key)) continue;
-
-			inputString = inputString.replace(new RegExp(value, 'gi'), '***');
-		}
-
-		return inputString;
+		return (
+			(typeof input === 'string' ? input : util.inspect(input, { depth }))
+				// escape codeblock markdown
+				.replaceAll('`', '`\u200B')
+				// replace the client token
+				.replace(new RegExp(this.client.token!, 'gi'), '***')
+				// replace other .env values
+				.replace(
+					new RegExp(
+						Object.entries(env)
+							.filter(([key, value]) => value && /KEY|TOKEN|PASSWORD|URI/i.test(key))
+							.flatMap(([, value]) => value!.split(/\s+/))
+							// sort descendingly by length
+							.sort(({ length: a }, { length: b }) => b - a)
+							.join('|'),
+						'gi',
+					),
+					'***',
+				)
+		);
 	}
 
 	/**
