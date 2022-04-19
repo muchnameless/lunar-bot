@@ -14,10 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@dcd71f646680f2efd8db4afa5ad64fdcba30e748 # tag=v3
 
-      - name: Install Node.js v17
+      - name: Install Node.js v18
         uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3
         with:
-          node-version: 17
+          node-version: 18
           cache: yarn
           registry-url: https://registry.npmjs.org/
 
@@ -37,10 +37,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@dcd71f646680f2efd8db4afa5ad64fdcba30e748 # tag=v3
 
-      - name: Install Node.js v17
+      - name: Install Node.js v18
         uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3
         with:
-          node-version: 17
+          node-version: 18
           cache: yarn
           registry-url: https://registry.npmjs.org/
 

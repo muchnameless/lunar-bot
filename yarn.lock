@@ -661,7 +661,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=12, @types/node@npm:^17.0.24":
+"@types/node@npm:*, @types/node@npm:>=12, @types/node@npm:^17.0.25":
   version: 17.0.25
   resolution: "@types/node@npm:17.0.25"
   checksum: 6a820bd624e69ea772f52a6cdb326484eff5829443dc981939373929ade109f58c21698b9f0a831bd6ceea799e722a75dc49c5fa7a6bc32a81e1cbdfc6507b64
@@ -3812,7 +3812,7 @@ __metadata:
     "@types/common-tags": ^1.8.1
     "@types/cron": ^1.7.3
     "@types/ms": ^0.7.31
-    "@types/node": ^17.0.24
+    "@types/node": ^17.0.25
     "@types/pg": ^8.6.5
     "@types/safe-timers": ^1.1.0
     "@typescript-eslint/eslint-plugin": ^5.20.0

@@ -99,14 +99,8 @@ class Parser {
 					output.push(token);
 
 					// check if token is followed by a unary operator
-					// TODO: replace with Array#findLast when updating to node v18
-					let nonBracketIndex = -1;
-					for (let i = stack.length; i !== 0; --i) {
-						if (stack[i] !== '(') {
-							nonBracketIndex = i;
-							break;
-						}
-					}
+					// @ts-expect-error
+					const nonBracketIndex = stack.findLast((x) => x !== '(');
 
 					if (
 						nonBracketIndex !== -1 &&
