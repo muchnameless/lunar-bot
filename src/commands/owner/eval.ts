@@ -25,6 +25,7 @@ import { Routes } from 'discord-api-types/v10';
 Routes;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
+import { regExpEsc } from '@sapphire/utilities';
 import { fetch } from 'undici';
 fetch;
 import ms from 'ms';
@@ -135,7 +136,7 @@ export default class EvalCommand extends ApplicationCommand {
 					new RegExp(
 						Object.entries(env)
 							.filter(([key, value]) => value && /KEY|TOKEN|PASSWORD|URI/i.test(key))
-							.flatMap(([, value]) => value!.split(/\s+/))
+							.flatMap(([, value]) => regExpEsc(value!).split(/\s+/))
 							// sort descendingly by length
 							.sort(({ length: a }, { length: b }) => b - a)
 							.join('|'),
