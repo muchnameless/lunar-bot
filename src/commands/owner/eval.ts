@@ -131,12 +131,8 @@ export default class EvalCommand extends ApplicationCommand {
 			.replace(new RegExp(this.client.token!, 'gi'), '***');
 
 		// replace other .env values
-		let keys = Object.keys(env);
-		keys = keys.slice(keys.indexOf('DISCORD_TOKEN'));
-
-		for (const key of keys) {
-			const value = env[key];
-			if (!value || !Number.isNaN(Number(value))) continue;
+		for (const [key, value] of Object.entries(env)) {
+			if (!value || !/key|token|password|uri/i.test(key)) continue;
 
 			inputString = inputString.replace(new RegExp(value, 'gi'), '***');
 		}
