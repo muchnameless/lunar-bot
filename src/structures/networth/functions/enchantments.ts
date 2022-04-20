@@ -150,7 +150,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 
 			if (!warnings.has(itemId)) {
 				warnings.add(itemId);
-				logger.warn(`[GET ENCHANTMENT TYPE]: unknown enchantment '${itemId}'`);
+				logger.warn({ enchantment, level }, '[GET ENCHANTMENT TYPE]: unknown enchantment');
 			}
 
 			return { itemId, count: 1 };
