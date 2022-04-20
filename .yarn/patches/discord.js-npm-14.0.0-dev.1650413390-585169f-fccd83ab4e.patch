@@ -54,7 +54,7 @@ index f49876da48b461d4f95047ee3823330d197e5a19..860c3faa91e0a2bd075ab8c14199c6b2
 +      this.guild.me.permissions.has(PermissionFlagsBits.ModerateMembers)
      );
    }
-
+ 
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
 index 243a243e506fb3d95f8a6362365b049e5a967de6..db6b87b4c6693dc26cd8ba20658cca441dffb515 100644
 --- a/src/structures/Invite.js
@@ -74,10 +74,28 @@ index 243a243e506fb3d95f8a6362365b049e5a967de6..db6b87b4c6693dc26cd8ba20658cca44
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d8950547340392673cce2e6 100644
+index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..56e6baa2024addd83ab16568c59e326afe07197b 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
-@@ -552,11 +552,16 @@ class Message extends Base {
+@@ -275,10 +275,13 @@ class Message extends Base {
+       this.client.channels._add(data.thread, this.guild);
+     }
+ 
+-    if (this.member && data.member) {
+-      this.member._patch(data.member);
+-    } else if (data.member && this.guild && this.author) {
+-      this.guild.members._add(Object.assign(data.member, { user: this.author }));
++    if (data.member) {
++      const { member } = this;
++      if (member) {
++        member._patch(data.member);
++      } else if (this.author) {
++        this.guild?.members._add(Object.assign(data.member, { user: this.author }));
++      }
+     }
+ 
+     if ('flags' in data) {
+@@ -552,11 +555,16 @@ class Message extends Base {
     * @readonly
     */
    get editable() {
@@ -97,7 +115,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
      }
      return precheck;
    }
-@@ -567,23 +572,27 @@ class Message extends Base {
+@@ -567,23 +575,27 @@ class Message extends Base {
     * @readonly
     */
    get deletable() {
@@ -130,7 +148,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
      );
    }
  
-@@ -596,10 +605,10 @@ class Message extends Base {
+@@ -596,10 +608,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
@@ -145,7 +163,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
    }
  
    /**
-@@ -627,10 +636,10 @@ class Message extends Base {
+@@ -627,10 +639,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildNews &&
@@ -160,7 +178,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
      );
    }
  
-@@ -660,8 +669,9 @@ class Message extends Base {
+@@ -660,8 +672,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -172,7 +190,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
    }
  
    /**
-@@ -676,8 +686,9 @@ class Message extends Base {
+@@ -676,8 +689,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -184,7 +202,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
    }
  
    /**
-@@ -691,8 +702,9 @@ class Message extends Base {
+@@ -691,8 +705,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -196,7 +214,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
      return this;
    }
  
-@@ -707,8 +719,9 @@ class Message extends Base {
+@@ -707,8 +722,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -208,7 +226,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
      return this;
    }
  
-@@ -728,13 +741,14 @@ class Message extends Base {
+@@ -728,13 +744,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -226,7 +244,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
          message: this,
          emoji: Util.resolvePartialEmoji(emoji),
        },
-@@ -752,8 +766,9 @@ class Message extends Base {
+@@ -752,8 +769,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -238,7 +256,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
      return this;
    }
  
-@@ -776,7 +791,8 @@ class Message extends Base {
+@@ -776,7 +794,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -248,7 +266,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -789,7 +805,7 @@ class Message extends Base {
+@@ -789,7 +808,7 @@ class Message extends Base {
          },
        });
      }
@@ -257,7 +275,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
    }
  
    /**
-@@ -820,12 +836,13 @@ class Message extends Base {
+@@ -820,12 +839,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -274,7 +292,7 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d89505473403926
    }
  
    /**
-@@ -834,8 +851,9 @@ class Message extends Base {
+@@ -834,8 +854,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
