@@ -7,7 +7,7 @@
 		":followTag(@discordjs/builders, dev)",
 		":followTag(@discordjs/collection, dev)",
 		":followTag(@discordjs/rest, dev)",
-		":followTag(discord-api-types, dev)",
+		":followTag(discord-api-types, next)",
 		":followTag(discord.js, dev)",
 		":semanticCommitTypeAll(chore)",
 		"default:automergeDigest",
