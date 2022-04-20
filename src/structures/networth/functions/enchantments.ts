@@ -1,119 +1,159 @@
 import { logger } from '../../../logger';
+import { Enchantment } from '../constants';
+
+const warnings = new Set<string>();
 
 /**
  * returns the enchantment id (name_level) and count
  * @param enchantment
  * @param level
  */
-export const getEnchantment = (enchantment: string, level: number) => {
+export const getEnchantment = (enchantment: Enchantment, level: number) => {
 	switch (enchantment) {
-		case 'aqua_affinity':
-		case 'counter_strike':
-		case 'delicate':
-		case 'flame':
-		case 'piercing':
-		case 'rainbow':
-		case 'replenish':
-		case 'silk_touch':
-		case 'smelting_touch':
-		case 'telekinesis':
-		case 'true_protection':
+		// lvl 1 only
+		case Enchantment.AquaAffinity:
+		case Enchantment.CounterStrike:
+		case Enchantment.Delicate:
+		case Enchantment.Flame:
+		case Enchantment.Piercing:
+		case Enchantment.Rainbow:
+		case Enchantment.Replenish:
+		case Enchantment.SilkTouch:
+		case Enchantment.SmeltingTouch:
+		case Enchantment.Telekinesis:
+		case Enchantment.TrueProtection:
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		case 'compact':
-		case 'cultivating':
-		case 'expertise':
+		// upgradable via usage
+		case Enchantment.Compact:
+		case Enchantment.Cultivating:
+		case Enchantment.Expertise:
 			return { itemId: `${enchantment}_1`, count: 1 };
 
-		case 'fire_aspect':
-		case 'frost_walker':
-		case 'knockback':
-		case 'punch':
+		// upgradable 1->2
+		case Enchantment.FireAspect:
+		case Enchantment.FrostWalker:
+		case Enchantment.Knockback:
+		case Enchantment.Punch:
 			if (level <= 2) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		case 'chance':
-		case 'depth_strider':
-		case 'experience':
-		case 'fortune':
-		case 'impaling':
-		case 'life_steal':
-		case 'looting':
-		case 'mana_steal':
-		case 'respiration':
-		case 'scavenger':
-		case 'snipe':
-		case 'sugar_rush':
-		case 'syphon':
-		case 'thorns':
+		// upgradable 1->3
+		case Enchantment.Chance:
+		case Enchantment.DepthStrider:
+		case Enchantment.Experience:
+		case Enchantment.Fortune:
+		case Enchantment.Impaling:
+		case Enchantment.LifeSteal:
+		case Enchantment.Looting:
+		case Enchantment.ManaSteal:
+		case Enchantment.Respiration:
+		case Enchantment.Scavenger:
+		case Enchantment.Snipe:
+		case Enchantment.SugarRush:
+		case Enchantment.Syphon:
+		case Enchantment.Thorns:
 			if (level <= 3) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		case 'first_strike':
-		case 'triple_strike':
+		// upgradable 1->4
+		case Enchantment.FirstStrike:
+		case Enchantment.TripleStrike:
 			if (level <= 4) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		case 'aiming':
-		case 'angler':
-		case 'bane_of_arthropods':
-		case 'blast_protection':
-		case 'blessing':
-		case 'caster':
-		case 'cleave':
-		case 'critical':
-		case 'cubism':
-		case 'dragon_hunter':
-		case 'dragon_tracer':
-		case 'efficiency':
-		case 'ender_slayer':
-		case 'execute':
-		case 'fire_protection':
-		case 'frail':
-		case 'giant_killer':
-		case 'growth':
-		case 'harvesting':
-		case 'lethality':
-		case 'luck':
-		case 'luck_of_the_sea':
-		case 'lure':
-		case 'magnet':
-		case 'overload':
-		case 'power':
-		case 'pristine':
-		case 'projectile_protection':
-		case 'PROSECUTE': // api inconsistency
-		case 'protection':
-		case 'rejuvenate':
-		case 'respite':
-		case 'sharpness':
-		case 'smarty_pants':
-		case 'smite':
-		case 'spiked_hook':
-		case 'thunderbolt':
-		case 'thunderlord':
-		case 'titan_killer':
-		case 'vampirism':
-		case 'venomous':
+		// upgradable 1->5
+		case Enchantment.Angler:
+		case Enchantment.BaneOfArthropods:
+		case Enchantment.BlastProtection:
+		case Enchantment.Blessing:
+		case Enchantment.Caster:
+		case Enchantment.Cleave:
+		case Enchantment.Critical:
+		case Enchantment.Cubism:
+		case Enchantment.DragonHunter:
+		case Enchantment.DragonTracer:
+		case Enchantment.Efficiency:
+		case Enchantment.EnderSlayer:
+		case Enchantment.Execute:
+		case Enchantment.FireProtection:
+		case Enchantment.Frail:
+		case Enchantment.GiantKiller:
+		case Enchantment.Growth:
+		case Enchantment.Harvesting:
+		case Enchantment.Lethality:
+		case Enchantment.Luck:
+		case Enchantment.LuckOfTheSea:
+		case Enchantment.Lure:
+		case Enchantment.Magnet:
+		case Enchantment.Overload:
+		case Enchantment.Power:
+		case Enchantment.Pristine:
+		case Enchantment.ProjectileProtection:
+		case Enchantment.Prosecute:
+		case Enchantment.Protection:
+		case Enchantment.Rejuvenate:
+		case Enchantment.Respite:
+		case Enchantment.Sharpness:
+		case Enchantment.SmartyPants:
+		case Enchantment.Smite:
+		case Enchantment.SpikedHook:
+		case Enchantment.Thunderbolt:
+		case Enchantment.Thunderlord:
+		case Enchantment.TitanKiller:
+		case Enchantment.Vampirism:
+		case Enchantment.Venomous:
 			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		case 'feather_falling':
-		case 'infinite_quiver':
+		// upgradable 1->5, 6->10
+		case Enchantment.FeatherFalling:
+		case Enchantment.InfiniteQuiver:
 			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			if (level <= 10) return { itemId: `${enchantment}_6`, count: 2 ** (level - 6) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		case 'big_brain':
-		case 'vicious':
+		// upgradable 3->5
+		case Enchantment.BigBrain:
+		case Enchantment.Vicious:
 			return { itemId: `${enchantment}_3`, count: 2 ** (level - 3) };
 
-		default:
-			if (enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_')) {
-				return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+		// upgradable 1->5
+		case Enchantment.TurboCactus: // turbo
+		case Enchantment.TurboCane:
+		case Enchantment.TurboCarrot:
+		case Enchantment.TurboCoco:
+		case Enchantment.TurboMelon:
+		case Enchantment.TurboMushrooms:
+		case Enchantment.TurboPotato:
+		case Enchantment.TurboPumpkin:
+		case Enchantment.TurboWarts:
+		case Enchantment.TurboWheat:
+		case Enchantment.Bank: // ultimate
+		case Enchantment.Chimera:
+		case Enchantment.Combo:
+		case Enchantment.Jerry:
+		case Enchantment.LastStand:
+		case Enchantment.Legion:
+		case Enchantment.NoPainNoGain:
+		case Enchantment.OneForAll:
+		case Enchantment.Rend:
+		case Enchantment.SoulEater:
+		case Enchantment.Swarm:
+		case Enchantment.Wisdom:
+		case Enchantment.Wise:
+			return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+
+		default: {
+			const e: never = enchantment;
+			const itemId = `${e}_${level}`;
+
+			if (!warnings.has(itemId)) {
+				warnings.add(itemId);
+				logger.warn(`[GET ENCHANTMENT TYPE]: unknown enchantment '${itemId}'`);
 			}
 
-			logger.warn(`[GET ENCHANTMENT TYPE]: unknown enchantment '${enchantment}', level: '${level}'`);
-			return { itemId: `${enchantment}_${level}`, count: 1 };
+			return { itemId, count: 1 };
+		}
 	}
 };

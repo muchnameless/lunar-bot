@@ -12,8 +12,10 @@ import { getEnchantment } from '../structures/networth/functions/enchantments'; 
 import { transformItemData } from '../structures/networth/functions/nbt';
 import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
 import { ItemId } from '../structures/networth/constants/itemId';
+import { ItemRarity } from '../structures/networth/constants/itemRarity';
 import { sql } from '../structures/database/sql';
 import { JobType } from '.';
+import type { Enchantment } from '../structures/networth/constants';
 import type { Components } from '@zikeji/hypixel';
 
 /**
@@ -248,7 +250,10 @@ async function updateAuctionPrices() {
 
 				if (enchants.length !== 1) return;
 
-				({ itemId, count } = getEnchantment(enchants[0], item.tag!.ExtraAttributes!.enchantments[enchants[0]]));
+				({ itemId, count } = getEnchantment(
+					enchants[0] as Enchantment,
+					item.tag!.ExtraAttributes!.enchantments[enchants[0]],
+				));
 				break;
 			}
 
@@ -260,12 +265,12 @@ async function updateAuctionPrices() {
 
 				// ignore skinned pets and pets with items held for lower tiers
 				switch (pet.tier) {
-					case 'COMMON':
-					case 'UNCOMMON':
+					case ItemRarity.Common:
+					case ItemRarity.Uncommon:
 						if (pet.heldItem) return;
 					// fallthrough
-					case 'RARE':
-					case 'EPIC':
+					case ItemRarity.Rare:
+					case ItemRarity.Epic:
 						if (pet.skin) return;
 				}
 

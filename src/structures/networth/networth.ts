@@ -5,6 +5,7 @@ import { hypixel } from '../../api';
 import {
 	BLOCKED_ENCHANTS,
 	CRAFTING_RECIPES,
+	Enchantment,
 	ESSENCE_PRICES,
 	ESSENCE_UPGRADES,
 	GEMSTONES,
@@ -144,13 +145,13 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 			let enchantmentPrice = 0;
 
-			if (enchantment === 'efficiency' && level > 5) {
+			if (enchantment === Enchantment.Efficiency && level > 5) {
 				if (itemId === ItemId.Stonk) continue;
 				price += getPrice(ItemId.Silex) * PriceModifier.Silex * (level - 5);
 				level = 5;
 			}
 
-			const { itemId: enchantmentId, count } = getEnchantment(enchantment, level);
+			const { itemId: enchantmentId, count } = getEnchantment(enchantment as Enchantment, level);
 
 			enchantmentPrice = getPrice(enchantmentId) * count;
 
