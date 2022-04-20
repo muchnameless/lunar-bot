@@ -166,7 +166,7 @@ index 7567a05284f7a2aafd5ef698e75621256c922a56..47c52c13986985daa68533360f8902d0
 +  : [State] extends ['DM']
 +  ? DMType
 +  : [State] extends ['cachedOrDM']
-+  ? CachedOrDMTyp
++  ? CachedOrDMType
    : Fallback;
  
  export class Interaction<Cached extends CacheType = CacheType> extends Base {
