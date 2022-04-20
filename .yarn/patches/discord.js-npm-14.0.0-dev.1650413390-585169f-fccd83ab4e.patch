@@ -74,10 +74,52 @@ index 243a243e506fb3d95f8a6362365b049e5a967de6..db6b87b4c6693dc26cd8ba20658cca44
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..a0531b15a6b72efe9d94c8b4516eae2b138b9036 100644
+index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..e37962ff54cbe3016d8950547340392673cce2e6 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
-@@ -582,8 +582,8 @@ class Message extends Base {
+@@ -552,11 +552,16 @@ class Message extends Base {
+    * @readonly
+    */
+   get editable() {
+-    const precheck = Boolean(this.author.id === this.client.user.id && (!this.guild || this.channel?.viewable));
++    const { channel } = this;
++    const precheck = Boolean(
++      this.author.id === this.client.user.id &&
++      !this.flags.has(MessageFlags.Ephemeral) &&
++      (!this.guildId || channel?.viewable)
++    );
+     // Regardless of permissions thread messages cannot be edited if
+     // the thread is locked.
+-    if (this.channel?.isThread()) {
+-      return precheck && !this.channel.locked;
++    if (channel?.isThread()) {
++      return precheck && !channel.locked;
+     }
+     return precheck;
+   }
+@@ -567,23 +572,27 @@ class Message extends Base {
+    * @readonly
+    */
+   get deletable() {
+-    if (!this.guild) {
++    if (this.flags.has(MessageFlags.Ephemeral)) {
++      return false;
++    }
++    if (!this.guildId) {
+       return this.author.id === this.client.user.id;
+     }
+     // DMChannel does not have viewable property, so check viewable after proved that message is on a guild.
+-    if (!this.channel?.viewable) {
++    const { channel } = this;
++    if (!channel?.viewable) {
+       return false;
+     }
+ 
+-    const permissions = this.channel?.permissionsFor(this.client.user);
++    const permissions = channel?.permissionsFor(this.client.user);
+     if (!permissions) return false;
+     // This flag allows deleting even if timed out
+     if (permissions.has(PermissionFlagsBits.Administrator, false)) return true;
  
      return Boolean(
        this.author.id === this.client.user.id ||
@@ -88,20 +130,22 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..a0531b15a6b72efe9d94c8b4516eae2b
      );
    }
  
-@@ -596,9 +596,9 @@ class Message extends Base {
+@@ -596,10 +605,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
 -        (!this.guild ||
 -          (channel?.viewable &&
 -            channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
-+      (!this.guild ||
+-    );
++      !this.flags.has(MessageFlags.Ephemeral) &&
++      (!this.guildId ||
 +        (channel?.viewable &&
-+          channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
-     );
++          channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))));
    }
  
-@@ -627,10 +627,10 @@ class Message extends Base {
+   /**
+@@ -627,10 +636,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildNews &&
@@ -109,15 +153,141 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..a0531b15a6b72efe9d94c8b4516eae2b
 -        this.type === MessageType.Default &&
 -        channel.viewable &&
 -        channel.permissionsFor(this.client.user)?.has(bitfield, false),
-+      !this.flags.has(MessageFlags.Crossposted) &&
++      !this.flags.any(MessageFlags.Crossposted | MessageFlags.Ephemeral) &&
 +      this.type === MessageType.Default &&
 +      channel.viewable &&
 +      channel.permissionsFor(this.client.user)?.has(bitfield, false),
      );
    }
  
+@@ -660,8 +669,9 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   edit(options) {
+-    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    return this.channel.messages.edit(this, options);
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    return channel.messages.edit(this, options);
+   }
+ 
+   /**
+@@ -676,8 +686,9 @@ class Message extends Base {
+    * }
+    */
+   crosspost() {
+-    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    return this.channel.messages.crosspost(this.id);
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    return channel.messages.crosspost(this.id);
+   }
+ 
+   /**
+@@ -691,8 +702,9 @@ class Message extends Base {
+    *   .catch(console.error)
+    */
+   async pin(reason) {
+-    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    await this.channel.messages.pin(this.id, reason);
++    const { channel } = this;
++    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    await channel.messages.pin(this.id, reason);
+     return this;
+   }
+ 
+@@ -707,8 +719,9 @@ class Message extends Base {
+    *   .catch(console.error)
+    */
+   async unpin(reason) {
+-    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    await this.channel.messages.unpin(this.id, reason);
++    const { channel } = this;
++    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    await channel.messages.unpin(this.id, reason);
+     return this;
+   }
+ 
+@@ -728,13 +741,14 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   async react(emoji) {
+-    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    await this.channel.messages.react(this.id, emoji);
++    const { channel } = this;
++    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    await channel.messages.react(this.id, emoji);
+ 
+     return this.client.actions.MessageReactionAdd.handle(
+       {
+         user: this.client.user,
+-        channel: this.channel,
++        channel: channel,
+         message: this,
+         emoji: Util.resolvePartialEmoji(emoji),
+       },
+@@ -752,8 +766,9 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   async delete() {
+-    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    await this.channel.messages.delete(this.id);
++    const { channel } = this;
++    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    await channel.messages.delete(this.id);
+     return this;
+   }
+ 
+@@ -776,7 +791,8 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   reply(options) {
+-    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+     let data;
+ 
+     if (options instanceof MessagePayload) {
+@@ -789,7 +805,7 @@ class Message extends Base {
+         },
+       });
+     }
+-    return this.channel.send(data);
++    return channel.send(data);
+   }
+ 
+   /**
+@@ -820,12 +836,13 @@ class Message extends Base {
+    * @returns {Promise<ThreadChannel>}
+    */
+   startThread(options = {}) {
+-    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    if (![ChannelType.GuildText, ChannelType.GuildNews].includes(this.channel.type)) {
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    if (![ChannelType.GuildText, ChannelType.GuildNews].includes(channel.type)) {
+       return Promise.reject(new Error('MESSAGE_THREAD_PARENT'));
+     }
+     if (this.hasThread) return Promise.reject(new Error('MESSAGE_EXISTING_THREAD'));
+-    return this.channel.threads.create({ ...options, startMessage: this });
++    return channel.threads.create({ ...options, startMessage: this });
+   }
+ 
+   /**
+@@ -834,8 +851,9 @@ class Message extends Base {
+    * @returns {Promise<Message>}
+    */
+   fetch(force = true) {
+-    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    return this.channel.messages.fetch(this.id, { force });
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    return channel.messages.fetch(this.id, { force });
+   }
+ 
+   /**
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 7567a05284f7a2aafd5ef698e75621256c922a56..47c52c13986985daa68533360f8902d0a125b49d 100644
+index 7567a05284f7a2aafd5ef698e75621256c922a56..e9533fb2d5f760294fbaa4d65972d77894245ef1 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -386,17 +386,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
