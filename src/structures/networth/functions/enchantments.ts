@@ -129,30 +129,40 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 		case Enchantment.TurboPumpkin:
 		case Enchantment.TurboWarts:
 		case Enchantment.TurboWheat:
-		case Enchantment.Bank: // ultimate
-		case Enchantment.Chimera:
-		case Enchantment.Combo:
-		case Enchantment.Jerry:
-		case Enchantment.LastStand:
-		case Enchantment.Legion:
-		case Enchantment.NoPainNoGain:
-		case Enchantment.OneForAll:
-		case Enchantment.Rend:
-		case Enchantment.SoulEater:
-		case Enchantment.Swarm:
-		case Enchantment.Wisdom:
-		case Enchantment.Wise:
+		case Enchantment.UltimateBank: // ultimate
+		case Enchantment.UltimateChimera:
+		case Enchantment.UltimateCombo:
+		case Enchantment.UltimateFatalTempo:
+		case Enchantment.UltimateJerry:
+		case Enchantment.UltimateLastStand:
+		case Enchantment.UltimateLegion:
+		case Enchantment.UltimateNoPainNoGain:
+		case Enchantment.UltimateOneForAll:
+		case Enchantment.UltimateReiterate:
+		case Enchantment.UltimateRend:
+		case Enchantment.UltimateSoulEater:
+		case Enchantment.UltimateSwarm:
+		case Enchantment.UltimateWisdom:
+		case Enchantment.UltimateWise:
 			return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 
 		default: {
+			// make sure TS errors if the switch is not exhaustive
 			const e: never = enchantment;
 			const itemId = `${e}_${level}`;
 
+			// log warning only once
 			if (!warnings.has(itemId)) {
 				warnings.add(itemId);
-				logger.warn({ enchantment, lvl: level }, '[GET ENCHANTMENT]: unknown enchantment');
+				logger.warn({ enchantment: e, lvl: level }, '[GET ENCHANTMENT]: unknown enchantment');
 			}
 
+			// unknown ultimate and turbo enchantments fallback
+			if (itemId.startsWith('ultimate_') || itemId.startsWith('turbo_')) {
+				return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			}
+
+			// generic fallback
 			return { itemId, count: 1 };
 		}
 	}
