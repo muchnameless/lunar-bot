@@ -1,5 +1,6 @@
 import { ActivityType, GatewayIntentBits, Options, Partials, Sweepers } from 'discord.js';
 import { RequestMethod } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v10';
 import { LunarClient } from './structures/LunarClient';
 import { seconds } from './functions';
 import { startJobs } from './jobs';
@@ -76,7 +77,7 @@ const client = new LunarClient({
 	rest: {
 		// don't await channel name and topic edits
 		rejectOnRateLimit: ({ method, route, timeToReset }) =>
-			method === RequestMethod.Patch && route === '/channels/:id' && timeToReset > seconds(30),
+			method === RequestMethod.Patch && route === Routes.channel(':id') && timeToReset > seconds(30),
 	},
 	jsonTransformer: (x) => x,
 });

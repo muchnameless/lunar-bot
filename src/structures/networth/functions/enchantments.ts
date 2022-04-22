@@ -154,7 +154,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 			// log warning only once
 			if (!warnings.has(itemId)) {
 				warnings.add(itemId);
-				logger.warn({ enchantment: e, lvl: level }, '[GET ENCHANTMENT]: unknown enchantment');
+				logger.warn({ enchantment, lvl: level }, '[GET ENCHANTMENT]: unknown enchantment');
 			}
 
 			// unknown ultimate and turbo enchantments fallback
