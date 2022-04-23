@@ -195,7 +195,8 @@ export class HypixelMessage {
 	 * whether the message was sent by the bot
 	 */
 	get me() {
-		return this.author?.ign === this.chatBridge.bot?.username ?? '@';
+		if (!this.author) return false;
+		return this.author.ign === this.chatBridge.bot?.username;
 	}
 
 	/**

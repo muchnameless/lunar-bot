@@ -137,6 +137,7 @@
 			}
 		],
 		"no-console": "off",
+		"no-constant-binary-expression": "error",
 		"no-dupe-class-members": "off",
 		"no-else-return": "error",
 		"no-floating-decimal": "error",
