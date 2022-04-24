@@ -25,7 +25,7 @@ for await (const path of readJSFiles(new URL('./models/', import.meta.url))) {
 		models,
 		model.name,
 		// @ts-expect-error
-		(model.initialise ?? model.init)(sequelize),
+		model.initialise(sequelize),
 	);
 }
 
