@@ -5,12 +5,20 @@ const warnings = new Set<string>();
 
 /**
  * returns the enchantment id (name_level) and count
+ * @link https://hypixel-skyblock.fandom.com/wiki/Enchantments
+ * @link https://wiki.hypixel.net/Enchantments
  * @param enchantment
  * @param level
  */
 export const getEnchantment = (enchantment: Enchantment, level: number) => {
 	switch (enchantment) {
-		// lvl 1 only
+		// upgradable via usage
+		case Enchantment.Compact:
+		case Enchantment.Cultivating:
+		case Enchantment.Expertise:
+			return { itemId: `${enchantment}_1`, count: 1 };
+
+		// not upgradable
 		case Enchantment.AquaAffinity:
 		case Enchantment.CounterStrike:
 		case Enchantment.Delicate:
@@ -23,12 +31,6 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 		case Enchantment.Telekinesis:
 		case Enchantment.TrueProtection:
 			return { itemId: `${enchantment}_${level}`, count: 1 };
-
-		// upgradable via usage
-		case Enchantment.Compact:
-		case Enchantment.Cultivating:
-		case Enchantment.Expertise:
-			return { itemId: `${enchantment}_1`, count: 1 };
 
 		// upgradable 1->2
 		case Enchantment.FireAspect:
@@ -68,7 +70,9 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 		case Enchantment.BlastProtection:
 		case Enchantment.Blessing:
 		case Enchantment.Caster:
+		case Enchantment.Charm:
 		case Enchantment.Cleave:
+		case Enchantment.Corruption:
 		case Enchantment.Critical:
 		case Enchantment.Cubism:
 		case Enchantment.DragonHunter:
@@ -97,6 +101,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 		case Enchantment.Sharpness:
 		case Enchantment.SmartyPants:
 		case Enchantment.Smite:
+		case Enchantment.Smoldering:
 		case Enchantment.SpikedHook:
 		case Enchantment.Thunderbolt:
 		case Enchantment.Thunderlord:
@@ -105,6 +110,13 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 		case Enchantment.Venomous:
 			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
+
+		// upgradable 1->10
+		case Enchantment.FerociousMana:
+		case Enchantment.HardenedMana:
+		case Enchantment.ManaVampire:
+		case Enchantment.StrongMana:
+			return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 
 		// upgradable 1->5, 6->10
 		case Enchantment.FeatherFalling:
