@@ -3847,7 +3847,7 @@ __metadata:
     ms: ^2.1.3
     pg: ^8.7.3
     pg-hstore: ^2.3.4
-    pino: ^7.10.0
+    pino: ^7.11.0
     pino-pretty: ^7.6.1
     postgres: 3.1.0
     prettier: ^2.6.2
@@ -4872,9 +4872,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:^7.10.0":
-  version: 7.10.0
-  resolution: "pino@npm:7.10.0"
+"pino@npm:^7.11.0":
+  version: 7.11.0
+  resolution: "pino@npm:7.11.0"
   dependencies:
     atomic-sleep: ^1.0.0
     fast-redact: ^3.0.0
@@ -4889,7 +4889,7 @@ __metadata:
     thread-stream: ^0.15.1
   bin:
     pino: bin.js
-  checksum: 154173fc0cceef04e0252f8cecabea5d85cfaf97271961723b7a78f493a36f08224bdb1eaf57c6acd6ca5c68cbb781ae164d7c7f9a7ec06c3fd44c2a3c087734
+  checksum: b919e7dbe41de978bb050dcef94fd687c012eb78d344a18f75f04ce180d5810fc162be1f136722d70cd005ed05832c4023a38b9acbc1076ae63c9f5ec5ca515c
   languageName: node
   linkType: hard
 
