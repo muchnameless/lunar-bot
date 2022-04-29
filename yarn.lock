@@ -1676,12 +1676,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cron@npm:^1.8.2":
-  version: 1.8.2
-  resolution: "cron@npm:1.8.2"
+"cron@npm:^1.8.3":
+  version: 1.8.3
+  resolution: "cron@npm:1.8.3"
   dependencies:
-    moment-timezone: ^0.5.x
-  checksum: 9df2d2e24684e1ebce37e3e29c183b1dfecf7adb5fb16f84435014e7205926fc9868e9bfacfa5f7b93c556c9f4a6fbcce5fde9bee1306d20bc848568bb587791
+    luxon: ^1.23.x
+  checksum: e0d88005733426a41203846c6c258bb9a928ab2ebfdbd3e12628dec1bca93314b139b5132594d4bd4ea43f1deb2e8b53a135c4b955310d447c3e1f1a5ed09ea4
   languageName: node
   linkType: hard
 
@@ -3823,7 +3823,7 @@ __metadata:
     chart.js: ^3.7.1
     chartjs-node-canvas: ^4.1.6
     common-tags: ^1.8.2
-    cron: ^1.8.2
+    cron: ^1.8.3
     discord-api-types: "*"
     discord.js: 14.0.0-dev.1650413390-585169f
     emoji-regex: 9.2.2
@@ -3864,6 +3864,13 @@ __metadata:
     utf-8-validate: ^5.0.9
   languageName: unknown
   linkType: soft
+
+"luxon@npm:^1.23.x":
+  version: 1.28.0
+  resolution: "luxon@npm:1.28.0"
+  checksum: 5250cb9f138b6048eeb0b3a9044a4ac994d0058f680c72a0da4b6aeaec8612460385639cba2b1052ef6d5564879e9ed144d686f26d9d97b38ab920d82e18281c
+  languageName: node
+  linkType: hard
 
 "macaddress@npm:^0.5.1":
   version: 0.5.2
@@ -4206,7 +4213,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment-timezone@npm:^0.5.34, moment-timezone@npm:^0.5.x":
+"moment-timezone@npm:^0.5.34":
   version: 0.5.34
   resolution: "moment-timezone@npm:0.5.34"
   dependencies:
