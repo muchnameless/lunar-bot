@@ -948,11 +948,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 				return this;
 			}
-			if (
-				(error instanceof Error && error.name.startsWith('Sequelize')) ||
-				error instanceof TypeError ||
-				error instanceof RangeError
-			) {
+
+			if (error instanceof Error && error.name.startsWith('Sequelize')) {
 				logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
 				return this;
 			}

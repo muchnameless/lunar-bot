@@ -1005,11 +1005,8 @@ export class HypixelGuild extends Model<
 				logger.error(`[UPDATE DATA]: ${this.name}: ${error}`);
 				return this;
 			}
-			if (
-				(error instanceof Error && error.name.startsWith('Sequelize')) ||
-				error instanceof TypeError ||
-				error instanceof RangeError
-			) {
+
+			if (error instanceof Error && error.name.startsWith('Sequelize')) {
 				logger.error(error, `[UPDATE DATA]: ${this.name}`);
 				return this;
 			}
