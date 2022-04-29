@@ -1733,11 +1733,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				newIgn: CURRENT_IGN,
 			};
 		} catch (error) {
-			if (
-				(error instanceof Error && error.name.startsWith('Sequelize')) ||
-				error instanceof TypeError ||
-				error instanceof RangeError
-			) {
+			if (error instanceof Error && error.name.startsWith('Sequelize')) {
 				return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
 			}
 
