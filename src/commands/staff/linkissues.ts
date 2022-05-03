@@ -59,16 +59,22 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 					.join('\n'),
 				{ char: '\n', maxLength: 1_024 },
 			)) {
-				embed.addFields({
-					name: `${bold(`Missing ${mandatoryRole!.name} Role:`)} [display name | tag] (${missingMandatoryRole.length})`,
-					value,
-				});
+				embed.addFields([
+					{
+						name: `${bold(`Missing ${mandatoryRole!.name} Role:`)} [display name | tag] (${
+							missingMandatoryRole.length
+						})`,
+						value,
+					},
+				]);
 			}
 		} else if (mandatoryRole) {
-			embed.addFields({
-				name: bold(`Missing ${mandatoryRole.name} Role:`),
-				value: 'none',
-			});
+			embed.addFields([
+				{
+					name: bold(`Missing ${mandatoryRole.name} Role:`),
+					value: 'none',
+				},
+			]);
 		}
 
 		if (guildRoleAndNotInGuild.length) {
@@ -78,16 +84,20 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 					.join('\n'),
 				{ char: '\n', maxLength: 1_024 },
 			)) {
-				embed.addFields({
-					name: `${bold('Guild Role and no linked Player:')} [display name | tag] (${guildRoleAndNotInGuild.length})`,
-					value,
-				});
+				embed.addFields([
+					{
+						name: `${bold('Guild Role and no linked Player:')} [display name | tag] (${guildRoleAndNotInGuild.length})`,
+						value,
+					},
+				]);
 			}
 		} else {
-			embed.addFields({
-				name: bold('Guild Role and no linked Player:'),
-				value: 'none',
-			});
+			embed.addFields([
+				{
+					name: bold('Guild Role and no linked Player:'),
+					value: 'none',
+				},
+			]);
 		}
 
 		// guild players that are either unlinked or not in the discord server
@@ -133,19 +143,23 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 
 		for (const { amount, values } of unlinkedPlayers) {
 			for (const value of values) {
-				embed.addFields({
-					name: `${bold('Unlinked Players:')}${amount ? ` [ign | tag] (${amount})` : ''}`,
-					value,
-				});
+				embed.addFields([
+					{
+						name: `${bold('Unlinked Players:')}${amount ? ` [ign | tag] (${amount})` : ''}`,
+						value,
+					},
+				]);
 			}
 		}
 
 		for (const { amount, values } of linkedAndNotInDiscord) {
 			for (const value of values) {
-				embed.addFields({
-					name: `${bold('Linked and not in Discord:')}${amount ? ` (${amount})` : ''}`,
-					value,
-				});
+				embed.addFields([
+					{
+						name: `${bold('Linked and not in Discord:')}${amount ? ` (${amount})` : ''}`,
+						value,
+					},
+				]);
 			}
 		}
 

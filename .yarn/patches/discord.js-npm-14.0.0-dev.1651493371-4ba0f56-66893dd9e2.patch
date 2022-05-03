@@ -74,7 +74,7 @@ index 243a243e506fb3d95f8a6362365b049e5a967de6..db6b87b4c6693dc26cd8ba20658cca44
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..56e6baa2024addd83ab16568c59e326afe07197b 100644
+index f2fffb9487dd343acc8e3bfbf4c096cd4d2efe8e..35119ad1983b6c96869b2a65417e998db3601d9c 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -304,11 +304,55 @@ index e9c484f97ce361339cb5eaff05a8f58555c7b5d2..56e6baa2024addd83ab16568c59e326a
    }
  
    /**
+diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
+index 2bbeb764cfc594ad727ab61f928b7c15b9f59b46..8a2153d72cfd3493e01816fd57c4fdafe6d2e3c5 100644
+--- a/src/structures/MessagePayload.js
++++ b/src/structures/MessagePayload.js
+@@ -105,7 +105,7 @@ class MessagePayload {
+     if (this.options.content === null) {
+       content = '';
+     } else if (typeof this.options.content !== 'undefined') {
+-      content = Util.verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE', true);
++      content = Util.verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE');
+     }
+ 
+     return content;
+@@ -132,7 +132,7 @@ class MessagePayload {
+       }
+     }
+ 
+-    const components = this.options.components?.map(c => (isJSONEncodable(c) ? c : new ActionRowBuilder(c)).toJSON());
++    const components = this.options.components?.map(c => isJSONEncodable(c) ? c.toJSON() : this.target.client.options.jsonTransformer(c));
+ 
+     let username;
+     let avatarURL;
+diff --git a/src/util/Util.js b/src/util/Util.js
+index 0d1da996232de9a2b98726abd9e933d1069882da..8397c6b61f7a7d2b629183c323acfc81ef488d95 100644
+--- a/src/util/Util.js
++++ b/src/util/Util.js
+@@ -359,17 +359,14 @@ class Util extends null {
+    * @param {string} data The string resolvable to resolve
+    * @param {Function} [error] The Error constructor to instantiate. Defaults to Error
+    * @param {string} [errorMessage] The error message to throw with. Defaults to "Expected string, got <data> instead."
+-   * @param {boolean} [allowEmpty=true] Whether an empty string should be allowed
+    * @returns {string}
+    */
+   static verifyString(
+     data,
+     error = Error,
+     errorMessage = `Expected a string, got ${data} instead.`,
+-    allowEmpty = true,
+   ) {
+     if (typeof data !== 'string') throw new error(errorMessage);
+-    if (!allowEmpty && data.length === 0) throw new error(errorMessage);
+     return data;
+   }
+ 
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 7567a05284f7a2aafd5ef698e75621256c922a56..e9533fb2d5f760294fbaa4d65972d77894245ef1 100644
+index 97aec6b57503f98a4ec66c94720418111ffc0b0f..b84cf2b8bc2925cfb9a148e0b1611ddf4f56f186 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -386,17 +386,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
+@@ -383,17 +383,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
    replied: boolean;
    webhook: InteractionWebhook;
    reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
@@ -330,7 +374,7 @@ index 7567a05284f7a2aafd5ef698e75621256c922a56..e9533fb2d5f760294fbaa4d65972d778
  }
  
  export type BooleanCache<T extends CacheType> = T extends 'cached' ? true : false;
-@@ -1479,7 +1477,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1482,7 +1480,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -339,7 +383,7 @@ index 7567a05284f7a2aafd5ef698e75621256c922a56..e9533fb2d5f760294fbaa4d65972d778
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1487,12 +1485,18 @@ export type CacheTypeReducer<
+@@ -1490,12 +1488,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -358,7 +402,7 @@ index 7567a05284f7a2aafd5ef698e75621256c922a56..e9533fb2d5f760294fbaa4d65972d778
    : Fallback;
  
  export class Interaction<Cached extends CacheType = CacheType> extends Base {
-@@ -1505,7 +1509,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1508,7 +1512,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -368,7 +412,7 @@ index 7567a05284f7a2aafd5ef698e75621256c922a56..e9533fb2d5f760294fbaa4d65972d778
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1513,7 +1518,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1516,7 +1521,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -377,7 +421,7 @@ index 7567a05284f7a2aafd5ef698e75621256c922a56..e9533fb2d5f760294fbaa4d65972d778
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1804,7 +1809,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1805,7 +1810,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
    public showModal(
      modal: JSONEncodable<APIModalInteractionResponseCallbackData> | ModalData | APIModalInteractionResponseCallbackData,
    ): Promise<void>;

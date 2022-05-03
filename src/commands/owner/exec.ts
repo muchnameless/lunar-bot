@@ -33,10 +33,12 @@ export default class ExecCommand extends ApplicationCommand {
 			const INPUT = interaction.options.getString('input', true);
 			const { stdout, stderr } = await promisify(exec)(INPUT);
 			const responseEmbed = this.client.defaultEmbed
-				.addFields({
-					name: 'Input',
-					value: codeBlock('bash', INPUT),
-				})
+				.addFields([
+					{
+						name: 'Input',
+						value: codeBlock('bash', INPUT),
+					},
+				])
 				.setFooter({
 					text: me?.displayName ?? this.client.user!.username,
 					iconURL: (me ?? this.client.user!).displayAvatarURL(),
@@ -45,27 +47,31 @@ export default class ExecCommand extends ApplicationCommand {
 			if (stdout) {
 				logger.info(stdout);
 
-				responseEmbed.addFields({
-					name: 'Output',
-					value: codeBlock('bash', stdout),
-				});
+				responseEmbed.addFields([
+					{
+						name: 'Output',
+						value: codeBlock('bash', stdout),
+					},
+				]);
 			}
 
 			if (stderr) {
 				logger.error(stderr);
 
-				responseEmbed.addFields({
-					name: stderr,
-					value: codeBlock('xl', stderr),
-				});
+				responseEmbed.addFields([
+					{
+						name: stderr,
+						value: codeBlock('xl', stderr),
+					},
+				]);
 			}
 
 			return InteractionUtil.reply(interaction, {
 				embeds: [responseEmbed],
 				components: [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 						buildDeleteButton(interaction.user.id),
-					),
+					]),
 				],
 			});
 		} catch (error) {
@@ -74,9 +80,9 @@ export default class ExecCommand extends ApplicationCommand {
 			return InteractionUtil.reply(interaction, {
 				content: codeBlock('xl', `${error}`),
 				components: [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 						buildDeleteButton(interaction.user.id),
-					),
+					]),
 				],
 			});
 		}

@@ -272,6 +272,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	 * Timeout for cleanup due to inactivity
 	 */
 	private _idletimeout: NodeJS.Timeout | null = null;
+	private _endReason: string | null = null;
 
 	constructor(chatBridge: ChatBridge, options: MessageCollectorOptions = {}) {
 		super();
@@ -304,7 +305,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	get endReason() {
 		if (this.options.max && this.collected.length >= this.options.max) return 'limit';
 		if (this.options.maxProcessed && this.received === this.options.maxProcessed) return 'processedLimit';
-		return null;
+		return this._endReason;
 	}
 
 	/**
@@ -384,6 +385,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 			this._idletimeout = null;
 		}
 
+		this._endReason = reason;
 		this.ended = true;
 
 		/**

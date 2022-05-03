@@ -53,24 +53,28 @@ export default class DonationsCommand extends ApplicationCommand {
 						minecraftUuid;
 					const notes = reducedNotes[minecraftUuid].join('\n');
 
-					embed.addFields({
-						name: '\u200B',
-						value: codeBlock(
-							'ada',
-							stripIndent`
-								#${`${index + 1}`.padStart(3, '0')} : ${IGN}
-									 > ${formatNumber(amount)}
-							`,
-						),
-						inline: true,
-					});
+					embed.addFields([
+						{
+							name: '\u200B',
+							value: codeBlock(
+								'ada',
+								stripIndent`
+									#${`${index + 1}`.padStart(3, '0')} : ${IGN}
+										 > ${formatNumber(amount)}
+								`,
+							),
+							inline: true,
+						},
+					]);
 
 					if (notes) {
-						embed.addFields({
-							name: '\u200B',
-							value: notes,
-							inline: true,
-						});
+						embed.addFields([
+							{
+								name: '\u200B',
+								value: notes,
+								inline: true,
+							},
+						]);
 					}
 
 					EmbedUtil.padFields(embed);

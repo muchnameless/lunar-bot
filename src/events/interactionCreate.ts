@@ -14,7 +14,7 @@ import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteract
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
 import type {
-	ApplicationCommandOptionChoice,
+	ApplicationCommandOptionChoiceData,
 	AutocompleteInteraction,
 	BaseGuildTextChannel,
 	ButtonInteraction,
@@ -288,7 +288,7 @@ export default class InteractionCreateEvent extends Event {
 					const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
 					if (!guild) return interaction.respond([]);
 
-					const response: ApplicationCommandOptionChoice[] = [];
+					const response: ApplicationCommandOptionChoiceData[] = [];
 
 					for (const member of guild.members.cache.values()) {
 						const player = GuildMemberUtil.getPlayer(member);
@@ -333,7 +333,7 @@ export default class InteractionCreateEvent extends Event {
 			case 'guild': {
 				// no value yet -> don't sort
 				if (!value) {
-					const response: ApplicationCommandOptionChoice[] = [];
+					const response: ApplicationCommandOptionChoiceData[] = [];
 
 					if ((this.client.commands.get(interaction.commandName) as LeaderboardCommand)?.includeAllHypixelGuilds) {
 						response.push({ name: 'All Guilds', value: GUILD_ID_ALL });

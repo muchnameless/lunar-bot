@@ -45,7 +45,7 @@ export default class DebugCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.addFields(
+					.addFields([
 						{
 							name: 'General',
 							value: stripIndents`
@@ -199,14 +199,16 @@ export default class DebugCommand extends ApplicationCommand {
 									EMBED_FIELD_MAX_CHARS,
 								) || 'disabled',
 						},
-					)
+					])
 					.setFooter({
 						text: me?.displayName ?? this.client.user!.username,
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
 			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildDeleteButton(interaction.user.id)),
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
+					buildDeleteButton(interaction.user.id),
+				]),
 			],
 		});
 	}

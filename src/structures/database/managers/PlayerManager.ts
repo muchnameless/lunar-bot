@@ -374,11 +374,11 @@ export class PlayerManager extends ModelManager<Player> {
 					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
 					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
 				) {
-					embed.addFields({ name, value });
+					embed.addFields([{ name, value }]);
 					currentLength += name.length + value.length;
 				} else {
 					embed = createEmbed(guildName, playerCount, ignChanges.length);
-					embed.addFields({ name, value });
+					embed.addFields([{ name, value }]);
 					currentLength = embedLength(embed.data);
 				}
 			}
@@ -501,11 +501,11 @@ export class PlayerManager extends ModelManager<Player> {
 					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
 					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
 				) {
-					embed.addFields({ name, value });
+					embed.addFields([{ name, value }]);
 					currentLength += name.length + value.length;
 				} else {
 					embed = createEmbed(guild, mainProfileUpdate.length);
-					embed.addFields({ name, value });
+					embed.addFields([{ name, value }]);
 					currentLength = embedLength(embed.data);
 				}
 			}

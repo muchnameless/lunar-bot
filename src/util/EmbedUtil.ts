@@ -26,11 +26,13 @@ export class EmbedUtil extends null {
 			--index >= 0;
 
 		) {
-			embed.addFields({
-				name: '\u200B',
-				value: '\u200B',
-				inline: true,
-			});
+			embed.addFields([
+				{
+					name: '\u200B',
+					value: '\u200B',
+					inline: true,
+				},
+			]);
 		}
 
 		return embed;

@@ -31,10 +31,12 @@ export default class RanksCommand extends ApplicationCommand {
 			for (const { name, positionReq, currentWeightReq } of hypixelGuild.ranks) {
 				if (positionReq == null || positionReq === 0) continue;
 
-				embed.addFields({
-					name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-					value: `${formatNumber(currentWeightReq!)} weight`,
-				});
+				embed.addFields([
+					{
+						name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
+						value: `${formatNumber(currentWeightReq!)} weight`,
+					},
+				]);
 			}
 
 			return InteractionUtil.reply(interaction, { embeds: [embed] });
@@ -55,12 +57,14 @@ export default class RanksCommand extends ApplicationCommand {
 		for (const { name, positionReq, currentWeightReq } of hypixelGuild.ranks) {
 			if (positionReq == null || positionReq === 0 || currentWeightReq == null) continue;
 
-			embed.addFields({
-				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-				value: `${formatNumber(Math.trunc(weight))} / ${formatNumber(currentWeightReq)} weight (${formatNumber(
-					Math.trunc(Math.abs(currentWeightReq - weight)),
-				)} ${weight < currentWeightReq ? 'below' : 'above'})`,
-			});
+			embed.addFields([
+				{
+					name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
+					value: `${formatNumber(Math.trunc(weight))} / ${formatNumber(currentWeightReq)} weight (${formatNumber(
+						Math.trunc(Math.abs(currentWeightReq - weight)),
+					)} ${weight < currentWeightReq ? 'below' : 'above'})`,
+				},
+			]);
 		}
 
 		return InteractionUtil.reply(interaction, { embeds: [embed] });

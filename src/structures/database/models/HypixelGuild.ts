@@ -989,11 +989,11 @@ export class HypixelGuild extends Model<
 					currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS &&
 					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
 				) {
-					embed.addFields(...newFields);
+					embed.addFields(newFields);
 					currentLength += ADDITIONAL_LENGTH;
 				} else {
 					embed = createEmbed();
-					embed.addFields(...newFields);
+					embed.addFields(newFields);
 					currentLength = embedLength(embed.data);
 				}
 			}
@@ -1117,7 +1117,7 @@ export class HypixelGuild extends Model<
 					this.client.defaultEmbed
 						.setThumbnail(player.imageURL)
 						.setDescription(`${bold('Auto Rank Sync')} for ${player.info}`)
-						.addFields(
+						.addFields([
 							{
 								name: 'Old',
 								value: OLD_RANK_NAME ?? 'unknown',
@@ -1128,7 +1128,7 @@ export class HypixelGuild extends Model<
 								value: newRank.name,
 								inline: true,
 							},
-						),
+						]),
 				);
 			}
 

@@ -1,4 +1,11 @@
-import { ActionRowBuilder, SelectMenuBuilder, SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
+import {
+	ActionRowBuilder,
+	SelectMenuBuilder,
+	SelectMenuOptionBuilder,
+	SlashCommandBuilder,
+	time,
+	TimestampStyles,
+} from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
@@ -86,12 +93,12 @@ export default class AhCommand extends ApplicationCommand {
 				return {
 					embeds: [embed.setDescription('no unclaimed auctions')],
 					components: [
-						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 							new SelectMenuBuilder()
 								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
-								.addOptions(...profiles),
-						),
+								.addOptions(profiles),
+						]),
 					],
 				};
 			}
@@ -111,32 +118,34 @@ export default class AhCommand extends ApplicationCommand {
 				item_lore: lore,
 				auctioneer,
 			} of auctions) {
-				embed.addFields({
-					name: `${item}${
-						item.startsWith('[Lvl ')
-							? ` - ${upperCaseFirstChar(tier)}`
-							: item === 'Enchanted Book'
-							? (() => {
-									const matched = lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
-									if (matched) return ` - ${matched}`;
-									return '';
-							  })()
-							: ''
-					}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
-					value: `${
-						bin
-							? `BIN: ${shortenNumber(startingBid)}`
-							: bids.length
-							? ((totalCoins += highestBid), `Highest Bid: ${shortenNumber(highestBid)}`)
-							: `Starting Bid: ${shortenNumber(startingBid)}`
-					} • ${
-						end < Date.now()
-							? highestBid
-								? (++endedAuctions, (totalUnclaimedCoins += highestBid), 'sold')
-								: 'expired'
-							: 'ends'
-					} ${time(new Date(end), TimestampStyles.RelativeTime)}`,
-				});
+				embed.addFields([
+					{
+						name: `${item}${
+							item.startsWith('[Lvl ')
+								? ` - ${upperCaseFirstChar(tier)}`
+								: item === 'Enchanted Book'
+								? (() => {
+										const matched = lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
+										if (matched) return ` - ${matched}`;
+										return '';
+								  })()
+								: ''
+						}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
+						value: `${
+							bin
+								? `BIN: ${shortenNumber(startingBid)}`
+								: bids.length
+								? ((totalCoins += highestBid), `Highest Bid: ${shortenNumber(highestBid)}`)
+								: `Starting Bid: ${shortenNumber(startingBid)}`
+						} • ${
+							end < Date.now()
+								? highestBid
+									? (++endedAuctions, (totalUnclaimedCoins += highestBid), 'sold')
+									: 'expired'
+								: 'ends'
+						} ${time(new Date(end), TimestampStyles.RelativeTime)}`,
+					},
+				]);
 			}
 
 			totalCoins += totalUnclaimedCoins;
@@ -149,12 +158,12 @@ export default class AhCommand extends ApplicationCommand {
 					`),
 				],
 				components: [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 						new SelectMenuBuilder()
 							.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
-							.addOptions(...profiles),
-					),
+							.addOptions(profiles),
+					]),
 				],
 			};
 		} catch (error) {
@@ -172,13 +181,14 @@ export default class AhCommand extends ApplicationCommand {
 
 	// eslint-disable-next-line class-methods-use-this
 	private _generateProfileOptions(profiles: SkyBlockProfile[]) {
-		return profiles.map(({ cute_name, profile_id }) => ({
-			/* eslint-disable camelcase */
-			label: cute_name,
-			value: profile_id,
-			emoji: { name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] },
-			/* eslint-enable camelcase */
-		}));
+		return profiles.map(({ cute_name, profile_id }) =>
+			new SelectMenuOptionBuilder()
+				// eslint-disable-next-line camelcase
+				.setEmoji({ name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] })
+				.setLabel(cute_name)
+				.setValue(profile_id)
+				.toJSON(),
+		);
 	}
 
 	/**
@@ -205,12 +215,12 @@ export default class AhCommand extends ApplicationCommand {
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 					new SelectMenuBuilder()
 						.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 						.setDisabled(true)
 						.setPlaceholder('Profile: None'),
-				),
+				]),
 			],
 		});
 	}
@@ -286,12 +296,12 @@ export default class AhCommand extends ApplicationCommand {
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [
-							new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+							new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 								new SelectMenuBuilder()
 									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
-									.addOptions(...this._generateProfileOptions(profiles)),
-							),
+									.addOptions(this._generateProfileOptions(profiles)),
+							]),
 						],
 					});
 				}

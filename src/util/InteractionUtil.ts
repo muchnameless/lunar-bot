@@ -411,7 +411,7 @@ export class InteractionUtil extends null {
 			case undefined:
 			case 0:
 				options.components = [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()),
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([buildVisibilityButton()]),
 				];
 				break;
 
@@ -428,14 +428,14 @@ export class InteractionUtil extends null {
 					}
 
 					// TODO: ActionRowBuilder.from
-					(options.components![i] as ActionRowBuilder).addComponents(buildVisibilityButton());
+					(options.components![i] as ActionRowBuilder).addComponents([buildVisibilityButton()]);
 					addNewRow = false;
 					break;
 				}
 
 				if (addNewRow) {
 					options.components!.push(
-						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()),
+						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([buildVisibilityButton()]),
 					);
 				}
 			}
@@ -765,7 +765,7 @@ export class InteractionUtil extends null {
 		} = typeof options === 'string' ? { question: options } : options;
 		const SUCCESS_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
 		const CANCEL_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
-		const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+		const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 			new ButtonBuilder() //
 				.setCustomId(SUCCESS_ID)
 				.setStyle(ButtonStyle.Success)
@@ -774,7 +774,7 @@ export class InteractionUtil extends null {
 				.setCustomId(CANCEL_ID)
 				.setStyle(ButtonStyle.Danger)
 				.setEmoji({ name: UnicodeEmoji.X }),
-		);
+		]);
 
 		let res: InteractionResponse | Message;
 

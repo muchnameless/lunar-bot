@@ -47,16 +47,18 @@ export default class GuildMemberRemoveEvent extends Event {
 							${player.info}
 						`,
 					)
-					.addFields({
-						name: 'Roles',
-						value: codeBlock(
-							member.roles?.cache
-								.filter(({ id }) => id !== member.guild.id)
-								.sort((a, b) => b.comparePositionTo(a))
-								.map(({ name }) => name)
-								.join('\n') ?? 'unknown',
-						),
-					})
+					.addFields([
+						{
+							name: 'Roles',
+							value: codeBlock(
+								member.roles?.cache
+									.filter(({ id }) => id !== member.guild.id)
+									.sort((a, b) => b.comparePositionTo(a))
+									.map(({ name }) => name)
+									.join('\n') ?? 'unknown',
+							),
+						},
+					])
 					.setTimestamp(),
 				2,
 			),

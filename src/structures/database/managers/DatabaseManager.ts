@@ -287,7 +287,7 @@ export class DatabaseManager {
 					void this.client.log(
 						this.client.defaultEmbed //
 							.setTitle('Guild Tax')
-							.addFields(...taxPaidLog),
+							.addFields(taxPaidLog),
 					);
 				}
 			}, 0);
@@ -386,7 +386,7 @@ export class DatabaseManager {
 		return this.client.defaultEmbed
 			.setTitle('Guild Tax')
 			.setDescription(description)
-			.addFields(...fields)
+			.addFields(fields)
 			.setFooter({ text: 'Last updated at' });
 	}
 

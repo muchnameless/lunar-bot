@@ -1389,19 +1389,23 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			await member.roles.set(_rolesToAdd, reason);
 
 			if (NAMES_TO_ADD) {
-				loggingEmbed.addFields({
-					name: 'Added',
-					value: NAMES_TO_ADD,
-					inline: true,
-				});
+				loggingEmbed.addFields([
+					{
+						name: 'Added',
+						value: NAMES_TO_ADD,
+						inline: true,
+					},
+				]);
 			}
 
 			if (NAMES_TO_REMOVE) {
-				loggingEmbed.addFields({
-					name: 'Removed',
-					value: NAMES_TO_REMOVE,
-					inline: true,
-				});
+				loggingEmbed.addFields([
+					{
+						name: 'Removed',
+						value: NAMES_TO_REMOVE,
+						inline: true,
+					},
+				]);
 			}
 
 			// was successful
@@ -1416,7 +1420,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			loggingEmbed //
 				.setColor(config.get('EMBED_RED'))
-				.addFields(
+				.addFields([
 					error instanceof Error
 						? {
 								name: error.name,
@@ -1426,22 +1430,26 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 								name: 'Error',
 								value: `${error}`,
 						  },
-				);
+				]);
 
 			if (NAMES_TO_ADD) {
-				loggingEmbed.addFields({
-					name: 'Failed to add',
-					value: NAMES_TO_ADD,
-					inline: true,
-				});
+				loggingEmbed.addFields([
+					{
+						name: 'Failed to add',
+						value: NAMES_TO_ADD,
+						inline: true,
+					},
+				]);
 			}
 
 			if (NAMES_TO_REMOVE) {
-				loggingEmbed.addFields({
-					name: 'Failed to remove',
-					value: NAMES_TO_REMOVE,
-					inline: true,
-				});
+				loggingEmbed.addFields([
+					{
+						name: 'Failed to remove',
+						value: NAMES_TO_REMOVE,
+						inline: true,
+					},
+				]);
 			}
 
 			return false;
@@ -1597,7 +1605,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 							${this.info}
 						`,
 					)
-					.addFields(
+					.addFields([
 						{
 							name: 'Old nickname',
 							value: codeBlock(PREV_NAME),
@@ -1608,7 +1616,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 							value: codeBlock(newNick ?? member.user.username),
 							inline: true,
 						},
-					),
+					]),
 			);
 
 			if (shouldSendDm) {

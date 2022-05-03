@@ -251,10 +251,12 @@ export default class EvalCommand extends ApplicationCommand {
 		}
 
 		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
-			responseEmbed.addFields({
-				name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
-				value: inputPart,
-			});
+			responseEmbed.addFields([
+				{
+					name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
+					value: inputPart,
+				},
+			]);
 		}
 
 		const stopwatch = new Stopwatch();
@@ -298,13 +300,15 @@ export default class EvalCommand extends ApplicationCommand {
 					break;
 				}
 
-				responseEmbed.addFields({ name, value });
+				responseEmbed.addFields([{ name, value }]);
 			}
 
-			responseEmbed.addFields({
-				name: '\u200B',
-				value: FOOTER_FIELD,
-			});
+			responseEmbed.addFields([
+				{
+					name: '\u200B',
+					value: FOOTER_FIELD,
+				},
+			]);
 		} catch (error) {
 			stopwatch.stop();
 
@@ -331,19 +335,21 @@ export default class EvalCommand extends ApplicationCommand {
 					break;
 				}
 
-				responseEmbed.addFields({ name, value });
+				responseEmbed.addFields([{ name, value }]);
 			}
 
-			responseEmbed.addFields({
-				name: '\u200B',
-				value: FOOTER_FIELD,
-			});
+			responseEmbed.addFields([
+				{
+					name: '\u200B',
+					value: FOOTER_FIELD,
+				},
+			]);
 		}
 
 		return InteractionUtil.replyOrUpdate(interaction, {
 			embeds: [responseEmbed],
 			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
 						.setEmoji({ name: UnicodeEmoji.EditMessage })
@@ -354,7 +360,7 @@ export default class EvalCommand extends ApplicationCommand {
 						.setStyle(ButtonStyle.Secondary),
 					buildPinButton(),
 					buildDeleteButton(interaction.user.id),
-				),
+				]),
 			],
 			files,
 		});
@@ -398,8 +404,8 @@ export default class EvalCommand extends ApplicationCommand {
 					new ModalBuilder()
 						.setTitle(this.name)
 						.setCustomId(interaction.customId)
-						.addComponents(
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+						.addComponents([
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
 								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Paragraph)
@@ -407,8 +413,8 @@ export default class EvalCommand extends ApplicationCommand {
 									.setValue(trim(OLD_INPUT, MAX_VALUE_LENGTH))
 									.setPlaceholder(trim(OLD_INPUT, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(false),
-							),
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+							]),
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
 								new TextInputBuilder()
 									.setCustomId('inspectDepth')
 									.setStyle(TextInputStyle.Short)
@@ -416,8 +422,8 @@ export default class EvalCommand extends ApplicationCommand {
 									.setValue(inspectDepth)
 									.setPlaceholder(inspectDepth)
 									.setRequired(false),
-							),
-						),
+							]),
+						]),
 				);
 			}
 
