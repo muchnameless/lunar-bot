@@ -37,7 +37,7 @@ export class CompetitionCommand extends ApplicationCommand {
 		});
 		const next = async () => {
 			const { content } = await collector.next;
-			if (/^(?:cancel|stop|abort|end)$/i.test(content)) throw 'command cancelled';
+			if (/^(?:abort|cancel|end|stop)$/i.test(content)) throw 'command cancelled';
 			return content;
 		};
 

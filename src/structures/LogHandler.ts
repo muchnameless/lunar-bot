@@ -38,7 +38,7 @@ export class LogHandler {
 	static cleanLoggingEmbedString(string: unknown) {
 		if (typeof string === 'string') {
 			return string
-				.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
+				.replace(/```(?:ada|cs|diff|js|undefined)?\n/g, '') // code blocks
 				.replace(/`|\*|\n?\u200B|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
 				.replace(/\n{2,}/g, '\n'); // consecutive line-breaks
 		}
@@ -192,7 +192,7 @@ export class LogHandler {
 						?.filter(({ name, value }) => name !== '\u200B' || value !== '\u200B')
 						.map(({ name, value }) => ({
 							name: name.replaceAll('\u200B', '').trim() || undefined,
-							value: LogHandler.cleanLoggingEmbedString(value).replace(/\n/g, ', '),
+							value: LogHandler.cleanLoggingEmbedString(value).replaceAll('\n', ', '),
 						})),
 				},
 				embed.title,

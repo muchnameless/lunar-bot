@@ -15,10 +15,6 @@ import { EventCollection } from './events/EventCollection';
 import { db } from './database';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 
-export interface LunarClientOptions {
-	fetchAllMembers?: boolean;
-}
-
 export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> {
 	override ownerId: Snowflake;
 	override db: DatabaseManager = new DatabaseManager(this, db);
@@ -122,8 +118,6 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	 * fetches and caches all members if the fetchAllMembers client option is set to true
 	 */
 	override fetchAllMembers() {
-		if (!this.options.fetchAllMembers) return;
-
 		return safePromiseAll(
 			this.guilds.cache.map(async (guild) => {
 				const { size } = await GuildUtil.fetchAllMembers(guild);

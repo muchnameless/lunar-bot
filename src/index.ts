@@ -6,10 +6,6 @@ import { seconds } from './functions';
 import { startJobs } from './jobs';
 
 const client = new LunarClient({
-	// custom options
-	fetchAllMembers: true,
-
-	// default options
 	makeCache: Options.cacheWithLimits({
 		...Options.DefaultMakeCacheSettings,
 		ApplicationCommandManager: 0,

@@ -12,13 +12,13 @@ const warnings = new Set<string>();
  */
 export const getEnchantment = (enchantment: Enchantment, level: number) => {
 	switch (enchantment) {
-		// upgradable via usage
+		// not combinable, upgradable via usage
 		case Enchantment.Compact:
 		case Enchantment.Cultivating:
 		case Enchantment.Expertise:
 			return { itemId: `${enchantment}_1`, count: 1 };
 
-		// not upgradable
+		// not combinable
 		case Enchantment.AquaAffinity:
 		case Enchantment.CounterStrike:
 		case Enchantment.Delicate:
@@ -32,7 +32,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 		case Enchantment.TrueProtection:
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		// upgradable 1->2
+		// combinable 1->2
 		case Enchantment.FireAspect:
 		case Enchantment.FrostWalker:
 		case Enchantment.Knockback:
@@ -40,7 +40,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 			if (level <= 2) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		// upgradable 1->3
+		// combinable 1->3
 		case Enchantment.Chance:
 		case Enchantment.DepthStrider:
 		case Enchantment.Experience:
@@ -58,13 +58,13 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 			if (level <= 3) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		// upgradable 1->4
+		// combinable 1->4
 		case Enchantment.FirstStrike:
 		case Enchantment.TripleStrike:
 			if (level <= 4) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		// upgradable 1->5
+		// combinable 1->5
 		case Enchantment.Angler:
 		case Enchantment.BaneOfArthropods:
 		case Enchantment.BlastProtection:
@@ -111,26 +111,27 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		// upgradable 1->10
+		// combinable 1->10
 		case Enchantment.FerociousMana:
 		case Enchantment.HardenedMana:
 		case Enchantment.ManaVampire:
 		case Enchantment.StrongMana:
-			return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			if (level <= 10) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		// upgradable 1->5, 6->10
+		// combinable 1->5, 6->10
 		case Enchantment.FeatherFalling:
 		case Enchantment.InfiniteQuiver:
 			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			if (level <= 10) return { itemId: `${enchantment}_6`, count: 2 ** (level - 6) };
 			return { itemId: `${enchantment}_${level}`, count: 1 };
 
-		// upgradable 3->5
+		// combinable 3->5
 		case Enchantment.BigBrain:
 		case Enchantment.Vicious:
 			return { itemId: `${enchantment}_3`, count: 2 ** (level - 3) };
 
-		// upgradable 1->5
+		// combinable 1->x
 		case Enchantment.TurboCactus: // turbo
 		case Enchantment.TurboCane:
 		case Enchantment.TurboCarrot:

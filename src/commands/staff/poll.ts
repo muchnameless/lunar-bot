@@ -20,8 +20,6 @@ interface RunOptions {
 }
 
 export default class PollCommand extends DualCommand {
-	quoteChars = ['\u{0022}', '\u{201C}', '\u{201D}'] as const;
-
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('create a poll for both in-game and discord guild chat')
@@ -188,8 +186,8 @@ export default class PollCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
-		const inputMatched = hypixelMessage.content
-			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
+		const inputMatched = /(?<=[\u0022\u201C\u201D]).+?(?=[\u0022\u201C\u201D])/u
+			.exec(hypixelMessage.content)
 			?.map((x) => x.trim())
 			.filter(Boolean);
 

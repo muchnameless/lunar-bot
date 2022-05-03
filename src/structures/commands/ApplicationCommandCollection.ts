@@ -1,15 +1,7 @@
 import { Collection } from 'discord.js';
-import { logger } from '../../logger';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import { ApplicationCommand } from './ApplicationCommand';
-import type {
-	ApplicationCommand as DiscordJSApplicationCommand,
-	ApplicationCommandManager,
-	GuildApplicationCommandManager,
-	GuildApplicationCommandPermissionData,
-	Snowflake,
-	GuildResolvable,
-} from 'discord.js';
+import type { ApplicationCommandManager, GuildApplicationCommandManager } from 'discord.js';
 import type { DualCommand } from './DualCommand';
 
 type SlashCommandType = DualCommand | ApplicationCommand;
@@ -36,61 +28,8 @@ export class ApplicationCommandCollection<
 	 * registers all slash commands
 	 * @param commandManager
 	 */
-	async init(
-		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands,
-	) {
-		const commands = await commandManager.set(this.apiData);
-
-		await this.setAllPermissions(commands);
-
-		return commands;
-	}
-
-	/**
-	 * sets all application command permissions
-	 * @param applicationCommandsInput
-	 * @param guild
-	 */
-	async setAllPermissions(
-		applicationCommandsInput: Collection<Snowflake, DiscordJSApplicationCommand>,
-		guild?: GuildResolvable,
-	) {
-		const applicationCommands = applicationCommandsInput ?? (await this.client.application!.commands.fetch());
-		const guildIds: Snowflake[] = guild
-			? ([this.client.guilds.resolveId(guild)].filter(Boolean) as Snowflake[])
-			: this.client.hypixelGuilds.uniqueDiscordGuildIds;
-
-		return Promise.all(
-			guildIds.map((discordId) => {
-				const fullPermissions: GuildApplicationCommandPermissionData[] = [];
-
-				for (const { name, id } of applicationCommands.values()) {
-					const command = this.client.commands.get(name);
-
-					if (!command) {
-						logger.warn(`unknown application command '${name}'`);
-						continue;
-					}
-
-					const permissions = command.permissionsFor(discordId);
-
-					if (!permissions.length) {
-						logger.info(`no permissions to set for '${name}'`);
-						continue;
-					}
-
-					fullPermissions.push({
-						id,
-						permissions,
-					});
-				}
-
-				return this.client.application!.commands.permissions.set({
-					guild: discordId,
-					fullPermissions,
-				});
-			}),
-		);
+	init(commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands) {
+		return commandManager.set(this.apiData);
 	}
 
 	/**
@@ -109,45 +48,7 @@ export class ApplicationCommandCollection<
 			throw new TypeError(`[COMMANDS CREATE]: ${command.name} is not an ApplicationCommand`);
 		}
 
-		const applicationCommands = await Promise.all(command.data.map((d) => commandManager.create(d)));
-
-		await this.setSinglePermissions({ command, applicationCommands });
-
-		return applicationCommands;
-	}
-
-	/**
-	 * sets a single application command's permissions (including possible aliases)
-	 * @param param0
-	 */
-	async setSinglePermissions({
-		command = this.getByName(arguments[0])!,
-		applicationCommands: applicationCommandsInput,
-	}: {
-		command: ApplicationCommand;
-		applicationCommands: DiscordJSApplicationCommand[];
-	}) {
-		const applicationCommands =
-			applicationCommandsInput ??
-			(await this.client.application!.commands.fetch()).filter(
-				(c) => c.name === command.name || (command.aliases?.includes(c.name) ?? false),
-			);
-
-		return Promise.all(
-			this.client.hypixelGuilds.uniqueDiscordGuildIds.map(async (discordId) => {
-				const permissions = command.permissionsFor(discordId);
-
-				if (permissions.length) {
-					for (const applicationCommand of applicationCommands) {
-						await this.client.application!.commands.permissions.set({
-							guild: discordId,
-							command: applicationCommand,
-							permissions,
-						});
-					}
-				}
-			}),
-		);
+		return Promise.all(command.data.map((d) => commandManager.create(d)));
 	}
 
 	/**

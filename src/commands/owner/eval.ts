@@ -135,7 +135,7 @@ export default class EvalCommand extends ApplicationCommand {
 				.replace(
 					new RegExp(
 						Object.entries(env)
-							.filter(([key, value]) => value && /KEY|TOKEN|PASSWORD|URI/i.test(key))
+							.filter(([key, value]) => value && /KEY|PASSWORD|TOKEN|URI/i.test(key))
 							.flatMap(([, value]) => regExpEsc(value!).split(/\s+/))
 							// sort descendingly by length
 							.sort(({ length: a }, { length: b }) => b - a)

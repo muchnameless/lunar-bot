@@ -1006,12 +1006,10 @@ export class HypixelGuild extends Model<
 				return this;
 			}
 
-			if (error instanceof Error && error.name.startsWith('Sequelize')) {
-				logger.error(error, `[UPDATE DATA]: ${this.name}`);
-				return this;
-			}
-
 			logger.error(error, `[UPDATE DATA]: ${this.name}`);
+
+			if (error instanceof Error && error.name.startsWith('Sequelize')) return this;
+
 			if (!(error instanceof RateLimitError)) void this.client.config.set('HYPIXEL_API_ERROR', true);
 			if (rejectOnAPIError) throw error;
 			return this;

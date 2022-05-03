@@ -313,7 +313,7 @@ export default class MathsCommand extends DualCommand {
 		throw `LexerError: unexpected character \`${c}\` at index ${this.lexer.index}`;
 	})
 		.addRule(/,/, () => void 0) // ignore ','
-		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
+		.addRule(/(?:(?<=[(*+/^-])-)?(?:\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
 		.addRule(/(?<![+-])[)/^*]/, (lexeme: string) => lexeme) // operators which should not follow after unary prefix operators
 		.addRule(/\(/, (lexeme: string) => lexeme) // operators which can be anywhere
 		.addRule(/[+-](?!$)/, (lexeme: string) => lexeme) // unary prefix
@@ -397,11 +397,11 @@ export default class MathsCommand extends DualCommand {
 	calculate(rawInput: string) {
 		// generate input string
 		const INPUT = rawInput
-			.replaceAll(' ', '') // remove spaces
+			.replace(/\s+/g, '') // remove spaces
 			.replaceAll('_', '') // 1_000 -> 1000
 			.replaceAll('**', '^') // 5**3 -> 5^3
 			.replaceAll(':', '/') // 5:3 -> 5/3
-			.replace(/(?<=[\d)]\s*)(?=[(a-jln-z])/gi, '*') // add implicit '*' between numbers before letters and '('
+			.replace(/(?<=[\d)])(?=[(a-jln-z])/gi, '*') // add implicit '*' between numbers before letters and '('
 			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
 			.replace(/=$/, ''); // 5*3= -> 5*3
 

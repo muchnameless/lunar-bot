@@ -37,7 +37,4 @@ declare module 'discord.js' {
 		dmOwner(options: string | MessageOptions): Promise<Message<boolean> | null>;
 		fetchAllMembers(): Promise<void> | undefined;
 	}
-
-	// eslint-disable-next-line @typescript-eslint/no-empty-interface
-	interface ClientOptions extends LunarClientOptions {}
 }

@@ -1,4 +1,4 @@
-import { hideLinkEmbed, SlashCommandBuilder } from 'discord.js';
+import { hideLinkEmbed, hyperlink, SlashCommandBuilder } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
@@ -29,14 +29,14 @@ export default class PatchnotesCommand extends DualCommand {
 	 */
 	private async _generateReply() {
 		try {
-			const [existing] = await sql<[{ link: string }]>`
-				SELECT link FROM "SkyBlockPatchNotes"
+			const [existing] = await sql<[{ link: string; title: string }]>`
+				SELECT link, title FROM "SkyBlockPatchNotes"
 				WHERE guid = ${this.config.get('HYPIXEL_FORUM_LAST_GUID')}
 			`;
 
 			if (!existing) return 'no patchnotes found';
 
-			return hideLinkEmbed(existing.link);
+			return hyperlink(existing.title, hideLinkEmbed(existing.link));
 		} catch (error) {
 			logger.error(error, '[PATCHNOTES CMD]');
 

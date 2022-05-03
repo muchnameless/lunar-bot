@@ -83,7 +83,7 @@ export const enum Enchantment {
 	StrongMana = 'strong_mana',
 	SugarRush = 'sugar_rush',
 	Syphon = 'syphon',
-	Telekinesis = 'telekinesis',
+	Telekinesis = 'telekinesis', // removed
 	Thorns = 'thorns',
 	Thunderbolt = 'thunderbolt',
 	Thunderlord = 'thunderlord',
