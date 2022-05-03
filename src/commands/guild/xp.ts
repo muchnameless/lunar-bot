@@ -154,7 +154,7 @@ export default class XpCommand extends ApplicationCommand {
 			]);
 		}
 
-		embeds.push(embed);
+		embeds.push(EmbedUtil.padFields(embed));
 
 		embed = this.client.defaultEmbed
 			.setDescription(`\u200B${''.padEnd(171, '\u00A0')}\u200B\n${codeBlock('Dungeons')}`)
