@@ -12,7 +12,6 @@ import type { ChatTrigger } from '../structures/database/models/ChatTrigger';
 import type { DiscordGuild } from '../structures/database/models/DiscordGuild';
 import type { EventCollection } from '../structures/events/EventCollection';
 import type { LogHandler } from '../structures/LogHandler';
-import type { LunarClientOptions } from '../structures/LunarClient';
 
 declare module 'discord.js' {
 	interface Client {
@@ -35,6 +34,6 @@ declare module 'discord.js' {
 		defaultEmbed: EmbedBuilder;
 
 		dmOwner(options: string | MessageOptions): Promise<Message<boolean> | null>;
-		fetchAllMembers(): Promise<void> | undefined;
+		fetchAllMembers(): Promise<void>;
 	}
 }
