@@ -1,5 +1,5 @@
 import { setTimeout } from 'node:timers';
-import { codeBlock, PermissionFlagsBits } from 'discord.js';
+import { codeBlock, DiscordAPIError, PermissionFlagsBits, RESTJSONErrorCodes } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
 import { Model } from 'sequelize';
@@ -14,7 +14,7 @@ import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';
 import { TaxCollectorManager } from './TaxCollectorManager';
 import { ModelManager } from './ModelManager';
-import type { EmbedFieldData, GuildChannel } from 'discord.js';
+import type { EmbedFieldData, GuildChannel, Message } from 'discord.js';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
 import type { Price } from '../models/Price';
@@ -455,9 +455,22 @@ export class DatabaseManager {
 			}
 
 			const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
-			const taxMessage = TAX_MESSAGE_ID
-				? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch((error) => logger.error(error, '[TAX MESSAGE]'))
-				: null;
+
+			let taxMessage: Message | null = null;
+
+			if (TAX_MESSAGE_ID) {
+				try {
+					taxMessage = await taxChannel.messages.fetch(TAX_MESSAGE_ID);
+				} catch (error) {
+					logger.error(error, '[TAX MESSAGE]: fetch');
+
+					// abort updating if the error is not 'unknown message (-> message was deleted)'
+					if (!(error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage)) {
+						logger.warn('[TAX MESSAGE]: aborting update');
+						return this;
+					}
+				}
+			}
 
 			if (!taxMessage?.editable) {
 				// taxMessage deleted -> send a new one
@@ -486,7 +499,7 @@ export class DatabaseManager {
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 			return this;
 		} catch (error) {
-			logger.error(error, '[DATABASE UPDATE ERROR]');
+			logger.error(error, '[UPDATE DATA]');
 			return this;
 		}
 	}
