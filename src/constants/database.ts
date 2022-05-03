@@ -185,7 +185,8 @@ export const LEADERBOARD_XP_TYPES = [
 	'senither-weight',
 	'skill-average',
 	...SKILLS,
-	...COSMETIC_SKILLS,
+	// TODO: refactor xpTypeOption to autocomplete
+	// ...COSMETIC_SKILLS,
 	'slayer',
 	...SLAYERS,
 	...DUNGEON_TYPES_AND_CLASSES,
