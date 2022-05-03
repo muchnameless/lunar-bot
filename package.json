@@ -38,7 +38,7 @@
 		"chart.js": "^3.7.1",
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
-		"cron": "^1.8.3",
+		"cron": "^2.0.0",
 		"discord-api-types": "*",
 		"discord.js": "14.0.0-dev.1650413390-585169f",
 		"emoji-regex": "9.2.2",
