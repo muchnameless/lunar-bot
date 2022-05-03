@@ -184,6 +184,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare spiderXp: CreationOptional<number>;
 	declare wolfXp: CreationOptional<number>;
 	declare endermanXp: CreationOptional<number>;
+	declare blazeXp: CreationOptional<number>;
 	declare catacombsXp: CreationOptional<number>;
 	declare healerXp: CreationOptional<number>;
 	declare mageXp: CreationOptional<number>;
@@ -209,6 +210,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare spiderXpHistory: CreationOptional<number[]>;
 	declare wolfXpHistory: CreationOptional<number[]>;
 	declare endermanXpHistory: CreationOptional<number[]>;
+	declare blazeXpHistory: CreationOptional<number[]>;
 	declare catacombsXpHistory: CreationOptional<number[]>;
 	declare healerXpHistory: CreationOptional<number[]>;
 	declare mageXpHistory: CreationOptional<number[]>;
@@ -234,6 +236,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare spiderXpCompetitionStart: CreationOptional<number>;
 	declare wolfXpCompetitionStart: CreationOptional<number>;
 	declare endermanXpCompetitionStart: CreationOptional<number>;
+	declare blazeXpCompetitionStart: CreationOptional<number>;
 	declare catacombsXpCompetitionStart: CreationOptional<number>;
 	declare healerXpCompetitionStart: CreationOptional<number>;
 	declare mageXpCompetitionStart: CreationOptional<number>;
@@ -259,6 +262,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare spiderXpCompetitionEnd: CreationOptional<number>;
 	declare wolfXpCompetitionEnd: CreationOptional<number>;
 	declare endermanXpCompetitionEnd: CreationOptional<number>;
+	declare blazeXpCompetitionEnd: CreationOptional<number>;
 	declare catacombsXpCompetitionEnd: CreationOptional<number>;
 	declare healerXpCompetitionEnd: CreationOptional<number>;
 	declare mageXpCompetitionEnd: CreationOptional<number>;
@@ -284,6 +288,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare spiderXpOffsetMayor: CreationOptional<number>;
 	declare wolfXpOffsetMayor: CreationOptional<number>;
 	declare endermanXpOffsetMayor: CreationOptional<number>;
+	declare blazeXpOffsetMayor: CreationOptional<number>;
 	declare catacombsXpOffsetMayor: CreationOptional<number>;
 	declare healerXpOffsetMayor: CreationOptional<number>;
 	declare mageXpOffsetMayor: CreationOptional<number>;
@@ -309,6 +314,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare spiderXpOffsetWeek: CreationOptional<number>;
 	declare wolfXpOffsetWeek: CreationOptional<number>;
 	declare endermanXpOffsetWeek: CreationOptional<number>;
+	declare blazeXpOffsetWeek: CreationOptional<number>;
 	declare catacombsXpOffsetWeek: CreationOptional<number>;
 	declare healerXpOffsetWeek: CreationOptional<number>;
 	declare mageXpOffsetWeek: CreationOptional<number>;
@@ -334,6 +340,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare spiderXpOffsetMonth: CreationOptional<number>;
 	declare wolfXpOffsetMonth: CreationOptional<number>;
 	declare endermanXpOffsetMonth: CreationOptional<number>;
+	declare blazeXpOffsetMonth: CreationOptional<number>;
 	declare catacombsXpOffsetMonth: CreationOptional<number>;
 	declare healerXpOffsetMonth: CreationOptional<number>;
 	declare mageXpOffsetMonth: CreationOptional<number>;

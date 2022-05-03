@@ -46,6 +46,8 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 	declare AVERAGE_LVL_50_ROLE_ID: Snowflake | null;
 	declare AVERAGE_LVL_55_ROLE_ID: Snowflake | null;
 	declare AVERAGE_LVL_60_ROLE_ID: Snowflake | null;
+	declare BLAZE_8_ROLE_ID: Snowflake | null;
+	declare BLAZE_9_ROLE_ID: Snowflake | null;
 	declare CATACOMBS_30_ROLE_ID: Snowflake | null;
 	declare CATACOMBS_35_ROLE_ID: Snowflake | null;
 	declare CATACOMBS_40_ROLE_ID: Snowflake | null;

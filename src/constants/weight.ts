@@ -30,6 +30,8 @@ export const SLAYER_DIVIDER = {
 	spider: 2_118,
 	wolf: 1_962,
 	enderman: 1_430,
+	// TODO
+	blaze: Number.POSITIVE_INFINITY,
 } as const;
 
 export const SLAYER_MODIFIER = {
@@ -37,6 +39,8 @@ export const SLAYER_MODIFIER = {
 	spider: 0.08,
 	wolf: 0.015,
 	enderman: 0.017,
+	// TODO
+	blaze: 0,
 } as const;
 
 export const DUNGEON_EXPONENTS = {

@@ -911,6 +911,7 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 		case 'spider':
 		case 'wolf':
 		case 'enderman':
+		case 'blaze':
 		case 'guild': {
 			title = `${upperCaseFirstChar(xpType)} XP Leaderboard`;
 			const XP_ARGUMENT = `${xpType}Xp${offset}` as const;

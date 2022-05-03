@@ -129,6 +129,7 @@ export default class TrackCommand extends ApplicationCommand {
 			case 'spider':
 			case 'wolf':
 			case 'enderman':
+			case 'blaze':
 			case 'guild': {
 				datasets = [
 					{

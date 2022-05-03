@@ -273,7 +273,7 @@ export type DungeonTypes = ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>;
  * SLAYERS
  */
 
-export const SLAYERS = ['zombie', 'spider', 'wolf', 'enderman'] as const;
+export const SLAYERS = ['zombie', 'spider', 'wolf', 'enderman', 'blaze'] as const;
 
 export type SlayerTypes = ArrayElement<typeof SLAYERS>;
 
