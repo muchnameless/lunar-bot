@@ -40,7 +40,7 @@
 		"common-tags": "^1.8.2",
 		"cron": "^2.0.0",
 		"discord-api-types": "*",
-		"discord.js": "14.0.0-dev.1650413390-585169f",
+		"discord.js": "14.0.0-dev.1651493371-4ba0f56",
 		"emoji-regex": "9.2.2",
 		"fast-xml-parser": "^4.0.7",
 		"ioredis": "^5.0.4",

@@ -1873,9 +1873,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@npm:14.0.0-dev.1650413390-585169f":
-  version: 14.0.0-dev.1650413390-585169f
-  resolution: "discord.js@npm:14.0.0-dev.1650413390-585169f"
+"discord.js@npm:14.0.0-dev.1651493371-4ba0f56":
+  version: 14.0.0-dev.1651493371-4ba0f56
+  resolution: "discord.js@npm:14.0.0-dev.1651493371-4ba0f56"
   dependencies:
     "@discordjs/builders": ^0.14.0-dev
     "@discordjs/collection": ^0.7.0-dev
@@ -1888,26 +1888,7 @@ __metadata:
     tslib: ^2.3.1
     undici: ^4.16.0
     ws: ^8.5.0
-  checksum: f4592cd46f5d7e839289699abf4fb82257af12737ff388aad0e7058c94961ec3602e341a0cbea127700692846b643a4f9fd395cf97aa87a523f8ce1bcad71d07
-  languageName: node
-  linkType: hard
-
-"discord.js@patch:discord.js@npm:14.0.0-dev.1650413390-585169f#.yarn/patches/discord.js-npm-14.0.0-dev.1650413390-585169f-fccd83ab4e.patch::locator=lunar-bot%40workspace%3A.":
-  version: 14.0.0-dev.1650413390-585169f
-  resolution: "discord.js@patch:discord.js@npm%3A14.0.0-dev.1650413390-585169f#.yarn/patches/discord.js-npm-14.0.0-dev.1650413390-585169f-fccd83ab4e.patch::version=14.0.0-dev.1650413390-585169f&hash=c3fc47&locator=lunar-bot%40workspace%3A."
-  dependencies:
-    "@discordjs/builders": ^0.14.0-dev
-    "@discordjs/collection": ^0.7.0-dev
-    "@discordjs/rest": ^0.5.0-dev
-    "@sapphire/snowflake": ^3.2.1
-    "@types/ws": ^8.5.3
-    discord-api-types: ^0.31.1
-    fast-deep-equal: ^3.1.3
-    lodash.snakecase: ^4.1.1
-    tslib: ^2.3.1
-    undici: ^4.16.0
-    ws: ^8.5.0
-  checksum: 2d23eda6414ab044e4ae1ed9d2608cb2a17e46f440b4589e242af076fb7f2f29d708c266c6e6a7d0f07fa93ada33d21549540c145a24dedb48ed125ab156bb58
+  checksum: 68724fa467e80b1b4bf1f30cd0dab766598bb584eef91f00b31c0e5fcecac53486ef5f823ee98a73b0a24d504445245f374e2965c726cb25c59620ebfcee9010
   languageName: node
   linkType: hard
 
@@ -3848,7 +3829,7 @@ __metadata:
     common-tags: ^1.8.2
     cron: ^2.0.0
     discord-api-types: "*"
-    discord.js: 14.0.0-dev.1650413390-585169f
+    discord.js: 14.0.0-dev.1651493371-4ba0f56
     emoji-regex: 9.2.2
     env-cmd: ^10.1.0
     eslint: ^8.14.0
