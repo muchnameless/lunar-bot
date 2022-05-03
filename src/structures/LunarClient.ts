@@ -2,6 +2,7 @@ import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
 import { env } from 'node:process';
 import { Client, EmbedBuilder } from 'discord.js';
+import { PresenceUpdateStatus } from 'discord-api-types/v10';
 import { GuildUtil, UserUtil } from '../util';
 import { hours, safePromiseAll } from '../functions';
 import { exitProcess } from '../process';
@@ -88,7 +89,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 				() =>
 					this.isReady() &&
 					this.user.setPresence({
-						status: this.user.presence.status !== 'offline' ? this.user.presence.status : undefined,
+						status: this.user.presence.status !== PresenceUpdateStatus.Offline ? this.user.presence.status : undefined,
 						activities: this.user.presence.activities as ActivitiesOptions[],
 					}),
 				hours(1),
