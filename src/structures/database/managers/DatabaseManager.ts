@@ -17,7 +17,6 @@ import { ModelManager } from './ModelManager';
 import type { EmbedFieldData, GuildChannel, Message } from 'discord.js';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
-import type { Price } from '../models/Price';
 import type { ChatTrigger } from '../models/ChatTrigger';
 import type { Config } from '../models/Config';
 import type { DiscordGuild } from '../models/DiscordGuild';
@@ -37,7 +36,6 @@ export interface Models {
 	HypixelGuild: ModelStatic<HypixelGuild>;
 	HypixelGuildBan: ModelStatic<HypixelGuildBan>;
 	Player: ModelStatic<Player>;
-	Price: ModelStatic<Price>;
 	SkyBlockPatchNote: ModelStatic<SkyBlockPatchNote>;
 	TaxCollector: ModelStatic<TaxCollector>;
 	Transaction: ModelStatic<Transaction>;
