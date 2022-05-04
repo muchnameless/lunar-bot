@@ -15,7 +15,7 @@ index 79ab303c570f76a1202adc74de5ef18f21d1d361..df3ffb0abb21953138f6392311893ddf
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index f49876da48b461d4f95047ee3823330d197e5a19..860c3faa91e0a2bd075ab8c14199c6b2166e24cd 100644
+index f49876da48b461d4f95047ee3823330d197e5a19..ddeec53608a00bdfa32d7f4f09a8c66b67461d21 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -239,8 +239,9 @@ class GuildMember extends Base {
@@ -326,6 +326,95 @@ index 2bbeb764cfc594ad727ab61f928b7c15b9f59b46..8a2153d72cfd3493e01816fd57c4fdaf
  
      let username;
      let avatarURL;
+diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
+index 915f3bc688a758cf60da387ee86862ecc8d66903..77c15fb069149744857ef214e4cadceca6477ef4 100644
+--- a/src/structures/SelectMenuBuilder.js
++++ b/src/structures/SelectMenuBuilder.js
+@@ -1,6 +1,10 @@
+ 'use strict';
+ 
+-const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable } = require('@discordjs/builders');
++const {
++  SelectMenuBuilder: BuildersSelectMenu,
++  isJSONEncodable,
++  UnsafeSelectMenuOptionBuilder,
++} = require('@discordjs/builders');
+ const Transformers = require('../util/Transformers');
+ const Util = require('../util/Util');
+ 
+@@ -13,39 +17,53 @@ class SelectMenuBuilder extends BuildersSelectMenu {
+     super(
+       Transformers.toSnakeCase({
+         ...data,
+-        options: options?.map(({ emoji, ...option }) => ({
+-          ...option,
+-          emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-        })),
++        options: options?.map(option =>
++          options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
++            ? option
++            : {
++                ...option,
++                emoji: Util.parseEmoji(option.emoji),
++              },
++        ),
+       }),
+     );
+   }
+ 
+   /**
+    * Adds options to this select menu
+-   * @param {APISelectMenuOption[]} options The options to add to this select menu
++   * @param {(BuildersSelectMenuOption | SelectMenuComponentOptionData | APISelectMenuOption)[]} options The options
++   * to add to this select menu
+    * @returns {SelectMenuBuilder}
+    */
+   addOptions(options) {
+     return super.addOptions(
+-      options.map(({ emoji, ...option }) => ({
+-        ...option,
+-        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-      })),
++      options.map(option =>
++        options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
++          ? option
++          : {
++              ...option,
++              emoji: Util.parseEmoji(option.emoji),
++            },
++      ),
+     );
+   }
+ 
+   /**
+    * Sets the options on this select menu
+-   * @param {APISelectMenuOption[]} options The options to set on this select menu
++   * @param {(BuildersSelectMenuOption | SelectMenuComponentOptionData | APISelectMenuOption)[]} options The options
++   * to set on this select menu
+    * @returns {SelectMenuBuilder}
+    */
+   setOptions(options) {
+     return super.setOptions(
+-      options.map(({ emoji, ...option }) => ({
+-        ...option,
+-        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-      })),
++      options.map(option =>
++        options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
++          ? option
++          : {
++              ...option,
++              emoji: Util.parseEmoji(option.emoji),
++            },
++      ),
+     );
+   }
+ 
+@@ -68,3 +86,4 @@ module.exports = SelectMenuBuilder;
+  * @external BuildersSelectMenu
+  * @see {@link https://discord.js.org/#/docs/builders/main/class/SelectMenuBuilder}
+  */
++
 diff --git a/src/util/Util.js b/src/util/Util.js
 index 0d1da996232de9a2b98726abd9e933d1069882da..8397c6b61f7a7d2b629183c323acfc81ef488d95 100644
 --- a/src/util/Util.js
