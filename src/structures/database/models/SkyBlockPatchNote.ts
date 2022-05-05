@@ -31,15 +31,15 @@ export class SkyBlockPatchNote extends Model<
 					primaryKey: true,
 				},
 				title: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: false,
 				},
 				creator: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: false,
 				},
 				link: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: false,
 				},
 				createdAt: DataTypes.DATE,

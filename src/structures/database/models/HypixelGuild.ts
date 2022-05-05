@@ -164,41 +164,41 @@ export class HypixelGuild extends Model<
 		return this.init(
 			{
 				guildId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					primaryKey: true,
 				},
 				discordId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				GUILD_ROLE_ID: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				EX_GUILD_ROLE_ID: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				BRIDGER_ROLE_ID: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				staffRoleIds: {
-					type: DataTypes.ARRAY(DataTypes.STRING),
+					type: DataTypes.ARRAY(DataTypes.TEXT),
 					defaultValue: [],
 					allowNull: false,
 				},
 				adminRoleIds: {
-					type: DataTypes.ARRAY(DataTypes.STRING),
+					type: DataTypes.ARRAY(DataTypes.TEXT),
 					defaultValue: [],
 					allowNull: false,
 				},
 				name: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: 'UNKNOWN_GUILD_NAME',
 					allowNull: false,
 				},
@@ -278,22 +278,22 @@ export class HypixelGuild extends Model<
 					allowNull: false,
 				},
 				taxChannelId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				taxMessageId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				announcementsChannelId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				loggingChannelId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},

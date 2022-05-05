@@ -26,11 +26,11 @@ export class HypixelGuildBan extends Model<InferAttributes<HypixelGuildBan>, Inf
 		return this.init(
 			{
 				minecraftUuid: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					primaryKey: true,
 				},
 				_reason: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},

@@ -110,7 +110,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 		// roles
 		for (const type of DELIMITER_ROLES) {
 			attributes[`${type}_DELIMITER_ROLE_ID`] = {
-				type: DataTypes.STRING,
+				type: DataTypes.TEXT,
 				defaultValue: null,
 				allowNull: true,
 			};
@@ -118,7 +118,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 
 		for (const level of SKILL_AVERAGE_ROLES) {
 			attributes[`AVERAGE_LVL_${level}_ROLE_ID`] = {
-				type: DataTypes.STRING,
+				type: DataTypes.TEXT,
 				defaultValue: null,
 				allowNull: true,
 			};
@@ -127,7 +127,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 		for (const skill of SKILLS) {
 			for (const level of SKILL_ROLES) {
 				attributes[`${toUpperCase(skill)}_${level}_ROLE_ID`] = {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				};
@@ -136,7 +136,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 
 		for (const level of SLAYER_TOTAL_ROLES) {
 			attributes[`SLAYER_ALL_${level}_ROLE_ID`] = {
-				type: DataTypes.STRING,
+				type: DataTypes.TEXT,
 				defaultValue: null,
 				allowNull: true,
 			};
@@ -145,7 +145,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 		for (const slayer of SLAYERS) {
 			for (const level of SLAYER_ROLES) {
 				attributes[`${toUpperCase(slayer)}_${level}_ROLE_ID`] = {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				};
@@ -154,7 +154,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 
 		for (const level of CATACOMBS_ROLES) {
 			attributes[`CATACOMBS_${level}_ROLE_ID`] = {
-				type: DataTypes.STRING,
+				type: DataTypes.TEXT,
 				defaultValue: null,
 				allowNull: true,
 			};
@@ -163,11 +163,11 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 		return this.init(
 			{
 				discordId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					primaryKey: true,
 				},
 				hypixelGuildIds: {
-					type: DataTypes.ARRAY(DataTypes.STRING),
+					type: DataTypes.ARRAY(DataTypes.TEXT),
 					defaultValue: [],
 					allowNull: false,
 				},
@@ -177,17 +177,17 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 					allowNull: true,
 				},
 				GUILD_ROLE_ID: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				INACTIVE_ROLE_ID: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				MANDATORY_ROLE_ID: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},

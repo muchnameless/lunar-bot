@@ -30,11 +30,11 @@ export class Config extends Model<
 		return this.init(
 			{
 				key: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					primaryKey: true,
 				},
 				value: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: true,
 					set(value) {
 						(this as Config).parsedValue = value;

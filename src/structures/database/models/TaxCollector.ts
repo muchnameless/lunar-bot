@@ -29,7 +29,7 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 		return this.init(
 			{
 				minecraftUuid: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					primaryKey: true,
 				},
 				isCollecting: {

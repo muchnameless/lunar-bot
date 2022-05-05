@@ -31,11 +31,11 @@ export class Transaction extends Model<InferAttributes<Transaction>, InferCreati
 		return this.init(
 			{
 				from: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: false,
 				},
 				to: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: false,
 				},
 				amount: {
@@ -45,7 +45,7 @@ export class Transaction extends Model<InferAttributes<Transaction>, InferCreati
 				},
 				auctionId: {
 					// hypixel api auction uuid
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},

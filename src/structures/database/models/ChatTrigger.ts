@@ -39,7 +39,7 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 		return this.init(
 			{
 				regExpString: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: false,
 					set(value: string) {
 						(this as ChatTrigger)._regExp = value.includes('{') ? null : new RegExp(value, 'i');
@@ -47,7 +47,7 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 					},
 				},
 				response: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					allowNull: false,
 				},
 				cooldown: {
@@ -55,7 +55,7 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 					allowNull: true,
 				},
 				chatTypes: {
-					type: DataTypes.ARRAY(DataTypes.STRING),
+					type: DataTypes.ARRAY(DataTypes.TEXT),
 					allowNull: false,
 				},
 				createdAt: DataTypes.DATE,

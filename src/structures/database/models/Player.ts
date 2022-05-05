@@ -441,16 +441,16 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			{
 				// general information
 				minecraftUuid: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					primaryKey: true,
 				},
 				ign: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: UNKNOWN_IGN,
 					allowNull: false,
 				},
 				discordId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 					set(value: Snowflake | null) {
@@ -468,7 +468,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 					},
 				},
 				guildId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
@@ -502,12 +502,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 				// xp stats reference
 				mainProfileId: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
 				mainProfileName: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
@@ -536,7 +536,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 				// hypixel guild exp
 				guildXpDay: {
-					type: DataTypes.STRING,
+					type: DataTypes.TEXT,
 					defaultValue: null,
 					allowNull: true,
 				},
