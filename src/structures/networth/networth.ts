@@ -6,8 +6,6 @@ import {
 	BLOCKED_ENCHANTS,
 	CRAFTING_RECIPES,
 	Enchantment,
-	ESSENCE_PRICES,
-	ESSENCE_UPGRADES,
 	GEMSTONES,
 	IGNORED_GEMSTONES,
 	ItemId,
@@ -20,8 +18,14 @@ import {
 	SPECIAL_GEMSTONES,
 	TALISMANS,
 } from './constants';
-import { getPrice, prices } from './prices';
-import { calculatePetSkillLevel, getEnchantment, isVanillaItem, transformItemData } from './functions';
+import { getPrice, itemUpgrades, prices } from './prices';
+import {
+	calculatePetSkillLevel,
+	getEnchantment,
+	getUpgradeMaterialPrice,
+	isVanillaItem,
+	transformItemData,
+} from './functions';
 import type { SkyBlockProfile } from '../../functions';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 
@@ -61,7 +65,7 @@ async function parseItems(base64: string) {
 	return networth;
 }
 
-type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
+export type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 	Partial<{
 		ability_scroll: string[];
 		art_of_war_count: number;
@@ -78,6 +82,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		skin: string;
 		talisman_enrichment: string;
 		tuned_transmission: number;
+		upgrade_level: number;
 		winning_bid: number;
 		wood_singularity_count: number;
 	}>;
@@ -200,33 +205,48 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies * ExtraAttributes.farming_for_dummies_count;
 	}
 
-	// dungeon stars
-	if (ExtraAttributes.dungeon_item_level) {
-		const essenceItem =
-			ESSENCE_UPGRADES[itemId as keyof typeof ESSENCE_UPGRADES] ??
-			// upgraded item fix p1: originTag (most of the time) shows the base version of upgraded items
-			ESSENCE_UPGRADES[ExtraAttributes.originTag as keyof typeof ESSENCE_UPGRADES] ??
-			// upgraded item fix p2: STARRED_BONZO_STAFF -> BONZO_STAFF
-			ESSENCE_UPGRADES[itemId.slice(itemId.indexOf('_') + 1) as keyof typeof ESSENCE_UPGRADES] ??
-			// upgraded item fix p3: PERFECT_HELMET_12 -> PERFECT_HELMET
-			ESSENCE_UPGRADES[itemId.slice(0, itemId.lastIndexOf('_')) as keyof typeof ESSENCE_UPGRADES];
+	// stars
+	// upgrade_level seems to be the newer key, if both are present it's always higher than dungeon_item_level
+	const stars = ExtraAttributes.upgrade_level ?? ExtraAttributes.dungeon_item_level;
 
-		if (essenceItem) {
-			let essenceAmount = essenceItem.dungeonize;
+	if (typeof stars === 'number') {
+		const itemUpgrade =
+			itemUpgrades.get(itemId) ??
+			// upgraded item fix p1: originTag (most of the time) shows the base version of upgraded items
+			itemUpgrades.get(ExtraAttributes.originTag!) ??
+			// TODO: the following might not be needed anymore when using the /resources/skyblock/items api
+			// upgraded item fix p2: STARRED_BONZO_STAFF -> BONZO_STAFF
+			itemUpgrades.get(itemId.slice(itemId.indexOf('_') + 1)) ??
+			// upgraded item fix p3: PERFECT_HELMET_12 -> PERFECT_HELMET
+			itemUpgrades.get(itemId.slice(0, itemId.lastIndexOf('_')));
+
+		if (itemUpgrade) {
+			let essencePrice = 0;
+
+			if (itemUpgrade.conversion) {
+				for (const [material, amount] of Object.entries(itemUpgrade.conversion)) {
+					essencePrice += getUpgradeMaterialPrice(material) * amount;
+				}
+			}
 
 			// normal stars (5 -> 1)
-			for (let star = Math.min(ExtraAttributes.dungeon_item_level, 5); star > 0; --star) {
-				essenceAmount += essenceItem[star as 1 | 2 | 3 | 4 | 5] ?? 0;
+			if (itemUpgrade.stars) {
+				for (let star = stars - 1; star >= 0; --star) {
+					// item api has required materials
+					if (itemUpgrade.stars[star]) {
+						for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
+							essencePrice += getUpgradeMaterialPrice(material) * amount;
+						}
+					} else {
+						// dungeon items require master stars for stars 6 - 10
+						price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonStar;
+					}
+				}
 			}
 
-			price += essenceAmount * (ESSENCE_PRICES[essenceItem.type] ?? 0) * PriceModifier.DungeonEssence;
-
-			// master stars (4 -> 0 cause array index)
-			for (let star = ExtraAttributes.dungeon_item_level - 5; star-- >= 0; ) {
-				price += getPrice(MASTER_STARS[star]) * PriceModifier.DungeonStar;
-			}
+			price += essencePrice * PriceModifier.Essence;
 		} else {
-			logger.warn(`[NETWORTH]: unknown dungeon item '${itemId}', originTag: '${ExtraAttributes.originTag}'`);
+			logger.warn(`[NETWORTH]: unknown starred item '${itemId}', originTag: '${ExtraAttributes.originTag}'`);
 		}
 	}
 

@@ -1,48 +1,49 @@
-import { fileURLToPath, URL } from 'node:url';
-import { execArgv } from 'node:process';
-import Bree from 'bree';
-import { minutes, seconds } from '../functions';
-import { prices } from '../structures/networth/prices';
+import { URL } from 'node:url';
+import { itemUpgrades, prices } from '../structures/networth/prices';
 import { logger } from '../logger';
+import { Job } from '../structures/jobs/Job';
+import { JobManager } from '../structures/jobs/JobManager';
+import type { ParsedSkyBlockItem } from './pricesAndPatchNotes';
 import type { LunarClient } from '../structures/LunarClient';
 
 export const enum JobType {
 	HypixelForumLastGUIDUpdate,
-	SkyblockAuctionPriceUpdate,
+	LogMessage,
+	SkyBlockItemUpdate,
+	SkyBlockPriceUpdate,
 }
 
-export let bree: Bree;
+export const jobs = new JobManager();
 
 export function startJobs(client: LunarClient) {
-	bree = new Bree({
-		root: false,
-		logger: logger as unknown as Record<string, unknown>,
-		worker: { execArgv: [...execArgv, '--no-warnings'] },
-		jobs: [
-			{
-				name: 'pricesAndPatchNotes',
-				cron: '*/1 * * * *',
-				path: fileURLToPath(new URL('./pricesAndPatchNotes.js', import.meta.url)),
+	jobs.add(
+		new Job(new URL('./pricesAndPatchNotes.js', import.meta.url), {
+			message(message: { op: JobType; d: any }) {
+				switch (message.op) {
+					case JobType.HypixelForumLastGUIDUpdate:
+						void client.config.set('HYPIXEL_FORUM_LAST_GUID', message.d);
+						break;
+
+					case JobType.LogMessage:
+						logger[message.d.lvl as 'info' | 'warn' | 'error'](...(message.d.args as [string]));
+						break;
+
+					case JobType.SkyBlockItemUpdate:
+						for (const { id, ...data } of message.d as ParsedSkyBlockItem[]) {
+							itemUpgrades.set(id, data);
+						}
+						break;
+
+					case JobType.SkyBlockPriceUpdate:
+						prices.set(message.d.itemId, message.d.price);
+						break;
+
+					default: {
+						const e: never = message.op;
+						logger.error(`[JOBS] pricesAndPatchNotes: unknown message op '${e}'`);
+					}
+				}
 			},
-		],
-		closeWorkerAfterMs: minutes(1) + seconds(45),
-		errorHandler(error, workerMetadata) {
-			logger.error({ err: error, workerMetadata }, '[BREE]');
-		},
-		workerMessageHandler({ message, name }: { message: 'done' | { op: JobType; d: any }; name: string }) {
-			if (message === 'done') return logger.info(`[BREE]: '${name}' signaled completion`);
-
-			switch (message.op) {
-				case JobType.HypixelForumLastGUIDUpdate:
-					void client.config.set('HYPIXEL_FORUM_LAST_GUID', message.d);
-					break;
-
-				case JobType.SkyblockAuctionPriceUpdate:
-					prices.set(message.d.itemId, message.d.price);
-					break;
-			}
-		},
-	});
-
-	bree.start();
+		}),
+	);
 }

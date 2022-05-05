@@ -146,6 +146,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number) => {
 		case Enchantment.UltimateChimera:
 		case Enchantment.UltimateCombo:
 		case Enchantment.UltimateFatalTempo:
+		case Enchantment.UltimateFlash:
 		case Enchantment.UltimateInferno:
 		case Enchantment.UltimateJerry:
 		case Enchantment.UltimateLastStand:

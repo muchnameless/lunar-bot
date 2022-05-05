@@ -1,10 +1,11 @@
 /* eslint-disable unicorn/prefer-top-level-await */
-import { exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import { setTimeout as sleep } from 'node:timers/promises';
+import EventEmitter from 'node:events';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
+import { CronJob } from 'cron';
 import { logger } from '../logger';
 import { consumeBody } from '../functions/fetch'; // no index imports to not import unused files in the worker
 import { FetchError } from '../structures/errors/FetchError';
@@ -17,6 +18,9 @@ import { sql } from '../structures/database/sql';
 import { JobType } from '.';
 import type { Enchantment } from '../structures/networth/constants';
 import type { Components } from '@zikeji/hypixel';
+
+// because a single AbortController is used for all fetches
+EventEmitter.setMaxListeners(100);
 
 /**
  * prices
@@ -53,7 +57,7 @@ async function updateItem(itemId: string, currentPrice: number) {
 			array_length(history, 1) = 1 AS new_entry
 	`;
 
-	parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: median } });
+	parentPort?.postMessage({ op: JobType.SkyBlockPriceUpdate, d: { itemId, price: median } });
 
 	// eslint-disable-next-line camelcase
 	if (new_entry) {
@@ -100,11 +104,8 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
 /**
  * fetches bazaar products
  */
-async function fetchBazaarPrices() {
-	const res = await fetch('https://api.hypixel.net/skyblock/bazaar', {
-		// @ts-expect-error
-		signal: AbortSignal.timeout(30_000),
-	});
+async function fetchBazaarPrices(ac: AbortController) {
+	const res = await fetch('https://api.hypixel.net/skyblock/bazaar', { signal: ac.signal });
 
 	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockBazaarResponse>;
 
@@ -115,8 +116,8 @@ async function fetchBazaarPrices() {
 /**
  * fetches and processes bazaar products
  */
-async function updateBazaarPrices() {
-	let { lastUpdated, products } = await fetchBazaarPrices();
+async function updateBazaarPrices(ac: AbortController) {
+	let { lastUpdated, products } = await fetchBazaarPrices(ac);
 
 	// check if API data is updated
 	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
@@ -132,14 +133,15 @@ async function updateBazaarPrices() {
 
 		while (lastUpdated <= lastUpdatedEntryParsed) {
 			if (++retries > MAX_RETRIES) {
-				return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE BAZAAR PRICES]');
+				logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE BAZAAR PRICES]');
+				return [];
 			}
 
 			logger.warn(`[UPDATE BAZAAR PRICES]: refetching Bazaar: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
 			await sleep(5_000);
 
 			// fetch first auction page
-			({ lastUpdated, products } = await fetchBazaarPrices());
+			({ lastUpdated, products } = await fetchBazaarPrices(ac));
 		}
 	}
 
@@ -167,6 +169,8 @@ async function updateBazaarPrices() {
 		ON CONFLICT (key) DO
 		UPDATE SET value = excluded.value
 	`;
+
+	return Object.keys(products);
 }
 
 /**
@@ -174,12 +178,10 @@ async function updateBazaarPrices() {
  * @param page
  */
 async function fetchAuctionPage(
+	ac: AbortController,
 	page: number,
 ): Promise<Pick<Components.Schemas.SkyBlockAuctionsResponse, 'auctions' | 'lastUpdated' | 'success' | 'totalPages'>> {
-	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`, {
-		// @ts-expect-error
-		signal: AbortSignal.timeout(30_000),
-	});
+	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`, { signal: ac.signal });
 
 	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
 
@@ -195,15 +197,20 @@ async function fetchAuctionPage(
 /**
  * fetches and processes all auction pages
  */
-async function updateAuctionPrices() {
+async function updateAuctionPrices(ac: AbortController) {
 	/**
 	 * fetches all auction pages
 	 */
 	// fetch first auction page
-	let { success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(0);
+	let { success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(ac, 0);
+
+	const binAuctions = new Collection<string, number[]>();
 
 	// abort on error
-	if (!success) return logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+	if (!success) {
+		logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+		return binAuctions;
+	}
 
 	// check if API data is updated
 	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
@@ -219,7 +226,8 @@ async function updateAuctionPrices() {
 
 		while (lastUpdated <= lastUpdatedEntryParsed) {
 			if (++retries > MAX_RETRIES) {
-				return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE AUCTION PRICES]');
+				logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE AUCTION PRICES]');
+				return binAuctions;
 			}
 
 			logger.warn(
@@ -228,16 +236,17 @@ async function updateAuctionPrices() {
 			await sleep(5_000);
 
 			// fetch first auction page
-			({ success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(0));
+			({ success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(ac, 0));
 
 			// abort on error
-			if (!success) return logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+			if (!success) {
+				logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+				return binAuctions;
+			}
 		}
 	}
 
 	// fetch remaining auction pages
-	const BINAuctions = new Collection<string, number[]>();
-
 	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem, price: number) => {
 		const [item] = await transformItemData(auction.item_bytes);
 
@@ -315,7 +324,7 @@ async function updateAuctionPrices() {
 				return;
 		}
 
-		BINAuctions.get(itemId)?.push(price / count) ?? BINAuctions.set(itemId, [price / count]);
+		binAuctions.get(itemId)?.push(price / count) ?? binAuctions.set(itemId, [price / count]);
 	};
 
 	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
@@ -324,7 +333,7 @@ async function updateAuctionPrices() {
 	let retries = 0;
 
 	const fetchAndProcessAuctions = async (page: number): Promise<unknown> => {
-		const { auctions: _auctions, lastUpdated: _lastUpdated } = await fetchAuctionPage(page);
+		const { auctions: _auctions, lastUpdated: _lastUpdated } = await fetchAuctionPage(ac, page);
 
 		if (_lastUpdated !== lastUpdated) {
 			if (_lastUpdated < lastUpdated && ++retries <= MAX_RETRIES) {
@@ -343,10 +352,7 @@ async function updateAuctionPrices() {
 	};
 
 	const fetchAndProcessEndedAuctions = async () => {
-		const res = await fetch('https://api.hypixel.net/skyblock/auctions_ended', {
-			// @ts-expect-error
-			signal: AbortSignal.timeout(30_000),
-		});
+		const res = await fetch('https://api.hypixel.net/skyblock/auctions_ended', { signal: ac.signal });
 
 		if (res.status === 200) {
 			return Promise.all(
@@ -369,9 +375,6 @@ async function updateAuctionPrices() {
 	// process all auction pages
 	await Promise.all(promises);
 
-	// update database and prices map
-	await Promise.all(BINAuctions.map((_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
-
 	// update config key
 	await sql`
 		INSERT INTO "Config" (
@@ -385,7 +388,112 @@ async function updateAuctionPrices() {
 		UPDATE SET value = excluded.value
 	`;
 
-	logger.debug(`[UPDATE AUCTION PRICES]: updated ${BINAuctions.size} items from ${totalPages} auction pages`);
+	logger.debug(`[UPDATE AUCTION PRICES]: updated ${binAuctions.size} items from ${totalPages} auction pages`);
+
+	// return auctions to update db
+	return binAuctions;
+}
+
+/**
+ * update auction and bazaar prices
+ * @param ac
+ */
+async function updatePrices(ac: AbortController) {
+	const [binAuctions, bazaarItems] = await Promise.all([updateAuctionPrices(ac), updateBazaarPrices(ac)]);
+
+	// remove auctioned items that are available in the bazaar
+	for (const itemId of bazaarItems) {
+		binAuctions.delete(itemId);
+	}
+
+	return Promise.all(binAuctions.map((_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
+}
+
+interface SkyBlockItem {
+	material: string;
+	durability: number;
+	skin: string;
+	name: string;
+	category: string;
+	stats?: Record<string, number>;
+	soulbound?: 'COOP' | 'SOLO';
+	tier: 'RARE';
+	npc_sell_price: number;
+	dungeon_item_conversion_cost?: {
+		essence_type: string;
+		amount: number;
+	};
+	upgrade_costs?: (EssenceUpgrade | ItemUpgrade)[][];
+	id: string;
+}
+
+interface Upgrade {
+	amount: number;
+}
+
+interface EssenceUpgrade extends Upgrade {
+	essence_type: string;
+}
+
+interface ItemUpgrade extends Upgrade {
+	item_id: string;
+}
+
+export type ParsedSkyBlockItem = {
+	id: string;
+	conversion: Record<string, number> | null;
+	stars: Record<string, number>[] | null;
+};
+
+/**
+ * update skyblock items
+ * @param ac
+ */
+async function updateItems(ac: AbortController) {
+	const res = await fetch('https://api.hypixel.net/resources/skyblock/items', { signal: ac.signal });
+
+	if (res.status !== 200) {
+		void consumeBody(res);
+		throw new FetchError('FetchBazaarError', res);
+	}
+
+	const { success, items } = (await res.json()) as { success: boolean; items: SkyBlockItem[] };
+
+	if (!success) return;
+
+	const parsed: ParsedSkyBlockItem[] = [];
+
+	for (const item of items) {
+		if (!item.upgrade_costs) continue;
+
+		parsed.push({
+			id: item.id,
+			conversion: item.dungeon_item_conversion_cost
+				? { [item.dungeon_item_conversion_cost.essence_type]: item.dungeon_item_conversion_cost.amount }
+				: null,
+			stars:
+				item.upgrade_costs?.map((entry) =>
+					entry.reduce((acc, cur) => {
+						acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
+						return acc;
+					}, {} as Record<string, number>),
+				) ?? null,
+		});
+	}
+
+	await sql`
+		INSERT INTO skyblock_items
+		${
+			// @ts-expect-error
+			sql(parsed)
+		}
+		ON CONFLICT (id) DO
+		UPDATE SET
+			conversion = excluded.conversion,
+			stars = excluded.stars
+	`;
+
+	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsed });
 }
 
 /**
@@ -423,11 +531,8 @@ const xmlParser = new XMLParser({ ignoreDeclaration: true });
  * fetch and parse xml data
  * @param forum
  */
-async function fetchForumEntries(forum: string) {
-	const res = await fetch(`https://hypixel.net/forums/${forum}/index.rss`, {
-		// @ts-expect-error
-		signal: AbortSignal.timeout(30_000),
-	});
+async function fetchForumEntries(ac: AbortController, forum: string) {
+	const res = await fetch(`https://hypixel.net/forums/${forum}/index.rss`, { signal: ac.signal });
 
 	if (res.status === 200) return (xmlParser.parse(await res.text()) as HypixelForumResponse).rss.channel.item;
 
@@ -438,11 +543,19 @@ async function fetchForumEntries(forum: string) {
 /**
  * updates skyblock patchnotes from hypixel forum rss feeds
  */
-async function updatePatchNotes() {
+let lastGuid: number = JSON.parse(
+	(
+		await sql<[{ value: string }]>`
+			SELECT value FROM "Config" WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
+		`
+	)[0]?.value,
+);
+
+async function updatePatchNotes(ac: AbortController) {
 	// fetch RSS feeds
 	const [skyblockPatchnotes, newsAndAnnouncements] = await Promise.all([
-		fetchForumEntries('skyblock-patch-notes.158'),
-		fetchForumEntries('news-and-announcements.4'),
+		fetchForumEntries(ac, 'skyblock-patch-notes.158'),
+		fetchForumEntries(ac, 'news-and-announcements.4'),
 	]);
 
 	// add skyblock related posts from news and announcements
@@ -462,13 +575,7 @@ async function updatePatchNotes() {
 		updatedAt: now,
 	}));
 
-	const [lastGuidEntry] = await sql<[{ value: string }]>`
-		SELECT value
-		FROM "Config"
-		WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
-	`;
-	const LAST_GUID: number = lastGuidEntry ? JSON.parse(lastGuidEntry.value) : 0;
-	const newPosts = parsedItems.filter(({ guid }) => guid > LAST_GUID);
+	const newPosts = parsedItems.filter(({ guid }) => guid > lastGuid);
 
 	await sql`
 		INSERT INTO "SkyBlockPatchNotes"
@@ -483,10 +590,12 @@ async function updatePatchNotes() {
 
 	if (!newPosts.length) return;
 
+	lastGuid = Math.max(...newPosts.map(({ guid }) => guid));
+
 	if (parentPort) {
 		parentPort.postMessage({
 			op: JobType.HypixelForumLastGUIDUpdate,
-			d: Math.max(...newPosts.map(({ guid }) => guid)),
+			d: lastGuid,
 		});
 	} else {
 		await sql`
@@ -495,7 +604,7 @@ async function updatePatchNotes() {
 				value
 			) VALUES (
 				'HYPIXEL_FORUM_LAST_GUID',
-				${JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid)))}
+				${JSON.stringify(lastGuid)}
 			)
 			ON CONFLICT (key) DO
 			UPDATE SET value = excluded.value
@@ -506,23 +615,32 @@ async function updatePatchNotes() {
 /**
  * run jobs
  */
-let exitCode = 0;
+let ac: AbortController | null = null;
 
-for (const res of await Promise.allSettled([updateAuctionPrices(), updateBazaarPrices(), updatePatchNotes()])) {
-	if (res.status === 'rejected') {
-		logger.fatal(res.reason);
-		exitCode = 1;
+async function runJobs() {
+	logger.debug('[WORKER]: running jobs');
+
+	if (ac) {
+		logger.error('[WORKER]: aborting current jobs');
+		ac.abort();
 	}
+
+	ac = new AbortController();
+
+	const jobs = [updatePrices(ac), updatePatchNotes(ac)];
+
+	// every full hour
+	if (new Date().getMinutes() === 0) {
+		jobs.push(updateItems(ac));
+	}
+
+	for (const res of await Promise.allSettled(jobs)) {
+		if (res.status === 'rejected') {
+			logger.error(res.reason);
+		}
+	}
+
+	ac = null;
 }
 
-/**
- * cleanup
- */
-
-await sql.end();
-
-if (parentPort) {
-	parentPort.postMessage('done');
-} else {
-	exit(exitCode);
-}
+new CronJob('*/1 * * * *', runJobs).start();

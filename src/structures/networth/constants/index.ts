@@ -1,7 +1,5 @@
 export * from './craftingRecipes';
-export * from './dungeons';
 export * from './enchantments';
-export * from './essenceUpgrades';
 export * from './farming';
 export * from './gemstones';
 export * from './itemId';
@@ -10,4 +8,5 @@ export * from './misc';
 export * from './modifiers';
 export * from './pets';
 export * from './reforges';
+export * from './stars';
 export * from './talismans';

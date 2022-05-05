@@ -1,8 +1,10 @@
 import process, { exit } from 'node:process';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { imgur, redis } from './api';
-import { bree } from './jobs';
+import { jobs } from './jobs';
 import { sequelize, sql } from './structures/database';
 import { logger } from './logger';
+import { seconds } from './functions';
 
 /**
  * error messages which will only be logged when not being caught
@@ -28,24 +30,21 @@ process
 		void exitProcess(0);
 	});
 
-/**
- * closes all db connections and exits the process
- * @param code exit code
- */
-export async function exitProcess(code = 0) {
+async function cleanup() {
 	let hasError = false;
 
 	try {
 		await imgur.cacheRateLimits();
 	} catch (error) {
 		logger.fatal(error);
+		hasError = true;
 	}
 
 	for (const output of await Promise.allSettled([
 		sequelize.close(),
 		sql.end({ timeout: 5 }),
 		redis.quit(),
-		bree?.stop(),
+		jobs.stop(),
 	])) {
 		if (output.status === 'rejected') {
 			logger.fatal(output.reason);
@@ -54,6 +53,16 @@ export async function exitProcess(code = 0) {
 			logger.info(output.value);
 		}
 	}
+
+	return hasError;
+}
+
+/**
+ * closes all db connections and exits the process
+ * @param code exit code
+ */
+export async function exitProcess(code = 0) {
+	const hasError = await Promise.race([cleanup(), sleep(seconds(10), true)]);
 
 	return exit(hasError ? 1 : code);
 }

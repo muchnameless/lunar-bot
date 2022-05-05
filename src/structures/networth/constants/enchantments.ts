@@ -104,6 +104,7 @@ export const enum Enchantment {
 	UltimateChimera = 'ultimate_chimera',
 	UltimateCombo = 'ultimate_combo',
 	UltimateFatalTempo = 'ultimate_fatal_tempo',
+	UltimateFlash = 'ultimate_flash',
 	UltimateInferno = 'ultimate_inferno',
 	UltimateJerry = 'ultimate_jerry',
 	UltimateLastStand = 'ultimate_last_stand',
