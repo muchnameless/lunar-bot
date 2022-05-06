@@ -450,7 +450,7 @@ export type ParsedSkyBlockItem = {
  * update skyblock items
  * @param ac
  */
-async function updateItems(ac: AbortController) {
+async function updateSkyBlockItems(ac: AbortController) {
 	const res = await fetch('https://api.hypixel.net/resources/skyblock/items', { signal: ac.signal });
 
 	if (res.status !== 200) {
@@ -491,6 +491,8 @@ async function updateItems(ac: AbortController) {
 	`;
 
 	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });
+
+	logger.debug(`[UPDATE SKYBLOCK ITEMS]: updated ${parsedItems.length} items`);
 }
 
 /**
@@ -607,6 +609,8 @@ async function updatePatchNotes(ac: AbortController) {
 			UPDATE SET value = excluded.value
 		`;
 	}
+
+	logger.debug(`[UPDATE PATCH NOTES]: new forum entry with guid '${lastGuid}'`);
 }
 
 /**
@@ -628,7 +632,7 @@ async function runJobs() {
 
 	// every full hour
 	if (new Date().getMinutes() === 0) {
-		jobs.push(updateItems(ac));
+		jobs.push(updateSkyBlockItems(ac));
 	}
 
 	for (const res of await Promise.allSettled(jobs)) {
