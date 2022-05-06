@@ -31,8 +31,8 @@ export function startJobs(client: LunarClient) {
 
 					case JobType.SkyBlockItemUpdate:
 						for (const { id, category, ...data } of message.d as ParsedSkyBlockItem[]) {
-							if (category === 'ACCESSORY') accessories.add(id);
-							if (data.stars) itemUpgrades.set(id, data as ItemUpgrade);
+							accessories[category === 'ACCESSORY' ? 'add' : 'delete'](id);
+							itemUpgrades[data.stars ? 'set' : 'delete'](id, data as ItemUpgrade);
 						}
 						break;
 

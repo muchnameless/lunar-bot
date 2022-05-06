@@ -443,7 +443,7 @@ export type ParsedSkyBlockItem = {
 	id: string;
 	dungeon_conversion: Record<string, number> | null;
 	stars: Record<string, number>[] | null;
-	category: string;
+	category: string | null;
 };
 
 /**
@@ -474,7 +474,7 @@ async function updateItems(ac: AbortController) {
 					return acc;
 				}, {} as Record<string, number>),
 			) ?? null,
-		category: item.category,
+		category: item.category ?? null,
 	}));
 
 	await sql`
