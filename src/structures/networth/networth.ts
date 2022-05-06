@@ -263,11 +263,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		 * API examples
 		 *
 		 * gems: {
-		 *   AMBER_0: 'FINE', <- FINE_AMBER
+		 *   AMBER_0: 'FINE', <- FINE_AMBER (slice '_')
 		 * }
 		 *
 		 * gems: {
-		 *   COMBAT_0: 'FINE', <- COMBAT_0_gem
+		 *   COMBAT_0: 'FINE', <- COMBAT_0_gem (gems[`${key}_gem`])
 		 *   unlocked_slots: [ 'COMBAT_0' ], // <- isArray continue
 		 *   COMBAT_0_gem: 'JASPER', // <- endsWith('_gem') continue
 		 * }
@@ -276,7 +276,8 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			if (Array.isArray(value) || key.endsWith('_gem')) continue;
 
 			price +=
-				getPrice(`${value}_${ExtraAttributes.gems[`${key}_gem`] ?? key.split('_', 1)[0]}_GEM`) * PriceModifier.Gemstone;
+				getPrice(`${value}_${ExtraAttributes.gems[`${key}_gem`] ?? key.slice(0, key.indexOf('_'))}_GEM`) *
+				PriceModifier.Gemstone;
 		}
 	}
 
