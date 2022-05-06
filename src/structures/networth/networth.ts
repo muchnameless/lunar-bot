@@ -210,37 +210,28 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	const stars = ExtraAttributes.upgrade_level ?? ExtraAttributes.dungeon_item_level;
 
 	if (typeof stars === 'number') {
-		const itemUpgrade =
-			itemUpgrades.get(itemId) ??
-			// upgraded item fix p1: originTag (most of the time) shows the base version of upgraded items
-			itemUpgrades.get(ExtraAttributes.originTag!) ??
-			// TODO: the following might not be needed anymore when using the /resources/skyblock/items api
-			// upgraded item fix p2: STARRED_BONZO_STAFF -> BONZO_STAFF
-			itemUpgrades.get(itemId.slice(itemId.indexOf('_') + 1)) ??
-			// upgraded item fix p3: PERFECT_HELMET_12 -> PERFECT_HELMET
-			itemUpgrades.get(itemId.slice(0, itemId.lastIndexOf('_')));
+		const itemUpgrade = itemUpgrades.get(itemId);
 
 		if (itemUpgrade) {
 			let essencePrice = 0;
 
+			// initial conversion cost
 			if (itemUpgrade.conversion) {
 				for (const [material, amount] of Object.entries(itemUpgrade.conversion)) {
 					essencePrice += getUpgradeMaterialPrice(material) * amount;
 				}
 			}
 
-			// normal stars (5 -> 1)
-			if (itemUpgrade.stars) {
-				for (let star = stars - 1; star >= 0; --star) {
-					// item api has required materials
-					if (itemUpgrade.stars[star]) {
-						for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
-							essencePrice += getUpgradeMaterialPrice(material) * amount;
-						}
-					} else {
-						// dungeon items require master stars for stars 6 - 10
-						price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonStar;
+			// stars
+			for (let star = stars - 1; star >= 0; --star) {
+				// item api has required materials
+				if (itemUpgrade.stars[star]) {
+					for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
+						essencePrice += getUpgradeMaterialPrice(material) * amount;
 					}
+				} else {
+					// dungeon items require master stars for stars 6 - 10
+					price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonStar;
 				}
 			}
 

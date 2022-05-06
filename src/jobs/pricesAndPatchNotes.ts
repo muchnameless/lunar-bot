@@ -442,7 +442,7 @@ interface ItemUpgrade extends Upgrade {
 export type ParsedSkyBlockItem = {
 	id: string;
 	conversion: Record<string, number> | null;
-	stars: Record<string, number>[] | null;
+	stars: Record<string, number>[];
 };
 
 /**
@@ -471,13 +471,12 @@ async function updateItems(ac: AbortController) {
 			conversion: item.dungeon_item_conversion_cost
 				? { [item.dungeon_item_conversion_cost.essence_type]: item.dungeon_item_conversion_cost.amount }
 				: null,
-			stars:
-				item.upgrade_costs?.map((entry) =>
-					entry.reduce((acc, cur) => {
-						acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
-						return acc;
-					}, {} as Record<string, number>),
-				) ?? null,
+			stars: item.upgrade_costs.map((entry) =>
+				entry.reduce((acc, cur) => {
+					acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
+					return acc;
+				}, {} as Record<string, number>),
+			),
 		});
 	}
 
