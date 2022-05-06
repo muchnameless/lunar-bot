@@ -1,7 +1,6 @@
 export * from './craftingRecipes';
 export * from './enchantments';
 export * from './farming';
-export * from './gemstones';
 export * from './itemId';
 export * from './itemRarity';
 export * from './misc';

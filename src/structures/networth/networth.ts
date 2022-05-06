@@ -6,7 +6,6 @@ import {
 	BLOCKED_ENCHANTS,
 	CRAFTING_RECIPES,
 	Enchantment,
-	IGNORED_GEMSTONES,
 	ItemId,
 	MASTER_STARS,
 	MATERIALS_TO_ID,
@@ -14,7 +13,6 @@ import {
 	REDUCED_VALUE_ENCHANTS,
 	REFORGES,
 	SKYBLOCK_INVENTORIES,
-	SPECIAL_GEMSTONES,
 	TALISMANS,
 } from './constants';
 import { getPrice, itemUpgrades, prices } from './prices';
@@ -265,27 +263,20 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		 * API examples
 		 *
 		 * gems: {
-		 *   AMBER_0: 'FINE',
+		 *   AMBER_0: 'FINE', <- FINE_AMBER
 		 * }
 		 *
 		 * gems: {
-		 *   COMBAT_0: 'FINE',
-		 *   unlocked_slots: [ 'COMBAT_0' ], // <- IGNORED_GEMSTONES.has continue
+		 *   COMBAT_0: 'FINE', <- COMBAT_0_gem
+		 *   unlocked_slots: [ 'COMBAT_0' ], // <- isArray continue
 		 *   COMBAT_0_gem: 'JASPER', // <- endsWith('_gem') continue
 		 * }
 		 */
 		for (const [key, value] of Object.entries(ExtraAttributes.gems)) {
-			if (IGNORED_GEMSTONES.has(key)) continue;
+			if (Array.isArray(value) || key.endsWith('_gem')) continue;
 
-			const [slotType] = key.split('_', 1);
-
-			if (SPECIAL_GEMSTONES.has(slotType)) {
-				if (key.endsWith('_gem')) continue;
-
-				price += getPrice(`${value}_${ExtraAttributes.gems[`${key}_gem`]}_GEM`) * PriceModifier.Gemstone;
-			} else {
-				price += getPrice(`${value}_${slotType}_GEM`) * PriceModifier.Gemstone;
-			}
+			price +=
+				getPrice(`${value}_${ExtraAttributes.gems[`${key}_gem`] ?? key.split('_', 1)[0]}_GEM`) * PriceModifier.Gemstone;
 		}
 	}
 
