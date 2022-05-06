@@ -60,7 +60,7 @@ nwFunctions;
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { calculateItemPrice } from '../../structures/networth/networth';
 calculateItemPrice;
-import { accessories, itemUpgrades, populateCaches, prices, unknownItems } from '../../structures/networth/prices';
+import { accessories, itemUpgrades, populateCaches, prices } from '../../structures/networth/prices';
 accessories;
 itemUpgrades;
 populateCaches;
