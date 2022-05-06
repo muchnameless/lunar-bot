@@ -6,7 +6,6 @@ import {
 	BLOCKED_ENCHANTS,
 	CRAFTING_RECIPES,
 	Enchantment,
-	GEMSTONES,
 	IGNORED_GEMSTONES,
 	ItemId,
 	MASTER_STARS,
@@ -262,6 +261,19 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// gemstones
 	if (ExtraAttributes.gems) {
+		/**
+		 * API examples
+		 *
+		 * gems: {
+		 *   AMBER_0: 'FINE',
+		 * }
+		 *
+		 * gems: {
+		 *   COMBAT_0: 'FINE',
+		 *   unlocked_slots: [ 'COMBAT_0' ], // <- IGNORED_GEMSTONES.has continue
+		 *   COMBAT_0_gem: 'JASPER', // <- endsWith('_gem') continue
+		 * }
+		 */
 		for (const [key, value] of Object.entries(ExtraAttributes.gems)) {
 			if (IGNORED_GEMSTONES.has(key)) continue;
 
@@ -271,10 +283,8 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				if (key.endsWith('_gem')) continue;
 
 				price += getPrice(`${value}_${ExtraAttributes.gems[`${key}_gem`]}_GEM`) * PriceModifier.Gemstone;
-			} else if (GEMSTONES.has(slotType)) {
-				price += getPrice(`${value}_${slotType}_GEM`) * PriceModifier.Gemstone;
 			} else {
-				logger.warn(`[NETWORTH]: unknown gemstone '${key}: ${value}'`);
+				price += getPrice(`${value}_${slotType}_GEM`) * PriceModifier.Gemstone;
 			}
 		}
 	}

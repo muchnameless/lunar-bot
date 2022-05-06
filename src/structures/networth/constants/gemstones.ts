@@ -1,14 +1,3 @@
-export const GEMSTONES = new Set([
-	'AMBER', //
-	'AMETHYST',
-	'JADE',
-	'JASPER',
-	'OPAL',
-	'RUBY',
-	'SAPPHIRE',
-	'TOPAZ',
-]);
-
 export const SPECIAL_GEMSTONES = new Set([
 	'COMBAT', //
 	'DEFENSIVE',
