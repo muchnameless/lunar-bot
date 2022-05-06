@@ -13,9 +13,8 @@ import {
 	REDUCED_VALUE_ENCHANTS,
 	REFORGES,
 	SKYBLOCK_INVENTORIES,
-	TALISMANS,
 } from './constants';
-import { getPrice, itemUpgrades, prices } from './prices';
+import { accessories, getPrice, itemUpgrades, prices } from './prices';
 import {
 	calculatePetSkillLevel,
 	getEnchantment,
@@ -88,17 +87,17 @@ export type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
  * @param item
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
-	const ExtraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
+	const extraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
 
 	// pet item
-	if (ExtraAttributes.petInfo) {
-		return getPetPrice(JSON.parse(ExtraAttributes.petInfo) as Components.Schemas.SkyBlockProfilePet);
+	if (extraAttributes.petInfo) {
+		return getPetPrice(JSON.parse(extraAttributes.petInfo) as Components.Schemas.SkyBlockProfilePet);
 	}
 
 	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
 	if (isVanillaItem(item)) return 0;
 
-	const itemId = ExtraAttributes.id;
+	const itemId = extraAttributes.id;
 
 	let price =
 		(prices.get(itemId) ??
@@ -108,8 +107,8 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			0) * item.Count;
 
 	// dark auctions
-	if (ExtraAttributes.winning_bid && itemId !== ItemId.HegemonyArtifact) {
-		price = ExtraAttributes.winning_bid;
+	if (extraAttributes.winning_bid && itemId !== ItemId.HegemonyArtifact) {
+		price = extraAttributes.winning_bid;
 	}
 
 	// farming tools
@@ -140,9 +139,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	// enchantments
-	if (ExtraAttributes.enchantments) {
+	if (extraAttributes.enchantments) {
 		// eslint-disable-next-line prefer-const
-		for (let [enchantment, level] of Object.entries(ExtraAttributes.enchantments)) {
+		for (let [enchantment, level] of Object.entries(extraAttributes.enchantments)) {
 			if (BLOCKED_ENCHANTS[itemId as keyof typeof BLOCKED_ENCHANTS]?.includes(enchantment as any)) continue;
 
 			let enchantmentPrice = 0;
@@ -169,42 +168,42 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	// runes
-	if (ExtraAttributes.runes) {
-		for (const [rune, level] of Object.entries(ExtraAttributes.runes)) {
+	if (extraAttributes.runes) {
+		for (const [rune, level] of Object.entries(extraAttributes.runes)) {
 			price += getPrice(`RUNE_${rune}_${level}`) * PriceModifier.Rune;
 		}
 	}
 
 	// hot potato books + fuming potato books
-	if (ExtraAttributes.hot_potato_count) {
-		if (ExtraAttributes.hot_potato_count > 10) {
+	if (extraAttributes.hot_potato_count) {
+		if (extraAttributes.hot_potato_count > 10) {
 			price += getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook * 10;
 			price +=
-				getPrice(ItemId.FumingPotatoBook) * PriceModifier.FumingPotatoBook * (ExtraAttributes.hot_potato_count - 10);
+				getPrice(ItemId.FumingPotatoBook) * PriceModifier.FumingPotatoBook * (extraAttributes.hot_potato_count - 10);
 		} else {
-			price += getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook * ExtraAttributes.hot_potato_count;
+			price += getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook * extraAttributes.hot_potato_count;
 		}
 	}
 
 	// dyes
-	if (ExtraAttributes.dye_item) {
-		price += getPrice(ExtraAttributes.dye_item) * PriceModifier.Dye;
+	if (extraAttributes.dye_item) {
+		price += getPrice(extraAttributes.dye_item) * PriceModifier.Dye;
 	}
 
 	// art of war
-	if (ExtraAttributes.art_of_war_count) {
-		price += getPrice(ItemId.ArtOfWar) * PriceModifier.ArtOfWar * ExtraAttributes.art_of_war_count;
+	if (extraAttributes.art_of_war_count) {
+		price += getPrice(ItemId.ArtOfWar) * PriceModifier.ArtOfWar * extraAttributes.art_of_war_count;
 	}
 
 	// farming for dummies
-	if (ExtraAttributes.farming_for_dummies_count) {
+	if (extraAttributes.farming_for_dummies_count) {
 		price +=
-			getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies * ExtraAttributes.farming_for_dummies_count;
+			getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies * extraAttributes.farming_for_dummies_count;
 	}
 
 	// stars
 	// upgrade_level seems to be the newer key, if both are present it's always higher than dungeon_item_level
-	const stars = ExtraAttributes.upgrade_level ?? ExtraAttributes.dungeon_item_level;
+	const stars = extraAttributes.upgrade_level ?? extraAttributes.dungeon_item_level;
 
 	if (typeof stars === 'number') {
 		const itemUpgrade = itemUpgrades.get(itemId);
@@ -212,9 +211,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		if (itemUpgrade) {
 			let essencePrice = 0;
 
-			// initial conversion cost
-			if (itemUpgrade.conversion) {
-				for (const [material, amount] of Object.entries(itemUpgrade.conversion)) {
+			// initial dungeon conversion cost
+			if (itemUpgrade.dungeon_conversion) {
+				for (const [material, amount] of Object.entries(itemUpgrade.dungeon_conversion)) {
 					essencePrice += getUpgradeMaterialPrice(material) * amount;
 				}
 			}
@@ -234,93 +233,91 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 			price += essencePrice * PriceModifier.Essence;
 		} else {
-			logger.warn(`[NETWORTH]: unknown starred item '${itemId}', originTag: '${ExtraAttributes.originTag}'`);
+			logger.warn(`[NETWORTH]: unknown starred item '${itemId}', originTag: '${extraAttributes.originTag}'`);
 		}
 	}
 
 	// skin
-	if (ExtraAttributes.skin) {
-		price += getPrice(ExtraAttributes.skin) * PriceModifier.ItemSkin;
+	if (extraAttributes.skin) {
+		price += getPrice(extraAttributes.skin) * PriceModifier.ItemSkin;
 	}
 
 	// enrichments
-	if (ExtraAttributes.talisman_enrichment) {
-		price += getPrice(`TALISMAN_ENRICHMENT_${ExtraAttributes.talisman_enrichment}`) * PriceModifier.TalismanEnrichment;
+	if (extraAttributes.talisman_enrichment) {
+		price += getPrice(`TALISMAN_ENRICHMENT_${extraAttributes.talisman_enrichment}`) * PriceModifier.TalismanEnrichment;
 	}
 
 	// recombed
 	if (
-		ExtraAttributes.rarity_upgrades! > 0 &&
-		ExtraAttributes.originTag &&
-		(ExtraAttributes.enchantments || TALISMANS.has(itemId))
+		extraAttributes.rarity_upgrades! > 0 &&
+		extraAttributes.originTag &&
+		(extraAttributes.enchantments || accessories.has(itemId))
 	) {
 		price += getPrice(ItemId.Recombobulator) * PriceModifier.Recomb;
 	}
 
 	// gemstones
-	if (ExtraAttributes.gems) {
+	if (extraAttributes.gems) {
 		/**
-		 * API examples
+		 * API example:
 		 *
 		 * gems: {
-		 *   AMBER_0: 'FINE', <- FINE_AMBER (slice '_')
-		 * }
-		 *
-		 * gems: {
-		 *   COMBAT_0: 'FINE', <- COMBAT_0_gem (gems[`${key}_gem`])
-		 *   unlocked_slots: [ 'COMBAT_0' ], // <- isArray continue
-		 *   COMBAT_0_gem: 'JASPER', // <- endsWith('_gem') continue
+		 *   AMBER_0: 'FINE',                // FINE_AMBER (slice '_')
+		 *   AMBER_1: 'FLAWLESS',            // FLAWLESS_AMBER (slice '_')
+		 *   COMBAT_0: 'FINE',               // COMBAT_0_gem (gems[`${key}_gem`])
+		 *   COMBAT_0_gem: 'JASPER',         // endsWith('_gem') continue
+		 *   unlocked_slots: [ 'COMBAT_0' ], // isArray continue
 		 * }
 		 */
-		for (const [key, value] of Object.entries(ExtraAttributes.gems)) {
+		for (const [key, value] of Object.entries(extraAttributes.gems)) {
 			if (Array.isArray(value) || key.endsWith('_gem')) continue;
 
 			price +=
-				getPrice(`${value}_${ExtraAttributes.gems[`${key}_gem`] ?? key.slice(0, key.indexOf('_'))}_GEM`) *
+				getPrice(`${value}_${extraAttributes.gems[`${key}_gem`] ?? key.slice(0, key.indexOf('_'))}_GEM`) *
 				PriceModifier.Gemstone;
 		}
 	}
 
 	// wooden singularity
-	if (ExtraAttributes.wood_singularity_count) {
+	if (extraAttributes.wood_singularity_count) {
 		price += getPrice(ItemId.WoodSingularity) * PriceModifier.WoodSingularity;
 	}
 
 	// transmission tuners
-	if (ExtraAttributes.tuned_transmission) {
-		price += getPrice(ItemId.TransmissionTuner) * PriceModifier.TransmissionTuner * ExtraAttributes.tuned_transmission;
+	if (extraAttributes.tuned_transmission) {
+		price += getPrice(ItemId.TransmissionTuner) * PriceModifier.TransmissionTuner * extraAttributes.tuned_transmission;
 	}
 
 	// reforge
-	if (ExtraAttributes.modifier && !TALISMANS.has(itemId)) {
-		price += getPrice(REFORGES[ExtraAttributes.modifier]) * PriceModifier.Reforge;
+	if (extraAttributes.modifier && !accessories.has(itemId)) {
+		price += getPrice(REFORGES[extraAttributes.modifier]) * PriceModifier.Reforge;
 	}
 
 	// scrolls (Necron's Blade)
-	if (ExtraAttributes.ability_scroll) {
-		for (const _item of Object.values(ExtraAttributes.ability_scroll)) {
+	if (extraAttributes.ability_scroll) {
+		for (const _item of Object.values(extraAttributes.ability_scroll)) {
 			price += getPrice(_item) * PriceModifier.NecronBladeScroll;
 		}
 	}
 
 	// divan armor
-	if (ExtraAttributes.gemstone_slots) {
-		price += ExtraAttributes.gemstone_slots * getPrice(ItemId.GemstoneChamber) * PriceModifier.GemstoneChamber;
+	if (extraAttributes.gemstone_slots) {
+		price += extraAttributes.gemstone_slots * getPrice(ItemId.GemstoneChamber) * PriceModifier.GemstoneChamber;
 	}
 
 	// drills
-	if (ExtraAttributes.drill_part_upgrade_module) {
-		price += getPrice(ExtraAttributes.drill_part_upgrade_module.toUpperCase()) * PriceModifier.DrillUpgrade;
+	if (extraAttributes.drill_part_upgrade_module) {
+		price += getPrice(extraAttributes.drill_part_upgrade_module.toUpperCase()) * PriceModifier.DrillUpgrade;
 	}
-	if (ExtraAttributes.drill_part_fuel_tank) {
-		price += getPrice(ExtraAttributes.drill_part_fuel_tank.toUpperCase()) * PriceModifier.DrillUpgrade;
+	if (extraAttributes.drill_part_fuel_tank) {
+		price += getPrice(extraAttributes.drill_part_fuel_tank.toUpperCase()) * PriceModifier.DrillUpgrade;
 	}
-	if (ExtraAttributes.drill_part_engine) {
-		price += getPrice(ExtraAttributes.drill_part_engine.toUpperCase()) * PriceModifier.DrillUpgrade;
+	if (extraAttributes.drill_part_engine) {
+		price += getPrice(extraAttributes.drill_part_engine.toUpperCase()) * PriceModifier.DrillUpgrade;
 	}
 
 	// ethermerge (Aspect of the Void)
-	if (ExtraAttributes.ethermerge) {
+	if (extraAttributes.ethermerge) {
 		price +=
 			getPrice(ItemId.EtherwarpConduit) * PriceModifier.EtherwarpConduit +
 			getPrice(ItemId.EtherwarpMerger) * PriceModifier.EtherwarpMerger;

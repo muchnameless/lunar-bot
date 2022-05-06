@@ -441,8 +441,9 @@ interface ItemUpgrade extends Upgrade {
 
 export type ParsedSkyBlockItem = {
 	id: string;
-	conversion: Record<string, number> | null;
-	stars: Record<string, number>[];
+	dungeon_conversion: Record<string, number> | null;
+	stars: Record<string, number>[] | null;
+	category: string;
 };
 
 /**
@@ -461,38 +462,35 @@ async function updateItems(ac: AbortController) {
 
 	if (!success) return;
 
-	const parsed: ParsedSkyBlockItem[] = [];
-
-	for (const item of items) {
-		if (!item.upgrade_costs) continue;
-
-		parsed.push({
-			id: item.id,
-			conversion: item.dungeon_item_conversion_cost
-				? { [item.dungeon_item_conversion_cost.essence_type]: item.dungeon_item_conversion_cost.amount }
-				: null,
-			stars: item.upgrade_costs.map((entry) =>
+	const parsedItems: ParsedSkyBlockItem[] = items.map((item) => ({
+		id: item.id,
+		dungeon_conversion: item.dungeon_item_conversion_cost
+			? { [item.dungeon_item_conversion_cost.essence_type]: item.dungeon_item_conversion_cost.amount }
+			: null,
+		stars:
+			item.upgrade_costs?.map((entry) =>
 				entry.reduce((acc, cur) => {
 					acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
 					return acc;
 				}, {} as Record<string, number>),
-			),
-		});
-	}
+			) ?? null,
+		category: item.category,
+	}));
 
 	await sql`
 		INSERT INTO skyblock_items
-		${
+		${sql(
 			// @ts-expect-error
-			sql(parsed)
-		}
+			parsedItems,
+		)}
 		ON CONFLICT (id) DO
 		UPDATE SET
-			conversion = excluded.conversion,
-			stars = excluded.stars
+			dungeon_conversion = excluded.dungeon_conversion,
+			stars = excluded.stars,
+			category = excluded.category
 	`;
 
-	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsed });
+	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });
 }
 
 /**

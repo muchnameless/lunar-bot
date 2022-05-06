@@ -1,8 +1,9 @@
 import { URL } from 'node:url';
-import { itemUpgrades, prices } from '../structures/networth/prices';
+import { itemUpgrades, prices, accessories } from '../structures/networth/prices';
 import { logger } from '../logger';
 import { Job } from '../structures/jobs/Job';
 import { JobManager } from '../structures/jobs/JobManager';
+import type { ItemUpgrade } from '../structures/networth/prices';
 import type { ParsedSkyBlockItem } from './pricesAndPatchNotes';
 import type { LunarClient } from '../structures/LunarClient';
 
@@ -29,8 +30,9 @@ export function startJobs(client: LunarClient) {
 						break;
 
 					case JobType.SkyBlockItemUpdate:
-						for (const { id, ...data } of message.d as ParsedSkyBlockItem[]) {
-							itemUpgrades.set(id, data);
+						for (const { id, category, ...data } of message.d as ParsedSkyBlockItem[]) {
+							if (category === 'ACCESSORY') accessories.add(id);
+							if (data.stars) itemUpgrades.set(id, data as ItemUpgrade);
 						}
 						break;
 
