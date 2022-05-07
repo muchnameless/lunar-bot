@@ -1,5 +1,7 @@
+import { setTimeout } from 'node:timers';
 import { logger } from '../../logger';
 import { sql } from '../database';
+import { minutes } from '../../functions';
 import type { ParsedSkyBlockItem } from '../../jobs/pricesAndPatchNotes';
 
 export interface ItemUpgrade {
@@ -16,43 +18,44 @@ export const getPrice = (item: string) => prices.get(item) ?? 0;
  * queries the prices database
  */
 export async function populateCaches() {
-	// prices
-	prices.clear();
-
 	try {
-		for (const { id, median } of await sql<[{ id: string; median: number }]>`
+		// prices
+		const pricesRows = await sql<[{ id: string; median: number }]>`
 			SELECT id, median(history) from prices
-		`) {
+		`;
+
+		prices.clear();
+
+		for (const { id, median } of pricesRows) {
 			prices.set(id, median);
 		}
-	} catch (error) {
-		logger.error(error, '[POPULATE CACHES]: prices');
-	}
 
-	// items
-	itemUpgrades.clear();
-
-	try {
-		for (const { id, ...data } of await sql<[Pick<ParsedSkyBlockItem, 'id' | 'dungeon_conversion'> & ItemUpgrade]>`
+		// item upgrades
+		const itemUpgradesRows = await sql<[Pick<ParsedSkyBlockItem, 'id'> & ItemUpgrade]>`
 			SELECT id, dungeon_conversion, stars from skyblock_items WHERE stars IS NOT NULL
-		`) {
+		`;
+
+		itemUpgrades.clear();
+
+		for (const { id, ...data } of itemUpgradesRows) {
 			itemUpgrades.set(id, data);
 		}
-	} catch (error) {
-		logger.error(error, '[POPULATE CACHES]: skyblock_items');
-	}
 
-	// accessories
-	accessories.clear();
-
-	try {
-		for (const { id } of await sql<[{ id: string }]>`
+		// accessories
+		const accessoriesRows = await sql<[{ id: string }]>`
 			SELECT id from skyblock_items WHERE category = 'ACCESSORY'
-		`) {
+		`;
+
+		accessories.clear();
+
+		for (const { id } of accessoriesRows) {
 			accessories.add(id);
 		}
 	} catch (error) {
-		logger.error(error, '[POPULATE CACHES]: talismans');
+		logger.error(error, '[POPULATE CACHES]');
+
+		// retry
+		setTimeout(() => populateCaches(), minutes(1));
 	}
 }
 
