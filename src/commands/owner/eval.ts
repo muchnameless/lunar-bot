@@ -28,6 +28,7 @@ import { Type } from '@sapphire/type';
 import { regExpEsc } from '@sapphire/utilities';
 import { fetch } from 'undici';
 fetch;
+import { format } from 'prettier';
 import ms from 'ms';
 ms;
 import commonTags from 'common-tags';
@@ -227,10 +228,13 @@ export default class EvalCommand extends ApplicationCommand {
 			});
 
 		// format input
-		let input = _input.replace(/(?<=;) *(?!$|\n)/g, '\n').trim();
-
-		if (!input.endsWith(';')) input += ';';
-
+		let input = format(_input.trim(), {
+			parser: 'typescript',
+			singleQuote: true,
+			printWidth: 120,
+			trailingComma: 'all',
+			useTabs: true,
+		});
 		let toEvaluate: string;
 
 		// wrap input in async IIFE
