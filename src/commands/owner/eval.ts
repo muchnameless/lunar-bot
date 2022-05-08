@@ -239,7 +239,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 		// wrap input in async IIFE
 		if (isAsync) {
-			const lines = input.split(';\n');
+			const lines = input.split('\n');
 
 			for (let index = lines.length - 1; index >= 0; --index) {
 				const trimmed = lines[index].trimStart();
@@ -251,7 +251,7 @@ export default class EvalCommand extends ApplicationCommand {
 				break;
 			}
 
-			input = lines.join(';\n');
+			input = lines.join('\n');
 			toEvaluate = `(async () => { ${input} })()`;
 		} else {
 			toEvaluate = input;
