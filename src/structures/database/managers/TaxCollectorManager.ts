@@ -6,6 +6,8 @@ import type { TaxCollector } from '../models/TaxCollector';
 import type { ModelResovable } from './ModelManager';
 import type { Player } from '../models/Player';
 
+export type TaxCollectorResovable = ModelResovable<TaxCollector>;
+
 export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	/**
 	 * returns a collection of all currently active collectors
@@ -40,6 +42,28 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 		this.cache.set(newEntry[this.primaryKey] as string, newEntry);
 
 		return newEntry;
+	}
+
+	/**
+	 * changes the tax collectors isCollecting to false or deletes the entry if the collector didn't collect anything
+	 * @param taxCollector
+	 */
+	async setInactive(taxCollector: TaxCollectorResovable) {
+		const _taxCollector = this.resolve(taxCollector);
+		if (!_taxCollector) return this;
+
+		const player =
+			_taxCollector.player ?? (await this.client.players.fetch({ minecraftUuid: _taxCollector.minecraftUuid }));
+
+		// remove self paid if only the collector paid the default amount at his own ah
+		if (_taxCollector.collectedTax === this.client.config.get('TAX_AMOUNT')) {
+			if (player && (await player.transactions)[0].to === player.minecraftUuid) await player.resetTax();
+			await _taxCollector.destroy();
+		} else {
+			await _taxCollector.update({ isCollecting: false });
+		}
+
+		return this;
 	}
 
 	/**

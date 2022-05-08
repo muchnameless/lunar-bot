@@ -123,17 +123,7 @@ export default class TaxCommand extends ApplicationCommand {
 							return InteractionUtil.reply(interaction, `\`${player}\` is not a tax collector`);
 						}
 
-						// remove self paid if only the collector paid the default amount at his own ah
-						if (
-							taxCollector.collectedTax === this.config.get('TAX_AMOUNT') &&
-							(await player.transactions)[0].to === player.minecraftUuid
-						) {
-							logger.info(`[TAX AH]: ${player}: removed and reset tax paid`);
-							await player.resetTax();
-							await taxCollector.destroy();
-						} else {
-							await taxCollector.update({ isCollecting: false });
-						}
+						await this.client.taxCollectors.setInactive(taxCollector);
 
 						log = `\`${taxCollector}\` is no longer a tax collector`;
 						break;

@@ -1468,6 +1468,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * removes the discord server in-game guild role & all roles handled automatically by the bot
 	 */
 	async removeFromGuild() {
+		void this.client.taxCollectors.setInactive(this.minecraftUuid).catch((error) => logger.error(error));
+
 		const member = await this.fetchDiscordMember();
 
 		if (member) {
