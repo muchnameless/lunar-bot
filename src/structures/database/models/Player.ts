@@ -801,8 +801,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		shouldOnlyAwaitUpdateXp = false,
 		rejectOnAPIError = false,
 	}: PlayerUpdateOptions = {}) {
-		if (!this.guildId) {
-			// uncache non guild members if no activity in the last hour
+		// uncache non guild members if no activity in the last hour
+		if (!this.guildId && !this.client.taxCollectors.cache.get(this.minecraftUuid)?.isCollecting) {
 			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) void this.uncache();
 			return;
 		}
