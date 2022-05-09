@@ -21,6 +21,7 @@ import {
 	upperCaseFirstChar,
 } from '../../../functions';
 import { logger } from '../../../logger';
+import { sql } from '../sql';
 import { ModelManager } from './ModelManager';
 import type { APIEmbed } from 'discord-api-types/v10';
 import type { JSONEncodable } from 'discord.js';
@@ -57,9 +58,18 @@ export class PlayerManager extends ModelManager<Player> {
 	override async loadCache(condition?: FindOptions<Attributes<Player>>) {
 		await super.loadCache({
 			where: {
-				guildId: {
-					// player is in a guild or error
-					[Op.ne]: null,
+				[Op.or]: {
+					guildId: {
+						// player is in a guild or error
+						[Op.ne]: null,
+					},
+					minecraftUuid: {
+						[Op.in]: (
+							await sql<[{ minecraftUuid: string }]>`
+								SELECT "minecraftUuid" FROM "TaxCollectors" WHERE "isCollecting" IS TRUE
+							`
+						).map(({ minecraftUuid }) => minecraftUuid),
+					},
 				},
 			},
 			...condition,
