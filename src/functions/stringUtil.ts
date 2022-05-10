@@ -5,20 +5,28 @@ import { EMBED_FIELD_MAX_CHARS, SMALL_LATIN_CAPITAL_LETTERS, AnsiFormat } from '
 import type { AnsiBackground, AnsiColour } from '../constants';
 import type { Merge } from '../types/util';
 
+type AnsiOptions =
+	| [AnsiFormat, AnsiBackground?, AnsiColour?]
+	| [AnsiFormat, AnsiColour?]
+	| [AnsiBackground, AnsiColour?]
+	| [AnsiBackground]
+	| [AnsiColour];
+
 /**
- * ansi code block formatting and colouring
- * @link https://gist.github.com/kkrypt0nn/a02506f3712ff2d1c8ca7c9e0aed7c06
+ * ansi code block formatting and colouring tag
  * @param options format | background | colour
  */
-export const ansi = <T extends string | number>(
-	content: T,
-	...options:
-		| [AnsiFormat?, AnsiBackground?, AnsiColour?]
-		| [AnsiFormat?, AnsiColour?]
-		| [AnsiBackground?, AnsiColour?]
-		| [AnsiBackground?]
-		| [AnsiColour?]
-) => `\u001B[${options.join(';')}m${content}\u001B[${AnsiFormat.Normal}m` as const;
+export const ansiTag = (options?: AnsiOptions) =>
+	`\u001B[${options?.length ? options.join(';') : AnsiFormat.Normal}m` as const;
+
+/**
+ * wraps the content in ansi tags
+ * @link https://gist.github.com/kkrypt0nn/a02506f3712ff2d1c8ca7c9e0aed7c06
+ * @param content
+ * @param options format | background | colour
+ */
+export const ansi = <T extends string | number>(content: T, ...options: AnsiOptions) =>
+	`${ansiTag(options)}${content}${ansiTag()}` as const;
 
 /**
  * escapes discord markdown in igns
