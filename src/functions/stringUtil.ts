@@ -1,8 +1,24 @@
 import { jaroWinkler } from '@skyra/jaro-winkler';
 import { codeBlock, Util } from 'discord.js';
 import ms from 'ms';
-import { EMBED_FIELD_MAX_CHARS, SMALL_LATIN_CAPITAL_LETTERS } from '../constants';
+import { EMBED_FIELD_MAX_CHARS, SMALL_LATIN_CAPITAL_LETTERS, AnsiFormat } from '../constants';
+import type { AnsiBackground, AnsiColour } from '../constants';
 import type { Merge } from '../types/util';
+
+/**
+ * ansi code block formatting and colouring
+ * @link https://gist.github.com/kkrypt0nn/a02506f3712ff2d1c8ca7c9e0aed7c06
+ * @param options format | background | colour
+ */
+export const ansi = <T extends string | number>(
+	content: T,
+	...options:
+		| [AnsiFormat?, AnsiBackground?, AnsiColour?]
+		| [AnsiFormat?, AnsiColour?]
+		| [AnsiBackground?, AnsiColour?]
+		| [AnsiBackground?]
+		| [AnsiColour?]
+) => `\u001B[${options.join(';')}m${content}\u001B[${AnsiFormat.Normal}m` as const;
 
 /**
  * escapes discord markdown in igns
@@ -73,11 +89,11 @@ export const escapeMarkdown = (string: string, escapeEverything = false) =>
 
 			return string
 				.split(/(?<=^|[^`])`(?=[^`]|$)/)
-				.map((subString_, index_, array_) => {
-					if (index_ % 2 && index_ !== array_.length - 1) return subString_;
+				.map((_subString, _index, _array) => {
+					if (_index % 2 && _index !== _array.length - 1) return _subString;
 
 					if (escapeEverything) {
-						return subString_
+						return _subString
 							.replace(/(?=\*)/g, '\\') // escape italic 1/2
 							.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
 								// escape italic 2/2 & underline
@@ -87,7 +103,7 @@ export const escapeMarkdown = (string: string, escapeEverything = false) =>
 							});
 					}
 
-					return subString_
+					return _subString
 						.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
 						.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
 							// escape italic 2/2 & underline

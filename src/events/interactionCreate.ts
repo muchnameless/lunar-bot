@@ -539,8 +539,8 @@ export default class InteractionCreateEvent extends Event {
 			) {
 				try {
 					await interaction.respond([]);
-				} catch (error_) {
-					logger.error({ err: error_, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
+				} catch (_error) {
+					logger.error({ err: _error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
 				}
 			}
 		}

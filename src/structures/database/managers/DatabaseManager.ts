@@ -3,10 +3,10 @@ import { codeBlock, DiscordAPIError, PermissionFlagsBits, RESTJSONErrorCodes } f
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
 import { Model } from 'sequelize';
-import { DEFAULT_CONFIG, UnicodeEmoji } from '../../../constants';
+import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, UnicodeEmoji } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';
-import { asyncFilter, compareAlphabetically, formatNumber } from '../../../functions';
+import { ansi, asyncFilter, compareAlphabetically, formatNumber } from '../../../functions';
 import { entries } from '../../../types/util';
 import { logger } from '../../../logger';
 import { ConfigManager } from './ConfigManager';
@@ -294,7 +294,7 @@ export class DatabaseManager {
 		return availableAuctionsLog
 			.sort(({ ign: a }, { ign: b }) => compareAlphabetically(a, b)) // alphabetically
 			.sort(({ auctions: a }, { auctions: b }) => Number(b) - Number(a)) // number of auctions
-			.map(({ ign, auctions }) => `\u200B > ${ign}: ${auctions}`);
+			.map(({ ign, auctions }) => `\u200B > ${ansi(ign!, AnsiColour.Red)}: ${ansi(auctions, AnsiColour.Cyan)}`);
 	}
 
 	/**
@@ -309,14 +309,19 @@ export class DatabaseManager {
 		const TOTAL_COINS = formatNumber(taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0));
 
 		return codeBlock(
-			'cs',
+			'ansi',
 			stripIndents(commaLists`
-				Collectors: # /ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}
-				Amount: ${formatNumber(config.get('TAX_AMOUNT'))}
-				Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${item}'`)}
-				Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round(
-				(PAID_COUNT / PLAYER_COUNT) * 100,
-			)} % | collected amount: ${TOTAL_COINS} coins
+				Collectors: ${ansi(
+					`/ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}`,
+					AnsiFormat.Bold,
+					AnsiColour.Red,
+				)}
+				Amount: ${ansi(formatNumber(config.get('TAX_AMOUNT')), AnsiFormat.Bold, AnsiColour.Cyan)}
+				Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${ansi(item, AnsiFormat.Bold, AnsiColour.Blue)}'`)}
+				Paid: ${ansi(PAID_COUNT, AnsiColour.Cyan)} / ${ansi(PLAYER_COUNT, AnsiColour.Cyan)} | ${ansi(
+				Math.round((PAID_COUNT / PLAYER_COUNT) * 100),
+				AnsiColour.Cyan,
+			)} % | collected amount: ${ansi(TOTAL_COINS, AnsiColour.Cyan)} $
 				Available auctions:
 				${availableAuctionsLog?.join('\n') ?? '\u200B -'}
 			`),

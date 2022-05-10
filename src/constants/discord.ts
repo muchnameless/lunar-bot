@@ -21,3 +21,32 @@ export const WEBHOOKS_MAX_PER_CHANNEL = 10;
 export const MAX_CHOICES = 25;
 export const MAX_PLACEHOLDER_LENGTH = 100;
 export const MAX_VALUE_LENGTH = 4_000;
+
+// formatting
+export const enum AnsiFormat {
+	Normal = 0,
+	Bold,
+	Underline = 4,
+}
+
+export const enum AnsiColour {
+	Gray = 30,
+	Red,
+	Green,
+	Yellow,
+	Blue,
+	Pink,
+	Cyan,
+	White,
+}
+
+export const enum AnsiBackground {
+	FireflyDarkBlue = 40,
+	Orange,
+	MarbleBlue,
+	GreyishTurquoise,
+	Gray,
+	Indigo,
+	LightGray,
+	White,
+}
