@@ -61,7 +61,7 @@
 		"timezonecomplete": "^5.12.4",
 		"tiny-typed-emitter": "^2.1.0",
 		"tslib": "^2.4.0",
-		"undici": "^5.1.1",
+		"undici": "^5.2.0",
 		"utf-8-validate": "^5.0.9"
 	},
 	"devDependencies": {
