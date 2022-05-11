@@ -574,13 +574,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cron@npm:^1.7.3":
-  version: 1.7.3
-  resolution: "@types/cron@npm:1.7.3"
+"@types/cron@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@types/cron@npm:2.0.0"
   dependencies:
+    "@types/luxon": "*"
     "@types/node": "*"
-    moment: ">=2.14.0"
-  checksum: f271c8624d5c2e8e38f62b66a4741877ffe31aa04ea8a038f117616e2a85196cfcd44edfce55fde91671348dab5b7ed1e65dcd902084243f5e19827b764cd770
+  checksum: 392d2cfca51504140397533c30be8facd2196251074eb26ee09232a7e983144ff1d8364cd64922ed22d142686a4724934a70672fc8353b441fea729ac0ed0611
   languageName: node
   linkType: hard
 
@@ -604,6 +604,13 @@ __metadata:
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
   checksum: e60b153664572116dfea673c5bda7778dbff150498f44f998e34b5886d8afc47f16799280e4b6e241c0472aef1bc36add771c569c68fc5125fc2ae519a3eb9ac
+  languageName: node
+  linkType: hard
+
+"@types/luxon@npm:*":
+  version: 2.3.2
+  resolution: "@types/luxon@npm:2.3.2"
+  checksum: b9fe79118681f4bb9f2e37696a7df992a82683ba4448e7ad1af8cc241443ffc64ef08fdeaad749de9e6259b42b0d4b6540d7e880bca39bb504e0f3863d503c98
   languageName: node
   linkType: hard
 
@@ -3655,7 +3662,7 @@ __metadata:
     "@sapphire/utilities": ^3.6.2
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
-    "@types/cron": ^1.7.3
+    "@types/cron": ^2.0.0
     "@types/ms": ^0.7.31
     "@types/node": ^17.0.31
     "@types/pg": ^8.6.5
@@ -4075,7 +4082,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:>= 2.9.0, moment@npm:>=2.14.0, moment@npm:^2.29.1":
+"moment@npm:>= 2.9.0, moment@npm:^2.29.1":
   version: 2.29.3
   resolution: "moment@npm:2.29.3"
   checksum: 2e780e36d9a1823c08a1b6313cbb08bd01ecbb2a9062095820a34f42c878991ccba53abaa6abb103fd5c01e763724f295162a8c50b7e95b4f1c992ef0772d3f0
