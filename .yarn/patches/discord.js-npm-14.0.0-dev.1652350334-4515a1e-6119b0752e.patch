@@ -15,7 +15,7 @@ index 79ab303c570f76a1202adc74de5ef18f21d1d361..df3ffb0abb21953138f6392311893ddf
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index f49876da48b461d4f95047ee3823330d197e5a19..ddeec53608a00bdfa32d7f4f09a8c66b67461d21 100644
+index f49876da48b461d4f95047ee3823330d197e5a19..860c3faa91e0a2bd075ab8c14199c6b2166e24cd 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -239,8 +239,9 @@ class GuildMember extends Base {
@@ -74,7 +74,7 @@ index 243a243e506fb3d95f8a6362365b049e5a967de6..db6b87b4c6693dc26cd8ba20658cca44
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index f2fffb9487dd343acc8e3bfbf4c096cd4d2efe8e..35119ad1983b6c96869b2a65417e998db3601d9c 100644
+index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4519fd5cd 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -240,7 +240,7 @@ index f2fffb9487dd343acc8e3bfbf4c096cd4d2efe8e..35119ad1983b6c96869b2a65417e998d
        {
          user: this.client.user,
 -        channel: this.channel,
-+        channel: channel,
++        channel,
          message: this,
          emoji: Util.resolvePartialEmoji(emoji),
        },
@@ -275,7 +275,7 @@ index f2fffb9487dd343acc8e3bfbf4c096cd4d2efe8e..35119ad1983b6c96869b2a65417e998d
    }
  
    /**
-@@ -820,12 +839,13 @@ class Message extends Base {
+@@ -819,12 +838,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -292,7 +292,7 @@ index f2fffb9487dd343acc8e3bfbf4c096cd4d2efe8e..35119ad1983b6c96869b2a65417e998d
    }
  
    /**
-@@ -834,8 +854,9 @@ class Message extends Base {
+@@ -833,8 +853,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -327,7 +327,7 @@ index 2bbeb764cfc594ad727ab61f928b7c15b9f59b46..8a2153d72cfd3493e01816fd57c4fdaf
      let username;
      let avatarURL;
 diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
-index 915f3bc688a758cf60da387ee86862ecc8d66903..77c15fb069149744857ef214e4cadceca6477ef4 100644
+index 915f3bc688a758cf60da387ee86862ecc8d66903..f77a6ede2208df3fd023f96d729106283adccd42 100644
 --- a/src/structures/SelectMenuBuilder.js
 +++ b/src/structures/SelectMenuBuilder.js
 @@ -1,6 +1,10 @@
@@ -354,9 +354,9 @@ index 915f3bc688a758cf60da387ee86862ecc8d66903..77c15fb069149744857ef214e4cadcec
 +          options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
 +            ? option
 +            : {
-+                ...option,
-+                emoji: Util.parseEmoji(option.emoji),
-+              },
++              ...option,
++              emoji: Util.parseEmoji(option.emoji),
++            },
 +        ),
        }),
      );
@@ -379,9 +379,9 @@ index 915f3bc688a758cf60da387ee86862ecc8d66903..77c15fb069149744857ef214e4cadcec
 +        options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
 +          ? option
 +          : {
-+              ...option,
-+              emoji: Util.parseEmoji(option.emoji),
-+            },
++            ...option,
++            emoji: Util.parseEmoji(option.emoji),
++          },
 +      ),
      );
    }
@@ -403,20 +403,15 @@ index 915f3bc688a758cf60da387ee86862ecc8d66903..77c15fb069149744857ef214e4cadcec
 +        options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
 +          ? option
 +          : {
-+              ...option,
-+              emoji: Util.parseEmoji(option.emoji),
-+            },
++            ...option,
++            emoji: Util.parseEmoji(option.emoji),
++          },
 +      ),
      );
    }
  
-@@ -68,3 +86,4 @@ module.exports = SelectMenuBuilder;
-  * @external BuildersSelectMenu
-  * @see {@link https://discord.js.org/#/docs/builders/main/class/SelectMenuBuilder}
-  */
-+
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 0d1da996232de9a2b98726abd9e933d1069882da..8397c6b61f7a7d2b629183c323acfc81ef488d95 100644
+index a16cdbea6b5197fe4376ede0ad32db73ec0d1dfc..dd001e6e5dc1669b8816fbb6e072a10e03249571 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -359,17 +359,14 @@ class Util extends null {
@@ -438,7 +433,7 @@ index 0d1da996232de9a2b98726abd9e933d1069882da..8397c6b61f7a7d2b629183c323acfc81
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 97aec6b57503f98a4ec66c94720418111ffc0b0f..b84cf2b8bc2925cfb9a148e0b1611ddf4f56f186 100644
+index a7c20dbd71b7b8c61675c494829b1b414ade7c16..d7864ce3546d4e5b2da5d49724f1e18562d6bcea 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -383,17 +383,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
