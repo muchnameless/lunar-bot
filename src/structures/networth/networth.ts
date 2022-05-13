@@ -152,9 +152,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				level = 5;
 			}
 
-			const { itemId: enchantmentId, count } = getEnchantment(enchantment as Enchantment, level);
+			const { itemId: enchantmentId, count, higherBaseLvls } = getEnchantment(enchantment as Enchantment, level);
 
-			enchantmentPrice = getPrice(enchantmentId) * count;
+			enchantmentPrice = higherBaseLvls
+				? Math.min(
+						getPrice(enchantmentId) * count,
+						...higherBaseLvls.map((higherEnchantment) => getPrice(higherEnchantment)),
+				  )
+				: getPrice(enchantmentId) * count;
 
 			// applied enchantments are worth less
 			if (itemId !== ItemId.EnchantedBook) {
