@@ -1572,7 +1572,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		if (!member) return false;
 
 		// permission checks
-		const { me } = member.guild;
+		const { me } = member.guild.members;
 		if (me!.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
 		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
 		if (!me!.permissions.has(PermissionFlagsBits.ManageNicknames)) {

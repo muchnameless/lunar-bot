@@ -43,7 +43,7 @@ export class GuildUtil extends null {
 				continue;
 			}
 
-			if (role.managed || guild.roles.comparePositions(role, (highest ??= guild.me!.roles.highest)) >= 0) {
+			if (role.managed || guild.roles.comparePositions(role, (highest ??= guild.members.me!.roles.highest)) >= 0) {
 				logger.warn({ ...this.logInfo(guild), data: role }, '[GUILD RESOLVE ROLES]: missing permissions to edit');
 				continue;
 			}
