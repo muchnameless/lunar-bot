@@ -1,7 +1,6 @@
 import { codeBlock, SlashCommandBuilder, SnowflakeUtil, time } from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
-import { commaListsOr } from 'common-tags';
 import {
 	demote,
 	historyErrors,
@@ -31,6 +30,7 @@ import { GuildMemberUtil, InteractionUtil, UserUtil } from '../../util';
 import {
 	autocorrect,
 	buildPaginationActionRow,
+	commaListOr,
 	escapeIgn,
 	getIdFromString,
 	getInlineFieldLineCount,
@@ -428,10 +428,12 @@ export default class GuildCommand extends ApplicationCommand {
 		}
 
 		if (!hypixelGuild.checkStaff(executor)) {
-			throw commaListsOr`you need to have an in-game staff rank (${
-				hypixelGuild.ranks
-					.filter(({ priority }) => priority > hypixelGuild.ranks.length - hypixelGuild.staffRanksAmount)
-					.map(({ name }) => name) || 'none set'
+			const staffRanks = hypixelGuild.ranks
+				.filter(({ priority }) => priority > hypixelGuild.ranks.length - hypixelGuild.staffRanksAmount)
+				.map(({ name }) => name);
+
+			throw `you need to have an in-game staff rank (${
+				staffRanks.length ? commaListOr(staffRanks) : 'none set'
 			}) in \`${hypixelGuild}\``;
 		}
 	}

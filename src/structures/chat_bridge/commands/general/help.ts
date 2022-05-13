@@ -1,6 +1,5 @@
-import { commaListsOr } from 'common-tags';
 import ms from 'ms';
-import { seconds } from '../../../../functions';
+import { commaListOr, seconds } from '../../../../functions';
 import { BridgeCommand } from '../../../commands/BridgeCommand';
 import type { CommandContext } from '../../../commands/BaseCommand';
 import type { Collection } from 'discord.js';
@@ -62,8 +61,10 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 			if (requiredRoles) {
 				reply.push(
-					commaListsOr`Required Roles: ${requiredRoles.map(
-						(roleId) => hypixelMessage.hypixelGuild?.discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
+					`Required Roles: ${commaListOr(
+						requiredRoles.map(
+							(roleId) => hypixelMessage.hypixelGuild?.discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
+						),
 					)}
 					`,
 				);
@@ -91,8 +92,10 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 		if (requiredRoles) {
 			reply.push(
-				commaListsOr`Required Roles: ${requiredRoles.map(
-					(roleId) => hypixelMessage.hypixelGuild?.discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
+				`Required Roles: ${commaListOr(
+					requiredRoles.map(
+						(roleId) => hypixelMessage.hypixelGuild?.discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
+					),
 				)}
 				`,
 			);

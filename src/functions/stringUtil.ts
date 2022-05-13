@@ -16,8 +16,8 @@ type AnsiOptions =
  * ansi code block formatting and colouring tag
  * @param options format | background | colour
  */
-export const ansiTag = (options?: AnsiOptions) =>
-	`\u001B[${options?.length ? options.join(';') : AnsiFormat.Normal}m` as const;
+// "? ||" to use the fallback for an empty options array
+export const ansiTag = (options?: AnsiOptions) => `\u001B[${options?.join(';') || AnsiFormat.Normal}m` as const;
 
 /**
  * wraps the content in ansi tags
@@ -27,6 +27,22 @@ export const ansiTag = (options?: AnsiOptions) =>
  */
 export const ansi = <T extends string | number>(content: T, ...options: AnsiOptions) =>
 	`${ansiTag(options)}${content}${ansiTag()}` as const;
+
+const orListFormatter = new Intl.ListFormat('en-GB', { style: 'short', type: 'disjunction' });
+
+/**
+ * ['a', 'b', 'c'] -> 'a, b or c'
+ * @param list
+ */
+export const commaListOr = (list: string[]) => orListFormatter.format(list);
+
+const andListFormatter = new Intl.ListFormat('en-GB', { style: 'short', type: 'conjunction' });
+
+/**
+ * ['a', 'b', 'c'] -> 'a, b or c'
+ * @param list
+ */
+export const commaListAnd = (list: string[]) => andListFormatter.format(list);
 
 /**
  * escapes discord markdown in igns

@@ -1,5 +1,4 @@
 import { setTimeout } from 'node:timers';
-import { commaListsOr } from 'common-tags';
 import ms from 'ms';
 import {
 	demoteSuccess,
@@ -13,7 +12,7 @@ import {
 } from '../constants';
 import { UnicodeEmoji } from '../../../constants';
 import { GuildMemberUtil, MessageUtil } from '../../../util';
-import { asyncFilter, getLilyWeight, stringToMS } from '../../../functions';
+import { asyncFilter, commaListOr, getLilyWeight, stringToMS } from '../../../functions';
 import { ChatBridgeEvent, type ChatBridgeEventContext } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
 import { logger } from '../../../logger';
@@ -487,8 +486,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 						status: `unable to find linked discord member in ${discordGuild?.name ?? 'currently unavailable'}`,
 					});
 					return void hypixelMessage.author.send(
-						commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(
-							(roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
+						`the '${command.name}' command requires a role (${commaListOr(
+							requiredRoles.map((roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId),
 						)}) from the ${discordGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in
 						`,
 					);
@@ -505,8 +504,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 						status: 'missing required role',
 					});
 					return void hypixelMessage.author.send(
-						commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(
-							(roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId,
+						`the '${command.name}' command requires you to have a role (${commaListOr(
+							requiredRoles.map((roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId),
 						)}) from the ${member.guild.name} Discord Server
 						`,
 					);

@@ -1,10 +1,10 @@
 import { mkdir, opendir, readFile, rm, writeFile } from 'node:fs/promises';
 import { URL } from 'node:url';
-import { commaListsAnd } from 'common-tags';
 import { PermissionFlagsBits, SnowflakeUtil, embedLength, isJSONEncodable } from 'discord.js';
 import ms from 'ms';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
+import { commaListAnd } from '../functions';
 import { logger } from '../logger';
 import type { Dir } from 'node:fs';
 import type { GuildChannel, JSONEncodable, Message, TextChannel } from 'discord.js';
@@ -63,9 +63,11 @@ export class LogHandler {
 
 		if (!ChannelUtil.botPermissions(channel).has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
 			logger.error(
-				commaListsAnd`[LOG HANDLER]: missing ${ChannelUtil.botPermissions(channel)
-					.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
-					.map((permission) => `'${permission}'`)}
+				`[LOG HANDLER]: missing ${commaListAnd(
+					ChannelUtil.botPermissions(channel)
+						.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
+						.map((permission) => `'${permission}'`),
+				)}
 				`,
 			);
 			return null;

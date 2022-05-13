@@ -257,6 +257,7 @@ async function updateAuctionPrices(ac: AbortController) {
 			case ItemId.EnchantedBook: {
 				const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
 
+				// ignore books with multiple enchantments
 				if (enchants.length !== 1) return;
 
 				({ itemId, count } = getEnchantment(

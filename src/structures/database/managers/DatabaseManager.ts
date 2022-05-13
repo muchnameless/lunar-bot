@@ -1,12 +1,12 @@
 import { setTimeout } from 'node:timers';
 import { codeBlock, DiscordAPIError, PermissionFlagsBits, RESTJSONErrorCodes } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
-import { stripIndents, commaLists } from 'common-tags';
+import { stripIndents } from 'common-tags';
 import { Model } from 'sequelize';
 import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, UnicodeEmoji } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';
-import { ansi, asyncFilter, compareAlphabetically, formatNumber } from '../../../functions';
+import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber } from '../../../functions';
 import { entries } from '../../../types/util';
 import { logger } from '../../../logger';
 import { ConfigManager } from './ConfigManager';
@@ -310,12 +310,12 @@ export class DatabaseManager {
 
 		return codeBlock(
 			'ansi',
-			stripIndents(commaLists`
-				Collectors: ${ansi(
-					`/ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}`,
-					AnsiFormat.Bold,
-					AnsiColour.Red,
-				)}
+			stripIndents`
+				Collectors: ${ansi('/ah', AnsiFormat.Bold, AnsiColour.Red)} ${commaListOr(
+				taxCollectors.activeCollectors
+					.map(({ ign }) => ansi(ign!, AnsiFormat.Bold, AnsiColour.Red))
+					.sort(compareAlphabetically),
+			)}
 				Amount: ${ansi(formatNumber(config.get('TAX_AMOUNT')), AnsiFormat.Bold, AnsiColour.Cyan)}
 				Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${ansi(item, AnsiFormat.Bold, AnsiColour.Blue)}'`)}
 				Paid: ${ansi(PAID_COUNT, AnsiColour.Cyan)} / ${ansi(PLAYER_COUNT, AnsiColour.Cyan)} | ${ansi(
@@ -324,7 +324,7 @@ export class DatabaseManager {
 			)} % | collected amount: ${ansi(TOTAL_COINS, AnsiColour.Cyan)} $
 				Available auctions:
 				${availableAuctionsLog?.join('\n') ?? '\u200B -'}
-			`),
+			`,
 		);
 	}
 

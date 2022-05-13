@@ -1,5 +1,5 @@
-import { commaListsOr } from 'common-tags';
 import { InteractionUtil } from '../../util';
+import { commaListOr } from '../../functions';
 import type { Guild, Interaction, Snowflake } from 'discord.js';
 
 /**
@@ -21,7 +21,9 @@ export const missingPermissionsError = (
 		return interaction.guildId === guild!.id ? `${role}` : role.name;
 	});
 
-	return commaListsOr`missing permissions for \`${InteractionUtil.fullCommandName(interaction)}\` (${
-		requiredRoles.length ? requiredRoles : `no roles set up for ${guild?.name ?? 'uncached discord server'}`
+	return `missing permissions for \`${InteractionUtil.fullCommandName(interaction)}\` (${
+		requiredRoles.length
+			? commaListOr(requiredRoles)
+			: `no roles set up for ${guild?.name ?? 'uncached discord server'}`
 	}): ${message}`;
 };

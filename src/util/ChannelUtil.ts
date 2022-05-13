@@ -1,8 +1,8 @@
 import { ChannelType, PermissionFlagsBits, PermissionsBitField } from 'discord.js';
-import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
 import { logger } from '../logger';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
+import { commaListAnd } from '../functions';
 import { EmbedUtil } from './EmbedUtil';
 import type { AnyChannel, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';
 
@@ -158,7 +158,7 @@ export class ChannelUtil extends null {
 			const missingChannelPermissions = this.botPermissions(channel)
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
-			const MESSAGE = commaListsAnd`missing ${missingChannelPermissions} permission${
+			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${
 				missingChannelPermissions?.length === 1 ? '' : 's'
 			} in ${this.logInfo(channel)}`;
 

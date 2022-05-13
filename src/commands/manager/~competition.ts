@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { commaListsOr } from 'common-tags';
 import { DUNGEON_TYPES, SKILLS } from '../../constants';
 import { InteractionUtil } from '../../util';
-import { autocorrect, seconds } from '../../functions';
+import { autocorrect, commaListOr, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -47,7 +46,7 @@ export class CompetitionCommand extends ApplicationCommand {
 		let retries = 0;
 
 		try {
-			void InteractionUtil.reply(interaction, commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`);
+			void InteractionUtil.reply(interaction, `competition type? ${commaListOr(CompetitionCommand.COMPETITION_TYPES)}`);
 
 			do {
 				const collected = await next();
