@@ -167,9 +167,9 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
-		if ((channel as TextChannel).guild?.me!.isCommunicationDisabled()) {
+		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
 			const MESSAGE = `bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
-				(channel as TextChannel).guild.me!.communicationDisabledUntilTimestamp! - Date.now(),
+				(channel as TextChannel).guild.members.me!.communicationDisabledUntilTimestamp! - Date.now(),
 				{ long: true },
 			)}`;
 

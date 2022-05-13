@@ -40,7 +40,7 @@ export default class DebugCommand extends ApplicationCommand {
 	 */
 	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { guilds, channels, players } = this.client;
-		const me = interaction.guild?.me ?? null;
+		const me = interaction.guild?.members.me ?? null;
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [

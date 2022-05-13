@@ -149,7 +149,7 @@ export class GuildMemberUtil extends null {
 			return member;
 		}
 
-		const me = member.guild.me!;
+		const me = member.guild.members.me!;
 		if (!me.permissions.has(PermissionFlagsBits.ManageRoles)) {
 			logger.warn({ member, data: roles }, "[GUILDMEMBER SET ROLES]: missing 'MANAGE_ROLES' permission");
 			return member;

@@ -1363,7 +1363,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		if (!_rolesToAdd.length && !_rolesToRemove.length) return true;
 
 		// permission check
-		if (!member.guild.me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
+		if (!member.guild.members.me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
 			return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false;
 		}
 

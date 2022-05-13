@@ -39,7 +39,7 @@ export const commaListOr = (list: string[]) => orListFormatter.format(list);
 const andListFormatter = new Intl.ListFormat('en-GB', { style: 'short', type: 'conjunction' });
 
 /**
- * ['a', 'b', 'c'] -> 'a, b or c'
+ * ['a', 'b', 'c'] -> 'a, b and c'
  * @param list
  */
 export const commaListAnd = (list: string[]) => andListFormatter.format(list);

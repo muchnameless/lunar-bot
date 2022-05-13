@@ -349,7 +349,7 @@ export class HypixelMessage {
 					({ uuid }) => uuidToBustURL(uuid),
 					(error) => logger.error(error, '[FORWARD TO DC]'),
 				)) ??
-				(member?.guild.me ?? this.client.user)?.displayAvatarURL(),
+				(member?.guild.members.me ?? this.client.user)?.displayAvatarURL(),
 			allowedMentions: {
 				parse: player?.hasDiscordPingPermission ? ['users'] : [],
 			},

@@ -73,8 +73,11 @@ export class LogHandler {
 			return null;
 		}
 
-		if ((channel as TextChannel).guild?.me!.isCommunicationDisabled()) {
-			const { me, name } = (channel as TextChannel).guild;
+		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
+			const {
+				members: { me },
+				name,
+			} = (channel as TextChannel).guild;
 			logger.error(
 				`[LOG HANDLER]: bot timed out in '${name}' for ${ms(me!.communicationDisabledUntilTimestamp! - Date.now(), {
 					long: true,

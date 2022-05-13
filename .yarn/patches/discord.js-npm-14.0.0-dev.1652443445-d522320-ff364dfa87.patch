@@ -1,30 +1,66 @@
+diff --git a/src/structures/ButtonBuilder.js b/src/structures/ButtonBuilder.js
+index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..76f2e245ab8950d81046526c554ad7cd46a32ee7 100644
+--- a/src/structures/ButtonBuilder.js
++++ b/src/structures/ButtonBuilder.js
+@@ -2,29 +2,14 @@
+ 
+ const { ButtonBuilder: BuildersButton, isJSONEncodable } = require('@discordjs/builders');
+ const Transformers = require('../util/Transformers');
+-const Util = require('../util/Util');
+ 
+ /**
+  * Represents a button builder.
+  * @extends {BuildersButton}
+  */
+ class ButtonBuilder extends BuildersButton {
+-  constructor({ emoji, ...data } = {}) {
+-    super(
+-      Transformers.toSnakeCase({ ...data, emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji }),
+-    );
+-  }
+-
+-  /**
+-   * Sets the emoji to display on this button
+-   * @param {string|APIMessageComponentEmoji} emoji The emoji to display on this button
+-   * @returns {ButtonBuilder}
+-   */
+-  setEmoji(emoji) {
+-    if (typeof emoji === 'string') {
+-      return super.setEmoji(Util.parseEmoji(emoji));
+-    }
+-    return super.setEmoji(emoji);
++  constructor(data) {
++    super(Transformers.toSnakeCase(data));
+   }
+ 
+   /**
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
-index 79ab303c570f76a1202adc74de5ef18f21d1d361..df3ffb0abb21953138f6392311893ddfa5c61a60 100644
+index b0a8ff2fd421b6fee59a3376fd72485d2c23afda..ce920b9046f3677ffe23efb947313c2316f00cad 100644
 --- a/src/structures/GuildEmoji.js
 +++ b/src/structures/GuildEmoji.js
 @@ -55,8 +55,9 @@ class GuildEmoji extends BaseGuildEmoji {
     * @readonly
     */
    get deletable() {
--    if (!this.guild.me) throw new Error('GUILD_UNCACHED_ME');
--    return !this.managed && this.guild.me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
-+    const { me } = this.guild;
+-    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+-    return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
++    const { me } = this.guild.members;
 +    if (!me) throw new Error('GUILD_UNCACHED_ME');
 +    return !this.managed && me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
    }
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index f49876da48b461d4f95047ee3823330d197e5a19..860c3faa91e0a2bd075ab8c14199c6b2166e24cd 100644
+index f732ca75400e7b799abd52ed401b08941f1a9251..dee14c7d7072760defe58ab56df8c7e11f254b61 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -239,8 +239,9 @@ class GuildMember extends Base {
      if (this.user.id === this.guild.ownerId) return false;
      if (this.user.id === this.client.user.id) return false;
      if (this.client.user.id === this.guild.ownerId) return true;
--    if (!this.guild.me) throw new Error('GUILD_UNCACHED_ME');
--    return this.guild.me.roles.highest.comparePositionTo(this.roles.highest) > 0;
-+    const { me } = this.guild;
+-    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+-    return this.guild.members.me.roles.highest.comparePositionTo(this.roles.highest) > 0;
++    const { me } = this.guild.members;
 +    if (!me) throw new Error('GUILD_UNCACHED_ME');
 +    return me.roles.highest.comparePositionTo(this.roles.highest) > 0;
    }
@@ -34,47 +70,47 @@ index f49876da48b461d4f95047ee3823330d197e5a19..860c3faa91e0a2bd075ab8c14199c6b2
     * @readonly
     */
    get kickable() {
--    if (!this.guild.me) throw new Error('GUILD_UNCACHED_ME');
-     return this.manageable && this.guild.me.permissions.has(PermissionFlagsBits.KickMembers);
+-    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+     return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers);
    }
  
 @@ -259,7 +259,6 @@ class GuildMember extends Base {
     * @readonly
     */
    get bannable() {
--    if (!this.guild.me) throw new Error('GUILD_UNCACHED_ME');
-     return this.manageable && this.guild.me.permissions.has(PermissionFlagsBits.BanMembers);
+-    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+     return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.BanMembers);
    }
  
 @@ -272,7 +271,7 @@ class GuildMember extends Base {
      return (
        !this.permissions.has(PermissionFlagsBits.Administrator) &&
        this.manageable &&
--      (this.guild.me?.permissions.has(PermissionFlagsBits.ModerateMembers) ?? false)
-+      this.guild.me.permissions.has(PermissionFlagsBits.ModerateMembers)
+-      (this.guild.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers) ?? false)
++      this.guild.members.me.permissions.has(PermissionFlagsBits.ModerateMembers)
      );
    }
  
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
-index 243a243e506fb3d95f8a6362365b049e5a967de6..db6b87b4c6693dc26cd8ba20658cca441dffb515 100644
+index 03b41500f925306a972fc3fc8972c7443e1bb654..2f184fd87582988bc97781643ec99c4a41a329c1 100644
 --- a/src/structures/Invite.js
 +++ b/src/structures/Invite.js
 @@ -233,10 +233,11 @@ class Invite extends Base {
    get deletable() {
      const guild = this.guild;
      if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
--    if (!guild.me) throw new Error('GUILD_UNCACHED_ME');
-+    const { me } = guild;
+-    if (!guild.members.me) throw new Error('GUILD_UNCACHED_ME');
++    const { me } = guild.members;
 +    if (!me) throw new Error('GUILD_UNCACHED_ME');
      return Boolean(
        this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits.ManageChannels, false) ||
--        guild.me.permissions.has(PermissionFlagsBits.ManageGuild),
+-        guild.members.me.permissions.has(PermissionFlagsBits.ManageGuild),
 +      me.permissions.has(PermissionFlagsBits.ManageGuild),
      );
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4519fd5cd 100644
+index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe50298067ccd836 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -142,28 +178,27 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
      return Boolean(
        this.author.id === this.client.user.id ||
 -        (permissions.has(PermissionFlagsBits.ManageMessages, false) &&
--          this.guild.me.communicationDisabledUntilTimestamp < Date.now()),
+-          this.guild.members.me.communicationDisabledUntilTimestamp < Date.now()),
 +      (permissions.has(PermissionFlagsBits.ManageMessages, false) &&
-+        this.guild.me.communicationDisabledUntilTimestamp < Date.now()),
++        this.guild.members.me.communicationDisabledUntilTimestamp < Date.now()),
      );
    }
  
-@@ -596,10 +608,10 @@ class Message extends Base {
+@@ -596,9 +608,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
 -        (!this.guild ||
 -          (channel?.viewable &&
 -            channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
--    );
 +      !this.flags.has(MessageFlags.Ephemeral) &&
 +      (!this.guildId ||
 +        (channel?.viewable &&
-+          channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))));
++          channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
+     );
    }
  
-   /**
-@@ -627,10 +639,10 @@ class Message extends Base {
+@@ -627,10 +640,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildNews &&
@@ -178,7 +213,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
      );
    }
  
-@@ -660,8 +672,9 @@ class Message extends Base {
+@@ -660,8 +673,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -190,7 +225,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
    }
  
    /**
-@@ -676,8 +689,9 @@ class Message extends Base {
+@@ -676,8 +690,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -202,7 +237,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
    }
  
    /**
-@@ -691,8 +705,9 @@ class Message extends Base {
+@@ -691,8 +706,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -214,7 +249,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
      return this;
    }
  
-@@ -707,8 +722,9 @@ class Message extends Base {
+@@ -707,8 +723,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -226,7 +261,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
      return this;
    }
  
-@@ -728,13 +744,14 @@ class Message extends Base {
+@@ -728,13 +745,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -244,7 +279,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
          message: this,
          emoji: Util.resolvePartialEmoji(emoji),
        },
-@@ -752,8 +769,9 @@ class Message extends Base {
+@@ -752,8 +770,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -256,7 +291,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
      return this;
    }
  
-@@ -776,7 +794,8 @@ class Message extends Base {
+@@ -776,7 +795,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -266,7 +301,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -789,7 +808,7 @@ class Message extends Base {
+@@ -789,7 +809,7 @@ class Message extends Base {
          },
        });
      }
@@ -275,7 +310,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
    }
  
    /**
-@@ -819,12 +838,13 @@ class Message extends Base {
+@@ -819,12 +839,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -292,7 +327,7 @@ index bec13b28c3db8315301aeb056afa8270509eb5fc..db004b4c82c0de7fc189362b07655bb4
    }
  
    /**
-@@ -833,8 +853,9 @@ class Message extends Base {
+@@ -833,8 +854,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -327,88 +362,105 @@ index 2bbeb764cfc594ad727ab61f928b7c15b9f59b46..8a2153d72cfd3493e01816fd57c4fdaf
      let username;
      let avatarURL;
 diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
-index 915f3bc688a758cf60da387ee86862ecc8d66903..f77a6ede2208df3fd023f96d729106283adccd42 100644
+index 915f3bc688a758cf60da387ee86862ecc8d66903..7bfcf37986abbe6bb9cffa2e455bb2b2e7fc6215 100644
 --- a/src/structures/SelectMenuBuilder.js
 +++ b/src/structures/SelectMenuBuilder.js
-@@ -1,6 +1,10 @@
+@@ -1,52 +1,18 @@
  'use strict';
  
 -const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable } = require('@discordjs/builders');
 +const {
 +  SelectMenuBuilder: BuildersSelectMenu,
 +  isJSONEncodable,
-+  UnsafeSelectMenuOptionBuilder,
 +} = require('@discordjs/builders');
  const Transformers = require('../util/Transformers');
- const Util = require('../util/Util');
+-const Util = require('../util/Util');
  
-@@ -13,39 +17,53 @@ class SelectMenuBuilder extends BuildersSelectMenu {
-     super(
-       Transformers.toSnakeCase({
-         ...data,
+ /**
+  * Class used to build select menu components to be sent through the API
+  * @extends {BuildersSelectMenu}
+  */
+ class SelectMenuBuilder extends BuildersSelectMenu {
+-  constructor({ options, ...data } = {}) {
+-    super(
+-      Transformers.toSnakeCase({
+-        ...data,
 -        options: options?.map(({ emoji, ...option }) => ({
 -          ...option,
 -          emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
 -        })),
-+        options: options?.map(option =>
-+          options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
-+            ? option
-+            : {
-+              ...option,
-+              emoji: Util.parseEmoji(option.emoji),
-+            },
-+        ),
-       }),
-     );
-   }
- 
-   /**
-    * Adds options to this select menu
+-      }),
+-    );
+-  }
+-
+-  /**
+-   * Adds options to this select menu
 -   * @param {APISelectMenuOption[]} options The options to add to this select menu
-+   * @param {(BuildersSelectMenuOption | SelectMenuComponentOptionData | APISelectMenuOption)[]} options The options
-+   * to add to this select menu
-    * @returns {SelectMenuBuilder}
-    */
-   addOptions(options) {
-     return super.addOptions(
+-   * @returns {SelectMenuBuilder}
+-   */
+-  addOptions(options) {
+-    return super.addOptions(
 -      options.map(({ emoji, ...option }) => ({
 -        ...option,
 -        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
 -      })),
-+      options.map(option =>
-+        options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
-+          ? option
-+          : {
-+            ...option,
-+            emoji: Util.parseEmoji(option.emoji),
-+          },
-+      ),
-     );
+-    );
+-  }
+-
+-  /**
+-   * Sets the options on this select menu
+-   * @param {APISelectMenuOption[]} options The options to set on this select menu
+-   * @returns {SelectMenuBuilder}
+-   */
+-  setOptions(options) {
+-    return super.setOptions(
+-      options.map(({ emoji, ...option }) => ({
+-        ...option,
+-        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-      })),
+-    );
++  constructor(data) {
++    super(Transformers.toSnakeCase(data));
    }
  
    /**
-    * Sets the options on this select menu
--   * @param {APISelectMenuOption[]} options The options to set on this select menu
-+   * @param {(BuildersSelectMenuOption | SelectMenuComponentOptionData | APISelectMenuOption)[]} options The options
-+   * to set on this select menu
-    * @returns {SelectMenuBuilder}
-    */
-   setOptions(options) {
-     return super.setOptions(
--      options.map(({ emoji, ...option }) => ({
--        ...option,
+diff --git a/src/structures/SelectMenuOptionBuilder.js b/src/structures/SelectMenuOptionBuilder.js
+index ea816bea2b39f6f864ae64e021686d428858fe3d..24f9a5bae8810b530323819fcf4e39ad45f8a113 100644
+--- a/src/structures/SelectMenuOptionBuilder.js
++++ b/src/structures/SelectMenuOptionBuilder.js
+@@ -2,31 +2,14 @@
+ 
+ const { SelectMenuOptionBuilder: BuildersSelectMenuOption } = require('@discordjs/builders');
+ const Transformers = require('../util/Transformers');
+-const Util = require('../util/Util');
+ 
+ /**
+  * Represents a select menu option builder.
+  * @extends {BuildersSelectMenuOption}
+  */
+ class SelectMenuOptionBuilder extends BuildersSelectMenuOption {
+-  constructor({ emoji, ...data } = {}) {
+-    super(
+-      Transformers.toSnakeCase({
+-        ...data,
 -        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
--      })),
-+      options.map(option =>
-+        options instanceof UnsafeSelectMenuOptionBuilder || typeof option.emoji !== 'string'
-+          ? option
-+          : {
-+            ...option,
-+            emoji: Util.parseEmoji(option.emoji),
-+          },
-+      ),
-     );
+-      }),
+-    );
+-  }
+-  /**
+-   * Sets the emoji to display on this option
+-   * @param {ComponentEmojiResolvable} emoji The emoji to display on this option
+-   * @returns {SelectMenuOptionBuilder}
+-   */
+-  setEmoji(emoji) {
+-    if (typeof emoji === 'string') {
+-      return super.setEmoji(Util.parseEmoji(emoji));
+-    }
+-    return super.setEmoji(emoji);
++  constructor(data) {
++    super(Transformers.toSnakeCase(data));
    }
+ }
  
 diff --git a/src/util/Util.js b/src/util/Util.js
 index a16cdbea6b5197fe4376ede0ad32db73ec0d1dfc..dd001e6e5dc1669b8816fbb6e072a10e03249571 100644
@@ -433,7 +485,7 @@ index a16cdbea6b5197fe4376ede0ad32db73ec0d1dfc..dd001e6e5dc1669b8816fbb6e072a10e
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index a7c20dbd71b7b8c61675c494829b1b414ade7c16..d7864ce3546d4e5b2da5d49724f1e18562d6bcea 100644
+index 38bda77b6cd543cd9b2daee37326292c39185cc1..364f261e1bda82cee70854cc3a5a75c9006de431 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -383,17 +383,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
@@ -458,7 +510,7 @@ index a7c20dbd71b7b8c61675c494829b1b414ade7c16..d7864ce3546d4e5b2da5d49724f1e185
  }
  
  export type BooleanCache<T extends CacheType> = T extends 'cached' ? true : false;
-@@ -1482,7 +1480,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1434,7 +1432,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -467,7 +519,7 @@ index a7c20dbd71b7b8c61675c494829b1b414ade7c16..d7864ce3546d4e5b2da5d49724f1e185
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1490,12 +1488,18 @@ export type CacheTypeReducer<
+@@ -1442,12 +1440,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -486,7 +538,7 @@ index a7c20dbd71b7b8c61675c494829b1b414ade7c16..d7864ce3546d4e5b2da5d49724f1e185
    : Fallback;
  
  export class Interaction<Cached extends CacheType = CacheType> extends Base {
-@@ -1508,7 +1512,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1460,7 +1464,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -496,7 +548,7 @@ index a7c20dbd71b7b8c61675c494829b1b414ade7c16..d7864ce3546d4e5b2da5d49724f1e185
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1516,7 +1521,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1468,7 +1473,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -505,12 +557,3 @@ index a7c20dbd71b7b8c61675c494829b1b414ade7c16..d7864ce3546d4e5b2da5d49724f1e185
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1805,7 +1810,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
-   public showModal(
-     modal: JSONEncodable<APIModalInteractionResponseCallbackData> | ModalData | APIModalInteractionResponseCallbackData,
-   ): Promise<void>;
--  public awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction>;
-+  public awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
- }
- 
- export class MessageContextMenuCommandInteraction<
