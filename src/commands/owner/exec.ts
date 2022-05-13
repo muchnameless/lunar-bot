@@ -29,7 +29,7 @@ export default class ExecCommand extends ApplicationCommand {
 	 */
 	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		try {
-			const me = interaction.guild?.me ?? null;
+			const me = interaction.guild?.members.me ?? null;
 			const INPUT = interaction.options.getString('input', true);
 			const { stdout, stderr } = await promisify(exec)(INPUT);
 			const responseEmbed = this.client.defaultEmbed
