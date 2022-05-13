@@ -6,7 +6,7 @@ export const enum PriceModifier {
 	AppliedEnchantmentReduced = 0.5,
 	ArtOfWar = 0.6,
 	DrillUpgrade = 1,
-	DungeonStar = 1,
+	DungeonMasterStar = 1,
 	Dye = 0.9,
 	Essence = 0.55,
 	EtherwarpConduit = 1,

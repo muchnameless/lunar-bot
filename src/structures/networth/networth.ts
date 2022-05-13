@@ -232,7 +232,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 					}
 				} else {
 					// dungeon items require master stars for stars 6 - 10
-					price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonStar;
+					price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonMasterStar;
 				}
 			}
 
