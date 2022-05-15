@@ -18,10 +18,10 @@ export default class UnnickCommand extends ApplicationCommand {
 						.setDescription('the user to unnick')
 						.setRequired(true),
 				)
-				.setDefaultPermission(false),
+				.setDMPermission(false),
 			user: new ContextMenuCommandBuilder() //
 				.setName('Reset nickname')
-				.setDefaultPermission(false),
+				.setDMPermission(false),
 			cooldown: 0,
 		});
 	}

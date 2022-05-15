@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandPermissionType,
 	ApplicationCommandType,
+	PermissionFlagsBits,
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
 } from 'discord.js';
@@ -93,6 +94,8 @@ export class ApplicationCommand extends BaseCommand {
 		 */
 
 		if (slash) {
+			ApplicationCommand._setDefaultPermissions(this, slash as SlashCommandBuilder);
+
 			if (aliases) {
 				this.aliases ??= [];
 				this.aliases.push(...aliases);
@@ -135,6 +138,8 @@ export class ApplicationCommand extends BaseCommand {
 		 */
 
 		if (message) {
+			ApplicationCommand._setDefaultPermissions(this, message);
+
 			if (!message.name) {
 				message.setName(this.name);
 			} else if (message.name !== this.name) {
@@ -149,6 +154,8 @@ export class ApplicationCommand extends BaseCommand {
 		}
 
 		if (user) {
+			ApplicationCommand._setDefaultPermissions(this, user);
+
 			if (!user.name) {
 				user.setName(this.name);
 			} else if (user.name !== this.name) {
@@ -220,6 +227,35 @@ export class ApplicationCommand extends BaseCommand {
 			) ?? 0;
 
 		return this.slash.name.length + this.slash.description.length + reduceOptions(this.slash.options);
+	}
+
+	/**
+	 * adds permission defaults to a builder based on the command's category
+	 * @param command
+	 * @param builder
+	 */
+	private static _setDefaultPermissions(
+		command: ApplicationCommand,
+		builder:
+			| Pick<SlashCommandBuilder, 'setDMPermission' | 'setDefaultMemberPermissions'>
+			| Pick<ContextMenuCommandBuilder, 'setDMPermission' | 'setDefaultMemberPermissions'>,
+	) {
+		if (command._requiredRoles) {
+			return void builder.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+		}
+
+		switch (command.category) {
+			case 'staff':
+			case 'moderation':
+			case 'tax':
+			case 'manager':
+				builder.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+				break;
+
+			case 'owner':
+				builder.setDefaultMemberPermissions('0');
+				break;
+		}
 	}
 
 	/**

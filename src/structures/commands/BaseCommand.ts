@@ -40,7 +40,7 @@ export class BaseCommand {
 	/**
 	 * function to dynamically create a required roles array
 	 */
-	private _requiredRoles: RequiredRoles | null;
+	protected _requiredRoles: RequiredRoles | null;
 	/**
 	 * user id -> last used timestamp, for cooldowns
 	 */
