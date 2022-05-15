@@ -51,7 +51,7 @@ index b0a8ff2fd421b6fee59a3376fd72485d2c23afda..ce920b9046f3677ffe23efb947313c23
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index f732ca75400e7b799abd52ed401b08941f1a9251..dee14c7d7072760defe58ab56df8c7e11f254b61 100644
+index f732ca75400e7b799abd52ed401b08941f1a9251..a99cc2252dc3ea0de248eed185952dcac6a7e65c 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -239,8 +239,9 @@ class GuildMember extends Base {
