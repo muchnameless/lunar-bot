@@ -42,7 +42,7 @@
 		"discord.js": "14.0.0-dev.1652573522-7ce641d",
 		"emoji-regex": "9.2.2",
 		"fast-xml-parser": "^4.0.7",
-		"ioredis": "^5.0.4",
+		"ioredis": "^5.0.5",
 		"js-big-decimal": "^1.3.4",
 		"lex": "^1.7.9",
 		"lilyweight": "^2.6.2",
