@@ -2159,41 +2159,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@npm:14.0.0-dev.1652573522-7ce641d":
-  version: 14.0.0-dev.1652573522-7ce641d
-  resolution: "discord.js@npm:14.0.0-dev.1652573522-7ce641d"
+"discord.js@npm:14.0.0-dev.1653480262-68d5169":
+  version: 14.0.0-dev.1653480262-68d5169
+  resolution: "discord.js@npm:14.0.0-dev.1653480262-68d5169"
   dependencies:
     "@discordjs/builders": ^0.14.0-dev
     "@discordjs/collection": ^0.7.0-dev
     "@discordjs/rest": ^0.5.0-dev
     "@sapphire/snowflake": ^3.2.1
     "@types/ws": ^8.5.3
-    discord-api-types: ^0.32.1
+    discord-api-types: ^0.33.0
     fast-deep-equal: ^3.1.3
     lodash.snakecase: ^4.1.1
     tslib: ^2.3.1
     undici: ^5.2.0
     ws: ^8.5.0
-  checksum: 328a3ae2d9569024fbce9edd50800e1ee0dcd6c1593075190baa5b63e67a392d810e59acb7e3e7b117e53e3515199462ccf3bc09fb370d100a8bf98344260857
-  languageName: node
-  linkType: hard
-
-"discord.js@patch:discord.js@npm:14.0.0-dev.1652573522-7ce641d#.yarn/patches/discord.js-npm-14.0.0-dev.1652573522-7ce641d-b2a98fd18c.patch::locator=lunar-bot%40workspace%3A.":
-  version: 14.0.0-dev.1652573522-7ce641d
-  resolution: "discord.js@patch:discord.js@npm%3A14.0.0-dev.1652573522-7ce641d#.yarn/patches/discord.js-npm-14.0.0-dev.1652573522-7ce641d-b2a98fd18c.patch::version=14.0.0-dev.1652573522-7ce641d&hash=8955e3&locator=lunar-bot%40workspace%3A."
-  dependencies:
-    "@discordjs/builders": ^0.14.0-dev
-    "@discordjs/collection": ^0.7.0-dev
-    "@discordjs/rest": ^0.5.0-dev
-    "@sapphire/snowflake": ^3.2.1
-    "@types/ws": ^8.5.3
-    discord-api-types: ^0.32.1
-    fast-deep-equal: ^3.1.3
-    lodash.snakecase: ^4.1.1
-    tslib: ^2.3.1
-    undici: ^5.2.0
-    ws: ^8.5.0
-  checksum: b244ae72944c932942db5494f963ded0d252b0a26a8054b42db82dbbe90f814286c6823cdfcacb44bec03595e987e8f3f61c2336430dcb2a62bde21728d81954
+  checksum: 781af86da3c074a9756b7cda942529714e5b2321637623ab80b02a3a2fbdc3fbc264d9d6528608aa0058df1040460d5f75eda82f1525fb14894413b80642ee3b
   languageName: node
   linkType: hard
 
@@ -4442,7 +4423,7 @@ __metadata:
     common-tags: ^1.8.2
     cron: ^2.0.0
     discord-api-types: "*"
-    discord.js: 14.0.0-dev.1652573522-7ce641d
+    discord.js: 14.0.0-dev.1653480262-68d5169
     emoji-regex: 9.2.2
     env-cmd: ^10.1.0
     eslint: ^8.16.0
