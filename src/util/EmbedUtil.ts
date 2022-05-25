@@ -1,7 +1,6 @@
 import { embedLength } from 'discord.js';
 import { EMBED_MAX_FIELDS } from '../constants';
-import type { Embed, EmbedBuilder, JSONEncodable } from 'discord.js';
-import type { APIEmbed } from 'discord-api-types/v10';
+import type { APIEmbed, Embed, EmbedBuilder, JSONEncodable } from 'discord.js';
 
 export class EmbedUtil extends null {
 	/**

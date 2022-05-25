@@ -23,8 +23,7 @@ import {
 import { logger } from '../../../logger';
 import { sql } from '../sql';
 import { ModelManager } from './ModelManager';
-import type { APIEmbed } from 'discord-api-types/v10';
-import type { JSONEncodable } from 'discord.js';
+import type { APIEmbed, JSONEncodable } from 'discord.js';
 import type { Attributes, CreationAttributes, FindOptions } from 'sequelize';
 import type { ModelResovable } from './ModelManager';
 import type { Player, PlayerInGuild, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';

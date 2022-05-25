@@ -13,11 +13,6 @@ import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
 import type {
 	APIApplicationCommandPermission,
-	RESTPostAPIApplicationCommandsJSONBody,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	RESTPostAPIContextMenuApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import type {
 	AutocompleteInteraction,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
@@ -27,6 +22,9 @@ import type {
 	Message,
 	MessageContextMenuCommandInteraction,
 	ModalSubmitInteraction,
+	RESTPostAPIApplicationCommandsJSONBody,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	RESTPostAPIContextMenuApplicationCommandsJSONBody,
 	SelectMenuInteraction,
 	SlashCommandBooleanOption,
 	SlashCommandBuilder,
@@ -253,6 +251,7 @@ export class ApplicationCommand extends BaseCommand {
 				break;
 
 			case 'owner':
+				// disable command
 				builder.setDefaultMemberPermissions('0');
 				break;
 		}

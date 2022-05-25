@@ -23,8 +23,8 @@ import {
 import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
 import { buildPaginationActionRow, days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
-import type { APIEmbed } from 'discord-api-types/v10';
 import type {
+	APIEmbed,
 	ButtonInteraction,
 	JSONEncodable,
 	Message,

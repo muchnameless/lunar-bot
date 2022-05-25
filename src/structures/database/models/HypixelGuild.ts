@@ -29,8 +29,7 @@ import {
 	splitMessage,
 } from '../../../functions';
 import { logger } from '../../../logger';
-import type { APIEmbed } from 'discord-api-types/v10';
-import type { Collection, Guild, GuildMember, JSONEncodable, Snowflake } from 'discord.js';
+import type { APIEmbed, Collection, Guild, GuildMember, JSONEncodable, Snowflake } from 'discord.js';
 import type {
 	CreationOptional,
 	InferAttributes,

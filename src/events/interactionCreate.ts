@@ -14,6 +14,8 @@ import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteract
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
 import type {
+	APIActionRowComponent,
+	APIMessageActionRowComponent,
 	ApplicationCommandOptionChoiceData,
 	AutocompleteInteraction,
 	BaseGuildTextChannel,
@@ -28,7 +30,6 @@ import type {
 	Snowflake,
 	UserContextMenuCommandInteraction,
 } from 'discord.js';
-import type { APIActionRowComponent, APIMessageActionRowComponent } from 'discord-api-types/v10';
 import type LeaderboardCommand from '../commands/guild/leaderboard';
 
 export default class InteractionCreateEvent extends Event {

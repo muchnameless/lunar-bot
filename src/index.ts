@@ -1,6 +1,5 @@
-import { ActivityType, GatewayIntentBits, Options, Partials, Sweepers } from 'discord.js';
+import { ActivityType, GatewayIntentBits, Options, Partials, PresenceUpdateStatus, Routes, Sweepers } from 'discord.js';
 import { RequestMethod } from '@discordjs/rest';
-import { PresenceUpdateStatus, Routes } from 'discord-api-types/v10';
 import { LunarClient } from './structures/LunarClient';
 import { seconds } from './functions';
 import { startJobs } from './jobs';

@@ -1,8 +1,7 @@
 import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
 import { env } from 'node:process';
-import { Client, EmbedBuilder } from 'discord.js';
-import { PresenceUpdateStatus } from 'discord-api-types/v10';
+import { Client, EmbedBuilder, PresenceUpdateStatus } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
 import { hours, safePromiseAll } from '../functions';
 import { exitProcess } from '../process';

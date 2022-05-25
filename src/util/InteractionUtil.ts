@@ -20,6 +20,7 @@ import { buildVisibilityButton, makeContent, seconds, validateDiscordId, validat
 import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
+	APIModalInteractionResponseCallbackData,
 	AutocompleteInteraction,
 	AwaitModalSubmitOptions,
 	BaseGuildTextChannel,
@@ -47,7 +48,6 @@ import type {
 	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
-import type { APIModalInteractionResponseCallbackData } from 'discord-api-types/v10';
 import type { SplitOptions } from '../functions';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';

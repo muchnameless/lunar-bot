@@ -1,5 +1,5 @@
 import { argv, env, exit } from 'node:process';
-import { Routes } from 'discord-api-types/v10';
+import { Routes } from 'discord.js';
 import { LunarClient } from '../structures/LunarClient';
 import { logger } from '../logger';
 

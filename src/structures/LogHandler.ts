@@ -7,8 +7,7 @@ import { ChannelUtil } from '../util';
 import { commaListAnd } from '../functions';
 import { logger } from '../logger';
 import type { Dir } from 'node:fs';
-import type { GuildChannel, JSONEncodable, Message, TextChannel } from 'discord.js';
-import type { APIEmbed } from 'discord-api-types/v10';
+import type { APIEmbed, GuildChannel, JSONEncodable, Message, TextChannel } from 'discord.js';
 import type { LunarClient } from './LunarClient';
 
 type LogInput = JSONEncodable<APIEmbed> | APIEmbed | string | number | null | undefined;

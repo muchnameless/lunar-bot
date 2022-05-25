@@ -14,6 +14,8 @@ import Discord, {
 	EmbedBuilder,
 	embedLength,
 	ModalBuilder,
+	Routes,
+	SelectMenuBuilder,
 	SlashCommandBuilder,
 	TextInputBuilder,
 	TextInputStyle,
@@ -21,7 +23,6 @@ import Discord, {
 	Util,
 } from 'discord.js';
 Util; // unused imports are 'used' so that tsc doesn't remove them
-import { Routes } from 'discord-api-types/v10';
 Routes;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
@@ -203,6 +204,11 @@ export default class EvalCommand extends ApplicationCommand {
 					? { content: options, ephemeral: false, rejectOnError: true, fetchReply: true }
 					: options instanceof EmbedBuilder
 					? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
+					: options instanceof ButtonBuilder || options instanceof SelectMenuBuilder
+					? {
+							components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([options])],
+							fetchReply: true,
+					  }
 					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
 		const type = (x: unknown) => new Type(x).toString();

@@ -10,8 +10,7 @@ import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '../../f
 import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
-import type { APIEmbed } from 'discord-api-types/v10';
-import type { ChatInputCommandInteraction, JSONEncodable, TextChannel } from 'discord.js';
+import type { APIEmbed, ChatInputCommandInteraction, JSONEncodable, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
