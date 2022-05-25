@@ -98,7 +98,7 @@
 		"@discordjs/builders": "0.14.0-dev.1652573539-7ce641d",
 		"@discordjs/collection": "0.7.0-dev.1652573514-7ce641d",
 		"@discordjs/rest": "0.5.0-dev.1652573517-7ce641d",
-		"discord-api-types": "0.33.1-next.6d85ad6.1653471833",
+		"discord-api-types": "0.33.1-next.8a5fb2c.1653499345",
 		"discord.js@14.0.0-dev.1652573522-7ce641d": "patch:discord.js@npm:14.0.0-dev.1652573522-7ce641d#.yarn/patches/discord.js-npm-14.0.0-dev.1652573522-7ce641d-b2a98fd18c.patch"
 	}
 }
