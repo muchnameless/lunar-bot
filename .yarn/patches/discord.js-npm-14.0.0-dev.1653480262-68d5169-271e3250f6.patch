@@ -485,7 +485,7 @@ index a16cdbea6b5197fe4376ede0ad32db73ec0d1dfc..dd001e6e5dc1669b8816fbb6e072a10e
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 38bda77b6cd543cd9b2daee37326292c39185cc1..364f261e1bda82cee70854cc3a5a75c9006de431 100644
+index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..171c27b5af127584c4819242434d0ff71aef762a 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -383,17 +383,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
