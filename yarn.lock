@@ -4466,7 +4466,7 @@ __metadata:
     pg-hstore: ^2.3.4
     pino: ^7.11.0
     pino-pretty: ^7.6.1
-    postgres: 3.2.3
+    postgres: 3.2.4
     prettier: ^2.6.2
     pretty-quick: ^3.1.3
     prismarine-chat: ^1.6.1
@@ -5781,10 +5781,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postgres@npm:3.2.3":
-  version: 3.2.3
-  resolution: "postgres@npm:3.2.3"
-  checksum: 646c99d71ede8211cc0c61cabdbf9647c8086d04de24be0f322e99ef60e48390dbf70e7e1ee2fb208851756d14000766d09362d4c3efe2039cbbd4943df61c05
+"postgres@npm:3.2.4":
+  version: 3.2.4
+  resolution: "postgres@npm:3.2.4"
+  checksum: 613d09d66927bd436e286685881fa40297bac97ca3fc34359abf347f1e9cf00fb3c6fea328b004c632c507129e279883354b4e411d9c0c7478f88d670df78503
   languageName: node
   linkType: hard
 
