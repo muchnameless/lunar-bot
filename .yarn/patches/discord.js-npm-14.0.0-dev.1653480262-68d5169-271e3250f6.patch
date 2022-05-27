@@ -361,6 +361,31 @@ index 2bbeb764cfc594ad727ab61f928b7c15b9f59b46..8a2153d72cfd3493e01816fd57c4fdaf
  
      let username;
      let avatarURL;
+diff --git a/src/structures/ModalSubmitFieldsResolver.js b/src/structures/ModalSubmitFieldsResolver.js
+index 6aa9529aa012176effdf6eb17388cddd966612f8..cc7f2ebd2d4cdc0e222aa9f3abd65532853ca2ef 100644
+--- a/src/structures/ModalSubmitFieldsResolver.js
++++ b/src/structures/ModalSubmitFieldsResolver.js
+@@ -49,6 +49,20 @@ class ModalSubmitFieldsResolver {
+     }
+     return field.value;
+   }
++
++  /**
++   * Gets the values of a select menu component given a custom id
++   * @param {string} customId The custom id for the select menu component
++   * @returns {string[]}
++   */
++  getSelectMenuValues(customId) {
++    const field = this.getField(customId);
++    const expectedType = ComponentType.SelectMenu;
++    if (field.type !== expectedType) {
++      throw new TypeError('MODAL_SUBMIT_INTERACTION_FIELD_TYPE', customId, field.type, expectedType);
++    }
++    return field.data.values;
++  }
+ }
+ 
+ module.exports = ModalSubmitFieldsResolver;
 diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
 index 915f3bc688a758cf60da387ee86862ecc8d66903..7bfcf37986abbe6bb9cffa2e455bb2b2e7fc6215 100644
 --- a/src/structures/SelectMenuBuilder.js
@@ -485,9 +510,18 @@ index a16cdbea6b5197fe4376ede0ad32db73ec0d1dfc..dd001e6e5dc1669b8816fbb6e072a10e
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..171c27b5af127584c4819242434d0ff71aef762a 100644
+index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2c4626514 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
+@@ -247,7 +247,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+ }
+ 
+ export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
+-export type ModalActionRowComponent = TextInputComponent;
++export type ModalActionRowComponent = TextInputComponent | SelectMenuComponent;
+ 
+ export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
+   APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
 @@ -383,17 +383,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
    replied: boolean;
    webhook: InteractionWebhook;
@@ -557,3 +591,20 @@ index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..171c27b5af127584c4819242434d0ff7
    public readonly token: string;
    public type: InteractionType;
    public user: User;
+@@ -1731,7 +1736,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+     MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
+     MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
+   >;
+-  public componentType: Exclude<ComponentType, ComponentType.ActionRow>;
++  public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
+   public customId: string;
+   public channelId: Snowflake;
+   public deferred: boolean;
+@@ -1858,6 +1863,7 @@ export class ModalSubmitFieldsResolver {
+   public fields: Collection<string, ModalActionRowComponent>;
+   public getField(customId: string): ModalActionRowComponent;
+   public getTextInputValue(customId: string): string;
++  public getSelectMenuValues(customId: string): string[];
+ }
+ 
+ export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
