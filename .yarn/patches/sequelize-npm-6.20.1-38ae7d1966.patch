@@ -1,0 +1,13 @@
+diff --git a/types/model.d.ts b/types/model.d.ts
+index 7155761f8770222ce7f75cf95b25486d52ad1383..45ab2990bc8f6a1424a2625c69eb1a5b3bd657f1 100644
+--- a/types/model.d.ts
++++ b/types/model.d.ts
+@@ -3273,7 +3273,7 @@ export default Model;
+ // - So if we want to check if T is branded, we remove the brand, and check if they list of keys is still the same.
+ // we exclude Null & Undefined so "field: Brand<value> | null" is still detected as branded
+ // this is important because "Brand<value | null>" are transformed into "Brand<value> | null" to not break null & undefined
+-type IsBranded<T, Brand extends symbol> = keyof NonNullable<T> extends keyof Omit<NonNullable<T>, Brand>
++type IsBranded<T, Brand extends symbol> = keyof (T extends null | undefined ? never : T) extends keyof Omit<(T extends null | undefined ? never : T), Brand>
+   ? false
+   : true;
+ 
