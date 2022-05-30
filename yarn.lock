@@ -5936,12 +5936,12 @@ __metadata:
   linkType: hard
 
 "typescript@patch:typescript@^4.8.0-dev.20220527#~builtin<compat/typescript>":
-  version: 4.8.0-dev.20220530
-  resolution: "typescript@patch:typescript@npm%3A4.8.0-dev.20220530#~builtin<compat/typescript>::version=4.8.0-dev.20220530&hash=7ad353"
+  version: 4.8.0-dev.20220527
+  resolution: "typescript@patch:typescript@npm%3A4.8.0-dev.20220527#~builtin<compat/typescript>::version=4.8.0-dev.20220527&hash=7ad353"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: f41145c1cfb8c9f87413c9020392ac8075552df23c4a65b7a76acfb779d6ea138ee909d0e33a73d6b1824adbce31e785aea522a2f1ea0abaf7fed756eaa3be84
+  checksum: bf9c4578d2a09d374de228ebb383c171f8c69dd3c0d81186e0d7e866e18e706aad3ae7452807094a35e48ae9e21a96d2477b4b0bb7a88c8ce16097c03ce492fd
   languageName: node
   linkType: hard
 
