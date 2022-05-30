@@ -94,7 +94,7 @@
 		"@discordjs/builders": "0.14.0-dev.1653480270-68d5169",
 		"@discordjs/collection": "0.7.0-dev.1653480253-68d5169",
 		"@discordjs/rest": "0.5.0-dev.1653480262-68d5169",
-		"discord-api-types": "0.33.2-next.51e664d.1653866356",
+		"discord-api-types": "0.33.2-next.15fcd1b.1653892446",
 		"@discordjs/builders@0.14.0-dev.1653480270-68d5169": "patch:@discordjs/builders@npm:0.14.0-dev.1653480270-68d5169#.yarn/patches/@discordjs-builders-npm-0.14.0-dev.1653480270-68d5169-ebe5018c36.patch",
 		"discord.js@14.0.0-dev.1653480262-68d5169": "patch:discord.js@npm:14.0.0-dev.1653480262-68d5169#.yarn/patches/discord.js-npm-14.0.0-dev.1653480262-68d5169-271e3250f6.patch"
 	}
