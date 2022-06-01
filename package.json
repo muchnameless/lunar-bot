@@ -85,7 +85,7 @@
 		"lint-staged": "^13.0.0",
 		"pino-pretty": "^7.6.1",
 		"pretty-quick": "^3.1.3",
-		"typescript": "^4.8.0-dev.20220531"
+		"typescript": "^4.8.0-dev.20220601"
 	},
 	"engines": {
 		"node": ">=v18.0.0",
