@@ -7,7 +7,7 @@ export const BLOCKED_WORDS_REGEXP = new RegExp(
 		/seks/,
 		/\bsemen\b/,
 		/nutte[dr]/,
-		/\bc *u *m+(?:ming?|s(?:hots?|lut)?)?\b/,
+		/\bc *u+ *m+(?:ming?|s(?:hots?|lut)?)?\b/,
 		/\bslu+t+\b/,
 		/sluts/,
 		/\bth[0o]t\b/,
