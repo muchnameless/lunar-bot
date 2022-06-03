@@ -1781,10 +1781,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:0.33.2-next.895083b.1654126480":
-  version: 0.33.2-next.895083b.1654126480
-  resolution: "discord-api-types@npm:0.33.2-next.895083b.1654126480"
-  checksum: 55e4e30f5ab104a00b4761e89a1017be2fb5e96d40689306ac92ab2fba1f22fcc74b40ace7e3e87d7de11f6b2ef436025ef4e03222206185b72ef6c408d2633f
+"discord-api-types@npm:0.33.3-next.9f386cb.1654248679":
+  version: 0.33.3-next.9f386cb.1654248679
+  resolution: "discord-api-types@npm:0.33.3-next.9f386cb.1654248679"
+  checksum: 22fa4e890a58c11471b62e92ad43b0d62726c16d31a4a77785321ead77b14d21c13d70713dca0cdeafd916c9c63bcf4ff9320718323887a8fa9ee818e292ab37
   languageName: node
   linkType: hard
 
