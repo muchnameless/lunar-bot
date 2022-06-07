@@ -1,4 +1,13 @@
-import { ActivityType, GatewayIntentBits, Options, Partials, PresenceUpdateStatus, Routes, Sweepers } from 'discord.js';
+import {
+	ActivityType,
+	ChannelType,
+	GatewayIntentBits,
+	Options,
+	Partials,
+	PresenceUpdateStatus,
+	Routes,
+	Sweepers,
+} from 'discord.js';
 import { RequestMethod } from '@discordjs/rest';
 import { LunarClient } from './structures/LunarClient';
 import { seconds } from './functions';
@@ -37,7 +46,7 @@ const client = new LunarClient({
 				getComparisonTimestamp: () => -1,
 				excludeFromSweep: (e) =>
 					e.client.guilds.cache.some((guild) => guild.members.cache.has(e.id)) || // user is part of a member
-					e.client.channels.cache.some((channel) => channel.isDM() && channel.recipientId === e.id) || // user has a DM channel
+					e.client.channels.cache.some((channel) => channel.type === ChannelType.DM && channel.recipientId === e.id) || // user has a DM channel
 					e.discriminator === '0000', // webhook message 'author'
 			}),
 		},

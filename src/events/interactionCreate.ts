@@ -3,6 +3,7 @@ import ms from 'ms';
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
+	ChannelType,
 	ComponentType,
 	InteractionType,
 	PermissionFlagsBits,
@@ -133,7 +134,10 @@ export default class InteractionCreateEvent extends Event {
 
 			// (un)pin message
 			case CustomIdKey.Pin:
-				if (!interaction.channel?.isDM() && !interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
+				if (
+					interaction.channel?.type !== ChannelType.DM &&
+					!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)
+				) {
 					return InteractionUtil.reply(interaction, {
 						content: 'you need `ManageMessage` permissions to (un)pin messages in this channel',
 						ephemeral: false,

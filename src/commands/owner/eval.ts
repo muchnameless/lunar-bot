@@ -7,7 +7,7 @@ import fs from 'node:fs/promises';
 import v8 from 'node:v8';
 import Discord, {
 	ActionRowBuilder,
-	Attachment,
+	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ContextMenuCommandBuilder,
@@ -158,7 +158,12 @@ export default class EvalCommand extends ApplicationCommand {
 	 */
 	private _getFiles(interaction: RepliableInteraction, content: string) {
 		void InteractionUtil.defer(interaction);
-		return [new Attachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
+
+		return [
+			new AttachmentBuilder() //
+				.setFile(Buffer.from(content).slice(0, this.MAX_FILE_SIZE))
+				.setName('result.ts'),
+		];
 	}
 
 	/**
@@ -274,7 +279,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 		const stopwatch = new Stopwatch();
 
-		let files: Attachment[] | undefined;
+		let files: AttachmentBuilder[] | undefined;
 
 		try {
 			stopwatch.restart();

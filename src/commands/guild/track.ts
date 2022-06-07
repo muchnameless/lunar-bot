@@ -1,4 +1,4 @@
-import { Attachment, SlashCommandBuilder } from 'discord.js';
+import { AttachmentBuilder, SlashCommandBuilder } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
@@ -167,7 +167,9 @@ export default class TrackCommand extends ApplicationCommand {
 				datasets,
 			},
 		});
-		const attachment = new Attachment(image, 'file.jpg');
+		const attachment = new AttachmentBuilder() //
+			.setFile(image)
+			.setName('file.jpg');
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [
@@ -178,7 +180,7 @@ export default class TrackCommand extends ApplicationCommand {
 						url: player.url,
 					})
 					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
-					.setImage(`attachment://${attachment.name}`),
+					.setImage(`attachment://${attachment.data.name}`),
 			],
 			files: [attachment],
 		});

@@ -16,6 +16,97 @@ index 871d519533caa340099f898fc81da0efa56432da..bfa68e0d3b78d306a763ed030ad9fefa
    /**
     * Creates a new action row builder from JSON data
     * @param {JSONEncodable<APIActionRowComponent<APIActionRowComponentTypes>>
+diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
+index fe4ce59a2ad3be68cb3313314a08ae993de8c039..5e6adae3599626e49772ef356bfd06204f8b43e0 100644
+--- a/src/structures/AttachmentBuilder.js
++++ b/src/structures/AttachmentBuilder.js
+@@ -7,25 +7,19 @@ const Util = require('../util/Util');
+  */
+ class AttachmentBuilder {
+   /**
+-   * @param {BufferResolvable|Stream} attachment The file
+-   * @param {APIAttachment} [data] Extra data
++   * @param {AttachmentPayload} payload Attachment and extra data
+    */
+-  constructor(attachment, data = {}) {
++  constructor({ attachment, ...data } = {}) {
+     /**
+      * The file associated with this attachment.
+      * @type {BufferResolvable|Stream}
+      */
+     this.attachment = attachment;
+     /**
+-     * The name of this attachment
+-     * @type {?string}
+-     */
+-    this.name = data.name;
+-    /**
+-     * The description of the attachment
+-     * @type {?string}
++     * The API data associated with this attachment.
++     * @type {APIAttachment}
+      */
+-    this.description = data.description;
++    this.data = data;
+   }
+ 
+   /**
+@@ -34,7 +28,7 @@ class AttachmentBuilder {
+    * @returns {AttachmentBuilder} This attachment
+    */
+   setDescription(description) {
+-    this.description = description;
++    this.data.description = description;
+     return this;
+   }
+ 
+@@ -54,7 +48,7 @@ class AttachmentBuilder {
+    * @returns {AttachmentBuilder} This attachment
+    */
+   setName(name) {
+-    this.name = name;
++    this.data.name = name;
+     return this;
+   }
+ 
+@@ -68,7 +62,7 @@ class AttachmentBuilder {
+ 
+     if (!spoiler) {
+       while (this.spoiler) {
+-        this.name = this.name.slice('SPOILER_'.length);
++        this.data.name = this.data.name.slice('SPOILER_'.length);
+       }
+       return this;
+     }
+@@ -82,11 +76,11 @@ class AttachmentBuilder {
+    * @readonly
+    */
+   get spoiler() {
+-    return Util.basename(this.name).startsWith('SPOILER_');
++    return Util.basename(this.data.name ?? '').startsWith('SPOILER_');
+   }
+ 
+   toJSON() {
+-    return Util.flatten(this);
++    return { ...this.data, attachment: this.attachment };
+   }
+ 
+   /**
+@@ -95,10 +89,10 @@ class AttachmentBuilder {
+    * @returns {AttachmentBuilder}
+    */
+   static from(other) {
+-    return new AttachmentBuilder(other.attachment, {
+-      name: other.name,
+-      description: other.description,
+-    });
++    if (isJSONEncodable(other)) {
++      return new this(other.toJSON());
++    }
++    return new this(other);
+   }
+ }
+ 
 diff --git a/src/structures/ButtonBuilder.js b/src/structures/ButtonBuilder.js
 index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..0136a626eadbc74f61dec1853509cb3b63e8864b 100644
 --- a/src/structures/ButtonBuilder.js
@@ -520,7 +611,7 @@ index 6b3a693d4c72bcd273d15d5b095b21684b857b3e..4b1630b12354c73b7966a84e53a45525
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..02429ef480cb59ffd1b08ad0a21925b9d558ff21 100644
+index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..829d2d6d33a395d8c7692bd9921069af135f853f 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -257,7 +257,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -604,7 +695,28 @@ index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..02429ef480cb59ffd1b08ad0a21925b9
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1755,7 +1757,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1703,16 +1705,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+ }
+ 
+ export class AttachmentBuilder {
+-  public constructor(attachment: BufferResolvable | Stream, data?: AttachmentData);
++  public constructor(data?: Partial<AttachmentPayload>);
+   public attachment: BufferResolvable | Stream;
+-  public description: string | null;
+-  public name: string | null;
++  public data: Exclude<AttachmentPayload, 'attachment'>;
+   public get spoiler(): boolean;
+   public setDescription(description: string): this;
+-  public setFile(attachment: BufferResolvable | Stream, name?: string): this;
++  public setFile(attachment: BufferResolvable | Stream): this;
+   public setName(name: string): this;
+   public setSpoiler(spoiler?: boolean): this;
+-  public toJSON(): unknown;
++  public toJSON(): AttachmentPayload;
+   public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
+ }
+ 
+@@ -1755,7 +1756,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
@@ -613,7 +725,7 @@ index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..02429ef480cb59ffd1b08ad0a21925b9
    public customId: string;
    public channelId: Snowflake;
    public deferred: boolean;
-@@ -1916,6 +1918,7 @@ export class ModalSubmitFields {
+@@ -1916,6 +1917,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -621,3 +733,15 @@ index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..02429ef480cb59ffd1b08ad0a21925b9
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
+@@ -3504,11 +3506,6 @@ export interface BaseApplicationCommandData {
+   defaultPermission?: boolean;
+ }
+ 
+-export interface AttachmentData {
+-  name?: string;
+-  description?: string;
+-}
+-
+ export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
+ 
+ export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;

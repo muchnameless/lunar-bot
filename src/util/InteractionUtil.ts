@@ -30,7 +30,6 @@ import type {
 	ChatInputCommandInteraction as DJSChatInputCommandInteraction,
 	ChatInputCommandInteraction,
 	EmojiIdentifierResolvable,
-	GuildCacheMessage,
 	Interaction,
 	InteractionDeferReplyOptions,
 	InteractionDeferUpdateOptions,
@@ -43,7 +42,7 @@ import type {
 	MessagePayload,
 	MessageResolvable,
 	ModalBuilder,
-	ModalData,
+	ModalComponentData,
 	ModalSubmitInteraction,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
@@ -68,7 +67,7 @@ export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> =
 		showModal(
 			modal:
 				| JSONEncodable<APIModalInteractionResponseCallbackData>
-				| ModalData
+				| ModalComponentData
 				| APIModalInteractionResponseCallbackData,
 		): Promise<void>;
 		awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
@@ -79,10 +78,10 @@ export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = In
 
 export interface FromMessageInteractionResponseFields<Cached extends CacheType = 'cachedOrDM'>
 	extends InteractionResponseFields<Cached> {
-	message: GuildCacheMessage<Cached>;
-	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+	message: Message;
+	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<Message>;
 	deferUpdate(options?: InteractionDeferUpdateOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
-	update(options: InteractionUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+	update(options: InteractionUpdateOptions & { fetchReply: true }): Promise<Message>;
 	update(
 		options: string | MessagePayload | InteractionUpdateOptions,
 	): Promise<InteractionResponse<BooleanCache<Cached>>>;
