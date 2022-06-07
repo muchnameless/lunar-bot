@@ -271,10 +271,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/collection@npm:0.7.0-dev.1653480253-68d5169":
-  version: 0.7.0-dev.1653480253-68d5169
-  resolution: "@discordjs/collection@npm:0.7.0-dev.1653480253-68d5169"
-  checksum: 4fb1adab0000830dd6d5be6866028cda1e8242873e138440717c5573ddca3246981bf661ec988e748e4759add62aed9251e9a84b7a2999774ae4e9f971318dac
+"@discordjs/collection@npm:0.8.0-dev.1654603468-769ea0b":
+  version: 0.8.0-dev.1654603468-769ea0b
+  resolution: "@discordjs/collection@npm:0.8.0-dev.1654603468-769ea0b"
+  checksum: bd203c512e521640cc3e4a7fa41936eec1c21504520745dcbeaa035688bf4daccc6991c67fc7e798266b0cd0cdd92277a93f4c52e802703b48a76e7a08810b32
   languageName: node
   linkType: hard
 
