@@ -23,7 +23,7 @@
 	"author": "muchnameless",
 	"license": "GPL-3.0",
 	"dependencies": {
-		"@discordjs/builders": "0.14.0-dev.1653480270-68d5169",
+		"@discordjs/builders": "0.16.0-dev.1654603500-769ea0b",
 		"@discordjs/rest": "*",
 		"@sapphire/async-queue": "^1.3.1",
 		"@sapphire/stopwatch": "^1.4.1",
@@ -37,7 +37,7 @@
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
 		"cron": "^2.0.0",
-		"discord.js": "14.0.0-dev.1653480262-68d5169",
+		"discord.js": "14.0.0-dev.1654603515-769ea0b",
 		"emoji-regex": "9.2.2",
 		"fast-xml-parser": "^4.0.8",
 		"ioredis": "^5.0.6",
@@ -93,12 +93,10 @@
 	},
 	"packageManager": "yarn@3.2.1",
 	"resolutions": {
-		"@discordjs/builders": "0.14.0-dev.1653480270-68d5169",
-		"@discordjs/collection": "0.7.0-dev.1653480253-68d5169",
-		"@discordjs/rest": "0.5.0-dev.1653480262-68d5169",
+		"@discordjs/builders": "0.16.0-dev.1654603500-769ea0b",
+		"@discordjs/collection": "0.8.0-dev.1654603468-769ea0b",
+		"@discordjs/rest": "0.6.0-dev.1654603677-769ea0b",
 		"discord-api-types": "0.33.5-next.d854317.1654556196",
-		"@discordjs/builders@0.14.0-dev.1653480270-68d5169": "patch:@discordjs/builders@npm:0.14.0-dev.1653480270-68d5169#.yarn/patches/@discordjs-builders-npm-0.14.0-dev.1653480270-68d5169-ebe5018c36.patch",
-		"discord.js@14.0.0-dev.1653480262-68d5169": "patch:discord.js@npm:14.0.0-dev.1653480262-68d5169#.yarn/patches/discord.js-npm-14.0.0-dev.1653480262-68d5169-271e3250f6.patch",
 		"sequelize@6.20.1": "patch:sequelize@npm:6.20.1#.yarn/patches/sequelize-npm-6.20.1-38ae7d1966.patch"
 	}
 }
