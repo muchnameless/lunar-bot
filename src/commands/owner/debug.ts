@@ -1,6 +1,7 @@
 import { memoryUsage, version as processVersion } from 'node:process';
 import {
 	ActionRowBuilder,
+	ChannelType,
 	quote,
 	SlashCommandBuilder,
 	SnowflakeUtil,
@@ -45,7 +46,7 @@ export default class DebugCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.addFields([
+					.addFields(
 						{
 							name: 'General',
 							value: stripIndents`
@@ -60,9 +61,9 @@ export default class DebugCommand extends ApplicationCommand {
 							value: stripIndents`
 								Guilds: ${formatNumber(guilds.cache.size)}
 								Channels: ${formatNumber(channels.cache.size)} (${formatNumber(
-								channels.cache.filter((c) => c.isThread() || c.isDM()).size,
+								channels.cache.filter((c) => c.isThread() || c.type === ChannelType.DM).size,
 							)} temporary)
-								${(channels.cache.filter((c) => c.isDM()) as Collection<Snowflake, DMChannel>)
+								${(channels.cache.filter((c) => c.type === ChannelType.DM) as Collection<Snowflake, DMChannel>)
 									.map(
 										(c) =>
 											[c.recipient?.tag ?? c.recipientId, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
@@ -109,7 +110,7 @@ export default class DebugCommand extends ApplicationCommand {
 									)
 									.map((c) =>
 										quote(
-											`${!c.isDM() ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
+											`${c.type !== ChannelType.DM ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
 												c.messages.cache.size,
 											)}`,
 										),
@@ -199,16 +200,14 @@ export default class DebugCommand extends ApplicationCommand {
 									EMBED_FIELD_MAX_CHARS,
 								) || 'disabled',
 						},
-					])
+					)
 					.setFooter({
 						text: me?.displayName ?? this.client.user!.username,
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
 			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
-					buildDeleteButton(interaction.user.id),
-				]),
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildDeleteButton(interaction.user.id)),
 			],
 		});
 	}

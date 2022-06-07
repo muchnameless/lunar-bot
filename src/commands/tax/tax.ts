@@ -167,7 +167,7 @@ export default class TaxCommand extends ApplicationCommand {
 							this.client.defaultEmbed
 								.setTitle('Guild Tax')
 								.setDescription(`${interaction.user.tag} | ${interaction.user} changed the guild tax amount`)
-								.addFields([
+								.addFields(
 									{
 										name: 'Old amount',
 										value: codeBlock(formatNumber(OLD_AMOUNT)),
@@ -178,7 +178,7 @@ export default class TaxCommand extends ApplicationCommand {
 										value: codeBlock(formatNumber(NEW_AMOUNT)),
 										inline: true,
 									},
-								]),
+								),
 						);
 
 						return InteractionUtil.reply(
@@ -223,12 +223,10 @@ export default class TaxCommand extends ApplicationCommand {
 						void this.client.log(
 							this.client.defaultEmbed //
 								.setTitle('Guild Tax')
-								.addFields([
-									{
-										name: `/ah ${collector}`,
-										value: codeBlock(`${player}: ${formatNumber(AMOUNT)} (manually)`),
-									},
-								]),
+								.addFields({
+									name: `/ah ${collector}`,
+									value: codeBlock(`${player}: ${formatNumber(AMOUNT)} (manually)`),
+								}),
 						);
 
 						return InteractionUtil.reply(

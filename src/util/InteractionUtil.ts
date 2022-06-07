@@ -30,7 +30,6 @@ import type {
 	ChatInputCommandInteraction as DJSChatInputCommandInteraction,
 	ChatInputCommandInteraction,
 	EmojiIdentifierResolvable,
-	GuildCacheMessage,
 	Interaction,
 	InteractionDeferReplyOptions,
 	InteractionDeferUpdateOptions,
@@ -43,7 +42,7 @@ import type {
 	MessagePayload,
 	MessageResolvable,
 	ModalBuilder,
-	ModalData,
+	ModalComponentData,
 	ModalSubmitInteraction,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
@@ -68,7 +67,7 @@ export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> =
 		showModal(
 			modal:
 				| JSONEncodable<APIModalInteractionResponseCallbackData>
-				| ModalData
+				| ModalComponentData
 				| APIModalInteractionResponseCallbackData,
 		): Promise<void>;
 		awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
@@ -79,10 +78,10 @@ export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = In
 
 export interface FromMessageInteractionResponseFields<Cached extends CacheType = 'cachedOrDM'>
 	extends InteractionResponseFields<Cached> {
-	message: GuildCacheMessage<Cached>;
-	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+	message: Message;
+	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<Message>;
 	deferUpdate(options?: InteractionDeferUpdateOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
-	update(options: InteractionUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+	update(options: InteractionUpdateOptions & { fetchReply: true }): Promise<Message>;
 	update(
 		options: string | MessagePayload | InteractionUpdateOptions,
 	): Promise<InteractionResponse<BooleanCache<Cached>>>;
@@ -411,7 +410,7 @@ export class InteractionUtil extends null {
 			case undefined:
 			case 0:
 				options.components = [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([buildVisibilityButton()]),
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()),
 				];
 				break;
 
@@ -428,14 +427,14 @@ export class InteractionUtil extends null {
 					}
 
 					// TODO: ActionRowBuilder.from
-					(options.components![i] as ActionRowBuilder).addComponents([buildVisibilityButton()]);
+					(options.components![i] as ActionRowBuilder).addComponents(buildVisibilityButton());
 					addNewRow = false;
 					break;
 				}
 
 				if (addNewRow) {
 					options.components!.push(
-						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([buildVisibilityButton()]),
+						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()),
 					);
 				}
 			}
@@ -765,7 +764,7 @@ export class InteractionUtil extends null {
 		} = typeof options === 'string' ? { question: options } : options;
 		const SUCCESS_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
 		const CANCEL_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
-		const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
+		const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 			new ButtonBuilder() //
 				.setCustomId(SUCCESS_ID)
 				.setStyle(ButtonStyle.Success)
@@ -774,7 +773,7 @@ export class InteractionUtil extends null {
 				.setCustomId(CANCEL_ID)
 				.setStyle(ButtonStyle.Danger)
 				.setEmoji({ name: UnicodeEmoji.X }),
-		]);
+		);
 
 		let res: InteractionResponse | Message;
 

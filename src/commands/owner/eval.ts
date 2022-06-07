@@ -7,7 +7,7 @@ import fs from 'node:fs/promises';
 import v8 from 'node:v8';
 import Discord, {
 	ActionRowBuilder,
-	Attachment,
+	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ContextMenuCommandBuilder,
@@ -76,9 +76,11 @@ import { logger } from '../../logger';
 import { IGNORED_ERRORS } from '../../process';
 IGNORED_ERRORS;
 import type {
+	AttachmentPayload,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
+	JSONEncodable,
 	Message,
 	MessageActionRowComponentBuilder,
 	MessageComponentInteraction,
@@ -158,7 +160,12 @@ export default class EvalCommand extends ApplicationCommand {
 	 */
 	private _getFiles(interaction: RepliableInteraction, content: string) {
 		void InteractionUtil.defer(interaction);
-		return [new Attachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
+
+		return [
+			new AttachmentBuilder() //
+				.setFile(Buffer.from(content).slice(0, this.MAX_FILE_SIZE))
+				.setName('result.ts'),
+		];
 	}
 
 	/**
@@ -206,7 +213,7 @@ export default class EvalCommand extends ApplicationCommand {
 					? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
 					: options instanceof ButtonBuilder || options instanceof SelectMenuBuilder
 					? {
-							components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([options])],
+							components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(options)],
 							fetchReply: true,
 					  }
 					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
@@ -264,17 +271,15 @@ export default class EvalCommand extends ApplicationCommand {
 		}
 
 		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
-			responseEmbed.addFields([
-				{
-					name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
-					value: inputPart,
-				},
-			]);
+			responseEmbed.addFields({
+				name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
+				value: inputPart,
+			});
 		}
 
 		const stopwatch = new Stopwatch();
 
-		let files: Attachment[] | undefined;
+		let files: JSONEncodable<AttachmentPayload>[] | undefined;
 
 		try {
 			stopwatch.restart();
@@ -313,15 +318,13 @@ export default class EvalCommand extends ApplicationCommand {
 					break;
 				}
 
-				responseEmbed.addFields([{ name, value }]);
+				responseEmbed.addFields({ name, value });
 			}
 
-			responseEmbed.addFields([
-				{
-					name: '\u200B',
-					value: FOOTER_FIELD,
-				},
-			]);
+			responseEmbed.addFields({
+				name: '\u200B',
+				value: FOOTER_FIELD,
+			});
 		} catch (error) {
 			stopwatch.stop();
 
@@ -348,21 +351,19 @@ export default class EvalCommand extends ApplicationCommand {
 					break;
 				}
 
-				responseEmbed.addFields([{ name, value }]);
+				responseEmbed.addFields({ name, value });
 			}
 
-			responseEmbed.addFields([
-				{
-					name: '\u200B',
-					value: FOOTER_FIELD,
-				},
-			]);
+			responseEmbed.addFields({
+				name: '\u200B',
+				value: FOOTER_FIELD,
+			});
 		}
 
 		return InteractionUtil.replyOrUpdate(interaction, {
 			embeds: [responseEmbed],
 			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
 						.setEmoji({ name: UnicodeEmoji.EditMessage })
@@ -373,7 +374,7 @@ export default class EvalCommand extends ApplicationCommand {
 						.setStyle(ButtonStyle.Secondary),
 					buildPinButton(),
 					buildDeleteButton(interaction.user.id),
-				]),
+				),
 			],
 			files,
 		});
@@ -417,8 +418,8 @@ export default class EvalCommand extends ApplicationCommand {
 					new ModalBuilder()
 						.setTitle(this.name)
 						.setCustomId(interaction.customId)
-						.addComponents([
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
+						.addComponents(
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Paragraph)
@@ -426,8 +427,8 @@ export default class EvalCommand extends ApplicationCommand {
 									.setValue(trim(OLD_INPUT, MAX_VALUE_LENGTH))
 									.setPlaceholder(trim(OLD_INPUT, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(false),
-							]),
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
+							),
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('inspectDepth')
 									.setStyle(TextInputStyle.Short)
@@ -435,8 +436,8 @@ export default class EvalCommand extends ApplicationCommand {
 									.setValue(inspectDepth)
 									.setPlaceholder(inspectDepth)
 									.setRequired(false),
-							]),
-						]),
+							),
+						),
 				);
 			}
 

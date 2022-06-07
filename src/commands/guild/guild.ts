@@ -628,7 +628,7 @@ export default class GuildCommand extends ApplicationCommand {
 			.setFooter({ text: hypixelGuild.name });
 
 		if (dates.length) {
-			embed.addFields([
+			embed.addFields(
 				{
 					// padding since dates are sometimes not as long (may <> november), with this 37 works everytime for getInlineFieldLineCount
 					name: `${'\u200B'.padEnd(105, '\u00A0')}\u200B`,
@@ -636,7 +636,7 @@ export default class GuildCommand extends ApplicationCommand {
 					inline: true,
 				},
 				{ name: '\u200B', value: codeBlock(events.join('\n\n')), inline: true },
-			]);
+			);
 		}
 
 		const currentPage = Number(pageMatched?.groups!.current ?? page) || 0;

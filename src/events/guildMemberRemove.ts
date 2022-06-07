@@ -1,4 +1,4 @@
-import { codeBlock, EmbedBuilder } from 'discord.js';
+import { ChannelType, codeBlock, EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { logger } from '../logger';
 import { EmbedUtil, GuildMemberUtil } from '../util';
@@ -21,7 +21,7 @@ export default class GuildMemberRemoveEvent extends Event {
 		// uncache user
 		if (
 			!this.client.guilds.cache.some((guild) => guild.members.cache.has(member.id)) &&
-			this.client.channels.cache.some((channel) => channel.isDM() && channel.recipientId === member.id)
+			this.client.channels.cache.some((channel) => channel.type === ChannelType.DM && channel.recipientId === member.id)
 		) {
 			this.client.users.cache.delete(member.id);
 		}
@@ -47,18 +47,16 @@ export default class GuildMemberRemoveEvent extends Event {
 							${player.info}
 						`,
 					)
-					.addFields([
-						{
-							name: 'Roles',
-							value: codeBlock(
-								member.roles?.cache
-									.filter(({ id }) => id !== member.guild.id)
-									.sort((a, b) => b.comparePositionTo(a))
-									.map(({ name }) => name)
-									.join('\n') ?? 'unknown',
-							),
-						},
-					])
+					.addFields({
+						name: 'Roles',
+						value: codeBlock(
+							member.roles?.cache
+								.filter(({ id }) => id !== member.guild.id)
+								.sort((a, b) => b.comparePositionTo(a))
+								.map(({ name }) => name)
+								.join('\n') ?? 'unknown',
+						),
+					})
 					.setTimestamp(),
 				2,
 			),

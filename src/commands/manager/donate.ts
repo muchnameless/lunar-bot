@@ -67,12 +67,10 @@ export default class DonateCommand extends ApplicationCommand {
 		void this.client.log(
 			this.client.defaultEmbed //
 				.setTitle('Guild Donations')
-				.addFields([
-					{
-						name: `/ah ${collector}`,
-						value: codeBlock(`${player}: ${formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
-					},
-				]),
+				.addFields({
+					name: `/ah ${collector}`,
+					value: codeBlock(`${player}: ${formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
+				}),
 		);
 
 		return InteractionUtil.reply(

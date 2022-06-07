@@ -69,18 +69,16 @@ export default class XpCommand extends ApplicationCommand {
 					'\u00A0',
 				)}\u200B`,
 			)
-			.addFields([
-				{
-					name: '\u200B',
-					value: stripIndents`
+			.addFields({
+				name: '\u200B',
+				value: stripIndents`
 						${codeBlock('Skills')}
 							Average skill level: ${bold(formatDecimalNumber(skillAverage))} [${bold(formatDecimalNumber(trueAverage))}] - ${bold(
-						'Δ',
-					)}: ${bold(formatDecimalNumber(skillAverage - skillAverageOffset))} [${bold(
-						formatDecimalNumber(trueAverage - trueAverageOffset),
-					)}]`,
-				},
-			]);
+					'Δ',
+				)}: ${bold(formatDecimalNumber(skillAverage - skillAverageOffset))} [${bold(
+					formatDecimalNumber(trueAverage - trueAverageOffset),
+				)}]`,
+			});
 
 		// skills
 		for (const skill of SKILLS) {
@@ -88,17 +86,15 @@ export default class XpCommand extends ApplicationCommand {
 			const OFFSET_ARGUMENT = `${skill}Xp${OFFSET}` as const;
 			const { progressLevel } = player.getSkillLevel(skill);
 
-			embed.addFields([
-				{
-					name: upperCaseFirstChar(skill),
-					value: stripIndents`
-						${bold('Lvl:')} ${progressLevel}
-						${bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
-						${bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT]))}
-					`,
-					inline: true,
-				},
-			]);
+			embed.addFields({
+				name: upperCaseFirstChar(skill),
+				value: stripIndents`
+					${bold('Lvl:')} ${progressLevel}
+					${bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
+					${bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT]))}
+				`,
+				inline: true,
+			});
 		}
 
 		EmbedUtil.padFields(embed);
@@ -107,17 +103,15 @@ export default class XpCommand extends ApplicationCommand {
 			const SKILL_ARGUMENT = `${skill}Xp` as const;
 			const { progressLevel } = player.getSkillLevel(skill);
 
-			embed.addFields([
-				{
-					name: upperCaseFirstChar(skill),
-					value: stripIndents`
-						${bold('Lvl:')} ${progressLevel}
-						${bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
-						${bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`]))}
-					`,
-					inline: true,
-				},
-			]);
+			embed.addFields({
+				name: upperCaseFirstChar(skill),
+				value: stripIndents`
+					${bold('Lvl:')} ${progressLevel}
+					${bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
+					${bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`]))}
+				`,
+				inline: true,
+			});
 		}
 
 		EmbedUtil.padFields(embed);
@@ -125,32 +119,28 @@ export default class XpCommand extends ApplicationCommand {
 		// slayer
 		const TOTAL_SLAYER_XP = player.getSlayerTotal();
 
-		embed.addFields([
-			{
-				name: '\u200B',
-				value: stripIndents`
-					${codeBlock('Slayer')}
-					Total slayer xp: ${bold(formatNumber(TOTAL_SLAYER_XP))} - ${bold('Δ')}: ${bold(
-					formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)),
-				)}`,
-				inline: false,
-			},
-		]);
+		embed.addFields({
+			name: '\u200B',
+			value: stripIndents`
+				${codeBlock('Slayer')}
+				Total slayer xp: ${bold(formatNumber(TOTAL_SLAYER_XP))} - ${bold('Δ')}: ${bold(
+				formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)),
+			)}`,
+			inline: false,
+		});
 
 		for (const slayer of SLAYERS) {
 			const SLAYER_ARGUMENT = `${slayer}Xp` as const;
 
-			embed.addFields([
-				{
-					name: upperCaseFirstChar(slayer),
-					value: stripIndents`
-						${bold('Lvl:')} ${player.getSlayerLevel(slayer)}
-						${bold('XP:')} ${formatNumber(player[SLAYER_ARGUMENT])}
-						${bold('Δ:')} ${formatNumber(Math.round(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`]))}
-					`,
-					inline: true,
-				},
-			]);
+			embed.addFields({
+				name: upperCaseFirstChar(slayer),
+				value: stripIndents`
+					${bold('Lvl:')} ${player.getSlayerLevel(slayer)}
+					${bold('XP:')} ${formatNumber(player[SLAYER_ARGUMENT])}
+					${bold('Δ:')} ${formatNumber(Math.round(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`]))}
+				`,
+				inline: true,
+			});
 		}
 
 		embeds.push(EmbedUtil.padFields(embed));
@@ -165,17 +155,15 @@ export default class XpCommand extends ApplicationCommand {
 			const DUNGEON_ARGUMENT = `${type}Xp` as const;
 			const { progressLevel } = player.getSkillLevel(type);
 
-			embed.addFields([
-				{
-					name: upperCaseFirstChar(type),
-					value: stripIndents`
-						${bold('Lvl:')} ${progressLevel}
-						${bold('XP:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT]))}
-						${bold('Δ:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`]))}
-					`,
-					inline: true,
-				},
-			]);
+			embed.addFields({
+				name: upperCaseFirstChar(type),
+				value: stripIndents`
+					${bold('Lvl:')} ${progressLevel}
+					${bold('XP:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT]))}
+					${bold('Δ:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`]))}
+				`,
+				inline: true,
+			});
 		}
 
 		const { totalWeight, weight, overflow } = player.getLilyWeight();
@@ -185,7 +173,7 @@ export default class XpCommand extends ApplicationCommand {
 			overflow: overflowOffset,
 		} = player.getLilyWeight(OFFSET);
 
-		EmbedUtil.padFields(embed).addFields([
+		EmbedUtil.padFields(embed).addFields(
 			{
 				name: '\u200B',
 				value: `${codeBlock('Miscellaneous')}\u200B`,
@@ -211,7 +199,7 @@ export default class XpCommand extends ApplicationCommand {
 				`,
 				inline: true,
 			},
-		]);
+		);
 
 		embeds.push(EmbedUtil.padFields(embed));
 

@@ -178,7 +178,7 @@ function createActionRows(
 	const guildSelectMenu = new SelectMenuBuilder()
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(hypixelGuild !== GUILD_ID_ALL ? `Guild: ${hypixelGuild}` : 'Guilds: All')
-		.addOptions([
+		.addOptions(
 			...client.hypixelGuilds.cache.map(({ guildId, name }) =>
 				new SelectMenuOptionBuilder() //
 					.setLabel(name)
@@ -187,7 +187,7 @@ function createActionRows(
 			new SelectMenuOptionBuilder() //
 				.setLabel('ALL')
 				.setValue(GUILD_ID_ALL),
-		]);
+		);
 
 	if (xpType !== 'purge') {
 		const offsetSelectMenu = new SelectMenuBuilder()
@@ -204,28 +204,28 @@ function createActionRows(
 			);
 
 		if (lbType === 'total') {
-			offsetSelectMenu.addOptions([
+			offsetSelectMenu.addOptions(
 				new SelectMenuOptionBuilder() //
 					.setLabel('None')
 					.setValue('none'),
-			]);
+			);
 		}
 
 		rows.push(
-			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 				new SelectMenuBuilder()
 					.setCustomId(`${cacheKey}:lbType`)
 					.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
-					.addOptions([
+					.addOptions(
 						new SelectMenuOptionBuilder() //
 							.setLabel('Total XP')
 							.setValue('total'),
 						new SelectMenuOptionBuilder() //
 							.setLabel('Gained XP')
 							.setValue('gained'),
-					]),
-			]),
-			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
+					),
+			),
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 				new SelectMenuBuilder()
 					.setCustomId(`${cacheKey}:xpType`)
 					.setPlaceholder(
@@ -241,13 +241,13 @@ function createActionRows(
 								.setValue(type),
 						),
 					),
-			]),
-			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([offsetSelectMenu]),
+			),
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(offsetSelectMenu),
 		);
 	}
 
 	rows.push(
-		new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([guildSelectMenu]),
+		new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(guildSelectMenu),
 		buildPaginationActionRow(cacheKey, page, totalPages, {
 			disablePages: isExpired,
 			pageStyle: isExpired ? ButtonStyle.Secondary : ButtonStyle.Primary,
@@ -454,15 +454,13 @@ async function getLeaderboardMessageOptions(
 						${codeBlock('ada', playerList)}
 					`,
 				)
-				.addFields([
-					{
-						name: playerRequestingEntry ? 'Your placement' : '\u200B',
-						value: stripIndent`
-							${playerRequestingEntry ?? ''}
-							Page: ${page} / ${PAGES_TOTAL}
-						`,
-					},
-				])
+				.addFields({
+					name: playerRequestingEntry ? 'Your placement' : '\u200B',
+					value: stripIndent`
+						${playerRequestingEntry ?? ''}
+						Page: ${page} / ${PAGES_TOTAL}
+					`,
+				})
 				.setFooter({ text: 'Updated at' })
 				.setTimestamp(lastUpdatedAt),
 		);

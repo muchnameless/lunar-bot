@@ -1114,7 +1114,7 @@ export class HypixelGuild extends Model<
 					this.client.defaultEmbed
 						.setThumbnail(player.imageURL)
 						.setDescription(`${bold('Auto Rank Sync')} for ${player.info}`)
-						.addFields([
+						.addFields(
 							{
 								name: 'Old',
 								value: OLD_RANK_NAME ?? 'unknown',
@@ -1125,7 +1125,7 @@ export class HypixelGuild extends Model<
 								value: newRank.name,
 								inline: true,
 							},
-						]),
+						),
 				);
 			}
 
