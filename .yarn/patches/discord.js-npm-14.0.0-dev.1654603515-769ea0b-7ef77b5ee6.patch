@@ -611,7 +611,7 @@ index 6b3a693d4c72bcd273d15d5b095b21684b857b3e..4b1630b12354c73b7966a84e53a45525
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..829d2d6d33a395d8c7692bd9921069af135f853f 100644
+index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..7eaeb171777821eeb55830e47948b0d667e81d71 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -257,7 +257,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -745,3 +745,27 @@ index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..829d2d6d33a395d8c7692bd9921069af
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
+@@ -4734,10 +4731,8 @@ export interface MessageEditOptions {
+   files?: (
+     | BufferResolvable
+     | Stream
+-    | JSONEncodable<APIAttachment>
+-    | Attachment
+-    | AttachmentBuilder
+     | AttachmentPayload
++    | JSONEncodable<AttachmentPayload>
+   )[];
+   flags?: BitFieldResolvable<MessageFlagsString, number>;
+   allowedMentions?: MessageMentionOptions;
+@@ -4792,10 +4787,8 @@ export interface MessageOptions {
+   files?: (
+     | BufferResolvable
+     | Stream
+-    | JSONEncodable<APIAttachment>
+-    | Attachment
+-    | AttachmentBuilder
+     | AttachmentPayload
++    | JSONEncodable<AttachmentPayload>
+   )[];
+   reply?: ReplyOptions;
+   stickers?: StickerResolvable[];

@@ -76,9 +76,11 @@ import { logger } from '../../logger';
 import { IGNORED_ERRORS } from '../../process';
 IGNORED_ERRORS;
 import type {
+	AttachmentPayload,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
+	JSONEncodable,
 	Message,
 	MessageActionRowComponentBuilder,
 	MessageComponentInteraction,
@@ -279,7 +281,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 		const stopwatch = new Stopwatch();
 
-		let files: AttachmentBuilder[] | undefined;
+		let files: JSONEncodable<AttachmentPayload>[] | undefined;
 
 		try {
 			stopwatch.restart();
