@@ -1,8 +1,8 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index f4b4483b2941c3c690c06ff0aa12031d1149197a..8e43331a6437fa8a2f5dedf6d5d47ab45bff1380 100644
+index 7fbce0c0b5e4b62ace0c961370d034d4fc345b8c..9b1b2b8fd41cf7c472b6d69ef72b975b7bf9ffa4 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
-@@ -568,7 +568,7 @@ declare abstract class ComponentBuilder<DataType extends Partial<APIBaseComponen
+@@ -571,7 +571,7 @@ declare abstract class ComponentBuilder<DataType extends Partial<APIBaseComponen
  declare type MessageComponentBuilder = MessageActionRowComponentBuilder | ActionRowBuilder<MessageActionRowComponentBuilder>;
  declare type ModalComponentBuilder = ModalActionRowComponentBuilder | ActionRowBuilder<ModalActionRowComponentBuilder>;
  declare type MessageActionRowComponentBuilder = ButtonBuilder | SelectMenuBuilder;

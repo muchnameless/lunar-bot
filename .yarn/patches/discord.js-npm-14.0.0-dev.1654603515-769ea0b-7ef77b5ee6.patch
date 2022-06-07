@@ -1,8 +1,26 @@
+diff --git a/src/structures/ActionRowBuilder.js b/src/structures/ActionRowBuilder.js
+index 871d519533caa340099f898fc81da0efa56432da..bfa68e0d3b78d306a763ed030ad9fefa814f845e 100644
+--- a/src/structures/ActionRowBuilder.js
++++ b/src/structures/ActionRowBuilder.js
+@@ -9,13 +9,6 @@ const Transformers = require('../util/Transformers');
+  * @extends {BuildersActionRow}
+  */
+ class ActionRowBuilder extends BuildersActionRow {
+-  constructor({ components, ...data } = {}) {
+-    super({
+-      ...Transformers.toSnakeCase(data),
+-      components: components?.map(c => (c instanceof ComponentBuilder ? c : Components.createComponentBuilder(c))),
+-    });
+-  }
+-
+   /**
+    * Creates a new action row builder from JSON data
+    * @param {JSONEncodable<APIActionRowComponent<APIActionRowComponentTypes>>
 diff --git a/src/structures/ButtonBuilder.js b/src/structures/ButtonBuilder.js
-index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..76f2e245ab8950d81046526c554ad7cd46a32ee7 100644
+index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..0136a626eadbc74f61dec1853509cb3b63e8864b 100644
 --- a/src/structures/ButtonBuilder.js
 +++ b/src/structures/ButtonBuilder.js
-@@ -2,29 +2,14 @@
+@@ -2,31 +2,12 @@
  
  const { ButtonBuilder: BuildersButton, isJSONEncodable } = require('@discordjs/builders');
  const Transformers = require('../util/Transformers');
@@ -29,11 +47,11 @@ index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..76f2e245ab8950d81046526c554ad7cd
 -      return super.setEmoji(Util.parseEmoji(emoji));
 -    }
 -    return super.setEmoji(emoji);
-+  constructor(data) {
-+    super(Transformers.toSnakeCase(data));
-   }
- 
+-  }
+-
    /**
+    * Creates a new button builder from JSON data
+    * @param {JSONEncodable<APIButtonComponent>|APIButtonComponent} other The other data
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
 index b0a8ff2fd421b6fee59a3376fd72485d2c23afda..ce920b9046f3677ffe23efb947313c2316f00cad 100644
 --- a/src/structures/GuildEmoji.js
@@ -110,7 +128,7 @@ index 03b41500f925306a972fc3fc8972c7443e1bb654..2f184fd87582988bc97781643ec99c4a
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe50298067ccd836 100644
+index c2cbab66b53692736c80e54d1ff9aafeae03244e..e8f3b0688b3295ce03fc44e23d0b004c1ee4b28c 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -213,7 +231,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
      );
    }
  
-@@ -660,8 +673,9 @@ class Message extends Base {
+@@ -661,8 +674,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -225,7 +243,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
    }
  
    /**
-@@ -676,8 +690,9 @@ class Message extends Base {
+@@ -677,8 +691,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -237,7 +255,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
    }
  
    /**
-@@ -691,8 +706,9 @@ class Message extends Base {
+@@ -692,8 +707,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -249,7 +267,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
      return this;
    }
  
-@@ -707,8 +723,9 @@ class Message extends Base {
+@@ -708,8 +724,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -261,7 +279,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
      return this;
    }
  
-@@ -728,13 +745,14 @@ class Message extends Base {
+@@ -729,13 +746,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -279,7 +297,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
          message: this,
          emoji: Util.resolvePartialEmoji(emoji),
        },
-@@ -752,8 +770,9 @@ class Message extends Base {
+@@ -753,8 +771,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -291,7 +309,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
      return this;
    }
  
-@@ -776,7 +795,8 @@ class Message extends Base {
+@@ -777,7 +796,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -301,7 +319,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -789,7 +809,7 @@ class Message extends Base {
+@@ -790,7 +810,7 @@ class Message extends Base {
          },
        });
      }
@@ -310,7 +328,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
    }
  
    /**
-@@ -819,12 +839,13 @@ class Message extends Base {
+@@ -820,12 +840,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -327,7 +345,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
    }
  
    /**
-@@ -833,8 +854,9 @@ class Message extends Base {
+@@ -834,8 +855,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -340,7 +358,7 @@ index 4f69b4b1b8ccdadce0e7ab1518af9ac9bc5702e5..95138b5a0b6872d7ec2f746abe502980
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 2bbeb764cfc594ad727ab61f928b7c15b9f59b46..8a2153d72cfd3493e01816fd57c4fdafe6d2e3c5 100644
+index 3f1769bcdb78873de1b37513e1bca33c4836b78a..e9bf087ca39bca2f9a78dbaa592c6e9f7e687322 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -105,7 +105,7 @@ class MessagePayload {
@@ -361,13 +379,13 @@ index 2bbeb764cfc594ad727ab61f928b7c15b9f59b46..8a2153d72cfd3493e01816fd57c4fdaf
  
      let username;
      let avatarURL;
-diff --git a/src/structures/ModalSubmitFieldsResolver.js b/src/structures/ModalSubmitFieldsResolver.js
-index 6aa9529aa012176effdf6eb17388cddd966612f8..cc7f2ebd2d4cdc0e222aa9f3abd65532853ca2ef 100644
---- a/src/structures/ModalSubmitFieldsResolver.js
-+++ b/src/structures/ModalSubmitFieldsResolver.js
-@@ -49,6 +49,20 @@ class ModalSubmitFieldsResolver {
-     }
-     return field.value;
+diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
+index 8929d54ed2f33e6409cf167215010c1548bef42a..ed3f1b8a300debb9dca2a37a227b65e89b0c86e6 100644
+--- a/src/structures/ModalSubmitFields.js
++++ b/src/structures/ModalSubmitFields.js
+@@ -50,6 +50,15 @@ class ModalSubmitFields {
+   getTextInputValue(customId) {
+     return this.getField(customId, ComponentType.TextInput).value;
    }
 +
 +  /**
@@ -376,29 +394,20 @@ index 6aa9529aa012176effdf6eb17388cddd966612f8..cc7f2ebd2d4cdc0e222aa9f3abd65532
 +   * @returns {string[]}
 +   */
 +  getSelectMenuValues(customId) {
-+    const field = this.getField(customId);
-+    const expectedType = ComponentType.SelectMenu;
-+    if (field.type !== expectedType) {
-+      throw new TypeError('MODAL_SUBMIT_INTERACTION_FIELD_TYPE', customId, field.type, expectedType);
-+    }
-+    return field.data.values;
++    return this.getField(customId, ComponentType.SelectMenu).data.values;
 +  }
  }
  
- module.exports = ModalSubmitFieldsResolver;
+ module.exports = ModalSubmitFields;
 diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
-index 915f3bc688a758cf60da387ee86862ecc8d66903..7bfcf37986abbe6bb9cffa2e455bb2b2e7fc6215 100644
+index 915f3bc688a758cf60da387ee86862ecc8d66903..3bccdb1d9b756940f2c7f8d532c6f779e44ae0a4 100644
 --- a/src/structures/SelectMenuBuilder.js
 +++ b/src/structures/SelectMenuBuilder.js
-@@ -1,52 +1,18 @@
+@@ -1,54 +1,12 @@
  'use strict';
  
--const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable } = require('@discordjs/builders');
-+const {
-+  SelectMenuBuilder: BuildersSelectMenu,
-+  isJSONEncodable,
-+} = require('@discordjs/builders');
- const Transformers = require('../util/Transformers');
+ const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable } = require('@discordjs/builders');
+-const Transformers = require('../util/Transformers');
 -const Util = require('../util/Util');
  
  /**
@@ -444,19 +453,20 @@ index 915f3bc688a758cf60da387ee86862ecc8d66903..7bfcf37986abbe6bb9cffa2e455bb2b2
 -        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
 -      })),
 -    );
-+  constructor(data) {
-+    super(Transformers.toSnakeCase(data));
-   }
- 
+-  }
+-
    /**
+    * Creates a new select menu builder from json data
+    * @param {JSONEncodable<APISelectMenuComponent> | APISelectMenuComponent} other The other data
 diff --git a/src/structures/SelectMenuOptionBuilder.js b/src/structures/SelectMenuOptionBuilder.js
-index ea816bea2b39f6f864ae64e021686d428858fe3d..24f9a5bae8810b530323819fcf4e39ad45f8a113 100644
+index 981b8d0ecef4b93d96c798f5ecc51143761d0424..137cc4590ce3ec9240b03db0c2a7bb688d8f778a 100644
 --- a/src/structures/SelectMenuOptionBuilder.js
 +++ b/src/structures/SelectMenuOptionBuilder.js
-@@ -2,31 +2,14 @@
+@@ -1,34 +1,12 @@
+ 'use strict';
  
- const { SelectMenuOptionBuilder: BuildersSelectMenuOption } = require('@discordjs/builders');
- const Transformers = require('../util/Transformers');
+ const { SelectMenuOptionBuilder: BuildersSelectMenuOption, isJSONEncodable } = require('@discordjs/builders');
+-const Transformers = require('../util/Transformers');
 -const Util = require('../util/Util');
  
  /**
@@ -482,13 +492,13 @@ index ea816bea2b39f6f864ae64e021686d428858fe3d..24f9a5bae8810b530323819fcf4e39ad
 -      return super.setEmoji(Util.parseEmoji(emoji));
 -    }
 -    return super.setEmoji(emoji);
-+  constructor(data) {
-+    super(Transformers.toSnakeCase(data));
-   }
- }
- 
+-  }
+-
+   /**
+    * Creates a new select menu option builder from JSON data
+    * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index a16cdbea6b5197fe4376ede0ad32db73ec0d1dfc..dd001e6e5dc1669b8816fbb6e072a10e03249571 100644
+index 6b3a693d4c72bcd273d15d5b095b21684b857b3e..4b1630b12354c73b7966a84e53a455258d751a87 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -359,17 +359,14 @@ class Util extends null {
@@ -510,10 +520,10 @@ index a16cdbea6b5197fe4376ede0ad32db73ec0d1dfc..dd001e6e5dc1669b8816fbb6e072a10e
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2c4626514 100644
+index 18a64c51b3ac96a28c5f522ab969b58c3cf4f4c0..02429ef480cb59ffd1b08ad0a21925b9d558ff21 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -247,7 +247,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+@@ -257,7 +257,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
  }
  
  export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
@@ -522,29 +532,32 @@ index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -383,17 +383,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
+@@ -393,20 +393,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
    replied: boolean;
    webhook: InteractionWebhook;
-   reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+   reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<Message>;
 -  reply(options: string | MessagePayload | InteractionReplyOptions): Promise<void>;
 +  reply(
 +    options: string | MessagePayload | InteractionReplyOptions,
 +  ): Promise<InteractionResponse<BooleanCache<Cached>>>;
    deleteReply(): Promise<void>;
-   editReply(options: string | MessagePayload | WebhookEditMessageOptions): Promise<GuildCacheMessage<Cached>>;
-   deferReply(options: InteractionDeferReplyOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+   editReply(options: string | MessagePayload | WebhookEditMessageOptions): Promise<Message>;
+   deferReply(options: InteractionDeferReplyOptions & { fetchReply: true }): Promise<Message>;
 -  deferReply(options?: InteractionDeferReplyOptions): Promise<void>;
 +  deferReply(options?: InteractionDeferReplyOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
-   fetchReply(): Promise<GuildCacheMessage<Cached>>;
-   followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<GuildCacheMessage<Cached>>;
+   fetchReply(): Promise<Message>;
+   followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<Message>;
 -  showModal(
--    modal: JSONEncodable<APIModalInteractionResponseCallbackData> | ModalData | APIModalInteractionResponseCallbackData,
+-    modal:
+-      | JSONEncodable<APIModalInteractionResponseCallbackData>
+-      | ModalComponentData
+-      | APIModalInteractionResponseCallbackData,
 -  ): Promise<void>;
 -  awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
  }
  
  export type BooleanCache<T extends CacheType> = T extends 'cached' ? true : false;
-@@ -1434,7 +1432,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1449,7 +1444,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -553,7 +566,7 @@ index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1442,12 +1440,18 @@ export type CacheTypeReducer<
+@@ -1457,12 +1452,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -572,7 +585,7 @@ index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2
    : Fallback;
  
  export class Interaction<Cached extends CacheType = CacheType> extends Base {
-@@ -1460,7 +1464,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1475,7 +1476,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -582,7 +595,7 @@ index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1468,7 +1473,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1483,7 +1485,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -591,7 +604,7 @@ index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1731,7 +1736,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1755,7 +1757,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
@@ -600,9 +613,9 @@ index eeaf9e0d0335f53d3f2025b7e3de4a34420fb78e..6f7f7fb5b01c1b0e4d803bff46c739e2
    public customId: string;
    public channelId: Snowflake;
    public deferred: boolean;
-@@ -1858,6 +1863,7 @@ export class ModalSubmitFieldsResolver {
-   public fields: Collection<string, ModalActionRowComponent>;
-   public getField(customId: string): ModalActionRowComponent;
+@@ -1916,6 +1918,7 @@ export class ModalSubmitFields {
+   public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
+   public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
 +  public getSelectMenuValues(customId: string): string[];
  }
