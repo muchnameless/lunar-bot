@@ -64,7 +64,7 @@ export function buildPaginationActionRow(
 	const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;
 
 	// emojis are added to customIds to ensure they are unique, e.g. "firstPage" could equal "currentPage - 1"
-	return new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
+	return new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`${baseCustomId}:${firstPage}:${UnicodeEmoji.DoubleLeft}`)
 			.setEmoji({ name: UnicodeEmoji.DoubleLeft })
@@ -89,5 +89,5 @@ export function buildPaginationActionRow(
 			.setCustomId(`${baseCustomId}:${currentPage}:${UnicodeEmoji.Reload}`)
 			.setEmoji({ name: UnicodeEmoji.Reload })
 			.setStyle(reloadStyle),
-	]);
+	);
 }

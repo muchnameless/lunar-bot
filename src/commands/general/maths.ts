@@ -488,8 +488,8 @@ export default class MathsCommand extends DualCommand {
 					new ModalBuilder()
 						.setTitle('Maths')
 						.setCustomId(this.baseCustomId)
-						.addComponents([
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
+						.addComponents(
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Short)
@@ -497,8 +497,8 @@ export default class MathsCommand extends DualCommand {
 									.setValue(trim(rawInput, MAX_VALUE_LENGTH))
 									.setPlaceholder(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
 									.setRequired(true),
-							]),
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
+							),
+							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('error')
 									.setStyle(TextInputStyle.Paragraph)
@@ -507,8 +507,8 @@ export default class MathsCommand extends DualCommand {
 									.setPlaceholder(trim(ERROR_MESSAGE, MAX_PLACEHOLDER_LENGTH))
 									.setMaxLength(Math.min(ERROR_MESSAGE.length, MAX_VALUE_LENGTH))
 									.setRequired(false),
-							]),
-						]),
+							),
+						),
 				);
 			} catch (_error) {
 				logger.error(_error, '[MATHS]: modal');
