@@ -24,6 +24,32 @@ import {
 import type { SkyBlockProfile } from '../../functions';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 
+interface DebugPrice {
+	itemId: string;
+	price: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const noop = () => {};
+let debugCache: DebugPrice[] | null;
+let networthDebug: typeof noop | ((x: DebugPrice) => void) = noop;
+let debuggingEnabled = false;
+
+export const switchNetworthDebugging = () => {
+	if (debuggingEnabled) {
+		networthDebug = noop;
+		debuggingEnabled = false;
+		const res = debugCache!.sort(({ price: a }, { price: b }) => b - a);
+		debugCache = null;
+		return res;
+	}
+
+	networthDebug = (x: DebugPrice) => debugCache!.push(x);
+	debuggingEnabled = true;
+	debugCache = [];
+	return 'started';
+};
+
 /**
  * parse base64 item_data strings and calculate item prices
  * @param base64
@@ -178,13 +204,28 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies * extraAttributes.farming_for_dummies_count;
 	}
 
+	// upgrades
+	const itemUpgrade = itemUpgrades.get(itemId);
+	// upgradable armor (e.g. crimson)
+	if (itemUpgrade?.prestige) {
+		let essencePrice = 0;
+
+		for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
+			essencePrice += getUpgradeMaterialPrice(material) * amount;
+		}
+
+		price += essencePrice * PriceModifier.Essence;
+
+		for (const id of itemUpgrade.prestige.items) {
+			price += getPrice(id);
+		}
+	}
+
 	// stars
 	// upgrade_level seems to be the newer key, if both are present it's always higher than dungeon_item_level
 	const stars = extraAttributes.upgrade_level ?? extraAttributes.dungeon_item_level;
 
 	if (typeof stars === 'number') {
-		const itemUpgrade = itemUpgrades.get(itemId);
-
 		if (itemUpgrade) {
 			let essencePrice = 0;
 
@@ -196,15 +237,17 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			}
 
 			// stars
-			for (let star = stars - 1; star >= 0; --star) {
-				// item api has required materials
-				if (itemUpgrade.stars[star]) {
-					for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
-						essencePrice += getUpgradeMaterialPrice(material) * amount;
+			if (itemUpgrade.stars) {
+				for (let star = stars - 1; star >= 0; --star) {
+					// item api has required materials
+					if (itemUpgrade.stars[star]) {
+						for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
+							essencePrice += getUpgradeMaterialPrice(material) * amount;
+						}
+					} else {
+						// dungeon items require master stars for stars 6 - 10
+						price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonMasterStar;
 					}
-				} else {
-					// dungeon items require master stars for stars 6 - 10
-					price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonMasterStar;
 				}
 			}
 
@@ -267,7 +310,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// reforge
 	if (extraAttributes.modifier && !accessories.has(itemId)) {
-		price += getPrice(REFORGES[extraAttributes.modifier]) * PriceModifier.Reforge;
+		// TODO: make dynamic if possible
+		price +=
+			getPrice(
+				REFORGES[extraAttributes.modifier] ?? logger.warn(`[NETWORTH]: unknown reforge '${extraAttributes.modifier}'`),
+			) * PriceModifier.Reforge;
 	}
 
 	// scrolls (Necron's Blade)
@@ -299,6 +346,8 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			getPrice(ItemId.EtherwarpConduit) * PriceModifier.EtherwarpConduit +
 			getPrice(ItemId.EtherwarpMerger) * PriceModifier.EtherwarpMerger;
 	}
+
+	networthDebug({ itemId, price });
 
 	return price;
 }
@@ -363,6 +412,8 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 			price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinWithCandy;
 		}
 	}
+
+	networthDebug({ itemId: `LVL_${level}_${pet.tier}_${pet.type}`, price });
 
 	return price;
 }
