@@ -1,22 +1,22 @@
 import { ItemId } from '.';
 
 const CAMPFIRE_TALISMAN_ADEPT = {
-	'LOG_2:1': 160, // dark oak wood
+	[ItemId.DarkOakWood]: 160,
 } as const;
 const CAMPFIRE_TALISMAN_CULTIST = {
-	'LOG_2:1': 160, // dark oak wood
-	'LOG:1': 1_000, // spruce wood
+	[ItemId.DarkOakWood]: 160,
+	[ItemId.SpruceWood]: 1_000,
 } as const;
 const CAMPFIRE_TALISMAN_SCION = {
-	'LOG_2:1': 160, // dark oak wood
-	'LOG:1': 1_000, // spruce wood
-	LOG_2: 16_000, // acacia wood
+	[ItemId.DarkOakWood]: 160,
+	[ItemId.SpruceWood]: 1_000,
+	[ItemId.AcaciaWood]: 16_000,
 } as const;
 const CAMPFIRE_TALISMAN_GOD = {
-	'LOG_2:1': 160, // dark oak wood
-	'LOG:1': 1_000, // spruce wood
-	LOG_2: 16_000, // acacia wood
-	'LOG:3': 240_000, // jungle wood
+	[ItemId.DarkOakWood]: 160,
+	[ItemId.SpruceWood]: 1_000,
+	[ItemId.AcaciaWood]: 16_000,
+	[ItemId.JungleWood]: 240_000,
 } as const;
 
 /**
@@ -25,7 +25,9 @@ const CAMPFIRE_TALISMAN_GOD = {
 export const CRAFTING_RECIPES = Object.fromEntries(
 	Object.entries({
 		// https://hypixel-skyblock.fandom.com/wiki/Artifact_of_Power
-		[ItemId.PowerTalisman]: { [ItemId.RoughRubyGem]: 3_600 },
+		[ItemId.PowerTalisman]: {
+			[ItemId.RoughRubyGem]: 3_600,
+		},
 		[ItemId.PowerRing]: {
 			[ItemId.RoughRubyGem]: 48_400,
 			[ItemId.RoughJadeGem]: 25_600,

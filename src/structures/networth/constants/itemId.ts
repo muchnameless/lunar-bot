@@ -2,6 +2,7 @@ export const enum ItemId {
 	Coins = '$COINS', // pseudo item
 
 	AcaciaBirdhouse = 'ACACIA_BIRDHOUSE',
+	AcaciaWood = 'LOG_2',
 	AmberMaterial = 'AMBER_MATERIAL',
 	AoteStone = 'AOTE_STONE',
 	ArmorshredArrow = 'ARMORSHRED_ARROW',
@@ -42,6 +43,7 @@ export const enum ItemId {
 	CandyCorn = 'CANDY_CORN',
 	Carrot = 'CARROT',
 	Coal = 'COAL',
+	DarkOakWood = 'LOG_2:1',
 	DarkOrb = 'DARK_ORB',
 	DayCrystal = 'DAY_CRYSTAL',
 	DeathBow = 'DEATH_BOW',
@@ -91,6 +93,7 @@ export const enum ItemId {
 	JacobsTicket = 'JACOBS_TICKET',
 	Jaderald = 'JADERALD',
 	JerryStone = 'JERRY_STONE',
+	JungleWood = 'LOG:3',
 	KuudraMandible = 'KUUDRA_MANDIBLE',
 	LapisCrystal = 'LAPIS_CRYSTAL',
 	LuckyDice = 'LUCKY_DICE',
@@ -151,6 +154,7 @@ export const enum ItemId {
 	SludgeJuice = 'SLUDGE_JUICE',
 	SlugBoots = 'SLUG_BOOTS',
 	SpiritStone = 'SPIRIT_STONE',
+	SpruceWood = 'LOG:1',
 	Stonk = 'STONK_PICKAXE',
 	SuspiciousVial = 'SUSPICIOUS_VIAL',
 	TarantulaWeb = 'TARANTULA_WEB',
