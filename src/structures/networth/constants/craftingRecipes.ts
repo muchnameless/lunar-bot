@@ -1,5 +1,7 @@
 import { ItemId } from '.';
 
+const ITEMS_PER_BLOCK = 9;
+
 const CAMPFIRE_TALISMAN_ADEPT = {
 	[ItemId.DarkOakWood]: 160,
 } as const;
@@ -153,13 +155,13 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 			[ItemId.GoldIngot]: 40 / 64,
 		},
 		[ItemId.RedstoneTippedArrow]: {
-			[ItemId.Redstone]: (24 * 9) / 64,
+			[ItemId.Redstone]: (24 * ITEMS_PER_BLOCK) / 64,
 		},
 		[ItemId.EmeraldTippedArrow]: {
-			[ItemId.Emerald]: (16 * 9) / 64,
+			[ItemId.Emerald]: (16 * ITEMS_PER_BLOCK) / 64,
 		},
 		[ItemId.BouncyArrow]: {
-			[ItemId.SlimeBall]: (24 * 9) / 64,
+			[ItemId.SlimeBall]: (24 * ITEMS_PER_BLOCK) / 64,
 		},
 		[ItemId.IcyArrow]: {
 			[ItemId.PackedIce]: 64 / 64,
@@ -168,7 +170,7 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 			[ItemId.EnchantedSand]: 2 / 64,
 		},
 		[ItemId.ExplosiveArrow]: {
-			[ItemId.Coal]: (24 * 9) / 64,
+			[ItemId.Coal]: (24 * ITEMS_PER_BLOCK) / 64,
 		},
 		[ItemId.GlueArrow]: {
 			[ItemId.TarantulaWeb]: 64 / 64,
