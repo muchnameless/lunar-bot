@@ -163,7 +163,7 @@ export const enum ItemId {
 	SearingStone = 'SEARING_STONE',
 	SecondMasterStar = 'SECOND_MASTER_STAR',
 	ShinyPrism = 'SHINY_PRISM',
-	Silex = 'SIL_EX',
+	Silex = 'SIL_EX', // SILEX is the old variant of the item
 	SlimeBall = 'SLIME_BALL',
 	SludgeJuice = 'SLUDGE_JUICE',
 	SlugBoots = 'SLUG_BOOTS',
