@@ -24,18 +24,18 @@ const CAMPFIRE_TALISMAN_GOD = {
 const THEORETICAL_HOE = {
 	[ItemId.Coins]: 1_000_000, // gold medal
 	[ItemId.JacobsTicket]: 32,
-};
+} as const;
 const UPGRADED_HOE_1 = {
 	...THEORETICAL_HOE,
-};
+} as const;
 const UPGRADED_HOE_2 = {
 	...UPGRADED_HOE_1,
 	[ItemId.JacobsTicket]: UPGRADED_HOE_1[ItemId.JacobsTicket] + 4 * 16,
-};
+} as const;
 const UPGRADED_HOE_3 = {
 	...UPGRADED_HOE_2,
 	[ItemId.JacobsTicket]: UPGRADED_HOE_2[ItemId.JacobsTicket] + 4 * 64,
-};
+} as const;
 
 /**
  * SkyBlock item crafting recipes, holds an array of { id, count } for each item
