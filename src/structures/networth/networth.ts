@@ -8,7 +8,6 @@ import {
 	Enchantment,
 	ItemId,
 	MASTER_STARS,
-	MATERIALS_TO_ID,
 	PriceModifier,
 	REDUCED_VALUE_ENCHANTS,
 	REFORGES,
@@ -109,33 +108,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// dark auctions
 	if (extraAttributes.winning_bid && itemId !== ItemId.HegemonyArtifact) {
 		price = extraAttributes.winning_bid;
-	}
-
-	// farming tools
-	if (itemId.startsWith(ItemId.TheoreticalHoe)) {
-		const hoe = itemId.split('_');
-		const level = Number(hoe.pop());
-
-		// base price
-		let tickets = 32;
-
-		price = 1_000_000;
-
-		// upgrades
-		if (!Number.isNaN(level)) {
-			// 256 + 256 * 144 ~= 256 * 144 -> only take materials for last upgrade stage into consideration
-			price += 256 * getPrice(MATERIALS_TO_ID[hoe.pop() as keyof typeof MATERIALS_TO_ID]) * 144 ** (level - 1);
-
-			switch (level) {
-				case 3:
-					tickets += 256;
-				// fallthrough
-				case 2:
-					tickets += 64;
-			}
-		}
-
-		price += getPrice(ItemId.JacobsTicket) * tickets;
 	}
 
 	// enchantments

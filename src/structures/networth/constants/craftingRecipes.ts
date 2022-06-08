@@ -21,6 +21,22 @@ const CAMPFIRE_TALISMAN_GOD = {
 	[ItemId.JungleWood]: 240_000,
 } as const;
 
+const THEORETICAL_HOE = {
+	[ItemId.Coins]: 1_000_000, // gold medal
+	[ItemId.JacobsTicket]: 32,
+};
+const UPGRADED_HOE_1 = {
+	...THEORETICAL_HOE,
+};
+const UPGRADED_HOE_2 = {
+	...UPGRADED_HOE_1,
+	[ItemId.JacobsTicket]: UPGRADED_HOE_1[ItemId.JacobsTicket] + 4 * 16,
+};
+const UPGRADED_HOE_3 = {
+	...UPGRADED_HOE_2,
+	[ItemId.JacobsTicket]: UPGRADED_HOE_2[ItemId.JacobsTicket] + 4 * 64,
+};
+
 /**
  * SkyBlock item crafting recipes, holds an array of { id, count } for each item
  */
@@ -106,42 +122,80 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 		[ItemId.CampfireTalisman29]: CAMPFIRE_TALISMAN_GOD,
 
 		// https://hypixel-skyblock.fandom.com/wiki/Mathematical_Hoe_Blueprint
-		[ItemId.TheoreticalHoe]: {
-			[ItemId.Coins]: 1_000_000, // gold medal
-			[ItemId.JacobsTicket]: 32,
+		[ItemId.TheoreticalHoe]: THEORETICAL_HOE,
+
+		// carrot
+		[ItemId.GaussCarrotHoe1]: {
+			...UPGRADED_HOE_1,
+			[ItemId.Carrot]: 8 * 64,
+		},
+		[ItemId.GaussCarrotHoe2]: {
+			...UPGRADED_HOE_2,
+			[ItemId.Carrot]: 8 * 64 + 4 * 64 * (5 * 32),
+		},
+		[ItemId.GaussCarrotHoe3]: {
+			...UPGRADED_HOE_3,
+			[ItemId.Carrot]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (4 * 32 * (5 * 32) + 32),
+			[ItemId.GoldIngot]: 4 * 64 * 32 * (8 / 9),
 		},
 
-		[ItemId.TheoreticalHoeWheat1]: {
-			[ItemId.Coins]: 1_000_000, // gold medal
-			[ItemId.JacobsTicket]: 32,
-			[ItemId.Wheat]: 512,
+		// nether warts
+		[ItemId.NewtonNetherWartsHoe1]: {
+			...UPGRADED_HOE_1,
+			[ItemId.NetherWart]: 8 * 64,
 		},
-		[ItemId.TheoreticalHoeWheat2]: {
-			[ItemId.Coins]: 1_000_000, // gold medal
-			[ItemId.JacobsTicket]: 96,
-			[ItemId.Wheat]: 331_776,
+		[ItemId.NewtonNetherWartsHoe2]: {
+			...UPGRADED_HOE_2,
+			[ItemId.NetherWart]: 8 * 64 + 4 * 64 * (5 * 32),
 		},
-		[ItemId.TheoreticalHoeWheat3]: {
-			[ItemId.Coins]: 1_000_000, // gold medal
-			[ItemId.JacobsTicket]: 352,
-			[ItemId.Wheat]: 48_107_520,
+		[ItemId.NewtonNetherWartsHoe3]: {
+			...UPGRADED_HOE_3,
+			[ItemId.NetherWart]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (5 * 32) * (5 * 32),
 		},
 
-		[ItemId.TheoreticalHoeCarrot1]: {
-			[ItemId.Coins]: 1_000_000, // gold medal
-			[ItemId.JacobsTicket]: 32,
-			[ItemId.Carrot]: 512,
+		// potato
+		[ItemId.PythagoreanPotatoHoe1]: {
+			...UPGRADED_HOE_1,
+			[ItemId.Potato]: 8 * 64,
 		},
-		[ItemId.TheoreticalHoeCarrot2]: {
-			[ItemId.Coins]: 1_000_000, // gold medal
-			[ItemId.JacobsTicket]: 96,
-			[ItemId.Carrot]: 41_472,
+		[ItemId.PythagoreanPotatoHoe1]: {
+			...UPGRADED_HOE_2,
+			[ItemId.Potato]: 8 * 64 + 4 * 64 * (5 * 32),
 		},
-		[ItemId.TheoreticalHoeCarrot3]: {
-			[ItemId.Coins]: 1_000_000, // gold medal
-			[ItemId.JacobsTicket]: 352,
-			[ItemId.Carrot]: 5_292_544,
-			[ItemId.GoldIngot]: 7_282,
+		[ItemId.PythagoreanPotatoHoe1]: {
+			...UPGRADED_HOE_3,
+			[ItemId.Potato]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (5 * 32) * (5 * 32),
+		},
+
+		// sugar cane
+		[ItemId.TuringSugarCaneHoe1]: {
+			...UPGRADED_HOE_1,
+			[ItemId.SugarCane]: 8 * 64,
+		},
+		[ItemId.TuringSugarCaneHoe2]: {
+			...UPGRADED_HOE_2,
+			[ItemId.SugarCane]: 8 * 64 + 4 * 64 * (5 * 32),
+		},
+		[ItemId.TuringSugarCaneHoe3]: {
+			...UPGRADED_HOE_3,
+			[ItemId.SugarCane]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (5 * 32) * (5 * 32),
+		},
+
+		// wheat
+		[ItemId.EuclidsWheatHoe1]: {
+			...UPGRADED_HOE_1,
+			[ItemId.Wheat]: 8 * 64,
+		},
+		[ItemId.EuclidsWheatHoe2]: {
+			...UPGRADED_HOE_2,
+			[ItemId.Wheat]: 8 * 64 + 4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK),
+		},
+		[ItemId.EuclidsWheatHoe3]: {
+			...UPGRADED_HOE_3,
+			[ItemId.Wheat]:
+				8 * 64 +
+				4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK) +
+				4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK) * (16 * ITEMS_PER_BLOCK),
 		},
 
 		// https://hypixel-skyblock.fandom.com/wiki/Arrows
@@ -181,5 +235,10 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 		[ItemId.MagmaArrow]: {
 			[ItemId.ArrowBundleMagma]: 1 / 256,
 		},
-	}).map(([id, recipe]) => [id, Object.entries(recipe).map(([_id, count]) => ({ id: _id, count }))]),
+	}).map(([id, recipe]) => [
+		id,
+		Object.entries(recipe)
+			.map(([_id, count]: [string, number]) => ({ id: _id, count }))
+			.filter(({ count }) => count),
+	]),
 );

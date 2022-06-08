@@ -1,7 +1,0 @@
-export const MATERIALS_TO_ID = {
-	WHEAT: 'WHEAT',
-	CANE: 'SUGAR_CANE',
-	CARROT: 'CARROT_ITEM',
-	WARTS: 'NETHER_STALK',
-	POTATO: 'POTATO_ITEM',
-} as const;
