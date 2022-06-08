@@ -159,6 +159,23 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 		[ItemId.BouncyArrow]: {
 			[ItemId.SlimeBall]: (24 * 9) / 64,
 		},
-		[ItemId.IcyArrow]: {},
+		[ItemId.IcyArrow]: {
+			[ItemId.PackedIce]: 64 / 64,
+		},
+		[ItemId.ArmorshredArrow]: {
+			[ItemId.EnchantedSand]: 2 / 64,
+		},
+		[ItemId.ExplosiveArrow]: {
+			[ItemId.Coal]: (24 * 9) / 64,
+		},
+		[ItemId.GlueArrow]: {
+			[ItemId.TarantulaWeb]: 64 / 64,
+		},
+		[ItemId.NansorbArrow]: {
+			[ItemId.EnchantedCactusGreen]: 8 / 64,
+		},
+		[ItemId.MagmaArrow]: {
+			[ItemId.ArrowBundleMagma]: 1 / 256,
+		},
 	}).map(([id, recipe]) => [id, Object.entries(recipe).map(([_id, count]) => ({ id: _id, count }))]),
 );
