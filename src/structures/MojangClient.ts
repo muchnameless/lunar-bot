@@ -141,8 +141,7 @@ export class MojangClient {
 
 	/**
 	 * @private
-	 * @param param0
-	 * @param retries current retry
+	 * @param options
 	 */
 	async request({
 		path,

@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers';
 import { logger } from '../../logger';
 import { sql } from '../database';
 import { minutes } from '../../functions';
+import { ItemId } from './constants';
 import type { ParsedSkyBlockItem } from '../../jobs/pricesAndPatchNotes';
 
 export interface ItemUpgrade {
@@ -25,6 +26,8 @@ export async function populateCaches() {
 		`;
 
 		prices.clear();
+
+		prices.set(ItemId.Coins, 1);
 
 		for (const { id, median } of pricesRows) {
 			prices.set(id, median);
