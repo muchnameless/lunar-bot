@@ -454,7 +454,7 @@ export type ParsedSkyBlockItem = {
 	prestige: Prestige | null;
 };
 
-const transformCostArray = (costs: (EssenceUpgrade | ItemUpgrade)[]) =>
+const reduceCostsArray = (costs: (EssenceUpgrade | ItemUpgrade)[]) =>
 	costs.reduce((acc, cur) => {
 		acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
 		return acc;
@@ -481,7 +481,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 		dungeon_conversion: item.dungeon_item_conversion_cost
 			? { [item.dungeon_item_conversion_cost.essence_type]: item.dungeon_item_conversion_cost.amount }
 			: null,
-		stars: item.upgrade_costs?.map((entry) => transformCostArray(entry)) ?? null,
+		stars: item.upgrade_costs?.map((entry) => reduceCostsArray(entry)) ?? null,
 		category: item.category ?? null,
 		prestige: null,
 	}));
@@ -494,7 +494,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 
 		// first hit
 		if (!item.prestige) {
-			item.prestige = { items: [item.id], costs: transformCostArray(prestige.costs) };
+			item.prestige = { items: [item.id], costs: reduceCostsArray(prestige.costs) };
 			continue;
 		}
 
@@ -522,113 +522,6 @@ async function updateSkyBlockItems(ac: AbortController) {
 	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });
 
 	logger.debug(`[UPDATE SKYBLOCK ITEMS]: updated ${parsedItems.length} items`);
-}
-
-interface GitFile<T extends `${string}.json` = `${string}.json`> {
-	name: T;
-	path: `items/${T}`;
-	sha: string;
-	size: number;
-	url: `https://api.github.com/repos/${string}/${T}`;
-	html_url: `https://github.com/${string}/${T}`;
-	git_url: `https://api.github.com/repos/${string}/${T}`;
-	download_url: `https://raw.githubusercontent.com/${string}/${T}`;
-	type: 'file';
-	_links: {
-		self: GitFile<T>['url'];
-		git: GitFile<T>['git_url'];
-		html: GitFile<T>['html_url'];
-	};
-}
-
-interface NEUItem {
-	itemid: string;
-	displayname: string;
-	nbttag: `{${string}}`;
-	damage: number;
-	lore: string[];
-	recipe?: {
-		A1: `${string}:${bigint}`;
-		A2: `${string}:${bigint}`;
-		A3: `${string}:${bigint}`;
-		B1: `${string}:${bigint}`;
-		B2: `${string}:${bigint}`;
-		B3: `${string}:${bigint}`;
-		C1: `${string}:${bigint}`;
-		C2: `${string}:${bigint}`;
-		C3: `${string}:${bigint}`;
-	};
-	slayer_req?: string;
-	internalname: string;
-	clickcommand: string;
-	modver: string;
-	infoType: string;
-	info: [string];
-	crafttext: string;
-}
-
-interface ParsedCraftingRecipe {
-	id: string;
-	sha: string;
-	[key: string]: number;
-}
-
-/**
- * @param ac
- */
-async function updateNEURepo(ac: AbortController) {
-	const res = await fetch('https://api.github.com/repos/NotEnoughUpdates/NotEnoughUpdates-REPO/contents/items', {
-		signal: ac.signal,
-	});
-
-	if (!res.ok) throw new FetchError('FetchNEURepoError', res);
-
-	const parsedRes = (await res.json()) as GitFile[];
-	const promises: Promise<Record<string, number> | undefined>[] = [];
-
-	for (const { sha, download_url } of parsedRes) {
-		if (sha === '') continue;
-
-		promises.push(fetchGitFile(ac, download_url, sha));
-	}
-
-	const resMap = (
-		(await Promise.allSettled(promises)).filter((r) => r.status === 'fulfilled' && r.value) as PromiseFulfilledResult<
-			Record<string, number>
-		>[]
-	).map(({ value }) => value);
-}
-
-/**
- * @param ac
- * @param url
- * @param sha
- */
-async function fetchGitFile(ac: AbortController, url: string, sha: string) {
-	const res = await fetch(url, { signal: ac.signal });
-
-	if (!res.ok) throw new FetchError('FetchGitFileError', res);
-
-	const { internalname, recipe } = (await res.json()) as NEUItem;
-
-	if (!recipe) return;
-
-	return Object.values(recipe).reduce(
-		(acc, cur) => {
-			const [itemId, amount] = cur.split(':', 2);
-			const parsedAmount = Number.parseInt(amount, 10);
-
-			if (Number.isNaN(parsedAmount)) {
-				logger.error(`[UPDATE NEU REPO]: invalid amount parsed from '${cur}'`);
-				return acc;
-			}
-
-			acc[itemId] = (acc[itemId] ?? 0) + parsedAmount;
-
-			return acc;
-		},
-		{ id: internalname, sha } as ParsedCraftingRecipe,
-	);
 }
 
 /**
