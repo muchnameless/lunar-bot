@@ -21,34 +21,9 @@ import {
 	isVanillaItem,
 	transformItemData,
 } from './functions';
+import type { ItemUpgrade } from './prices';
 import type { SkyBlockProfile } from '../../functions';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
-
-interface DebugPrice {
-	itemId: string;
-	price: number;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {};
-let debugCache: DebugPrice[] | null;
-let networthDebug: typeof noop | ((x: DebugPrice) => void) = noop;
-let debuggingEnabled = false;
-
-export const switchNetworthDebugging = () => {
-	if (debuggingEnabled) {
-		networthDebug = noop;
-		debuggingEnabled = false;
-		const res = debugCache!.sort(({ price: a }, { price: b }) => b - a);
-		debugCache = null;
-		return res;
-	}
-
-	networthDebug = (x: DebugPrice) => debugCache!.push(x);
-	debuggingEnabled = true;
-	debugCache = [];
-	return 'started';
-};
 
 /**
  * parse base64 item_data strings and calculate item prices
@@ -206,19 +181,35 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// upgrades
 	const itemUpgrade = itemUpgrades.get(itemId);
+
 	// upgradable armor (e.g. crimson)
 	if (itemUpgrade?.prestige) {
+		let currentItemUpgrade: ItemUpgrade | undefined = itemUpgrade;
 		let essencePrice = 0;
 
-		for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
-			essencePrice += getUpgradeMaterialPrice(material) * amount;
+		// follow prestige chain
+		while (currentItemUpgrade?.prestige) {
+			// stars
+			if (itemUpgrade.stars) {
+				for (const star of itemUpgrade.stars) {
+					for (const [material, amount] of Object.entries(star)) {
+						essencePrice += getUpgradeMaterialPrice(material) * amount;
+					}
+				}
+			}
+
+			// prestige
+			for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
+				essencePrice += getUpgradeMaterialPrice(material) * amount;
+			}
+
+			// try to add "base item"
+			price += getPrice(currentItemUpgrade.prestige.item);
+
+			currentItemUpgrade = itemUpgrades.get(currentItemUpgrade.prestige.item);
 		}
 
 		price += essencePrice * PriceModifier.Essence;
-
-		for (const id of itemUpgrade.prestige.items) {
-			price += getPrice(id);
-		}
 	}
 
 	// stars
@@ -347,8 +338,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			getPrice(ItemId.EtherwarpMerger) * PriceModifier.EtherwarpMerger;
 	}
 
-	networthDebug({ itemId, price });
-
 	return price;
 }
 
@@ -412,8 +401,6 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 			price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinWithCandy;
 		}
 	}
-
-	networthDebug({ itemId: `LVL_${level}_${pet.tier}_${pet.type}`, price });
 
 	return price;
 }

@@ -443,7 +443,7 @@ interface ItemUpgrade extends Upgrade {
 }
 
 interface Prestige {
-	items: string[];
+	item: string;
 	costs: Record<string, number>;
 }
 
@@ -493,28 +493,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 		const item = parsedItems.find(({ id: _id }) => _id === prestige.item_id);
 		if (!item) continue;
 
-		// first hit
-		if (!item.prestige) {
-			item.prestige = { items: [id], costs: reduceCostsArray(prestige.costs) };
-		} else {
-		// consecutive hit
-		item.prestige.items.push(id);
-
-		for (const upgrade of prestige.costs) {
-			item.prestige.costs[(upgrade as EssenceUpgrade).essence_type ?? (upgrade as ItemUpgrade).item_id] =
-				(item.prestige.costs[(upgrade as EssenceUpgrade).essence_type ?? (upgrade as ItemUpgrade).item_id] ?? 0) +
-				upgrade.amount;
-		}
-	}
-
-		const prevItem = parsedItems.find(({ id: _id }) => _id === id);
-		if (!prevItem?.prestige) continue;
-
-		item.prestige.items.push(...prevItem.prestige.items);
-
-		for (const [material, cost] of Object.entries(prevItem.prestige.costs)) {
-			item.prestige.costs[material] = (item.prestige.costs[material] ?? 0) + cost;
-		}
+		item.prestige = { item: id, costs: reduceCostsArray(prestige.costs) };
 	}
 
 	await sql`
