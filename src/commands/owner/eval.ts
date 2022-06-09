@@ -164,7 +164,9 @@ export default class EvalCommand extends ApplicationCommand {
 		return [
 			new AttachmentBuilder() //
 				.setFile(Buffer.from(content).slice(0, this.MAX_FILE_SIZE))
-				.setName('result.ts'),
+				.setName('result.ts')
+				// TODO: remove if no longer needed
+				.toJSON(),
 		];
 	}
 
