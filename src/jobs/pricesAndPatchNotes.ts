@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/prefer-top-level-await */
 import { parentPort } from 'node:worker_threads';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { clearTimeout, setTimeout } from 'node:timers';
 import EventEmitter from 'node:events';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
@@ -643,7 +644,24 @@ async function updatePatchNotes(ac: AbortController) {
 }
 
 /**
- * run jobs
+ * manual jobs
+ */
+parentPort?.on('message', async (message) => {
+	if (message === updateSkyBlockItems.name) {
+		const ac = new AbortController();
+		const timeout = setTimeout(() => ac.abort(), 60_000);
+
+		try {
+			await updateSkyBlockItems(ac);
+			clearTimeout(timeout);
+		} catch (error) {
+			logger.error(error);
+		}
+	}
+});
+
+/**
+ * automatic jobs
  */
 let ac: AbortController | null = null;
 
