@@ -23,7 +23,7 @@
 	"author": "muchnameless",
 	"license": "GPL-3.0",
 	"dependencies": {
-		"@discordjs/builders": "0.16.0-dev.1654603500-769ea0b",
+		"@discordjs/builders": "0.16.0-dev.1654733415-3ae2633",
 		"@discordjs/rest": "*",
 		"@sapphire/async-queue": "^1.3.1",
 		"@sapphire/stopwatch": "^1.4.1",
