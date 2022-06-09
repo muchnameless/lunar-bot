@@ -31,7 +31,7 @@
 		"@sapphire/type": "^2.2.4",
 		"@sapphire/utilities": "^3.6.2",
 		"@skyra/jaro-winkler": "^1.1.0",
-		"@zikeji/hypixel": "github:muchnameless/node-hypixel#6da21ece522ea8dd61f44b5c74ab64b2f0e8be82",
+		"@zikeji/hypixel": "github:muchnameless/node-hypixel#5d0af5aedf8d9f6748d9e03a183a8dde3bc74338",
 		"bufferutil": "^4.0.6",
 		"chart.js": "^3.8.0",
 		"chartjs-node-canvas": "^4.1.6",

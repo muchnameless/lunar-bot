@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/prefer-top-level-await */
 import { parentPort } from 'node:worker_threads';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { clearTimeout, setTimeout } from 'node:timers';
 import EventEmitter from 'node:events';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
@@ -420,12 +421,13 @@ interface SkyBlockItem {
 	soulbound?: 'COOP' | 'SOLO';
 	tier: 'RARE';
 	npc_sell_price: number;
-	dungeon_item_conversion_cost?: {
-		essence_type: string;
-		amount: number;
-	};
+	dungeon_item_conversion_cost?: EssenceUpgrade;
 	upgrade_costs?: (EssenceUpgrade | ItemUpgrade)[][];
 	id: string;
+	prestige?: {
+		item_id: string;
+		costs: (EssenceUpgrade | ItemUpgrade)[];
+	};
 }
 
 interface Upgrade {
@@ -440,12 +442,24 @@ interface ItemUpgrade extends Upgrade {
 	item_id: string;
 }
 
+interface Prestige {
+	item: string;
+	costs: Record<string, number>;
+}
+
 export type ParsedSkyBlockItem = {
 	id: string;
 	dungeon_conversion: Record<string, number> | null;
 	stars: Record<string, number>[] | null;
 	category: string | null;
+	prestige: Prestige | null;
 };
+
+const reduceCostsArray = (costs: (EssenceUpgrade | ItemUpgrade)[]) =>
+	costs.reduce((acc, cur) => {
+		acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
+		return acc;
+	}, {} as Record<string, number>);
 
 /**
  * update skyblock items
@@ -468,15 +482,19 @@ async function updateSkyBlockItems(ac: AbortController) {
 		dungeon_conversion: item.dungeon_item_conversion_cost
 			? { [item.dungeon_item_conversion_cost.essence_type]: item.dungeon_item_conversion_cost.amount }
 			: null,
-		stars:
-			item.upgrade_costs?.map((entry) =>
-				entry.reduce((acc, cur) => {
-					acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
-					return acc;
-				}, {} as Record<string, number>),
-			) ?? null,
+		stars: item.upgrade_costs?.map((entry) => reduceCostsArray(entry)) ?? null,
 		category: item.category ?? null,
+		prestige: null,
 	}));
+
+	for (const { id, prestige } of items) {
+		if (!prestige) continue;
+
+		const item = parsedItems.find(({ id: _id }) => _id === prestige.item_id);
+		if (!item) continue;
+
+		item.prestige = { item: id, costs: reduceCostsArray(prestige.costs) };
+	}
 
 	await sql`
 		INSERT INTO skyblock_items
@@ -485,7 +503,8 @@ async function updateSkyBlockItems(ac: AbortController) {
 		UPDATE SET
 			dungeon_conversion = excluded.dungeon_conversion,
 			stars = excluded.stars,
-			category = excluded.category
+			category = excluded.category,
+			prestige = excluded.prestige
 	`;
 
 	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });
@@ -612,7 +631,24 @@ async function updatePatchNotes(ac: AbortController) {
 }
 
 /**
- * run jobs
+ * manual jobs
+ */
+parentPort?.on('message', async (message) => {
+	if (message === updateSkyBlockItems.name) {
+		const ac = new AbortController();
+		const timeout = setTimeout(() => ac.abort(), 60_000);
+
+		try {
+			await updateSkyBlockItems(ac);
+			clearTimeout(timeout);
+		} catch (error) {
+			logger.error(error);
+		}
+	}
+});
+
+/**
+ * automatic jobs
  */
 let ac: AbortController | null = null;
 

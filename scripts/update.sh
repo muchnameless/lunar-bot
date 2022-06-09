@@ -13,7 +13,7 @@ yarn install
 
 echo ""
 echo "compiling to js"
-yarn build
+time yarn build
 
 echo ""
 echo "done"

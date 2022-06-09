@@ -8,7 +8,6 @@ import {
 	Enchantment,
 	ItemId,
 	MASTER_STARS,
-	MATERIALS_TO_ID,
 	PriceModifier,
 	REDUCED_VALUE_ENCHANTS,
 	REFORGES,
@@ -22,6 +21,7 @@ import {
 	isVanillaItem,
 	transformItemData,
 } from './functions';
+import type { ItemUpgrade } from './prices';
 import type { SkyBlockProfile } from '../../functions';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 
@@ -111,33 +111,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		price = extraAttributes.winning_bid;
 	}
 
-	// farming tools
-	if (itemId.startsWith(ItemId.TheoreticalHoe)) {
-		const hoe = itemId.split('_');
-		const level = Number(hoe.pop());
-
-		// base price
-		let tickets = 32;
-
-		price = 1_000_000;
-
-		// upgrades
-		if (!Number.isNaN(level)) {
-			// 256 + 256 * 144 ~= 256 * 144 -> only take materials for last upgrade stage into consideration
-			price += 256 * getPrice(MATERIALS_TO_ID[hoe.pop() as keyof typeof MATERIALS_TO_ID]) * 144 ** (level - 1);
-
-			switch (level) {
-				case 3:
-					tickets += 256;
-				// fallthrough
-				case 2:
-					tickets += 64;
-			}
-		}
-
-		price += getPrice(ItemId.JacobsTicket) * tickets;
-	}
-
 	// enchantments
 	if (extraAttributes.enchantments) {
 		// eslint-disable-next-line prefer-const
@@ -206,13 +179,44 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies * extraAttributes.farming_for_dummies_count;
 	}
 
+	// upgrades
+	const itemUpgrade = itemUpgrades.get(itemId);
+
+	// upgradable armor (e.g. crimson)
+	if (itemUpgrade?.prestige) {
+		let currentItemUpgrade: ItemUpgrade | undefined = itemUpgrade;
+		let essencePrice = 0;
+
+		// follow prestige chain
+		while (currentItemUpgrade?.prestige) {
+			// stars
+			if (itemUpgrade.stars) {
+				for (const star of itemUpgrade.stars) {
+					for (const [material, amount] of Object.entries(star)) {
+						essencePrice += getUpgradeMaterialPrice(material) * amount;
+					}
+				}
+			}
+
+			// prestige
+			for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
+				essencePrice += getUpgradeMaterialPrice(material) * amount;
+			}
+
+			// try to add "base item"
+			price += getPrice(currentItemUpgrade.prestige.item);
+
+			currentItemUpgrade = itemUpgrades.get(currentItemUpgrade.prestige.item);
+		}
+
+		price += essencePrice * PriceModifier.Essence;
+	}
+
 	// stars
 	// upgrade_level seems to be the newer key, if both are present it's always higher than dungeon_item_level
 	const stars = extraAttributes.upgrade_level ?? extraAttributes.dungeon_item_level;
 
 	if (typeof stars === 'number') {
-		const itemUpgrade = itemUpgrades.get(itemId);
-
 		if (itemUpgrade) {
 			let essencePrice = 0;
 
@@ -224,15 +228,17 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			}
 
 			// stars
-			for (let star = stars - 1; star >= 0; --star) {
-				// item api has required materials
-				if (itemUpgrade.stars[star]) {
-					for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
-						essencePrice += getUpgradeMaterialPrice(material) * amount;
+			if (itemUpgrade.stars) {
+				for (let star = stars - 1; star >= 0; --star) {
+					// item api has required materials
+					if (itemUpgrade.stars[star]) {
+						for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
+							essencePrice += getUpgradeMaterialPrice(material) * amount;
+						}
+					} else {
+						// dungeon items require master stars for stars 6 - 10
+						price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonMasterStar;
 					}
-				} else {
-					// dungeon items require master stars for stars 6 - 10
-					price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonMasterStar;
 				}
 			}
 
@@ -295,7 +301,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// reforge
 	if (extraAttributes.modifier && !accessories.has(itemId)) {
-		price += getPrice(REFORGES[extraAttributes.modifier]) * PriceModifier.Reforge;
+		// TODO: make dynamic if possible
+		price +=
+			getPrice(
+				REFORGES[extraAttributes.modifier] ?? logger.warn(`[NETWORTH]: unknown reforge '${extraAttributes.modifier}'`),
+			) * PriceModifier.Reforge;
 	}
 
 	// scrolls (Necron's Blade)
@@ -456,7 +466,13 @@ export async function getNetworth(
 
 	// banking
 	let bankingAPIEnabled = true;
-	let networth = (addBanking ? banking?.balance ?? ((bankingAPIEnabled = false), 0) : 0) + (member.coin_purse ?? 0);
+	let networth =
+		// co-op bank
+		(addBanking ? banking?.balance ?? ((bankingAPIEnabled = false), 0) : 0) +
+		// purse
+		(member.coin_purse ?? 0) +
+		// personal bank
+		(member.bank_account ?? 0);
 
 	const promises: Promise<number>[] = [];
 
