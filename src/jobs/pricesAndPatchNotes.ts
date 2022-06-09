@@ -500,7 +500,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 		}
 
 		// consecutive hit
-		item.prestige.items.push(item.id);
+		item.prestige.items.push(prestige.item_id);
 
 		for (const upgrade of prestige.costs) {
 			item.prestige.costs[(upgrade as EssenceUpgrade).essence_type ?? (upgrade as ItemUpgrade).item_id] =
