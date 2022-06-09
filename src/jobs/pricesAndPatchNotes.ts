@@ -487,20 +487,20 @@ async function updateSkyBlockItems(ac: AbortController) {
 		prestige: null,
 	}));
 
-	for (const { prestige } of items) {
+	for (const { id, prestige } of items) {
 		if (!prestige) continue;
 
-		const item = parsedItems.find(({ id }) => id === prestige.item_id);
+		const item = parsedItems.find(({ id: _id }) => _id === prestige.item_id);
 		if (!item) continue;
 
 		// first hit
 		if (!item.prestige) {
-			item.prestige = { items: [prestige.item_id], costs: reduceCostsArray(prestige.costs) };
+			item.prestige = { items: [id], costs: reduceCostsArray(prestige.costs) };
 			continue;
 		}
 
 		// consecutive hit
-		item.prestige.items.push(prestige.item_id);
+		item.prestige.items.push(id);
 
 		for (const upgrade of prestige.costs) {
 			item.prestige.costs[(upgrade as EssenceUpgrade).essence_type ?? (upgrade as ItemUpgrade).item_id] =
