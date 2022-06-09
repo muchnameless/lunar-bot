@@ -496,9 +496,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 		// first hit
 		if (!item.prestige) {
 			item.prestige = { items: [id], costs: reduceCostsArray(prestige.costs) };
-			continue;
-		}
-
+		} else {
 		// consecutive hit
 		item.prestige.items.push(id);
 
@@ -506,6 +504,16 @@ async function updateSkyBlockItems(ac: AbortController) {
 			item.prestige.costs[(upgrade as EssenceUpgrade).essence_type ?? (upgrade as ItemUpgrade).item_id] =
 				(item.prestige.costs[(upgrade as EssenceUpgrade).essence_type ?? (upgrade as ItemUpgrade).item_id] ?? 0) +
 				upgrade.amount;
+		}
+	}
+
+		const prevItem = parsedItems.find(({ id: _id }) => _id === id);
+		if (!prevItem?.prestige) continue;
+
+		item.prestige.items.push(...prevItem.prestige.items);
+
+		for (const [material, cost] of Object.entries(prevItem.prestige.costs)) {
+			item.prestige.costs[material] = (item.prestige.costs[material] ?? 0) + cost;
 		}
 	}
 
