@@ -495,7 +495,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 
 		// first hit
 		if (!item.prestige) {
-			item.prestige = { items: [item.id], costs: reduceCostsArray(prestige.costs) };
+			item.prestige = { items: [prestige.item_id], costs: reduceCostsArray(prestige.costs) };
 			continue;
 		}
 
