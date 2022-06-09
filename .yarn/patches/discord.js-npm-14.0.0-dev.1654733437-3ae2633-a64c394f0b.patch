@@ -1,5 +1,5 @@
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..cb7861ffb32d8303f9cede0a8aeaf53aec481250 100644
+index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..3f8541aa69cce977defd11e2d79188c0713052fd 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
 @@ -269,6 +269,7 @@ class WebSocketShard extends EventEmitter {
@@ -19,7 +19,7 @@ index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..cb7861ffb32d8303f9cede0a8aeaf53a
      this.emitClose(event);
    }
  
-@@ -833,8 +830,8 @@ class WebSocketShard extends EventEmitter {
+@@ -833,8 +834,8 @@ class WebSocketShard extends EventEmitter {
      // Step 2: Null the connection object
      this.connection = null;
  
