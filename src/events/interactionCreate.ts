@@ -543,22 +543,22 @@ export default class InteractionCreateEvent extends Event {
 
 			if (InteractionUtil.isInteractionError(error)) return; // interaction expired
 
-			// error reply
-			if (interaction.isRepliable()) {
-				void InteractionUtil.reply(interaction, {
+			// respond to interaction
+			if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
+				// reply with error
+				return void InteractionUtil.reply(interaction, {
 					content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
 					ephemeral: true,
 					allowedMentions: { parse: [], repliedUser: true },
 				});
-			} else if (
-				interaction.type === InteractionType.ApplicationCommandAutocomplete && // autocomplete -> send empty choices
-				!interaction.responded
-			) {
-				try {
-					await interaction.respond([]);
-				} catch (_error) {
-					logger.error({ err: _error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
-				}
+			}
+
+			// autocomplete -> send empty choices
+			if (interaction.responded) return;
+			try {
+				await interaction.respond([]);
+			} catch (_error) {
+				logger.error({ err: _error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
 			}
 		}
 	}
