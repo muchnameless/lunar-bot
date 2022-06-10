@@ -15,6 +15,7 @@ import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteract
 import { Event, type EventContext } from '../structures/events/Event';
 import { logger } from '../logger';
 import type {
+	AnyInteraction,
 	APIActionRowComponent,
 	APIMessageActionRowComponent,
 	ApplicationCommandOptionChoiceData,
@@ -22,7 +23,6 @@ import type {
 	BaseGuildTextChannel,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
-	Interaction,
 	JSONEncodable,
 	MessageActionRowComponentBuilder,
 	MessageContextMenuCommandInteraction,
@@ -483,49 +483,61 @@ export default class InteractionCreateEvent extends Event {
 	 * event listener callback
 	 * @param interaction
 	 */
-	override async run(interaction: Interaction) {
+	override async run(interaction: AnyInteraction) {
 		if (!InteractionUtil.inCachedGuildOrDM(interaction)) return;
 
 		try {
-			// add interaction to the WeakMap which holds InteractionData and schedules deferring
-			if (interaction.isRepliable()) {
-				InteractionUtil.add(interaction);
-			} else if (interaction.isAutocomplete()) {
-				// autocomplete
-				return void (await this._handleAutocompleteInteraction(interaction));
-			}
+			switch (interaction.type) {
+				case InteractionType.ApplicationCommand:
+					InteractionUtil.add(interaction);
 
-			// commands
-			if (interaction.isChatInputCommand()) {
-				return void (await this._handleChatInputCommandInteraction(interaction));
-			}
+					switch (interaction.commandType) {
+						case ApplicationCommandType.ChatInput:
+							return void (await this._handleChatInputCommandInteraction(interaction));
 
-			// buttons
-			if (interaction.isButton()) {
-				return void (await this._handleButtonInteraction(interaction));
-			}
+						case ApplicationCommandType.Message:
+							return void (await this._handleMessageContextMenuInteraction(interaction));
 
-			// select menus
-			if (interaction.isSelectMenu()) {
-				return void (await this._handleSelectMenuInteraction(interaction));
-			}
+						case ApplicationCommandType.User:
+							return void (await this._handleUserContextMenuInteraction(interaction));
 
-			// message context menu
-			if (interaction.isMessageContextMenuCommand()) {
-				return void (await this._handleMessageContextMenuInteraction(interaction));
-			}
+						default: {
+							// eslint-disable-next-line @typescript-eslint/no-unused-vars
+							const _: never = interaction;
+							return;
+						}
+					}
 
-			// user context menu
-			if (interaction.isUserContextMenuCommand()) {
-				return void (await this._handleUserContextMenuInteraction(interaction));
-			}
+				case InteractionType.ApplicationCommandAutocomplete:
+					return void (await this._handleAutocompleteInteraction(interaction));
 
-			// modals
-			if (interaction.isModalSubmit()) {
-				return void (await this._handleModalSubmitInteraction(interaction));
-			}
+				case InteractionType.MessageComponent:
+					InteractionUtil.add(interaction);
 
-			throw `unknown interaction type '${interaction.type}'`;
+					switch (interaction.componentType) {
+						case ComponentType.Button:
+							return void (await this._handleButtonInteraction(interaction));
+
+						case ComponentType.SelectMenu:
+							return void (await this._handleSelectMenuInteraction(interaction));
+
+						default: {
+							// eslint-disable-next-line @typescript-eslint/no-unused-vars
+							const _: never = interaction;
+							return;
+						}
+					}
+
+				case InteractionType.ModalSubmit:
+					InteractionUtil.add(interaction);
+					return void (await this._handleModalSubmitInteraction(interaction));
+
+				default: {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const _: never = interaction;
+					return;
+				}
+			}
 		} catch (error) {
 			logger.error({ err: error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
 
@@ -539,7 +551,7 @@ export default class InteractionCreateEvent extends Event {
 					allowedMentions: { parse: [], repliedUser: true },
 				});
 			} else if (
-				interaction.isAutocomplete() && // autocomplete -> send empty choices
+				interaction.type === InteractionType.ApplicationCommandAutocomplete && // autocomplete -> send empty choices
 				!interaction.responded
 			) {
 				try {

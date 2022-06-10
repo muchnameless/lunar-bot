@@ -476,7 +476,7 @@ index 32e6fd74e8e17dadf2f4d573bd98bf494042743c..e8f3b0688b3295ce03fc44e23d0b004c
 -    return this.channel.messages.fetch({ message: this.id, force });
 +    const { channel } = this;
 +    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
-+    return channel.messages.fetch(this.id, { force });
++    return channel.messages.fetch({ message: this.id, force });
    }
  
    /**

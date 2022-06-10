@@ -1,4 +1,4 @@
-import { codeBlock, SlashCommandBuilder, SnowflakeUtil, time } from 'discord.js';
+import { codeBlock, InteractionType, SlashCommandBuilder, SnowflakeUtil, time } from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
 import {
@@ -43,10 +43,10 @@ import {
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
 import type {
+	AnyInteraction,
 	AutocompleteInteraction,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
-	Interaction,
 	SlashCommandStringOption,
 	Snowflake,
 } from 'discord.js';
@@ -240,7 +240,11 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param subcommand
 	 */
-	private _assertRequiredRoles(interaction: Interaction<'cachedOrDM'>, hypixelGuild: HypixelGuild, subcommand: string) {
+	private _assertRequiredRoles(
+		interaction: AnyInteraction<'cachedOrDM'>,
+		hypixelGuild: HypixelGuild,
+		subcommand: string,
+	) {
 		const roleIds: Snowflake[] = [];
 
 		switch (subcommand) {
@@ -645,7 +649,7 @@ export default class GuildCommand extends ApplicationCommand {
 		// send reply
 		return (
 			InteractionUtil[
-				interaction.isCommand() || interaction.user.id !== userId ? 'reply' : 'update'
+				interaction.type === InteractionType.ApplicationCommand || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction<'cachedOrDM'>, {
 			embeds: [embed],

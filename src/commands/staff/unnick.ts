@@ -3,7 +3,7 @@ import { UNKNOWN_IGN } from '../../constants';
 import { logger } from '../../logger';
 import { GuildMemberUtil, InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, GuildMember, User } from 'discord.js';
+import type { ChatInputCommandInteraction, GuildMember, User, UserContextMenuCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class UnnickCommand extends ApplicationCommand {
@@ -31,7 +31,7 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * @param member
 	 */
 	private async _sharedRun(
-		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ContextMenuCommandInteraction<'cachedOrDM'>,
+		interaction: ChatInputCommandInteraction<'cachedOrDM'> | UserContextMenuCommandInteraction<'cachedOrDM'>,
 		member: GuildMember | null,
 	) {
 		// input validation
@@ -92,7 +92,7 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override userContextMenuRun(
-		interaction: ContextMenuCommandInteraction<'cachedOrDM'>,
+		interaction: UserContextMenuCommandInteraction<'cachedOrDM'>,
 		_: User,
 		member: GuildMember | null,
 	) {

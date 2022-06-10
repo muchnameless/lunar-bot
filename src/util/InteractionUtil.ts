@@ -20,6 +20,7 @@ import { buildVisibilityButton, makeContent, seconds, validateDiscordId, validat
 import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
+	AnyInteraction,
 	APIModalInteractionResponseCallbackData,
 	AutocompleteInteraction,
 	AwaitModalSubmitOptions,
@@ -59,10 +60,16 @@ interface InteractionData {
 	autoDeferTimeout: NodeJS.Timeout | null;
 }
 
-export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
+export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
+	AnyInteraction<Cached>,
+	AutocompleteInteraction
+> &
 	InteractionResponseFields<Cached>;
 
-export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
+export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
+	AnyInteraction<Cached>,
+	AutocompleteInteraction
+> &
 	InteractionResponseFields<Cached> & {
 		showModal(
 			modal:
@@ -73,7 +80,10 @@ export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> =
 		awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
 	};
 
-export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = Interaction<Cached> &
+export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
+	AnyInteraction<Cached>,
+	AutocompleteInteraction
+> &
 	FromMessageInteractionResponseFields<Cached>;
 
 export interface FromMessageInteractionResponseFields<Cached extends CacheType = 'cachedOrDM'>
@@ -140,11 +150,12 @@ export class InteractionUtil extends null {
 	/**
 	 * cache
 	 */
-	static CACHE = new WeakMap<Interaction<'cachedOrDM'>, InteractionData>();
+	static CACHE = new WeakMap<Exclude<AnyInteraction<'cachedOrDM'>, AutocompleteInteraction>, InteractionData>();
 
 	static AUTO_DEFER_TIMEOUT = seconds(1);
 
 	/**
+	 * adds the interaction to the WeakMap which holds InteractionData and schedules deferring
 	 * @param interaction
 	 */
 	static add(interaction: RepliableInteraction<'cachedOrDM'>) {
@@ -182,7 +193,7 @@ export class InteractionUtil extends null {
 	 * checks the command options for the ephemeral option
 	 * @param interaction
 	 */
-	static checkEphemeralOption(interaction: Interaction<'cachedOrDM'>) {
+	static checkEphemeralOption(interaction: AnyInteraction<'cachedOrDM'>) {
 		if (!interaction.isChatInputCommand()) return null;
 
 		switch (interaction.options.getString('visibility')) {
@@ -219,87 +230,118 @@ export class InteractionUtil extends null {
 	/**
 	 * @param interaction
 	 */
-	static logInfo(interaction: Interaction<'cachedOrDM'>) {
-		if (interaction.isChatInputCommand()) {
-			return {
-				type: InteractionType[interaction.type],
-				command: interaction.toString(),
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			};
+	static logInfo(interaction: AnyInteraction<'cachedOrDM'>) {
+		switch (interaction.type) {
+			case InteractionType.ApplicationCommand:
+				switch (interaction.commandType) {
+					case ApplicationCommandType.ChatInput:
+						return {
+							type: InteractionType[interaction.type],
+							command: interaction.toString(),
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								: 'DM',
+							guild: interaction.guild?.name ?? null,
+						};
+
+					case ApplicationCommandType.Message:
+					case ApplicationCommandType.User:
+						return {
+							type: ApplicationCommandType[interaction.commandType],
+							command: interaction.commandName,
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								: 'DM',
+							guild: interaction.guild?.name ?? null,
+						};
+
+					default: {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const _: never = interaction;
+						return {};
+					}
+				}
+
+			case InteractionType.ApplicationCommandAutocomplete:
+				return {
+					type: InteractionType[interaction.type],
+					command: interaction.commandName,
+					focused: interaction.options.getFocused(true),
+					user: interaction.member
+						? `${interaction.member.displayName} | ${interaction.user.tag}`
+						: interaction.user.tag,
+					channel: interaction.guildId
+						? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+						: 'DM',
+					guild: interaction.guild?.name ?? null,
+				};
+
+			case InteractionType.MessageComponent:
+				switch (interaction.componentType) {
+					case ComponentType.Button:
+						return {
+							type: ComponentType[interaction.componentType],
+							customId: interaction.customId,
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								: 'DM',
+							guild: interaction.guild?.name ?? null,
+						};
+
+					case ComponentType.SelectMenu:
+						return {
+							type: ComponentType[interaction.componentType],
+							customId: interaction.customId,
+							values: interaction.values,
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								: 'DM',
+							guild: interaction.guild?.name ?? null,
+						};
+
+					default: {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const _: never = interaction;
+						return {};
+					}
+				}
+
+			// TODO: modal submit
+			// case InteractionType.ModalSubmit:
+			// 	return {};
+
+			default:
+				return {
+					type: InteractionType[interaction.type],
+					user: interaction.member
+						? `${interaction.member.displayName} | ${interaction.user.tag}`
+						: interaction.user.tag,
+					channel: interaction.guildId
+						? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+						: 'DM',
+					guild: interaction.guild?.name ?? null,
+				};
 		}
-
-		if (interaction.isButton()) {
-			return {
-				type: ComponentType[interaction.componentType],
-				customId: interaction.customId,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			};
-		}
-
-		if (interaction.isSelectMenu()) {
-			return {
-				type: ComponentType[interaction.componentType],
-				customId: interaction.customId,
-				values: interaction.values,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			};
-		}
-
-		if (interaction.isContextMenuCommand()) {
-			return {
-				type: ApplicationCommandType[interaction.commandType],
-				command: interaction.commandName,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			};
-		}
-
-		if (interaction.isAutocomplete()) {
-			return {
-				type: InteractionType[interaction.type],
-				command: interaction.commandName,
-				focused: interaction.options.getFocused(true),
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			};
-		}
-
-		// TODO: modal submit
-
-		return {
-			type: InteractionType[interaction.type],
-			user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-			channel: interaction.guildId
-				? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
-				: 'DM',
-			guild: interaction.guild?.name ?? null,
-		};
 	}
 
 	/**
 	 * appends the first option name if the command is a subcommand or subcommand group
 	 * @param interaction
 	 */
-	static fullCommandName(interaction: Interaction) {
-		if (interaction.isMessageComponent()) {
+	static fullCommandName(interaction: AnyInteraction) {
+		if (interaction.type === InteractionType.MessageComponent) {
 			return `${interaction.componentType} '${interaction.customId}'`;
 		}
 
@@ -324,7 +366,7 @@ export class InteractionUtil extends null {
 	 * whether the interaction is from a cached guild or DM	channel
 	 * @param interaction
 	 */
-	static inCachedGuildOrDM(interaction: Interaction): interaction is Interaction<'cachedOrDM'> {
+	static inCachedGuildOrDM(interaction: AnyInteraction): interaction is AnyInteraction<'cachedOrDM'> {
 		// guilds are sent with all their channels -> cached channel implies cached guild
 		return interaction.client.channels.cache.has(interaction.channelId!);
 	}
@@ -366,7 +408,7 @@ export class InteractionUtil extends null {
 	) {
 		if (this.isFromMessage(interaction)) return this.update(interaction, options as UpdateOptions);
 
-		return this.reply(interaction, options);
+		return this.reply(interaction, options as InteractionUtilReplyOptions);
 	}
 
 	/**
@@ -705,7 +747,14 @@ export class InteractionUtil extends null {
 	 * @param modal
 	 */
 	static showModal(interaction: ModalRepliableInteraction, modal: ModalBuilder) {
-		clearTimeout(this.CACHE.get(interaction)!.autoDeferTimeout!);
+		const cached = this.CACHE.get(interaction)!;
+
+		// showModal is an initial reply
+		if (cached.deferReplyPromise || cached.deferUpdatePromise) {
+			throw new Error('[INTERACTION SHOW MODAL]: interaction already acknowledged');
+		}
+
+		clearTimeout(cached.autoDeferTimeout!);
 
 		return interaction.showModal(modal);
 	}
@@ -978,23 +1027,23 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static getHypixelGuild(
-		interaction: Interaction<'cachedOrDM'>,
+		interaction: AnyInteraction<'cachedOrDM'>,
 		options: { fallbackIfNoInput?: true; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL;
 	static getHypixelGuild(
-		interaction: Interaction<'cachedOrDM'>,
+		interaction: AnyInteraction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL | null;
 	static getHypixelGuild(
-		interaction: Interaction<'cachedOrDM'>,
+		interaction: AnyInteraction<'cachedOrDM'>,
 		options?: { fallbackIfNoInput?: true; includeAll?: false },
 	): HypixelGuild;
 	static getHypixelGuild(
-		interaction: Interaction<'cachedOrDM'>,
+		interaction: AnyInteraction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll?: false },
 	): HypixelGuild | null;
 	static getHypixelGuild(
-		interaction: Interaction<'cachedOrDM'>,
+		interaction: AnyInteraction<'cachedOrDM'>,
 		{ fallbackIfNoInput = true, includeAll = false }: GetHypixelGuildOptions = {},
 	) {
 		const INPUT = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getString('guild');

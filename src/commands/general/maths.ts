@@ -1,5 +1,6 @@
 import {
 	ActionRowBuilder,
+	InteractionType,
 	ModalBuilder,
 	SlashCommandBuilder,
 	TextInputBuilder,
@@ -476,7 +477,7 @@ export default class MathsCommand extends DualCommand {
 				Util.escapeMarkdown(`${input} = ${formattedOutput}`, { inlineCode: false }),
 			);
 		} catch (error) {
-			if (interaction.isModalSubmit()) {
+			if (interaction.type === InteractionType.ModalSubmit) {
 				return InteractionUtil.reply(interaction, Util.escapeMarkdown(`${error}`, { inlineCode: false }));
 			}
 

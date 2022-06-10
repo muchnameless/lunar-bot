@@ -1,4 +1,4 @@
-import { bold, EmbedBuilder, hyperlink, SlashCommandBuilder } from 'discord.js';
+import { bold, EmbedBuilder, hyperlink, InteractionType, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
@@ -90,7 +90,7 @@ export default class BanListCommand extends ApplicationCommand {
 
 		return (
 			InteractionUtil[
-				interaction.isCommand() || interaction.user.id !== userId ? 'reply' : 'update'
+				interaction.type === InteractionType.ApplicationCommand || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction<'cachedOrDM'>, {
 			embeds: [

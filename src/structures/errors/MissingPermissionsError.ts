@@ -1,6 +1,6 @@
 import { InteractionUtil } from '../../util';
 import { commaListOr } from '../../functions';
-import type { Guild, Interaction, Snowflake } from 'discord.js';
+import type { AnyInteraction, Guild, Snowflake } from 'discord.js';
 
 /**
  * @param message
@@ -10,7 +10,7 @@ import type { Guild, Interaction, Snowflake } from 'discord.js';
  */
 export const missingPermissionsError = (
 	message: string,
-	interaction: Interaction,
+	interaction: AnyInteraction,
 	guild: Guild | null,
 	requiredRolesRaw: Snowflake[],
 ) => {

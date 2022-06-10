@@ -12,13 +12,13 @@ import { InteractionUtil } from '../../util';
 import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
 import type {
+	AnyInteraction,
 	APIApplicationCommandPermission,
 	AutocompleteInteraction,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	ContextMenuCommandBuilder,
 	GuildMember,
-	Interaction,
 	Message,
 	MessageContextMenuCommandInteraction,
 	ModalSubmitInteraction,
@@ -312,7 +312,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param options
 	 */
 	async assertPermissions(
-		interaction: Interaction<'cachedOrDM'>,
+		interaction: AnyInteraction<'cachedOrDM'>,
 		{
 			hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
 			roleIds = this.requiredRoles(hypixelGuild),

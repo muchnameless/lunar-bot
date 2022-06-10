@@ -79,11 +79,11 @@ import type {
 	AttachmentPayload,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
-	ContextMenuCommandInteraction,
 	JSONEncodable,
 	Message,
 	MessageActionRowComponentBuilder,
 	MessageComponentInteraction,
+	MessageContextMenuCommandInteraction,
 	ModalActionRowComponentBuilder,
 	ModalSubmitInteraction,
 } from 'discord.js';
@@ -388,7 +388,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param message
 	 */
 	override messageContextMenuRun(
-		interaction: ContextMenuCommandInteraction<'cachedOrDM'>,
+		interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>,
 		{ content, author }: Message,
 	) {
 		if (author.id !== this.client.ownerId) {
