@@ -10,8 +10,7 @@ export type ItemUpgrade = Pick<ParsedSkyBlockItem, 'dungeon_conversion' | 'stars
 export const prices = new Map<string, number>();
 export const itemUpgrades = new Map<string, ItemUpgrade>();
 export const accessories = new Set<string>();
-export const unknownItems = new Set<string>();
-export const getPrice = (item: string) => prices.get(item) ?? (unknownItems.add(item), 0);
+export const getPrice = (item: string) => prices.get(item) ?? 0;
 
 /**
  * queries the prices database

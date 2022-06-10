@@ -188,7 +188,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		let essencePrice = 0;
 
 		// follow prestige chain
-		while (currentItemUpgrade?.prestige) {
+		do {
 			// stars
 			if (itemUpgrade.stars) {
 				for (const star of itemUpgrade.stars) {
@@ -204,10 +204,10 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			}
 
 			// try to add "base item"
-			price += getPrice(currentItemUpgrade.prestige.item);
+			price += getPrice(currentItemUpgrade.prestige!.item);
 
-			currentItemUpgrade = itemUpgrades.get(currentItemUpgrade.prestige.item);
-		}
+			currentItemUpgrade = itemUpgrades.get(currentItemUpgrade.prestige!.item);
+		} while (currentItemUpgrade?.prestige);
 
 		price += essencePrice * PriceModifier.Essence;
 	}
