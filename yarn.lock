@@ -297,17 +297,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/rest@npm:0.6.0-dev.1654733423-3ae2633":
-  version: 0.6.0-dev.1654733423-3ae2633
-  resolution: "@discordjs/rest@npm:0.6.0-dev.1654733423-3ae2633"
+"@discordjs/rest@npm:0.6.0-dev.1654862700-0415300":
+  version: 0.6.0-dev.1654862700-0415300
+  resolution: "@discordjs/rest@npm:0.6.0-dev.1654862700-0415300"
   dependencies:
     "@discordjs/collection": ^0.8.0-dev
     "@sapphire/async-queue": ^1.3.1
     "@sapphire/snowflake": ^3.2.2
-    discord-api-types: ^0.33.4
+    discord-api-types: ^0.33.5
     tslib: ^2.4.0
     undici: ^5.4.0
-  checksum: 16f49db05528286bf976bf74b7e9b3de5a450782e41b890956d29de3da7bf96f9090669e38db691d08c4543e49e721d091f6eaf3e3ccff50bc7cc305edf92c83
+  checksum: 120231e0f6a5cf76e2bb345ea16d55525e1da76201e63f8418eef50a4f23804504367345ba956c7fa295138d33a39487712c09e5b19ddc19ae2dfd19c0f5b207
   languageName: node
   linkType: hard
 
