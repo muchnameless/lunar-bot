@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { Type } from '@sapphire/type';
-import RE2 from 're2';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
+import RE2 from 're2';
 import { formatNumber, sortCache } from '../../functions';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';

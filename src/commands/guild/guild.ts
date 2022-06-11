@@ -1,7 +1,7 @@
 import { codeBlock, InteractionType, SlashCommandBuilder, SnowflakeUtil, time } from 'discord.js';
 import { Op } from 'sequelize';
-import ms from 'ms';
 import { AutoCompleteLimits, EmbedLimits } from '@sapphire/discord-utilities';
+import ms from 'ms';
 import {
 	demote,
 	historyErrors,
