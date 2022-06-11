@@ -1,6 +1,6 @@
 import { URL } from 'node:url';
 import { opendir } from 'node:fs/promises';
-import { MAX_CHOICES } from '../constants';
+import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import { logger } from '../logger';
 import { days, jaroWinklerSimilarity } from '.';
 import type { Collection } from 'discord.js';
@@ -202,7 +202,7 @@ export function sortCache<T>(
 	value: string,
 	nameKey: keyof T,
 	valueKey: keyof T,
-	max = MAX_CHOICES,
+	max: number = AutoCompleteLimits.MaximumAmountOfOptions,
 ) {
 	return (cache as T[])
 		.map((element) => ({

@@ -2,17 +2,10 @@ import { setTimeout, clearTimeout } from 'node:timers';
 import { Model, DataTypes } from 'sequelize';
 import { bold, codeBlock, EmbedBuilder, embedLength } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
+import { EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
 import { mute, setRank, unmute } from '../../chat_bridge/constants';
-import {
-	EMBED_FIELD_MAX_CHARS,
-	EMBED_MAX_CHARS,
-	EMBED_MAX_FIELDS,
-	Offset,
-	SKYBLOCK_XP_TYPES,
-	UNKNOWN_IGN,
-	XP_OFFSETS_TIME,
-} from '../../../constants';
+import { Offset, SKYBLOCK_XP_TYPES, UNKNOWN_IGN, XP_OFFSETS_TIME } from '../../../constants';
 import { GuildUtil } from '../../../util';
 import { hypixel, mojang } from '../../../api';
 import {
@@ -327,7 +320,7 @@ export class HypixelGuild extends Model<
 		if (!logArray.length) return logArray;
 
 		return splitMessage(logArray.sort(compareAlphabetically).join('\n'), {
-			maxLength: EMBED_FIELD_MAX_CHARS - 11,
+			maxLength: EmbedLimits.MaximumFieldValueLength - 11,
 			char: '\n',
 		});
 	}
@@ -985,8 +978,8 @@ export class HypixelGuild extends Model<
 				const ADDITIONAL_LENGTH = newFields.reduce((acc, { name, value }) => acc + name.length + value.length, 0);
 
 				if (
-					currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS &&
-					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
+					currentLength + ADDITIONAL_LENGTH <= EmbedLimits.MaximumTotalCharacters &&
+					(embed.data.fields?.length ?? 0) < EmbedLimits.MaximumFields
 				) {
 					embed.addFields(newFields);
 					currentLength += ADDITIONAL_LENGTH;

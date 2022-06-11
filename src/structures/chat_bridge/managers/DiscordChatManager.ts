@@ -8,7 +8,7 @@ import {
 	TimestampStyles,
 } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
-import { UnicodeEmoji, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
+import { UnicodeEmoji, MAX_WEBHOOKS_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { imgur } from '../../../api';
@@ -228,7 +228,7 @@ export class DiscordChatManager extends ChatManager {
 				webhooks.find((webhook) => webhook.isIncoming() && webhook.owner?.id === this.client.user!.id) ?? null;
 
 			if (!this.webhook) {
-				if (webhooks.size >= WEBHOOKS_MAX_PER_CHANNEL) {
+				if (webhooks.size >= MAX_WEBHOOKS_PER_CHANNEL) {
 					throw new WebhookError('cannot create more webhooks', channel, this.hypixelGuild);
 				}
 

@@ -1,6 +1,7 @@
 import { codeBlock, InteractionType, SlashCommandBuilder, SnowflakeUtil, time } from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
+import { AutoCompleteLimits, EmbedLimits } from '@sapphire/discord-utilities';
 import {
 	demote,
 	historyErrors,
@@ -14,7 +15,7 @@ import {
 	unmute,
 	unknownIgn,
 } from '../../structures/chat_bridge/constants';
-import { EMBED_DESCRIPTION_MAX_CHARS, MAX_CHOICES, UNKNOWN_IGN } from '../../constants';
+import { UNKNOWN_IGN } from '../../constants';
 import {
 	forceOption,
 	hypixelGuildOption,
@@ -543,7 +544,7 @@ export default class GuildCommand extends ApplicationCommand {
 											: msg.content,
 									)
 									.join('\n'),
-								EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
+								EmbedLimits.MaximumDescriptionLength - 8, // 2 * (3 [```] + 1 [\n])
 							),
 						),
 					)
@@ -563,7 +564,7 @@ export default class GuildCommand extends ApplicationCommand {
 				if (!value) {
 					return interaction.respond(
 						InteractionUtil.getHypixelGuild(interaction)
-							.ranks.slice(0, MAX_CHOICES)
+							.ranks.slice(0, AutoCompleteLimits.MaximumAmountOfOptions)
 							.map(({ name: rankName }) => ({ name: rankName, value: rankName })),
 					);
 				}

@@ -2,14 +2,8 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { codeBlock, Collection, EmbedBuilder, embedLength } from 'discord.js';
 import { Op } from 'sequelize';
 import { CronJob } from 'cron';
-import {
-	EMBED_FIELD_MAX_CHARS,
-	EMBED_MAX_CHARS,
-	EMBED_MAX_FIELDS,
-	MAYOR_CHANGE_INTERVAL,
-	Offset,
-	XP_OFFSETS_TIME,
-} from '../../../constants';
+import { EmbedLimits } from '@sapphire/discord-utilities';
+import { MAYOR_CHANGE_INTERVAL, Offset, XP_OFFSETS_TIME } from '../../../constants';
 import { hypixel } from '../../../api';
 import {
 	autocorrect,
@@ -366,7 +360,7 @@ export class PlayerManager extends ModelManager<Player> {
 			.sort(({ guildName: a }, { guildName: b }) => compareAlphabetically(a, b))
 			.values()) {
 			const logParts = splitMessage(codeBlock(ignChanges.sort(compareAlphabetically).join('\n')), {
-				maxLength: EMBED_FIELD_MAX_CHARS,
+				maxLength: EmbedLimits.MaximumFieldValueLength,
 				char: '\n',
 				prepend: '```\n',
 				append: '```',
@@ -380,8 +374,8 @@ export class PlayerManager extends ModelManager<Player> {
 				const value = logParts.shift()!;
 
 				if (
-					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
-					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
+					currentLength + name.length + value.length <= EmbedLimits.MaximumTotalCharacters &&
+					(embed.data.fields?.length ?? 0) < EmbedLimits.MaximumFields
 				) {
 					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
@@ -493,7 +487,7 @@ export class PlayerManager extends ModelManager<Player> {
 			compareAlphabetically(a, b),
 		)) {
 			const logParts = splitMessage(codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')), {
-				maxLength: EMBED_FIELD_MAX_CHARS,
+				maxLength: EmbedLimits.MaximumFieldValueLength,
 				char: '\n',
 				prepend: '```diff\n',
 				append: '```',
@@ -507,8 +501,8 @@ export class PlayerManager extends ModelManager<Player> {
 				const value = logParts.shift()!;
 
 				if (
-					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
-					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
+					currentLength + name.length + value.length <= EmbedLimits.MaximumTotalCharacters &&
+					(embed.data.fields?.length ?? 0) < EmbedLimits.MaximumFields
 				) {
 					embed.addFields({ name, value });
 					currentLength += name.length + value.length;

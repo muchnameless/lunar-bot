@@ -1,7 +1,8 @@
 import { jaroWinkler } from '@skyra/jaro-winkler';
 import { codeBlock, Util } from 'discord.js';
+import { EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
-import { EMBED_FIELD_MAX_CHARS, SMALL_LATIN_CAPITAL_LETTERS, AnsiFormat } from '../constants';
+import { SMALL_LATIN_CAPITAL_LETTERS, AnsiFormat } from '../constants';
 import type { AnsiBackground, AnsiColour } from '../constants';
 import type { Merge } from '../types/util';
 
@@ -294,7 +295,7 @@ export function splitForEmbedFields(
 	if (!formattedInput) return [codeBlock('\u200B')];
 
 	return splitMessage(codeBlock(code, formattedInput), {
-		maxLength: EMBED_FIELD_MAX_CHARS,
+		maxLength: EmbedLimits.MaximumFieldValueLength,
 		char: [char, ''],
 		prepend: `\`\`\`${code}\n`,
 		append: '```',

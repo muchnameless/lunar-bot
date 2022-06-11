@@ -27,6 +27,7 @@ Routes;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import { regExpEsc } from '@sapphire/utilities';
+import { EmbedLimits, TextInputLimits } from '@sapphire/discord-utilities';
 import { fetch } from 'undici';
 fetch;
 import { format } from 'prettier';
@@ -90,7 +91,7 @@ import type {
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
-const { EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, MAX_VALUE_LENGTH, UnicodeEmoji } = constants;
+const { UnicodeEmoji } = constants;
 const { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
@@ -309,7 +310,7 @@ export default class EvalCommand extends ApplicationCommand {
 				const name = index ? '\u200B' : 'Output';
 
 				// embed size overflow -> convert output to file
-				if ((length += name.length + value.length) > EMBED_MAX_CHARS) {
+				if ((length += name.length + value.length) > EmbedLimits.MaximumTotalCharacters) {
 					// remove result fields
 					responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
 						name: 'Output',
@@ -342,7 +343,7 @@ export default class EvalCommand extends ApplicationCommand {
 				const name = index ? '\u200B' : 'Error';
 
 				// embed size overflow -> convert output to file
-				if ((length += name.length + value.length) > EMBED_MAX_CHARS) {
+				if ((length += name.length + value.length) > EmbedLimits.MaximumTotalCharacters) {
 					// remove error fields
 					responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
 						name: 'Error',
@@ -426,8 +427,8 @@ export default class EvalCommand extends ApplicationCommand {
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Input')
-									.setValue(trim(OLD_INPUT, MAX_VALUE_LENGTH))
-									.setPlaceholder(trim(OLD_INPUT, MAX_PLACEHOLDER_LENGTH))
+									.setValue(trim(OLD_INPUT, TextInputLimits.MaximumValueCharacters))
+									.setPlaceholder(trim(OLD_INPUT, TextInputLimits.MaximumPlaceholderCharacters))
 									.setRequired(false),
 							),
 							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(

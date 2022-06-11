@@ -1,8 +1,8 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import { DiscordAPIError, MessageFlags, MessageType, PermissionFlagsBits, RESTJSONErrorCodes, Util } from 'discord.js';
+import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
 import { commaListAnd, seconds } from '../functions';
-import { MESSAGE_MAX_CHARS, EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS } from '../constants';
 import { logger } from '../logger';
 import { ChannelUtil, EmbedUtil } from '.';
 import type {
@@ -342,8 +342,8 @@ export class MessageUtil extends null {
 			requiredChannelPermissions |= PermissionFlagsBits.ManageMessages; // removing attachments requires MANAGE_MESSAGES
 		}
 
-		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+		if ((_options.content?.length ?? 0) > MessageLimits.MaximumLength) {
+			const MESSAGE = `content length ${_options.content!.length} > ${MessageLimits.MaximumLength}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
@@ -351,8 +351,8 @@ export class MessageUtil extends null {
 		}
 
 		if (Reflect.has(_options, 'embeds')) {
-			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+			if (_options.embeds!.length > MessageLimits.MaximumEmbeds) {
+				const MESSAGE = `embeds length ${_options.embeds!.length} > ${MessageLimits.MaximumEmbeds}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
@@ -361,8 +361,8 @@ export class MessageUtil extends null {
 
 			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
-			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+			if (TOTAL_LENGTH > EmbedLimits.MaximumTotalCharacters) {
+				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EmbedLimits.MaximumTotalCharacters}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);

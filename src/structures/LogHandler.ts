@@ -1,8 +1,8 @@
 import { mkdir, opendir, readFile, rm, writeFile } from 'node:fs/promises';
 import { URL } from 'node:url';
 import { PermissionFlagsBits, SnowflakeUtil, embedLength, isJSONEncodable } from 'discord.js';
+import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
-import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { commaListAnd } from '../functions';
 import { logger } from '../logger';
@@ -123,8 +123,8 @@ export class LogHandler {
 
 		// send 1 message
 		if (
-			embeds.length <= EMBEDS_MAX_AMOUNT &&
-			embeds.reduce((acc, cur) => acc + embedLength(cur), 0) <= EMBED_MAX_CHARS
+			embeds.length <= MessageLimits.MaximumEmbeds &&
+			embeds.reduce((acc, cur) => acc + embedLength(cur), 0) <= EmbedLimits.MaximumTotalCharacters
 		) {
 			return this._log(embeds);
 		}
@@ -137,11 +137,11 @@ export class LogHandler {
 
 			let embedChunkLength = 0;
 
-			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < embeds.length; ++current, ++total) {
+			for (let current = 0; current < MessageLimits.MaximumEmbeds && total < embeds.length; ++current, ++total) {
 				embedChunkLength += embedLength(embeds[total]);
 
 				// adding the new embed would exceed the max char count
-				if (embedChunkLength > EMBED_MAX_CHARS) {
+				if (embedChunkLength > EmbedLimits.MaximumTotalCharacters) {
 					--total;
 					break;
 				}

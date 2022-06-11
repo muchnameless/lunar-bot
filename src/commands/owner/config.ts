@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { Type } from '@sapphire/type';
 import RE2 from 're2';
+import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import { formatNumber, sortCache } from '../../functions';
-import { MAX_CHOICES } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { AutocompleteInteraction, Collection, ChatInputCommandInteraction } from 'discord.js';
@@ -98,7 +98,11 @@ export default class ConfigCommand extends ApplicationCommand {
 	 */
 	override autocompleteRun(interaction: AutocompleteInteraction<'cachedOrDM'>, value: string) {
 		if (!value) {
-			return interaction.respond(this.config.cache.map(({ key }) => ({ name: key, value: key })).slice(0, MAX_CHOICES));
+			return interaction.respond(
+				this.config.cache
+					.map(({ key }) => ({ name: key, value: key }))
+					.slice(0, AutoCompleteLimits.MaximumAmountOfOptions),
+			);
 		}
 
 		switch (interaction.options.getSubcommand()) {
@@ -106,7 +110,13 @@ export default class ConfigCommand extends ApplicationCommand {
 			case 'search':
 				return interaction.respond([
 					{ name: value, value }, // current input
-					...sortCache(this.config.cache, ConfigCommand._transformKey(value), 'key', 'key', MAX_CHOICES - 1),
+					...sortCache(
+						this.config.cache,
+						ConfigCommand._transformKey(value),
+						'key',
+						'key',
+						AutoCompleteLimits.MaximumAmountOfOptions - 1,
+					),
 				]);
 
 			case 'delete':

@@ -10,6 +10,7 @@ import {
 import { DataTypes, fn, Model, UniqueConstraintError } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
+import { GuildMemberLimits } from '@sapphire/discord-utilities';
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
@@ -22,7 +23,6 @@ import {
 	GUILD_ID_ERROR,
 	isXPType,
 	LILY_SKILL_NAMES,
-	NICKNAME_MAX_CHARS,
 	Offset,
 	SKILL_ACHIEVEMENTS,
 	SKILL_AVERAGE_ROLES,
@@ -1535,7 +1535,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		// check if member already has a nick which is not just the current ign (case insensitive)
 		let newNick =
 			member.nickname && member.nickname.toLowerCase() !== this.ign.toLowerCase()
-				? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - ' ()'.length).replace(
+				? `${trim(member.nickname, GuildMemberLimits.MaximumDisplayNameLength - this.ign.length - ' ()'.length).replace(
 						/ +(?:\([^ )]*?)?\.{3}$/,
 						'',
 				  )} (${this.ign})`

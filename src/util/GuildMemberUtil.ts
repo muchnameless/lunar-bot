@@ -1,8 +1,8 @@
 import { Collection, PermissionFlagsBits } from 'discord.js';
+import { ModerationLimits } from '@sapphire/discord-utilities';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
-	MAX_TIMEOUT_DURATION,
 	SKILL_AVERAGE_ROLES,
 	SKILL_ROLES,
 	SKILLS,
@@ -226,7 +226,7 @@ export class GuildMemberUtil extends null {
 			return member;
 		}
 
-		const DURATION = duration !== null ? Math.min(duration, MAX_TIMEOUT_DURATION) : null;
+		const DURATION = duration !== null ? Math.min(duration, ModerationLimits.MaximumTimeoutDuration) : null;
 
 		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - DURATION!) < seconds(1)) {
 			logger.debug({ member, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]: is already in (similar) timeout');

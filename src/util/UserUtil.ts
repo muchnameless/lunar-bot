@@ -1,6 +1,6 @@
 import { DiscordAPIError, RESTJSONErrorCodes } from 'discord.js';
+import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import { hours } from '../functions';
-import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
 import { redis } from '../api';
 import { logger } from '../logger';
 import { EmbedUtil } from '.';
@@ -90,8 +90,8 @@ export class UserUtil extends null {
 		}
 
 		if (Reflect.has(_options, 'embeds')) {
-			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+			if (_options.embeds!.length > MessageLimits.MaximumEmbeds) {
+				const MESSAGE = `embeds length ${_options.embeds!.length} > ${MessageLimits.MaximumEmbeds}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
@@ -100,8 +100,8 @@ export class UserUtil extends null {
 
 			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
-			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+			if (TOTAL_LENGTH > EmbedLimits.MaximumTotalCharacters) {
+				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EmbedLimits.MaximumTotalCharacters}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
@@ -109,8 +109,8 @@ export class UserUtil extends null {
 			}
 		}
 
-		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+		if ((_options.content?.length ?? 0) > MessageLimits.MaximumLength) {
+			const MESSAGE = `content length ${_options.content!.length} > ${MessageLimits.MaximumLength}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);

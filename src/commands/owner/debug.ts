@@ -10,8 +10,8 @@ import {
 	version as djsVersion,
 } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import { EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
-import { EMBED_FIELD_MAX_CHARS } from '../../constants';
 import { hypixel, imgur } from '../../api';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, buildDeleteButton, trim } from '../../functions';
@@ -197,7 +197,7 @@ export default class DebugCommand extends ApplicationCommand {
 											),
 										)
 									).join('\n\n'),
-									EMBED_FIELD_MAX_CHARS,
+									EmbedLimits.MaximumFieldValueLength,
 								) || 'disabled',
 						},
 					)

@@ -1,5 +1,5 @@
 import { embedLength } from 'discord.js';
-import { EMBED_MAX_FIELDS } from '../constants';
+import { EmbedLimits } from '@sapphire/discord-utilities';
 import type { APIEmbed, Embed, EmbedBuilder, JSONEncodable } from 'discord.js';
 
 export class EmbedUtil extends null {
@@ -17,7 +17,7 @@ export class EmbedUtil extends null {
 	 * @param numberOfRows
 	 */
 	static padFields(embed: EmbedBuilder, numberOfRows = 3) {
-		if (!embed.data.fields || embed.data.fields.length >= EMBED_MAX_FIELDS) return embed; // max number of embed fields already reached
+		if (!embed.data.fields || embed.data.fields.length >= EmbedLimits.MaximumFields) return embed; // max number of embed fields already reached
 
 		for (
 			let index =

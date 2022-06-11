@@ -7,12 +7,12 @@ import {
 	TextInputStyle,
 	Util,
 } from 'discord.js';
+import { TextInputLimits } from '@sapphire/discord-utilities';
 import BigDecimal from 'js-big-decimal';
 import Lexer from 'lex';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { formatNumber, trim } from '../../functions';
-import { MAX_PLACEHOLDER_LENGTH, MAX_VALUE_LENGTH } from '../../constants';
 import { logger } from '../../logger';
 import type { ChatInputCommandInteraction, ModalActionRowComponentBuilder, ModalSubmitInteraction } from 'discord.js';
 import type { RepliableInteraction, ModalRepliableInteraction } from '../../util';
@@ -482,7 +482,7 @@ export default class MathsCommand extends DualCommand {
 			}
 
 			try {
-				const ERROR_MESSAGE = trim(`${error}`, MAX_VALUE_LENGTH);
+				const ERROR_MESSAGE = trim(`${error}`, TextInputLimits.MaximumValueCharacters);
 
 				return await InteractionUtil.showModal(
 					interaction as ModalRepliableInteraction,
@@ -495,8 +495,8 @@ export default class MathsCommand extends DualCommand {
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Short)
 									.setLabel('New input')
-									.setValue(trim(rawInput, MAX_VALUE_LENGTH))
-									.setPlaceholder(trim(rawInput, MAX_PLACEHOLDER_LENGTH))
+									.setValue(trim(rawInput, TextInputLimits.MaximumValueCharacters))
+									.setPlaceholder(trim(rawInput, TextInputLimits.MaximumPlaceholderCharacters))
 									.setRequired(true),
 							),
 							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
@@ -504,9 +504,9 @@ export default class MathsCommand extends DualCommand {
 									.setCustomId('error')
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Error')
-									.setValue(trim(ERROR_MESSAGE, MAX_VALUE_LENGTH))
-									.setPlaceholder(trim(ERROR_MESSAGE, MAX_PLACEHOLDER_LENGTH))
-									.setMaxLength(Math.min(ERROR_MESSAGE.length, MAX_VALUE_LENGTH))
+									.setValue(trim(ERROR_MESSAGE, TextInputLimits.MaximumValueCharacters))
+									.setPlaceholder(trim(ERROR_MESSAGE, TextInputLimits.MaximumPlaceholderCharacters))
+									.setMaxLength(Math.min(ERROR_MESSAGE.length, TextInputLimits.MaximumValueCharacters))
 									.setRequired(false),
 							),
 						),

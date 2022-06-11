@@ -9,7 +9,8 @@ import {
 	PermissionFlagsBits,
 	userMention,
 } from 'discord.js';
-import { CustomIdKey, GUILD_ID_ALL, MAX_CHOICES } from '../constants';
+import { ApplicationCommandOptionLimits } from '@sapphire/discord-utilities';
+import { CustomIdKey, GUILD_ID_ALL } from '../constants';
 import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
@@ -281,7 +282,7 @@ export default class InteractionCreateEvent extends Event {
 					return interaction.respond(
 						InteractionUtil.getHypixelGuild(interaction)
 							.players.map(({ minecraftUuid, ign }) => ({ name: ign, value: minecraftUuid }))
-							.slice(0, MAX_CHOICES),
+							.slice(0, ApplicationCommandOptionLimits.MaximumChoicesLength),
 					);
 				}
 
@@ -304,7 +305,7 @@ export default class InteractionCreateEvent extends Event {
 
 					// no displayName yet -> don't sort
 					if (value === '@') {
-						return interaction.respond(response.slice(0, MAX_CHOICES));
+						return interaction.respond(response.slice(0, ApplicationCommandOptionLimits.MaximumChoicesLength));
 					}
 
 					return interaction.respond(sortCache(response, value.slice(1), 'name', 'value'));
@@ -324,7 +325,7 @@ export default class InteractionCreateEvent extends Event {
 							value,
 							'ign',
 							'minecraftUuid',
-							MAX_CHOICES - 1,
+							ApplicationCommandOptionLimits.MaximumChoicesLength - 1,
 						),
 					]);
 				}
@@ -351,7 +352,7 @@ export default class InteractionCreateEvent extends Event {
 						})),
 					);
 
-					return interaction.respond(response.slice(0, MAX_CHOICES));
+					return interaction.respond(response.slice(0, ApplicationCommandOptionLimits.MaximumChoicesLength));
 				}
 
 				// all guilds
