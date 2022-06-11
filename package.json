@@ -95,7 +95,7 @@
 	"resolutions": {
 		"@discordjs/builders": "0.16.0-dev.1654862703-0415300",
 		"@discordjs/builders@0.16.0-dev.1654862703-0415300": "patch:@discordjs/builders@npm:0.16.0-dev.1654862703-0415300#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1654862703-0415300-9e0679dcbc.patch",
-		"@discordjs/collection": "0.8.0-dev.1654862701-0415300",
+		"@discordjs/collection": "0.8.0-dev.1654906189-c7391db",
 		"@discordjs/rest": "0.6.0-dev.1654862700-0415300",
 		"discord-api-types": "0.34.0-next.f72fbc9.1654886649",
 		"discord.js@14.0.0-dev.1654862727-0415300": "patch:discord.js@npm:14.0.0-dev.1654862727-0415300#.yarn/patches/discord.js-npm-14.0.0-dev.1654862727-0415300-775f357688.patch",
