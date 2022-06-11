@@ -37,7 +37,7 @@
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
 		"cron": "^2.0.0",
-		"discord.js": "14.0.0-dev.1654906231-c7391db",
+		"discord.js": "14.0.0-dev.1654949087-96053ba",
 		"emoji-regex": "9.2.2",
 		"fast-xml-parser": "^4.0.8",
 		"ioredis": "^5.0.6",
