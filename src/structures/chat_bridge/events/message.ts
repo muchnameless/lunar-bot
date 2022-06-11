@@ -13,7 +13,7 @@ import {
 import { UnicodeEmoji } from '../../../constants';
 import { GuildMemberUtil, MessageUtil } from '../../../util';
 import { asyncFilter, commaListOr, getLilyWeight, stringToMS } from '../../../functions';
-import { ChatBridgeEvent, type ChatBridgeEventContext } from '../ChatBridgeEvent';
+import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
 import { logger } from '../../../logger';
 import type { SkyBlockProfile } from '../../../functions';
@@ -21,13 +21,6 @@ import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
 
 export default class MessageChatBridgeEvent extends ChatBridgeEvent {
-	constructor(context: ChatBridgeEventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * parse server message content
 	 * @param hypixelMessage

@@ -1,14 +1,7 @@
 import { logger } from '../../../logger';
-import { ChatBridgeEvent, type ChatBridgeEventContext } from '../ChatBridgeEvent';
+import { ChatBridgeEvent } from '../ChatBridgeEvent';
 
 export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
-	constructor(context: ChatBridgeEventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * event listener callback
 	 * @param error

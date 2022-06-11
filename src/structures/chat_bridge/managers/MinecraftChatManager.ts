@@ -36,7 +36,7 @@ import { logger } from '../../../logger';
 import { ChatManager } from './ChatManager';
 import type { GuildChannel, Message, Snowflake } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
-import type { MessageCollectorOptions } from '../MessageCollector';
+import type { HypixelMessageCollectorOptions } from '../HypixelMessageCollector';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 import type { If } from '../../../types/util';
