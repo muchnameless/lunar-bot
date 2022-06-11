@@ -30,20 +30,6 @@ index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..3f8541aa69cce977defd11e2d79188c0
  
      // Step 4: Cache the old sequence (use to attempt a resume)
      if (this.sequence !== -1) this.closeSequence = this.sequence;
-diff --git a/src/client/websocket/handlers/index.js b/src/client/websocket/handlers/index.js
-index 53892eafaa3c5adb2aad0e1c227510b671363e39..e8eb15fcc1546ecf1ccca84ce66fe40dc28f223a 100644
---- a/src/client/websocket/handlers/index.js
-+++ b/src/client/websocket/handlers/index.js
-@@ -21,9 +21,6 @@ const handlers = Object.fromEntries([
-   ['GUILD_ROLE_UPDATE', require('./GUILD_ROLE_UPDATE')],
-   ['GUILD_STICKERS_UPDATE', require('./GUILD_STICKERS_UPDATE')],
-   ['GUILD_UPDATE', require('./GUILD_UPDATE')],
--  ['INTEGRATION_CREATE', require('./INTEGRATION_CREATE')],
--  ['INTEGRATION_DELETE', require('./INTEGRATION_DELETE')],
--  ['INTEGRATION_UPDATE', require('./INTEGRATION_UPDATE')],
-   ['INTERACTION_CREATE', require('./INTERACTION_CREATE')],
-   ['INVITE_CREATE', require('./INVITE_CREATE')],
-   ['INVITE_DELETE', require('./INVITE_DELETE')],
 diff --git a/src/structures/ActionRowBuilder.js b/src/structures/ActionRowBuilder.js
 index 871d519533caa340099f898fc81da0efa56432da..bfa68e0d3b78d306a763ed030ad9fefa814f845e 100644
 --- a/src/structures/ActionRowBuilder.js
