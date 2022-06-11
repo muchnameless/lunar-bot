@@ -1,13 +1,8 @@
 import { logger } from '../logger';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 
 export default class ReadyEvent extends Event {
-	constructor(context: EventContext) {
-		super(context, {
-			once: true,
-			enabled: true,
-		});
-	}
+	override once = true;
 
 	/**
 	 * event listener callback

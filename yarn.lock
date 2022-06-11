@@ -3710,7 +3710,6 @@ __metadata:
     re2: ^1.17.4
     sequelize: 6.20.1
     timezonecomplete: ^5.12.4
-    tiny-typed-emitter: ^2.1.0
     tslib: ^2.4.0
     typescript: ^4.8.0-dev.20220611
     undici: ^5.4.0
@@ -5878,13 +5877,6 @@ __metadata:
   dependencies:
     tzdata: ^1.0.25
   checksum: aa5690cd9a2baf6ef3042c4b2424eec1d397a9fd4d2cbe20df68d821b3e19ee605ca7f4bb188060835eea355cd3dfdc96d088b94b45f54b0133448bc896dc326
-  languageName: node
-  linkType: hard
-
-"tiny-typed-emitter@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "tiny-typed-emitter@npm:2.1.0"
-  checksum: 709bca410054e08df4dc29d5ea0916328bb2900d60245c6a743068ea223887d9fd2c945b6070eb20336275a557a36c2808e5c87d2ed4b60633458632be4a3e10
   languageName: node
   linkType: hard
 

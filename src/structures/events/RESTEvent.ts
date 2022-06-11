@@ -1,10 +1,9 @@
 import { Event } from './Event';
 import type { EventContext } from './Event';
-import type { EventData } from './BaseEvent';
 
 export class RESTEvent extends Event {
-	constructor(context: EventContext, data: EventData) {
-		super(context, data);
+	constructor(context: EventContext) {
+		super(context);
 
 		this.emitter = this.client.rest;
 	}

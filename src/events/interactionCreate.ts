@@ -13,7 +13,7 @@ import { ApplicationCommandOptionLimits } from '@sapphire/discord-utilities';
 import { CustomIdKey, GUILD_ID_ALL } from '../constants';
 import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 import { logger } from '../logger';
 import type {
 	AnyInteraction,
@@ -36,13 +36,6 @@ import type LeaderboardCommand from '../commands/guild/leaderboard';
 
 export default class InteractionCreateEvent extends Event {
 	private _visibilityButtonMessages = new Set<Snowflake>();
-
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
 
 	/**
 	 * @param interaction

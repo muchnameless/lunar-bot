@@ -21,7 +21,7 @@ import {
 import { MC_CLIENT_VERSION, UnicodeEmoji, UNKNOWN_IGN } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
-import { MessageCollector, MessageCollectorEvent } from '../MessageCollector';
+import { HypixelMessageCollector, HypixelMessageCollectorEvent } from '../HypixelMessageCollector';
 import {
 	asyncReplace,
 	cleanFormattedNumber,
@@ -573,8 +573,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * collects chat messages from the bot
 	 * @param options
 	 */
-	override createMessageCollector(options?: MessageCollectorOptions) {
-		return new MessageCollector(this.chatBridge, options);
+	override createMessageCollector(options?: HypixelMessageCollectorOptions) {
+		return new HypixelMessageCollector(this.chatBridge, options);
 	}
 
 	/**
@@ -988,7 +988,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		});
 
 		// collect message
-		collector.on(MessageCollectorEvent.Collect, (hypixelMessage) => {
+		collector.on(HypixelMessageCollectorEvent.Collect, (hypixelMessage) => {
 			// message is line separator
 			if (/^-{29,}/.test(hypixelMessage.content)) {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
@@ -1012,7 +1012,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		// eslint-disable-next-line no-async-promise-executor
 		return new Promise(async (resolve, reject) => {
 			// end collection
-			collector.once(MessageCollectorEvent.End, (collected, reason) => {
+			collector.once(HypixelMessageCollectorEvent.End, (collected, reason) => {
 				this.commandQueue.shift();
 
 				switch (reason) {

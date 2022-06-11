@@ -1,5 +1,5 @@
 import { BaseEvent } from '../events/BaseEvent';
-import type { EventData, BaseEventContext } from '../events/BaseEvent';
+import type { BaseEventContext } from '../events/BaseEvent';
 import type { ChatBridge } from './ChatBridge';
 
 export interface ChatBridgeEventContext extends BaseEventContext {
@@ -8,8 +8,8 @@ export interface ChatBridgeEventContext extends BaseEventContext {
 export class ChatBridgeEvent extends BaseEvent {
 	chatBridge: ChatBridge;
 
-	constructor(context: ChatBridgeEventContext, data: EventData) {
-		super(context, data);
+	constructor(context: ChatBridgeEventContext) {
+		super(context);
 
 		this.chatBridge = context.emitter;
 	}

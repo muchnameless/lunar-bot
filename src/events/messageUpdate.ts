@@ -4,16 +4,8 @@ import { minutes } from '../functions';
 import { logger } from '../logger';
 import MessageCreateEvent from './messageCreate';
 import type { Message } from 'discord.js';
-import type { EventContext } from '../structures/events/Event';
 
 export default class MessageUpdateEvent extends MessageCreateEvent {
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * event listener callback
 	 * @param oldMessage

@@ -1,18 +1,11 @@
 import { EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 import { logger } from '../logger';
 import type { GuildMember } from 'discord.js';
 
 export default class GuildMemberAddEvent extends Event {
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * event listener callback
 	 * @param member

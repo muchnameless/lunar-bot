@@ -1,5 +1,5 @@
 import { BaseEvent } from './BaseEvent';
-import type { BaseEventContext, EventData } from './BaseEvent';
+import type { BaseEventContext } from './BaseEvent';
 import type { LunarClient } from '../LunarClient';
 
 export interface EventContext extends BaseEventContext {
@@ -9,8 +9,8 @@ export interface EventContext extends BaseEventContext {
 export class Event extends BaseEvent {
 	client: LunarClient;
 
-	constructor(context: EventContext, data: EventData) {
-		super(context, data);
+	constructor(context: EventContext) {
+		super(context);
 
 		this.client = context.emitter;
 	}

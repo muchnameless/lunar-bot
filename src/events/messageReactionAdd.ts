@@ -1,16 +1,9 @@
 import { UnicodeEmoji } from '../constants';
 import { logger } from '../logger';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 import type { Message, MessageReaction, User } from 'discord.js';
 
 export default class MessageReactionAddEvent extends Event {
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * event listener callback
 	 * @param reaction

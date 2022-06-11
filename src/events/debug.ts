@@ -1,14 +1,9 @@
 import { env } from 'node:process';
 import { logger } from '../logger';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 
 export default class DebugEvent extends Event {
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: env.NODE_ENV === 'development',
-		});
-	}
+	override enabled = env.NODE_ENV === 'development';
 
 	/**
 	 * event listener callback

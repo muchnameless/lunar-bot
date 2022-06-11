@@ -5,28 +5,19 @@ export interface BaseEventContext {
 	name: string;
 }
 
-export interface EventData {
-	once?: boolean;
-	enabled?: boolean;
-}
-
 export class BaseEvent {
 	emitter: EventEmitter;
 	name: string;
-	once: boolean;
-	enabled: boolean;
+	once = false;
+	enabled = true;
 	callback = this.run.bind(this);
 
 	/**
 	 * @param context
-	 * @param data
 	 */
-	constructor({ emitter, name }: BaseEventContext, { once, enabled }: EventData = {}) {
+	constructor({ emitter, name }: BaseEventContext) {
 		this.emitter = emitter;
 		this.name = name;
-
-		this.once = once ?? false;
-		this.enabled = enabled ?? true;
 	}
 
 	/**

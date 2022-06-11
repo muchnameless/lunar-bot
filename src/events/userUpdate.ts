@@ -1,15 +1,8 @@
 import { UserUtil } from '../util';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 import type { User } from 'discord.js';
 
 export default class UserUpdateEvent extends Event {
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * event listener callback
 	 * @param oldUser

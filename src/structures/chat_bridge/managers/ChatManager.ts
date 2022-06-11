@@ -1,11 +1,11 @@
 import { AsyncQueue } from '@sapphire/async-queue';
 import { BLOCKED_WORDS_REGEXP } from '../constants';
-import { MessageCollectorEvent } from '../MessageCollector';
-import type { MessageCollector, MessageCollectorOptions } from '../MessageCollector';
+import { HypixelMessageCollectorEvent } from '../HypixelMessageCollector';
+import type { HypixelMessageCollector, HypixelMessageCollectorOptions } from '../HypixelMessageCollector';
 import type { ChatBridge } from '../ChatBridge';
 import type { HypixelMessage } from '../HypixelMessage';
 
-interface AwaitMessagesOptions extends MessageCollectorOptions {
+interface AwaitMessagesOptions extends HypixelMessageCollectorOptions {
 	errors?: string[];
 }
 
@@ -47,9 +47,9 @@ export abstract class ChatManager {
 	 */
 	awaitMessages(options?: AwaitMessagesOptions): Promise<HypixelMessage[]> {
 		return new Promise((resolve, reject) => {
-			const collector = this.createMessageCollector(options) as MessageCollector;
+			const collector = this.createMessageCollector(options) as HypixelMessageCollector;
 
-			collector.once(MessageCollectorEvent.End, (collection, reason) => {
+			collector.once(HypixelMessageCollectorEvent.End, (collection, reason) => {
 				if (options?.errors?.includes(reason)) {
 					reject(collection);
 				} else {

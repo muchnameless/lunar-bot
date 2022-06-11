@@ -199,7 +199,7 @@
  */
 
 import { setTimeout, clearTimeout } from 'node:timers';
-import { TypedEmitter } from 'tiny-typed-emitter';
+import { EventEmitter } from 'node:events';
 import { ChatBridgeEvent } from './ChatBridge';
 import type { Awaitable } from 'discord.js';
 import type { HypixelMessage } from './HypixelMessage';
@@ -213,7 +213,7 @@ type CollectorFilter = (message: HypixelMessage, collected: HypixelMessage[]) =>
 /**
  * Options to be applied to the collector.
  */
-export interface MessageCollectorOptions {
+export interface HypixelMessageCollectorOptions {
 	filter?: CollectorFilter;
 	/** How long to run the collector for in milliseconds */
 	time?: number;
@@ -225,21 +225,23 @@ export interface MessageCollectorOptions {
 	maxProcessed?: number;
 }
 
-export const enum MessageCollectorEvent {
+export const enum HypixelMessageCollectorEvent {
 	Collect = 'collect',
 	End = 'end',
 }
 
-interface MessageCollectorEventListeners {
-	[MessageCollectorEvent.Collect]: (item: HypixelMessage) => Awaitable<void>;
-	[MessageCollectorEvent.End]: (collected: MessageCollector['collected'], reason: string) => Awaitable<void>;
-	string: (...args: unknown[]) => Awaitable<void>;
+export interface HypixelMessageCollector {
+	on(event: HypixelMessageCollectorEvent.Collect, listener: (item: HypixelMessage) => Awaitable<void>): this;
+	on(
+		event: HypixelMessageCollectorEvent.End,
+		listener: (collected: HypixelMessageCollector['collected'], reason: string) => Awaitable<void>,
+	): this;
 }
 
 /**
  * MessageCollector
  */
-export class MessageCollector extends TypedEmitter<MessageCollectorEventListeners> {
+export class HypixelMessageCollector extends EventEmitter {
 	/**
 	 * The chatBridge that instantiated this Collector
 	 */
@@ -247,7 +249,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	/**
 	 * The options of this collector
 	 */
-	options: MessageCollectorOptions;
+	options: HypixelMessageCollectorOptions;
 	/**
 	 * The filter applied to this collector
 	 */
@@ -274,7 +276,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	private _idletimeout: NodeJS.Timeout | null = null;
 	private _endReason: string | null = null;
 
-	constructor(chatBridge: ChatBridge, options: MessageCollectorOptions = {}) {
+	constructor(chatBridge: ChatBridge, options: HypixelMessageCollectorOptions = {}) {
 		super();
 
 		this.chatBridge = chatBridge;
@@ -289,7 +291,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 		this.chatBridge.on(ChatBridgeEvent.Message, this._handleCollect);
 		this.chatBridge.once(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
 
-		this.once(MessageCollectorEvent.End, () => {
+		this.once(HypixelMessageCollectorEvent.End, () => {
 			this.chatBridge.removeListener(ChatBridgeEvent.Message, this._handleCollect);
 			this.chatBridge.removeListener(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
@@ -320,8 +322,8 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 			}
 
 			const cleanup = () => {
-				this.removeListener(MessageCollectorEvent.Collect, onCollect);
-				this.removeListener(MessageCollectorEvent.End, onEnd);
+				this.removeListener(HypixelMessageCollectorEvent.Collect, onCollect);
+				this.removeListener(HypixelMessageCollectorEvent.End, onEnd);
 			};
 
 			const onCollect = (item: HypixelMessage) => {
@@ -334,8 +336,8 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 				reject(this.collected);
 			};
 
-			this.on(MessageCollectorEvent.Collect, onCollect);
-			this.on(MessageCollectorEvent.End, onEnd);
+			this.on(HypixelMessageCollectorEvent.Collect, onCollect);
+			this.on(HypixelMessageCollectorEvent.End, onEnd);
 		});
 	}
 
@@ -358,7 +360,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 			/**
 			 * Emitted whenever an element is collected.
 			 */
-			this.emit(MessageCollectorEvent.Collect, hypixelMessage);
+			this.emit(HypixelMessageCollectorEvent.Collect, hypixelMessage);
 
 			if (this._idletimeout) {
 				clearTimeout(this._idletimeout);
@@ -393,7 +395,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 		 * @param collected The elements collected by the collector
 		 * @param reason The reason the collector ended
 		 */
-		this.emit(MessageCollectorEvent.End, this.collected, reason);
+		this.emit(HypixelMessageCollectorEvent.End, this.collected, reason);
 	}
 
 	/**
@@ -431,7 +433,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 		const onCollect = (item: HypixelMessage) => {
 			queue.push(item);
 		};
-		this.on(MessageCollectorEvent.Collect, onCollect);
+		this.on(HypixelMessageCollectorEvent.Collect, onCollect);
 
 		try {
 			while (queue.length || !this.ended) {
@@ -440,17 +442,17 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 				} else {
 					await new Promise((resolve) => {
 						const tick = () => {
-							this.removeListener(MessageCollectorEvent.Collect, tick);
-							this.removeListener(MessageCollectorEvent.End, tick);
+							this.removeListener(HypixelMessageCollectorEvent.Collect, tick);
+							this.removeListener(HypixelMessageCollectorEvent.End, tick);
 							return resolve(null);
 						};
-						this.on(MessageCollectorEvent.Collect, tick);
-						this.on(MessageCollectorEvent.End, tick);
+						this.on(HypixelMessageCollectorEvent.Collect, tick);
+						this.on(HypixelMessageCollectorEvent.End, tick);
 					});
 				}
 			}
 		} finally {
-			this.removeListener(MessageCollectorEvent.Collect, onCollect);
+			this.removeListener(HypixelMessageCollectorEvent.Collect, onCollect);
 		}
 	}
 }

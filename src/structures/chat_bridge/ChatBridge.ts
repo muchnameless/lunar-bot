@@ -1,6 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
-import { TypedEmitter } from 'tiny-typed-emitter';
+import { EventEmitter } from 'node:events';
 import { EventCollection } from '../events/EventCollection';
 import { minutes, seconds } from '../../functions';
 import { logger } from '../../logger';
@@ -43,16 +43,15 @@ export const enum ChatBridgeEvent {
 	Ready = 'ready',
 }
 
-interface ChatBridgeEventListeners {
-	[ChatBridgeEvent.Connect]: () => Awaitable<void>;
-	[ChatBridgeEvent.Disconnect]: (reason?: string) => Awaitable<void>;
-	[ChatBridgeEvent.Error]: (error: Error) => Awaitable<void>;
-	[ChatBridgeEvent.Message]: (hypixelMessage: HypixelMessage) => Awaitable<void>;
-	[ChatBridgeEvent.Ready]: () => Awaitable<void>;
-	string: (...args: unknown[]) => Awaitable<void>;
+export interface ChatBridge {
+	on(event: ChatBridgeEvent.Connect, listener: () => Awaitable<void>): this;
+	on(event: ChatBridgeEvent.Disconnect, listener: (reason?: string) => Awaitable<void>): this;
+	on(event: ChatBridgeEvent.Error, listener: (error: Error) => Awaitable<void>): this;
+	on(event: ChatBridgeEvent.Message, listener: (hypixelMessage: HypixelMessage) => Awaitable<void>): this;
+	on(event: ChatBridgeEvent.Ready, listener: () => Awaitable<void>): this;
 }
 
-export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter<ChatBridgeEventListeners> {
+export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter {
 	/**
 	 * increases each link cycle
 	 */
@@ -88,7 +87,6 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	events = new EventCollection(this, new URL('./events/', import.meta.url));
 
 	constructor(client: LunarClient, mcAccount: number) {
-		// @ts-expect-error
 		super({ captureRejections: true });
 
 		this.client = client;

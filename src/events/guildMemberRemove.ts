@@ -2,17 +2,10 @@ import { ChannelType, codeBlock, EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { logger } from '../logger';
 import { EmbedUtil, GuildMemberUtil } from '../util';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 import type { GuildMember } from 'discord.js';
 
 export default class GuildMemberRemoveEvent extends Event {
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * event listener callback
 	 * @param member

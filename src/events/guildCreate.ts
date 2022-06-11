@@ -1,16 +1,9 @@
 import { GuildUtil } from '../util';
 import { logger } from '../logger';
-import { Event, type EventContext } from '../structures/events/Event';
+import { Event } from '../structures/events/Event';
 import type { Guild } from 'discord.js';
 
 export default class GuildCreateEvent extends Event {
-	constructor(context: EventContext) {
-		super(context, {
-			once: false,
-			enabled: true,
-		});
-	}
-
 	/**
 	 * event listener callback
 	 * @param guild
