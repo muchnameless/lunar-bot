@@ -232,7 +232,8 @@ export class DiscordChatManager extends ChatManager {
 					throw new WebhookError('cannot create more webhooks', channel, this.hypixelGuild);
 				}
 
-				this.webhook = await channel.createWebhook(`${this.hypixelGuild} Chat Bridge`, {
+				this.webhook = await channel.createWebhook({
+					name: `${this.hypixelGuild} Chat Bridge`,
 					avatar: (channel.guild?.members.me ?? this.client.user!).displayAvatarURL(),
 					reason: 'no Webhooks in Chat Bridge Channel found',
 				});
