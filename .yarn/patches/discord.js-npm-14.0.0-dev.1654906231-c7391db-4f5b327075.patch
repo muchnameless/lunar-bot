@@ -176,7 +176,7 @@ index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..0136a626eadbc74f61dec1853509cb3b
     * Creates a new button builder from JSON data
     * @param {JSONEncodable<APIButtonComponent>|APIButtonComponent} other The other data
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
-index b0a8ff2fd421b6fee59a3376fd72485d2c23afda..ce920b9046f3677ffe23efb947313c2316f00cad 100644
+index d3c586a3beecbe02356bef6b0a4804056c295988..ce920b9046f3677ffe23efb947313c2316f00cad 100644
 --- a/src/structures/GuildEmoji.js
 +++ b/src/structures/GuildEmoji.js
 @@ -55,8 +55,9 @@ class GuildEmoji extends BaseGuildEmoji {
@@ -192,7 +192,7 @@ index b0a8ff2fd421b6fee59a3376fd72485d2c23afda..ce920b9046f3677ffe23efb947313c23
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index f732ca75400e7b799abd52ed401b08941f1a9251..a99cc2252dc3ea0de248eed185952dcac6a7e65c 100644
+index 2da967d34c9650888a02cbf27ab28cb48524a6a6..a99cc2252dc3ea0de248eed185952dcac6a7e65c 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -239,8 +239,9 @@ class GuildMember extends Base {
@@ -251,7 +251,7 @@ index 03b41500f925306a972fc3fc8972c7443e1bb654..2f184fd87582988bc97781643ec99c4a
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 32e6fd74e8e17dadf2f4d573bd98bf494042743c..e8f3b0688b3295ce03fc44e23d0b004c1ee4b28c 100644
+index 32e6fd74e8e17dadf2f4d573bd98bf494042743c..5b4c930bea77c7326f87a1d3ee54bb652f46e75b 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -523,15 +523,16 @@ index 8929d54ed2f33e6409cf167215010c1548bef42a..ed3f1b8a300debb9dca2a37a227b65e8
  
  module.exports = ModalSubmitFields;
 diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
-index 915f3bc688a758cf60da387ee86862ecc8d66903..3bccdb1d9b756940f2c7f8d532c6f779e44ae0a4 100644
+index 4d3c7710d4f7208f19eed2b5188dd21622725e1d..3bccdb1d9b756940f2c7f8d532c6f779e44ae0a4 100644
 --- a/src/structures/SelectMenuBuilder.js
 +++ b/src/structures/SelectMenuBuilder.js
 @@ -1,54 +1,12 @@
  'use strict';
  
- const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable } = require('@discordjs/builders');
+-const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable, normalizeArray } = require('@discordjs/builders');
 -const Transformers = require('../util/Transformers');
 -const Util = require('../util/Util');
++const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable } = require('@discordjs/builders');
  
  /**
   * Class used to build select menu components to be sent through the API
@@ -552,12 +553,12 @@ index 915f3bc688a758cf60da387ee86862ecc8d66903..3bccdb1d9b756940f2c7f8d532c6f779
 -
 -  /**
 -   * Adds options to this select menu
--   * @param {APISelectMenuOption[]} options The options to add to this select menu
+-   * @param {RestOrArray<APISelectMenuOption>} options The options to add to this select menu
 -   * @returns {SelectMenuBuilder}
 -   */
--  addOptions(options) {
+-  addOptions(...options) {
 -    return super.addOptions(
--      options.map(({ emoji, ...option }) => ({
+-      normalizeArray(options).map(({ emoji, ...option }) => ({
 -        ...option,
 -        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
 -      })),
@@ -566,12 +567,12 @@ index 915f3bc688a758cf60da387ee86862ecc8d66903..3bccdb1d9b756940f2c7f8d532c6f779
 -
 -  /**
 -   * Sets the options on this select menu
--   * @param {APISelectMenuOption[]} options The options to set on this select menu
+-   * @param {RestOrArray<APISelectMenuOption>} options The options to set on this select menu
 -   * @returns {SelectMenuBuilder}
 -   */
--  setOptions(options) {
+-  setOptions(...options) {
 -    return super.setOptions(
--      options.map(({ emoji, ...option }) => ({
+-      normalizeArray(options).map(({ emoji, ...option }) => ({
 -        ...option,
 -        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
 -      })),
@@ -643,7 +644,7 @@ index 6b3a693d4c72bcd273d15d5b095b21684b857b3e..4b1630b12354c73b7966a84e53a45525
    }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b8e36ccb7 100644
+index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53da6a269a 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -257,7 +257,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -655,7 +656,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -393,20 +393,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
+@@ -396,20 +396,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
    replied: boolean;
    webhook: InteractionWebhook;
    reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<Message>;
@@ -680,7 +681,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
  }
  
  export type BooleanCache<T extends CacheType> = T extends 'cached' ? true : false;
-@@ -1459,7 +1454,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1467,7 +1462,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -689,7 +690,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1467,12 +1462,18 @@ export type CacheTypeReducer<
+@@ -1475,12 +1470,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -708,7 +709,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
    : Fallback;
  
  export type AnyInteraction<Cached extends CacheType = CacheType> =
-@@ -1494,7 +1495,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1502,7 +1503,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -718,7 +719,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1502,7 +1504,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1510,7 +1512,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -727,7 +728,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1719,16 +1721,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1726,16 +1728,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -748,7 +749,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1934,6 +1935,7 @@ export class ModalSubmitFields {
+@@ -1941,6 +1942,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -756,8 +757,8 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3532,11 +3534,6 @@ export interface BaseApplicationCommandData {
-   defaultPermission?: boolean;
+@@ -3533,11 +3535,6 @@ export interface BaseApplicationCommandData {
+   defaultMemberPermissions?: PermissionResolvable;
  }
  
 -export interface AttachmentData {
@@ -768,7 +769,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4766,10 +4763,8 @@ export interface MessageEditOptions {
+@@ -4811,10 +4808,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -780,7 +781,7 @@ index 65a790c555886fb3d9ada8d12574ed9d23a170ab..44b8d6d6e740ceeb99f01881adf53b5b
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -4824,10 +4819,8 @@ export interface MessageOptions {
+@@ -4869,10 +4864,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
