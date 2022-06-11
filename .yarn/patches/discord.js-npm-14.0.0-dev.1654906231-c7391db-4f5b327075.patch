@@ -30,6 +30,20 @@ index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..3f8541aa69cce977defd11e2d79188c0
  
      // Step 4: Cache the old sequence (use to attempt a resume)
      if (this.sequence !== -1) this.closeSequence = this.sequence;
+diff --git a/src/client/websocket/handlers/index.js b/src/client/websocket/handlers/index.js
+index 53892eafaa3c5adb2aad0e1c227510b671363e39..e8eb15fcc1546ecf1ccca84ce66fe40dc28f223a 100644
+--- a/src/client/websocket/handlers/index.js
++++ b/src/client/websocket/handlers/index.js
+@@ -21,9 +21,6 @@ const handlers = Object.fromEntries([
+   ['GUILD_ROLE_UPDATE', require('./GUILD_ROLE_UPDATE')],
+   ['GUILD_STICKERS_UPDATE', require('./GUILD_STICKERS_UPDATE')],
+   ['GUILD_UPDATE', require('./GUILD_UPDATE')],
+-  ['INTEGRATION_CREATE', require('./INTEGRATION_CREATE')],
+-  ['INTEGRATION_DELETE', require('./INTEGRATION_DELETE')],
+-  ['INTEGRATION_UPDATE', require('./INTEGRATION_UPDATE')],
+   ['INTERACTION_CREATE', require('./INTERACTION_CREATE')],
+   ['INVITE_CREATE', require('./INVITE_CREATE')],
+   ['INVITE_DELETE', require('./INVITE_DELETE')],
 diff --git a/src/structures/ActionRowBuilder.js b/src/structures/ActionRowBuilder.js
 index 871d519533caa340099f898fc81da0efa56432da..bfa68e0d3b78d306a763ed030ad9fefa814f845e 100644
 --- a/src/structures/ActionRowBuilder.js
@@ -176,7 +190,7 @@ index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..0136a626eadbc74f61dec1853509cb3b
     * Creates a new button builder from JSON data
     * @param {JSONEncodable<APIButtonComponent>|APIButtonComponent} other The other data
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
-index d3c586a3beecbe02356bef6b0a4804056c295988..ce920b9046f3677ffe23efb947313c2316f00cad 100644
+index d3c586a3beecbe02356bef6b0a4804056c295988..34921507a975be2967892ebd350ad686279e1f25 100644
 --- a/src/structures/GuildEmoji.js
 +++ b/src/structures/GuildEmoji.js
 @@ -55,8 +55,9 @@ class GuildEmoji extends BaseGuildEmoji {
@@ -192,7 +206,7 @@ index d3c586a3beecbe02356bef6b0a4804056c295988..ce920b9046f3677ffe23efb947313c23
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index 2da967d34c9650888a02cbf27ab28cb48524a6a6..a99cc2252dc3ea0de248eed185952dcac6a7e65c 100644
+index 2da967d34c9650888a02cbf27ab28cb48524a6a6..4c90c5a227dd45c63a1b23112e72a1726ea7a35e 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -239,8 +239,9 @@ class GuildMember extends Base {
