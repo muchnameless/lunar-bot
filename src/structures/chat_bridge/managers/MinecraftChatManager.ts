@@ -7,7 +7,7 @@ import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import minecraftData from 'minecraft-data';
 import ms from 'ms';
-import emojiRegexBuilder from 'emoji-regex/es2015';
+import { TwemojiRegex } from '@sapphire/discord-utilities';
 import { jaroWinkler } from '@skyra/jaro-winkler';
 import {
 	INVISIBLE_CHARACTER_REGEXP,
@@ -150,8 +150,6 @@ class LastMessages {
 		this.cache[this.index] = LastMessages._cleanContent(content);
 	}
 }
-
-const emojiRegex = emojiRegexBuilder();
 
 export class MinecraftChatManager<loggedIn extends boolean = boolean> extends ChatManager {
 	/**
@@ -605,7 +603,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			)
 				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 				.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
-				.replace(emojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
+				.replace(TwemojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
 				// replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
 				.replace(/(?<![¯\\])\\(?=[^a-z\d\\ \n])/gi, '')
 				.replace(/\\{2,}/g, (match) => {
