@@ -54,7 +54,7 @@
 		"prettier": "^2.6.2",
 		"prismarine-chat": "^1.6.1",
 		"prismarine-nbt": "^2.2.1",
-		"re2": "^1.17.4",
+		"re2": "^1.17.6",
 		"sequelize": "6.20.1",
 		"timezonecomplete": "^5.12.4",
 		"tslib": "^2.4.0",
