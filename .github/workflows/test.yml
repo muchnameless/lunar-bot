@@ -24,7 +24,10 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: yarn --immutable
+        run: |
+          sudo apt update
+          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
+          yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -49,7 +52,10 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: yarn --immutable
+        run: |
+          sudo apt update
+          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
+          yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
