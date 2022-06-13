@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+        with:
+          persist-credentials: false
 
       - name: Install Node.js v18
         uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3
@@ -22,10 +24,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
-          yarn --immutable
+        run: yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -39,6 +38,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+        with:
+          persist-credentials: false
 
       - name: Install Node.js v18
         uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3
@@ -48,10 +49,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
-          yarn --immutable
+        run: yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
