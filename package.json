@@ -58,7 +58,7 @@
 		"sequelize": "6.20.1",
 		"timezonecomplete": "^5.12.4",
 		"tslib": "^2.4.0",
-		"undici": "^5.4.0",
+		"undici": "^5.5.1",
 		"utf-8-validate": "^5.0.9"
 	},
 	"devDependencies": {
