@@ -59,15 +59,13 @@ import * as functions from '../../functions';
 import * as nwFunctions from '../../structures/networth/functions';
 nwFunctions;
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { calculateItemPrice, switchNetworthDebugging } from '../../structures/networth/networth';
+import { calculateItemPrice } from '../../structures/networth/networth';
 calculateItemPrice;
-switchNetworthDebugging;
-import { accessories, itemUpgrades, populateCaches, prices, unknownItems } from '../../structures/networth/prices';
+import { accessories, itemUpgrades, populateCaches, prices } from '../../structures/networth/prices';
 accessories;
 itemUpgrades;
 populateCaches;
 prices;
-unknownItems;
 import { jobs } from '../../jobs';
 jobs;
 import { sequelize, sql } from '../../structures/database';
@@ -120,24 +118,6 @@ export default class EvalCommand extends ApplicationCommand {
 					option //
 						.setName('async')
 						.setDescription('wrap the code in an async IIFE')
-						.setRequired(false),
-				)
-				.addMentionableOption((option) =>
-					option //
-						.setName('mention')
-						.setDescription('provided via the "mention" variable')
-						.setRequired(false),
-				)
-				.addChannelOption((option) =>
-					option //
-						.setName('channel')
-						.setDescription('provided via the "channel" variable')
-						.setRequired(false),
-				)
-				.addAttachmentOption((option) =>
-					option //
-						.setName('attachment')
-						.setDescription('provided via the "attachment" variable')
 						.setRequired(false),
 				),
 			message: new ContextMenuCommandBuilder().setName('Evaluate content'),
@@ -249,17 +229,12 @@ export default class EvalCommand extends ApplicationCommand {
 		};
 		const i = interaction;
 		const { client, config } = this;
-		const { guild, guild: g, user, user: author, member, member: m } = interaction;
+		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { discordGuilds, hypixelGuilds, players, taxCollectors, db, rest } = client;
 		const me = guild?.members.me ?? null;
 		const player = UserUtil.getPlayer(user);
 		const p = player;
 		const bridges = client.chatBridges.cache;
-		const mention = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getMentionable('mention');
-		const channel =
-			(interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getChannel('channel') ?? interaction.channel;
-		const ch = channel;
-		const attachment = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getAttachment('attachment');
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed //
@@ -280,6 +255,8 @@ export default class EvalCommand extends ApplicationCommand {
 				useTabs: true,
 			});
 		} catch (error) {
+			this._addInputToResponseEmbed(responseEmbed, _input, isAsync);
+
 			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
 		}
 
@@ -305,12 +282,7 @@ export default class EvalCommand extends ApplicationCommand {
 			toEvaluate = input;
 		}
 
-		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
-			responseEmbed.addFields({
-				name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
-				value: inputPart,
-			});
-		}
+		this._addInputToResponseEmbed(responseEmbed, input, isAsync);
 
 		try {
 			stopwatch.restart();
@@ -365,6 +337,21 @@ export default class EvalCommand extends ApplicationCommand {
 			logger.debug(error, '[EVAL ERROR]');
 
 			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
+		}
+	}
+
+	/**
+	 * @param responseEmbed
+	 * @param input
+	 * @param isAsync
+	 */
+	// eslint-disable-next-line class-methods-use-this
+	private _addInputToResponseEmbed(responseEmbed: EmbedBuilder, input: string, isAsync: boolean) {
+		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
+			responseEmbed.addFields({
+				name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
+				value: inputPart,
+			});
 		}
 	}
 
