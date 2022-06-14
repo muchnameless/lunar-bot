@@ -59,13 +59,15 @@ import * as functions from '../../functions';
 import * as nwFunctions from '../../structures/networth/functions';
 nwFunctions;
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { calculateItemPrice } from '../../structures/networth/networth';
+import { calculateItemPrice, switchNetworthDebugging } from '../../structures/networth/networth';
 calculateItemPrice;
-import { accessories, itemUpgrades, populateCaches, prices } from '../../structures/networth/prices';
+switchNetworthDebugging;
+import { accessories, itemUpgrades, populateCaches, prices, unknownItems } from '../../structures/networth/prices';
 accessories;
 itemUpgrades;
 populateCaches;
 prices;
+unknownItems;
 import { jobs } from '../../jobs';
 jobs;
 import { sequelize, sql } from '../../structures/database';
@@ -118,6 +120,24 @@ export default class EvalCommand extends ApplicationCommand {
 					option //
 						.setName('async')
 						.setDescription('wrap the code in an async IIFE')
+						.setRequired(false),
+				)
+				.addMentionableOption((option) =>
+					option //
+						.setName('mention')
+						.setDescription('provided via the "mention" variable')
+						.setRequired(false),
+				)
+				.addChannelOption((option) =>
+					option //
+						.setName('channel')
+						.setDescription('provided via the "channel" variable')
+						.setRequired(false),
+				)
+				.addAttachmentOption((option) =>
+					option //
+						.setName('attachment')
+						.setDescription('provided via the "attachment" variable')
 						.setRequired(false),
 				),
 			message: new ContextMenuCommandBuilder().setName('Evaluate content'),
@@ -204,6 +224,8 @@ export default class EvalCommand extends ApplicationCommand {
 			throw `eval is restricted to ${userMention(this.client.ownerId)}`;
 		}
 
+		const stopwatch = new Stopwatch();
+
 		/* eslint-disable @typescript-eslint/no-unused-vars */
 		const reply = (options: string | InteractionUtilReplyOptions) =>
 			InteractionUtil.reply(
@@ -227,12 +249,17 @@ export default class EvalCommand extends ApplicationCommand {
 		};
 		const i = interaction;
 		const { client, config } = this;
-		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
+		const { guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { discordGuilds, hypixelGuilds, players, taxCollectors, db, rest } = client;
 		const me = guild?.members.me ?? null;
 		const player = UserUtil.getPlayer(user);
 		const p = player;
 		const bridges = client.chatBridges.cache;
+		const mention = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getMentionable('mention');
+		const channel =
+			(interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getChannel('channel') ?? interaction.channel;
+		const ch = channel;
+		const attachment = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getAttachment('attachment');
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed //
@@ -242,13 +269,20 @@ export default class EvalCommand extends ApplicationCommand {
 			});
 
 		// format input
-		let input = format(_input.trim(), {
-			parser: 'typescript',
-			singleQuote: true,
-			printWidth: 120,
-			trailingComma: 'all',
-			useTabs: true,
-		});
+		let input: string;
+
+		try {
+			input = format(_input.trim(), {
+				parser: 'typescript',
+				singleQuote: true,
+				printWidth: 120,
+				trailingComma: 'all',
+				useTabs: true,
+			});
+		} catch (error) {
+			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
+		}
+
 		let toEvaluate: string;
 
 		// wrap input in async IIFE
@@ -278,10 +312,6 @@ export default class EvalCommand extends ApplicationCommand {
 			});
 		}
 
-		const stopwatch = new Stopwatch();
-
-		let files: JSONEncodable<AttachmentPayload>[] | undefined;
-
 		try {
 			stopwatch.restart();
 
@@ -301,6 +331,7 @@ export default class EvalCommand extends ApplicationCommand {
 			const CLEANED_OUTPUT = this._cleanOutput(evaled, inspectDepth);
 			const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
 
+			let files: JSONEncodable<AttachmentPayload>[] | undefined;
 			let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
 
 			// add output fields till embed character limit is reached
@@ -326,41 +357,76 @@ export default class EvalCommand extends ApplicationCommand {
 				name: '\u200B',
 				value: FOOTER_FIELD,
 			});
+
+			return this._respond(interaction, responseEmbed, files, inspectDepth);
 		} catch (error) {
 			stopwatch.stop();
 
 			logger.debug(error, '[EVAL ERROR]');
 
-			const errorType = new Type(error);
-			const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
-			const CLEANED_OUTPUT = this._cleanOutput(error, inspectDepth);
+			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
+		}
+	}
 
-			let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
+	/**
+	 * @param interaction
+	 * @param error
+	 * @param responseEmbed
+	 * @param stopwatch
+	 * @param inspectDepth
+	 */
+	private _respondWithError(
+		interaction: RepliableInteraction<'cachedOrDM'>,
+		error: unknown,
+		responseEmbed: EmbedBuilder,
+		stopwatch: Stopwatch,
+		inspectDepth: number,
+	) {
+		const errorType = new Type(error);
+		const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
+		const CLEANED_OUTPUT = this._cleanOutput(error, inspectDepth);
 
-			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
-				const name = index ? '\u200B' : 'Error';
+		let files: JSONEncodable<AttachmentPayload>[] | undefined;
+		let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
 
-				// embed size overflow -> convert output to file
-				if ((length += name.length + value.length) > EmbedLimits.MaximumTotalCharacters) {
-					// remove error fields
-					responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
-						name: 'Error',
-						value: 'result.ts',
-					});
-					// add files
-					files = this._getFiles(interaction, CLEANED_OUTPUT);
-					break;
-				}
+		for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
+			const name = index ? '\u200B' : 'Error';
 
-				responseEmbed.addFields({ name, value });
+			// embed size overflow -> convert output to file
+			if ((length += name.length + value.length) > EmbedLimits.MaximumTotalCharacters) {
+				// remove error fields
+				responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
+					name: 'Error',
+					value: 'result.ts',
+				});
+				// add files
+				files = this._getFiles(interaction, CLEANED_OUTPUT);
+				break;
 			}
 
-			responseEmbed.addFields({
-				name: '\u200B',
-				value: FOOTER_FIELD,
-			});
+			responseEmbed.addFields({ name, value });
 		}
 
+		responseEmbed.addFields({
+			name: '\u200B',
+			value: FOOTER_FIELD,
+		});
+
+		return this._respond(interaction, responseEmbed, files, inspectDepth);
+	}
+
+	/**
+	 * @param interaction
+	 * @param responseEmbed
+	 * @param files
+	 * @param inspectDepth
+	 */
+	private _respond(
+		interaction: RepliableInteraction<'cachedOrDM'>,
+		responseEmbed: EmbedBuilder,
+		files: JSONEncodable<AttachmentPayload>[] | undefined,
+		inspectDepth: number,
+	) {
 		return InteractionUtil.replyOrUpdate(interaction, {
 			embeds: [responseEmbed],
 			components: [
