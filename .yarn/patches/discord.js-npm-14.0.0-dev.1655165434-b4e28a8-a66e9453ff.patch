@@ -31,17 +31,25 @@ index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..3f8541aa69cce977defd11e2d79188c0
      // Step 4: Cache the old sequence (use to attempt a resume)
      if (this.sequence !== -1) this.closeSequence = this.sequence;
 diff --git a/src/structures/ActionRowBuilder.js b/src/structures/ActionRowBuilder.js
-index 871d519533caa340099f898fc81da0efa56432da..bfa68e0d3b78d306a763ed030ad9fefa814f845e 100644
+index 379b0e1f43273c4f979203e4087af3a4f654df19..fabdac796e2005ab2e03704c3cf18fbb077c2e54 100644
 --- a/src/structures/ActionRowBuilder.js
 +++ b/src/structures/ActionRowBuilder.js
-@@ -9,13 +9,6 @@ const Transformers = require('../util/Transformers');
+@@ -1,21 +1,12 @@
+ 'use strict';
+ 
+ const { ActionRowBuilder: BuildersActionRow, ComponentBuilder, isJSONEncodable } = require('@discordjs/builders');
+-const { createComponentBuilder } = require('../util/Components');
+-const { toSnakeCase } = require('../util/Transformers');
+ 
+ /**
+  * Represents an action row builder.
   * @extends {BuildersActionRow}
   */
  class ActionRowBuilder extends BuildersActionRow {
 -  constructor({ components, ...data } = {}) {
 -    super({
--      ...Transformers.toSnakeCase(data),
--      components: components?.map(c => (c instanceof ComponentBuilder ? c : Components.createComponentBuilder(c))),
+-      ...toSnakeCase(data),
+-      components: components?.map(c => (c instanceof ComponentBuilder ? c : createComponentBuilder(c))),
 -    });
 -  }
 -
@@ -49,10 +57,17 @@ index 871d519533caa340099f898fc81da0efa56432da..bfa68e0d3b78d306a763ed030ad9fefa
     * Creates a new action row builder from JSON data
     * @param {JSONEncodable<APIActionRowComponent<APIActionRowComponentTypes>>
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
-index fe4ce59a2ad3be68cb3313314a08ae993de8c039..5e6adae3599626e49772ef356bfd06204f8b43e0 100644
+index f904cb84b34ef249eba111282e28b6307695ce4d..528843909e65ff4293b1a9efc71ec757402d7a38 100644
 --- a/src/structures/AttachmentBuilder.js
 +++ b/src/structures/AttachmentBuilder.js
-@@ -7,25 +7,19 @@ const Util = require('../util/Util');
+@@ -1,31 +1,25 @@
+ 'use strict';
+ 
+-const { basename, flatten } = require('../util/Util');
++const { basename } = require('../util/Util');
+ 
+ /**
+  * Represents an attachment builder
   */
  class AttachmentBuilder {
    /**
@@ -114,12 +129,12 @@ index fe4ce59a2ad3be68cb3313314a08ae993de8c039..5e6adae3599626e49772ef356bfd0620
     * @readonly
     */
    get spoiler() {
--    return Util.basename(this.name).startsWith('SPOILER_');
-+    return Util.basename(this.data.name ?? '').startsWith('SPOILER_');
+-    return basename(this.name).startsWith('SPOILER_');
++    return basename(this.data.name ?? '').startsWith('SPOILER_');
    }
  
    toJSON() {
--    return Util.flatten(this);
+-    return flatten(this);
 +    return { ...this.data, attachment: this.attachment };
    }
  
@@ -140,14 +155,15 @@ index fe4ce59a2ad3be68cb3313314a08ae993de8c039..5e6adae3599626e49772ef356bfd0620
  }
  
 diff --git a/src/structures/ButtonBuilder.js b/src/structures/ButtonBuilder.js
-index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..0136a626eadbc74f61dec1853509cb3b63e8864b 100644
+index 671a77a8f574c3892055bc6d073fa5439c14cbc9..fe7c86df56acdf30b510bd7ec2f3e4bfe96d9777 100644
 --- a/src/structures/ButtonBuilder.js
 +++ b/src/structures/ButtonBuilder.js
-@@ -2,31 +2,12 @@
+@@ -1,30 +1,12 @@
+ 'use strict';
  
  const { ButtonBuilder: BuildersButton, isJSONEncodable } = require('@discordjs/builders');
- const Transformers = require('../util/Transformers');
--const Util = require('../util/Util');
+-const { toSnakeCase } = require('../util/Transformers');
+-const { parseEmoji } = require('../util/Util');
  
  /**
   * Represents a button builder.
@@ -155,9 +171,7 @@ index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..0136a626eadbc74f61dec1853509cb3b
   */
  class ButtonBuilder extends BuildersButton {
 -  constructor({ emoji, ...data } = {}) {
--    super(
--      Transformers.toSnakeCase({ ...data, emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji }),
--    );
+-    super(toSnakeCase({ ...data, emoji: emoji && typeof emoji === 'string' ? parseEmoji(emoji) : emoji }));
 -  }
 -
 -  /**
@@ -167,7 +181,7 @@ index c427ce3c7516c88a36613255d6f7914aa7eb9ffa..0136a626eadbc74f61dec1853509cb3b
 -   */
 -  setEmoji(emoji) {
 -    if (typeof emoji === 'string') {
--      return super.setEmoji(Util.parseEmoji(emoji));
+-      return super.setEmoji(parseEmoji(emoji));
 -    }
 -    return super.setEmoji(emoji);
 -  }
@@ -251,7 +265,7 @@ index 03b41500f925306a972fc3fc8972c7443e1bb654..2f184fd87582988bc97781643ec99c4a
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 32e6fd74e8e17dadf2f4d573bd98bf494042743c..5b4c930bea77c7326f87a1d3ee54bb652f46e75b 100644
+index 86dbbff6ccf05d7ac3fb79f75201aa2e6da99c5a..853f170ed3c9e015bd837c4cb12c224a66d58d23 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -418,7 +432,7 @@ index 32e6fd74e8e17dadf2f4d573bd98bf494042743c..5b4c930bea77c7326f87a1d3ee54bb65
 -        channel: this.channel,
 +        channel,
          message: this,
-         emoji: Util.resolvePartialEmoji(emoji),
+         emoji: resolvePartialEmoji(emoji),
        },
 @@ -753,8 +771,9 @@ class Message extends Base {
     *   .catch(console.error);
@@ -481,15 +495,15 @@ index 32e6fd74e8e17dadf2f4d573bd98bf494042743c..5b4c930bea77c7326f87a1d3ee54bb65
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 3f1769bcdb78873de1b37513e1bca33c4836b78a..e9bf087ca39bca2f9a78dbaa592c6e9f7e687322 100644
+index 395a412e9ff4505e38abd7fa62c1fbf326a17f81..76df570898a6c9759b4d5552afd17c2ae4e434d4 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -105,7 +105,7 @@ class MessagePayload {
      if (this.options.content === null) {
        content = '';
      } else if (typeof this.options.content !== 'undefined') {
--      content = Util.verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE', true);
-+      content = Util.verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE');
+-      content = verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE', true);
++      content = verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE');
      }
  
      return content;
@@ -523,15 +537,15 @@ index 8929d54ed2f33e6409cf167215010c1548bef42a..ed3f1b8a300debb9dca2a37a227b65e8
  
  module.exports = ModalSubmitFields;
 diff --git a/src/structures/SelectMenuBuilder.js b/src/structures/SelectMenuBuilder.js
-index 4d3c7710d4f7208f19eed2b5188dd21622725e1d..3bccdb1d9b756940f2c7f8d532c6f779e44ae0a4 100644
+index 0e6656ccb2600caba6ecda97fca0f6b82eeb9e32..3bccdb1d9b756940f2c7f8d532c6f779e44ae0a4 100644
 --- a/src/structures/SelectMenuBuilder.js
 +++ b/src/structures/SelectMenuBuilder.js
 @@ -1,54 +1,12 @@
  'use strict';
  
 -const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable, normalizeArray } = require('@discordjs/builders');
--const Transformers = require('../util/Transformers');
--const Util = require('../util/Util');
+-const { toSnakeCase } = require('../util/Transformers');
+-const { parseEmoji } = require('../util/Util');
 +const { SelectMenuBuilder: BuildersSelectMenu, isJSONEncodable } = require('@discordjs/builders');
  
  /**
@@ -541,11 +555,11 @@ index 4d3c7710d4f7208f19eed2b5188dd21622725e1d..3bccdb1d9b756940f2c7f8d532c6f779
  class SelectMenuBuilder extends BuildersSelectMenu {
 -  constructor({ options, ...data } = {}) {
 -    super(
--      Transformers.toSnakeCase({
+-      toSnakeCase({
 -        ...data,
 -        options: options?.map(({ emoji, ...option }) => ({
 -          ...option,
--          emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-          emoji: emoji && typeof emoji === 'string' ? parseEmoji(emoji) : emoji,
 -        })),
 -      }),
 -    );
@@ -560,7 +574,7 @@ index 4d3c7710d4f7208f19eed2b5188dd21622725e1d..3bccdb1d9b756940f2c7f8d532c6f779
 -    return super.addOptions(
 -      normalizeArray(options).map(({ emoji, ...option }) => ({
 -        ...option,
--        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-        emoji: emoji && typeof emoji === 'string' ? parseEmoji(emoji) : emoji,
 -      })),
 -    );
 -  }
@@ -574,7 +588,7 @@ index 4d3c7710d4f7208f19eed2b5188dd21622725e1d..3bccdb1d9b756940f2c7f8d532c6f779
 -    return super.setOptions(
 -      normalizeArray(options).map(({ emoji, ...option }) => ({
 -        ...option,
--        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-        emoji: emoji && typeof emoji === 'string' ? parseEmoji(emoji) : emoji,
 -      })),
 -    );
 -  }
@@ -583,15 +597,15 @@ index 4d3c7710d4f7208f19eed2b5188dd21622725e1d..3bccdb1d9b756940f2c7f8d532c6f779
     * Creates a new select menu builder from json data
     * @param {JSONEncodable<APISelectMenuComponent> | APISelectMenuComponent} other The other data
 diff --git a/src/structures/SelectMenuOptionBuilder.js b/src/structures/SelectMenuOptionBuilder.js
-index 981b8d0ecef4b93d96c798f5ecc51143761d0424..137cc4590ce3ec9240b03db0c2a7bb688d8f778a 100644
+index c5f0bd136b60f4ba424d9b6450c9524298d661b3..137cc4590ce3ec9240b03db0c2a7bb688d8f778a 100644
 --- a/src/structures/SelectMenuOptionBuilder.js
 +++ b/src/structures/SelectMenuOptionBuilder.js
 @@ -1,34 +1,12 @@
  'use strict';
  
  const { SelectMenuOptionBuilder: BuildersSelectMenuOption, isJSONEncodable } = require('@discordjs/builders');
--const Transformers = require('../util/Transformers');
--const Util = require('../util/Util');
+-const { toSnakeCase } = require('../util/Transformers');
+-const { parseEmoji } = require('../util/Util');
  
  /**
   * Represents a select menu option builder.
@@ -600,9 +614,9 @@ index 981b8d0ecef4b93d96c798f5ecc51143761d0424..137cc4590ce3ec9240b03db0c2a7bb68
  class SelectMenuOptionBuilder extends BuildersSelectMenuOption {
 -  constructor({ emoji, ...data } = {}) {
 -    super(
--      Transformers.toSnakeCase({
+-      toSnakeCase({
 -        ...data,
--        emoji: emoji && typeof emoji === 'string' ? Util.parseEmoji(emoji) : emoji,
+-        emoji: emoji && typeof emoji === 'string' ? parseEmoji(emoji) : emoji,
 -      }),
 -    );
 -  }
@@ -613,7 +627,7 @@ index 981b8d0ecef4b93d96c798f5ecc51143761d0424..137cc4590ce3ec9240b03db0c2a7bb68
 -   */
 -  setEmoji(emoji) {
 -    if (typeof emoji === 'string') {
--      return super.setEmoji(Util.parseEmoji(emoji));
+-      return super.setEmoji(parseEmoji(emoji));
 -    }
 -    return super.setEmoji(emoji);
 -  }
@@ -622,32 +636,32 @@ index 981b8d0ecef4b93d96c798f5ecc51143761d0424..137cc4590ce3ec9240b03db0c2a7bb68
     * Creates a new select menu option builder from JSON data
     * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 6b3a693d4c72bcd273d15d5b095b21684b857b3e..4b1630b12354c73b7966a84e53a455258d751a87 100644
+index 75b13d0eead1dc98a8ab5ed71b08ae59eb531b5e..9807045f21ec088ef55e7e6ab421bbd830da0bcc 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
-@@ -359,17 +359,14 @@ class Util extends null {
-    * @param {string} data The string resolvable to resolve
-    * @param {Function} [error] The Error constructor to instantiate. Defaults to Error
-    * @param {string} [errorMessage] The error message to throw with. Defaults to "Expected string, got <data> instead."
--   * @param {boolean} [allowEmpty=true] Whether an empty string should be allowed
-    * @returns {string}
-    */
-   static verifyString(
-     data,
-     error = Error,
-     errorMessage = `Expected a string, got ${data} instead.`,
--    allowEmpty = true,
-   ) {
-     if (typeof data !== 'string') throw new error(errorMessage);
--    if (!allowEmpty && data.length === 0) throw new error(errorMessage);
-     return data;
-   }
+@@ -355,17 +355,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
+  * @param {string} data The string resolvable to resolve
+  * @param {Function} [error] The Error constructor to instantiate. Defaults to Error
+  * @param {string} [errorMessage] The error message to throw with. Defaults to "Expected string, got <data> instead."
+- * @param {boolean} [allowEmpty=true] Whether an empty string should be allowed
+  * @returns {string}
+  */
+ function verifyString(
+   data,
+   error = Error,
+   errorMessage = `Expected a string, got ${data} instead.`,
+-  allowEmpty = true,
+ ) {
+   if (typeof data !== 'string') throw new error(errorMessage);
+-  if (!allowEmpty && data.length === 0) throw new error(errorMessage);
+   return data;
+ }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53da6a269a 100644
+index 862b12a83bbf0bcfaeeed1d4558a571f39b9b019..188a0458e74b8ab1a11dda243435237150902540 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -257,7 +257,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+@@ -258,7 +258,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
  }
  
  export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
@@ -656,7 +670,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -396,20 +396,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
+@@ -397,20 +397,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
    replied: boolean;
    webhook: InteractionWebhook;
    reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<Message>;
@@ -681,7 +695,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
  }
  
  export type BooleanCache<T extends CacheType> = T extends 'cached' ? true : false;
-@@ -1467,7 +1462,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1469,7 +1464,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -690,7 +704,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1475,12 +1470,18 @@ export type CacheTypeReducer<
+@@ -1477,12 +1472,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -709,7 +723,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
    : Fallback;
  
  export type AnyInteraction<Cached extends CacheType = CacheType> =
-@@ -1502,7 +1503,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1504,7 +1505,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -719,7 +733,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1510,7 +1512,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1512,7 +1514,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -728,7 +742,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1726,16 +1728,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1728,16 +1730,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -749,7 +763,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1941,6 +1942,7 @@ export class ModalSubmitFields {
+@@ -1943,6 +1944,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -757,7 +771,16 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3533,11 +3535,6 @@ export interface BaseApplicationCommandData {
+@@ -3081,7 +3083,7 @@ export class ApplicationCommandPermissionsManager<
+     },
+   ): Promise<boolean>;
+   public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
+-  public fetch(options: BaseOptions): Promise<Collection<Snowflake, ApplicationCommandPermissions[]>>;
++  public fetch(options?: BaseOptions): Promise<Collection<Snowflake, ApplicationCommandPermissions[]>>;
+   public remove(
+     options:
+       | (FetchSingleOptions & {
+@@ -3537,11 +3539,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable;
  }
  
@@ -769,7 +792,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4811,10 +4808,8 @@ export interface MessageEditOptions {
+@@ -4823,10 +4820,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -781,7 +804,7 @@ index 80114745956d8a50748d17cf1bccbb9fea77e0c5..424748a0e7d6d400fa23073bb28fae53
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -4869,10 +4864,8 @@ export interface MessageOptions {
+@@ -4881,10 +4876,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream

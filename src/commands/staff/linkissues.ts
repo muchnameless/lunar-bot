@@ -1,4 +1,4 @@
-import { bold, SlashCommandBuilder, userMention, Util } from 'discord.js';
+import { bold, escapeMarkdown, SlashCommandBuilder, userMention } from 'discord.js';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { escapeIgn, splitMessage } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -55,7 +55,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		if (missingMandatoryRole.length) {
 			for (const value of splitMessage(
 				missingMandatoryRole
-					.map((member) => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
+					.map((member) => `${member} | ${escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
 					.join('\n'),
 				{ char: '\n', maxLength: 1_024 },
 			)) {
@@ -74,7 +74,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		if (guildRoleAndNotInGuild.length) {
 			for (const value of splitMessage(
 				guildRoleAndNotInGuild
-					.map((member) => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
+					.map((member) => `${member} | ${escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
 					.join('\n'),
 				{ char: '\n', maxLength: 1_024 },
 			)) {
@@ -110,8 +110,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				? splitMessage(
 						unlinkedGuildPlayers
 							.map(
-								({ ign, discordId }) =>
-									`${escapeIgn(ign)} | ${discordId ? Util.escapeMarkdown(discordId) : 'unknown tag'}`,
+								({ ign, discordId }) => `${escapeIgn(ign)} | ${discordId ? escapeMarkdown(discordId) : 'unknown tag'}`,
 							)
 							.join('\n'),
 						{ char: '\n', maxLength: 1_024 },

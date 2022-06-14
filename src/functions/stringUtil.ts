@@ -1,5 +1,5 @@
 import { jaroWinkler } from '@skyra/jaro-winkler';
-import { codeBlock, Util } from 'discord.js';
+import { cleanCodeBlockContent, codeBlock, escapeCodeBlock } from 'discord.js';
 import { EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
 import { SMALL_LATIN_CAPITAL_LETTERS, AnsiFormat } from '../constants';
@@ -265,7 +265,7 @@ export function makeContent(text = '', options: MakeContentOptions = {}) {
 	if (isCode) {
 		const codeName = typeof options.code === 'string' ? options.code : '';
 
-		content = codeBlock(codeName, Util.cleanCodeBlockContent(content));
+		content = codeBlock(codeName, cleanCodeBlockContent(content));
 
 		if (splitOptions) {
 			splitOptions.prepend = `${splitOptions.prepend ?? ''}\`\`\`${codeName}\n`;
@@ -287,7 +287,7 @@ export function splitForEmbedFields(
 	input: string,
 	code = '',
 	char = '\n',
-	formatter: (text: string) => string = Util.escapeCodeBlock,
+	formatter: (text: string) => string = escapeCodeBlock,
 ) {
 	const formattedInput = formatter(input);
 

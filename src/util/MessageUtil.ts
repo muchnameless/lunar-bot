@@ -1,5 +1,12 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import { DiscordAPIError, MessageFlags, MessageType, PermissionFlagsBits, RESTJSONErrorCodes, Util } from 'discord.js';
+import {
+	DiscordAPIError,
+	MessageFlags,
+	MessageType,
+	PermissionFlagsBits,
+	resolvePartialEmoji,
+	RESTJSONErrorCodes,
+} from 'discord.js';
 import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
 import { commaListAnd, seconds } from '../functions';
@@ -96,7 +103,7 @@ export class MessageUtil extends null {
 	 * @param emojiIndetifier
 	 */
 	private static _reactSingle(message: Message, emojiIndetifier: EmojiIdentifierResolvable) {
-		const emoji = Util.resolvePartialEmoji(emojiIndetifier);
+		const emoji = resolvePartialEmoji(emojiIndetifier);
 		const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
 
 		return reaction?.me

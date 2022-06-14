@@ -1,4 +1,4 @@
-import { Collection, userMention, Util } from 'discord.js';
+import { Collection, escapeMarkdown as djsEscapeMarkdown, userMention } from 'discord.js';
 import { Op } from 'sequelize';
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '../../../functions';
@@ -94,7 +94,7 @@ export class DiscordManager {
 	 */
 	async parseContent(string: string, fromMinecraft = false) {
 		return escapeMarkdown(
-			Util.escapeMarkdown(
+			djsEscapeMarkdown(
 				// @mentions
 				(
 					await asyncReplace(string, /(?<!<)@(?<type>!|&)?(?<name>\w+)(?!\d{17,19}>)/g, async (match) => {

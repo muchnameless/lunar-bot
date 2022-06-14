@@ -1,11 +1,11 @@
 import {
 	ActionRowBuilder,
+	escapeMarkdown,
 	InteractionType,
 	ModalBuilder,
 	SlashCommandBuilder,
 	TextInputBuilder,
 	TextInputStyle,
-	Util,
 } from 'discord.js';
 import { TextInputLimits } from '@sapphire/discord-utilities';
 import BigDecimal from 'js-big-decimal';
@@ -472,13 +472,10 @@ export default class MathsCommand extends DualCommand {
 		try {
 			const { input, formattedOutput } = this.calculate(rawInput);
 
-			return InteractionUtil.reply(
-				interaction,
-				Util.escapeMarkdown(`${input} = ${formattedOutput}`, { inlineCode: false }),
-			);
+			return InteractionUtil.reply(interaction, escapeMarkdown(`${input} = ${formattedOutput}`, { inlineCode: false }));
 		} catch (error) {
 			if (interaction.type === InteractionType.ModalSubmit) {
-				return InteractionUtil.reply(interaction, Util.escapeMarkdown(`${error}`, { inlineCode: false }));
+				return InteractionUtil.reply(interaction, escapeMarkdown(`${error}`, { inlineCode: false }));
 			}
 
 			try {
@@ -513,7 +510,7 @@ export default class MathsCommand extends DualCommand {
 				);
 			} catch (_error) {
 				logger.error(_error, '[MATHS]: modal');
-				return InteractionUtil.reply(interaction, Util.escapeMarkdown(`${error}`, { inlineCode: false }));
+				return InteractionUtil.reply(interaction, escapeMarkdown(`${error}`, { inlineCode: false }));
 			}
 		}
 	}

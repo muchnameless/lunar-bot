@@ -20,10 +20,8 @@ import Discord, {
 	TextInputBuilder,
 	TextInputStyle,
 	userMention,
-	Util,
 } from 'discord.js';
-Util; // unused imports are 'used' so that tsc doesn't remove them
-Routes;
+Routes; // unused imports are 'used' so that tsc doesn't remove them
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import { regExpEsc } from '@sapphire/utilities';
