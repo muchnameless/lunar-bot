@@ -471,8 +471,8 @@ export async function getNetworth(
 		(addBanking ? banking?.balance ?? ((bankingAPIEnabled = false), 0) : 0) +
 		// purse
 		(member.coin_purse ?? 0) +
-		// personal bank
-		(member.bank_account ?? 0);
+		// personal bank (for co-op members)
+		(Object.keys(members).length > 1 ? member.bank_account ?? 0 : 0);
 
 	const promises: Promise<number>[] = [];
 
