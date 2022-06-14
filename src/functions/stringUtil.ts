@@ -178,7 +178,7 @@ function concatMessageChunks(
 
 export interface SplitOptions {
 	maxLength?: number;
-	char?: string | RegExp | (string | RegExp)[];
+	char?: string | string[];
 	prepend?: string;
 	append?: string;
 }
@@ -200,43 +200,21 @@ export function splitMessage(
 		while (char.length && splitText.some(({ length }) => length > maxLength)) {
 			const currentChar = char.shift()!;
 
-			splitText =
-				currentChar instanceof RegExp
-					? splitText.flatMap((chunk) => {
-							if (chunk.length <= maxLength) return chunk;
-
-							if (currentChar.global) {
-								const matched = chunk.match(currentChar);
-
-								if (!matched) return chunk;
-
-								return matched.flatMap((match) =>
-									concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }),
-								);
-							}
-
-							// no global flag
-							const matched = chunk.match(currentChar)?.[0];
-
-							if (!matched) return chunk;
-
-							return concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
-					  })
-					: splitText.flatMap((chunk) =>
-							chunk.length > maxLength
-								? concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append })
-								: chunk,
-					  );
+			splitText = splitText.flatMap((chunk) =>
+				chunk.length > maxLength
+					? concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append })
+					: chunk,
+			);
 		}
 
-		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
+		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('[SPLIT MESSAGE]: SPLIT_MAX_LEN');
 
 		return splitText;
 	}
 
 	splitText = text.split(char);
 
-	if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
+	if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('[SPLIT MESSAGE]: SPLIT_MAX_LEN');
 
 	return concatMessageChunks(splitText, { maxLength, char: typeof char === 'string' ? char : '', append, prepend });
 }
