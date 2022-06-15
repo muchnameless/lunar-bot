@@ -371,7 +371,7 @@ export default class EvalCommand extends ApplicationCommand {
 	) {
 		const errorType = new Type(error);
 		const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
-		const CLEANED_OUTPUT = this._cleanOutput(error, inspectDepth);
+		const CLEANED_OUTPUT = this._cleanOutput(error, Number.POSITIVE_INFINITY);
 
 		let files: JSONEncodable<AttachmentPayload>[] | undefined;
 		let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
