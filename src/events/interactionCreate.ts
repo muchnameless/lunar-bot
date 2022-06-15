@@ -184,6 +184,7 @@ export default class InteractionCreateEvent extends Event {
 						files: interaction.message.attachments.map(({ url }) => url),
 						components,
 						ephemeral: false,
+						allowedMentions: { parse: [] },
 					});
 
 					// remove the button from the ephemeral message
