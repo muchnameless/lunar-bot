@@ -323,10 +323,10 @@ export class ApplicationCommand extends BaseCommand {
 
 		// user is not the owner at this point
 		if (this.category === 'owner') {
-			throw `the \`${this.name}\` command is restricted to the bot owner`;
+			throw `${interaction.user} is not in the sudoers file. This incident will be reported.`;
 		}
 
-		if (roleIds == null) return; // no role requirements
+		if (!roleIds) return; // no role requirements
 
 		const member =
 			interaction.guildId === hypixelGuild.discordId
