@@ -17,7 +17,7 @@ else
 			systemctl status lunar-bot.service
 			breaksw
 		case 'init':
-			sed "s@NODE@`which node`@ ; s@USER@$USER@ ; s@HOME@$HOME@" ~/lunar-bot/lunar-bot.service | sudo tee /etc/systemd/system/lunar-bot.service
+			sed "s@NODE@`which node`@g ; s@USER@$USER@g ; s@HOME@$HOME@g" ~/lunar-bot/lunar-bot.service | sudo tee /etc/systemd/system/lunar-bot.service
 			sudo systemctl daemon-reload
 			sudo systemctl enable lunar-bot
 			breaksw
