@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/tcsh -f
 
-curdir=`pwd`
+set curdir = `pwd`
 
 cd ~/lunar-bot
 
