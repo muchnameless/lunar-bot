@@ -381,7 +381,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 	}
 
 	// held item
-	if (pet.heldItem && level !== 200) {
+	if (pet.heldItem) {
 		price += getPrice(pet.heldItem) * PriceModifier.PetItem;
 	}
 
