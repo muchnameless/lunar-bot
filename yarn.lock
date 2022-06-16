@@ -3642,7 +3642,7 @@ __metadata:
     prismarine-chat: ^1.6.1
     prismarine-nbt: ^2.2.1
     re2: ^1.17.7
-    sequelize: 6.20.1
+    sequelize: 6.21.0
     timezonecomplete: ^5.12.4
     tslib: ^2.4.0
     typescript: ^4.8.0-dev.20220616
@@ -5220,9 +5220,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize@npm:6.20.1":
-  version: 6.20.1
-  resolution: "sequelize@npm:6.20.1"
+"sequelize@npm:6.21.0":
+  version: 6.21.0
+  resolution: "sequelize@npm:6.21.0"
   dependencies:
     "@types/debug": ^4.1.7
     "@types/validator": ^13.7.1
@@ -5257,48 +5257,7 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: 08a6f9e3fb9d31d87399b378802cc5a0531f93cfb5ac18e0b11dc0942cac4a886bbba2dbe5aa33dd3d7ba060d32891876ba0de5c03ebfb4f6459ce84f430be79
-  languageName: node
-  linkType: hard
-
-"sequelize@patch:sequelize@npm:6.20.1#.yarn/patches/sequelize-npm-6.20.1-38ae7d1966.patch::locator=lunar-bot%40workspace%3A.":
-  version: 6.20.1
-  resolution: "sequelize@patch:sequelize@npm%3A6.20.1#.yarn/patches/sequelize-npm-6.20.1-38ae7d1966.patch::version=6.20.1&hash=894203&locator=lunar-bot%40workspace%3A."
-  dependencies:
-    "@types/debug": ^4.1.7
-    "@types/validator": ^13.7.1
-    debug: ^4.3.3
-    dottie: ^2.0.2
-    inflection: ^1.13.2
-    lodash: ^4.17.21
-    moment: ^2.29.1
-    moment-timezone: ^0.5.34
-    pg-connection-string: ^2.5.0
-    retry-as-promised: ^5.0.0
-    semver: ^7.3.5
-    sequelize-pool: ^7.1.0
-    toposort-class: ^1.0.1
-    uuid: ^8.3.2
-    validator: ^13.7.0
-    wkx: ^0.5.0
-  peerDependenciesMeta:
-    ibm_db:
-      optional: true
-    mariadb:
-      optional: true
-    mysql2:
-      optional: true
-    pg:
-      optional: true
-    pg-hstore:
-      optional: true
-    snowflake-sdk:
-      optional: true
-    sqlite3:
-      optional: true
-    tedious:
-      optional: true
-  checksum: de0d17915aa69cddf9864ac99906f559a9903d569159fbf4cb8095fb12e6547848acc786bd2f80f1088171cbb92978f3bfacfa7c92c71ac7ace06ff4c58fb724
+  checksum: b863771d59343b57bfbdf4ab86cbc724719f4350f3053da0ed4942987e8a3c9bf8c18b7ebc9361be9216455988790bee501264ee0cba8b4caf28a8727a66459d
   languageName: node
   linkType: hard
 
