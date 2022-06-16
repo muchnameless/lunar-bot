@@ -658,7 +658,7 @@ index 75b13d0eead1dc98a8ab5ed71b08ae59eb531b5e..9807045f21ec088ef55e7e6ab421bbd8
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 862b12a83bbf0bcfaeeed1d4558a571f39b9b019..188a0458e74b8ab1a11dda243435237150902540 100644
+index da9532b40065647bfde03528148458be335a5e53..188a0458e74b8ab1a11dda243435237150902540 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -258,7 +258,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
