@@ -1,16 +1,25 @@
+# Packages and development
+node_modules
+.vscode
+
+# Build artifacts
+dist/
+
+# Log files
+log_buffer
+logs
+*.log
+*.heapsnapshot
+
+# Environment variables
 .env
 launcher_accounts.json
 
-.vscode
-*.heapsnapshot
-
-dist
-log_buffer
-logs
-node_modules
+# Tests and debug data
 src/tests
 data
 
+# Yarn files
 .pnp.*
 .yarn/*
 !.yarn/patches

@@ -20,7 +20,6 @@ else
 			sed "s@NODE@`which node`@ ; s@USER@$USER@ ; s@HOME@$HOME@" ~/lunar-bot/lunar-bot.service | sudo tee /etc/systemd/system/lunar-bot.service
 			sudo systemctl daemon-reload
 			sudo systemctl enable lunar-bot
-			sudo systemctl restart lunar-bot
 			breaksw
 		default:
 			echo "invalid args"
