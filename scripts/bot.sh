@@ -14,7 +14,18 @@ else
 			sudo systemctl restart lunar-bot
 			breaksw
 		case 'status':
-			systemctl status lunar-bot.service
+			set running = `cat ~/lunar-bot/running.log`
+			set current = `git rev-parse --short HEAD`
+
+			echo " --- latest"
+			echo " v"
+			if (running == current) then
+				git log --oneline -1
+			else
+				git log --oneline $running~1..$current
+			endif
+			echo " ^"
+			echo " --- running"
 			breaksw
 		case 'init':
 			sed "s@NODE@`which node`@g ; s@USER@$USER@g ; s@HOME@$HOME@g" ~/lunar-bot/lunar-bot.service | sudo tee /etc/systemd/system/lunar-bot.service
