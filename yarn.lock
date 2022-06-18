@@ -255,9 +255,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/builders@npm:0.16.0-dev.1655381038-4df491c":
-  version: 0.16.0-dev.1655381038-4df491c
-  resolution: "@discordjs/builders@npm:0.16.0-dev.1655381038-4df491c"
+"@discordjs/builders@npm:0.16.0-dev.1655510999-2681929":
+  version: 0.16.0-dev.1655510999-2681929
+  resolution: "@discordjs/builders@npm:0.16.0-dev.1655510999-2681929"
   dependencies:
     "@sapphire/shapeshift": ^3.1.0
     "@sindresorhus/is": ^4.6.0
@@ -265,7 +265,7 @@ __metadata:
     fast-deep-equal: ^3.1.3
     ts-mixer: ^6.0.1
     tslib: ^2.4.0
-  checksum: 0ad43efd5b37e623c42d01ca0aabcbc6301e80159c17b67eb1bc6cd87b7b46776317f5d5c3a7604f08060300cda1f4535507e54a010207cf5f39a53a16ff58f6
+  checksum: 2474d9e35f613307fbf3c0a4e841078e3c98c45b4ce130dc8c2e0d74b51585d62bff56549dbc560592c35ff00abe53c8c2c54f8ad395a8dec803a2072bdd1acd
   languageName: node
   linkType: hard
 
