@@ -17,7 +17,7 @@ if (`git rev-parse --short HEAD` != $current) then
 
 	echo ""
 	echo "compiling to js"
-	\time -p yarn build
+	\time -f 'Done in %E, CPU Usage %P' yarn build
 endif
 
 echo ""
