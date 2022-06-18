@@ -47,12 +47,12 @@ class Parser {
 		for (let token of input) {
 			switch (token) {
 				case '(':
-					stack.unshift(token);
+					stack.push(token);
 					break;
 
 				case ')':
 					while (stack.length) {
-						token = stack.shift()!;
+						token = stack.pop()!;
 						if (token === '(') break;
 						output.push(token);
 					}
@@ -66,7 +66,7 @@ class Parser {
 						let shouldWriteToStack = true;
 
 						while (stack.length) {
-							const [punctuator] = stack;
+							const punctuator = stack.at(-1)!;
 							const operator = this.table[token];
 
 							if (punctuator === '(') {
@@ -88,10 +88,10 @@ class Parser {
 								break;
 							}
 
-							output.push(stack.shift()!);
+							output.push(stack.pop()!);
 						}
 
-						if (shouldWriteToStack) stack.unshift(token);
+						if (shouldWriteToStack) stack.push(token);
 
 						continue;
 					}
@@ -100,7 +100,8 @@ class Parser {
 					output.push(token);
 
 					// check if token is followed by a unary operator
-					const nonBracketIndex = stack.findIndex((x) => x !== '(');
+					// @ts-expect-error
+					const nonBracketIndex: number = stack.findLastIndex((x: number) => x !== '(');
 
 					if (
 						nonBracketIndex !== -1 &&
@@ -114,7 +115,7 @@ class Parser {
 
 		if (stack.includes('(')) throw 'ParserError: mismatched parentheses';
 
-		output.push(...stack);
+		output.push(...stack.reverse());
 
 		return output;
 	}
