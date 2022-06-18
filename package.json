@@ -38,7 +38,7 @@
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
 		"cron": "^2.0.0",
-		"discord.js": "14.0.0-dev.1655381041-4df491c",
+		"discord.js": "14.0.0-dev.1655511041-2681929",
 		"fast-xml-parser": "^4.0.8",
 		"ioredis": "^5.0.6",
 		"js-big-decimal": "github:muchnameless/js-big-decimal",
@@ -92,13 +92,12 @@
 	},
 	"packageManager": "yarn@3.2.1",
 	"resolutions": {
-		"@discordjs/builders": "0.16.0-dev.1655381038-4df491c",
-		"@discordjs/builders@0.16.0-dev.1655381038-4df491c": "patch:@discordjs/builders@npm:0.16.0-dev.1655381038-4df491c#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1655381038-4df491c-7469f7b2df.patch",
-		"@discordjs/collection:": "0.8.0-dev.1655381030-4df491c",
-		"@discordjs/rest": "0.6.0-dev.1655381037-4df491c",
+		"@discordjs/builders@^0.16.0-dev": "patch:@discordjs/builders@npm:0.16.0-dev.1655510999-2681929#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1655510999-2681929-7d8ed35094.patch",
+		"@discordjs/collection:": "0.8.0-dev.1655510999-2681929",
+		"@discordjs/rest": "0.6.0-dev.1655511001-2681929",
 		"@sapphire/discord-utilities@2.11.2": "patch:@sapphire/discord-utilities@npm:2.11.2#.yarn/patches/@sapphire-discord-utilities-npm-2.11.2-8d7f4a3c59.patch",
 		"discord-api-types": "0.35.0-next.3b10c60.1655494915",
-		"discord.js@14.0.0-dev.1655381041-4df491c": "patch:discord.js@npm:14.0.0-dev.1655381041-4df491c#.yarn/patches/discord.js-npm-14.0.0-dev.1655381041-4df491c-c82568c9af.patch",
+		"discord.js@14.0.0-dev.1655511041-2681929": "patch:discord.js@npm:14.0.0-dev.1655511041-2681929#.yarn/patches/discord.js-npm-14.0.0-dev.1655511041-2681929-54dc07dc99.patch",
 		"sequelize@6.21.0": "patch:sequelize@npm:6.21.0#.yarn/patches/sequelize-npm-6.21.0-30f6211950.patch"
 	}
 }
