@@ -38,7 +38,7 @@
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
 		"cron": "^2.0.0",
-		"discord.js": "14.0.0-dev.1655511041-2681929",
+		"discord.js": "14.0.0-dev.1655553881-8610700",
 		"fast-xml-parser": "^4.0.8",
 		"ioredis": "^5.0.6",
 		"js-big-decimal": "github:muchnameless/js-big-decimal",
