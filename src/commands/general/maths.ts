@@ -402,7 +402,7 @@ export default class MathsCommand extends DualCommand {
 			.replaceAll('_', '') // 1_000 -> 1000
 			.replaceAll('**', '^') // 5**3 -> 5^3
 			.replaceAll(':', '/') // 5:3 -> 5/3
-			.replace(/(?<=\d)e(?=\d)/gi, '*10^') // 5e3 -> 5*10^3
+			.replace(/(?<=\d)e(?=-?\d)/gi, '*10^') // 5e3 -> 5*10^3
 			.replace(/(?<=[\d)])(?=[(a-jln-z])/gi, '*') // add implicit '*' between numbers before letters and '('
 			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
 			.replace(/=$/, ''); // 5*3= -> 5*3
