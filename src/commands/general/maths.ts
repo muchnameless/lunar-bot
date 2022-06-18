@@ -47,12 +47,12 @@ class Parser {
 		for (let token of input) {
 			switch (token) {
 				case '(':
-					stack.push(token);
+					stack.unshift(token);
 					break;
 
 				case ')':
 					while (stack.length) {
-						token = stack.pop()!;
+						token = stack.shift()!;
 						if (token === '(') break;
 						output.push(token);
 					}
@@ -66,7 +66,7 @@ class Parser {
 						let shouldWriteToStack = true;
 
 						while (stack.length) {
-							const punctuator = stack.at(-1)!;
+							const [punctuator] = stack;
 							const operator = this.table[token];
 
 							if (punctuator === '(') {
@@ -88,10 +88,10 @@ class Parser {
 								break;
 							}
 
-							output.push(stack.pop()!);
+							output.push(stack.shift()!);
 						}
 
-						if (shouldWriteToStack) stack.push(token);
+						if (shouldWriteToStack) stack.unshift(token);
 
 						continue;
 					}
@@ -100,8 +100,7 @@ class Parser {
 					output.push(token);
 
 					// check if token is followed by a unary operator
-					// @ts-expect-error
-					const nonBracketIndex: number = stack.findLast((x) => x !== '(');
+					const nonBracketIndex = stack.findIndex((x) => x !== '(');
 
 					if (
 						nonBracketIndex !== -1 &&
@@ -402,6 +401,7 @@ export default class MathsCommand extends DualCommand {
 			.replaceAll('_', '') // 1_000 -> 1000
 			.replaceAll('**', '^') // 5**3 -> 5^3
 			.replaceAll(':', '/') // 5:3 -> 5/3
+			.replace(/(?<=\d)e(?=\d)/gi, '*10^') // 5e3 -> 5*10^3
 			.replace(/(?<=[\d)])(?=[(a-jln-z])/gi, '*') // add implicit '*' between numbers before letters and '('
 			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
 			.replace(/=$/, ''); // 5*3= -> 5*3
