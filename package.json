@@ -98,7 +98,7 @@
 		"@discordjs/collection": "0.8.0-dev.1655597371-3a77ce0",
 		"@discordjs/rest": "0.6.0-dev.1655597378-3a77ce0",
 		"@sapphire/discord-utilities@2.11.2": "patch:@sapphire/discord-utilities@npm:2.11.2#.yarn/patches/@sapphire-discord-utilities-npm-2.11.2-8d7f4a3c59.patch",
-		"discord-api-types": "0.35.0-next.3b10c60.1655494915",
+		"discord-api-types": "0.35.0-next.56d491f.1655578012",
 		"discord.js@14.0.0-dev.1655597371-3a77ce0": "patch:discord.js@npm:14.0.0-dev.1655597371-3a77ce0#.yarn/patches/discord.js-npm-14.0.0-dev.1655597371-3a77ce0-293157ab44.patch",
 		"sequelize@6.21.0": "patch:sequelize@npm:6.21.0#.yarn/patches/sequelize-npm-6.21.0-30f6211950.patch"
 	}
