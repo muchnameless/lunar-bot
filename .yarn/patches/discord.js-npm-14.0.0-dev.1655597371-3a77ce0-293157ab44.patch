@@ -1,5 +1,5 @@
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..3f8541aa69cce977defd11e2d79188c0713052fd 100644
+index 7e822caf6da297a7b084c44f064307f3fa928c80..3f8541aa69cce977defd11e2d79188c0713052fd 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
 @@ -269,6 +269,7 @@ class WebSocketShard extends EventEmitter {
@@ -10,26 +10,6 @@ index 756cd08ef4cdd1e791487f83f6592d08f3d3c370..3f8541aa69cce977defd11e2d79188c0
        this.connectedAt = Date.now();
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
-@@ -368,7 +369,7 @@ class WebSocketShard extends EventEmitter {
-     this.setWsCloseTimeout(-1);
-     // If we still have a connection object, clean up its listeners
-     if (this.connection) this._cleanupConnection();
--    this.status = Status.DISCONNECTED;
-+    this.status = Status.Disconnected;
-     this.emitClose(event);
-   }
- 
-@@ -833,8 +834,8 @@ class WebSocketShard extends EventEmitter {
-     // Step 2: Null the connection object
-     this.connection = null;
- 
--    // Step 3: Set the shard status to DISCONNECTED
--    this.status = Status.DISCONNECTED;
-+    // Step 3: Set the shard status to Disconnected
-+    this.status = Status.Disconnected;
- 
-     // Step 4: Cache the old sequence (use to attempt a resume)
-     if (this.sequence !== -1) this.closeSequence = this.sequence;
 diff --git a/src/structures/ActionRowBuilder.js b/src/structures/ActionRowBuilder.js
 index 379b0e1f43273c4f979203e4087af3a4f654df19..fabdac796e2005ab2e03704c3cf18fbb077c2e54 100644
 --- a/src/structures/ActionRowBuilder.js
@@ -265,7 +245,7 @@ index 03b41500f925306a972fc3fc8972c7443e1bb654..2f184fd87582988bc97781643ec99c4a
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 86dbbff6ccf05d7ac3fb79f75201aa2e6da99c5a..853f170ed3c9e015bd837c4cb12c224a66d58d23 100644
+index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a66d58d23 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -495,7 +475,7 @@ index 86dbbff6ccf05d7ac3fb79f75201aa2e6da99c5a..853f170ed3c9e015bd837c4cb12c224a
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 395a412e9ff4505e38abd7fa62c1fbf326a17f81..76df570898a6c9759b4d5552afd17c2ae4e434d4 100644
+index 8ab4d4c6e44266e3d8ea6fef13f08cfadc3e395c..76df570898a6c9759b4d5552afd17c2ae4e434d4 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -105,7 +105,7 @@ class MessagePayload {
@@ -658,7 +638,7 @@ index 75b13d0eead1dc98a8ab5ed71b08ae59eb531b5e..9807045f21ec088ef55e7e6ab421bbd8
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 946dc2c9220ec100a7e785475ad8e0260721fb87..dfb260815b38592a096ed9ed0df3ccf8b56cb76a 100644
+index 946dc2c9220ec100a7e785475ad8e0260721fb87..05e68f69ce7a573664e7eee6f2f31ed029c456cc 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -258,7 +258,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -742,7 +722,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..dfb260815b38592a096ed9ed0df3ccf8
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1733,16 +1730,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1733,16 +1735,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -763,7 +743,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..dfb260815b38592a096ed9ed0df3ccf8
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1948,6 +1944,7 @@ export class ModalSubmitFields {
+@@ -1948,6 +1949,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -771,7 +751,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..dfb260815b38592a096ed9ed0df3ccf8
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3086,7 +3083,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3086,7 +3088,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -780,7 +760,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..dfb260815b38592a096ed9ed0df3ccf8
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3542,11 +3539,6 @@ export interface BaseApplicationCommandData {
+@@ -3542,11 +3544,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable;
  }
  
@@ -792,7 +772,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..dfb260815b38592a096ed9ed0df3ccf8
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4828,10 +4820,8 @@ export interface MessageEditOptions {
+@@ -4828,10 +4825,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -804,7 +784,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..dfb260815b38592a096ed9ed0df3ccf8
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -4886,10 +4876,8 @@ export interface MessageOptions {
+@@ -4886,10 +4881,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
