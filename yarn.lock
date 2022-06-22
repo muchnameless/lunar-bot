@@ -1754,9 +1754,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@npm:14.0.0-dev.1655597371-3a77ce0":
-  version: 14.0.0-dev.1655597371-3a77ce0
-  resolution: "discord.js@npm:14.0.0-dev.1655597371-3a77ce0"
+"discord.js@npm:14.0.0-dev.1655856700-65d1879":
+  version: 14.0.0-dev.1655856700-65d1879
+  resolution: "discord.js@npm:14.0.0-dev.1655856700-65d1879"
   dependencies:
     "@discordjs/builders": ^0.16.0-dev
     "@discordjs/collection": ^0.8.0-dev
@@ -1767,28 +1767,9 @@ __metadata:
     fast-deep-equal: ^3.1.3
     lodash.snakecase: ^4.1.1
     tslib: ^2.4.0
-    undici: ^5.4.0
+    undici: ^5.5.1
     ws: ^8.8.0
-  checksum: 6bb6cae77184e8c0a2a019749cbd2a13efb3930fa1cb0af2365c6242892f35ddb7d7b1c85912c8a1b7e3abdd7e4089cd8ef710bc4bed5614311606fe5f1920bd
-  languageName: node
-  linkType: hard
-
-"discord.js@patch:discord.js@npm:14.0.0-dev.1655597371-3a77ce0#.yarn/patches/discord.js-npm-14.0.0-dev.1655597371-3a77ce0-293157ab44.patch::locator=lunar-bot%40workspace%3A.":
-  version: 14.0.0-dev.1655597371-3a77ce0
-  resolution: "discord.js@patch:discord.js@npm%3A14.0.0-dev.1655597371-3a77ce0#.yarn/patches/discord.js-npm-14.0.0-dev.1655597371-3a77ce0-293157ab44.patch::version=14.0.0-dev.1655597371-3a77ce0&hash=3ee1fa&locator=lunar-bot%40workspace%3A."
-  dependencies:
-    "@discordjs/builders": ^0.16.0-dev
-    "@discordjs/collection": ^0.8.0-dev
-    "@discordjs/rest": ^0.6.0-dev
-    "@sapphire/snowflake": ^3.2.2
-    "@types/ws": ^8.5.3
-    discord-api-types: ^0.33.5
-    fast-deep-equal: ^3.1.3
-    lodash.snakecase: ^4.1.1
-    tslib: ^2.4.0
-    undici: ^5.4.0
-    ws: ^8.8.0
-  checksum: ad926ca0783a10efe6442d7d8a4e36bd67fe2453c4e30d5e9677e3b57eadf56910f114a535c4fe0fea2022dfb9f8453d5f62e15a3b1db52076ecd2730f8ec76d
+  checksum: a91ba87d8b709d474ee55e7d1be2efaf6e24229245334741e30e7ca78d1fc87845c74e2d95b55fe36172dcc92fc1300a359eafdd8ed75bcda14c05a8a7314727
   languageName: node
   linkType: hard
 
@@ -3629,7 +3610,7 @@ __metadata:
     chartjs-node-canvas: ^4.1.6
     common-tags: ^1.8.2
     cron: ^2.0.0
-    discord.js: 14.0.0-dev.1655597371-3a77ce0
+    discord.js: 14.0.0-dev.1655856700-65d1879
     env-cmd: ^10.1.0
     eslint: ^8.18.0
     eslint-config-prettier: ^8.5.0
