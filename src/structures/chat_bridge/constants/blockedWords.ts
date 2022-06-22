@@ -77,6 +77,7 @@ export const BLOCKED_WORDS_REGEXP = new RegExp(
 		/\bco{2,}n+s*\b/,
 		/\bhurri\b/,
 		/\bjap\b/,
+		/\bkike\b/,
 		/\bk{3,}\b/,
 		/ku +klux +klan/,
 		/kkr/,
