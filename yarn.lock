@@ -307,9 +307,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/rest@npm:0.6.0-dev.1655856673-65d1879":
-  version: 0.6.0-dev.1655856673-65d1879
-  resolution: "@discordjs/rest@npm:0.6.0-dev.1655856673-65d1879"
+"@discordjs/rest@npm:0.6.0-dev.1655899433-a3799f9":
+  version: 0.6.0-dev.1655899433-a3799f9
+  resolution: "@discordjs/rest@npm:0.6.0-dev.1655899433-a3799f9"
   dependencies:
     "@discordjs/collection": ^0.8.0-dev
     "@sapphire/async-queue": ^1.3.1
@@ -317,7 +317,7 @@ __metadata:
     discord-api-types: ^0.33.5
     tslib: ^2.4.0
     undici: ^5.5.1
-  checksum: 66a8289cd66f9c9daec44aaacb6bea561e41e9edecd794c7c8ae2dca534cd248bb4fbf1d7062f28c90900032ca20da233afb5b55bd9c3cb724f6ea4362411d04
+  checksum: cec75cd05083c6c08779a6a27a15a5be7784a9f641d2afc0289bb6301b19cd874bbb73e358876e561391d2b1f995339ded3199027e24de430d144e4b48a8b900
   languageName: node
   linkType: hard
 
@@ -3597,7 +3597,7 @@ __metadata:
     "@commitlint/config-angular": ^17.0.0
     "@discordjs/builders": 0.16.0-dev.1655856688-65d1879
     "@discordjs/collection": 0.8.0-dev.1655856675-65d1879
-    "@discordjs/rest": 0.6.0-dev.1655856673-65d1879
+    "@discordjs/rest": 0.6.0-dev.1655899433-a3799f9
     "@sapphire/async-queue": ^1.3.1
     "@sapphire/discord-utilities": ^2.11.2
     "@sapphire/shapeshift": ^3.3.0
