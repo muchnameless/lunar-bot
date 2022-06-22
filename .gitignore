@@ -27,3 +27,7 @@ data
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Cache
+.prettiercache
+.eslintcache
