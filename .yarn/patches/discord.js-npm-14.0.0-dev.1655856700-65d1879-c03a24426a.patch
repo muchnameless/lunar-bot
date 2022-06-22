@@ -1,5 +1,5 @@
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index 7e822caf6da297a7b084c44f064307f3fa928c80..3f8541aa69cce977defd11e2d79188c0713052fd 100644
+index 7e822caf6da297a7b084c44f064307f3fa928c80..e646c9c9d40bb7cd9ad2a782cbd76b175b2400ce 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
 @@ -269,6 +269,7 @@ class WebSocketShard extends EventEmitter {
@@ -170,33 +170,33 @@ index 671a77a8f574c3892055bc6d073fa5439c14cbc9..fe7c86df56acdf30b510bd7ec2f3e4bf
     * Creates a new button builder from JSON data
     * @param {JSONEncodable<APIButtonComponent>|APIButtonComponent} other The other data
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
-index d3c586a3beecbe02356bef6b0a4804056c295988..34921507a975be2967892ebd350ad686279e1f25 100644
+index baf328ccb44b53c8725e5ea7204f6cb8c4b29945..a85daccc3cd649fd0c42313b1f1108cc52259eb4 100644
 --- a/src/structures/GuildEmoji.js
 +++ b/src/structures/GuildEmoji.js
 @@ -55,8 +55,9 @@ class GuildEmoji extends BaseGuildEmoji {
     * @readonly
     */
    get deletable() {
--    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
 -    return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
 +    const { me } = this.guild.members;
-+    if (!me) throw new Error('GUILD_UNCACHED_ME');
++    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
 +    return !this.managed && me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
    }
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index 2da967d34c9650888a02cbf27ab28cb48524a6a6..4c90c5a227dd45c63a1b23112e72a1726ea7a35e 100644
+index b0ee8458c90ee81551e90a0e29d15c25802fa5f8..6293abd97123cdf7c09d668319d150bcf5879a8f 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -239,8 +239,9 @@ class GuildMember extends Base {
      if (this.user.id === this.guild.ownerId) return false;
      if (this.user.id === this.client.user.id) return false;
      if (this.client.user.id === this.guild.ownerId) return true;
--    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
 -    return this.guild.members.me.roles.highest.comparePositionTo(this.roles.highest) > 0;
 +    const { me } = this.guild.members;
-+    if (!me) throw new Error('GUILD_UNCACHED_ME');
++    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
 +    return me.roles.highest.comparePositionTo(this.roles.highest) > 0;
    }
  
@@ -205,7 +205,7 @@ index 2da967d34c9650888a02cbf27ab28cb48524a6a6..4c90c5a227dd45c63a1b23112e72a172
     * @readonly
     */
    get kickable() {
--    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers);
    }
  
@@ -213,7 +213,7 @@ index 2da967d34c9650888a02cbf27ab28cb48524a6a6..4c90c5a227dd45c63a1b23112e72a172
     * @readonly
     */
    get bannable() {
--    if (!this.guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.BanMembers);
    }
  
@@ -227,16 +227,16 @@ index 2da967d34c9650888a02cbf27ab28cb48524a6a6..4c90c5a227dd45c63a1b23112e72a172
    }
  
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
-index 03b41500f925306a972fc3fc8972c7443e1bb654..2f184fd87582988bc97781643ec99c4a41a329c1 100644
+index d0e9602c7279d7035284241f5fda87beec8ac078..61a01eb05a7bc9d7a99c6b9eee0492fb0dc726f7 100644
 --- a/src/structures/Invite.js
 +++ b/src/structures/Invite.js
 @@ -233,10 +233,11 @@ class Invite extends Base {
    get deletable() {
      const guild = this.guild;
      if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
--    if (!guild.members.me) throw new Error('GUILD_UNCACHED_ME');
+-    if (!guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
 +    const { me } = guild.members;
-+    if (!me) throw new Error('GUILD_UNCACHED_ME');
++    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
      return Boolean(
        this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits.ManageChannels, false) ||
 -        guild.members.me.permissions.has(PermissionFlagsBits.ManageGuild),
@@ -245,7 +245,7 @@ index 03b41500f925306a972fc3fc8972c7443e1bb654..2f184fd87582988bc97781643ec99c4a
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a66d58d23 100644
+index c54b5c32a953f98b6afbd5094685b513f6de9cb7..a717aae05ee3d7d058dcab76ccc6d52d791f95b8 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -352,10 +352,10 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     *   .catch(console.error);
     */
    edit(options) {
--    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 -    return this.channel.messages.edit(this, options);
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 +    return channel.messages.edit(this, options);
    }
  
@@ -364,10 +364,10 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     * }
     */
    crosspost() {
--    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 -    return this.channel.messages.crosspost(this.id);
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 +    return channel.messages.crosspost(this.id);
    }
  
@@ -376,10 +376,10 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     *   .catch(console.error)
     */
    async pin(reason) {
--    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.pin(this.id, reason);
 +    const { channel } = this;
-+    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
 +    await channel.messages.pin(this.id, reason);
      return this;
    }
@@ -388,10 +388,10 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     *   .catch(console.error)
     */
    async unpin(reason) {
--    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.unpin(this.id, reason);
 +    const { channel } = this;
-+    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
 +    await channel.messages.unpin(this.id, reason);
      return this;
    }
@@ -400,10 +400,10 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     *   .catch(console.error);
     */
    async react(emoji) {
--    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.react(this.id, emoji);
 +    const { channel } = this;
-+    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
 +    await channel.messages.react(this.id, emoji);
  
      return this.client.actions.MessageReactionAdd.handle(
@@ -418,10 +418,10 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     *   .catch(console.error);
     */
    async delete() {
--    if (!this.channel) throw new Error('CHANNEL_NOT_CACHED');
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.delete(this.id);
 +    const { channel } = this;
-+    if (!channel) throw new Error('CHANNEL_NOT_CACHED');
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
 +    await channel.messages.delete(this.id);
      return this;
    }
@@ -430,9 +430,9 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     *   .catch(console.error);
     */
    reply(options) {
--    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
      let data;
  
      if (options instanceof MessagePayload) {
@@ -449,14 +449,14 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
--    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 -    if (![ChannelType.GuildText, ChannelType.GuildNews].includes(this.channel.type)) {
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 +    if (![ChannelType.GuildText, ChannelType.GuildNews].includes(channel.type)) {
-       return Promise.reject(new Error('MESSAGE_THREAD_PARENT'));
+       return Promise.reject(new Error(ErrorCodes.MessageThreadParent));
      }
-     if (this.hasThread) return Promise.reject(new Error('MESSAGE_EXISTING_THREAD'));
+     if (this.hasThread) return Promise.reject(new Error(ErrorCodes.MessageExistingThread));
 -    return this.channel.threads.create({ ...options, startMessage: this });
 +    return channel.threads.create({ ...options, startMessage: this });
    }
@@ -466,24 +466,24 @@ index 4d0f2b26e2003a427634f36f7971f81c97805e3c..853f170ed3c9e015bd837c4cb12c224a
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
--    if (!this.channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 -    return this.channel.messages.fetch({ message: this.id, force });
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error('CHANNEL_NOT_CACHED'));
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
 +    return channel.messages.fetch({ message: this.id, force });
    }
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 8ab4d4c6e44266e3d8ea6fef13f08cfadc3e395c..76df570898a6c9759b4d5552afd17c2ae4e434d4 100644
+index 37edf4818440d2fd2c46d68d1cd557784cd414af..d3e9542a75b0d256eb9f678f201d5ceaf447117a 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -105,7 +105,7 @@ class MessagePayload {
      if (this.options.content === null) {
        content = '';
      } else if (typeof this.options.content !== 'undefined') {
--      content = verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE', true);
-+      content = verifyString(this.options.content, RangeError, 'MESSAGE_CONTENT_TYPE');
+-      content = verifyString(this.options.content, RangeError, ErrorCodes.MessageContentType, true);
++      content = verifyString(this.options.content, RangeError, ErrorCodes.MessageContentType);
      }
  
      return content;
@@ -497,7 +497,7 @@ index 8ab4d4c6e44266e3d8ea6fef13f08cfadc3e395c..76df570898a6c9759b4d5552afd17c2a
      let username;
      let avatarURL;
 diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
-index 8929d54ed2f33e6409cf167215010c1548bef42a..ed3f1b8a300debb9dca2a37a227b65e89b0c86e6 100644
+index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cbb4db6129 100644
 --- a/src/structures/ModalSubmitFields.js
 +++ b/src/structures/ModalSubmitFields.js
 @@ -50,6 +50,15 @@ class ModalSubmitFields {
@@ -511,7 +511,7 @@ index 8929d54ed2f33e6409cf167215010c1548bef42a..ed3f1b8a300debb9dca2a37a227b65e8
 +   * @returns {string[]}
 +   */
 +  getSelectMenuValues(customId) {
-+    return this.getField(customId, ComponentType.SelectMenu).data.values;
++    return this.getField(customId, ComponentType.SelectMenu).values;
 +  }
  }
  
@@ -616,7 +616,7 @@ index c5f0bd136b60f4ba424d9b6450c9524298d661b3..137cc4590ce3ec9240b03db0c2a7bb68
     * Creates a new select menu option builder from JSON data
     * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 75b13d0eead1dc98a8ab5ed71b08ae59eb531b5e..9807045f21ec088ef55e7e6ab421bbd830da0bcc 100644
+index 8d4dd7c5533b94c9c414da266b60d611b448e0f7..ec1382a9457babb69c1ec26f4dc9b9a9c1c7db31 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -355,17 +355,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
@@ -638,7 +638,7 @@ index 75b13d0eead1dc98a8ab5ed71b08ae59eb531b5e..9807045f21ec088ef55e7e6ab421bbd8
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 946dc2c9220ec100a7e785475ad8e0260721fb87..05e68f69ce7a573664e7eee6f2f31ed029c456cc 100644
+index 7fd47174df747775a7f5502af532b8204a349a09..2bfbc791de5cf890b452de92924b380b9d1b73c3 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -258,7 +258,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -743,7 +743,26 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..05e68f69ce7a573664e7eee6f2f31ed0
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1948,6 +1949,7 @@ export class ModalSubmitFields {
+@@ -1934,12 +1935,17 @@ export interface TextInputModalData extends BaseModalData {
+   value: string;
+ }
+ 
++export interface SelectMenuModalData extends BaseModalData {
++  type: ComponentType.SelectMenu;
++  values: string[];
++}
++
+ export interface ActionRowModalData {
+   type: ComponentType.ActionRow;
+   components: ModalData[];
+ }
+ 
+-export type ModalData = TextInputModalData | ActionRowModalData;
++export type ModalData = ActionRowModalData | TextInputModalData | SelectMenuModalData;
+ 
+ export class ModalSubmitFields {
+   constructor(components: ModalActionRowComponent[][]);
+@@ -1948,6 +1954,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -751,7 +770,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..05e68f69ce7a573664e7eee6f2f31ed0
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3086,7 +3088,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3250,7 +3257,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -760,7 +779,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..05e68f69ce7a573664e7eee6f2f31ed0
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3542,11 +3544,6 @@ export interface BaseApplicationCommandData {
+@@ -3706,11 +3713,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable;
  }
  
@@ -772,7 +791,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..05e68f69ce7a573664e7eee6f2f31ed0
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4828,10 +4825,8 @@ export interface MessageEditOptions {
+@@ -4992,10 +4994,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -784,7 +803,7 @@ index 946dc2c9220ec100a7e785475ad8e0260721fb87..05e68f69ce7a573664e7eee6f2f31ed0
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -4886,10 +4881,8 @@ export interface MessageOptions {
+@@ -5050,10 +5050,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
