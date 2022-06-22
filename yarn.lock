@@ -269,6 +269,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@discordjs/builders@npm:0.16.0-dev.1655856688-65d1879":
+  version: 0.16.0-dev.1655856688-65d1879
+  resolution: "@discordjs/builders@npm:0.16.0-dev.1655856688-65d1879"
+  dependencies:
+    "@sapphire/shapeshift": ^3.2.0
+    discord-api-types: ^0.33.5
+    fast-deep-equal: ^3.1.3
+    ts-mixer: ^6.0.1
+    tslib: ^2.4.0
+  checksum: 5153bfaf9222671b7cfdbf5e06cee19f500cecf6760f8c1a316bc9c4b067137fd6a7245df1c77aabff6181011d3ac0a058b0bdb13779587501ce9aff7c4841db
+  languageName: node
+  linkType: hard
+
 "@discordjs/builders@patch:@discordjs/builders@npm:0.16.0-dev.1655597382-3a77ce0#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1655597382-3a77ce0-d69008545a.patch::locator=lunar-bot%40workspace%3A.":
   version: 0.16.0-dev.1655597382-3a77ce0
   resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A0.16.0-dev.1655597382-3a77ce0#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1655597382-3a77ce0-d69008545a.patch::version=0.16.0-dev.1655597382-3a77ce0&hash=257637&locator=lunar-bot%40workspace%3A."
@@ -476,7 +489,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/shapeshift@npm:^3.1.0, @sapphire/shapeshift@npm:^3.3.0":
+"@sapphire/shapeshift@npm:^3.1.0, @sapphire/shapeshift@npm:^3.2.0, @sapphire/shapeshift@npm:^3.3.0":
   version: 3.3.0
   resolution: "@sapphire/shapeshift@npm:3.3.0"
   checksum: 1388cc65ae42f31059e0167499f391ef157693a8da1185b29f1f1c4caad8b1172b2d8a94bcc4e2c55650826aa14dc296098bca0754ce15c691c2f3e16a691fd4
@@ -3604,7 +3617,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": ^17.0.2
     "@commitlint/config-angular": ^17.0.0
-    "@discordjs/builders": 0.16.0-dev.1655597382-3a77ce0
+    "@discordjs/builders": 0.16.0-dev.1655856688-65d1879
     "@discordjs/collection": 0.8.0-dev.1655597371-3a77ce0
     "@discordjs/rest": 0.6.0-dev.1655597378-3a77ce0
     "@sapphire/async-queue": ^1.3.1
