@@ -35,7 +35,7 @@ export default class DonationsCommand extends ApplicationCommand {
 		// fill said object
 		for (const { from, amount, notes } of donations) {
 			reducedAmount[from] += amount;
-			if (notes?.length) reducedNotes[from].push(notes);
+			if (notes?.length) reducedNotes[from]!.push(notes);
 		}
 
 		// transform and prettify data
@@ -51,7 +51,7 @@ export default class DonationsCommand extends ApplicationCommand {
 						this.client.players.cache.get(minecraftUuid)?.ign ??
 						(await mojang.uuid(minecraftUuid).catch((error) => logger.error(error)))?.ign ??
 						minecraftUuid;
-					const notes = reducedNotes[minecraftUuid].join('\n');
+					const notes = reducedNotes[minecraftUuid]!.join('\n');
 
 					embed.addFields({
 						name: '\u200B',

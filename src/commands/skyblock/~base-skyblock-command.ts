@@ -59,7 +59,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	// eslint-disable-next-line class-methods-use-this
 	protected async _fetchData(
 		ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage,
-		ignOrUuid: string | null,
+		ignOrUuid?: string | null,
 		profileName?: string | null,
 		findProfileStrategy?: FindProfileStrategy | null,
 	) {
@@ -135,7 +135,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 				try {
 					await hypixelMessage.awaitConfirmation({
 						question: `'${upperCaseFirstChar(
-							PROFILE_NAME_INPUT,
+							PROFILE_NAME_INPUT!,
 						)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
 						time: seconds(30),
 					});

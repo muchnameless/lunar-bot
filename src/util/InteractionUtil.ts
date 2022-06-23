@@ -463,7 +463,7 @@ export class InteractionUtil extends null {
 				for (let i = options.components!.length - 1; i >= 0; --i) {
 					if (
 						(options.components![i] as ActionRowBuilder).components.length === 5 ||
-						(options.components![i] as ActionRowBuilder).components[0].data?.type === ComponentType.SelectMenu
+						(options.components![i] as ActionRowBuilder).components[0]?.data?.type === ComponentType.SelectMenu
 					) {
 						continue;
 					}

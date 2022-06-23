@@ -16,7 +16,7 @@ import { asyncFilter, commaListOr, getLilyWeight, stringToMS } from '../../../fu
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
 import { logger } from '../../../logger';
-import type { SkyBlockProfile } from '../../../functions';
+import type { SkyBlockProfile, WeightData } from '../../../functions';
 import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
 
@@ -49,7 +49,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (blockedMatched) {
 				const { sender, blockedContent } = blockedMatched.groups!;
-				const senderDiscordId = this.client.players.findByIgn(sender)?.discordId;
+				const senderDiscordId = this.client.players.findByIgn(sender!)?.discordId;
 
 				// react to latest message from 'sender' with that content
 				for (const { channel } of this.chatBridge.discord.channels.values()) {
@@ -60,9 +60,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 								senderDiscordId
 									? async (message) =>
 											message.author.id === senderDiscordId &&
-											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent)
+											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent!)
 									: async (message) =>
-											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent),
+											(
+												await this.chatBridge.minecraft.parseContent(message.content, message)
+											).includes(blockedContent!),
 							)
 						).sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a)[0] ?? null,
 						UnicodeEmoji.Stop,
@@ -153,7 +155,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { target, duration, executor } = muteMatched.groups!;
 
 			if (target === 'the guild chat') {
-				const msDuration = stringToMS(duration);
+				const msDuration = stringToMS(duration!);
 
 				this.chatBridge
 					.hypixelGuild!.update({
@@ -164,11 +166,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 			}
 
-			const player = this.client.players.findByIgn(target);
+			const player = this.client.players.findByIgn(target!);
 
 			if (!player) return;
 
-			const MS_DURATION = stringToMS(duration);
+			const MS_DURATION = stringToMS(duration!);
 
 			// update db and timeout discord member
 			void this.chatBridge.hypixelGuild!.syncMute(
@@ -207,7 +209,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was unmuted`);
 			}
 
-			const player = this.client.players.findByIgn(target);
+			const player = this.client.players.findByIgn(target!);
 
 			if (!player) return;
 
@@ -232,7 +234,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			void hypixelMessage.forwardToDiscord();
 
 			const { target, newRank } = promoteMatched.groups!;
-			const player = this.client.players.findByIgn(target);
+			const player = this.client.players.findByIgn(target!);
 
 			if (!player?.guildId) {
 				return logger.info(
@@ -265,7 +267,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			void hypixelMessage.forwardToDiscord();
 
 			const { target, newRank } = demotedMatched.groups!;
-			const player = this.client.players.findByIgn(target);
+			const player = this.client.players.findByIgn(target!);
 
 			if (!player?.guildId) {
 				return logger.info(
@@ -307,7 +309,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			}
 
 			try {
-				const { uuid } = await mojang.ign(ign);
+				const { uuid } = await mojang.ign(ign!);
 
 				// ban list check
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
@@ -331,8 +333,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					}
 
 					const [{ totalWeight }] = profiles
-						.map(({ members }) => getLilyWeight(members[uuid]))
-						.sort(({ totalWeight: a }, { totalWeight: b }) => b - a);
+						.map(({ members }) => getLilyWeight(members[uuid]!))
+						.sort(({ totalWeight: a }, { totalWeight: b }) => b - a) as [WeightData];
 
 					if (totalWeight < hypixelMessage.hypixelGuild.weightReq) {
 						return logger.info(
@@ -372,7 +374,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (guildJoinMatched) {
 			const [guildName] = guildJoinMatched;
 
-			void this.client.hypixelGuilds.findByName(guildName)?.updateData();
+			void this.client.hypixelGuilds.findByName(guildName!)?.updateData();
 
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: joined ${guildName}`);
 			return void this.chatBridge.link(guildName);
@@ -386,7 +388,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		if (friendReqMatched) {
 			const { ign } = friendReqMatched.groups!;
-			const player = this.client.players.findByIgn(ign);
+			const player = this.client.players.findByIgn(ign!);
 
 			if (!player?.guildId) {
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: denying f request from ${ign}`);

@@ -120,7 +120,7 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
-		const [SUBCOMMAND, USER_ID, PAGE] = args;
+		const [SUBCOMMAND, USER_ID, PAGE] = args as [string, Snowflake, `${bigint}`];
 
 		switch (SUBCOMMAND) {
 			case 'view':

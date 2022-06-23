@@ -136,7 +136,7 @@ export default class TrackCommand extends ApplicationCommand {
 						label: `${upperCaseFirstChar(type)} XP`,
 						backgroundColor: 'rgba(0, 0, 255, 0.25)',
 						borderColor: 'rgb(0, 0, 128)',
-						data: [...Array.from({ length: days }).keys()].map((x) => player[`${type}XpHistory`][x]),
+						data: [...Array.from({ length: days }).keys()].map((x) => player[`${type}XpHistory`][x]!),
 					},
 				];
 				break;
@@ -179,7 +179,7 @@ export default class TrackCommand extends ApplicationCommand {
 						iconURL: player.imageURL,
 						url: player.url,
 					})
-					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
+					.setTitle(`${upperCaseFirstChar(datasets[0]!.label)} history (${days} days)`)
 					.setImage(`attachment://${attachment.data.name}`),
 			],
 			files: [attachment],

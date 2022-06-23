@@ -50,8 +50,8 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 
 		if (!profileName) {
 			[weightData] = profiles
-				.map(({ cute_name: name, members }) => ({ name, ...this.getWeight(members[uuid]) }))
-				.sort(({ totalWeight: a }, { totalWeight: b }) => b - a);
+				.map(({ cute_name: name, members }) => ({ name, ...this.getWeight(members[uuid]!) }))
+				.sort(({ totalWeight: a }, { totalWeight: b }) => b - a) as [WeightData & { name: string }];
 		} else {
 			const profile = profiles.find(({ cute_name: name }) => name === profileName);
 
@@ -59,7 +59,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 
 			weightData = {
 				name: profile.cute_name,
-				...this.getWeight(profile.members[uuid]),
+				...this.getWeight(profile.members[uuid]!),
 			};
 		}
 

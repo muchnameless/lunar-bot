@@ -138,7 +138,7 @@ export class LogHandler {
 			let embedChunkLength = 0;
 
 			for (let current = 0; current < MessageLimits.MaximumEmbeds && total < embeds.length; ++current, ++total) {
-				embedChunkLength += embedLength(embeds[total]);
+				embedChunkLength += embedLength(embeds[total]!);
 
 				// adding the new embed would exceed the max char count
 				if (embedChunkLength > EmbedLimits.MaximumTotalCharacters) {
@@ -146,7 +146,7 @@ export class LogHandler {
 					break;
 				}
 
-				embedChunk.push(embeds[total]);
+				embedChunk.push(embeds[total]!);
 			}
 
 			returnValue.push(this._log(embedChunk));

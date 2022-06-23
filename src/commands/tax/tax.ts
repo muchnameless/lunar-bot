@@ -302,7 +302,7 @@ export default class TaxCommand extends ApplicationCommand {
 						const { players, taxCollectors } = this.client;
 						const PLAYER_INPUT = interaction.options.getString('player');
 
-						let currentTaxEmbed: JSONEncodable<APIEmbed> | null = null;
+						let currentTaxEmbed: JSONEncodable<APIEmbed> | undefined;
 						let currentTaxCollectedEmbed!: JSONEncodable<APIEmbed>;
 						let result: string;
 
@@ -348,14 +348,13 @@ export default class TaxCommand extends ApplicationCommand {
 									((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)
 								) {
 									logger.warn('[TAX RESET] tax channel error');
-									return null;
+									return;
 								}
 
 								try {
 									return (await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID'))).embeds[0];
 								} catch (error) {
 									logger.error(error, '[TAX RESET] TAX_MESSAGE fetch error');
-									return null;
 								}
 							})();
 

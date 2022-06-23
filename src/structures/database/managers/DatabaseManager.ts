@@ -492,7 +492,7 @@ export class DatabaseManager {
 			if (
 				taxMessage.embeds[0]?.description === DESCRIPTION &&
 				taxMessage.embeds[0].fields?.every(
-					({ name, value }, index) => fields[index].name === name && fields[index].value === value,
+					({ name, value }, index) => fields[index]?.name === name && fields[index]?.value === value,
 				)
 			) {
 				return this; // no changes to taxMessage

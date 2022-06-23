@@ -267,7 +267,7 @@ export default class EvalCommand extends ApplicationCommand {
 			const lines = input.split('\n');
 
 			for (let index = lines.length - 1; index >= 0; --index) {
-				const trimmed = lines[index].trimStart();
+				const trimmed = lines[index]!.trimStart();
 
 				if (!trimmed || ['//', '/*'].some((x) => trimmed.startsWith(x))) continue;
 				if (['return ', 'const ', 'let ', 'var ', '}', ')'].some((x) => trimmed.startsWith(x))) break;
@@ -460,12 +460,12 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
-		const [subcommand, inspectDepth] = args;
+		const [subcommand, inspectDepth] = args as [string, string];
 
 		switch (subcommand) {
 			case 'edit': {
 				const OLD_INPUT =
-					interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ?? 'code to evaluate';
+					interaction.message.embeds[0]?.fields?.[0]!.value.replace(/^```[a-z]*\n|```$/g, '') ?? 'code to evaluate';
 
 				return InteractionUtil.showModal(
 					interaction,
@@ -512,7 +512,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]) {
-		const [subcommand, inspectDepth] = args;
+		const [subcommand, inspectDepth] = args as [string, string];
 
 		switch (subcommand) {
 			case 'edit':

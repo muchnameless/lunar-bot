@@ -761,7 +761,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				raw: true,
 			});
 
-			return result.length ? result[0].amount : null;
+			return result[0]?.amount ?? null;
 		})();
 	}
 
@@ -1089,12 +1089,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		}
 
 		// other delimiter roles
-		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
-			if (
-				discordGuild[`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`] &&
-				!roleCache.has(discordGuild[`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`]!)
-			) {
-				rolesToAdd.push(discordGuild[`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`]!);
+		for (const role of DELIMITER_ROLES) {
+			if (discordGuild[`${role}_DELIMITER_ROLE_ID`] && !roleCache.has(discordGuild[`${role}_DELIMITER_ROLE_ID`]!)) {
+				rolesToAdd.push(discordGuild[`${role}_DELIMITER_ROLE_ID`]!);
 			}
 		}
 
@@ -1848,8 +1845,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		try {
 			await this.client.taxCollectors.cache
-				.get(result[0].to)
-				?.addAmount(-result[0].amount, TransactionType.Tax, { transaction });
+				.get(result[0]!.to)
+				?.addAmount(-result[0]!.amount, TransactionType.Tax, { transaction });
 			await this.update({ paid: false }, { transaction });
 
 			await transaction.commit();
@@ -1960,7 +1957,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		const [currentDay] = Object.keys(expHistory);
 
 		if (currentDay) {
-			const xp = expHistory[currentDay];
+			const xp = expHistory[currentDay]!;
 
 			if (this.guildXpDay === currentDay) {
 				// xp gained on the same day
@@ -2141,7 +2138,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * @param index xpHistory array index
 	 */
 	getSlayerTotalHistory(index: number) {
-		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
+		return SLAYERS.reduce((acc, slayer) => acc + (this[`${slayer}XpHistory`][index] ?? 0), 0);
 	}
 
 	/**
@@ -2149,7 +2146,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * @param index xpHistory array index
 	 */
 	getLilyWeightHistory(index: number) {
-		const SKILL_XP_LILY = LILY_SKILL_NAMES.map((skill) => this[`${skill}XpHistory`][index]);
+		const SKILL_XP_LILY = LILY_SKILL_NAMES.map((skill) => this[`${skill}XpHistory`][index] ?? 0);
 		const {
 			total,
 			skill: { overflow },
@@ -2158,8 +2155,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			SKILL_XP_LILY, // skill xp
 			this.catacombsCompletionsHistory[index] as Parameters<typeof LilyWeight['getWeightRaw']>[2], // catacombs completions
 			this.catacombsMasterCompletionsHistory[index] as Parameters<typeof LilyWeight['getWeightRaw']>[3], // master catacombs completions
-			this.catacombsXpHistory[index], // catacombs xp
-			SLAYERS.map((slayer) => this[`${slayer}XpHistory`][index]), // slayer xp
+			this.catacombsXpHistory[index] ?? 0, // catacombs xp
+			SLAYERS.map((slayer) => this[`${slayer}XpHistory`][index] ?? 0), // slayer xp
 		);
 
 		return {

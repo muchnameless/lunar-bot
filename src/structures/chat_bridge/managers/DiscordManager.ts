@@ -101,7 +101,7 @@ export class DiscordManager {
 						switch (match.groups!.type) {
 							// members/users
 							case '!': {
-								const TO_SEARCH = match.groups!.name.toLowerCase();
+								const TO_SEARCH = match.groups!.name!.toLowerCase();
 								const MENTION =
 									this.chatBridge.hypixelGuild?.discordGuild?.members.cache
 										.find(({ displayName }) => displayName.toLowerCase() === TO_SEARCH)
@@ -114,7 +114,7 @@ export class DiscordManager {
 
 							// roles
 							case '&': {
-								const TO_SEARCH = match.groups!.name.toLowerCase();
+								const TO_SEARCH = match.groups!.name!.toLowerCase();
 								const MENTION = this.chatBridge.hypixelGuild?.discordGuild?.roles.cache
 									.find(({ name }) => name.toLowerCase() === TO_SEARCH)
 									?.toString(); // roles
@@ -125,7 +125,7 @@ export class DiscordManager {
 
 							// players, members/users, roles
 							default: {
-								const TO_SEARCH = match.groups!.name.toLowerCase();
+								const TO_SEARCH = match.groups!.name!.toLowerCase();
 								if (!TO_SEARCH) break;
 
 								const player =
@@ -139,7 +139,7 @@ export class DiscordManager {
 							}
 						}
 
-						return match[0];
+						return match[0]!;
 					})
 				)
 					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible mc characters

@@ -435,7 +435,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		return ((this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
 			host: env.MINECRAFT_SERVER_HOST,
 			port: Number(env.MINECRAFT_SERVER_PORT),
-			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
+			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
 			password: env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
 			version: MC_CLIENT_VERSION,
 			auth: env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as 'mojang' | 'microsoft',
@@ -587,18 +587,18 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			cleanFormattedNumber(
 				// @mentions
 				await asyncReplace(string, /<@!?(\d{17,19})>/g, async (match) => {
-					const user = this.client.users.cache.get(match[1]);
+					const user = this.client.users.cache.get(match[1]!);
 					if (user) {
 						const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
 						if (player) return `@${player}`;
 					}
 
 					const NAME =
-						(discordMessage?.guild ?? this.chatBridge.hypixelGuild?.discordGuild)?.members.cache.get(match[1])
+						(discordMessage?.guild ?? this.chatBridge.hypixelGuild?.discordGuild)?.members.cache.get(match[1]!)
 							?.displayName ?? user?.username;
 					if (NAME) return `@${NAME}`;
 
-					return match[0];
+					return match[0]!;
 				}),
 			)
 				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1

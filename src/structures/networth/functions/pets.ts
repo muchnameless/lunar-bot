@@ -14,7 +14,7 @@ export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePe
 	let totalExperience = 0;
 
 	for (; level < maxLevel && totalExperience <= pet.exp; ++level) {
-		totalExperience += levels[level];
+		totalExperience += levels[level]!;
 	}
 
 	return {

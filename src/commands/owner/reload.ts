@@ -82,7 +82,7 @@ export default class ReloadCommand extends DualCommand {
 				cooldown: 0,
 			},
 			{
-				args: true,
+				args: 2,
 				usage: '[`command` [command `name`]|`commands`|`event` [event `name`]|`events`|`database`|`cooldowns`]',
 			},
 		);
@@ -283,7 +283,7 @@ export default class ReloadCommand extends DualCommand {
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
-			await this._sharedRun(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]),
+			await this._sharedRun(hypixelMessage.commandData.args[0]!, hypixelMessage.commandData.args[1]!),
 		);
 	}
 }

@@ -456,10 +456,10 @@ export class DiscordChatManager extends ChatManager {
 				messageContent = await asyncReplace(messageContent, DISCORD_CDN_URL_REGEXP, async (match) => {
 					try {
 						// try to upload URL without query parameters
-						return (await imgur.upload(match[1])).data.link;
+						return (await imgur.upload(match[1]!)).data.link;
 					} catch (error) {
 						logger.error(error, '[FORWARD DC TO MC]');
-						return match[0];
+						return match[0]!;
 					}
 				});
 			}

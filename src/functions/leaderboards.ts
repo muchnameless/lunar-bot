@@ -342,7 +342,7 @@ export async function handleLeaderboardSelectMenuInteraction(
 
 	switch (SELECT_TYPE) {
 		case 'lbType':
-			[leaderboardArgs.lbType] = interaction.values as LeaderboardType[];
+			[leaderboardArgs.lbType] = interaction.values as [LeaderboardType];
 
 			// reset offsets to defaults
 			switch (leaderboardArgs.lbType) {
@@ -363,7 +363,7 @@ export async function handleLeaderboardSelectMenuInteraction(
 		}
 
 		case 'guild': {
-			const [HYPIXEL_GUILD_ID_SELECT] = interaction.values;
+			const [HYPIXEL_GUILD_ID_SELECT] = interaction.values as [string];
 			leaderboardArgs.hypixelGuild =
 				HYPIXEL_GUILD_ID_SELECT !== GUILD_ID_ALL
 					? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID_SELECT)!
@@ -372,7 +372,7 @@ export async function handleLeaderboardSelectMenuInteraction(
 		}
 
 		case 'xpType':
-			[leaderboardArgs[SELECT_TYPE]] = interaction.values as LeaderboardXPTypes[];
+			[leaderboardArgs[SELECT_TYPE]] = interaction.values as [LeaderboardXPTypes];
 			break;
 
 		default: {
@@ -406,7 +406,7 @@ async function getLeaderboardMessageOptions(
 
 		if (cachedEmbeds) {
 			return {
-				embeds: [cachedEmbeds[leaderboardArgs.page - 1]],
+				embeds: [cachedEmbeds[leaderboardArgs.page - 1]!],
 				components: createActionRows(client, CACHE_KEY, leaderboardArgs, cachedEmbeds.length),
 			};
 		}
@@ -433,7 +433,7 @@ async function getLeaderboardMessageOptions(
 		// get the page elements
 		for (let index = Math.max(0, page - 1) * ELEMENTS_PER_PAGE; index < page * ELEMENTS_PER_PAGE; ++index) {
 			if (index < PLAYER_COUNT) {
-				const player = playerData[index];
+				const player = playerData[index]!;
 				playerList += `\n${stripIndent`
 					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${UnicodeEmoji.VarY}` : ''}${
 					player.isStaff ? ' [STAFF]' : ''
@@ -475,7 +475,7 @@ async function getLeaderboardMessageOptions(
 	}
 
 	return {
-		embeds: [embeds[leaderboardArgs.page - 1]],
+		embeds: [embeds[leaderboardArgs.page - 1]!],
 		components: createActionRows(client, CACHE_KEY, leaderboardArgs, embeds.length),
 	};
 }
@@ -589,7 +589,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				const XP_TRACKING_START = player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0);
 				const { totalWeight: totalWeightOffet } = player.getLilyWeightHistory(XP_TRACKING_START);
 				const gainedWeight = totalWeight - totalWeightOffet;
-				const gainedGuildXp = player.guildXp - player.guildXpHistory[XP_TRACKING_START];
+				const gainedGuildXp = player.guildXp - (player.guildXpHistory[XP_TRACKING_START] ?? 0);
 				return {
 					ign: player.ign,
 					discordId: player.discordId,
@@ -729,7 +729,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			totalStats = bold(formatNumber(Math.round(playerData.reduce((acc, player) => acc + player.sortingStat, 0))));
 			getEntry = (player) =>
 				formatNumber(Math.round(player.sortingStat), {
-					padding: Math.round(playerData[0]?.sortingStat).toLocaleString('fr-FR').length,
+					padding: Math.round(playerData[0]?.sortingStat!).toLocaleString('fr-FR').length,
 				});
 		}
 	}
@@ -786,7 +786,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 	let playerRequestingEntry!: string;
 
 	if (playerRequestingIndex !== -1) {
-		const playerRequesting = playerData[playerRequestingIndex];
+		const playerRequesting = playerData[playerRequestingIndex]!;
 
 		playerRequestingEntry = codeBlock(
 			'ada',
@@ -1020,7 +1020,7 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 	let playerRequestingEntry!: string;
 
 	if (playerRequestingIndex !== -1) {
-		const playerRequesting = playerData[playerRequestingIndex];
+		const playerRequesting = playerData[playerRequestingIndex]!;
 
 		playerRequestingEntry = codeBlock(
 			'ada',

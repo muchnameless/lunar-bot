@@ -1046,7 +1046,7 @@ export class HypixelGuild extends Model<
 			if (!nonStaffWithWeight[0]?.weight) {
 				logger.error(
 					`[SYNC GUILD RANKS] ${this.name}: ${
-						nonStaffWithWeight.length ? `${nonStaffWithWeight[0].player.ign}'s weight is 0` : 'no non-staff players'
+						nonStaffWithWeight.length ? `${nonStaffWithWeight[0]!.player.ign}'s weight is 0` : 'no non-staff players'
 					}`,
 				);
 				return this;

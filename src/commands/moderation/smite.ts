@@ -43,7 +43,7 @@ export default class SmiteCommand extends DualCommand {
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
-		const TARGET_INPUT = hypixelMessage.commandData.args[0].toLowerCase();
+		const TARGET_INPUT = hypixelMessage.commandData.args[0]!.toLowerCase();
 		const target = await guildCommand.getMuteTarget(TARGET_INPUT);
 
 		if (!target) return hypixelMessage.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);

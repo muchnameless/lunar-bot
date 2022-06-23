@@ -229,8 +229,8 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override async selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]) {
-		const [uuid, ign, userId] = args;
-		const [profileId] = interaction.values;
+		const [uuid, ign, userId] = args as [string, string, string];
+		const [profileId] = interaction.values as [string];
 		const profiles = interaction.component.options;
 
 		if (!profiles) {

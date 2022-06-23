@@ -232,12 +232,12 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				for (let star = stars - 1; star >= 0; --star) {
 					// item api has required materials
 					if (itemUpgrade.stars[star]) {
-						for (const [material, amount] of Object.entries(itemUpgrade.stars[star])) {
+						for (const [material, amount] of Object.entries(itemUpgrade.stars[star]!)) {
 							essencePrice += getUpgradeMaterialPrice(material) * amount;
 						}
 					} else {
 						// dungeon items require master stars for stars 6 - 10
-						price += getPrice(MASTER_STARS[star - 5]) * PriceModifier.DungeonMasterStar;
+						price += getPrice(MASTER_STARS[star - 5]!) * PriceModifier.DungeonMasterStar;
 					}
 				}
 			}
@@ -463,6 +463,7 @@ export async function getNetworth(
 	{ addBanking = true, addAuctions = false } = {},
 ) {
 	const member = members[uuid];
+	if (!member) throw new Error(`No member with the uuid '${uuid}'`);
 
 	// banking
 	let bankingAPIEnabled = true;

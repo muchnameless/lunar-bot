@@ -59,6 +59,6 @@ export default class GuildOfCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(await this._generateReply(hypixelMessage.commandData.args[0]));
+		return hypixelMessage.reply(await this._generateReply(hypixelMessage.commandData.args[0]!));
 	}
 }

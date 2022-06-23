@@ -60,7 +60,7 @@ export default class FriendCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
-		const [SUBCOMMAND, HYPIXEL_GUILD_ID, PAGE] = args;
+		const [SUBCOMMAND, HYPIXEL_GUILD_ID, PAGE] = args as [string, string, string];
 
 		switch (SUBCOMMAND) {
 			case 'list':

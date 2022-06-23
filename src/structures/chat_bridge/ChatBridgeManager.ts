@@ -116,7 +116,7 @@ export class ChatBridgeManager {
 
 		// single
 		if (typeof index === 'number' && index >= 0 && index < ChatBridgeManager._accounts.length) {
-			const chatBridge = this.cache[index];
+			const chatBridge = this.cache[index]!;
 
 			await chatBridge.connect();
 			await once(chatBridge, ChatBridgeEvent.Ready);

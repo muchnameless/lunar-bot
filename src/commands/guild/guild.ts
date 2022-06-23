@@ -618,12 +618,12 @@ export default class GuildCommand extends ApplicationCommand {
 
 			let padding = '\n';
 
-			for (let i = getInlineFieldLineCount(event, 37); i--; ) {
+			for (let i = getInlineFieldLineCount(event!, 37); i--; ) {
 				padding += '\n';
 			}
 
-			dates.push(`${time(new Date(date))}${padding}`);
-			events.push(event);
+			dates.push(`${time(new Date(date!))}${padding}`);
+			events.push(event!);
 		}
 
 		// build embed
@@ -671,8 +671,8 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override async buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
-		const [SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT] = args;
-		const [SUBCOMMAND] = SUBCOMMAND_WITH_ARGS.split(' ', 1);
+		const [SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT] = args as [string, string, string, string];
+		const [SUBCOMMAND] = SUBCOMMAND_WITH_ARGS.split(' ', 1) as [string];
 		const hypixelGuild = this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID);
 
 		if (!hypixelGuild) {

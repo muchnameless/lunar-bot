@@ -108,7 +108,7 @@ export class HypixelMessage {
 				this.chatBridge,
 				matched.groups!.whisper !== 'To'
 					? {
-							ign: matched.groups!.ign,
+							ign: matched.groups!.ign!,
 							guildRank: matched.groups!.guildRank,
 							uuid: matched.groups!.type
 								? // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
@@ -124,7 +124,7 @@ export class HypixelMessage {
 							uuid: this.chatBridge.minecraft.botUuid,
 					  },
 			);
-			this.content = this.cleanedContent.slice(matched[0].length).trimStart();
+			this.content = this.cleanedContent.slice(matched[0]!.length).trimStart();
 			this.spam = false;
 
 			// message was sent from the bot -> don't parse input
@@ -379,7 +379,7 @@ export class HypixelMessage {
 			time,
 		});
 
-		if (!this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase())) {
+		if (!this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase()!)) {
 			throw errorMessage;
 		}
 	}

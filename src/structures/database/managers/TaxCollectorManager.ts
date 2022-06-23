@@ -57,7 +57,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 
 		// remove self paid if only the collector paid the default amount at his own ah
 		if (_taxCollector.collectedTax === this.client.config.get('TAX_AMOUNT')) {
-			if (player && (await player.transactions)[0].to === player.minecraftUuid) await player.resetTax();
+			if (player && (await player.transactions)[0]?.to === player.minecraftUuid) await player.resetTax();
 			await _taxCollector.destroy();
 		} else {
 			await _taxCollector.update({ isCollecting: false });

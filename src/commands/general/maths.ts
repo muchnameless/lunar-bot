@@ -67,7 +67,7 @@ class Parser {
 
 						while (stack.length) {
 							const punctuator = stack.at(-1)!;
-							const operator = this.table[token];
+							const operator = this.table[token]!;
 
 							if (punctuator === '(') {
 								if (operator.associativity === OperatorAssociativity.Right) {
@@ -79,7 +79,7 @@ class Parser {
 							}
 
 							const { precedence } = operator;
-							const antecedence = this.table[punctuator].precedence;
+							const antecedence = this.table[punctuator]!.precedence;
 
 							if (
 								precedence > antecedence ||
@@ -105,9 +105,9 @@ class Parser {
 
 					if (
 						nonBracketIndex !== -1 &&
-						this.table[stack[nonBracketIndex]]?.associativity === OperatorAssociativity.Right
+						this.table[stack[nonBracketIndex]!]?.associativity === OperatorAssociativity.Right
 					) {
-						output.push(stack.splice(nonBracketIndex, 1)[0]);
+						output.push(stack.splice(nonBracketIndex, 1)[0]!);
 					}
 				}
 			}

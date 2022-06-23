@@ -263,7 +263,7 @@ async function updateAuctionPrices(ac: AbortController) {
 
 				({ itemId, count } = getEnchantment(
 					enchants[0] as Enchantment,
-					item.tag!.ExtraAttributes!.enchantments[enchants[0]],
+					item.tag!.ExtraAttributes!.enchantments[enchants[0]!]!,
 				));
 				break;
 			}
@@ -300,7 +300,7 @@ async function updateAuctionPrices(ac: AbortController) {
 			}
 
 			case ItemId.Rune: {
-				const [[RUNE, LEVEL]] = Object.entries(item.tag!.ExtraAttributes!.runes!);
+				const [RUNE, LEVEL] = Object.entries(item.tag!.ExtraAttributes!.runes!)[0]!;
 
 				itemId = `RUNE_${RUNE}_${LEVEL}`;
 				break;

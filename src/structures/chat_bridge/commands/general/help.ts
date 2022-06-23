@@ -47,7 +47,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
-		const INPUT = hypixelMessage.commandData.args[0].toLowerCase();
+		const INPUT = hypixelMessage.commandData.args[0]!.toLowerCase();
 
 		// category help
 		const requestedCategory = this.collection.categories.find((categoryName) => categoryName === INPUT);

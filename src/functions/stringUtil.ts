@@ -61,7 +61,7 @@ export const getIdFromString = (string: string) => string.match(/(?<=^(?:<@!?)?)
  * aBc -> Abc
  * @param string to convert
  */
-export const upperCaseFirstChar = (string: string) => `${string[0].toUpperCase()}${string.slice(1).toLowerCase()}`;
+export const upperCaseFirstChar = (string: string) => `${string[0]!.toUpperCase()}${string.slice(1).toLowerCase()}`;
 
 /**
  * removes ',', '.' and '_' from the input string

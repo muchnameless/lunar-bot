@@ -66,7 +66,7 @@ export default class PingMuteCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
-		const [INPUT] = hypixelMessage.commandData.args;
+		const [INPUT] = hypixelMessage.commandData.args as [string];
 
 		return hypixelMessage.reply(
 			await this._generateReply(this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT), INPUT),

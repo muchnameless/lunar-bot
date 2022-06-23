@@ -119,7 +119,7 @@ export default class InteractionCreateEvent extends Event {
 				// check if button press is from the user that invoked the original interaction
 				if (interaction.user.id !== args[0]) {
 					return InteractionUtil.reply(interaction, {
-						content: `you cannot delete messages from ${userMention(args[0])}`,
+						content: `you cannot delete messages from ${userMention(args[0]!)}`,
 						ephemeral: true,
 					});
 				}

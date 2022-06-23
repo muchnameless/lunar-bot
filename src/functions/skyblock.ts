@@ -105,7 +105,7 @@ export function findSkyblockProfile(
 			for (const profile of profiles) {
 				if (!profile) continue;
 
-				const { totalWeight } = getLilyWeight(profile.members[uuid]);
+				const { totalWeight } = getLilyWeight(profile.members[uuid]!);
 
 				if (maxWeight > totalWeight) continue;
 
@@ -123,12 +123,12 @@ export function findSkyblockProfile(
 			for (const profile of profiles) {
 				if (!profile) continue;
 
-				profile.members[uuid].last_save;
+				profile.members[uuid]!.last_save;
 
-				if (lastActive > profile.members[uuid].last_save) continue;
+				if (lastActive > profile.members[uuid]!.last_save) continue;
 
 				mainProfile = profile;
-				lastActive = profile.members[uuid].last_save;
+				lastActive = profile.members[uuid]!.last_save;
 			}
 
 			return mainProfile;

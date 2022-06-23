@@ -156,7 +156,7 @@ export class MessageUtil extends null {
 		// single reaction
 		if (emojis.length === 1) {
 			try {
-				return await this._reactSingle(message, emojis[0]);
+				return await this._reactSingle(message, emojis[0]!);
 			} catch (error) {
 				logger.error({ message, err: error, data: emojis }, `[MESSAGE REACT]: in ${this.channelLogInfo(message)}`);
 				return null;
