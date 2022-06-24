@@ -1089,9 +1089,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		}
 
 		// other delimiter roles
-		for (const role of DELIMITER_ROLES) {
-			if (discordGuild[`${role}_DELIMITER_ROLE_ID`] && !roleCache.has(discordGuild[`${role}_DELIMITER_ROLE_ID`]!)) {
-				rolesToAdd.push(discordGuild[`${role}_DELIMITER_ROLE_ID`]!);
+		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
+			if (
+				discordGuild[`${DELIMITER_ROLES[i]!}_DELIMITER_ROLE_ID`] &&
+				!roleCache.has(discordGuild[`${DELIMITER_ROLES[i]!}_DELIMITER_ROLE_ID`]!)
+			) {
+				rolesToAdd.push(discordGuild[`${DELIMITER_ROLES[i]!}_DELIMITER_ROLE_ID`]!);
 			}
 		}
 
