@@ -20,11 +20,11 @@ import { buildVisibilityButton, makeContent, seconds, validateDiscordId, validat
 import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
-	AnyInteraction,
 	APIModalInteractionResponseCallbackData,
 	AutocompleteInteraction,
 	AwaitModalSubmitOptions,
 	BaseGuildTextChannel,
+	BaseInteraction,
 	BooleanCache,
 	ButtonInteraction,
 	CacheType,
@@ -61,13 +61,13 @@ interface InteractionData {
 }
 
 export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
-	AnyInteraction<Cached>,
+	Interaction<Cached>,
 	AutocompleteInteraction
 > &
 	InteractionResponseFields<Cached>;
 
 export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
-	AnyInteraction<Cached>,
+	Interaction<Cached>,
 	AutocompleteInteraction
 > &
 	InteractionResponseFields<Cached> & {
@@ -81,7 +81,7 @@ export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> =
 	};
 
 export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
-	AnyInteraction<Cached>,
+	Interaction<Cached>,
 	AutocompleteInteraction
 > &
 	FromMessageInteractionResponseFields<Cached>;
@@ -150,7 +150,7 @@ export class InteractionUtil extends null {
 	/**
 	 * cache
 	 */
-	static CACHE = new WeakMap<Exclude<AnyInteraction<'cachedOrDM'>, AutocompleteInteraction>, InteractionData>();
+	static CACHE = new WeakMap<Exclude<Interaction<'cachedOrDM'>, AutocompleteInteraction>, InteractionData>();
 
 	static AUTO_DEFER_TIMEOUT = seconds(1);
 
@@ -193,7 +193,7 @@ export class InteractionUtil extends null {
 	 * checks the command options for the ephemeral option
 	 * @param interaction
 	 */
-	static checkEphemeralOption(interaction: AnyInteraction<'cachedOrDM'>) {
+	static checkEphemeralOption(interaction: Interaction<'cachedOrDM'>) {
 		if (!interaction.isChatInputCommand()) return null;
 
 		switch (interaction.options.getString('visibility')) {
@@ -230,7 +230,7 @@ export class InteractionUtil extends null {
 	/**
 	 * @param interaction
 	 */
-	static logInfo(interaction: AnyInteraction<'cachedOrDM'>) {
+	static logInfo(interaction: Interaction<'cachedOrDM'>) {
 		switch (interaction.type) {
 			case InteractionType.ApplicationCommand:
 				switch (interaction.commandType) {
@@ -340,7 +340,7 @@ export class InteractionUtil extends null {
 	 * appends the first option name if the command is a subcommand or subcommand group
 	 * @param interaction
 	 */
-	static fullCommandName(interaction: AnyInteraction) {
+	static fullCommandName(interaction: Interaction) {
 		if (interaction.type === InteractionType.MessageComponent) {
 			return `${interaction.componentType} '${interaction.customId}'`;
 		}
@@ -366,7 +366,7 @@ export class InteractionUtil extends null {
 	 * whether the interaction is from a cached guild or DM	channel
 	 * @param interaction
 	 */
-	static inCachedGuildOrDM(interaction: AnyInteraction): interaction is AnyInteraction<'cachedOrDM'> {
+	static inCachedGuildOrDM(interaction: Interaction): interaction is Interaction<'cachedOrDM'> {
 		// guilds are sent with all their channels -> cached channel implies cached guild
 		return interaction.client.channels.cache.has(interaction.channelId!);
 	}
@@ -375,7 +375,7 @@ export class InteractionUtil extends null {
 	 * whether the interaction has a message attached
 	 * @param interaction
 	 */
-	static isFromMessage<T extends Interaction<'cachedOrDM'>>(
+	static isFromMessage<T extends BaseInteraction<'cachedOrDM'>>(
 		interaction: T,
 	): interaction is T & FromMessageInteractionResponseFields {
 		return Boolean((interaction as any).message);
@@ -1027,23 +1027,23 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static getHypixelGuild(
-		interaction: AnyInteraction<'cachedOrDM'>,
+		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput?: true; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL;
 	static getHypixelGuild(
-		interaction: AnyInteraction<'cachedOrDM'>,
+		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL | null;
 	static getHypixelGuild(
-		interaction: AnyInteraction<'cachedOrDM'>,
+		interaction: Interaction<'cachedOrDM'>,
 		options?: { fallbackIfNoInput?: true; includeAll?: false },
 	): HypixelGuild;
 	static getHypixelGuild(
-		interaction: AnyInteraction<'cachedOrDM'>,
+		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll?: false },
 	): HypixelGuild | null;
 	static getHypixelGuild(
-		interaction: AnyInteraction<'cachedOrDM'>,
+		interaction: Interaction<'cachedOrDM'>,
 		{ fallbackIfNoInput = true, includeAll = false }: GetHypixelGuildOptions = {},
 	) {
 		const INPUT = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getString('guild');

@@ -44,10 +44,10 @@ import {
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { logger } from '../../logger';
 import type {
-	AnyInteraction,
 	AutocompleteInteraction,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
+	Interaction,
 	SlashCommandStringOption,
 	Snowflake,
 } from 'discord.js';
@@ -241,11 +241,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param subcommand
 	 */
-	private _assertRequiredRoles(
-		interaction: AnyInteraction<'cachedOrDM'>,
-		hypixelGuild: HypixelGuild,
-		subcommand: string,
-	) {
+	private _assertRequiredRoles(interaction: Interaction<'cachedOrDM'>, hypixelGuild: HypixelGuild, subcommand: string) {
 		const roleIds: Snowflake[] = [];
 
 		switch (subcommand) {

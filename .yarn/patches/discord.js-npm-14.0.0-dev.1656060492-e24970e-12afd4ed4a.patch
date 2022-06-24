@@ -1,51 +1,5 @@
-diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
-index 6b938f16e7409b72928e02efe6ae93d19b49fb3e..5354bed91e05f0f0ebc882e03ba736a70bcfe9f6 100644
---- a/src/client/websocket/WebSocketManager.js
-+++ b/src/client/websocket/WebSocketManager.js
-@@ -22,13 +22,14 @@ const BeforeReadyWhitelist = [
-   GatewayDispatchEvents.GuildMemberRemove,
- ];
- 
--const UNRECOVERABLE_CLOSE_CODES = [
--  GatewayCloseCodes.AuthenticationFailed,
--  GatewayCloseCodes.InvalidShard,
--  GatewayCloseCodes.ShardingRequired,
--  GatewayCloseCodes.InvalidIntents,
--  GatewayCloseCodes.DisallowedIntents,
--];
-+const unrecoverableErrorCodeMap = {
-+  [GatewayCloseCodes.AuthenticationFailed]: ErrorCodes.TokenInvalid,
-+  [GatewayCloseCodes.InvalidShard]: ErrorCodes.ShardingInvalid,
-+  [GatewayCloseCodes.ShardingRequired]: ErrorCodes.ShardingRequired,
-+  [GatewayCloseCodes.InvalidIntents]: ErrorCodes.InvalidIntents,
-+  [GatewayCloseCodes.DisallowedIntents]: ErrorCodes.DisallowedIntents,
-+};
-+
- const UNRESUMABLE_CLOSE_CODES = [1000, GatewayCloseCodes.AlreadyAuthenticated, GatewayCloseCodes.InvalidSeq];
- 
- /**
-@@ -194,7 +195,7 @@ class WebSocketManager extends EventEmitter {
-       });
- 
-       shard.on(ShardEvents.Close, event => {
--        if (event.code === 1_000 ? this.destroyed : UNRECOVERABLE_CLOSE_CODES.includes(event.code)) {
-+        if (event.code === 1_000 ? this.destroyed : event.code in unrecoverableErrorCodeMap) {
-           /**
-            * Emitted when a shard's WebSocket disconnects and will no longer reconnect.
-            * @event Client#shardDisconnect
-@@ -245,8 +246,8 @@ class WebSocketManager extends EventEmitter {
-     try {
-       await shard.connect();
-     } catch (error) {
--      if (error?.code && UNRECOVERABLE_CLOSE_CODES.includes(error.code)) {
--        throw new Error(GatewayCloseCodes[error.code]);
-+      if (error?.code && error.code in unrecoverableErrorCodeMap) {
-+        throw new Error(unrecoverableErrorCodeMap[error.code]);
-         // Undefined if session is invalid, error event for regular closes
-       } else if (!error || error.code) {
-         this.debug('Failed to connect to the gateway, requeueing...', shard);
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index 7e822caf6da297a7b084c44f064307f3fa928c80..9e0b96bab7fdff21f50e0678ff4b36d7f9239161 100644
+index c3490ca514ce8776e366b5f168fd762f7a5fdca5..9e0b96bab7fdff21f50e0678ff4b36d7f9239161 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
 @@ -269,6 +269,7 @@ class WebSocketShard extends EventEmitter {
@@ -56,45 +10,6 @@ index 7e822caf6da297a7b084c44f064307f3fa928c80..9e0b96bab7fdff21f50e0678ff4b36d7
        this.connectedAt = Date.now();
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
-@@ -859,7 +860,8 @@ class WebSocketShard extends EventEmitter {
-    * @private
-    */
-   _cleanupConnection() {
--    this.connection.onopen = this.connection.onclose = this.connection.onerror = this.connection.onmessage = null;
-+    this.connection.onopen = this.connection.onclose = this.connection.onmessage = null;
-+    this.connection.onerror = () => null;
-   }
- 
-   /**
-diff --git a/src/errors/DJSError.js b/src/errors/DJSError.js
-index 877e3a8920e24ad19639268d024c61ae1a1f5c18..aa37ab3a9352ffc7b526a996305208272b1a4283 100644
---- a/src/errors/DJSError.js
-+++ b/src/errors/DJSError.js
-@@ -16,7 +16,7 @@ function makeDiscordjsError(Base) {
-     constructor(code, ...args) {
-       super(message(code, args));
-       this[kCode] = code;
--      if (Error.captureStackTrace) Error.captureStackTrace(this, DiscordjsError);
-+      Error.captureStackTrace?.(this, DiscordjsError);
-     }
- 
-     get name() {
-diff --git a/src/errors/Messages.js b/src/errors/Messages.js
-index 08e801123df6835151fdaa39b7c0dcade774de91..417e7a809637bc4fad0540b326312dec28e01a40 100644
---- a/src/errors/Messages.js
-+++ b/src/errors/Messages.js
-@@ -159,11 +159,4 @@ const Messages = {
-   [DjsErrorCodes.SweepFilterReturn]: 'The return value of the sweepFilter function was not false or a Function',
- };
- 
--// Magic needed by WS
--Messages.AuthenticationFailed = Messages[DjsErrorCodes.TokenInvalid];
--Messages.InvalidShard = Messages[DjsErrorCodes.ShardingInvalid];
--Messages.ShardingRequired = Messages[DjsErrorCodes.ShardingRequired];
--Messages.InvalidIntents = Messages[DjsErrorCodes.InvalidIntents];
--Messages.DisallowedIntents = Messages[DjsErrorCodes.DisallowedIntents];
--
- module.exports = Messages;
 diff --git a/src/structures/ActionRowBuilder.js b/src/structures/ActionRowBuilder.js
 index 379b0e1f43273c4f979203e4087af3a4f654df19..fabdac796e2005ab2e03704c3cf18fbb077c2e54 100644
 --- a/src/structures/ActionRowBuilder.js
@@ -311,27 +226,8 @@ index b0ee8458c90ee81551e90a0e29d15c25802fa5f8..6293abd97123cdf7c09d668319d150bc
      );
    }
  
-diff --git a/src/structures/GuildScheduledEvent.js b/src/structures/GuildScheduledEvent.js
-index 390486c877070f5a5858dec44f863427bc3c6f47..d7e328669e0e3fd4d78dd42539d34dda9fd83d2b 100644
---- a/src/structures/GuildScheduledEvent.js
-+++ b/src/structures/GuildScheduledEvent.js
-@@ -193,11 +193,12 @@ class GuildScheduledEvent extends Base {
- 
-   /**
-    * The time the guild scheduled event will start at
--   * @type {Date}
-+   * <info>This can be potentially `null` only when it's an {@link AuditLogEntryTarget}</info>
-+   * @type {?Date}
-    * @readonly
-    */
-   get scheduledStartAt() {
--    return new Date(this.scheduledStartTimestamp);
-+    return this.scheduledStartTimestamp && new Date(this.scheduledStartTimestamp);
-   }
- 
-   /**
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
-index d0e9602c7279d7035284241f5fda87beec8ac078..61a01eb05a7bc9d7a99c6b9eee0492fb0dc726f7 100644
+index f95d5681bcafc6ed9439af10fc10866a2ebe22e1..a3a417b315e72683fee3efa97483abe5b5339303 100644
 --- a/src/structures/Invite.js
 +++ b/src/structures/Invite.js
 @@ -233,10 +233,11 @@ class Invite extends Base {
@@ -579,10 +475,10 @@ index fe2347bc8f4b4195ac039556e4d2b80ce469f208..1ed24f988aa769b13846b4a6d3ad5957
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 37edf4818440d2fd2c46d68d1cd557784cd414af..d3e9542a75b0d256eb9f678f201d5ceaf447117a 100644
+index 07a46de1b1e4f8fa080913d43de9022a6f5c655a..432d0f1dce9604b0f16e9c6f4bd7708802f1e7be 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
-@@ -105,7 +105,7 @@ class MessagePayload {
+@@ -107,7 +107,7 @@ class MessagePayload {
      if (this.options.content === null) {
        content = '';
      } else if (typeof this.options.content !== 'undefined') {
@@ -591,7 +487,7 @@ index 37edf4818440d2fd2c46d68d1cd557784cd414af..d3e9542a75b0d256eb9f678f201d5cea
      }
  
      return content;
-@@ -132,7 +132,7 @@ class MessagePayload {
+@@ -134,7 +134,7 @@ class MessagePayload {
        }
      }
  
@@ -720,7 +616,7 @@ index c5f0bd136b60f4ba424d9b6450c9524298d661b3..137cc4590ce3ec9240b03db0c2a7bb68
     * Creates a new select menu option builder from JSON data
     * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 8d4dd7c5533b94c9c414da266b60d611b448e0f7..ec1382a9457babb69c1ec26f4dc9b9a9c1c7db31 100644
+index 2f477337027e571a30c54cd09af4c6ddd7e0e764..7932c900ff56a93b6aaacea7ff2a72c9cf330a6f 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -355,17 +355,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
@@ -742,7 +638,7 @@ index 8d4dd7c5533b94c9c414da266b60d611b448e0f7..ec1382a9457babb69c1ec26f4dc9b9a9
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106ddaf728dd42 100644
+index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b722b5178e 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -259,7 +259,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -779,24 +675,6 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
  }
  
  export type BooleanCache<T extends CacheType> = T extends 'cached' ? true : false;
-@@ -631,7 +626,7 @@ export class SelectMenuOptionBuilder extends BuildersSelectMenuOption {
- }
- 
- export class ModalBuilder extends BuildersModal {
--  public constructor(data?: ModalData | APIModalComponent);
-+  public constructor(data?: Partial<ModalComponentData> | Partial<APIModalComponent>);
-   public static from(other: JSONEncodable<APIModalComponent> | APIModalComponent): ModalBuilder;
- }
- 
-@@ -1368,7 +1363,7 @@ export class GuildScheduledEvent<S extends GuildScheduledEventStatus = GuildSche
-   public creator: User | null;
-   public get createdTimestamp(): number;
-   public get createdAt(): Date;
--  public get scheduledStartAt(): Date;
-+  public get scheduledStartAt(): Date | null;
-   public get scheduledEndAt(): Date | null;
-   public get channel(): VoiceChannel | StageChannel | null;
-   public get guild(): Guild | null;
 @@ -1470,7 +1465,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
@@ -824,8 +702,8 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
 +  ? CachedOrDMType
    : Fallback;
  
- export type AnyInteraction<Cached extends CacheType = CacheType> =
-@@ -1505,7 +1506,8 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+ export type Interaction<Cached extends CacheType = CacheType> =
+@@ -1505,7 +1506,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -835,7 +713,7 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1513,7 +1515,7 @@ export class Interaction<Cached extends CacheType = CacheType> extends Base {
+@@ -1513,7 +1515,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -844,7 +722,7 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1734,16 +1736,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1736,16 +1738,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -865,19 +743,7 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1922,7 +1923,10 @@ export class MessageReaction {
- export interface ModalComponentData {
-   customId: string;
-   title: string;
--  components: (ActionRow<ModalActionRowComponent> | ActionRowData<ModalActionRowComponentData>)[];
-+  components: (
-+    | JSONEncodable<APIActionRowComponent<APIModalActionRowComponent>>
-+    | ActionRowData<ModalActionRowComponentData>
-+  )[];
- }
- 
- export interface BaseModalData {
-@@ -1935,12 +1939,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1940,12 +1941,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -896,7 +762,7 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1949,6 +1958,7 @@ export class ModalSubmitFields {
+@@ -1954,6 +1960,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -904,7 +770,7 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3251,7 +3261,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3239,7 +3246,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -913,8 +779,8 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3707,11 +3717,6 @@ export interface BaseApplicationCommandData {
-   defaultMemberPermissions?: PermissionResolvable;
+@@ -3695,11 +3702,6 @@ export interface BaseApplicationCommandData {
+   defaultMemberPermissions?: PermissionResolvable | null;
  }
  
 -export interface AttachmentData {
@@ -925,7 +791,7 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4993,10 +4998,8 @@ export interface MessageEditOptions {
+@@ -4991,10 +4993,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -937,7 +803,7 @@ index 8fa5126b647de275d22bfd2965a15c25e2fb72d9..fb98b7fe8e918efa0967995320106dda
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5051,10 +5054,8 @@ export interface MessageOptions {
+@@ -5049,10 +5049,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream

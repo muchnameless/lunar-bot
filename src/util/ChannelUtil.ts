@@ -4,7 +4,7 @@ import ms from 'ms';
 import { logger } from '../logger';
 import { commaListAnd } from '../functions';
 import { EmbedUtil } from './EmbedUtil';
-import type { AnyChannel, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';
+import type { Channel, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
@@ -12,7 +12,7 @@ export interface SendOptions extends MessageOptions {
 
 export class ChannelUtil extends null {
 	static DM_PERMISSIONS = new PermissionsBitField()
-		.add([
+		.add(
 			PermissionFlagsBits.AddReactions,
 			PermissionFlagsBits.ViewChannel,
 			PermissionFlagsBits.SendMessages,
@@ -22,7 +22,7 @@ export class ChannelUtil extends null {
 			PermissionFlagsBits.ReadMessageHistory,
 			PermissionFlagsBits.MentionEveryone,
 			PermissionFlagsBits.UseExternalEmojis,
-		])
+		)
 		.freeze();
 
 	static DEFAULT_SEND_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
@@ -30,7 +30,7 @@ export class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 */
-	static logInfo(channel: AnyChannel | null) {
+	static logInfo(channel: Channel | null) {
 		if (!channel) return null;
 
 		switch (channel.type) {
@@ -45,10 +45,10 @@ export class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 */
-	static botPermissions(channel: AnyChannel): Readonly<PermissionsBitField>;
+	static botPermissions(channel: Channel): Readonly<PermissionsBitField>;
 	static botPermissions(channel: null): null;
-	static botPermissions(channel: AnyChannel | null): Readonly<PermissionsBitField> | null;
-	static botPermissions(channel: AnyChannel | null) {
+	static botPermissions(channel: Channel | null): Readonly<PermissionsBitField> | null;
+	static botPermissions(channel: Channel | null) {
 		if (!channel) return null;
 
 		switch (channel.type) {

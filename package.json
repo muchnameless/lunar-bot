@@ -22,9 +22,9 @@
 	"author": "muchnameless",
 	"license": "GPL-3.0",
 	"dependencies": {
-		"@discordjs/builders": "0.16.0-dev.1655899432-a3799f9",
-		"@discordjs/collection": "0.8.0-dev.1655899433-a3799f9",
-		"@discordjs/rest": "0.6.0-dev.1655899433-a3799f9",
+		"@discordjs/builders": "0.16.0-dev.1656060475-e24970e",
+		"@discordjs/collection": "0.8.0-dev.1656060489-e24970e",
+		"@discordjs/rest": "0.6.0-dev.1656060473-e24970e",
 		"@sapphire/async-queue": "^1.3.1",
 		"@sapphire/discord-utilities": "^2.11.2",
 		"@sapphire/shapeshift": "^3.3.1",
@@ -39,7 +39,7 @@
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
 		"cron": "^2.0.0",
-		"discord.js": "14.0.0-dev.1655899441-a3799f9",
+		"discord.js": "14.0.0-dev.1656060492-e24970e",
 		"fast-xml-parser": "^4.0.8",
 		"ioredis": "^5.0.6",
 		"js-big-decimal": "github:muchnameless/js-big-decimal",
@@ -93,12 +93,12 @@
 	},
 	"packageManager": "yarn@3.2.1",
 	"resolutions": {
-		"@discordjs/builders@^0.16.0-dev": "patch:@discordjs/builders@npm:0.16.0-dev.1655899432-a3799f9#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1655899432-a3799f9-55b0c8691b.patch",
-		"@discordjs/collection": "0.8.0-dev.1655899433-a3799f9",
-		"@discordjs/rest": "0.6.0-dev.1655899433-a3799f9",
+		"@discordjs/builders@^0.16.0-dev": "patch:@discordjs/builders@npm:0.16.0-dev.1656060475-e24970e#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1656060475-e24970e-2d574137f4.patch",
+		"@discordjs/collection": "0.8.0-dev.1656060489-e24970e",
+		"@discordjs/rest": "0.6.0-dev.1656060473-e24970e",
 		"@sapphire/discord-utilities@2.11.2": "patch:@sapphire/discord-utilities@npm:2.11.2#.yarn/patches/@sapphire-discord-utilities-npm-2.11.2-8d7f4a3c59.patch",
 		"discord-api-types": "0.35.0-next.fc3aa1c.1655808098",
-		"discord.js@14.0.0-dev.1655899441-a3799f9": "patch:discord.js@npm:14.0.0-dev.1655899441-a3799f9#.yarn/patches/discord.js-npm-14.0.0-dev.1655899441-a3799f9-57e9d4d3aa.patch",
-		"sequelize@6.21.0": "patch:sequelize@npm:6.21.0#.yarn/patches/sequelize-npm-6.21.0-30f6211950.patch"
+		"sequelize@6.21.0": "patch:sequelize@npm:6.21.0#.yarn/patches/sequelize-npm-6.21.0-30f6211950.patch",
+		"discord.js@14.0.0-dev.1656060492-e24970e": "patch:discord.js@npm:14.0.0-dev.1656060492-e24970e#.yarn/patches/discord.js-npm-14.0.0-dev.1656060492-e24970e-12afd4ed4a.patch"
 	}
 }

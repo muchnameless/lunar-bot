@@ -16,7 +16,6 @@ import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteract
 import { Event } from '../structures/events/Event';
 import { logger } from '../logger';
 import type {
-	AnyInteraction,
 	APIActionRowComponent,
 	APIMessageActionRowComponent,
 	ApplicationCommandOptionChoiceData,
@@ -24,6 +23,7 @@ import type {
 	BaseGuildTextChannel,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
+	Interaction,
 	JSONEncodable,
 	MessageActionRowComponentBuilder,
 	MessageContextMenuCommandInteraction,
@@ -478,7 +478,7 @@ export default class InteractionCreateEvent extends Event {
 	 * event listener callback
 	 * @param interaction
 	 */
-	override async run(interaction: AnyInteraction) {
+	override async run(interaction: Interaction) {
 		if (!InteractionUtil.inCachedGuildOrDM(interaction)) return;
 
 		try {
