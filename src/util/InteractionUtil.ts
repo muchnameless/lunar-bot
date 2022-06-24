@@ -367,9 +367,7 @@ export class InteractionUtil extends null {
 	 * whether the interaction has a message attached
 	 * @param interaction
 	 */
-	static isFromMessage<T extends /* Base */ Interaction<'cachedOrDM'>>(
-		interaction: T,
-	): interaction is T & FromMessageInteraction {
+	static isFromMessage<T extends Interaction<'cachedOrDM'>>(interaction: T): interaction is T & FromMessageInteraction {
 		return Boolean((interaction as any).message);
 	}
 
