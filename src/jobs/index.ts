@@ -3,6 +3,7 @@ import { itemUpgrades, prices, accessories } from '../structures/networth/prices
 import { logger } from '../logger';
 import { Job } from '../structures/jobs/Job';
 import { JobManager } from '../structures/jobs/JobManager';
+import { assertNever } from '../functions';
 import type { LevelWithSilent } from 'pino';
 import type { ParsedSkyBlockItem } from './pricesAndPatchNotes';
 import type { LunarClient } from '../structures/LunarClient';
@@ -58,14 +59,8 @@ export function startJobs(client: LunarClient) {
 						prices.set(message.d.itemId, message.d.price);
 						break;
 
-					default: {
-						const e: never = message;
-						if (typeof e === 'string') {
-							logger.error(`[JOBS] pricesAndPatchNotes: unknown message op '${e}'`);
-						} else {
-							logger.error(e, '[JOBS] pricesAndPatchNotes: unknown message op');
-						}
-					}
+					default:
+						return assertNever(message);
 				}
 			},
 		}),

@@ -12,7 +12,7 @@ import {
 } from '../constants';
 import { UnicodeEmoji } from '../../../constants';
 import { GuildMemberUtil, MessageUtil } from '../../../util';
-import { asyncFilter, commaListOr, getLilyWeight, stringToMS } from '../../../functions';
+import { assertNever, asyncFilter, commaListOr, getLilyWeight, stringToMS } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
 import { logger } from '../../../logger';
@@ -634,10 +634,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return this._handleUserMessage(hypixelMessage);
 			}
 
-			default: {
-				const never: never = hypixelMessage.type;
-				logger.error(`[MESSAGE]: unknown type '${never}'`);
-			}
+			default:
+				return assertNever(hypixelMessage.type);
 		}
 	}
 }

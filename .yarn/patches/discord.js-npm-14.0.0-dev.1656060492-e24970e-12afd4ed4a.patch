@@ -650,31 +650,6 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -398,20 +398,15 @@ export interface InteractionResponseFields<Cached extends CacheType = CacheType>
-   replied: boolean;
-   webhook: InteractionWebhook;
-   reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<Message>;
--  reply(options: string | MessagePayload | InteractionReplyOptions): Promise<void>;
-+  reply(
-+    options: string | MessagePayload | InteractionReplyOptions,
-+  ): Promise<InteractionResponse<BooleanCache<Cached>>>;
-   deleteReply(): Promise<void>;
-   editReply(options: string | MessagePayload | WebhookEditMessageOptions): Promise<Message>;
-   deferReply(options: InteractionDeferReplyOptions & { fetchReply: true }): Promise<Message>;
--  deferReply(options?: InteractionDeferReplyOptions): Promise<void>;
-+  deferReply(options?: InteractionDeferReplyOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
-   fetchReply(): Promise<Message>;
-   followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<Message>;
--  showModal(
--    modal:
--      | JSONEncodable<APIModalInteractionResponseCallbackData>
--      | ModalComponentData
--      | APIModalInteractionResponseCallbackData,
--  ): Promise<void>;
--  awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
- }
- 
- export type BooleanCache<T extends CacheType> = T extends 'cached' ? true : false;
 @@ -1470,7 +1465,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }

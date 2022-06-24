@@ -16,35 +16,32 @@ import {
 } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '../constants';
-import { buildVisibilityButton, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
+import {
+	assertNever,
+	buildVisibilityButton,
+	makeContent,
+	seconds,
+	validateDiscordId,
+	validateMinecraftUuid,
+} from '../functions';
 import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
-	APIModalInteractionResponseCallbackData,
 	AutocompleteInteraction,
-	AwaitModalSubmitOptions,
 	BaseGuildTextChannel,
-	BaseInteraction,
-	BooleanCache,
 	ButtonInteraction,
 	CacheType,
-	ChatInputCommandInteraction as DJSChatInputCommandInteraction,
 	ChatInputCommandInteraction,
 	EmojiIdentifierResolvable,
 	Interaction,
 	InteractionDeferReplyOptions,
 	InteractionDeferUpdateOptions,
 	InteractionReplyOptions,
-	InteractionResponseFields,
 	InteractionUpdateOptions,
-	JSONEncodable,
 	Message,
 	MessageActionRowComponentBuilder,
-	MessagePayload,
 	MessageResolvable,
 	ModalBuilder,
-	ModalComponentData,
-	ModalSubmitInteraction,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
@@ -60,42 +57,20 @@ interface InteractionData {
 	autoDeferTimeout: NodeJS.Timeout | null;
 }
 
-export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
+export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Extract<
 	Interaction<Cached>,
-	AutocompleteInteraction
-> &
-	InteractionResponseFields<Cached>;
+	{ reply: unknown }
+>;
 
-export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
+export type ModalRepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Extract<
 	Interaction<Cached>,
-	AutocompleteInteraction
-> &
-	InteractionResponseFields<Cached> & {
-		showModal(
-			modal:
-				| JSONEncodable<APIModalInteractionResponseCallbackData>
-				| ModalComponentData
-				| APIModalInteractionResponseCallbackData,
-		): Promise<void>;
-		awaitModalSubmit(options: AwaitModalSubmitOptions<ModalSubmitInteraction>): Promise<ModalSubmitInteraction<Cached>>;
-	};
+	{ showModal: unknown }
+>;
 
-export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = Exclude<
+export type FromMessageInteraction<Cached extends CacheType = 'cachedOrDM'> = Extract<
 	Interaction<Cached>,
-	AutocompleteInteraction
-> &
-	FromMessageInteractionResponseFields<Cached>;
-
-export interface FromMessageInteractionResponseFields<Cached extends CacheType = 'cachedOrDM'>
-	extends InteractionResponseFields<Cached> {
-	message: Message;
-	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<Message>;
-	deferUpdate(options?: InteractionDeferUpdateOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
-	update(options: InteractionUpdateOptions & { fetchReply: true }): Promise<Message>;
-	update(
-		options: string | MessagePayload | InteractionUpdateOptions,
-	): Promise<InteractionResponse<BooleanCache<Cached>>>;
-}
+	{ message: Message }
+>;
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;
@@ -261,11 +236,8 @@ export class InteractionUtil extends null {
 							guild: interaction.guild?.name ?? null,
 						};
 
-					default: {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const _: never = interaction;
-						return {};
-					}
+					default:
+						return assertNever(interaction);
 				}
 
 			case InteractionType.ApplicationCommandAutocomplete:
@@ -311,11 +283,8 @@ export class InteractionUtil extends null {
 							guild: interaction.guild?.name ?? null,
 						};
 
-					default: {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const _: never = interaction;
-						return {};
-					}
+					default:
+						return assertNever(interaction);
 				}
 
 			// TODO: modal submit
@@ -341,24 +310,47 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 */
 	static fullCommandName(interaction: Interaction) {
-		if (interaction.type === InteractionType.MessageComponent) {
-			return `${interaction.componentType} '${interaction.customId}'`;
-		}
+		switch (interaction.type) {
+			case InteractionType.MessageComponent:
+				return `${ComponentType[interaction.componentType]} '${interaction.customId}'`;
 
-		return [
-			(interaction as DJSChatInputCommandInteraction).commandName,
-			(interaction as DJSChatInputCommandInteraction).options.getSubcommandGroup(),
-			(interaction as DJSChatInputCommandInteraction).options.getSubcommand(false),
-		]
-			.filter((x) => x !== null)
-			.join(' ');
+			case InteractionType.ApplicationCommandAutocomplete:
+				return [
+					interaction.commandName,
+					interaction.options.getSubcommandGroup(),
+					interaction.options.getSubcommand(false),
+				]
+					.filter((x) => x !== null)
+					.join(' ');
+
+			case InteractionType.ApplicationCommand:
+				switch (interaction.commandType) {
+					case ApplicationCommandType.ChatInput:
+						return [
+							interaction.commandName,
+							interaction.options.getSubcommandGroup(),
+							interaction.options.getSubcommand(false),
+						]
+							.filter((x) => x !== null)
+							.join(' ');
+
+					default:
+						return interaction.commandName;
+				}
+
+			case InteractionType.ModalSubmit:
+				return interaction.customId;
+
+			default:
+				return assertNever(interaction);
+		}
 	}
 
 	/**
 	 * whether the force option was set to true
 	 * @param interaction
 	 */
-	static checkForce(interaction: DJSChatInputCommandInteraction<'cachedOrDM'> | AutocompleteInteraction<'cachedOrDM'>) {
+	static checkForce(interaction: ChatInputCommandInteraction<'cachedOrDM'> | AutocompleteInteraction<'cachedOrDM'>) {
 		return interaction.options.getBoolean('force') ?? false;
 	}
 
@@ -375,9 +367,9 @@ export class InteractionUtil extends null {
 	 * whether the interaction has a message attached
 	 * @param interaction
 	 */
-	static isFromMessage<T extends BaseInteraction<'cachedOrDM'>>(
+	static isFromMessage<T extends /* Base */ Interaction<'cachedOrDM'>>(
 		interaction: T,
-	): interaction is T & FromMessageInteractionResponseFields {
+	): interaction is T & FromMessageInteraction {
 		return Boolean((interaction as any).message);
 	}
 

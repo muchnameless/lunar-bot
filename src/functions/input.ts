@@ -2,17 +2,14 @@ import { HypixelMessage } from '../structures/chat_bridge/HypixelMessage';
 import { UserUtil } from '../util';
 import { mojang } from '../api';
 import type { HypixelUserMessage } from '../structures/chat_bridge/HypixelMessage';
-import type { BaseInteraction } from 'discord.js';
+import type { Interaction } from 'discord.js';
 
 /**
  * message, args -> ign, uuid
  * @param ctx
  * @param ignOrUuid
  */
-export async function getUuidAndIgn(
-	ctx: BaseInteraction<'cachedOrDM'> | HypixelUserMessage,
-	ignOrUuid?: string | null,
-) {
+export async function getUuidAndIgn(ctx: Interaction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid?: string | null) {
 	// remove non-alphanumeric characters
 	const IGN_OR_UUID = ignOrUuid?.replace(/\W/g, '');
 

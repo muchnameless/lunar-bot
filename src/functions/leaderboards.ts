@@ -22,7 +22,15 @@ import {
 } from '../constants';
 import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
-import { buildPaginationActionRow, days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
+import {
+	assertNever,
+	buildPaginationActionRow,
+	days,
+	formatDecimalNumber,
+	formatNumber,
+	minutes,
+	upperCaseFirstChar,
+} from '.';
 import type {
 	APIEmbed,
 	ButtonInteraction,
@@ -375,10 +383,8 @@ export async function handleLeaderboardSelectMenuInteraction(
 			[leaderboardArgs[SELECT_TYPE]] = interaction.values as [LeaderboardXPTypes];
 			break;
 
-		default: {
-			const never: never = SELECT_TYPE;
-			throw new Error(`unknown select type ${never}`);
-		}
+		default:
+			return assertNever(SELECT_TYPE);
 	}
 
 	if (USER_ID !== interaction.user.id) {

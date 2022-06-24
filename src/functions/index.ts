@@ -10,4 +10,5 @@ export * from './skyblock';
 export * from './stringUtil';
 export * from './stringValidators';
 export * from './time';
+export * from './types';
 export * from './util';

@@ -1,4 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
+import { assertNever } from '../../../functions';
 import { TransactionType } from './Transaction';
 import type {
 	Attributes,
@@ -83,10 +84,8 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 				data = { collectedDonations: this.collectedDonations + amount };
 				break;
 
-			default: {
-				const e: never = type;
-				throw new Error(`[ADD AMOUNT]: ${this}: unknown type '${e}'`);
-			}
+			default:
+				return assertNever(type);
 		}
 
 		return this.update(data, options);
@@ -104,10 +103,8 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 			case TransactionType.Donation:
 				return this.update({ collectedDonations: 0 });
 
-			default: {
-				const e: never = type;
-				throw new Error(`[RESET AMOUNT]: ${this}: unknown type '${e}'`);
-			}
+			default:
+				return assertNever(type);
 		}
 	}
 

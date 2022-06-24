@@ -1756,7 +1756,7 @@ __metadata:
 
 "discord.js@patch:discord.js@npm:14.0.0-dev.1656060492-e24970e#.yarn/patches/discord.js-npm-14.0.0-dev.1656060492-e24970e-12afd4ed4a.patch::locator=lunar-bot%40workspace%3A.":
   version: 14.0.0-dev.1656060492-e24970e
-  resolution: "discord.js@patch:discord.js@npm%3A14.0.0-dev.1656060492-e24970e#.yarn/patches/discord.js-npm-14.0.0-dev.1656060492-e24970e-12afd4ed4a.patch::version=14.0.0-dev.1656060492-e24970e&hash=8cdcae&locator=lunar-bot%40workspace%3A."
+  resolution: "discord.js@patch:discord.js@npm%3A14.0.0-dev.1656060492-e24970e#.yarn/patches/discord.js-npm-14.0.0-dev.1656060492-e24970e-12afd4ed4a.patch::version=14.0.0-dev.1656060492-e24970e&hash=d93732&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@discordjs/builders": ^0.16.0-dev
     "@discordjs/collection": ^0.8.0-dev
@@ -1769,7 +1769,7 @@ __metadata:
     tslib: ^2.4.0
     undici: ^5.5.1
     ws: ^8.8.0
-  checksum: 35b373caba74a6dbec580d028a0a88f0609afc1f4383e55042a66acd229ef2bebcb2ef8d78cee478ba7ac16dd29410513f5a87c15f49afc0cbae9065acc421e3
+  checksum: c8df9e96f60e214c5d34e9fe721887c474881656c2c4944183dce2778c8922982a483db9d5d93de58cc15e46ec3e424382e11f662a36fe967da63fe10ed32712
   languageName: node
   linkType: hard
 

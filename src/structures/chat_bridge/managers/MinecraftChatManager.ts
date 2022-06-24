@@ -23,6 +23,7 @@ import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
 import { HypixelMessageCollector, HypixelMessageCollectorEvent } from '../HypixelMessageCollector';
 import {
+	assertNever,
 	asyncReplace,
 	cleanFormattedNumber,
 	hours,
@@ -393,10 +394,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				`;
 				break;
 
-			default: {
-				const never: never = reason;
-				throw new Error(`invalid rejection case '${never}'`);
-			}
+			default:
+				return assertNever(reason);
 		}
 
 		void UserUtil.sendDM(

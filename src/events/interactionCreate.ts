@@ -12,7 +12,12 @@ import {
 import { ApplicationCommandOptionLimits } from '@sapphire/discord-utilities';
 import { CustomIdKey, GUILD_ID_ALL } from '../constants';
 import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
-import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, sortCache } from '../functions';
+import {
+	assertNever,
+	handleLeaderboardButtonInteraction,
+	handleLeaderboardSelectMenuInteraction,
+	sortCache,
+} from '../functions';
 import { Event } from '../structures/events/Event';
 import { logger } from '../logger';
 import type {
@@ -496,11 +501,8 @@ export default class InteractionCreateEvent extends Event {
 						case ApplicationCommandType.User:
 							return void (await this._handleUserContextMenuInteraction(interaction));
 
-						default: {
-							// eslint-disable-next-line @typescript-eslint/no-unused-vars
-							const _: never = interaction;
-							return;
-						}
+						default:
+							return assertNever(interaction);
 					}
 
 				case InteractionType.ApplicationCommandAutocomplete:
@@ -516,22 +518,16 @@ export default class InteractionCreateEvent extends Event {
 						case ComponentType.SelectMenu:
 							return void (await this._handleSelectMenuInteraction(interaction));
 
-						default: {
-							// eslint-disable-next-line @typescript-eslint/no-unused-vars
-							const _: never = interaction;
-							return;
-						}
+						default:
+							return assertNever(interaction);
 					}
 
 				case InteractionType.ModalSubmit:
 					InteractionUtil.add(interaction);
 					return void (await this._handleModalSubmitInteraction(interaction));
 
-				default: {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					const _: never = interaction;
-					return;
-				}
+				default:
+					return assertNever(interaction);
 			}
 		} catch (error) {
 			logger.error({ err: error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');

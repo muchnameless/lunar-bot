@@ -6,7 +6,7 @@ export default class ErrorEvent extends Event {
 	 * event listener callback
 	 * @param error
 	 */
-	override run(error: Error) {
+	override run(error: unknown) {
 		logger.error(error, '[CLIENT ERROR]');
 	}
 }
