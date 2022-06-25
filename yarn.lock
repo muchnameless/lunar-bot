@@ -268,6 +268,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@discordjs/builders@npm:0.16.0-dev.1656158607-c4653f9":
+  version: 0.16.0-dev.1656158607-c4653f9
+  resolution: "@discordjs/builders@npm:0.16.0-dev.1656158607-c4653f9"
+  dependencies:
+    "@sapphire/shapeshift": ^3.2.0
+    discord-api-types: ^0.33.5
+    fast-deep-equal: ^3.1.3
+    ts-mixer: ^6.0.1
+    tslib: ^2.4.0
+  checksum: 7def70832a8076167e23b1c7cb46a4573d899a687dc3fa005bbedc03b329e45265f78ce63d43aefa78358bc1eb780cf98d83e3352a91bc244f271916c49d9d7d
+  languageName: node
+  linkType: hard
+
 "@discordjs/builders@patch:@discordjs/builders@npm:0.16.0-dev.1656060475-e24970e#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1656060475-e24970e-2d574137f4.patch::locator=lunar-bot%40workspace%3A.":
   version: 0.16.0-dev.1656060475-e24970e
   resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A0.16.0-dev.1656060475-e24970e#.yarn/patches/@discordjs-builders-npm-0.16.0-dev.1656060475-e24970e-2d574137f4.patch::version=0.16.0-dev.1656060475-e24970e&hash=257637&locator=lunar-bot%40workspace%3A."
@@ -3602,7 +3615,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-angular": ^17.0.3
-    "@discordjs/builders": 0.16.0-dev.1656060475-e24970e
+    "@discordjs/builders": 0.16.0-dev.1656158607-c4653f9
     "@discordjs/collection": 0.8.0-dev.1656060489-e24970e
     "@discordjs/rest": 0.6.0-dev.1656060473-e24970e
     "@sapphire/async-queue": ^1.3.1
