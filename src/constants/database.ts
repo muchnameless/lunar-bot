@@ -72,7 +72,7 @@ export const DEFAULT_CONFIG = {
 } as const;
 
 type Loosen<T> = {
-	-readonly [P in keyof T]: T[P] extends Offset
+	[P in keyof T]: T[P] extends Offset
 		? Offset.Week
 		: T[P] extends string
 		? string
