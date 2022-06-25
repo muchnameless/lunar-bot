@@ -16,13 +16,6 @@ export const toLowerCase = <T extends string>(s: T) => s.toLowerCase() as Lowerc
 export type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
 
 /**
- * T[] -> T
- */
-export type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends readonly (infer ElementType)[]
-	? ElementType
-	: never;
-
-/**
  * Type helper for making certain fields of an object optional. This is helpful
  * for creating the `CreationAttributes` from your `Attributes` for a Model.
  */
@@ -51,9 +44,3 @@ export type DeepPartialAny<T> = {
 };
 
 type AnyObject = Record<string, any>;
-
-export type FilterByPropertyType<Base, Condition> = {
-	[Key in keyof Base]: Base[Key] extends Condition ? Key : never;
-};
-
-export type KeysByType<Base, Condition> = FilterByPropertyType<Base, Condition>[keyof Base];

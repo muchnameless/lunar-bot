@@ -13,8 +13,8 @@ import {
 	SLAYERS,
 } from '../constants';
 import { getSkillLevel } from '.';
+import type { ArrayElementType } from '@sapphire/utilities';
 import type { Components } from '@zikeji/hypixel';
-import type { ArrayElement } from '../types/util';
 import type { DungeonTypes } from '../constants';
 
 export type WeightData = ReturnType<typeof getSenitherWeight>;
@@ -91,7 +91,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
  * @param skillType
  * @param xp
  */
-export function getSenitherSkillWeight(skillType: ArrayElement<typeof SKILLS>, xp = 0) {
+export function getSenitherSkillWeight(skillType: ArrayElementType<typeof SKILLS>, xp = 0) {
 	const { nonFlooredLevel: LEVEL } = getSkillLevel(skillType, xp);
 	const MAX_XP = SKILL_XP_TOTAL[LEVEL_CAP[skillType]] ?? Number.POSITIVE_INFINITY;
 
@@ -105,7 +105,7 @@ export function getSenitherSkillWeight(skillType: ArrayElement<typeof SKILLS>, x
  * @param slayerType
  * @param xp
  */
-export function getSenitherSlayerWeight(slayerType: ArrayElement<typeof SLAYERS>, xp = 0) {
+export function getSenitherSlayerWeight(slayerType: ArrayElementType<typeof SLAYERS>, xp = 0) {
 	if (xp <= 1_000_000) {
 		return {
 			slayerWeight: xp === 0 ? 0 : xp / (SLAYER_DIVIDER[slayerType] ?? Number.POSITIVE_INFINITY),

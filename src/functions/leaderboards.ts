@@ -31,6 +31,7 @@ import {
 	minutes,
 	upperCaseFirstChar,
 } from '.';
+import type { ArrayElementType } from '@sapphire/utilities';
 import type {
 	APIEmbed,
 	ButtonInteraction,
@@ -54,21 +55,17 @@ import type {
 	SkillTypes,
 	SLAYERS,
 } from '../constants';
-import type { ArrayElement } from '../types/util';
 
-export type LeaderboardXPTypes = ArrayElement<
-	[
-		'lily-weight',
-		'senither-weight',
-		'skill-average',
-		...typeof SKILLS,
-		...typeof COSMETIC_SKILLS,
-		'slayer',
-		...typeof SLAYERS,
-		...typeof DUNGEON_TYPES_AND_CLASSES,
-		'guild',
-	]
->;
+export type LeaderboardXPTypes =
+	| 'lily-weight'
+	| 'senither-weight'
+	| 'skill-average'
+	| ArrayElementType<typeof SKILLS>
+	| ArrayElementType<typeof COSMETIC_SKILLS>
+	| 'slayer'
+	| ArrayElementType<typeof SLAYERS>
+	| ArrayElementType<typeof DUNGEON_TYPES_AND_CLASSES>
+	| 'guild';
 
 type GetEntry = (player: PlayerData) => string;
 

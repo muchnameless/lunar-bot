@@ -3,8 +3,8 @@ import { opendir } from 'node:fs/promises';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import { logger } from '../logger';
 import { days, jaroWinklerSimilarity } from '.';
+import type { PickByValue } from '@sapphire/utilities';
 import type { Collection } from 'discord.js';
-import type { KeysByType } from '../types/util';
 
 /**
  * returns the ISO week number of the given date
@@ -47,12 +47,12 @@ export function autocorrect(
 export function autocorrect<T>(
 	query: string,
 	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
-	attributeToQuery: KeysByType<T, string>,
+	attributeToQuery: PickByValue<T, string>,
 ): AutocorrectResult<T>;
 export function autocorrect<T>(
 	query: string,
 	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
-	attributeToQuery?: KeysByType<T, string>,
+	attributeToQuery?: PickByValue<T, string>,
 ) {
 	let currentBestElement!: T;
 	let currentBestSimilarity = 0;

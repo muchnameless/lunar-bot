@@ -1,5 +1,5 @@
 import { days, hours } from '../functions';
-import type { ArrayElement } from '../types/util';
+import type { ArrayElementType } from '@sapphire/utilities';
 
 /**
  * misc
@@ -182,7 +182,7 @@ const SKILL_CAP = {
 	runecrafting: 25,
 } as const;
 
-export type SkillTypes = ArrayElement<typeof SKILLS> | ArrayElement<typeof COSMETIC_SKILLS>;
+export type SkillTypes = ArrayElementType<typeof SKILLS> | ArrayElementType<typeof COSMETIC_SKILLS>;
 
 /**
  * dungeons
@@ -267,7 +267,7 @@ export const DUNGEON_TYPES_AND_CLASSES = [...DUNGEON_TYPES, ...DUNGEON_CLASSES] 
 
 export const DUNGEON_TYPES_AND_CLASSES_SET = new Set(DUNGEON_TYPES_AND_CLASSES);
 
-export type DungeonTypes = ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>;
+export type DungeonTypes = ArrayElementType<typeof DUNGEON_TYPES_AND_CLASSES>;
 
 /**
  * SLAYERS
@@ -275,7 +275,7 @@ export type DungeonTypes = ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>;
 
 export const SLAYERS = ['zombie', 'spider', 'wolf', 'enderman', 'blaze'] as const;
 
-export type SlayerTypes = ArrayElement<typeof SLAYERS>;
+export type SlayerTypes = ArrayElementType<typeof SLAYERS>;
 
 export const SLAYER_XP = {
 	1: 5,

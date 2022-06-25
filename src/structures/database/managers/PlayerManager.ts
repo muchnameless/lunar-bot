@@ -216,16 +216,6 @@ export class PlayerManager extends ModelManager<Player> {
 	}
 
 	/**
-	 * update db entries and linked discord members of all players
-	 * @param options
-	 */
-	async updateData(options?: PlayerUpdateOptions) {
-		await Promise.all([this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }), this.updateIgns()]);
-
-		return this;
-	}
-
-	/**
 	 * update Xp for all players
 	 * @param options
 	 */
@@ -247,7 +237,7 @@ export class PlayerManager extends ModelManager<Player> {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+				if (new Date().getMinutes() <= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 					logger.warn('[PLAYERS UPDATE XP]: auto updates disabled');
 					return this;
 				}
@@ -290,7 +280,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('MOJANG_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (new Date().getMinutes() <= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn('[PLAYERS UPDATE IGNS]: auto updates disabled');
 				return this;
 			}
@@ -412,7 +402,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (new Date().getMinutes() <= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
 				return this;
 			}
@@ -551,6 +541,25 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	override schedule() {
 		const { config } = this.client;
+
+		// updateIGNs
+		this.client.cronJobs.schedule(
+			`${this.constructor.name}:updateIGNs`,
+			new CronJob({
+				cronTime: `0 0/${config.get('IGN_UPDATE_INTERVAL')} * * * *`,
+				onTick: () => config.get('IGN_UPDATE_ENABLED') && this.updateIgns(),
+			}),
+		);
+
+		// updateMainProfiles
+		this.client.cronJobs.schedule(
+			`${this.constructor.name}:updateMainProfiles`,
+			new CronJob({
+				cronTime: '0 0 0 * * *',
+				timeZone: 'GMT',
+				onTick: () => this.updateMainProfiles(),
+			}),
+		);
 
 		// auto competition starting
 		if (config.get('COMPETITION_SCHEDULED')) {
@@ -725,7 +734,7 @@ export class PlayerManager extends ModelManager<Player> {
 				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
 		);
 
-		return this.updateMainProfiles();
+		return this;
 	}
 
 	/**

@@ -9,7 +9,7 @@ import {
 	SLAYERS,
 } from '.';
 import type { Snowflake } from 'discord.js';
-import type { ArrayElement } from '../types/util';
+import type { ArrayElementType, Mutable } from '@sapphire/utilities';
 
 // generate default config
 export const DEFAULT_CONFIG = {
@@ -38,6 +38,8 @@ export const DEFAULT_CONFIG = {
 	HYPIXEL_API_ERROR: false,
 	HYPIXEL_FORUM_LAST_GUID: 0,
 	HYPIXEL_SKYBLOCK_API_ERROR: false,
+	IGN_UPDATE_ENABLED: true,
+	IGN_UPDATE_INTERVAL: 30,
 	IMGUR_UPLOADER_CONTENT_TYPE: ['image'],
 	IMGUR_UPLOADER_ENABLED: true,
 	INACTIVE_ROLE_TIME: days(7),
@@ -69,58 +71,23 @@ export const DEFAULT_CONFIG = {
 	XP_TRACKING_ENABLED: true,
 } as const;
 
-export type ConfigValues = {
-	AUTO_GUILD_RANKS: boolean;
-	AUTOCORRECT_THRESHOLD: number;
-	CHATBRIDGE_AUTO_MATH: boolean;
-	CHATBRIDGE_AUTOMUTE_DURATION: number;
-	CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS: number;
-	CHATBRIDGE_CHATTRIGGERS_ENABLED: boolean;
-	CHATBRIDGE_DEFAULT_MAX_PARTS: number;
-	CHATBRIDGE_ENABLED: boolean;
-	COMMAND_COOLDOWN_DEFAULT: 1;
-	COMPETITION_END_TIME: number;
-	COMPETITION_RUNNING: boolean;
-	COMPETITION_SCHEDULED: boolean;
-	COMPETITION_START_TIME: number;
-	CURRENT_COMPETITION: 'lily-weight';
-	DATABASE_UPDATE_INTERVAL: number;
-	DEFAULT_MAX_PARTS: number;
-	DEFAULT_XP_OFFSET: Offset.Week;
-	ELEMENTS_PER_PAGE: number;
-	EMBED_BLUE: number;
-	EMBED_GREEN: number;
-	EMBED_RED: number;
-	EVAL_INSPECT_DEPTH: number;
-	HYPIXEL_API_ERROR: boolean;
-	HYPIXEL_FORUM_LAST_GUID: number;
-	HYPIXEL_SKYBLOCK_API_ERROR: boolean;
-	IMGUR_UPLOADER_CONTENT_TYPE: string[];
-	IMGUR_UPLOADER_ENABLED: boolean;
-	INACTIVE_ROLE_TIME: number;
-	INGAME_RESPONSE_TIMEOUT: number;
-	LAST_DAILY_STATS_SAVE_TIME: number;
-	LAST_DAILY_XP_RESET_TIME: number;
-	LAST_MAYOR_XP_RESET_TIME: number;
-	LAST_MONTHLY_XP_RESET_TIME: number;
-	LAST_WEEKLY_XP_RESET_TIME: number;
-	LOGGING_CHANNEL_ID: Snowflake;
-	MAIN_GUILD_ID: string;
-	MOJANG_API_ERROR: boolean;
-	PLAYER_DB_UPDATE_ENABLED: boolean;
-	PREFIXES: string[];
-	PURGE_LIST_OFFSET: number;
-	REPLY_CONFIRMATION: string[];
-	STAT_DISCORD_CHANNELS_UPDATE_ENABLED: boolean;
-	TAX_AMOUNT: number;
-	TAX_AUCTIONS_ITEMS: string[];
-	TAX_AUCTIONS_START_TIME: number;
-	TAX_CHANNEL_ID: Snowflake;
-	TAX_MESSAGE_ID: Snowflake;
-	TAX_TRACKING_ENABLED: number;
-	USER_INPUT_MAX_RETRIES: number;
-	XP_TRACKING_ENABLED: boolean;
+type Loosen<T> = {
+	-readonly [P in keyof T]: T[P] extends Offset
+		? Offset.Week
+		: T[P] extends string
+		? string
+		: T[P] extends number
+		? number
+		: T[P] extends boolean
+		? boolean
+		: T[P] extends null
+		? Snowflake // Ids default to null
+		: T[P] extends [...infer E]
+		? ArrayElementType<Loosen<E>>[]
+		: T[P];
 };
+
+export type ConfigValues = Loosen<Mutable<typeof DEFAULT_CONFIG>>;
 
 export const enum Offset {
 	CompetitionEnd = 'CompetitionEnd',
@@ -165,7 +132,7 @@ export const XP_OFFSETS_TIME = {
 	[Offset.Day]: 'LAST_DAILY_XP_RESET_TIME',
 } as const;
 
-export type XPOffsets = ArrayElement<typeof XP_OFFSETS> | '';
+export type XPOffsets = ArrayElementType<typeof XP_OFFSETS> | '';
 
 export const SKYBLOCK_XP_TYPES = [...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES] as const;
 export const XP_TYPES = [...SKYBLOCK_XP_TYPES, 'guild'] as const;
@@ -177,8 +144,8 @@ export const XP_AND_DATA_TYPES = [
 const XP_TYPES_SET = new Set(XP_TYPES);
 export const isXPType = (type: unknown): type is XPTypes => XP_TYPES_SET.has(type as XPTypes);
 
-export type XPTypes = ArrayElement<typeof XP_TYPES>;
-export type XPAndDataTypes = ArrayElement<typeof XP_AND_DATA_TYPES>;
+export type XPTypes = ArrayElementType<typeof XP_TYPES>;
+export type XPAndDataTypes = ArrayElementType<typeof XP_AND_DATA_TYPES>;
 
 export const LEADERBOARD_XP_TYPES = [
 	'lily-weight',

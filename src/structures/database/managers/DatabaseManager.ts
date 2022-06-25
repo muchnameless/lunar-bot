@@ -416,9 +416,7 @@ export class DatabaseManager {
 			// the hypxiel api encountered an error before
 			if (config.get('HYPIXEL_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() >= config.get('DATABASE_UPDATE_INTERVAL')) {
-					await players.updateIgns();
-
+				if (new Date().getMinutes() <= config.get('DATABASE_UPDATE_INTERVAL')) {
 					for (const hypixelGuild of hypixelGuilds.cache.values()) {
 						void hypixelGuild.syncRanks();
 					}
@@ -438,9 +436,6 @@ export class DatabaseManager {
 
 			// update Xp
 			if (config.get('XP_TRACKING_ENABLED')) void players.updateXp();
-
-			// update IGNs
-			await players.updateIgns();
 
 			// update taxMessage
 			const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));

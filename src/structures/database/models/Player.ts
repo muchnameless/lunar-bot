@@ -62,6 +62,7 @@ import {
 import { toUpperCase } from '../../../types/util';
 import { logger } from '../../../logger';
 import { TransactionType } from './Transaction';
+import type { ArrayElementType } from '@sapphire/utilities';
 import type LilyWeight from 'lilyweight';
 import type {
 	CreationOptional,
@@ -82,7 +83,6 @@ import type { TaxCollector } from './TaxCollector';
 import type { ModelResovable } from '../managers/ModelManager';
 import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '../../../constants';
 import type { RoleResolvables } from '../../../util';
-import type { ArrayElement } from '../../../types/util';
 
 interface ParsedTransaction extends InferAttributes<Transaction> {
 	fromIGN: string | null;
@@ -361,15 +361,15 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	static initialise(sequelize: Sequelize) {
 		const attributes = {} as Record<
-			| `${ArrayElement<typeof XP_TYPES>}Xp`
-			| `${ArrayElement<typeof XP_TYPES>}XpHistory`
-			| `${ArrayElement<typeof XP_TYPES>}Xp${ArrayElement<typeof XP_OFFSETS>}`
-			| `${ArrayElement<typeof DUNGEON_TYPES>}Completions`
-			| `${ArrayElement<typeof DUNGEON_TYPES>}MasterCompletions`
-			| `${ArrayElement<typeof DUNGEON_TYPES>}CompletionsHistory`
-			| `${ArrayElement<typeof DUNGEON_TYPES>}MasterCompletionsHistory`
-			| `${ArrayElement<typeof DUNGEON_TYPES>}Completions${ArrayElement<typeof XP_OFFSETS>}`
-			| `${ArrayElement<typeof DUNGEON_TYPES>}MasterCompletions${ArrayElement<typeof XP_OFFSETS>}`,
+			| `${ArrayElementType<typeof XP_TYPES>}Xp`
+			| `${ArrayElementType<typeof XP_TYPES>}XpHistory`
+			| `${ArrayElementType<typeof XP_TYPES>}Xp${ArrayElementType<typeof XP_OFFSETS>}`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}Completions`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletions`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}CompletionsHistory`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletionsHistory`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}Completions${ArrayElementType<typeof XP_OFFSETS>}`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletions${ArrayElementType<typeof XP_OFFSETS>}`,
 			ModelAttributeColumnOptions<Player>
 		>;
 

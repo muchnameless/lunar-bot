@@ -10,6 +10,7 @@ import {
 	SLAYER_TOTAL_ROLES,
 } from '../../../constants';
 import { toUpperCase } from '../../../types/util';
+import type { ArrayElementType } from '@sapphire/utilities';
 import type {
 	CreationOptional,
 	InferAttributes,
@@ -22,7 +23,6 @@ import type {
 } from 'sequelize';
 import type { Snowflake } from 'discord.js';
 import type { LunarClient } from '../../LunarClient';
-import type { ArrayElement } from '../../../types/util';
 
 interface WeightRole {
 	weightReq: number;
@@ -98,12 +98,12 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 
 	static initialise(sequelize: Sequelize) {
 		const attributes = {} as Record<
-			| `${ArrayElement<typeof DELIMITER_ROLES>}_DELIMITER_ROLE_ID`
-			| `AVERAGE_LVL_${ArrayElement<typeof SKILL_AVERAGE_ROLES>}_ROLE_ID`
-			| `${Uppercase<ArrayElement<typeof SKILLS>>}_${ArrayElement<typeof SKILL_ROLES>}_ROLE_ID`
-			| `SLAYER_ALL_${ArrayElement<typeof SLAYER_TOTAL_ROLES>}_ROLE_ID`
-			| `${Uppercase<ArrayElement<typeof SLAYERS>>}_${ArrayElement<typeof SLAYER_ROLES>}_ROLE_ID`
-			| `CATACOMBS_${ArrayElement<typeof CATACOMBS_ROLES>}_ROLE_ID`,
+			| `${ArrayElementType<typeof DELIMITER_ROLES>}_DELIMITER_ROLE_ID`
+			| `AVERAGE_LVL_${ArrayElementType<typeof SKILL_AVERAGE_ROLES>}_ROLE_ID`
+			| `${Uppercase<ArrayElementType<typeof SKILLS>>}_${ArrayElementType<typeof SKILL_ROLES>}_ROLE_ID`
+			| `SLAYER_ALL_${ArrayElementType<typeof SLAYER_TOTAL_ROLES>}_ROLE_ID`
+			| `${Uppercase<ArrayElementType<typeof SLAYERS>>}_${ArrayElementType<typeof SLAYER_ROLES>}_ROLE_ID`
+			| `CATACOMBS_${ArrayElementType<typeof CATACOMBS_ROLES>}_ROLE_ID`,
 			ModelAttributeColumnOptions<DiscordGuild>
 		>;
 
