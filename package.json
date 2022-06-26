@@ -27,7 +27,7 @@
 		"@discordjs/rest": "0.6.0-dev.1656060473-e24970e",
 		"@sapphire/async-queue": "^1.3.1",
 		"@sapphire/discord-utilities": "^2.11.2",
-		"@sapphire/shapeshift": "^3.3.1",
+		"@sapphire/shapeshift": "^3.3.2",
 		"@sapphire/stopwatch": "^1.4.1",
 		"@sapphire/time-utilities": "^1.7.4",
 		"@sapphire/type": "^2.2.4",
