@@ -742,13 +742,13 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 
 	if (xpType !== 'purge') {
 		if (IS_COMPETITION_LB) {
-			description += `Start: ${time(new Date(config.get(XP_OFFSETS_TIME[offset])))}\n`;
+			description += `Start: ${time(config.get(XP_OFFSETS_TIME[offset]))}\n`;
 			description += COMPETITION_RUNNING
-				? `Ends: ${time(new Date(COMPETITION_END_TIME), TimestampStyles.RelativeTime)}\n`
-				: `Ended: ${time(new Date(COMPETITION_END_TIME))}\n`;
+				? `Ends: ${time(COMPETITION_END_TIME, TimestampStyles.RelativeTime)}\n`
+				: `Ended: ${time(COMPETITION_END_TIME)}\n`;
 		} else {
 			description += `Tracking xp gained since ${time(
-				new Date(config.get(XP_OFFSETS_TIME[offset as keyof typeof XP_OFFSETS_TIME])),
+				config.get(XP_OFFSETS_TIME[offset as keyof typeof XP_OFFSETS_TIME]),
 			)}\n`;
 		}
 

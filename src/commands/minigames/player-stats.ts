@@ -78,7 +78,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			achievement points: ${formatNumber(achievementPoints)},
 			karma: ${formatNumber(karma)},
 			first joined: ${time(Number.parseInt(_id.slice(0, 8), 16))},
-			last joined: ${lastLogin ? time(new Date(lastLogin)) : 'unknown'}
+			last joined: ${lastLogin ? time(lastLogin) : 'unknown'}
 		`;
 	}
 }

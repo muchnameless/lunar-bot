@@ -404,7 +404,7 @@ export class DiscordChatManager extends ChatManager {
 			void DiscordChatManager._dmMuteInfo(
 				message.author,
 				`your mute expires ${time(
-					new Date(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
+					this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!,
 					TimestampStyles.RelativeTime,
 				)}`,
 			);
@@ -422,7 +422,7 @@ export class DiscordChatManager extends ChatManager {
 			void DiscordChatManager._dmMuteInfo(
 				message.author,
 				`${this.hypixelGuild!.name}'s guild chat mute expires ${time(
-					new Date(this.hypixelGuild!.mutedTill),
+					this.hypixelGuild!.mutedTill,
 					TimestampStyles.RelativeTime,
 				)}`,
 			);
@@ -434,7 +434,7 @@ export class DiscordChatManager extends ChatManager {
 			void DiscordChatManager._dmMuteInfo(
 				message.author,
 				`the bot's mute expires ${time(
-					new Date(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid)!),
+					this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid)!,
 					TimestampStyles.RelativeTime,
 				)}`,
 			);

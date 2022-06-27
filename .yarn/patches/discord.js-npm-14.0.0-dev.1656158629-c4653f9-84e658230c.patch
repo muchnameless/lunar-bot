@@ -616,7 +616,7 @@ index c5f0bd136b60f4ba424d9b6450c9524298d661b3..137cc4590ce3ec9240b03db0c2a7bb68
     * Creates a new select menu option builder from JSON data
     * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 2f477337027e571a30c54cd09af4c6ddd7e0e764..7932c900ff56a93b6aaacea7ff2a72c9cf330a6f 100644
+index a2a273707fc4a5823cb646a76d794f1f436ee5ce..7932c900ff56a93b6aaacea7ff2a72c9cf330a6f 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -355,17 +355,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
@@ -638,7 +638,7 @@ index 2f477337027e571a30c54cd09af4c6ddd7e0e764..7932c900ff56a93b6aaacea7ff2a72c9
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b722b5178e 100644
+index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e6a1ee59e 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -259,7 +259,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -650,7 +650,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -1470,7 +1465,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1470,7 +1470,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -659,7 +659,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1478,12 +1473,18 @@ export type CacheTypeReducer<
+@@ -1478,12 +1478,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -678,7 +678,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1505,7 +1506,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1505,7 +1511,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -688,7 +688,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1513,7 +1515,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1513,7 +1520,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -697,7 +697,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1736,16 +1738,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1736,16 +1743,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -718,7 +718,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1940,12 +1941,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1940,12 +1946,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -737,7 +737,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1954,6 +1960,7 @@ export class ModalSubmitFields {
+@@ -1954,6 +1965,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -745,7 +745,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3239,7 +3246,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3240,7 +3251,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -754,7 +754,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3695,11 +3702,6 @@ export interface BaseApplicationCommandData {
+@@ -3696,11 +3707,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -766,7 +766,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4991,10 +4993,8 @@ export interface MessageEditOptions {
+@@ -4992,10 +4998,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -778,7 +778,7 @@ index b5beeff3a2643c6abe8d4d22470533286c12326f..285a5270a9ddda342a3c3096d40c84b7
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5049,10 +5049,8 @@ export interface MessageOptions {
+@@ -5050,10 +5054,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream

@@ -58,11 +58,9 @@ export default class XpCommand extends ApplicationCommand {
 			})
 			.setDescription(
 				`${`Δ: change since ${time(
-					new Date(
-						Math.max(
-							this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]),
-							player.createdAt.getTime(),
-						),
+					Math.max(
+						this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]),
+						player.createdAt.getTime(),
 					),
 				)} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET as keyof typeof XP_OFFSETS_CONVERTER])})`.padEnd(
 					105,

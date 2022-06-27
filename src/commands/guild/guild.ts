@@ -595,7 +595,7 @@ export default class GuildCommand extends ApplicationCommand {
 			...commandOptions,
 			command,
 		});
-		const pageMatched = response.match(/\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/);
+		const pageMatched = /\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/.exec(response);
 
 		// split input and parse dates
 		const description: string[] = [];
@@ -603,7 +603,7 @@ export default class GuildCommand extends ApplicationCommand {
 		const events: string[] = [];
 
 		for (const line of response.split('\n')) {
-			const matched = line.match(/^(?<date>[a-z]+ \d+ \d{4} \d{2}:\d{2} [a-z]+): (?<event>.+)$/i);
+			const matched = /^(?<date>[a-z]+ \d+ \d{4} \d{2}:\d{2} [a-z]+): (?<event>.+)$/i.exec(line);
 
 			if (!matched) {
 				description.push(line);
@@ -618,7 +618,7 @@ export default class GuildCommand extends ApplicationCommand {
 				padding += '\n';
 			}
 
-			dates.push(`${time(new Date(date!))}${padding}`);
+			dates.push(`${time(Date.parse(date!))}${padding}`);
 			events.push(event!);
 		}
 

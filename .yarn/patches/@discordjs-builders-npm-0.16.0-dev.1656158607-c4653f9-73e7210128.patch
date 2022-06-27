@@ -1,0 +1,62 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 7fbce0c0b5e4b62ace0c961370d034d4fc345b8c..f3936d45663561ef835b0fb7ee673d4a64dc4908 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -354,13 +354,13 @@ declare function time<S extends TimestampStylesString>(date: Date, style: S): `<
+ /**
+  * Formats the given timestamp into a short date-time string
+  *
+- * @param seconds The time to format, represents an UNIX timestamp in seconds
++ * @param seconds The time to format, represents an UNIX timestamp in milliseconds
+  */
+ declare function time<C extends number>(seconds: C): `<t:${C}>`;
+ /**
+  * Formats the given timestamp into a short date-time string
+  *
+- * @param seconds The time to format, represents an UNIX timestamp in seconds
++ * @param seconds The time to format, represents an UNIX timestamp in milliseconds
+  * @param style The style to use
+  */
+ declare function time<C extends number, S extends TimestampStylesString>(seconds: C, style: S): `<t:${C}:${S}>`;
+@@ -571,7 +571,7 @@ declare abstract class ComponentBuilder<DataType extends Partial<APIBaseComponen
+ declare type MessageComponentBuilder = MessageActionRowComponentBuilder | ActionRowBuilder<MessageActionRowComponentBuilder>;
+ declare type ModalComponentBuilder = ModalActionRowComponentBuilder | ActionRowBuilder<ModalActionRowComponentBuilder>;
+ declare type MessageActionRowComponentBuilder = ButtonBuilder | SelectMenuBuilder;
+-declare type ModalActionRowComponentBuilder = TextInputBuilder;
++declare type ModalActionRowComponentBuilder = TextInputBuilder | SelectMenuBuilder;
+ declare type AnyComponentBuilder = MessageActionRowComponentBuilder | ModalActionRowComponentBuilder;
+ /**
+  * Represents an action row component
+diff --git a/dist/index.js b/dist/index.js
+index 15e8c06893547207ee352a3c66993b6c3522f69a..64e35874fba7b0e3879bb2b515cfa31dd49d36b9 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -368,9 +368,9 @@ function formatEmoji(emojiId, animated = false) {
+ __name(formatEmoji, "formatEmoji");
+ function time(timeOrSeconds, style) {
+   if (typeof timeOrSeconds !== "number") {
+-    timeOrSeconds = Math.floor((timeOrSeconds?.getTime() ?? Date.now()) / 1e3);
++    timeOrSeconds = timeOrSeconds?.getTime() ?? Date.now();
+   }
+-  return typeof style === "string" ? `<t:${timeOrSeconds}:${style}>` : `<t:${timeOrSeconds}>`;
++  return typeof style === "string" ? `<t:${Math.floor(timeOrSeconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrSeconds / 1e3)}>`;
+ }
+ __name(time, "time");
+ var TimestampStyles = {
+diff --git a/dist/index.mjs b/dist/index.mjs
+index a25d062ccac765fe3b09cc4a37503628f9a1c68b..38201e238a244626f9c25bb381fcadd125a93372 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -285,10 +285,9 @@ function formatEmoji(emojiId, animated = false) {
+ __name(formatEmoji, "formatEmoji");
+ function time(timeOrSeconds, style) {
+   if (typeof timeOrSeconds !== "number") {
+-    timeOrSeconds = Math.floor((timeOrSeconds?.getTime() ?? Date.now()) / 1e3);
++    timeOrSeconds = timeOrSeconds?.getTime() ?? Date.now();
+   }
+-  return typeof style === "string" ? `<t:${timeOrSeconds}:${style}>` : `<t:${timeOrSeconds}>`;
+-}
++  return typeof style === "string" ? `<t:${Math.floor(timeOrSeconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrSeconds / 1e3)}>`;
+ __name(time, "time");
+ var TimestampStyles = {
+   ShortTime: "t",

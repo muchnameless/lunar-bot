@@ -68,7 +68,7 @@ export default class PollCommand extends DualCommand {
 	 */
 	private async _sharedRun({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
 		if (chatBridge.pollUntil) {
-			return `poll already in progress, ends ${time(new Date(chatBridge.pollUntil), TimestampStyles.RelativeTime)}`;
+			return `poll already in progress, ends ${time(chatBridge.pollUntil, TimestampStyles.RelativeTime)}`;
 		}
 
 		try {

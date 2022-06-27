@@ -14,7 +14,6 @@ import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMes
 
 interface JoinInfo {
 	ign: string;
-	date: Date;
 	timestamp: number;
 }
 
@@ -49,27 +48,26 @@ export default class JoinDateCommand extends DualCommand {
 	static async getJoinDate(chatBridge: ChatBridge, ign: string) {
 		// get first page
 		let logEntry = await this.getLogEntry(chatBridge, ign, 1);
-		let lastPage = Number(logEntry.match(/\(Page 1 of (\d+)\)/)?.[1]);
+		let lastPage = Number(/\(Page 1 of (\d+)\)/.exec(logEntry)?.[1]);
 
 		// log has more than 1 page -> get latest page
 		if (lastPage !== 1) logEntry = await this.getLogEntry(chatBridge, ign, lastPage);
 
-		let matched = logEntry.match(JoinDateCommand.JOINED_REGEXP);
+		let matched = JoinDateCommand.JOINED_REGEXP.exec(logEntry);
 
 		// last page didn't contain join, get next-to-last page
 		while (!matched && lastPage >= 1) {
-			matched = (await this.getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
+			matched = JoinDateCommand.JOINED_REGEXP.exec(await this.getLogEntry(chatBridge, ign, --lastPage));
 
 			// entry does not end with invited message -> no joined / created message at all
 			if (!new RegExp(`\\n.+: \\w{1,16} invited ${ign}$`).test(logEntry)) break;
 		}
 
-		const date = new Date(matched?.groups!.time!);
+		const timestamp = Date.parse(matched?.groups!.time!);
 
 		return {
 			ign,
-			date,
-			timestamp: date.getTime(),
+			timestamp,
 		};
 	}
 
@@ -93,9 +91,9 @@ export default class JoinDateCommand extends DualCommand {
 	 */
 	private async _generateReply(chatBridge: ChatBridge, ignInput: string) {
 		try {
-			const { ign, date, timestamp } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
+			const { ign, timestamp } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
 			return `${escapeIgn(ign)}: joined ${chatBridge.hypixelGuild} at ${
-				!Number.isNaN(timestamp) ? time(date) : 'an unknown date'
+				!Number.isNaN(timestamp) ? time(timestamp) : 'an unknown date'
 			}`;
 		} catch {
 			return `${escapeIgn(ignInput)}: never joined ${chatBridge.hypixelGuild}`;
@@ -144,8 +142,7 @@ export default class JoinDateCommand extends DualCommand {
 				content: `${bold(hypixelGuild.name)} join dates:\n${joinInfos
 					.sort(({ timestamp: a }, { timestamp: b }) => a - b)
 					.map(
-						({ ign, date, timestamp }) =>
-							`${!Number.isNaN(timestamp) ? time(date) : 'unknown date'}: ${escapeIgn(ign)}`,
+						({ ign, timestamp }) => `${!Number.isNaN(timestamp) ? time(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`,
 					)
 					.join('\n')}`,
 				split: true,

@@ -50,7 +50,7 @@ export default class DebugCommand extends ApplicationCommand {
 						{
 							name: 'General',
 							value: stripIndents`
-								Ready at: ${time(this.client.readyAt!, TimestampStyles.LongDateTime)}
+								Ready at: ${time(this.client.readyTimestamp!, TimestampStyles.LongDateTime)}
 								Uptime: ${ms(this.client.uptime!)}
 								Discord.js v${djsVersion}
 								Node.js ${processVersion}
@@ -70,14 +70,14 @@ export default class DebugCommand extends ApplicationCommand {
 									)
 									.sort(([, a], [, b]) => b - a)
 									.map(([name, timestamp]) =>
-										quote(`${name ?? 'unknown channel'}: ${time(new Date(timestamp), TimestampStyles.LongDateTime)}`),
+										quote(`${name ?? 'unknown channel'}: ${time(timestamp, TimestampStyles.LongDateTime)}`),
 									)
 									.join('\n')}
 								${(channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
 									.map((c) => [c, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const)
 									.sort(([, a], [, b]) => b - a)
 									.map(([c, timestamp]) =>
-										quote(`${c ?? 'unknown channel'}: ${time(new Date(timestamp), TimestampStyles.LongDateTime)}`),
+										quote(`${c ?? 'unknown channel'}: ${time(timestamp, TimestampStyles.LongDateTime)}`),
 									)
 									.join('\n')}
 								Members: ${formatNumber(guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
@@ -158,9 +158,7 @@ export default class DebugCommand extends ApplicationCommand {
 									.map(([key, value]: [string, number | null]) =>
 										quote(
 											`${key}: ${
-												key.endsWith('reset') && value !== null
-													? time(new Date(value), TimestampStyles.LongDateTime)
-													: value
+												key.endsWith('reset') && value !== null ? time(value, TimestampStyles.LongDateTime) : value
 											}`,
 										),
 									)
@@ -169,9 +167,7 @@ export default class DebugCommand extends ApplicationCommand {
 									.map(([key, value]: [string, number | null]) =>
 										quote(
 											`post${key}: ${
-												key.endsWith('reset') && value !== null
-													? time(new Date(value), TimestampStyles.LongDateTime)
-													: value
+												key.endsWith('reset') && value !== null ? time(value, TimestampStyles.LongDateTime) : value
 											}`,
 										),
 									)
