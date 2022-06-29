@@ -24,29 +24,29 @@ __metadata:
   linkType: hard
 
 "@babel/code-frame@npm:^7.0.0":
-  version: 7.16.7
-  resolution: "@babel/code-frame@npm:7.16.7"
+  version: 7.18.6
+  resolution: "@babel/code-frame@npm:7.18.6"
   dependencies:
-    "@babel/highlight": ^7.16.7
-  checksum: db2f7faa31bc2c9cf63197b481b30ea57147a5fc1a6fab60e5d6c02cdfbf6de8e17b5121f99917b3dabb5eeb572da078312e70697415940383efc140d4e0808b
+    "@babel/highlight": ^7.18.6
+  checksum: 195e2be3172d7684bf95cff69ae3b7a15a9841ea9d27d3c843662d50cdd7d6470fd9c8e64be84d031117e4a4083486effba39f9aef6bbb2c89f7f21bcfba33ba
   languageName: node
   linkType: hard
 
-"@babel/helper-validator-identifier@npm:^7.15.7, @babel/helper-validator-identifier@npm:^7.16.7":
-  version: 7.16.7
-  resolution: "@babel/helper-validator-identifier@npm:7.16.7"
-  checksum: dbb3db9d184343152520a209b5684f5e0ed416109cde82b428ca9c759c29b10c7450657785a8b5c5256aa74acc6da491c1f0cf6b784939f7931ef82982051b69
+"@babel/helper-validator-identifier@npm:^7.15.7, @babel/helper-validator-identifier@npm:^7.18.6":
+  version: 7.18.6
+  resolution: "@babel/helper-validator-identifier@npm:7.18.6"
+  checksum: e295254d616bbe26e48c196a198476ab4d42a73b90478c9842536cf910ead887f5af6b5c4df544d3052a25ccb3614866fa808dc1e3a5a4291acd444e243c0648
   languageName: node
   linkType: hard
 
-"@babel/highlight@npm:^7.16.7":
-  version: 7.17.12
-  resolution: "@babel/highlight@npm:7.17.12"
+"@babel/highlight@npm:^7.18.6":
+  version: 7.18.6
+  resolution: "@babel/highlight@npm:7.18.6"
   dependencies:
-    "@babel/helper-validator-identifier": ^7.16.7
+    "@babel/helper-validator-identifier": ^7.18.6
     chalk: ^2.0.0
     js-tokens: ^4.0.0
-  checksum: 841a11aa353113bcce662b47085085a379251bf8b09054e37e1e082da1bf0d59355a556192a6b5e9ee98e8ee6f1f2831ac42510633c5e7043e3744dda2d6b9d6
+  checksum: 92d8ee61549de5ff5120e945e774728e5ccd57fd3b2ed6eace020ec744823d4a98e242be1453d21764a30a14769ecd62170fba28539b211799bbaf232bbb2789
   languageName: node
   linkType: hard
 
@@ -2437,9 +2437,9 @@ __metadata:
   linkType: hard
 
 "flatted@npm:^3.1.0":
-  version: 3.2.5
-  resolution: "flatted@npm:3.2.5"
-  checksum: 3c436e9695ccca29620b4be5671dd72e5dd0a7500e0856611b7ca9bd8169f177f408c3b9abfa78dfe1493ee2d873e2c119080a8a9bee4e1a186a9e60ca6c89f1
+  version: 3.2.6
+  resolution: "flatted@npm:3.2.6"
+  checksum: 33b87aa88dfa40ca6ee31d7df61712bbbad3d3c05c132c23e59b9b61d34631b337a18ff2b8dc5553acdc871ec72b741e485f78969cf006124a3f57174de29a0e
   languageName: node
   linkType: hard
 
@@ -3192,9 +3192,9 @@ __metadata:
   linkType: hard
 
 "jose@npm:^4.1.4":
-  version: 4.8.1
-  resolution: "jose@npm:4.8.1"
-  checksum: c3e239ccbb07863c28250aedea3e734e4a3b26abc1cbf6acf333381db5ef31e5d1eeced791299076f13b24f41b4b463a7a1e4eaa0079ae0febf9bfd60acb555a
+  version: 4.8.3
+  resolution: "jose@npm:4.8.3"
+  checksum: a4a03d329d3611696d94a81df06e7fe160cef987da032ecc9e0a9d1e5e751b5101d1657eed16ead5f1905c9c2009d48820538412af4e5257f205a8754dd09d31
   languageName: node
   linkType: hard
 
@@ -3663,7 +3663,7 @@ __metadata:
     prismarine-chat: ^1.6.1
     prismarine-nbt: ^2.2.1
     re2: ^1.17.7
-    sequelize: 6.21.1
+    sequelize: ^6.21.2
     timezonecomplete: ^5.12.4
     tslib: ^2.4.0
     typescript: ^4.8.0-dev.20220629
@@ -3938,11 +3938,11 @@ __metadata:
   linkType: hard
 
 "minipass@npm:^3.0.0, minipass@npm:^3.1.1, minipass@npm:^3.1.6":
-  version: 3.3.3
-  resolution: "minipass@npm:3.3.3"
+  version: 3.3.4
+  resolution: "minipass@npm:3.3.4"
   dependencies:
     yallist: ^4.0.0
-  checksum: 523a338f42140c2e62bff3429f236cc44a32ddd29a70d5221e0570ace237057190981cad406fd3a420f03a95cc001ad58a388d902b9519038e27f190bb88a6e7
+  checksum: 5d95a7738c54852ba78d484141e850c792e062666a2d0c681a5ac1021275beb7e1acb077e59f9523ff1defb80901aea4e30fac10ded9a20a25d819a42916ef1b
   languageName: node
   linkType: hard
 
@@ -5251,9 +5251,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize@npm:6.21.1":
-  version: 6.21.1
-  resolution: "sequelize@npm:6.21.1"
+"sequelize@npm:6.21.2":
+  version: 6.21.2
+  resolution: "sequelize@npm:6.21.2"
   dependencies:
     "@types/debug": ^4.1.7
     "@types/validator": ^13.7.1
@@ -5288,13 +5288,13 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: f8d15f656655c20b38c7684e13102c9a762c563462f1590671d299c2a72f2aa3f1d219df053ce225b469ba1d486f8fe819b6c607acd9d7aa47ee7b32d730434b
+  checksum: 5486ec15e80cf51e49d819c2495a05a17b5a0102866ca0af054dbc4a625d2dc6200e36189261e50234625fcf4da5cbc973eb9900591a5b9e9f63c67955196f56
   languageName: node
   linkType: hard
 
-"sequelize@patch:sequelize@npm:6.21.1#.yarn/patches/sequelize-npm-6.21.1-198900aff3.patch::locator=lunar-bot%40workspace%3A.":
-  version: 6.21.1
-  resolution: "sequelize@patch:sequelize@npm%3A6.21.1#.yarn/patches/sequelize-npm-6.21.1-198900aff3.patch::version=6.21.1&hash=894203&locator=lunar-bot%40workspace%3A."
+"sequelize@patch:sequelize@npm:6.21.2#.yarn/patches/sequelize-npm-6.21.2-a0519a6da0.patch::locator=lunar-bot%40workspace%3A.":
+  version: 6.21.2
+  resolution: "sequelize@patch:sequelize@npm%3A6.21.2#.yarn/patches/sequelize-npm-6.21.2-a0519a6da0.patch::version=6.21.2&hash=894203&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/debug": ^4.1.7
     "@types/validator": ^13.7.1
@@ -5329,7 +5329,7 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: 94515914a53f232ce79414a98ff8da3e7dc783d3ab86107144de72a49c88b4b45a9343c17e493d0e8a140d63cf3f7e4c1bd854d60dfa23e7f312be054d888001
+  checksum: 2160c8ffcbb5338d84c186f6b2e8b8e3746dadb29bd823f7e4617b052495f3d24311be3c786af18d78f28922e479d5f2ed81a80089bf11779ada0a79f9f22bb7
   languageName: node
   linkType: hard
 
