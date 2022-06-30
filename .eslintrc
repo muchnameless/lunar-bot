@@ -64,6 +64,7 @@
 			}
 		],
 		"unicorn/prefer-at": "error",
+		"unicorn/prefer-event-target": "off",
 		"unicorn/prefer-export-from": ["error", { "ignoreUsedVariables": true }],
 		"unicorn/prefer-object-has-own": "error",
 		"unicorn/prefer-string-replace-all": "error",

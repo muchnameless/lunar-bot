@@ -4,7 +4,7 @@ import pg from 'pg';
 
 // to get bigints as numbers instead of strings
 pg.defaults.parseInt8 = true;
-pg.types.setTypeParser(1_700, parseFloat);
+pg.types.setTypeParser(1_700, Number.parseFloat);
 
 // use floats instead of strings as decimal representation (1/2)
 // @ts-expect-error
