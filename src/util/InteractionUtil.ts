@@ -593,7 +593,7 @@ export class InteractionUtil extends null {
 				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION EDIT REPLY]');
 
 				try {
-					return MessageUtil.edit(await interaction.fetchReply(), options);
+					return MessageUtil.edit(await interaction.fetchReply(), options, interaction.appPermissions ?? undefined);
 				} catch (_error) {
 					if (_options.rejectOnError) throw _error;
 					logger.error({ err: _error, ...this.logInfo(interaction), data: _options }, '[INTERACTION EDIT REPLY]');
@@ -689,7 +689,7 @@ export class InteractionUtil extends null {
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION UPDATE]');
-				return MessageUtil.edit(interaction.message, _options);
+				return MessageUtil.edit(interaction.message, _options, interaction.appPermissions ?? undefined);
 			}
 
 			if (_options.rejectOnError) throw error;

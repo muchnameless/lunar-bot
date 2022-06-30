@@ -329,8 +329,13 @@ export class MessageUtil extends null {
 	 * edits a message, preserving @mention pings at the beginning
 	 * @param message
 	 * @param options
+	 * @param permissions
 	 */
-	static async edit(message: Message, options: string | EditOptions) {
+	static async edit(
+		message: Message,
+		options: string | EditOptions,
+		permissions = ChannelUtil.botPermissions(message.channel),
+	) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		// permission checks
@@ -381,10 +386,8 @@ export class MessageUtil extends null {
 
 		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
-		const { channel } = message;
-
-		if (!ChannelUtil.botPermissions(channel).has(requiredChannelPermissions)) {
-			const missingChannelPermissions = ChannelUtil.botPermissions(channel)
+		if (!permissions.has(requiredChannelPermissions)) {
+			const missingChannelPermissions = permissions
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
 			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${
@@ -392,7 +395,7 @@ export class MessageUtil extends null {
 			}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(`[MESSAGE EDIT]: ${MESSAGE} in ${ChannelUtil.logInfo(channel)}`);
+			logger.warn(`[MESSAGE EDIT]: ${MESSAGE} in ${ChannelUtil.logInfo(message.channel)}`);
 			return message;
 		}
 

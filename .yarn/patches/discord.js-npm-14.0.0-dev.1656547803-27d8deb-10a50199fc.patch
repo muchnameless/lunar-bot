@@ -1,5 +1,5 @@
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index c3490ca514ce8776e366b5f168fd762f7a5fdca5..9e0b96bab7fdff21f50e0678ff4b36d7f9239161 100644
+index 9ffbd91438a61ee401c76226ac32b33e596f4650..9e0b96bab7fdff21f50e0678ff4b36d7f9239161 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
 @@ -269,6 +269,7 @@ class WebSocketShard extends EventEmitter {
@@ -616,7 +616,7 @@ index c5f0bd136b60f4ba424d9b6450c9524298d661b3..137cc4590ce3ec9240b03db0c2a7bb68
     * Creates a new select menu option builder from JSON data
     * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index a2a273707fc4a5823cb646a76d794f1f436ee5ce..7932c900ff56a93b6aaacea7ff2a72c9cf330a6f 100644
+index a2a273707fc4a5823cb646a76d794f1f436ee5ce..ed46bcda4764a177e080f9f790092f092c6f3345 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -355,17 +355,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
@@ -638,7 +638,7 @@ index a2a273707fc4a5823cb646a76d794f1f436ee5ce..7932c900ff56a93b6aaacea7ff2a72c9
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e6a1ee59e 100644
+index f0a1369ecdb6ed50db10c762d587026fab831aa4..90b8c2fa52408bc770d933b819d555a084ee07dc 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -259,7 +259,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -697,7 +697,7 @@ index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1736,16 +1743,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1737,16 +1743,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -718,7 +718,7 @@ index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1940,12 +1946,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1941,12 +1946,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -737,7 +737,7 @@ index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1954,6 +1965,7 @@ export class ModalSubmitFields {
+@@ -1955,6 +1965,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -745,7 +745,7 @@ index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3240,7 +3251,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3242,7 +3252,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -754,7 +754,7 @@ index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3696,11 +3707,6 @@ export interface BaseApplicationCommandData {
+@@ -3698,11 +3708,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -766,7 +766,7 @@ index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4992,10 +4998,8 @@ export interface MessageEditOptions {
+@@ -4994,10 +4999,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -778,7 +778,7 @@ index 3d7cafe23587741be771648810ce0534bef599a7..5322030879442678e569085512dbc57e
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5050,10 +5054,8 @@ export interface MessageOptions {
+@@ -5052,10 +5055,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream

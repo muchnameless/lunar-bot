@@ -1340,9 +1340,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * adds and/or removes the provided roles and logs it via the log handler, returns true or false depending on the success
-	 * @param rolesToAdd roles to add to the member
-	 * @param rolesToRemove roles to remove from the member
-	 * @param reason reason for discord's audit logs
+	 * @param options.rolesToAdd roles to add to the member
+	 * @param options.rolesToRemove roles to remove from the member
+	 * @param options.reason reason for discord's audit logs
 	 */
 	async makeRoleAPICall({
 		rolesToAdd = [],

@@ -110,10 +110,23 @@ export class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 * @param options
+	 * @param permissions
 	 */
-	static async send(channel: TextBasedChannel, options: SendOptions & { rejectOnError: true }): Promise<Message>;
-	static async send(channel: TextBasedChannel, options: string | SendOptions): Promise<Message | null>;
-	static async send(channel: TextBasedChannel, options: string | SendOptions) {
+	static async send(
+		channel: TextBasedChannel,
+		options: SendOptions & { rejectOnError: true },
+		permissions?: Readonly<PermissionsBitField>,
+	): Promise<Message>;
+	static async send(
+		channel: TextBasedChannel,
+		options: string | SendOptions,
+		permissions?: Readonly<PermissionsBitField>,
+	): Promise<Message | null>;
+	static async send(
+		channel: TextBasedChannel,
+		options: string | SendOptions,
+		permissions = this.botPermissions(channel),
+	) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		// guild -> requires permission
@@ -154,8 +167,8 @@ export class ChannelUtil extends null {
 		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
 		// permission checks
-		if (!this.botPermissions(channel).has(requiredChannelPermissions)) {
-			const missingChannelPermissions = this.botPermissions(channel)
+		if (!permissions.has(requiredChannelPermissions)) {
+			const missingChannelPermissions = permissions
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
 			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${

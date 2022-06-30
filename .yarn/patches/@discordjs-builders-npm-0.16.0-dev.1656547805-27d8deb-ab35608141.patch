@@ -28,7 +28,7 @@ index 7fbce0c0b5e4b62ace0c961370d034d4fc345b8c..f3936d45663561ef835b0fb7ee673d4a
  /**
   * Represents an action row component
 diff --git a/dist/index.js b/dist/index.js
-index 15e8c06893547207ee352a3c66993b6c3522f69a..64e35874fba7b0e3879bb2b515cfa31dd49d36b9 100644
+index 15e8c06893547207ee352a3c66993b6c3522f69a..1058f9f6d9dc408e72c402b2aaa42fa988ffa7a0 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -368,9 +368,9 @@ function formatEmoji(emojiId, animated = false) {
@@ -44,7 +44,7 @@ index 15e8c06893547207ee352a3c66993b6c3522f69a..64e35874fba7b0e3879bb2b515cfa31d
  __name(time, "time");
  var TimestampStyles = {
 diff --git a/dist/index.mjs b/dist/index.mjs
-index a25d062ccac765fe3b09cc4a37503628f9a1c68b..38201e238a244626f9c25bb381fcadd125a93372 100644
+index a25d062ccac765fe3b09cc4a37503628f9a1c68b..42e2ced5c23872b28e25ffaf227b6ff0a6cec7e1 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -285,10 +285,9 @@ function formatEmoji(emojiId, animated = false) {
