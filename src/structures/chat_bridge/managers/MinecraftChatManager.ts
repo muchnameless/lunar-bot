@@ -613,17 +613,22 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				})
 				.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
 				.replaceAll('`', "'") // better single quotes
-				.replace(/<#(\d{17,19})>/g, (match, p1: Snowflake) => {
-					// channels
-					const CHANNEL_NAME = (this.client.channels.cache.get(p1) as GuildChannel)?.name;
-					if (CHANNEL_NAME) return `#${replaceSmallLatinCapitalLetters(CHANNEL_NAME)}`;
-					return match;
-				})
-				.replace(/<@&(\d{17,19})>/g, (match, p1: Snowflake) => {
-					// roles
-					const ROLE_NAME = discordMessage?.guild?.roles.cache.get(p1)?.name;
-					if (ROLE_NAME) return `@${ROLE_NAME}`;
-					return match;
+				.replace(/<(#|@&)(\d{17,19})>/g, (match, type: '#' | '@&', id: Snowflake) => {
+					switch (type) {
+						// channels
+						case '#': {
+							const CHANNEL_NAME = (this.client.channels.cache.get(id) as GuildChannel)?.name;
+							if (CHANNEL_NAME) return `#${replaceSmallLatinCapitalLetters(CHANNEL_NAME)}`;
+							return match;
+						}
+
+						// roles
+						case '@&': {
+							const ROLE_NAME = discordMessage?.guild?.roles.cache.get(id)?.name;
+							if (ROLE_NAME) return `@${ROLE_NAME}`;
+							return match;
+						}
+					}
 				})
 				.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1: string, p2: string) => {
 					// dates
