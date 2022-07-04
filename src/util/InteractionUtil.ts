@@ -11,9 +11,11 @@ import {
 	EmbedBuilder,
 	InteractionResponse,
 	InteractionType,
+	isJSONEncodable,
 	RESTJSONErrorCodes,
 	SnowflakeUtil,
 } from 'discord.js';
+import { InteractionLimits, MessageLimits } from '@sapphire/discord-utilities';
 import { stripIndent } from 'common-tags';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '../constants';
 import {
@@ -27,6 +29,8 @@ import {
 import { logger } from '../logger';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
+	APIActionRowComponent,
+	APIMessageActionRowComponent,
 	AutocompleteInteraction,
 	BaseGuildTextChannel,
 	ButtonInteraction,
@@ -447,28 +451,31 @@ export class InteractionUtil extends null {
 				break;
 
 			default: {
-				let addNewRow = options.components!.length !== 5;
+				// convert all rows to plain JSON
+				const components = options.components!.map((x) =>
+					isJSONEncodable(x) ? x.toJSON() : (x as APIActionRowComponent<APIMessageActionRowComponent>),
+				);
+				options.components = components;
 
-				// TODO: Array#prototype#findLast
-				for (let i = options.components!.length - 1; i >= 0; --i) {
-					if (
-						(options.components![i] as ActionRowBuilder).components.length === 5 ||
-						(options.components![i] as ActionRowBuilder).components[0]?.data?.type === ComponentType.SelectMenu
-					) {
-						continue;
-					}
+				// @ts-expect-error
+				const LAST_NON_FULL_ROW: number = components.findLastIndex(
+					({ components: c }: APIActionRowComponent<APIMessageActionRowComponent>) =>
+						c[0]?.type !== ComponentType.SelectMenu && c.length < InteractionLimits.MaximumButtonsPerActionRow,
+				);
 
-					// TODO: ActionRowBuilder.from
-					(options.components![i] as ActionRowBuilder).addComponents(buildVisibilityButton());
-					addNewRow = false;
-					break;
+				// non empty row found
+				if (LAST_NON_FULL_ROW !== -1) {
+					components[LAST_NON_FULL_ROW]!.components.push(buildVisibilityButton().toJSON());
+					return;
 				}
 
-				if (addNewRow) {
-					options.components!.push(
-						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()),
-					);
-				}
+				// all rows are full
+				if (components.length === MessageLimits.MaximumActionRows) return;
+
+				// add a new row
+				components.push(
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()).toJSON(),
+				);
 			}
 		}
 	}
