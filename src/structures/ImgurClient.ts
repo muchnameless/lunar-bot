@@ -140,9 +140,9 @@ export class ImgurClient {
 	 * caches the current ratelimit data
 	 */
 	cacheRateLimits() {
-		if (this.rateLimit.userlimit === null) return;
+		if (!this.cache || this.rateLimit.userlimit === null) return Promise.resolve();
 
-		return this.cache?.set('ratelimits', {
+		return this.cache.set('ratelimits', {
 			rateLimit: this.rateLimit,
 			postRateLimit: this.postRateLimit,
 		});
