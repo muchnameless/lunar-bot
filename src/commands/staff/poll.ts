@@ -20,6 +20,11 @@ interface RunOptions {
 }
 
 export default class PollCommand extends DualCommand {
+	/**
+	 * currently running polls
+	 */
+	polls = new Map<ChatBridge, number>();
+
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('create a poll for both in-game and discord guild chat')
@@ -67,8 +72,8 @@ export default class PollCommand extends DualCommand {
 	 * @param options
 	 */
 	private async _sharedRun({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
-		if (chatBridge.pollUntil) {
-			return `poll already in progress, ends ${time(chatBridge.pollUntil, TimestampStyles.RelativeTime)}`;
+		if (this.polls.has(chatBridge)) {
+			return `poll already in progress, ends ${time(this.polls.get(chatBridge)!, TimestampStyles.RelativeTime)}`;
 		}
 
 		try {
@@ -77,7 +82,7 @@ export default class PollCommand extends DualCommand {
 					? Math.min(Math.max(stringToMS(duration), seconds(30)), minutes(10)) || minutes(1)
 					: minutes(1);
 
-			chatBridge.pollUntil = Date.now() + DURATION;
+			this.polls.set(chatBridge, Date.now() + DURATION);
 
 			const pollOptions = pollOptionNames.map((name, index) => ({
 				number: index + 1,
@@ -151,7 +156,7 @@ export default class PollCommand extends DualCommand {
 				maxParts: Number.POSITIVE_INFINITY,
 			});
 		} finally {
-			chatBridge.pollUntil = null; // unlock poll command
+			this.polls.delete(chatBridge); // unlock poll command
 		}
 	}
 

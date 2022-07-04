@@ -73,10 +73,6 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 */
 	shouldRetryLinking = true;
 	/**
-	 * timestamp of the end of the current poll, if existing
-	 */
-	pollUntil: number | null = null;
-	/**
 	 * minecraft related functions
 	 */
 	minecraft: MinecraftChatManager<loggedIn> = new MinecraftChatManager(this);
