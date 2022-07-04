@@ -144,7 +144,6 @@ export default class MathsCommand extends DualCommand {
 			{
 				aliases: ['m'],
 				args: true,
-				usage: '',
 			},
 		);
 	}
@@ -537,7 +536,7 @@ export default class MathsCommand extends DualCommand {
 	 */
 	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		try {
-			const { input, formattedOutput } = this.calculate(hypixelMessage.commandData.args.join(''));
+			const { input, formattedOutput } = this.calculate(hypixelMessage.commandData.args.positionals.join(''));
 
 			return hypixelMessage.reply(`${input} = ${formattedOutput}`);
 		} catch (error) {

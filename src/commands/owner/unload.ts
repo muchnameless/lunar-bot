@@ -90,7 +90,9 @@ export default class UnloadCommand extends DualCommand {
 	 */
 	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
-			this._sharedRun(...(hypixelMessage.commandData.args.map((arg) => arg.toLowerCase()) as [string, string])),
+			this._sharedRun(
+				...(hypixelMessage.commandData.args.positionals.map((arg) => arg.toLowerCase()) as [string, string]),
+			),
 		);
 	}
 }

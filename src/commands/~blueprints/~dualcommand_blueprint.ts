@@ -15,8 +15,6 @@ export default class MyCommand extends DualCommand {
 			},
 			{
 				aliases: [],
-				args: false,
-				usage: '',
 			},
 		);
 	}

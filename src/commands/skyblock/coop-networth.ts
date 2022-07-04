@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getAuctionNetworth, getNetworth } from '#networth/networth';
-import { includeAuctionsOption } from '#structures/commands/commonOptions';
+import { shortenNumber } from '#functions';
 import { UnicodeEmoji } from '#constants';
-import { seconds, shortenNumber } from '#functions';
 import NetworthCommand from './networth';
 import type { FetchedData } from './~base-skyblock-command';
 import type { CommandContext } from '#structures/commands/BaseCommand';
@@ -15,8 +14,6 @@ export default class CoopNetworthCommand extends NetworthCommand {
 				slash: new SlashCommandBuilder().setDescription(
 					"shows a player's Co-op's networth, algorithm by Maro and SkyHelper",
 				),
-				additionalOptions: [includeAuctionsOption],
-				cooldown: seconds(1),
 			},
 			{
 				aliases: ['coopnw'],

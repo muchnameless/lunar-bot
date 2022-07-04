@@ -16,8 +16,6 @@ export default class CoinFlipCommand extends DualCommand {
 			},
 			{
 				aliases: ['cf', 'flip'],
-				args: false,
-				usage: '',
 			},
 		);
 	}

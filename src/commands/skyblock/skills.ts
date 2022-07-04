@@ -8,16 +8,10 @@ import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class SkillsCommand extends BaseSkyBlockCommand {
 	constructor(context: CommandContext) {
-		super(
-			context,
-			{
-				slash: new SlashCommandBuilder().setDescription("shows a player's skills"),
-				cooldown: seconds(1),
-			},
-			{
-				aliases: [],
-			},
-		);
+		super(context, {
+			slash: new SlashCommandBuilder().setDescription("shows a player's skills"),
+			cooldown: seconds(1),
+		});
 	}
 
 	/**

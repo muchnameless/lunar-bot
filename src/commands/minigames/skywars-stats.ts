@@ -29,7 +29,6 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 			},
 			{
 				aliases: ['swstats'],
-				args: false,
 				usage: '<`IGN`>',
 			},
 		);

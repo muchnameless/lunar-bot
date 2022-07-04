@@ -19,7 +19,6 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			},
 			{
 				aliases: ['bwstats'],
-				args: false,
 				usage: '<`IGN`>',
 			},
 		);

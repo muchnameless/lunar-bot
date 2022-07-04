@@ -20,7 +20,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
-		const targetInput = hypixelMessage.commandData.args.shift()!;
+		const targetInput = hypixelMessage.commandData.args.positionals.shift()!;
 		const hypixelGuild = hypixelMessage.hypixelGuild ?? hypixelMessage.player?.hypixelGuild;
 
 		if (!hypixelGuild) return hypixelMessage.author.send('unable to determine the guild to perform the kick on');
@@ -29,7 +29,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 			ctx: hypixelMessage,
 			target: this.client.players.getByIgn(targetInput) ?? targetInput,
 			executor: hypixelMessage.player,
-			reason: hypixelMessage.commandData.args.join(' '),
+			reason: hypixelMessage.commandData.args.positionals.join(' '),
 			hypixelGuild,
 		});
 

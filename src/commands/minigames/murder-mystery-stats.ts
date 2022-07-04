@@ -30,7 +30,6 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 			},
 			{
 				aliases: ['mmstats'],
-				args: false,
 				usage: '<`IGN`>',
 			},
 		);

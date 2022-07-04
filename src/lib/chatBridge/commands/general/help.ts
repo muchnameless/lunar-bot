@@ -34,7 +34,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 	 */
 	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		// default help
-		if (!hypixelMessage.commandData.args.length) {
+		if (!hypixelMessage.commandData.args.positionals.length) {
 			const reply = [
 				`Guild chat prefix: ${[...this.config.get('PREFIXES'), `@${hypixelMessage.chatBridge.bot!.username}`].join(
 					', ',
@@ -47,7 +47,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
-		const INPUT = hypixelMessage.commandData.args[0]!.toLowerCase();
+		const INPUT = hypixelMessage.commandData.args.positionals[0]!.toLowerCase();
 
 		// category help
 		const requestedCategory = this.collection.categories.find((categoryName) => categoryName === INPUT);

@@ -11,18 +11,20 @@ import type { ApplicationCommandData } from '#structures/commands/ApplicationCom
 import type { BridgeCommandData } from '#structures/commands/BridgeCommand';
 
 export default class PingMuteCommand extends DualCommand {
-	constructor(context: CommandContext, param1?: ApplicationCommandData, param2?: BridgeCommandData) {
+	constructor(context: CommandContext, slashData?: ApplicationCommandData, bridgeData?: BridgeCommandData) {
 		super(
 			context,
-			param1 ?? {
+			{
 				slash: new SlashCommandBuilder()
 					.setDescription('prevent a guild member from @mentioning via the chat bridge')
 					.addStringOption(requiredPlayerOption),
 				cooldown: 0,
+				...slashData,
 			},
-			param2 ?? {
+			{
 				args: 1,
 				usage: '[`IGN`|`UUID`|`discord ID`|`@mention`]',
+				...bridgeData,
 			},
 		);
 	}
@@ -66,7 +68,7 @@ export default class PingMuteCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
-		const [INPUT] = hypixelMessage.commandData.args as [string];
+		const [INPUT] = hypixelMessage.commandData.args.positionals as [string];
 
 		return hypixelMessage.reply(
 			await this._generateReply(this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT), INPUT),

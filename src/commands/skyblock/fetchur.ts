@@ -16,8 +16,6 @@ export default class FetchurCommand extends DualCommand {
 			},
 			{
 				aliases: ['f'],
-				args: false,
-				usage: '',
 			},
 		);
 	}

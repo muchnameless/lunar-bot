@@ -1,6 +1,7 @@
 import { BaseCommand } from './BaseCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { Awaitable } from '@sapphire/utilities';
+import type { ParseArgsOptions } from 'node:util';
 import type { CommandContext, CommandData } from './BaseCommand';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type { BridgeCommandCollection } from './BridgeCommandCollection';
@@ -10,6 +11,7 @@ export interface BridgeCommandData extends CommandData {
 	description?: string;
 	guildOnly?: boolean;
 	args?: number | boolean;
+	parseArgsOptions?: ParseArgsOptions;
 	usage?: string | (() => string);
 }
 
@@ -17,7 +19,8 @@ export class BridgeCommand extends BaseCommand {
 	_usage: string | (() => string) | null = null;
 	description: string | null;
 	guildOnly = false;
-	args: number | boolean | null;
+	args: number | boolean = false;
+	parseArgsOptions?: ParseArgsOptions;
 	declare collection: BridgeCommandCollection;
 
 	/**
@@ -25,13 +28,17 @@ export class BridgeCommand extends BaseCommand {
 	 * @param context
 	 * @param data
 	 */
-	constructor(context: CommandContext, { aliases, description, guildOnly, args, usage, ...data }: BridgeCommandData) {
+	constructor(
+		context: CommandContext,
+		{ aliases, description, guildOnly, args, parseArgsOptions, usage, ...data }: BridgeCommandData,
+	) {
 		super(context, data);
 
 		this.aliases = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
 		this.description = description || null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
+		this.parseArgsOptions = parseArgsOptions;
 		this.usage = usage ?? null;
 	}
 
