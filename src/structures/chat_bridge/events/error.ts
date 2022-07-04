@@ -10,7 +10,7 @@ export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 	override run(error: unknown) {
 		logger.error(error, '[CHATBRIDGE ERROR]');
 
-		if (error instanceof Error && error.message.includes('Invalid credentials')) {
+		if (error instanceof Error && /invalid credentials/i.test(error.message)) {
 			this.chatBridge.minecraft.state = MinecraftChatManagerState.Errored;
 			this.chatBridge.minecraft.disconnect();
 

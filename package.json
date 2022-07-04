@@ -99,6 +99,7 @@
 		"@discordjs/rest": "0.6.0-dev.1656864759-c7a205f",
 		"discord-api-types": "0.36.1-next.df1527c.1656886610",
 		"discord.js@14.0.0-dev.1656864763-c7a205f": "patch:discord.js@npm:14.0.0-dev.1656864763-c7a205f#.yarn/patches/discord.js-npm-14.0.0-dev.1656864763-c7a205f-025015492f.patch",
+		"minecraft-protocol@^1.35.0": "patch:minecraft-protocol@npm:1.35.0#.yarn/patches/minecraft-protocol-npm-1.35.0-d5ba667cea.patch",
 		"sequelize@^6.21.2": "patch:sequelize@npm:6.21.2#.yarn/patches/sequelize-npm-6.21.2-a0519a6da0.patch"
 	}
 }

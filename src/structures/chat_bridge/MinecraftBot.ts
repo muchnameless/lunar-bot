@@ -36,7 +36,7 @@ let events: MinecraftBotEvent[];
  * @param options
  */
 export async function createBot(chatBridge: ChatBridge, options: ClientOptions) {
-	const bot = createClient(options);
+	const { client: bot, login } = createClient(options);
 
 	/**
 	 * load (and cache) bot events
@@ -46,6 +46,8 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 	}
 
 	logger.debug(`[CHATBRIDGE BOT EVENTS]: ${events.length} event${events.length !== 1 ? 's' : ''} loaded`);
+
+	await login();
 
 	return bot;
 }

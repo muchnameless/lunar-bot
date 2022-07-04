@@ -1,0 +1,52 @@
+diff --git a/src/client.js b/src/client.js
+index 03e2c9bf1300fddad0d627942e60c14e5ad438ad..633f2cbca6b90edabcb4c389b599fe4351a8ec1f 100644
+--- a/src/client.js
++++ b/src/client.js
+@@ -15,7 +15,7 @@ const closeTimeout = 30 * 1000
+ 
+ class Client extends EventEmitter {
+   constructor (isServer, version, customPackets, hideErrors = false) {
+-    super()
++    super({ captureRejections: true })
+     this.customPackets = customPackets
+     this.version = version
+     this.isServer = !!isServer
+diff --git a/src/createClient.js b/src/createClient.js
+index ffdc5edc92eb85909d86e746c68a3b8464dbd789..a0520e15649b933ff86aba01b707868b4c6b11d7 100644
+--- a/src/createClient.js
++++ b/src/createClient.js
+@@ -34,11 +34,6 @@ function createClient (options) {
+   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
+ 
+   tcpDns(client, options)
+-  if (options.auth === 'microsoft') {
+-    microsoftAuth.authenticate(client, options)
+-  } else {
+-    auth(client, options)
+-  }
+   if (options.version === false) autoVersion(client, options)
+   setProtocol(client, options)
+   keepalive(client, options)
+@@ -48,5 +43,8 @@ function createClient (options) {
+   pluginChannels(client, options)
+   versionChecking(client, options)
+ 
+-  return client
++  return {
++	  client,
++	  login: () => (options.auth === 'microsoft' ? microsoftAuth.authenticate : auth)(client, options),
++  }
+ }
+diff --git a/src/index.d.ts b/src/index.d.ts
+index ac76a1d95fddc02826c4530f7d4d27c6d8a47b35..2d9af509277790820f9fd0e0b01aa9876cbdbbae 100644
+--- a/src/index.d.ts
++++ b/src/index.d.ts
+@@ -252,7 +252,7 @@ declare module 'minecraft-protocol' {
+ 	export const defaultVersion: string
+ 
+ 	export function createServer(options: ServerOptions): Server
+-	export function createClient(options: ClientOptions): Client
++	export function createClient(options: ClientOptions): { client: Client; login: () => Promise<void>; }
+ 
+ 	// TODO: Create typings on protodef to define here
+ 	export function createSerializer({ state, isServer, version, customPackets }: SerializerOptions): any

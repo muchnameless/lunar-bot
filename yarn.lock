@@ -3809,7 +3809,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:^1.35.0":
+"minecraft-protocol@npm:1.35.0":
   version: 1.35.0
   resolution: "minecraft-protocol@npm:1.35.0"
   dependencies:
@@ -3831,6 +3831,31 @@ __metadata:
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
   checksum: a0c8cf10e7669bc9a8468e3ca3dfefc0c6718765b68c993700f9912c6d37293da74b1fbcea0d96ad0082e430c087de5f1b16e1d4b1bbecb067243590bbfb8e71
+  languageName: node
+  linkType: hard
+
+"minecraft-protocol@patch:minecraft-protocol@npm:1.35.0#.yarn/patches/minecraft-protocol-npm-1.35.0-d5ba667cea.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.35.0
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.35.0#.yarn/patches/minecraft-protocol-npm-1.35.0-d5ba667cea.patch::version=1.35.0&hash=10ae8c&locator=lunar-bot%40workspace%3A."
+  dependencies:
+    "@types/readable-stream": ^2.3.13
+    aes-js: ^3.1.2
+    buffer-equal: ^1.0.0
+    debug: ^4.3.2
+    endian-toggle: ^0.0.0
+    lodash.get: ^4.1.2
+    lodash.merge: ^4.3.0
+    minecraft-data: ^3.0.0
+    minecraft-folder-path: ^1.2.0
+    node-fetch: ^2.6.1
+    node-rsa: ^0.4.2
+    prismarine-auth: ^1.1.0
+    prismarine-nbt: ^2.0.0
+    protodef: ^1.8.0
+    readable-stream: ^3.0.6
+    uuid-1345: ^1.0.1
+    yggdrasil: ^1.4.0
+  checksum: 413dc453c64a8cc612d9a52dd85d08916a674b80a32579fc00408e145f9db93a6d2ea5ed6948d5419629a8dcadc58eb4ffac80b7fb64e2e6bccdbe608765f5a4
   languageName: node
   linkType: hard
 
