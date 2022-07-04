@@ -34,7 +34,6 @@ import {
 	commaListOr,
 	escapeIgn,
 	getIdFromString,
-	getInlineFieldLineCount,
 	removeMcFormatting,
 	seconds,
 	sortCache,
@@ -598,46 +597,37 @@ export default class GuildCommand extends ApplicationCommand {
 		const pageMatched = /\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/.exec(response);
 
 		// split input and parse dates
-		const description: string[] = [];
-		const dates: string[] = [];
-		const events: string[] = [];
+		const descriptionParts: string[] = [];
+
+		// build embed
+		const embed = this.client.defaultEmbed
+			.setTitle(`/${command}`)
+			.setDescription(codeBlock(descriptionParts.join('\n')))
+			.setFooter({ text: hypixelGuild.name });
 
 		for (const line of response.split('\n')) {
 			const matched = /^(?<date>[a-z]+ \d+ \d{4} \d{2}:\d{2} [a-z]+): (?<event>.+)$/i.exec(line);
 
 			if (!matched) {
-				description.push(line);
+				descriptionParts.push(line);
 				continue;
 			}
 
 			const { date, event } = matched.groups!;
 
-			let padding = '\n';
-
-			for (let i = getInlineFieldLineCount(event!, 37); i--; ) {
-				padding += '\n';
-			}
-
-			dates.push(`${time(Date.parse(date!))}${padding}`);
-			events.push(event!);
+			embed.addFields({
+				name: time(Date.parse(date!)),
+				value: codeBlock(event!),
+			});
 		}
 
-		// build embed
-		const embed = this.client.defaultEmbed
-			.setTitle(`/${command}`)
-			.setDescription(codeBlock(description.join('\n')))
-			.setFooter({ text: hypixelGuild.name });
+		if (descriptionParts.length) {
+			let description = codeBlock(descriptionParts.join('\n'));
 
-		if (dates.length) {
-			embed.addFields(
-				{
-					// padding since dates are sometimes not as long (may <> november), with this 37 works everytime for getInlineFieldLineCount
-					name: `${'\u200B'.padEnd(105, '\u00A0')}\u200B`,
-					value: `\u200B\n${dates.join('')}`,
-					inline: true,
-				},
-				{ name: '\u200B', value: codeBlock(events.join('\n\n')), inline: true },
-			);
+			// add a separating line between fields and description
+			if (embed.data.fields?.length) description += '\n\u200B';
+
+			embed.setDescription(description);
 		}
 
 		const currentPage = Number(pageMatched?.groups!.current ?? page) || 0;
