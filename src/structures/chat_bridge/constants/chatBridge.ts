@@ -16,6 +16,12 @@ export const enum HypixelMessageType {
 	Party = 'PARTY',
 }
 
+export const enum MinecraftChatManagerState {
+	Ready,
+	Connecting,
+	Errored,
+}
+
 export const PREFIX_BY_TYPE = {
 	GUILD: '/gc',
 	OFFICER: '/oc',

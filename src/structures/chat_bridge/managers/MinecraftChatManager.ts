@@ -10,10 +10,11 @@ import ms from 'ms';
 import { TwemojiRegex } from '@sapphire/discord-utilities';
 import { jaroWinkler } from '@skyra/jaro-winkler';
 import {
+	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
 	MEME_REGEXP,
-	HypixelMessageType,
+	MinecraftChatManagerState,
 	NON_WHITESPACE_REGEXP,
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
@@ -46,7 +47,6 @@ import type { ChatOptions } from '../ChatBridge';
 export interface SendToChatOptions {
 	content: string;
 	prefix?: string;
-	isMessage?: boolean;
 	discordMessage?: Message | null;
 	/** whether to whisper to the author */
 	ephemeral?: boolean;
@@ -85,6 +85,11 @@ const enum ForwardRejectionReason {
 	MessageCount,
 }
 
+const enum LastMessagesType {
+	Guild,
+	Whisper,
+}
+
 class LastMessages {
 	/**
 	 * buffer size
@@ -93,7 +98,7 @@ class LastMessages {
 	/**
 	 * treshold above which the message to send gets additional random padding
 	 */
-	private static JARO_WINKLER_THRESHOLD = 0.975 as const;
+	private static JARO_WINKLER_THRESHOLD = 0.985 as const;
 
 	/**
 	 * current buffer index
@@ -135,7 +140,9 @@ class LastMessages {
 		return this.cache.some((cached) => {
 			// exact match
 			if (cached === CLEANED_CONTENT) return true;
+			if (CLEANED_CONTENT.length <= 7) return false;
 			// fuzzy match
+			// return distance(CLEANED_CONTENT, cached) !== 0;
 			return jaroWinkler(CLEANED_CONTENT, cached) >= THRESHOLD;
 		});
 	}
@@ -149,6 +156,32 @@ class LastMessages {
 		if (++this.index === LastMessages.MAX_INDEX) this.index = 0;
 
 		this.cache[this.index] = LastMessages._cleanContent(content);
+	}
+}
+
+class TimeoutManager {
+	private readonly timeouts = new Map<string, NodeJS.Timeout>();
+
+	/**
+	 * adds a new timeout to the internal map
+	 * @param name
+	 * @param callback
+	 * @param timeout
+	 */
+	public add(name: string, callback: () => void, timeout: number) {
+		this.timeouts.set(name, setTimeout(callback, timeout));
+	}
+
+	/**
+	 * clears a timeout and removes it from the internal map
+	 * @param name
+	 */
+	public clear(name: string) {
+		const timeout = this.timeouts.get(name);
+		if (!timeout) return;
+
+		clearTimeout(timeout);
+		this.timeouts.delete(name);
 	}
 }
 
@@ -178,10 +211,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	private _reconnectPromise: Promise<this> | null = null;
 	/**
-	 * scheduled reconnection
-	 */
-	private _reconnectTimeout: NodeJS.Timeout | null = null;
-	/**
 	 * current retry when resending messages
 	 */
 	private _retries = 0;
@@ -194,10 +223,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	private commandQueue = new AsyncQueue();
 	/**
-	 * whether the minecraft bot is logged in and ready to receive and send chat messages
-	 */
-	botReady = false;
-	/**
 	 * minecraft bot client
 	 */
 	bot: If<loggedIn, MinecraftBot> = null as If<loggedIn, MinecraftBot>;
@@ -206,27 +231,27 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	botUuid: If<loggedIn, string> = null as If<loggedIn, string>;
 	/**
-	 * disconnect the bot if it hasn't successfully spawned in 60 seconds
-	 */
-	abortLoginTimeout: NodeJS.Timeout | null = null;
-	/**
 	 * increases each login, reset to 0 on successfull spawn
 	 */
 	loginAttempts = 0;
 	/**
-	 * to prevent chatBridge from reconnecting at <MinecraftBot>.end
+	 * the state of the minecraft bot
 	 */
-	shouldReconnect = true;
+	state = MinecraftChatManagerState.Connecting;
+	/**
+	 * manages timeouts
+	 */
+	timeouts = new TimeoutManager();
 	/**
 	 * anti spam checker
 	 */
-	private _lastMessages = new LastMessages();
+	private _lastMessages = [new LastMessages(), new LastMessages()];
 
 	/**
 	 * whether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
 	isReady(): this is MinecraftChatManager<true> {
-		return this.botReady && !(this.bot?.ended ?? true);
+		return this.state === MinecraftChatManagerState.Ready && !(this.bot?.ended ?? true);
 	}
 
 	/**
@@ -445,7 +470,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * create and log the bot into hypixel
 	 */
 	async connect() {
-		if (!this.shouldReconnect) {
+		if (this.state === MinecraftChatManagerState.Errored) {
 			throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
 		}
 
@@ -458,10 +483,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
 		if (!this.isReady()) {
-			this.abortLoginTimeout = setTimeout(() => {
-				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-				this.reconnect(0).catch((error) => logger.error(error));
-			}, seconds(60));
+			this.timeouts.add(
+				'abortLogin',
+				() => {
+					logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
+					this.reconnect(0).catch((error) => logger.error(error));
+				},
+				seconds(60),
+			);
 		}
 
 		return this;
@@ -499,13 +528,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * disconnects the bot
 	 */
 	disconnect() {
-		clearTimeout(this._reconnectTimeout!);
-		this._reconnectTimeout = null;
+		this.timeouts.clear('reconnect');
+		this.timeouts.clear('abortLogin');
 
-		clearTimeout(this.abortLoginTimeout!);
-		this.abortLoginTimeout = null;
-
-		this.botReady = false;
+		if (this.state !== MinecraftChatManagerState.Errored) {
+			this.state = MinecraftChatManagerState.Connecting;
+		}
 
 		try {
 			this.bot?.end('disconnect.quitting');
@@ -826,7 +854,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of contentParts) {
-			success = (await this.sendToChat({ content: part, prefix, discordMessage, isMessage: true })) && success;
+			success = (await this.sendToChat({ content: part, prefix, discordMessage })) && success;
 		}
 
 		return success;
@@ -863,24 +891,27 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 * @internal
 	 */
-	private async _sendToChat({
-		content,
-		prefix = '',
-		isMessage,
-		discordMessage = null,
-	}: SendToChatOptions): Promise<unknown> {
+	private async _sendToChat({ content, prefix = '', discordMessage = null }: SendToChatOptions): Promise<unknown> {
 		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
 		let message = `${prefix}${content}`;
+		let _content: string | undefined;
+		let lastMessages: LastMessages | undefined;
 
-		const useSpamBypass = isMessage ?? /^\/(?:[acgop]c|msg|w(?:hisper)?|t(?:ell)?) /i.test(message);
+		if (message.startsWith('/gc ') || message.startsWith('/oc ')) {
+			lastMessages = this._lastMessages[LastMessagesType.Guild];
+			_content = message.slice('/gc '.length);
+		} else if (message.startsWith('/w ')) {
+			lastMessages = this._lastMessages[LastMessagesType.Whisper];
+			_content = message.slice(message.indexOf(' ', '/w '.length) + 1);
+		}
 
-		if (useSpamBypass) {
+		if (lastMessages) {
 			let index = this._retries;
 
 			// 1 for each retry + additional if _lastMessages includes curent padding
 			while (
-				(--index >= 0 || this._lastMessages.check(message, this._retries)) &&
+				(--index >= 0 || lastMessages.check(_content!, this._retries)) &&
 				message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH
 			) {
 				message += randomPadding();
@@ -919,7 +950,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					throw response;
 				}
 
-				if (useSpamBypass) this._lastMessages.add(message);
+				lastMessages?.add(_content!);
 
 				return;
 			}
@@ -936,7 +967,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				}
 
 				await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				return this._sendToChat({ content, prefix, isMessage, discordMessage }); // retry sending
+				return this._sendToChat({ content, prefix, discordMessage }); // retry sending
 			}
 
 			// hypixel filter blocked message
@@ -948,7 +979,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// message sent successfully
 			default: {
-				this._lastMessages.add(message); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
+				lastMessages!.add(_content!); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
 
 				await sleep(
 					[HypixelMessageType.Guild, HypixelMessageType.Party, HypixelMessageType.Officer].includes(response.type!)
@@ -972,7 +1003,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const {
 			command,
 			responseRegExp,
-			abortRegExp,
+			abortRegExp = /^Unknown command. Type "help" for help\.$/,
 			max = -1,
 			raw = false,
 			timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'),
@@ -1058,7 +1089,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				await this._sendToChat({
 					content: command,
 					prefix: command.startsWith('/') ? '' : '/',
-					isMessage: false,
 				});
 			} catch (error) {
 				logger.error(error, '[CHATBRIDGE MC COMMAND]');

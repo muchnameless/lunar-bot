@@ -1,6 +1,6 @@
-import { clearTimeout } from 'node:timers';
 import { logger } from '../../../logger';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
+import { MinecraftChatManagerState } from '../constants';
 
 export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 	/**
@@ -8,14 +8,13 @@ export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 	 */
 	override run() {
 		// stop abort controller
-		clearTimeout(this.chatBridge.minecraft.abortLoginTimeout!);
-		this.chatBridge.minecraft.abortLoginTimeout = null;
+		this.chatBridge.minecraft.timeouts.clear('abortLogin');
 
 		// reset relog timeout
 		this.chatBridge.minecraft.loginAttempts = 0;
 
 		// set bot to ready
-		this.chatBridge.minecraft.botReady = true;
+		this.chatBridge.minecraft.state = MinecraftChatManagerState.Ready;
 
 		logger.debug(`[CHATBRIDGE READY]: ${this.chatBridge.logInfo}: spawned and ready`);
 	}
