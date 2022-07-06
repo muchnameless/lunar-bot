@@ -142,7 +142,6 @@ class LastMessages {
 			if (cached === CLEANED_CONTENT) return true;
 			if (CLEANED_CONTENT.length <= 7) return false;
 			// fuzzy match
-			// return distance(CLEANED_CONTENT, cached) !== 0;
 			return jaroWinkler(CLEANED_CONTENT, cached) >= THRESHOLD;
 		});
 	}
@@ -977,7 +976,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// message sent successfully
 			default: {
-				lastMessages!.add(_content!); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
+				lastMessages!.add(_content!); // listener doesn't collect command responses -> lastMessages is always defined
 
 				await sleep(
 					[HypixelMessageType.Guild, HypixelMessageType.Party, HypixelMessageType.Officer].includes(response.type!)
@@ -992,7 +991,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 	/**
 	 * sends a message to in-game chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
-	 * @param commandOptions
+	 * @param options
 	 */
 	async command(options: string | (CommandOptions & { raw?: false })): Promise<string>;
 	async command(options: CommandOptions & { raw: true }): Promise<HypixelMessage[]>;
