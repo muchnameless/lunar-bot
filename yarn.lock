@@ -474,10 +474,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/shapeshift@npm:^3.2.0, @sapphire/shapeshift@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "@sapphire/shapeshift@npm:3.4.0"
-  checksum: fede7cc81c360e4222328278a4cd5fb21b5dd79d3d3bd7365a1f9582215032dc8b7c75a3713d047254f69f327f7259f912605c23444bca1a3db9ea9ab0211269
+"@sapphire/shapeshift@npm:^3.2.0, @sapphire/shapeshift@npm:^3.4.1":
+  version: 3.4.1
+  resolution: "@sapphire/shapeshift@npm:3.4.1"
+  checksum: 97006b34941136c26dd1a8259c1838df08e7e15e869e515a3e4e844d2c5757c4bb92d79eeec72c73ff856e9be00876c88bf71142d11f4b55e043ec76153365cd
   languageName: node
   linkType: hard
 
@@ -3598,7 +3598,7 @@ __metadata:
     "@discordjs/rest": 0.6.0-dev.1656864759-c7a205f
     "@sapphire/async-queue": ^1.3.2
     "@sapphire/discord-utilities": ^2.11.4
-    "@sapphire/shapeshift": ^3.4.0
+    "@sapphire/shapeshift": ^3.4.1
     "@sapphire/stopwatch": ^1.4.1
     "@sapphire/time-utilities": ^1.7.4
     "@sapphire/type": ^2.2.4
