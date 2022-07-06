@@ -136,8 +136,9 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * destroys the connection to the guild and reconnects the bot
 	 */
-	get reconnect() {
-		return this.minecraft.reconnect.bind(this.minecraft);
+	async reconnect(...args: Parameters<MinecraftChatManager['reconnect']>) {
+		await this.minecraft.reconnect(...args);
+		return this;
 	}
 
 	/**

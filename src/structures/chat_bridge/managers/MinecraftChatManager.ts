@@ -479,19 +479,17 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return this;
 		}
 
-		await this._createBot();
-
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
-		if (!this.isReady()) {
-			this.timeouts.add(
-				'abortLogin',
-				() => {
-					logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-					this.reconnect(0).catch((error) => logger.error(error));
-				},
-				seconds(60),
-			);
-		}
+		this.timeouts.add(
+			'abortLogin',
+			() => {
+				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
+				this.reconnect(0).catch((error) => logger.error(error));
+			},
+			seconds(60),
+		);
+
+		await this._createBot();
 
 		return this;
 	}

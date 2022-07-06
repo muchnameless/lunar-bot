@@ -45,9 +45,13 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 		bot[SPAWN_EVENTS.has(name as any) ? 'once' : 'on'](name, callback.bind(null, chatBridge));
 	}
 
-	logger.debug(`[CHATBRIDGE BOT EVENTS]: ${events.length} event${events.length !== 1 ? 's' : ''} loaded`);
+	logger.debug(`[CREATE BOT]: ${events.length} event${events.length !== 1 ? 's' : ''} loaded`);
 
-	await login();
+	try {
+		await login();
+	} catch (error) {
+		logger.error(error, '[CREATE BOT]');
+	}
 
 	return bot;
 }
