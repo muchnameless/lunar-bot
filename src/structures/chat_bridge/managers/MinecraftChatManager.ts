@@ -450,22 +450,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * create bot instance, loads and binds it's events and logs it into hypixel
-	 */
-	private async _createBot(): Promise<MinecraftBot> {
-		++this.loginAttempts;
-
-		return ((this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
-			host: env.MINECRAFT_SERVER_HOST,
-			port: Number(env.MINECRAFT_SERVER_PORT),
-			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
-			password: env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
-			version: MC_CLIENT_VERSION,
-			auth: env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as 'mojang' | 'microsoft',
-		}));
-	}
-
-	/**
 	 * create and log the bot into hypixel
 	 */
 	async connect() {
@@ -483,12 +467,21 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			'abortLogin',
 			() => {
 				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-				this.reconnect(0).catch((error) => logger.error(error));
+				this.reconnect(0).catch((error) => logger.error(error, '[CHATBRIDGE ABORT TIMER]'));
 			},
 			seconds(60),
 		);
 
-		await this._createBot();
+		++this.loginAttempts;
+
+		(this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
+			host: env.MINECRAFT_SERVER_HOST,
+			port: Number(env.MINECRAFT_SERVER_PORT),
+			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
+			password: env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
+			version: MC_CLIENT_VERSION,
+			auth: env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as 'mojang' | 'microsoft',
+		});
 
 		return this;
 	}
