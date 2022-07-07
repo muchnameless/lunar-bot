@@ -44,7 +44,7 @@
 		"ioredis": "^5.1.0",
 		"js-big-decimal": "github:muchnameless/js-big-decimal",
 		"lex": "^1.7.9",
-		"lilyweight": "^2.6.2",
+		"lilyweight": "^2.6.3",
 		"minecraft-data": "^3.5.1",
 		"minecraft-protocol": "^1.35.0",
 		"ms": "^2.1.3",
