@@ -1,7 +1,9 @@
+import { GuildMemberLimits } from '@sapphire/discord-utilities';
 import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from 'discord.js';
 import {
 	FindProfileStrategy,
 	LEADERBOARD_XP_TYPES,
+	MAX_IGN_INPUT_LENGTH,
 	PROFILE_NAMES,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_SHORT,
@@ -12,30 +14,37 @@ import { keys } from '../../types/util';
 export const optionalIgnOption = new SlashCommandStringOption()
 	.setName('ign')
 	.setDescription('IGN | UUID')
-	.setRequired(false);
+	.setRequired(false)
+	.setMaxLength(MAX_IGN_INPUT_LENGTH);
 
 export const requiredIgnOption = new SlashCommandStringOption()
 	.setName('ign')
 	.setDescription('IGN | UUID')
-	.setRequired(true);
+	.setRequired(true)
+	.setMaxLength(MAX_IGN_INPUT_LENGTH);
+
+const MAX_INPUT_LENGTH = Math.max(MAX_IGN_INPUT_LENGTH, '@'.length + GuildMemberLimits.MaximumDisplayNameLength);
 
 export const optionalPlayerOption = new SlashCommandStringOption()
 	.setName('player')
 	.setDescription('IGN | UUID | discord ID | @mention')
 	.setRequired(false)
-	.setAutocomplete(true);
+	.setAutocomplete(true)
+	.setMaxLength(MAX_INPUT_LENGTH);
 
 export const requiredPlayerOption = new SlashCommandStringOption()
 	.setName('player')
 	.setDescription('IGN | UUID | discord ID | @mention')
 	.setRequired(true)
-	.setAutocomplete(true);
+	.setAutocomplete(true)
+	.setMaxLength(MAX_INPUT_LENGTH);
 
 export const targetOption = new SlashCommandStringOption()
 	.setName('target')
 	.setDescription("IGN | UUID | discord ID | @mention | 'guild' | 'everyone'")
 	.setRequired(true)
-	.setAutocomplete(true);
+	.setAutocomplete(true)
+	.setMaxLength(MAX_INPUT_LENGTH);
 
 export const forceOption = new SlashCommandBooleanOption()
 	.setName('force')
@@ -103,3 +112,4 @@ export const hypixelGuildOption = new SlashCommandStringOption()
 	.setDescription('hypixel guild')
 	.setRequired(false)
 	.setAutocomplete(true);
+// TODO: add guild name length limit
