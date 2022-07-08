@@ -14,6 +14,7 @@
 		"helpers:followTypescriptNext",
 		"helpers:pinGitHubActionDigests"
 	],
+	"ignorePresets": ["workarounds:typesNodeVersioning"],
 	"postUpdateOptions": ["yarnDedupeHighest"],
 	"labels": ["Meta: Dependencies"],
 	"npm": {

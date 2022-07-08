@@ -2,6 +2,7 @@ import { env } from 'node:process';
 import {
 	ActivityType,
 	ChannelType,
+	disableValidators,
 	GatewayIntentBits,
 	Options,
 	Partials,
@@ -10,12 +11,11 @@ import {
 	Sweepers,
 } from 'discord.js';
 import { RequestMethod } from '@discordjs/rest';
-import { setGlobalValidationEnabled } from '@sapphire/shapeshift';
 import { LunarClient } from './structures/LunarClient';
 import { seconds } from './functions';
 import { startJobs } from './jobs';
 
-setGlobalValidationEnabled(env.NODE_ENV === 'development');
+if (env.NODE_ENV !== 'development') disableValidators();
 
 const client = new LunarClient({
 	makeCache: Options.cacheWithLimits({

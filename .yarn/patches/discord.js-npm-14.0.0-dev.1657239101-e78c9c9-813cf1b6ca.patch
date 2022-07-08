@@ -1,8 +1,8 @@
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index 541ec0ca36351f414207fa96434ab5b68bb8e9f0..e53566e2c5fb7eea4bec9e59269531cf22b9e681 100644
+index 541ec0ca36351f414207fa96434ab5b68bb8e9f0..3ac1d6fa6ad5b56a94654fdd5c88783169756498 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
-@@ -270,6 +269,7 @@ class WebSocketShard extends EventEmitter {
+@@ -270,6 +270,7 @@ class WebSocketShard extends EventEmitter {
        this.status = this.status === Status.Disconnected ? Status.Reconnecting : Status.Connecting;
        this.setHelloTimeout();
  
@@ -227,10 +227,10 @@ index b0ee8458c90ee81551e90a0e29d15c25802fa5f8..6293abd97123cdf7c09d668319d150bc
    }
  
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
-index 68699aba7207575a849b0610a2852ce029dd4795..a3a417b315e72683fee3efa97483abe5b5339303 100644
+index 68699aba7207575a849b0610a2852ce029dd4795..06684efdb77f0f59a3768f7d531c6af6867e9434 100644
 --- a/src/structures/Invite.js
 +++ b/src/structures/Invite.js
-@@ -234,10 +233,11 @@ class Invite extends Base {
+@@ -234,10 +234,11 @@ class Invite extends Base {
    get deletable() {
      const guild = this.guild;
      if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
@@ -245,7 +245,7 @@ index 68699aba7207575a849b0610a2852ce029dd4795..a3a417b315e72683fee3efa97483abe5
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad59573a965ed4 100644
+index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..169d6a4aea38e134b574dbf60ed07ed80a6b6896 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -266,7 +266,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      }
  
      if ('flags' in data) {
-@@ -553,11 +555,16 @@ class Message extends Base {
+@@ -553,11 +556,16 @@ class Message extends Base {
     * @readonly
     */
    get editable() {
@@ -286,7 +286,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      }
      return precheck;
    }
-@@ -568,23 +575,27 @@ class Message extends Base {
+@@ -568,23 +576,27 @@ class Message extends Base {
     * @readonly
     */
    get deletable() {
@@ -319,7 +319,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      );
    }
  
-@@ -597,9 +608,10 @@ class Message extends Base {
+@@ -597,9 +609,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
@@ -333,7 +333,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      );
    }
  
-@@ -628,10 +640,10 @@ class Message extends Base {
+@@ -628,10 +641,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildNews &&
@@ -348,7 +348,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      );
    }
  
-@@ -662,8 +674,9 @@ class Message extends Base {
+@@ -662,8 +675,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -360,7 +360,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
    }
  
    /**
-@@ -678,8 +691,9 @@ class Message extends Base {
+@@ -678,8 +692,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -372,7 +372,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
    }
  
    /**
-@@ -693,8 +707,9 @@ class Message extends Base {
+@@ -693,8 +708,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -384,7 +384,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      return this;
    }
  
-@@ -709,8 +724,9 @@ class Message extends Base {
+@@ -709,8 +725,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -396,7 +396,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      return this;
    }
  
-@@ -730,13 +746,14 @@ class Message extends Base {
+@@ -730,13 +747,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -414,7 +414,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
          message: this,
          emoji: resolvePartialEmoji(emoji),
        },
-@@ -754,8 +771,9 @@ class Message extends Base {
+@@ -754,8 +772,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -426,7 +426,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      return this;
    }
  
-@@ -778,7 +796,8 @@ class Message extends Base {
+@@ -778,7 +797,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -436,7 +436,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -791,7 +810,7 @@ class Message extends Base {
+@@ -791,7 +811,7 @@ class Message extends Base {
          },
        });
      }
@@ -445,7 +445,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
    }
  
    /**
-@@ -811,12 +830,13 @@ class Message extends Base {
+@@ -811,12 +831,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -462,7 +462,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
    }
  
    /**
-@@ -825,8 +845,9 @@ class Message extends Base {
+@@ -825,8 +846,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -475,7 +475,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..1ed24f988aa769b13846b4a6d3ad5957
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 896df62d27d717c73dcee68ea077db1fe32a935d..432d0f1dce9604b0f16e9c6f4bd7708802f1e7be 100644
+index 896df62d27d717c73dcee68ea077db1fe32a935d..114788b6c7502f79184dc475a86731d077206f44 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -107,7 +107,7 @@ class MessagePayload {
@@ -624,10 +624,10 @@ index c5f0bd136b60f4ba424d9b6450c9524298d661b3..137cc4590ce3ec9240b03db0c2a7bb68
     * Creates a new select menu option builder from JSON data
     * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 82050d77ded515e3c4f235b0d24a9b22832a32c1..ed46bcda4764a177e080f9f790092f092c6f3345 100644
+index 82050d77ded515e3c4f235b0d24a9b22832a32c1..df8c063049b6074d9afada51a66811c16c8e25eb 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
-@@ -345,17 +355,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
+@@ -345,17 +345,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
   * @param {string} data The string resolvable to resolve
   * @param {Function} [error] The Error constructor to instantiate. Defaults to Error
   * @param {string} [errorMessage] The error message to throw with. Defaults to "Expected string, got <data> instead."
@@ -646,10 +646,10 @@ index 82050d77ded515e3c4f235b0d24a9b22832a32c1..ed46bcda4764a177e080f9f790092f09
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6d02ff0be 100644
+index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7db0511d2 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -260,7 +259,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+@@ -260,7 +260,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
  }
  
  export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
@@ -658,7 +658,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -1474,7 +1470,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1474,7 +1474,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -667,7 +667,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1482,12 +1478,18 @@ export type CacheTypeReducer<
+@@ -1482,12 +1482,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -686,7 +686,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1509,7 +1511,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1509,7 +1515,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -696,7 +696,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1517,7 +1520,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1517,7 +1524,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -705,7 +705,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1741,16 +1744,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1741,16 +1748,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -726,7 +726,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1946,12 +1947,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1946,12 +1952,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -745,7 +745,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1960,6 +1966,7 @@ export class ModalSubmitFields {
+@@ -1960,6 +1971,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -753,7 +753,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3247,7 +3254,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3247,7 +3259,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -762,7 +762,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3703,11 +3710,6 @@ export interface BaseApplicationCommandData {
+@@ -3703,11 +3715,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -774,7 +774,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5026,10 +5001,8 @@ export interface MessageEditOptions {
+@@ -5026,10 +5033,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -786,7 +786,7 @@ index 7d4ef4779307e44164a4fa3d9423e45b01c9458c..9e9b46d84e10c2e7425aa5d1a40e14a6
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5084,10 +5057,8 @@ export interface MessageOptions {
+@@ -5084,10 +5089,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
