@@ -8,7 +8,7 @@ export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 	 */
 	override run() {
 		// stop abort controller
-		this.chatBridge.minecraft.timeouts.clear('abortLogin');
+		this.chatBridge.minecraft.clearAbortLoginTimeout();
 
 		// reset relog timeout
 		this.chatBridge.minecraft.loginAttempts = 0;

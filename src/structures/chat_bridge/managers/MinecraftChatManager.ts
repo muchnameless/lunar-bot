@@ -158,32 +158,6 @@ class LastMessages {
 	}
 }
 
-class TimeoutManager {
-	private readonly timeouts = new Map<string, NodeJS.Timeout>();
-
-	/**
-	 * adds a new timeout to the internal map
-	 * @param name
-	 * @param callback
-	 * @param timeout
-	 */
-	public add(name: string, callback: () => void, timeout: number) {
-		this.timeouts.set(name, setTimeout(callback, timeout));
-	}
-
-	/**
-	 * clears a timeout and removes it from the internal map
-	 * @param name
-	 */
-	public clear(name: string) {
-		const timeout = this.timeouts.get(name);
-		if (!timeout) return;
-
-		clearTimeout(timeout);
-		this.timeouts.delete(name);
-	}
-}
-
 export class MinecraftChatManager<loggedIn extends boolean = boolean> extends ChatManager {
 	/**
 	 * resolves this._promise
@@ -206,10 +180,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	private _collecting = false;
 	/**
-	 * chatBridge mc bot reconnecting (prevents executing multiple reconnections)
-	 */
-	private _reconnectPromise: Promise<this> | null = null;
-	/**
 	 * current retry when resending messages
 	 */
 	private _retries = 0;
@@ -221,6 +191,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * async queue for minecraft commands, prevents multiple response collectors
 	 */
 	private commandQueue = new AsyncQueue();
+	/**
+	 * timeout to disconnect the bot if it hasn't successfully spawned and connected in 60 seconds
+	 */
+	private _abortLoginTimeout: NodeJS.Timeout | null = null;
+	/**
+	 * anti spam checker
+	 */
+	private _lastMessages = [new LastMessages(), new LastMessages()];
 	/**
 	 * minecraft bot client
 	 */
@@ -237,14 +215,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * the state of the minecraft bot
 	 */
 	state = MinecraftChatManagerState.Connecting;
-	/**
-	 * manages timeouts
-	 */
-	timeouts = new TimeoutManager();
-	/**
-	 * anti spam checker
-	 */
-	private _lastMessages = [new LastMessages(), new LastMessages()];
 
 	/**
 	 * whether the minecraft bot is logged in and ready to receive and send chat messages
@@ -450,6 +420,28 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
+	 * clears and nullifies the abort login timeout
+	 */
+	clearAbortLoginTimeout() {
+		clearTimeout(this._abortLoginTimeout!);
+
+		this._abortLoginTimeout = null;
+	}
+
+	/**
+	 * reconnect the bot if it hasn't successfully spawned in 60 seconds
+	 * @param time
+	 */
+	scheduleAbortLoginTimeout(time = seconds(60)) {
+		clearTimeout(this._abortLoginTimeout!);
+
+		this._abortLoginTimeout = setTimeout(() => {
+			logger.warn(`[CHATBRIDGE ABORT LOGIN]: triggered after ${ms(time, { long: true })} -> reconnecting`);
+			this.reconnect(0).catch((error) => logger.error(error, '[CHATBRIDGE ABORT LOGIN]'));
+		}, time);
+	}
+
+	/**
 	 * create and log the bot into hypixel
 	 */
 	async connect() {
@@ -462,15 +454,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return this;
 		}
 
-		// reconnect the bot if it hasn't successfully spawned in 60 seconds
-		this.timeouts.add(
-			'abortLogin',
-			() => {
-				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-				this.reconnect(0).catch((error) => logger.error(error, '[CHATBRIDGE ABORT TIMER]'));
-			},
-			seconds(60),
-		);
+		this.scheduleAbortLoginTimeout();
 
 		++this.loginAttempts;
 
@@ -491,19 +475,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param loginDelay delay in ms
 	 */
 	async reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
-		if (this._reconnectPromise) return this._reconnectPromise;
-
-		try {
-			return await (this._reconnectPromise = this._reconnect(loginDelay));
-		} finally {
-			this._reconnectPromise = null;
-		}
-	}
-	/**
-	 * should only ever be called from within reconnect
-	 * @internal
-	 */
-	private async _reconnect(loginDelay: number) {
 		this.disconnect();
 
 		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
@@ -518,8 +489,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * disconnects the bot
 	 */
 	disconnect() {
-		this.timeouts.clear('reconnect');
-		this.timeouts.clear('abortLogin');
+		this.clearAbortLoginTimeout();
 
 		if (this.state !== MinecraftChatManagerState.Errored) {
 			this.state = MinecraftChatManagerState.Connecting;
