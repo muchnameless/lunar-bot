@@ -100,8 +100,7 @@ class Parser {
 					output.push(token);
 
 					// check if token is followed by a unary operator
-					// @ts-expect-error
-					const nonBracketIndex: number = stack.findLastIndex((x: number) => x !== '(');
+					const nonBracketIndex = stack.findLastIndex((x) => x !== '(');
 
 					if (
 						nonBracketIndex !== -1 &&

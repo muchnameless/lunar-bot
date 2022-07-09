@@ -833,10 +833,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zikeji/hypixel@github:muchnameless/node-hypixel#5d0af5aedf8d9f6748d9e03a183a8dde3bc74338":
+"@zikeji/hypixel@github:muchnameless/node-hypixel#b8e9632211c09bb6e97c7a9a96fe34109fcb2055":
   version: 3.1.1
-  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=5d0af5aedf8d9f6748d9e03a183a8dde3bc74338"
-  checksum: 1f43398be0979ed99e2e95d517c6f3ab976eea9a3faddd8ed27b3a2639d2e4b7e6fe8851dda0ade4c67a269ca950193350482268c77564ccd6dbd1696adb77b3
+  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=b8e9632211c09bb6e97c7a9a96fe34109fcb2055"
+  checksum: 290b1269da40f0abf1ba631951f85f2018eae4e615272809dfb9842d1bc099b94e4c2aa0b41a714524f9dee5e54c8aebce0909529631af7de35259c517f87b76
   languageName: node
   linkType: hard
 
@@ -3612,7 +3612,7 @@ __metadata:
     "@types/prettier": ^2.6.3
     "@typescript-eslint/eslint-plugin": ^5.30.5
     "@typescript-eslint/parser": ^5.30.5
-    "@zikeji/hypixel": "github:muchnameless/node-hypixel#5d0af5aedf8d9f6748d9e03a183a8dde3bc74338"
+    "@zikeji/hypixel": "github:muchnameless/node-hypixel#b8e9632211c09bb6e97c7a9a96fe34109fcb2055"
     bufferutil: ^4.0.6
     chart.js: ^3.8.0
     chartjs-node-canvas: ^4.1.6

@@ -11,6 +11,7 @@ import { logger } from '../../logger';
 import { InteractionUtil } from '../../util';
 import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
+import type { Awaitable } from '@sapphire/utilities';
 import type {
 	APIApplicationCommandPermission,
 	AutocompleteInteraction,
@@ -363,7 +364,7 @@ export class ApplicationCommand extends BaseCommand {
 		interaction: AutocompleteInteraction<'cachedOrDM'>,
 		value: string | number,
 		name: string,
-	): unknown | Promise<unknown> {
+	): Awaitable<unknown> {
 		throw new Error('no run function specified for autocomplete');
 	}
 
@@ -377,7 +378,7 @@ export class ApplicationCommand extends BaseCommand {
 		interaction: UserContextMenuCommandInteraction<'cachedOrDM'>,
 		user: User,
 		member: GuildMember | null,
-	): unknown | Promise<unknown> {
+	): Awaitable<unknown> {
 		throw new Error('no run function specified for user context menus');
 	}
 
@@ -389,7 +390,7 @@ export class ApplicationCommand extends BaseCommand {
 	messageContextMenuRun(
 		interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>,
 		message: Message,
-	): unknown | Promise<unknown> {
+	): Awaitable<unknown> {
 		throw new Error('no run function specified for message context menus');
 	}
 
@@ -398,7 +399,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]): unknown | Promise<unknown> {
+	selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
 		throw new Error('no run function specified for select menus');
 	}
 
@@ -407,7 +408,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]): unknown | Promise<unknown> {
+	buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 
@@ -416,7 +417,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]): unknown | Promise<unknown> {
+	modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 
@@ -424,7 +425,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>): unknown | Promise<unknown> {
+	chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>): Awaitable<unknown> {
 		throw new Error('no run function specified for slash commands');
 	}
 

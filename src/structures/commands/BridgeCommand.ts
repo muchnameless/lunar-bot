@@ -1,5 +1,6 @@
 import { BaseCommand } from './BaseCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
+import type { Awaitable } from '@sapphire/utilities';
 import type { CommandContext, CommandData } from './BaseCommand';
 import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 import type { BridgeCommandCollection } from './BridgeCommandCollection';
@@ -70,7 +71,7 @@ export class BridgeCommand extends BaseCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	minecraftRun(hypixelMessage: HypixelUserMessage): unknown | Promise<unknown> {
+	minecraftRun(hypixelMessage: HypixelUserMessage): Awaitable<unknown> {
 		throw new Error('no run function specified for minecraft');
 	}
 

@@ -1,5 +1,4 @@
 import {
-	DUNGEON_TYPES_AND_CLASSES_SET,
 	DUNGEON_XP,
 	FindProfileStrategy,
 	LEVEL_CAP,
@@ -7,9 +6,9 @@ import {
 	SKILL_XP,
 	SKILL_XP_PAST_50,
 	SLAYER_XP,
+	SOCIAL_XP,
 } from '../constants';
-import { keys } from '../types/util';
-import { getLilyWeight } from '.';
+import { assertNever, getLilyWeight } from '.';
 import type { Components } from '@zikeji/hypixel';
 import type { DungeonTypes, SkillTypes } from '../constants';
 
@@ -24,26 +23,57 @@ type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
  * @param individualCap individual level cap for the player
  */
 export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individualCap: number | null = null) {
-	let xpTable = DUNGEON_TYPES_AND_CLASSES_SET.has(type as any)
-		? DUNGEON_XP
-		: type === 'runecrafting'
-		? RUNECRAFTING_XP
-		: SKILL_XP;
-	let maxLevel = Math.max(...keys(xpTable));
+	let xpTable;
+
+	switch (type) {
+		case 'catacombs':
+		case 'healer':
+		case 'mage':
+		case 'berserk':
+		case 'archer':
+		case 'tank':
+			xpTable = DUNGEON_XP;
+			break;
+
+		case 'runecrafting':
+			xpTable = RUNECRAFTING_XP;
+			break;
+
+		case 'social2':
+			xpTable = SOCIAL_XP;
+			break;
+
+		case 'taming':
+		case 'farming':
+		case 'mining':
+		case 'combat':
+		case 'foraging':
+		case 'fishing':
+		case 'enchanting':
+		case 'alchemy':
+		case 'carpentry':
+			xpTable = SKILL_XP;
+			break;
+
+		default:
+			return assertNever(type);
+	}
+
+	let maxLevel = xpTable.length - 1;
 
 	if (LEVEL_CAP[type] > maxLevel || individualCap) {
-		xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
-		maxLevel = individualCap !== null ? individualCap : Math.max(...keys(xpTable));
+		xpTable = SKILL_XP_PAST_50;
+		maxLevel = individualCap !== null ? individualCap : xpTable.length - 1;
 	}
 
 	let xpTotal = 0;
 	let trueLevel = 0;
 
 	for (let x = 1; x <= maxLevel; ++x) {
-		xpTotal += xpTable[x as keyof typeof xpTable];
+		xpTotal += xpTable[x]!;
 
 		if (xpTotal > xp) {
-			xpTotal -= xpTable[x as keyof typeof xpTable];
+			xpTotal -= xpTable[x]!;
 			break;
 		} else {
 			trueLevel = x;
@@ -58,7 +88,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		};
 	}
 
-	const nonFlooredLevel = trueLevel + Math.trunc(xp - xpTotal) / xpTable[(trueLevel + 1) as keyof typeof xpTable];
+	const nonFlooredLevel = trueLevel + Math.trunc(xp - xpTotal) / xpTable[trueLevel + 1]!;
 
 	return {
 		trueLevel,
@@ -72,15 +102,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
  * @param xp
  */
 export function getSlayerLevel(xp = 0) {
-	const MAX_LEVEL = Math.max(...keys(SLAYER_XP));
-
-	let level = 0;
-
-	for (let x = 1; x <= MAX_LEVEL && SLAYER_XP[x as keyof typeof SLAYER_XP] <= xp; ++x) {
-		level = x;
-	}
-
-	return level;
+	return SLAYER_XP.findLastIndex((requiredXp) => requiredXp <= xp);
 }
 
 /**

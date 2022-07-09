@@ -229,7 +229,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	get botPlayer() {
 		return (this._botPlayer ??= this.client.players.cache.get(this.botUuid!) ?? null);
 	}
-
 	set botPlayer(value) {
 		this._botPlayer = value;
 	}

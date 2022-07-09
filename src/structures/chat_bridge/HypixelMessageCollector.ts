@@ -201,14 +201,14 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import { EventEmitter } from 'node:events';
 import { ChatBridgeEvent } from './ChatBridge';
-import type { Awaitable } from 'discord.js';
+import type { Awaitable } from '@sapphire/utilities';
 import type { HypixelMessage } from './HypixelMessage';
 import type { ChatBridge } from './ChatBridge';
 
 /**
  * Filter to be applied to the collector.
  */
-type CollectorFilter = (message: HypixelMessage, collected: HypixelMessage[]) => boolean | Promise<boolean>;
+type CollectorFilter = (message: HypixelMessage, collected: HypixelMessage[]) => Awaitable<boolean>;
 
 /**
  * Options to be applied to the collector.

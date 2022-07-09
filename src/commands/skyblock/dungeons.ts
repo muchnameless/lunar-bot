@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { formatDecimalNumber, formatNumber, getSkillLevel, seconds, shortenNumber } from '../../functions';
-import { DUNGEON_CLASSES, DUNGEON_XP, LEVEL_CAP } from '../../constants';
+import { DUNGEON_CLASSES, DUNGEON_XP_TOTAL, LEVEL_CAP } from '../../constants';
 import { hypixel } from '../../api';
 import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -29,11 +29,8 @@ export default class DungeonsCommand extends BaseSkyBlockCommand {
 		const member = profile.members[uuid]!;
 		const XP = member.dungeons?.dungeon_types?.catacombs?.experience ?? 0;
 		const { progressLevel: catacombsLvl, trueLevel } = getSkillLevel('catacombs', XP);
-		const XP_TILL_NEXT = Math.abs(
-			Object.values(DUNGEON_XP)
-				.slice(0, trueLevel + 1)
-				.reduce((acc, cur) => acc + cur, 0) - XP,
-		);
+		const XP_TILL_NEXT =
+			trueLevel < LEVEL_CAP.catacombs ? DUNGEON_XP_TOTAL[trueLevel + 1]! - XP : XP - DUNGEON_XP_TOTAL.at(-1)!;
 		const CLASS_AVERAGE =
 			DUNGEON_CLASSES.reduce(
 				(acc, cur) => acc + getSkillLevel(cur, member.dungeons?.player_classes?.[cur]?.experience).nonFlooredLevel,

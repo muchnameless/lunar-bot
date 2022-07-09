@@ -3,7 +3,7 @@ import { opendir } from 'node:fs/promises';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import { logger } from '../logger';
 import { days, jaroWinklerSimilarity } from '.';
-import type { PickByValue } from '@sapphire/utilities';
+import type { Awaitable, PickByValue } from '@sapphire/utilities';
 import type { Collection } from 'discord.js';
 
 /**
@@ -157,7 +157,7 @@ export async function asyncReplace(
  */
 export async function asyncFilter<T>(
 	array: T[],
-	predicate: (value: T, index: number, array: T[]) => boolean | Promise<boolean>,
+	predicate: (value: T, index: number, array: T[]) => Awaitable<boolean>,
 ): Promise<T[]> {
 	const fail = Symbol();
 

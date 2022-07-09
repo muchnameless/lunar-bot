@@ -1,4 +1,5 @@
 import type { EventEmitter } from 'node:events';
+import type { Awaitable } from '@sapphire/utilities';
 
 export interface BaseEventContext {
 	emitter: EventEmitter;
@@ -41,7 +42,7 @@ export class BaseEvent {
 	 * event listener callback
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	run(...args: unknown[]): void | Promise<void> {
+	run(...args: unknown[]): Awaitable<void> {
 		throw new Error('no run function specified');
 	}
 }

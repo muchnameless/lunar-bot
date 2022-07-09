@@ -206,14 +206,14 @@ export class DatabaseManager {
 				let availableAuctions = 0;
 
 				// filter auctions
-				for (const auction of (await asyncFilter(
+				for (const auction of await asyncFilter(
 					auctions,
 					// correct item & started after last reset & no outbid from already logged auction
-					(auc) =>
-						TAX_AUCTIONS_ITEMS.includes(auc.item_name) &&
-						auc.start >= TAX_AUCTIONS_START_TIME &&
-						this._validateAuctionId(auc.uuid),
-				)) as Components.Schemas.SkyBlockAuction[]) {
+					(a) =>
+						TAX_AUCTIONS_ITEMS.includes(a.item_name) &&
+						a.start >= TAX_AUCTIONS_START_TIME &&
+						this._validateAuctionId(a.uuid),
+				)) {
 					if (auction.highest_bid_amount >= TAX_AMOUNT) {
 						if (auction.bids.length) taxAuctions.push(auction); // player bid on the auction
 					} else if (auction.end > Date.now()) {

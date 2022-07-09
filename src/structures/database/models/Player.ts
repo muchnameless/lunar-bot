@@ -180,6 +180,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare alchemyXp: CreationOptional<number>;
 	declare carpentryXp: CreationOptional<number>;
 	declare runecraftingXp: CreationOptional<number>;
+	declare social2Xp: CreationOptional<number>;
 	declare zombieXp: CreationOptional<number>;
 	declare spiderXp: CreationOptional<number>;
 	declare wolfXp: CreationOptional<number>;
@@ -206,6 +207,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare alchemyXpHistory: CreationOptional<number[]>;
 	declare carpentryXpHistory: CreationOptional<number[]>;
 	declare runecraftingXpHistory: CreationOptional<number[]>;
+	declare social2XpHistory: CreationOptional<number[]>;
 	declare zombieXpHistory: CreationOptional<number[]>;
 	declare spiderXpHistory: CreationOptional<number[]>;
 	declare wolfXpHistory: CreationOptional<number[]>;
@@ -232,6 +234,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare alchemyXpCompetitionStart: CreationOptional<number>;
 	declare carpentryXpCompetitionStart: CreationOptional<number>;
 	declare runecraftingXpCompetitionStart: CreationOptional<number>;
+	declare social2XpCompetitionStart: CreationOptional<number>;
 	declare zombieXpCompetitionStart: CreationOptional<number>;
 	declare spiderXpCompetitionStart: CreationOptional<number>;
 	declare wolfXpCompetitionStart: CreationOptional<number>;
@@ -258,6 +261,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare alchemyXpCompetitionEnd: CreationOptional<number>;
 	declare carpentryXpCompetitionEnd: CreationOptional<number>;
 	declare runecraftingXpCompetitionEnd: CreationOptional<number>;
+	declare social2XpCompetitionEnd: CreationOptional<number>;
 	declare zombieXpCompetitionEnd: CreationOptional<number>;
 	declare spiderXpCompetitionEnd: CreationOptional<number>;
 	declare wolfXpCompetitionEnd: CreationOptional<number>;
@@ -284,6 +288,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare alchemyXpOffsetMayor: CreationOptional<number>;
 	declare carpentryXpOffsetMayor: CreationOptional<number>;
 	declare runecraftingXpOffsetMayor: CreationOptional<number>;
+	declare social2XpOffsetMayor: CreationOptional<number>;
 	declare zombieXpOffsetMayor: CreationOptional<number>;
 	declare spiderXpOffsetMayor: CreationOptional<number>;
 	declare wolfXpOffsetMayor: CreationOptional<number>;
@@ -310,6 +315,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare alchemyXpOffsetWeek: CreationOptional<number>;
 	declare carpentryXpOffsetWeek: CreationOptional<number>;
 	declare runecraftingXpOffsetWeek: CreationOptional<number>;
+	declare social2XpOffsetWeek: CreationOptional<number>;
 	declare zombieXpOffsetWeek: CreationOptional<number>;
 	declare spiderXpOffsetWeek: CreationOptional<number>;
 	declare wolfXpOffsetWeek: CreationOptional<number>;
@@ -336,6 +342,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare alchemyXpOffsetMonth: CreationOptional<number>;
 	declare carpentryXpOffsetMonth: CreationOptional<number>;
 	declare runecraftingXpOffsetMonth: CreationOptional<number>;
+	declare social2XpOffsetMonth: CreationOptional<number>;
 	declare zombieXpOffsetMonth: CreationOptional<number>;
 	declare spiderXpOffsetMonth: CreationOptional<number>;
 	declare wolfXpOffsetMonth: CreationOptional<number>;

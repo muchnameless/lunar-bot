@@ -457,9 +457,8 @@ export class InteractionUtil extends null {
 				);
 				options.components = components;
 
-				// @ts-expect-error
-				const LAST_NON_FULL_ROW: number = components.findLastIndex(
-					({ components: c }: APIActionRowComponent<APIMessageActionRowComponent>) =>
+				const LAST_NON_FULL_ROW = components.findLastIndex(
+					({ components: c }) =>
 						c[0]?.type !== ComponentType.SelectMenu && c.length < InteractionLimits.MaximumButtonsPerActionRow,
 				);
 
