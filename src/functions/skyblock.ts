@@ -1,12 +1,11 @@
 import {
-	DUNGEON_XP,
+	DUNGEON_XP_TOTAL,
 	FindProfileStrategy,
 	LEVEL_CAP,
-	RUNECRAFTING_XP,
-	SKILL_XP,
-	SKILL_XP_PAST_50,
-	SLAYER_XP,
-	SOCIAL_XP,
+	RUNECRAFTING_XP_TOTAL,
+	SKILL_XP_TOTAL,
+	SLAYER_XP_TOTAL,
+	SOCIAL_XP_TOTAL,
 } from '../constants';
 import { assertNever, getLilyWeight } from '.';
 import type { Components } from '@zikeji/hypixel';
@@ -32,15 +31,15 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		case 'berserk':
 		case 'archer':
 		case 'tank':
-			xpTable = DUNGEON_XP;
+			xpTable = DUNGEON_XP_TOTAL;
 			break;
 
 		case 'runecrafting':
-			xpTable = RUNECRAFTING_XP;
+			xpTable = RUNECRAFTING_XP_TOTAL;
 			break;
 
 		case 'social2':
-			xpTable = SOCIAL_XP;
+			xpTable = SOCIAL_XP_TOTAL;
 			break;
 
 		case 'taming':
@@ -52,48 +51,30 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		case 'enchanting':
 		case 'alchemy':
 		case 'carpentry':
-			xpTable = SKILL_XP;
+			xpTable = SKILL_XP_TOTAL;
 			break;
 
 		default:
 			return assertNever(type);
 	}
 
-	let maxLevel = xpTable.length - 1;
+	const MAX_LEVEL = individualCap ?? LEVEL_CAP[type];
+	const TRUE_LEVEL = xpTable.findLastIndex((requiredXp, level) => requiredXp <= xp && level <= MAX_LEVEL);
 
-	if (LEVEL_CAP[type] > maxLevel || individualCap) {
-		xpTable = SKILL_XP_PAST_50;
-		maxLevel = individualCap !== null ? individualCap : xpTable.length - 1;
-	}
-
-	let xpTotal = 0;
-	let trueLevel = 0;
-
-	for (let x = 1; x <= maxLevel; ++x) {
-		xpTotal += xpTable[x]!;
-
-		if (xpTotal > xp) {
-			xpTotal -= xpTable[x]!;
-			break;
-		} else {
-			trueLevel = x;
-		}
-	}
-
-	if (trueLevel >= maxLevel) {
+	if (TRUE_LEVEL >= MAX_LEVEL) {
 		return {
-			trueLevel,
-			progressLevel: trueLevel,
-			nonFlooredLevel: trueLevel,
+			trueLevel: TRUE_LEVEL,
+			progressLevel: TRUE_LEVEL,
+			nonFlooredLevel: TRUE_LEVEL,
 		};
 	}
 
-	const nonFlooredLevel = trueLevel + Math.trunc(xp - xpTotal) / xpTable[trueLevel + 1]!;
+	const PROGRESS_LEVEL = TRUE_LEVEL + (xp - xpTable[TRUE_LEVEL]!) / (xpTable[TRUE_LEVEL + 1]! - xpTable[TRUE_LEVEL]!);
 
 	return {
-		trueLevel,
-		progressLevel: Math.trunc(nonFlooredLevel * 100) / 100,
-		nonFlooredLevel,
+		trueLevel: TRUE_LEVEL,
+		progressLevel: Math.trunc(PROGRESS_LEVEL * 100) / 100,
+		nonFlooredLevel: PROGRESS_LEVEL,
 	};
 }
 
@@ -102,7 +83,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
  * @param xp
  */
 export function getSlayerLevel(xp = 0) {
-	return SLAYER_XP.findLastIndex((requiredXp) => requiredXp <= xp);
+	return SLAYER_XP_TOTAL.findLastIndex((requiredXp) => requiredXp <= xp);
 }
 
 /**
