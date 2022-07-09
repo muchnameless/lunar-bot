@@ -22,7 +22,7 @@ type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
  * @param individualCap individual level cap for the player
  */
 export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individualCap: number | null = null) {
-	let xpTable;
+	let totalXp: Readonly<number[]>;
 
 	switch (type) {
 		case 'catacombs':
@@ -31,15 +31,15 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		case 'berserk':
 		case 'archer':
 		case 'tank':
-			xpTable = DUNGEON_XP_TOTAL;
+			totalXp = DUNGEON_XP_TOTAL;
 			break;
 
 		case 'runecrafting':
-			xpTable = RUNECRAFTING_XP_TOTAL;
+			totalXp = RUNECRAFTING_XP_TOTAL;
 			break;
 
 		case 'social2':
-			xpTable = SOCIAL_XP_TOTAL;
+			totalXp = SOCIAL_XP_TOTAL;
 			break;
 
 		case 'taming':
@@ -51,7 +51,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		case 'enchanting':
 		case 'alchemy':
 		case 'carpentry':
-			xpTable = SKILL_XP_TOTAL;
+			totalXp = SKILL_XP_TOTAL;
 			break;
 
 		default:
@@ -59,7 +59,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 	}
 
 	const MAX_LEVEL = individualCap ?? LEVEL_CAP[type];
-	const TRUE_LEVEL = xpTable.findLastIndex((requiredXp, level) => requiredXp <= xp && level <= MAX_LEVEL);
+	const TRUE_LEVEL = totalXp.findLastIndex((requiredXp, level) => requiredXp <= xp && level <= MAX_LEVEL);
 
 	if (TRUE_LEVEL >= MAX_LEVEL) {
 		return {
@@ -69,7 +69,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		};
 	}
 
-	const PROGRESS_LEVEL = TRUE_LEVEL + (xp - xpTable[TRUE_LEVEL]!) / (xpTable[TRUE_LEVEL + 1]! - xpTable[TRUE_LEVEL]!);
+	const PROGRESS_LEVEL = TRUE_LEVEL + (xp - totalXp[TRUE_LEVEL]!) / (totalXp[TRUE_LEVEL + 1]! - totalXp[TRUE_LEVEL]!);
 
 	return {
 		trueLevel: TRUE_LEVEL,

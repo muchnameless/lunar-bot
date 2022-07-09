@@ -1,3 +1,4 @@
+export * from './array';
 export * from './components';
 export * from './fetch';
 export * from './image';

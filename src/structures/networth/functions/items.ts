@@ -1,4 +1,4 @@
-import { ItemRarityColourCode } from '../constants/itemRarity';
+import { ItemRarityColourCode } from '../constants';
 import { VANILLA_ITEM_DISPLAY_NAMES, VANILLA_ITEM_IDS } from '../../../constants/minecraft';
 import type { NBTInventoryItem } from '@zikeji/hypixel';
 

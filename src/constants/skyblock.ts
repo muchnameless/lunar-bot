@@ -1,4 +1,4 @@
-import { days, hours } from '../functions';
+import { days, hours, toTotal } from '../functions';
 import type { ArrayElementType } from '@sapphire/utilities';
 
 /**
@@ -66,16 +66,6 @@ export const SKILL_ACHIEVEMENTS = {
 	taming: 'skyblock_domesticator',
 } as const;
 
-const xpToTotal = (xp: Readonly<number[]>): Readonly<number[]> => {
-	const total = [...xp];
-
-	for (let i = 1; i < xp.length; ++i) {
-		total[i] = total[i - 1]! + xp[i]!;
-	}
-
-	return total;
-};
-
 export const SKILL_XP = [
 	0, 50, 125, 200, 300, 500, 750, 1_000, 1_500, 2_000, 3_500, 5_000, 7_500, 10_000, 15_000, 20_000, 30_000, 50_000,
 	75_000, 100_000, 200_000, 300_000, 400_000, 500_000, 600_000, 700_000, 800_000, 900_000, 1_000_000, 1_100_000,
@@ -85,21 +75,21 @@ export const SKILL_XP = [
 	7_000_000,
 ] as const;
 
-export const SKILL_XP_TOTAL = xpToTotal(SKILL_XP);
+export const SKILL_XP_TOTAL = toTotal(SKILL_XP);
 
 export const RUNECRAFTING_XP = [
 	0, 50, 100, 125, 160, 200, 250, 315, 400, 500, 625, 785, 1_000, 1_250, 1_600, 2_000, 2_465, 3_125, 4_000, 5_000,
 	6_200, 7_800, 9_800, 12_200, 15_300, 19_050,
 ] as const;
 
-export const RUNECRAFTING_XP_TOTAL = xpToTotal(RUNECRAFTING_XP);
+export const RUNECRAFTING_XP_TOTAL = toTotal(RUNECRAFTING_XP);
 
 export const SOCIAL_XP = [
 	0, 50, 100, 150, 250, 500, 750, 1_000, 1_250, 1_500, 2_000, 2_500, 3_000, 3_750, 4_500, 6_000, 8_000, 10_000, 12_500,
 	15_000, 20_000, 25_000, 30_000, 35_000, 40_000, 50_000,
 ] as const;
 
-export const SOCIAL_XP_TOTAL = xpToTotal(SOCIAL_XP);
+export const SOCIAL_XP_TOTAL = toTotal(SOCIAL_XP);
 
 const SKILL_CAP = {
 	taming: 50,
@@ -128,7 +118,7 @@ export const DUNGEON_XP = [
 	19_000_000, 24_000_000, 30_000_000, 38_000_000, 48_000_000, 60_000_000, 75_000_000, 93_000_000, 116_250_000,
 ] as const;
 
-export const DUNGEON_XP_TOTAL = xpToTotal(DUNGEON_XP);
+export const DUNGEON_XP_TOTAL = toTotal(DUNGEON_XP);
 
 const DUNGEON_CAP = {
 	catacombs: 50,
