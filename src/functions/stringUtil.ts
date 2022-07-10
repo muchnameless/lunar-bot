@@ -49,7 +49,7 @@ export const commaListAnd = (list: string[]) => andListFormatter.format(list);
  * escapes discord markdown in igns
  * @param string to escape
  */
-export const escapeIgn = (string: string | null) => string?.replace(/_/g, '\\_') ?? '';
+export const escapeIgn = (string: string | null) => string?.replaceAll('_', '\\_') ?? '';
 
 /**
  * extracts user IDs from @mentions
