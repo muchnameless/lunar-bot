@@ -474,10 +474,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/shapeshift@npm:3.5.0-next.ebc46de.0":
-  version: 3.5.0-next.ebc46de.0
-  resolution: "@sapphire/shapeshift@npm:3.5.0-next.ebc46de.0"
-  checksum: e11b6ac458057719dcb0d153ccba41c9e0381496b97e82cdeab24ec6c8007968a4c04f485c7b19b6019d218392e4666ccaf676479c80b48427beabcc48398611
+"@sapphire/shapeshift@npm:3.5.1-next.bdf089d.0":
+  version: 3.5.1-next.bdf089d.0
+  resolution: "@sapphire/shapeshift@npm:3.5.1-next.bdf089d.0"
+  dependencies:
+    fast-deep-equal: ^3.1.3
+    lodash.uniqwith: ^4.5.0
+  checksum: 8760c96f4082d26cbc0fe1968a8f9cdaf6ae6793e20bbd7d6b0e95ed3c5046d374740b7058b748fef41ca5fbb1a9972e6323ddd60bcc85d3cd82cff33fc3b96e
   languageName: node
   linkType: hard
 
@@ -3552,6 +3555,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.uniqwith@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.uniqwith@npm:4.5.0"
+  checksum: d49a4565ed64efd86674127d321622673c29cde3e060baebc0f30372f22886c61b2ead44709db8c890053db1b9660e8ed689689812c1a485eb5703caa94d1150
+  languageName: node
+  linkType: hard
+
 "lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
@@ -3598,7 +3608,7 @@ __metadata:
     "@discordjs/rest": 0.6.0-dev.1657239084-e78c9c9
     "@sapphire/async-queue": 1.3.2-next.26774e0.0
     "@sapphire/discord-utilities": 2.11.5-next.26774e0.0
-    "@sapphire/shapeshift": 3.5.0-next.ebc46de.0
+    "@sapphire/shapeshift": 3.5.1-next.bdf089d.0
     "@sapphire/stopwatch": 1.4.2-next.26774e0.0
     "@sapphire/time-utilities": 1.7.5-next.26774e0.0
     "@sapphire/type": 2.2.5-next.cf34f61.0
