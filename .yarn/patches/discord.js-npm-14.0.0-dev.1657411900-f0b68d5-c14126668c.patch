@@ -646,7 +646,7 @@ index 82050d77ded515e3c4f235b0d24a9b22832a32c1..df8c063049b6074d9afada51a66811c1
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7db0511d2 100644
+index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495f241e5f6 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -260,7 +260,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -658,7 +658,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -1474,7 +1474,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1473,7 +1474,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -667,7 +667,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1482,12 +1482,18 @@ export type CacheTypeReducer<
+@@ -1481,12 +1482,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -686,7 +686,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1509,7 +1515,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1508,7 +1515,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -696,7 +696,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1517,7 +1524,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1516,7 +1524,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -705,7 +705,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1741,16 +1748,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1740,16 +1748,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -726,7 +726,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1946,12 +1952,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1945,12 +1952,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -745,7 +745,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1960,6 +1971,7 @@ export class ModalSubmitFields {
+@@ -1959,6 +1971,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -753,7 +753,7 @@ index a134711eca377d8eed2e99b59b2587f43a62aa96..c2361a95f470c20ec6b7d94a316a14c7
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3247,7 +3259,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3246,7 +3259,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
