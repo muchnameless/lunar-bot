@@ -10,7 +10,7 @@ PostgresQueryGenerator.prototype.pgEnum = function (
 	const enumName = this.pgEnumName(tableName, attr, options);
 	const values = dataType.values
 		? `ENUM(${dataType.values.map((value: string) => this.escape(value)).join(', ')})`
-		: `${dataType}`.match(/^ENUM\(.+\)/)![0];
+		: /^ENUM\(.+\)/.exec(`${dataType}`)![0];
 
 	let sql = `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_${tableName}_${attr}') THEN CREATE TYPE ${enumName} AS ${values}; END IF; END$$;`;
 
