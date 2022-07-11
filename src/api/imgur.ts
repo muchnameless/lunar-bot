@@ -1,7 +1,7 @@
 import { env } from 'node:process';
-import { ImgurClient } from '../structures/ImgurClient';
-import { hours, seconds } from '../functions';
-import { RedisKey } from '../constants';
+import { ImgurClient } from '#structures/ImgurClient';
+import { RedisKey } from '#constants';
+import { hours, seconds } from '#functions';
 import { redis } from '.';
 
 export const imgur = new ImgurClient(env.IMGUR_CLIENT_ID!, {

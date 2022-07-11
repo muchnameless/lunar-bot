@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getLilyWeight, seconds } from '../../functions';
+import { getLilyWeight, seconds } from '#functions';
 import BaseWeightCommand from './~base-weight';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class LilyWeightCommand extends BaseWeightCommand {
 	override weightType = 'Lily';

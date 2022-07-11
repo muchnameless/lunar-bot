@@ -1,5 +1,5 @@
-import { UserUtil } from '../util';
-import { Event } from '../structures/events/Event';
+import { UserUtil } from '#utils';
+import { Event } from '#structures/events/Event';
 import type { User } from 'discord.js';
 
 export default class UserUpdateEvent extends Event {

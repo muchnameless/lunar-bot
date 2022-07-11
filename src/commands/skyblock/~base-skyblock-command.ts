@@ -1,29 +1,22 @@
-import { PROFILE_NAMES } from '../../constants';
-import { InteractionUtil } from '../../util';
-import {
-	autocorrect,
-	formatError,
-	findSkyblockProfile,
-	getUuidAndIgn,
-	seconds,
-	upperCaseFirstChar,
-} from '../../functions';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import { hypixel } from '../../api';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { PROFILE_NAMES } from '#constants';
 import {
 	optionalIgnOption,
 	skyblockFindProfileOption,
 	skyblockFindProfileOptionName,
 	skyblockProfileOption,
-} from '../../structures/commands/commonOptions';
-import { logger } from '../../logger';
+} from '#structures/commands/commonOptions';
+import { autocorrect, formatError, findSkyblockProfile, getUuidAndIgn, seconds, upperCaseFirstChar } from '#functions';
+import { hypixel } from '#api';
 import type { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import type { FindProfileStrategy } from '../../constants';
-import type { SkyBlockProfile } from '../../functions';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { BridgeCommandData } from '../../structures/commands/BridgeCommand';
-import type { ApplicationCommandData, SlashCommandOption } from '../../structures/commands/ApplicationCommand';
+import type { FindProfileStrategy } from '#constants';
+import type { SkyBlockProfile } from '#functions';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { BridgeCommandData } from '#structures/commands/BridgeCommand';
+import type { ApplicationCommandData, SlashCommandOption } from '#structures/commands/ApplicationCommand';
 
 export type FetchedData = Awaited<ReturnType<BaseSkyBlockCommand['_fetchData']>>;
 

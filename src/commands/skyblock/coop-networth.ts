@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { seconds, shortenNumber } from '../../functions';
-import { getAuctionNetworth, getNetworth } from '../../structures/networth/networth';
-import { UnicodeEmoji } from '../../constants';
-import { includeAuctionsOption } from '../../structures/commands/commonOptions';
+import { getAuctionNetworth, getNetworth } from '#networth/networth';
+import { includeAuctionsOption } from '#structures/commands/commonOptions';
+import { UnicodeEmoji } from '#constants';
+import { seconds, shortenNumber } from '#functions';
 import NetworthCommand from './networth';
 import type { FetchedData } from './~base-skyblock-command';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class CoopNetworthCommand extends NetworthCommand {
 	constructor(context: CommandContext) {

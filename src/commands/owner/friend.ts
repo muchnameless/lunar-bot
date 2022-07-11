@@ -1,11 +1,11 @@
 import { codeBlock, SlashCommandBuilder } from 'discord.js';
-import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { buildPaginationActionRow } from '../../functions';
+import { InteractionUtil } from '#utils';
+import { hypixelGuildOption, pageOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { buildPaginationActionRow } from '#functions';
 import type { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class FriendCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

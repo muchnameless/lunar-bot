@@ -2,12 +2,12 @@ import { SlashCommandBuilder } from 'discord.js';
 import { Type } from '@sapphire/type';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import RE2 from 're2';
-import { formatNumber, sortCache } from '../../functions';
-import { InteractionUtil } from '../../util';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { formatNumber, sortCache } from '#functions';
 import type { AutocompleteInteraction, Collection, ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { Config } from '../../structures/database/models/Config';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { Config } from '#structures/database/models/Config';
 
 export default class ConfigCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

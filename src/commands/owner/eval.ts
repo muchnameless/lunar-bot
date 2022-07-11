@@ -33,12 +33,6 @@ import ms from 'ms';
 ms;
 import commonTags from 'common-tags';
 commonTags;
-import * as constants from '../../constants';
-import { redis, hypixel, imgur, mojang } from '../../api';
-redis;
-hypixel;
-imgur;
-mojang;
 import {
 	ChannelUtil,
 	EmbedUtil,
@@ -48,32 +42,39 @@ import {
 	LeaderboardUtil,
 	MessageUtil,
 	UserUtil,
-} from '../../util';
+} from '#utils';
 ChannelUtil;
 EmbedUtil;
 GuildMemberUtil;
 GuildUtil;
 LeaderboardUtil;
 MessageUtil;
-import * as functions from '../../functions';
-import * as nwFunctions from '../../structures/networth/functions';
-nwFunctions;
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { calculateItemPrice } from '../../structures/networth/networth';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { calculateItemPrice } from '#networth/networth';
 calculateItemPrice;
-import { accessories, itemUpgrades, populateCaches, prices } from '../../structures/networth/prices';
+import { accessories, itemUpgrades, populateCaches, prices } from '#networth/prices';
 accessories;
 itemUpgrades;
 populateCaches;
 prices;
-import { jobs } from '../../jobs';
-jobs;
-import { sequelize, sql } from '../../structures/database';
+
+import { sequelize, sql } from '#db';
 sequelize;
 sql;
-import { logger } from '../../logger';
-import { IGNORED_ERRORS } from '../../process';
+import { logger } from '#logger';
+import * as constants from '#constants';
+import { redis, hypixel, imgur, mojang } from '#api';
+redis;
+hypixel;
+imgur;
+mojang;
+import * as functions from '#functions';
+import * as nwFunctions from '#functions';
+nwFunctions;
+import { IGNORED_ERRORS } from '#root/process';
 IGNORED_ERRORS;
+import { jobs } from '#root/jobs/index';
+jobs;
 import type {
 	AttachmentPayload,
 	ButtonInteraction,
@@ -86,8 +87,8 @@ import type {
 	ModalActionRowComponentBuilder,
 	ModalSubmitInteraction,
 } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { InteractionUtilReplyOptions, RepliableInteraction } from '#utils';
 
 const { UnicodeEmoji } = constants;
 const { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } = functions;

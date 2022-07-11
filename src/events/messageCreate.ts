@@ -1,6 +1,6 @@
-import { UnicodeEmoji } from '../constants';
-import { MessageUtil, UserUtil } from '../util';
-import { Event } from '../structures/events/Event';
+import { MessageUtil, UserUtil } from '#utils';
+import { Event } from '#structures/events/Event';
+import { UnicodeEmoji } from '#constants';
 import type { Message } from 'discord.js';
 
 export default class MessageCreateEvent extends Event {

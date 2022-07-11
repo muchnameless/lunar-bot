@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { oneLine } from 'common-tags';
-import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '../../functions';
+import { optionalIgnOption } from '#structures/commands/commonOptions';
+import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '#functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { Components } from '@zikeji/hypixel';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
 export default class BridgeStatsCommand extends BaseStatsCommand {

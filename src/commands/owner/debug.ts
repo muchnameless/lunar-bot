@@ -12,10 +12,10 @@ import {
 import { stripIndents } from 'common-tags';
 import { EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
-import { hypixel, imgur } from '../../api';
-import { InteractionUtil } from '../../util';
-import { escapeIgn, formatNumber, buildDeleteButton, trim } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { hypixel, imgur } from '#api';
+import { escapeIgn, formatNumber, buildDeleteButton, trim } from '#functions';
 import type {
 	ChatInputCommandInteraction,
 	Collection,
@@ -25,7 +25,7 @@ import type {
 	TextBasedChannel,
 	ThreadChannel,
 } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class DebugCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

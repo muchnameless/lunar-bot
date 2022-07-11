@@ -1,12 +1,12 @@
 import { URL } from 'node:url';
-import { itemUpgrades, prices, accessories } from '../structures/networth/prices';
-import { logger } from '../logger';
-import { Job } from '../structures/jobs/Job';
-import { JobManager } from '../structures/jobs/JobManager';
-import { assertNever } from '../functions';
+import { logger } from '#logger';
+import { itemUpgrades, prices, accessories } from '#networth/prices';
+import { Job } from '#structures/jobs/Job';
+import { JobManager } from '#structures/jobs/JobManager';
+import { assertNever } from '#functions';
 import type { LevelWithSilent } from 'pino';
 import type { ParsedSkyBlockItem } from './pricesAndPatchNotes';
-import type { LunarClient } from '../structures/LunarClient';
+import type { LunarClient } from '#structures/LunarClient';
 
 export const enum JobType {
 	HypixelForumLastGUIDUpdate,

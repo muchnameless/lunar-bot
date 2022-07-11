@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { DUNGEON_TYPES, SKILLS } from '../../constants';
-import { InteractionUtil } from '../../util';
-import { autocorrect, commaListOr, seconds } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { DUNGEON_TYPES, SKILLS } from '#constants';
+import { autocorrect, commaListOr, seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 /**
  * Roadmap: (project discontinued)

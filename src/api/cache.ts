@@ -1,6 +1,6 @@
 import { env } from 'node:process';
 import Redis from 'ioredis';
-import { logger } from '../logger';
+import { logger } from '#logger';
 
 export const redis = new Redis(env.REDIS_URI!);
 

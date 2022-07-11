@@ -1,5 +1,9 @@
 import { bold, codeBlock, EmbedBuilder, SlashCommandBuilder, time } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import { EmbedUtil, InteractionUtil } from '#utils';
+import { optionalPlayerOption, pageOption, offsetOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { formatDecimalNumber, formatNumber, getDefaultOffset, upperCaseFirstChar } from '#functions';
 import {
 	COSMETIC_SKILLS,
 	DUNGEON_TYPES_AND_CLASSES,
@@ -7,14 +11,10 @@ import {
 	SLAYERS,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_TIME,
-} from '../../constants';
-import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions';
-import { EmbedUtil, InteractionUtil } from '../../util';
-import { formatDecimalNumber, formatNumber, getDefaultOffset, upperCaseFirstChar } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+} from '#constants';
 import type { APIEmbed, ChatInputCommandInteraction, JSONEncodable } from 'discord.js';
-import type { XPOffsets } from '../../constants';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { XPOffsets } from '#constants';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class XpCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

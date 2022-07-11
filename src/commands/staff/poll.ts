@@ -1,15 +1,15 @@
 import { SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
-import { INVISIBLE_CHARACTERS, HypixelMessageType } from '../../structures/chat_bridge/constants';
-import { hypixelGuildOption } from '../../structures/commands/commonOptions';
-import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
-import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
-import { DualCommand } from '../../structures/commands/DualCommand';
+import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
+import { INVISIBLE_CHARACTERS, HypixelMessageType } from '#chatBridge/constants';
+import { hypixelGuildOption } from '#structures/commands/commonOptions';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '#functions';
 import type { ChatInputCommandInteraction, CommandInteractionOption } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
-import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import type { ChatBridge } from '#chatBridge/ChatBridge';
 
 interface RunOptions {
 	chatBridge: ChatBridge;

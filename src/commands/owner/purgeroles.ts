@@ -1,13 +1,13 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { SlashCommandBuilder } from 'discord.js';
 import ms from 'ms';
-import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
-import { seconds } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { hypixelGuildOption } from '../../structures/commands/commonOptions';
-import { logger } from '../../logger';
+import { GuildMemberUtil, GuildUtil, InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { hypixelGuildOption } from '#structures/commands/commonOptions';
+import { seconds } from '#functions';
 import type { ChatInputCommandInteraction, Snowflake } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class PurgeRolesCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

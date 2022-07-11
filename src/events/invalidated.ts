@@ -1,6 +1,6 @@
-import { logger } from '../logger';
-import { exitProcess } from '../process';
-import { Event } from '../structures/events/Event';
+import { logger } from '#logger';
+import { Event } from '#structures/events/Event';
+import { exitProcess } from '#root/process';
 
 export default class InvalidatedEvent extends Event {
 	/**

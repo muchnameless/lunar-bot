@@ -1,16 +1,16 @@
 import { bold, SlashCommandBuilder, time } from 'discord.js';
 import ms from 'ms';
-import { logErrors } from '../../structures/chat_bridge/constants';
-import { forceOption, hypixelGuildOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { escapeIgn } from '../../functions';
-import { MinecraftChatManager } from '../../structures/chat_bridge/managers/MinecraftChatManager';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import { logger } from '../../logger';
+import { logger } from '#logger';
+import { InteractionUtil } from '#utils';
+import { logErrors } from '#chatBridge/constants';
+import { forceOption, hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions';
+import { MinecraftChatManager } from '#chatBridge/managers/MinecraftChatManager';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { escapeIgn } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { ChatBridge } from '#chatBridge/ChatBridge';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 interface JoinInfo {
 	ign: string;

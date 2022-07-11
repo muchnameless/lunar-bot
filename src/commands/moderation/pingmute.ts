@@ -1,14 +1,14 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { requiredPlayerOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { logger } from '../../logger';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { Player } from '../../structures/database/models/Player';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { requiredPlayerOption } from '#structures/commands/commonOptions';
+import { DualCommand } from '#structures/commands/DualCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { Player } from '#structures/database/models/Player';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
-import type { ApplicationCommandData } from '../../structures/commands/ApplicationCommand';
-import type { BridgeCommandData } from '../../structures/commands/BridgeCommand';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import type { ApplicationCommandData } from '#structures/commands/ApplicationCommand';
+import type { BridgeCommandData } from '#structures/commands/BridgeCommand';
 
 export default class PingMuteCommand extends DualCommand {
 	constructor(context: CommandContext, param1?: ApplicationCommandData, param2?: BridgeCommandData) {

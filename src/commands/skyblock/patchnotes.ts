@@ -1,12 +1,12 @@
 import { hideLinkEmbed, hyperlink, SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '../../util';
-import { seconds } from '../../functions';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import { sql } from '../../structures/database';
-import { logger } from '../../logger';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { sql } from '#db';
+import { seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 export default class PatchnotesCommand extends DualCommand {
 	constructor(context: CommandContext) {

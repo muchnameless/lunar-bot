@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { hypixelGuildOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { formatNumber } from '../../functions';
+import { InteractionUtil } from '#utils';
+import { hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { formatNumber } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class RanksCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

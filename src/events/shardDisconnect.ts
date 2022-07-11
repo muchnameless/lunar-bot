@@ -1,6 +1,6 @@
-import { logger } from '../logger';
-import { exitProcess } from '../process';
-import { Event } from '../structures/events/Event';
+import { logger } from '#logger';
+import { Event } from '#structures/events/Event';
+import { exitProcess } from '#root/process';
 import type { CloseEvent } from 'discord.js';
 
 export default class ShardDisconnectEvent extends Event {

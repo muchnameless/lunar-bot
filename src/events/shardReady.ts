@@ -1,5 +1,5 @@
-import { logger } from '../logger';
-import { Event } from '../structures/events/Event';
+import { logger } from '#logger';
+import { Event } from '#structures/events/Event';
 import type { Snowflake } from 'discord.js';
 
 export default class ShardReadyEvent extends Event {

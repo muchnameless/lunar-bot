@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { hypixelGuildOption, offsetOption, pageOption, xpTypeOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { getDefaultOffset, handleLeaderboardCommandInteraction, seconds } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { hypixelGuildOption, offsetOption, pageOption, xpTypeOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { getDefaultOffset, handleLeaderboardCommandInteraction, seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { LeaderboardXPOffsets, LeaderboardXPTypes } from '../../functions';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { LeaderboardXPOffsets, LeaderboardXPTypes } from '#functions';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class LeaderboardCommand extends ApplicationCommand {
 	includeAllHypixelGuilds = true;

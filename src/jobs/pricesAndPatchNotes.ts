@@ -7,17 +7,17 @@ import { fetch } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
 import { CronJob } from 'cron';
-import { logger } from '../logger';
-import { consumeBody } from '../functions/fetch'; // no index imports to not import unused files in the worker
-import { FetchError } from '../structures/errors/FetchError';
-import { getEnchantment } from '../structures/networth/functions/enchantments'; // separate imports to not import unused files in the worker
-import { transformItemData } from '../structures/networth/functions/nbt';
-import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
-import { ItemId } from '../structures/networth/constants/itemId';
-import { ItemRarity } from '../structures/networth/constants/itemRarity';
-import { sql } from '../structures/database/sql';
+import { logger } from '#logger';
+import { FetchError } from '#structures/errors/FetchError';
+import { getEnchantment } from '#networth/functions/enchantments'; // separate imports to not import unused files in the worker
+import { transformItemData } from '#networth/functions/nbt';
+import { calculatePetSkillLevel } from '#networth/functions/pets';
+import { ItemId } from '#networth/constants/itemId';
+import { ItemRarity } from '#networth/constants/itemRarity';
+import { sql } from '#structures/database/sql';
+import { consumeBody } from '#root/lib/functions/fetch'; // no index imports to not import unused files in the worker
 import { JobType } from '.';
-import type { Enchantment } from '../structures/networth/constants';
+import type { Enchantment } from '#networth/constants/enchantments';
 import type { Components } from '@zikeji/hypixel';
 
 // because a single AbortController is used for all fetches

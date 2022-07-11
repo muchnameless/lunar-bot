@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, seconds } from '../../functions';
+import { optionalIgnOption } from '#structures/commands/commonOptions';
+import { escapeIgn, seconds } from '#functions';
 import BaseStatsCommand from './~base-stats-command';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
 export default class BedWarsFkdrCommand extends BaseStatsCommand {

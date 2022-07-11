@@ -2,6 +2,33 @@ import { codeBlock, InteractionType, SlashCommandBuilder, SnowflakeUtil, time } 
 import { Op } from 'sequelize';
 import { AutoCompleteLimits, EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
+import { GuildMemberUtil, InteractionUtil, UserUtil } from '#utils';
+import { logger } from '#logger';
+import { HypixelMessage } from '#chatBridge/HypixelMessage';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { UNKNOWN_IGN } from '#constants';
+import {
+	forceOption,
+	hypixelGuildOption,
+	optionalPlayerOption,
+	pageOption,
+	requiredIgnOption,
+	requiredPlayerOption,
+	targetOption,
+} from '#structures/commands/commonOptions';
+import { mojang } from '#api';
+import {
+	autocorrect,
+	buildPaginationActionRow,
+	commaListOr,
+	escapeIgn,
+	getIdFromString,
+	removeMcFormatting,
+	seconds,
+	sortCache,
+	stringToMS,
+	trim,
+} from '#functions';
 import {
 	demote,
 	historyErrors,
@@ -14,34 +41,7 @@ import {
 	topErrors,
 	unmute,
 	unknownIgn,
-} from '../../structures/chat_bridge/constants';
-import { UNKNOWN_IGN } from '../../constants';
-import {
-	forceOption,
-	hypixelGuildOption,
-	optionalPlayerOption,
-	pageOption,
-	requiredIgnOption,
-	requiredPlayerOption,
-	targetOption,
-} from '../../structures/commands/commonOptions';
-import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
-import { mojang } from '../../api';
-import { GuildMemberUtil, InteractionUtil, UserUtil } from '../../util';
-import {
-	autocorrect,
-	buildPaginationActionRow,
-	commaListOr,
-	escapeIgn,
-	getIdFromString,
-	removeMcFormatting,
-	seconds,
-	sortCache,
-	stringToMS,
-	trim,
-} from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { logger } from '../../logger';
+} from '#chatBridge/constants';
 import type {
 	AutocompleteInteraction,
 	ButtonInteraction,
@@ -51,11 +51,11 @@ import type {
 	Snowflake,
 } from 'discord.js';
 import type { Attributes, WhereOptions } from 'sequelize';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { Player } from '../../structures/database/models/Player';
-import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
-import type { CommandOptions } from '../../structures/chat_bridge/managers/MinecraftChatManager';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { Player } from '#structures/database/models/Player';
+import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
+import type { CommandOptions } from '#chatBridge/managers/MinecraftChatManager';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 interface RunModerationOptions {
 	target: Player | string;

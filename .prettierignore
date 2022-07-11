@@ -1,2 +1,2 @@
-**/.yarn*
-**/dist/
+.yarn/
+dist/

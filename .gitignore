@@ -1,13 +1,13 @@
 # Packages and development
-node_modules
-.vscode
+node_modules/
+.vscode/
 
 # Build artifacts
 dist/
 
 # Log files
-log_buffer
-logs
+log_buffer/
+logs/
 *.log
 *.heapsnapshot
 
@@ -16,8 +16,8 @@ logs
 launcher_accounts.json
 
 # Tests and debug data
-src/tests
-data
+src/tests/
+data/
 
 # Yarn files
 .pnp.*

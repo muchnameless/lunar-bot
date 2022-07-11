@@ -1,10 +1,10 @@
 import process, { exit } from 'node:process';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { imgur, redis } from './api';
-import { jobs } from './jobs';
-import { sequelize, sql } from './structures/database';
-import { logger } from './logger';
-import { seconds } from './functions';
+import { logger } from '#logger';
+import { sequelize, sql } from '#db';
+import { seconds } from '#functions';
+import { imgur, redis } from '#api';
+import { jobs } from '#root/jobs/index';
 
 /**
  * error messages which will only be logged when not being caught

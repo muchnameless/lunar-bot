@@ -1,17 +1,13 @@
 import { codeBlock, PermissionFlagsBits, SlashCommandBuilder, userMention } from 'discord.js';
 import { Op } from 'sequelize';
-import {
-	hypixelGuildOption,
-	optionalPlayerOption,
-	requiredPlayerOption,
-} from '../../structures/commands/commonOptions';
-import { ChannelUtil, InteractionUtil } from '../../util';
-import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '../../functions';
-import { TransactionType } from '../../structures/database/models/Transaction';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { logger } from '../../logger';
+import { ChannelUtil, InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { TransactionType } from '#structures/database/models/Transaction';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { hypixelGuildOption, optionalPlayerOption, requiredPlayerOption } from '#structures/commands/commonOptions';
+import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '#functions';
 import type { APIEmbed, ChatInputCommandInteraction, JSONEncodable, TextChannel } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
 	includeAllHypixelGuilds = true;

@@ -1,10 +1,10 @@
 import { bold, escapeMarkdown, SlashCommandBuilder, userMention } from 'discord.js';
-import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
-import { escapeIgn, splitMessage } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { hypixelGuildOption } from '../../structures/commands/commonOptions';
+import { GuildMemberUtil, GuildUtil, InteractionUtil } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { hypixelGuildOption } from '#structures/commands/commonOptions';
+import { escapeIgn, splitMessage } from '#functions';
 import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 interface IssueInfo {
 	amount: number;

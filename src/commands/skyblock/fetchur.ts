@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
 import { zone, TimeStruct, DateFunctions } from 'timezonecomplete';
-import { InteractionUtil } from '../../util';
-import { DualCommand } from '../../structures/commands/DualCommand';
+import { InteractionUtil } from '#utils';
+import { DualCommand } from '#structures/commands/DualCommand';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class FetchurCommand extends DualCommand {
 	constructor(context: CommandContext) {

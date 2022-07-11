@@ -1,8 +1,8 @@
-import { MojangClient } from '../structures/MojangClient';
-import { days, hours, minutes, seconds } from '../functions';
-import { RedisKey } from '../constants';
+import { MojangClient } from '#structures/MojangClient';
+import { RedisKey } from '#constants';
+import { days, hours, minutes, seconds } from '#functions';
 import { redis } from '.';
-import type { MojangResult } from '../structures/MojangClient';
+import type { MojangResult } from '#structures/MojangClient';
 
 export const mojang = new MojangClient({
 	timeout: seconds(30),

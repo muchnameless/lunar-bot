@@ -11,8 +11,8 @@ import {
 	Sweepers,
 } from 'discord.js';
 import { RequestMethod } from '@discordjs/rest';
-import { LunarClient } from './structures/LunarClient';
-import { seconds } from './functions';
+import { LunarClient } from '#structures/LunarClient';
+import { seconds } from '#functions';
 import { startJobs } from './jobs';
 
 if (env.NODE_ENV !== 'development') disableValidators();

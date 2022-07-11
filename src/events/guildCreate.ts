@@ -1,6 +1,6 @@
-import { GuildUtil } from '../util';
-import { logger } from '../logger';
-import { Event } from '../structures/events/Event';
+import { GuildUtil } from '#utils';
+import { logger } from '#logger';
+import { Event } from '#structures/events/Event';
 import type { Guild } from 'discord.js';
 
 export default class GuildCreateEvent extends Event {

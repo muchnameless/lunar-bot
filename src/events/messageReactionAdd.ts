@@ -1,6 +1,6 @@
-import { UnicodeEmoji } from '../constants';
-import { logger } from '../logger';
-import { Event } from '../structures/events/Event';
+import { logger } from '#logger';
+import { Event } from '#structures/events/Event';
+import { UnicodeEmoji } from '#constants';
 import type { Message, MessageReaction, User } from 'discord.js';
 
 export default class MessageReactionAddEvent extends Event {

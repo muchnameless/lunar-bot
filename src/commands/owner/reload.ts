@@ -1,14 +1,14 @@
 import { basename } from 'node:path';
 import { codeBlock, SlashCommandBooleanOption, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { InteractionUtil } from '../../util';
-import { readJSFiles } from '../../functions';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import { logger } from '../../logger';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { readJSFiles } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandType } from '../../structures/commands/BaseCommandCollection';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { CommandType } from '#structures/commands/BaseCommandCollection';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 export default class ReloadCommand extends DualCommand {
 	constructor(context: CommandContext) {
@@ -241,7 +241,7 @@ export default class ReloadCommand extends DualCommand {
 					const { BLOCKED_WORDS_REGEXP } = await import(
 						`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`
 					);
-					const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager');
+					const { ChatManager } = await import('../../lib/chatBridge/managers/ChatManager');
 
 					ChatManager.BLOCKED_WORDS_REGEXP = BLOCKED_WORDS_REGEXP;
 

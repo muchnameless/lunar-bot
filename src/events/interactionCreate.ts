@@ -10,16 +10,16 @@ import {
 	userMention,
 } from 'discord.js';
 import { ApplicationCommandOptionLimits } from '@sapphire/discord-utilities';
-import { CustomIdKey, GUILD_ID_ALL } from '../constants';
-import { GuildMemberUtil, InteractionUtil, MessageUtil } from '../util';
+import { GuildMemberUtil, InteractionUtil, MessageUtil } from '#utils';
+import { logger } from '#logger';
+import { Event } from '#structures/events/Event';
+import { CustomIdKey, GUILD_ID_ALL } from '#constants';
 import {
 	assertNever,
 	handleLeaderboardButtonInteraction,
 	handleLeaderboardSelectMenuInteraction,
 	sortCache,
-} from '../functions';
-import { Event } from '../structures/events/Event';
-import { logger } from '../logger';
+} from '#functions';
 import type {
 	APIActionRowComponent,
 	APIMessageActionRowComponent,
@@ -37,7 +37,7 @@ import type {
 	Snowflake,
 	UserContextMenuCommandInteraction,
 } from 'discord.js';
-import type LeaderboardCommand from '../commands/guild/leaderboard';
+import type LeaderboardCommand from '#root/commands/guild/leaderboard';
 
 export default class InteractionCreateEvent extends Event {
 	private _visibilityButtonMessages = new Set<Snowflake>();

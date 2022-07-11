@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getSenitherWeight, seconds } from '../../functions';
+import { getSenitherWeight, seconds } from '#functions';
 import BaseWeightCommand from './~base-weight';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class WeightCommand extends BaseWeightCommand {
 	override weightType = 'Senither';

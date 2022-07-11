@@ -7,15 +7,17 @@ import {
 	TimestampStyles,
 } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
-import { hypixel } from '../../api';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { PROFILE_EMOJIS, STATS_URL_BASE } from '#constants';
 import {
 	optionalIgnOption,
 	skyblockFindProfileOption,
 	skyblockFindProfileOptionName,
 	skyblockProfileOption,
-} from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
+} from '#structures/commands/commonOptions';
+import { hypixel } from '#api';
 import {
 	formatError,
 	findSkyblockProfile,
@@ -24,10 +26,8 @@ import {
 	shortenNumber,
 	upperCaseFirstChar,
 	uuidToBustURL,
-} from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { logger } from '../../logger';
-import type { FindProfileStrategy } from '../../constants';
+} from '#functions';
+import type { FindProfileStrategy } from '#constants';
 import type {
 	APISelectMenuOption,
 	ChatInputCommandInteraction,
@@ -36,8 +36,8 @@ import type {
 	SelectMenuInteraction,
 	Snowflake,
 } from 'discord.js';
-import type { SkyBlockProfile } from '../../functions';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { SkyBlockProfile } from '#functions';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 interface GenerateCustomIdOptions {
 	ign: string;

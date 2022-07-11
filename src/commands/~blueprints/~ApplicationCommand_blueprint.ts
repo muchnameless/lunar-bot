@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { ChatInputCommandInteraction } from 'discord.js';
 
 export default class MyCommand extends ApplicationCommand {

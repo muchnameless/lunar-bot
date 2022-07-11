@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { Op } from 'sequelize';
-import { Offset } from '../../constants';
-import { optionalPlayerOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { seconds } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { optionalPlayerOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { Offset } from '#constants';
+import { seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class XpResetCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

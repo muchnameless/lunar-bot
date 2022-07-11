@@ -1,11 +1,11 @@
-import { UnicodeEmoji } from '../../constants';
-import { hypixel } from '../../api';
-import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn, upperCaseFirstChar } from '../../functions';
+import { UnicodeEmoji } from '#constants';
+import { hypixel } from '#api';
+import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn, upperCaseFirstChar } from '#functions';
 import BaseSkyBlockCommand from './~base-skyblock-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type { Components } from '@zikeji/hypixel';
-import type { SkyBlockProfile, WeightData } from '../../functions';
+import type { SkyBlockProfile, WeightData } from '#functions';
 
 export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	/**

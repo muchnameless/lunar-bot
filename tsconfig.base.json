@@ -1,0 +1,32 @@
+{
+	"compileOnSave": true,
+	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"emitDecoratorMetadata": true,
+		"esModuleInterop": true,
+		"experimentalDecorators": true,
+		"forceConsistentCasingInFileNames": true,
+		"importHelpers": true,
+		"importsNotUsedAsValues": "remove",
+		"incremental": true,
+		"lib": ["esnext"],
+		"module": "esnext",
+		"moduleResolution": "node",
+		"newLine": "lf",
+		"noEmitHelpers": true,
+		"noImplicitOverride": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"removeComments": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"skipDefaultLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"target": "esnext",
+		"useDefineForClassFields": true
+	}
+}

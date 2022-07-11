@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getSlayerLevel, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
-import { SLAYERS } from '../../constants';
+import { SLAYERS } from '#constants';
+import { getSlayerLevel, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
 import BaseSkyBlockCommand from './~base-skyblock-command';
 import type { FetchedData } from './~base-skyblock-command';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class SlayersCommand extends BaseSkyBlockCommand {
 	constructor(context: CommandContext) {

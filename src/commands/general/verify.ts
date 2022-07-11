@@ -1,14 +1,14 @@
 import { SlashCommandBuilder, userMention } from 'discord.js';
 import { Op } from 'sequelize';
-import { hypixel, mojang } from '../../api';
-import { requiredIgnOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil, UserUtil } from '../../util';
-import { formatError } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { logger } from '../../logger';
+import { InteractionUtil, UserUtil } from '#utils';
+import { logger } from '#logger';
+import { requiredIgnOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { hypixel, mojang } from '#api';
+import { formatError } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class VerifyCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

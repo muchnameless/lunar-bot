@@ -4,13 +4,27 @@
 	"type": "module",
 	"description": "dev version of the lunar guard discord bot",
 	"main": "dist/index.js",
+	"imports": {
+		"#api": "./dist/api/index.js",
+		"#chatBridge/*": "./dist/lib/chatBridge/*.js",
+		"#chatBridge/constants": "./dist/lib/chatBridge/constants/index.js",
+		"#constants": "./dist/lib/constants/index.js",
+		"#db": "./dist/lib/structures/database/index.js",
+		"#functions": "./dist/lib/functions/index.js",
+		"#logger": "./dist/logger.js",
+		"#networth/*": "./dist/lib/networth/*.js",
+		"#structures/*": "./dist/lib/structures/*.js",
+		"#types": "./dist/lib/types/util.js",
+		"#utils": "./dist/lib/util/index.js",
+		"#root/*": "./dist/*.js"
+	},
 	"scripts": {
 		"clean": "rm -rf dist",
-		"build": "yarn clean && tsc",
+		"build": "yarn clean && tsc -b src",
 		"update": "yarn upgrade-interactive",
-		"test": "tsc --noEmit",
-		"lint": "eslint src --ext .ts --cache",
-		"format": "prettier --cache --write . && eslint src --ext .ts --fix --cache",
+		"test": "tsc -b src",
+		"lint": "eslint src --ext ts --cache",
+		"format": "prettier --cache --write . && eslint src --ext ts --fix --cache",
 		"prepare": "husky install",
 		"start": "scripts/save_commit.sh && env-cmd node . | tee -a logs/lunar-bot-out.log",
 		"start:dev": "NODE_ENV=development yarn start | pino-pretty",
@@ -60,7 +74,8 @@
 		"timezonecomplete": "^5.12.4",
 		"tslib": "^2.4.0",
 		"undici": "^5.6.1",
-		"utf-8-validate": "^5.0.9"
+		"utf-8-validate": "^5.0.9",
+		"zlib-sync": "^0.1.7"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^17.0.3",

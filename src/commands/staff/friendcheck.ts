@@ -1,12 +1,12 @@
 import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { EmbedLimits } from '@sapphire/discord-utilities';
-import { hypixel, mojang } from '../../api';
-import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { escapeIgn, seconds, trim } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { hypixelGuildOption, requiredIgnOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { hypixel, mojang } from '#api';
+import { escapeIgn, seconds, trim } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class FriendCheckCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

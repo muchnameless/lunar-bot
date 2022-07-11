@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '../../util';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { exitProcess } from '../../process';
+import { InteractionUtil } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { exitProcess } from '#root/process';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class StopCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

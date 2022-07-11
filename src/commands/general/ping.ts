@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { oneLine } from 'common-tags';
-import { InteractionUtil } from '../../util';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { seconds } from '../../functions';
+import { InteractionUtil } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class PingCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

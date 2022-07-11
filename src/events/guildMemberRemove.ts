@@ -1,8 +1,8 @@
 import { ChannelType, codeBlock, EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { logger } from '../logger';
-import { EmbedUtil, GuildMemberUtil } from '../util';
-import { Event } from '../structures/events/Event';
+import { logger } from '#logger';
+import { EmbedUtil, GuildMemberUtil } from '#utils';
+import { Event } from '#structures/events/Event';
 import type { GuildMember } from 'discord.js';
 
 export default class GuildMemberRemoveEvent extends Event {

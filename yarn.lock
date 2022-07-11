@@ -3663,6 +3663,7 @@ __metadata:
     typescript: ^4.8.0-dev.20220710
     undici: ^5.6.1
     utf-8-validate: ^5.0.9
+    zlib-sync: ^0.1.7
   languageName: unknown
   linkType: soft
 
@@ -4064,7 +4065,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.15.0, nan@npm:^2.16.0":
+"nan@npm:^2.14.0, nan@npm:^2.15.0, nan@npm:^2.16.0":
   version: 2.16.0
   resolution: "nan@npm:2.16.0"
   dependencies:
@@ -6300,5 +6301,15 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zlib-sync@npm:^0.1.7":
+  version: 0.1.7
+  resolution: "zlib-sync@npm:0.1.7"
+  dependencies:
+    nan: ^2.14.0
+    node-gyp: latest
+  checksum: 8f6ef7bf5726b41fefffa4509f5679872b425ef47227a59d8c787b32518db6220961262f78b0f6eb1dcd9b52cd71bc8213d4f061b8b56a9b7e82c345a548e6f4
   languageName: node
   linkType: hard

@@ -1,11 +1,11 @@
-import { hypixel } from '../../api';
-import { InteractionUtil } from '../../util';
-import { formatDecimalNumber, formatError, getUuidAndIgn } from '../../functions';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import { logger } from '../../logger';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { hypixel } from '#api';
+import { formatDecimalNumber, formatError, getUuidAndIgn } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
-import type { Awaited } from '../../types/util';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import type { Awaited } from '#types';
 
 export type FetchedData = Awaited<ReturnType<BaseStatsCommand['_fetchData']>>;
 

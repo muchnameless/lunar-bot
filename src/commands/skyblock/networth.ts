@@ -1,20 +1,20 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { getNetworth } from '#networth/networth';
+import { UnicodeEmoji } from '#constants';
 import {
 	includeAuctionsOption,
 	includeAuctionsOptionName,
 	skyblockFindProfileOptionName,
-} from '../../structures/commands/commonOptions';
-import { formatError, seconds, shortenNumber } from '../../functions';
-import { getNetworth } from '../../structures/networth/networth';
-import { UnicodeEmoji } from '../../constants';
-import { InteractionUtil } from '../../util';
-import { logger } from '../../logger';
+} from '#structures/commands/commonOptions';
+import { formatError, seconds, shortenNumber } from '#functions';
 import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { FindProfileStrategy } from '../../constants';
+import type { FindProfileStrategy } from '#constants';
 import type { BaseSkyBlockSlashData } from './~base-skyblock-command';
-import type { BridgeCommandData } from '../../structures/commands/BridgeCommand';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { BridgeCommandData } from '#structures/commands/BridgeCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class NetworthCommand extends BaseSkyBlockCommand {
 	constructor(context: CommandContext, slashData?: BaseSkyBlockSlashData, bridgeData?: BridgeCommandData) {

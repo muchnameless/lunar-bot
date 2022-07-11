@@ -1,13 +1,13 @@
 import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { stripIndent } from 'common-tags';
-import { mojang } from '../../api';
-import { EmbedUtil, InteractionUtil } from '../../util';
-import { formatNumber } from '../../functions';
-import { TransactionType } from '../../structures/database/models/Transaction';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { logger } from '../../logger';
+import { EmbedUtil, InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { TransactionType } from '#structures/database/models/Transaction';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { mojang } from '#api';
+import { formatNumber } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class DonationsCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

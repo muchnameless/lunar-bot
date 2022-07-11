@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { handleLeaderboardCommandInteraction, seconds } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { hypixelGuildOption, pageOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { handleLeaderboardCommandInteraction, seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { LeaderboardXPOffsets } from '../../functions';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { LeaderboardXPOffsets } from '#functions';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class PurgeListCommand extends ApplicationCommand {
 	includeAllHypixelGuilds = true;

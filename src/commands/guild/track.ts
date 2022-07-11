@@ -1,12 +1,12 @@
 import { AttachmentBuilder, SlashCommandBuilder } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { seconds, upperCaseFirstChar } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { InteractionUtil } from '#utils';
+import { optionalPlayerOption, xpTypeOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { seconds, upperCaseFirstChar } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { LeaderboardXPTypes } from '../../functions';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { LeaderboardXPTypes } from '#functions';
 
 interface DataSets {
 	label: string;

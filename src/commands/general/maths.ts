@@ -10,14 +10,14 @@ import {
 import { TextInputLimits } from '@sapphire/discord-utilities';
 import BigDecimal from 'js-big-decimal';
 import Lexer from 'lex';
-import { InteractionUtil } from '../../util';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import { formatNumber, trim } from '../../functions';
-import { logger } from '../../logger';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { formatNumber, trim } from '#functions';
 import type { ChatInputCommandInteraction, ModalActionRowComponentBuilder, ModalSubmitInteraction } from 'discord.js';
-import type { RepliableInteraction, ModalRepliableInteraction } from '../../util';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { RepliableInteraction, ModalRepliableInteraction } from '#utils';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 const enum OperatorAssociativity {
 	Left,

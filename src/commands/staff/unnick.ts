@@ -1,10 +1,10 @@
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from 'discord.js';
-import { UNKNOWN_IGN } from '../../constants';
-import { logger } from '../../logger';
-import { GuildMemberUtil, InteractionUtil } from '../../util';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { logger } from '#logger';
+import { GuildMemberUtil, InteractionUtil } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { UNKNOWN_IGN } from '#constants';
 import type { ChatInputCommandInteraction, GuildMember, User, UserContextMenuCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class UnnickCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

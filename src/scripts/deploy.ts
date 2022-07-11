@@ -1,7 +1,7 @@
 import { argv, env, exit } from 'node:process';
 import { Routes } from 'discord.js';
-import { LunarClient } from '../structures/LunarClient';
-import { logger } from '../logger';
+import { logger } from '#logger';
+import { LunarClient } from '#structures/LunarClient';
 
 const GUILD_ID = argv[2];
 const client = new LunarClient({

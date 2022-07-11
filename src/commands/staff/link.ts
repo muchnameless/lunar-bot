@@ -1,14 +1,14 @@
 import { DiscordAPIError, RESTJSONErrorCodes, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { hypixel, mojang } from '../../api';
-import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil, UserUtil } from '../../util';
-import { seconds, validateNumber } from '../../functions';
-import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import { logger } from '../../logger';
+import { InteractionUtil, UserUtil } from '#utils';
+import { logger } from '#logger';
+import { hypixelGuildOption, requiredIgnOption } from '#structures/commands/commonOptions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { hypixel, mojang } from '#api';
+import { seconds, validateNumber } from '#functions';
 import type { ChatInputCommandInteraction, User } from 'discord.js';
-import type { Player } from '../../structures/database/models/Player';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { Player } from '#structures/database/models/Player';
+import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class LinkCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {

@@ -1,13 +1,13 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { hypixel, mojang } from '../../api';
-import { requiredIgnOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
-import { escapeIgn, formatError, seconds } from '../../functions';
-import { DualCommand } from '../../structures/commands/DualCommand';
-import { logger } from '../../logger';
+import { InteractionUtil } from '#utils';
+import { logger } from '#logger';
+import { requiredIgnOption } from '#structures/commands/commonOptions';
+import { DualCommand } from '#structures/commands/DualCommand';
+import { hypixel, mojang } from '#api';
+import { escapeIgn, formatError, seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { CommandContext } from '#structures/commands/BaseCommand';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 export default class GuildOfCommand extends DualCommand {
 	constructor(context: CommandContext) {

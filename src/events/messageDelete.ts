@@ -1,5 +1,5 @@
-import { MessageUtil } from '../util';
-import { Event } from '../structures/events/Event';
+import { MessageUtil } from '#utils';
+import { Event } from '#structures/events/Event';
 import type { Message } from 'discord.js';
 
 export default class MessageDeleteEvent extends Event {
