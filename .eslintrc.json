@@ -5,6 +5,8 @@
 		"plugin:@typescript-eslint/recommended",
 		"plugin:unicorn/recommended",
 		"plugin:regexp/recommended",
+		"plugin:import/recommended",
+		"plugin:import/typescript",
 		"plugin:prettier/recommended"
 	],
 	"env": {
@@ -71,6 +73,8 @@
 		"unicorn/relative-url-style": ["error", "always"],
 		"unicorn/string-content": "error",
 		"unicorn/template-indent": "warn",
+		"import/default": "off",
+		"import/no-unresolved": "off",
 		"import/order": [
 			"error",
 			{
