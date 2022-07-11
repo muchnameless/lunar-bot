@@ -1,18 +1,13 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 sleep;
-import { Buffer } from 'node:buffer';
-import { env } from 'node:process';
 import util from 'node:util';
 import fs from 'node:fs/promises';
 import v8 from 'node:v8';
 import Discord, {
 	ActionRowBuilder,
-	AttachmentBuilder,
 	ButtonBuilder,
-	ButtonStyle,
 	ContextMenuCommandBuilder,
 	EmbedBuilder,
-	embedLength,
 	ModalBuilder,
 	Routes,
 	SelectMenuBuilder,
@@ -24,8 +19,7 @@ import Discord, {
 Routes; // unused imports are 'used' so that tsc doesn't remove them
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
-import { regExpEsc } from '@sapphire/utilities';
-import { EmbedLimits, TextInputLimits } from '@sapphire/discord-utilities';
+import { TextInputLimits } from '@sapphire/discord-utilities';
 import { fetch } from 'undici';
 fetch;
 import { format } from 'prettier';
@@ -49,7 +43,6 @@ GuildMemberUtil;
 GuildUtil;
 LeaderboardUtil;
 MessageUtil;
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { calculateItemPrice } from '#networth/networth';
 calculateItemPrice;
 import { accessories, itemUpgrades, populateCaches, prices } from '#networth/prices';
@@ -62,6 +55,7 @@ sequelize;
 sql;
 import { logger } from '#logger';
 import * as constants from '#constants';
+constants;
 import { redis, hypixel, imgur, mojang } from '#api';
 redis;
 hypixel;
@@ -74,14 +68,12 @@ import { IGNORED_ERRORS } from '#root/process';
 IGNORED_ERRORS;
 import { jobs } from '#root/jobs/index';
 jobs;
+import BaseOwnerCommand from './~base';
 import type {
-	AttachmentPayload,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
-	JSONEncodable,
 	Message,
 	MessageActionRowComponentBuilder,
-	MessageComponentInteraction,
 	MessageContextMenuCommandInteraction,
 	ModalActionRowComponentBuilder,
 	ModalSubmitInteraction,
@@ -89,15 +81,9 @@ import type {
 import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '#utils';
 
-const { UnicodeEmoji } = constants;
-const { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } = functions;
+const { trim } = functions;
 
-export default class EvalCommand extends ApplicationCommand {
-	/**
-	 * slightly less than 8 MB
-	 */
-	MAX_FILE_SIZE = 8_387_600;
-
+export default class EvalCommand extends BaseOwnerCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
@@ -119,6 +105,24 @@ export default class EvalCommand extends ApplicationCommand {
 						.setName('async')
 						.setDescription('wrap the code in an async IIFE')
 						.setRequired(false),
+				)
+				.addMentionableOption((option) =>
+					option //
+						.setName('mention')
+						.setDescription('provided via the "mention" variable')
+						.setRequired(false),
+				)
+				.addChannelOption((option) =>
+					option //
+						.setName('channel')
+						.setDescription('provided via the "channel" variable')
+						.setRequired(false),
+				)
+				.addAttachmentOption((option) =>
+					option //
+						.setName('attachment')
+						.setDescription('provided via the "attachment" variable')
+						.setRequired(false),
 				),
 			message: new ContextMenuCommandBuilder().setName('Evaluate content'),
 			cooldown: 0,
@@ -126,68 +130,27 @@ export default class EvalCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * replaces the client's token in 'text' and escapes `
-	 * @param input
-	 * @param depth
+	 * @param interaction
+	 * @param error
+	 * @param responseEmbed
+	 * @param stopwatch
+	 * @param inspectDepth
 	 */
-	private _cleanOutput(input: unknown, depth: number) {
-		return (
-			(typeof input === 'string' ? input : util.inspect(input, { depth }))
-				// escape codeblock markdown
-				.replaceAll('`', '`\u200B')
-				// replace the client token
-				.replace(new RegExp(this.client.token!, 'gi'), '***')
-				// replace other .env values
-				.replace(
-					new RegExp(
-						Object.entries(env)
-							.filter(([key, value]) => value && /KEY|PASSWORD|TOKEN|URI/i.test(key))
-							.flatMap(([, value]) => regExpEsc(value!).split(/\s+/))
-							// sort descendingly by length
-							.sort(({ length: a }, { length: b }) => b - a)
-							.join('|'),
-						'gi',
-					),
-					'***',
-				)
+	// @ts-expect-error
+	protected override _respondWithError(
+		interaction: RepliableInteraction<'cachedOrDM'>,
+		error: unknown,
+		responseEmbed: EmbedBuilder,
+		stopwatch: Stopwatch,
+		inspectDepth: number,
+	) {
+		return super._respondWithError(
+			interaction,
+			util.inspect(error, { depth: Number.POSITIVE_INFINITY }),
+			responseEmbed,
+			`discord.js ${Discord.version} • type: \`${new Type(error)}\` • time taken: \`${stopwatch}\``,
+			inspectDepth,
 		);
-	}
-
-	/**
-	 * returns an attachment trimmed to the max file size
-	 * @param content
-	 */
-	private _getFiles(interaction: RepliableInteraction, content: string) {
-		void InteractionUtil.defer(interaction);
-
-		return [
-			new AttachmentBuilder() //
-				.setFile(Buffer.from(content).slice(0, this.MAX_FILE_SIZE))
-				.setName('result.ts')
-				// TODO: remove if no longer needed
-				.toJSON() as AttachmentBuilder,
-		];
-	}
-
-	/**
-	 * gets the original eval input from the result embed
-	 * @param message
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	private _getInputFromMessage(message: MessageComponentInteraction['message'] | null) {
-		const fields = message?.embeds[0]?.fields;
-
-		if (!fields) throw 'unable to extract the input from the attached message';
-
-		let input = '';
-
-		for (const { name, value } of fields) {
-			if (['Output', 'Error'].includes(name)) break;
-
-			input += value.replace(/^```[a-z]*\n|\n?```$/g, '');
-		}
-
-		return input;
 	}
 
 	/**
@@ -229,12 +192,17 @@ export default class EvalCommand extends ApplicationCommand {
 		};
 		const i = interaction;
 		const { client, config } = this;
-		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
+		const { guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { discordGuilds, hypixelGuilds, players, taxCollectors, db, rest } = client;
 		const me = guild?.members.me ?? null;
 		const player = UserUtil.getPlayer(user);
 		const p = player;
 		const bridges = client.chatBridges.cache;
+		const mention = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getMentionable('mention');
+		const channel =
+			(interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getChannel('channel') ?? interaction.channel;
+		const ch = channel;
+		const attachment = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getAttachment('attachment');
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed //
@@ -255,7 +223,7 @@ export default class EvalCommand extends ApplicationCommand {
 				useTabs: true,
 			});
 		} catch (error) {
-			this._addInputToResponseEmbed(responseEmbed, _input, isAsync);
+			BaseOwnerCommand._addInputToResponseEmbed(responseEmbed, _input, 'ts', isAsync);
 
 			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
 		}
@@ -282,7 +250,7 @@ export default class EvalCommand extends ApplicationCommand {
 			toEvaluate = input;
 		}
 
-		this._addInputToResponseEmbed(responseEmbed, input, isAsync);
+		BaseOwnerCommand._addInputToResponseEmbed(responseEmbed, input, 'ts', isAsync);
 
 		try {
 			stopwatch.restart();
@@ -300,138 +268,22 @@ export default class EvalCommand extends ApplicationCommand {
 				stopwatch.stop();
 			}
 
-			const CLEANED_OUTPUT = this._cleanOutput(evaled, inspectDepth);
-			const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
-
-			let files: JSONEncodable<AttachmentPayload>[] | undefined;
-			let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
-
-			// add output fields till embed character limit is reached
-			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'ts').entries()) {
-				const name = index ? '\u200B' : 'Output';
-
-				// embed size overflow -> convert output to file
-				if ((length += name.length + value.length) > EmbedLimits.MaximumTotalCharacters) {
-					// remove result fields
-					responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
-						name: 'Output',
-						value: 'result.ts',
-					});
-					// add files
-					files = this._getFiles(interaction, CLEANED_OUTPUT);
-					break;
-				}
-
-				responseEmbed.addFields({ name, value });
-			}
-
-			responseEmbed.addFields({
-				name: '\u200B',
-				value: FOOTER_FIELD,
-			});
+			const files = this._addOutputToResponseEmbed(
+				interaction,
+				responseEmbed,
+				util.inspect(evaled, { depth: inspectDepth }),
+				'ts',
+				`discord.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``,
+			);
 
 			return this._respond(interaction, responseEmbed, files, inspectDepth);
 		} catch (error) {
 			stopwatch.stop();
 
-			logger.debug(error, '[EVAL ERROR]');
+			logger.debug(error, '[EVAL]');
 
 			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
 		}
-	}
-
-	/**
-	 * @param responseEmbed
-	 * @param input
-	 * @param isAsync
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	private _addInputToResponseEmbed(responseEmbed: EmbedBuilder, input: string, isAsync: boolean) {
-		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
-			responseEmbed.addFields({
-				name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
-				value: inputPart,
-			});
-		}
-	}
-
-	/**
-	 * @param interaction
-	 * @param error
-	 * @param responseEmbed
-	 * @param stopwatch
-	 * @param inspectDepth
-	 */
-	private _respondWithError(
-		interaction: RepliableInteraction<'cachedOrDM'>,
-		error: unknown,
-		responseEmbed: EmbedBuilder,
-		stopwatch: Stopwatch,
-		inspectDepth: number,
-	) {
-		const errorType = new Type(error);
-		const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
-		const CLEANED_OUTPUT = this._cleanOutput(error, Number.POSITIVE_INFINITY);
-
-		let files: JSONEncodable<AttachmentPayload>[] | undefined;
-		let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
-
-		for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
-			const name = index ? '\u200B' : 'Error';
-
-			// embed size overflow -> convert output to file
-			if ((length += name.length + value.length) > EmbedLimits.MaximumTotalCharacters) {
-				// remove error fields
-				responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
-					name: 'Error',
-					value: 'result.ts',
-				});
-				// add files
-				files = this._getFiles(interaction, CLEANED_OUTPUT);
-				break;
-			}
-
-			responseEmbed.addFields({ name, value });
-		}
-
-		responseEmbed.addFields({
-			name: '\u200B',
-			value: FOOTER_FIELD,
-		});
-
-		return this._respond(interaction, responseEmbed, files, inspectDepth);
-	}
-
-	/**
-	 * @param interaction
-	 * @param responseEmbed
-	 * @param files
-	 * @param inspectDepth
-	 */
-	private _respond(
-		interaction: RepliableInteraction<'cachedOrDM'>,
-		responseEmbed: EmbedBuilder,
-		files: JSONEncodable<AttachmentPayload>[] | undefined,
-		inspectDepth: number,
-	) {
-		return InteractionUtil.replyOrUpdate(interaction, {
-			embeds: [responseEmbed],
-			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-					new ButtonBuilder()
-						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
-						.setEmoji({ name: UnicodeEmoji.EditMessage })
-						.setStyle(ButtonStyle.Secondary),
-					new ButtonBuilder()
-						.setCustomId(`${this.baseCustomId}:repeat:${inspectDepth}`)
-						.setEmoji({ name: UnicodeEmoji.Reload })
-						.setStyle(ButtonStyle.Secondary),
-					buildPinButton(),
-					buildDeleteButton(interaction.user.id),
-				),
-			],
-			files,
-		});
 	}
 
 	/**
@@ -496,7 +348,7 @@ export default class EvalCommand extends ApplicationCommand {
 			}
 
 			case 'repeat': {
-				const input = this._getInputFromMessage(interaction.message);
+				const input = BaseOwnerCommand._getInputFromMessage(interaction.message);
 
 				return this._sharedRun(interaction, input, { inspectDepth: Number(inspectDepth) });
 			}
@@ -518,7 +370,7 @@ export default class EvalCommand extends ApplicationCommand {
 			case 'edit':
 				return this._sharedRun(
 					interaction,
-					interaction.fields.getTextInputValue('input') || this._getInputFromMessage(interaction.message),
+					interaction.fields.getTextInputValue('input') || BaseOwnerCommand._getInputFromMessage(interaction.message),
 					{
 						// use parseInt over Number so that 12a is still a valid input
 						inspectDepth: Number.parseInt(
