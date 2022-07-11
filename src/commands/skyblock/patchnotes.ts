@@ -10,18 +10,10 @@ import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 export default class PatchnotesCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(
-			context,
-			{
-				slash: new SlashCommandBuilder().setDescription('shows latest SkyBlock patchnotes'),
-				cooldown: seconds(1),
-			},
-			{
-				aliases: [],
-				args: false,
-				usage: '',
-			},
-		);
+		super(context, {
+			slash: new SlashCommandBuilder().setDescription('shows latest SkyBlock patchnotes'),
+			cooldown: seconds(1),
+		});
 	}
 
 	/**

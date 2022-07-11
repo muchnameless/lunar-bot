@@ -191,6 +191,7 @@ export default class PollCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+		// TODO: use parseArgs
 		const inputMatched = /(?<=[\u0022\u201C\u201D]).+?(?=[\u0022\u201C\u201D])/u
 			.exec(hypixelMessage.content)
 			?.map((x) => x.trim())
@@ -202,7 +203,7 @@ export default class PollCommand extends DualCommand {
 			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()!),
 			pollOptionNames: inputMatched,
-			duration: hypixelMessage.commandData.args[0],
+			duration: hypixelMessage.commandData.args.positionals[0],
 			ign: hypixelMessage.author.ign,
 		});
 

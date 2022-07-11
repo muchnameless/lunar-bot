@@ -7,8 +7,6 @@ export default class PingBridgeCommand extends BridgeCommand {
 		super(context, {
 			aliases: ['o/'],
 			description: 'ping the bot',
-			args: false,
-			usage: '',
 			cooldown: 0,
 		});
 	}

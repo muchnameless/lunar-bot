@@ -1,6 +1,6 @@
 import { UnicodeEmoji } from '#constants';
 import { hypixel } from '#api';
-import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn, upperCaseFirstChar } from '#functions';
+import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn } from '#functions';
 import BaseSkyBlockCommand from './~base-skyblock-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
@@ -53,9 +53,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 				.map(({ cute_name: name, members }) => ({ name, ...this.getWeight(members[uuid]!) }))
 				.sort(({ totalWeight: a }, { totalWeight: b }) => b - a) as [WeightData & { name: string }];
 		} else {
-			const profile = profiles.find(({ cute_name: name }) => name === profileName);
-
-			if (!profile) throw `\`${ign}\` has no profile named \`${upperCaseFirstChar(profileName)}\``;
+			const profile = this._findProfileByName(profiles, profileName, ign);
 
 			weightData = {
 				name: profile.cute_name,

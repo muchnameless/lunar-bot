@@ -19,7 +19,6 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 			},
 			{
 				aliases: ['bridge'],
-				args: false,
 				usage: '<`IGN`>',
 			},
 		);

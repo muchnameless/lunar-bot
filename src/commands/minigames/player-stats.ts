@@ -24,7 +24,6 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			},
 			{
 				aliases: ['player'],
-				args: false,
 				usage: '<`IGN`>',
 			},
 		);

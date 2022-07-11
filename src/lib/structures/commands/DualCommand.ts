@@ -1,6 +1,7 @@
 import { ApplicationCommand } from './ApplicationCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { Awaitable } from '@sapphire/utilities';
+import type { ParseArgsOptions } from 'node:util';
 import type { CommandContext } from './BaseCommand';
 import type { ApplicationCommandData } from './ApplicationCommand';
 import type { BridgeCommand, BridgeCommandData } from './BridgeCommand';
@@ -13,7 +14,8 @@ export class DualCommand
 	_usage: string | (() => string) | null = null;
 	aliasesInGame: string[] | null;
 	guildOnly: boolean;
-	args: number | boolean | null;
+	args: number | boolean = false;
+	parseArgsOptions?: ParseArgsOptions;
 
 	/**
 	 * create a new command
@@ -24,13 +26,14 @@ export class DualCommand
 	constructor(
 		context: CommandContext,
 		slashData: ApplicationCommandData,
-		{ aliases, guildOnly, args, usage }: BridgeCommandData = {},
+		{ aliases, guildOnly, args, parseArgsOptions, usage }: BridgeCommandData = {},
 	) {
 		super(context, slashData);
 
 		this.aliasesInGame = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
+		this.parseArgsOptions = parseArgsOptions;
 		this.usage = usage ?? null;
 	}
 

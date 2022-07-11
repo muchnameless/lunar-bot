@@ -547,13 +547,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			}
 		}
 
-		// argument handling
-		if (
-			command.args &&
-			(typeof command.args === 'boolean'
-				? !hypixelMessage.commandData.args.length
-				: hypixelMessage.commandData.args.length < command.args)
-		) {
+		// positional argument handling
+		if (command.args && hypixelMessage.commandData.args.positionals.length < command.args) {
 			const reply: string[] = [];
 
 			reply.push(

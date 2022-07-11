@@ -2,7 +2,7 @@ import { bold, SlashCommandBuilder, time } from 'discord.js';
 import ms from 'ms';
 import { logger } from '#logger';
 import { InteractionUtil } from '#utils';
-import { logErrors } from '#chatBridge/constants';
+import { IGN_DEFAULT, logErrors } from '#chatBridge/constants';
 import { forceOption, hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions';
 import { MinecraftChatManager } from '#chatBridge/managers/MinecraftChatManager';
 import { DualCommand } from '#structures/commands/DualCommand';
@@ -31,7 +31,12 @@ export default class JoinDateCommand extends DualCommand {
 			},
 			{
 				aliases: ['joined'],
-				args: false,
+				parseArgsOptions: {
+					guild: {
+						type: 'string',
+						short: 'g',
+					},
+				},
 				usage: '<`IGN`>',
 			},
 		);
@@ -39,7 +44,9 @@ export default class JoinDateCommand extends DualCommand {
 
 	static running = new Set();
 
-	static JOINED_REGEXP = /(?<time>.+): \w{1,16} (?:joined|created the guild)(?:\n.+: \w{1,16} invited \w{1,16})*$/;
+	static JOINED_REGEXP = new RegExp(
+		`(?<time>.+): ${IGN_DEFAULT} (?:joined|created the guild)(?:\\n.+: ${IGN_DEFAULT} invited ${IGN_DEFAULT})*$`,
+	);
 
 	/**
 	 * @param chatBridge
@@ -56,11 +63,12 @@ export default class JoinDateCommand extends DualCommand {
 		let matched = JoinDateCommand.JOINED_REGEXP.exec(logEntry);
 
 		// last page didn't contain join, get next-to-last page
+		let invitedRegExp: RegExp;
 		while (!matched && lastPage >= 1) {
 			matched = JoinDateCommand.JOINED_REGEXP.exec(await this.getLogEntry(chatBridge, ign, --lastPage));
 
 			// entry does not end with invited message -> no joined / created message at all
-			if (!new RegExp(`\\n.+: \\w{1,16} invited ${ign}$`).test(logEntry)) break;
+			if (!(invitedRegExp ??= new RegExp(`\\n.+: ${IGN_DEFAULT} invited ${ign}$`)).test(logEntry)) break;
 		}
 
 		const timestamp = Date.parse(matched?.groups!.time!);
@@ -157,11 +165,19 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+		const {
+			values: { guild: HYPIXEL_GUILD_NAME },
+			positionals,
+		} = hypixelMessage.commandData.args;
+
+		let chatBridge: ChatBridge | undefined;
+
+		if (HYPIXEL_GUILD_NAME) {
+			chatBridge = this.client.hypixelGuilds.findByName(HYPIXEL_GUILD_NAME as string)?.chatBridge;
+		}
+
 		return hypixelMessage.reply(
-			await this._generateReply(
-				hypixelMessage.chatBridge,
-				hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
-			),
+			await this._generateReply(chatBridge ?? hypixelMessage.chatBridge, positionals[0] ?? hypixelMessage.author.ign),
 		);
 	}
 }

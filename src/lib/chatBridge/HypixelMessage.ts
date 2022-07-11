@@ -1,3 +1,4 @@
+import { parseArgs } from 'node:util';
 import { regExpEsc } from '@sapphire/utilities';
 import { MessageUtil } from '#utils';
 import { logger } from '#logger';
@@ -19,7 +20,7 @@ import type { DualCommand } from '#structures/commands/DualCommand';
 type CommandData = {
 	name: string | null;
 	command: BridgeCommand | DualCommand | null;
-	args: string[];
+	args: ReturnType<typeof parseArgs>;
 	prefix: string | null;
 };
 
@@ -143,27 +144,39 @@ export class HypixelMessage {
 					'i',
 				).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
 
-			const args: string[] = this.content // command arguments
+			const args = this.content // command arguments
 				.slice(prefixMatched?.length ?? 0)
 				.trim()
 				.split(/ +/);
 			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
-			this.commandData =
-				(!prefixMatched && this.type !== HypixelMessageType.Whisper) || !COMMAND_NAME
+			if ((!prefixMatched && this.type !== HypixelMessageType.Whisper) || !COMMAND_NAME) {
+				this.commandData = {
+					name: null,
+					command: null,
+					args: { values: {}, positionals: args },
+					prefix: null,
+				};
+			} else {
+				const command = this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase());
+
+				this.commandData = command
 					? {
-							name: null,
-							command: null,
-							args,
-							prefix: null,
+							name: COMMAND_NAME,
+							command,
+							args: command.parseArgsOptions
+								? parseArgs({ args, options: command.parseArgsOptions, strict: false })
+								: { values: {}, positionals: args },
+							prefix: prefixMatched,
 					  }
 					: {
 							name: COMMAND_NAME,
-							command: this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase()),
-							args,
+							command,
+							args: { values: {}, positionals: args },
 							prefix: prefixMatched,
 					  };
+			}
 		} else {
 			this.type = null;
 			this.author = null;

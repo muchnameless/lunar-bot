@@ -11,7 +11,6 @@ export default class PingUnmuteCommand extends PingMute {
 			slash: new SlashCommandBuilder()
 				.setDescription('allow a guild member to @mention via the chat bridge')
 				.addStringOption(requiredPlayerOption),
-			cooldown: 0,
 		});
 	}
 

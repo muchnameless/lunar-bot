@@ -17,7 +17,6 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 			},
 			{
 				aliases: ['fkdr'],
-				args: false,
 				usage: '<`IGN`>',
 			},
 		);

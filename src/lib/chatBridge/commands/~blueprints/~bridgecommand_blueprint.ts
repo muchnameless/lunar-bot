@@ -7,8 +7,6 @@ export default class MyCommand extends BridgeCommand {
 		super(context, {
 			aliases: [],
 			description: '',
-			args: false,
-			usage: '',
 			cooldown: 0,
 		});
 	}

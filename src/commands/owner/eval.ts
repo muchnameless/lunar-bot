@@ -57,7 +57,6 @@ accessories;
 itemUpgrades;
 populateCaches;
 prices;
-
 import { sequelize, sql } from '#db';
 sequelize;
 sql;

@@ -1,3 +1,4 @@
+import { IGN_DEFAULT } from '#chatBridge/constants';
 import type { Snowflake } from 'discord.js';
 
 /**
@@ -19,11 +20,12 @@ export const validateDiscordTag = (string: string | null): string is `${string}#
  */
 export const validateDiscordId = (string: unknown): string is Snowflake => /^\d{17,19}$/.test(string as string);
 
+const ignRegExp = new RegExp(`^${IGN_DEFAULT}$`);
 /**
  * checks if the string can be a minecraft IGN
  * @param string
  */
-export const validateMinecraftIgn = (string: string | null) => /^\w{1,16}$/.test(string!);
+export const validateMinecraftIgn = (string: string | null) => ignRegExp.test(string!);
 
 /**
  * checks if the string can be a minecraft IGN
