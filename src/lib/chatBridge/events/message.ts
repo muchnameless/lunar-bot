@@ -3,8 +3,9 @@ import ms from 'ms';
 import { GuildMemberUtil, MessageUtil } from '#utils';
 import { logger } from '#logger';
 import { UnicodeEmoji } from '#constants';
-import { assertNever, asyncFilter, commaListOr, getLilyWeight, stringToMS } from '#functions';
+import { assertNever, asyncCollectionFilter, commaListOr, getLilyWeight, stringToMS } from '#functions';
 import { hypixel, mojang } from '#api';
+import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent';
 import {
 	demoteSuccess,
 	IGN_DEFAULT,
@@ -15,10 +16,9 @@ import {
 	promoteSuccess,
 	unmuteSuccess,
 } from '../constants';
-import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import type { SkyBlockProfile, WeightData } from '#functions';
-import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
-import type MathsCommand from '../../../commands/general/maths';
+import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import type MathsCommand from '#root/commands/general/maths';
 
 const blockedRegExp = new RegExp(
 	`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+) [${INVISIBLE_CHARACTERS.join(
@@ -52,11 +52,13 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				const senderDiscordId = this.client.players.findByIgn(sender)?.discordId;
 
 				// react to latest message from 'sender' with that content
-				for (const { channel } of this.chatBridge.discord.channels.values()) {
+				const cache = this.chatBridge.discord.channelsByType.get(hypixelMessage.type!)?.channel.messages.cache;
+
+				if (cache) {
 					void MessageUtil.react(
 						(
-							await asyncFilter(
-								[...(channel?.messages.cache.values() ?? [])],
+							await asyncCollectionFilter(
+								cache,
 								senderDiscordId
 									? async (message) =>
 											message.author.id === senderDiscordId &&

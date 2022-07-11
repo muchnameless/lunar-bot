@@ -166,6 +166,29 @@ export async function asyncFilter<T>(
 	).filter((x) => x !== fail) as T[];
 }
 
+type CopyFunction<F, R> = F extends (...p: infer P) => any ? (...p: P) => R : never;
+type CollectionFilter<I extends Collection<K, V>, K = unknown, V = unknown> = CopyFunction<
+	Parameters<I['filter']>[0],
+	Awaitable<ReturnType<Parameters<I['filter']>[0]>>
+>;
+type Value<C> = C extends Collection<any, infer V> ? V : never;
+
+/**
+ * Collection.prototype.filter with an asynchronous callback function, returns an array
+ * @param iterable
+ * @param predicate
+ */
+export async function asyncCollectionFilter<I extends Collection<K, V>, K, V>(
+	iterable: I,
+	predicate: CollectionFilter<I>,
+): Promise<Value<I>[]> {
+	const fail = Symbol();
+
+	return (
+		await Promise.all(iterable.map(async (item, index) => ((await predicate(item, index, iterable)) ? item : fail)))
+	).filter((x) => x !== fail) as Value<I>[];
+}
+
 /**
  * waits for all promises to settle and logs the errored ones
  * @param array
