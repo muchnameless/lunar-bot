@@ -96,9 +96,10 @@ export class HypixelMessage {
 		 * Officer > [HypixelRank] ign [GuildRank]: message
 		 * From [HypixelRank] ign: message
 		 */
-		const matched = this.cleanedContent.match(
-			/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /,
-		);
+		const matched =
+			/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /.exec(
+				this.cleanedContent,
+			);
 
 		if (matched) {
 			this.type =

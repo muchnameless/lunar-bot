@@ -20,6 +20,13 @@ import type { SkyBlockProfile, WeightData } from '#functions';
 import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
 
+const blockedRegExp = new RegExp(
+	`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+) [${INVISIBLE_CHARACTERS.join(
+		'',
+	)}]*" as it is breaking our rules because it`,
+	'su',
+);
+
 export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	/**
 	 * parse server message content
@@ -38,18 +45,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (hypixelMessage.content.startsWith('We blocked your comment ')) {
 			// react to latest message from 'sender' with that content
-			const blockedMatched = hypixelMessage.rawContent.match(
-				new RegExp(
-					`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+) [${INVISIBLE_CHARACTERS.join(
-						'',
-					)}]*" as it is breaking our rules because it`,
-					'su',
-				),
-			);
+			const blockedMatched = blockedRegExp.exec(hypixelMessage.rawContent);
 
 			if (blockedMatched) {
-				const { sender, blockedContent } = blockedMatched.groups!;
-				const senderDiscordId = this.client.players.findByIgn(sender!)?.discordId;
+				const { sender, blockedContent } = blockedMatched.groups as { sender: string; blockedContent: string };
+				const senderDiscordId = this.client.players.findByIgn(sender)?.discordId;
 
 				// react to latest message from 'sender' with that content
 				for (const { channel } of this.chatBridge.discord.channels.values()) {
@@ -60,11 +60,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 								senderDiscordId
 									? async (message) =>
 											message.author.id === senderDiscordId &&
-											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent!)
+											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent)
 									: async (message) =>
-											(
-												await this.chatBridge.minecraft.parseContent(message.content, message)
-											).includes(blockedContent!),
+											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent),
 							)
 						).sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a)[0] ?? null,
 						UnicodeEmoji.Stop,
@@ -147,15 +145,19 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HYPIXEL_RANK] IGN has muted [HYPIXEL_RANK] IGN for 10s
 		 * [HYPIXEL_RANK] IGN has muted the guild chat for 10M
 		 */
-		const muteMatched = hypixelMessage.content.match(muteSuccess);
+		const muteMatched = muteSuccess.exec(hypixelMessage.content);
 
 		if (muteMatched) {
 			void hypixelMessage.forwardToDiscord();
 
-			const { target, duration, executor } = muteMatched.groups!;
+			const { target, duration, executor } = muteMatched.groups as {
+				target: string;
+				duration: string;
+				executor: string;
+			};
 
 			if (target === 'the guild chat') {
-				const msDuration = stringToMS(duration!);
+				const msDuration = stringToMS(duration);
 
 				this.chatBridge
 					.hypixelGuild!.update({
@@ -166,11 +168,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 			}
 
-			const player = this.client.players.findByIgn(target!);
+			const player = this.client.players.findByIgn(target);
 
 			if (!player) return;
 
-			const MS_DURATION = stringToMS(duration!);
+			const MS_DURATION = stringToMS(duration);
 
 			// update db and timeout discord member
 			void this.chatBridge.hypixelGuild!.syncMute(
@@ -196,12 +198,12 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HYPIXEL_RANK] IGN has unmuted [HYPIXEL_RANK] IGN
 		 * [HYPIXEL_RANK] IGN has unmuted the guild chat!
 		 */
-		const unmuteMatched = hypixelMessage.content.match(unmuteSuccess);
+		const unmuteMatched = unmuteSuccess.exec(hypixelMessage.content);
 
 		if (unmuteMatched) {
 			void hypixelMessage.forwardToDiscord();
 
-			const { target, executor } = unmuteMatched.groups!;
+			const { target, executor } = unmuteMatched.groups as { target: string; executor: string };
 
 			if (target === 'the guild chat') {
 				this.chatBridge.hypixelGuild!.update({ mutedTill: 0 }).catch((error) => logger.error(error));
@@ -209,7 +211,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was unmuted`);
 			}
 
-			const player = this.client.players.findByIgn(target!);
+			const player = this.client.players.findByIgn(target);
 
 			if (!player) return;
 
@@ -228,13 +230,13 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * auto '/gc gg' for promotions
 		 * [HYPIXEL_RANK] IGN was promoted from PREV to NOW
 		 */
-		const promoteMatched = hypixelMessage.content.match(promoteSuccess);
+		const promoteMatched = promoteSuccess.exec(hypixelMessage.content);
 
 		if (promoteMatched) {
 			void hypixelMessage.forwardToDiscord();
 
-			const { target, newRank } = promoteMatched.groups!;
-			const player = this.client.players.findByIgn(target!);
+			const { target, newRank } = promoteMatched.groups as { target: string; newRank: string };
+			const player = this.client.players.findByIgn(target);
 
 			if (!player?.guildId) {
 				return logger.info(
@@ -261,13 +263,13 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * demote
 		 * [HYPIXEL_RANK] IGN was demoted from PREV to NOW
 		 */
-		const demotedMatched = hypixelMessage.content.match(demoteSuccess);
+		const demotedMatched = demoteSuccess.exec(hypixelMessage.content);
 
 		if (demotedMatched) {
 			void hypixelMessage.forwardToDiscord();
 
-			const { target, newRank } = demotedMatched.groups!;
-			const player = this.client.players.findByIgn(target!);
+			const { target, newRank } = demotedMatched.groups as { target: string; newRank: string };
+			const player = this.client.players.findByIgn(target);
 
 			if (!player?.guildId) {
 				return logger.info(
@@ -294,12 +296,12 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * accept g join requests if hypixel guild has it enabled and player is not on the ban list
 		 * [HYPIXEL_RANK] IGN has requested to join the Guild!
 		 */
-		const guildJoinReqMatched = hypixelMessage.content.match(
-			/(?:\[.+?\] )?(?<ign>\w+) has requested to join the Guild!/,
+		const guildJoinReqMatched = /(?:\[.+?\] )?(?<ign>\w+) has requested to join the Guild!/.exec(
+			hypixelMessage.content,
 		);
 
 		if (guildJoinReqMatched) {
-			const { ign } = guildJoinReqMatched.groups!;
+			const { ign } = guildJoinReqMatched.groups as { ign: string };
 
 			if (!hypixelMessage.hypixelGuild?.acceptJoinRequests) {
 				return logger.info(
@@ -309,7 +311,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			}
 
 			try {
-				const { uuid } = await mojang.ign(ign!);
+				const { uuid } = await mojang.ign(ign);
 
 				// ban list check
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
@@ -369,7 +371,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		/**
 		 * You joined GUILD_NAME!
 		 */
-		const guildJoinMatched = hypixelMessage.content.match(/(?<=^You joined ).+(?=!)/);
+		const guildJoinMatched = /(?<=^You joined ).+(?=!)/.exec(hypixelMessage.content);
 
 		if (guildJoinMatched) {
 			const [guildName] = guildJoinMatched;
@@ -384,11 +386,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * accept f reqs from guild members
 		 * Friend request from [HYPIXEL_RANK] IGN
 		 */
-		const friendReqMatched = hypixelMessage.content.match(/Friend request from (?:\[.+?\] )?(?<ign>\w+)/);
+		const friendReqMatched = /Friend request from (?:\[.+?\] )?(?<ign>\w+)/.exec(hypixelMessage.content);
 
 		if (friendReqMatched) {
-			const { ign } = friendReqMatched.groups!;
-			const player = this.client.players.findByIgn(ign!);
+			const { ign } = friendReqMatched.groups as { ign: string };
+			const player = this.client.players.findByIgn(ign);
 
 			if (!player?.guildId) {
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: denying f request from ${ign}`);

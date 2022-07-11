@@ -69,7 +69,7 @@ hypixel;
 imgur;
 mojang;
 import * as functions from '#functions';
-import * as nwFunctions from '#functions';
+import * as nwFunctions from '#networth/functions/index';
 nwFunctions;
 import { IGNORED_ERRORS } from '#root/process';
 IGNORED_ERRORS;

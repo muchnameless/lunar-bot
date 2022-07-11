@@ -73,6 +73,8 @@
 		"unicorn/relative-url-style": ["error", "always"],
 		"unicorn/string-content": "error",
 		"unicorn/template-indent": "warn",
+		"regexp/prefer-regexp-exec": "error",
+		"regexp/prefer-regexp-test": "error",
 		"import/default": "off",
 		"import/no-unresolved": "off",
 		"import/order": [
