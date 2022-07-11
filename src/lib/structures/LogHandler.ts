@@ -29,23 +29,6 @@ export class LogHandler {
 		PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks;
 
 	/**
-	 * cleans a string from an embed for console logging
-	 * @param string the string to clean
-	 */
-	static cleanLoggingEmbedString(string: string): string;
-	static cleanLoggingEmbedString(string: string | undefined): string | null;
-	static cleanLoggingEmbedString(string: unknown) {
-		if (typeof string === 'string') {
-			return string
-				.replace(/```(?:ada|cs|diff|js|undefined)?\n/g, '') // code blocks
-				.replace(/`|\*|\n?\u200B|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
-				.replace(/\n{2,}/g, '\n'); // consecutive line-breaks
-		}
-
-		return null;
-	}
-
-	/**
 	 * logging channel
 	 */
 	get channel() {
@@ -188,19 +171,7 @@ export class LogHandler {
 	private async _log(embeds: APIEmbed[]) {
 		// log to console
 		for (const embed of embeds) {
-			logger.info(
-				{
-					description: LogHandler.cleanLoggingEmbedString(embed.description) || undefined,
-					user: embed.author?.name,
-					fields: embed.fields
-						?.filter(({ name, value }) => name !== '\u200B' || value !== '\u200B')
-						.map(({ name, value }) => ({
-							name: name.replaceAll('\u200B', '').trim() || undefined,
-							value: LogHandler.cleanLoggingEmbedString(value).replaceAll('\n', ', '),
-						})),
-				},
-				embed.title,
-			);
+			logger.info(embed, embed.title);
 		}
 
 		const { channel } = this;

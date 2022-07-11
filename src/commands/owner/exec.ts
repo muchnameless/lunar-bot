@@ -46,7 +46,7 @@ export default class ExecCommand extends BaseOwnerCommand {
 
 	protected async _sharedRun(interaction: RepliableInteraction, input: string) {
 		if (interaction.user.id !== this.client.ownerId) {
-			throw `eval is restricted to ${userMention(this.client.ownerId)}`;
+			throw `exec is restricted to ${userMention(this.client.ownerId)}`;
 		}
 
 		const me = interaction.guild?.members.me ?? null;
