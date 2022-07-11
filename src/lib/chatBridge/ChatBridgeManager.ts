@@ -1,4 +1,3 @@
-import { URL } from 'node:url';
 import { once } from 'node:events';
 import { env } from 'node:process';
 import { clearTimeout, setTimeout } from 'node:timers';
@@ -11,6 +10,7 @@ import { BridgeCommandCollection } from '#structures/commands/BridgeCommandColle
 import { minutes } from '#functions';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
+import type { URL } from 'node:url';
 import type { ChatInputCommandInteraction, Message, Snowflake } from 'discord.js';
 import type { MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '#structures/LunarClient';
@@ -75,13 +75,13 @@ export class ChatBridgeManager {
 	 */
 	cache: ChatBridge[] = [];
 
-	constructor(client: LunarClient) {
+	constructor(client: LunarClient, commandsURL: URL) {
 		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {
 			this.cache.push(new ChatBridge(client, i));
 		}
 
 		this.client = client;
-		this.commands = new BridgeCommandCollection(client, new URL('./commands/', import.meta.url));
+		this.commands = new BridgeCommandCollection(client, commandsURL);
 	}
 
 	/**

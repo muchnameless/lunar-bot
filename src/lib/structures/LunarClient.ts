@@ -1,5 +1,4 @@
 import { setInterval } from 'node:timers';
-import { URL } from 'node:url';
 import { env } from 'node:process';
 import { Client, EmbedBuilder, PresenceUpdateStatus } from 'discord.js';
 import { GuildUtil, UserUtil } from '#utils';
@@ -13,25 +12,35 @@ import { CronJobManager } from './CronJobManager';
 import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
 import { EventCollection } from './events/EventCollection';
 import { db } from './database';
+import type { URL } from 'node:url';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
+
+interface DirURLs {
+	applicationCommands: URL;
+	chatBridgeCommands: URL;
+	events: URL;
+	logBuffer: URL;
+}
 
 export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> {
 	override ownerId: Snowflake;
 	override db: DatabaseManager = new DatabaseManager(this, db);
-	override logHandler: LogHandler = new LogHandler(this, new URL('../../../log_buffer/', import.meta.url));
+	override logHandler: LogHandler;
 	override cronJobs: CronJobManager = new CronJobManager(this);
-	override chatBridges: ChatBridgeManager = new ChatBridgeManager(this);
-	override commands: ApplicationCommandCollection = new ApplicationCommandCollection(
-		this,
-		new URL('../../commands/', import.meta.url),
-	);
-	override events = new EventCollection(this, new URL('../../events/', import.meta.url));
-	override log = this.logHandler.log.bind(this.logHandler);
+	override chatBridges: ChatBridgeManager;
+	override commands: ApplicationCommandCollection;
+	override events: EventCollection;
+	override log: LogHandler['log'];
 
-	constructor(options: ClientOptions) {
+	constructor({ applicationCommands, chatBridgeCommands, events, logBuffer, ...options }: ClientOptions & DirURLs) {
 		super(options);
 
 		this.ownerId = env.OWNER as Snowflake;
+		this.commands = new ApplicationCommandCollection(this, applicationCommands);
+		this.chatBridges = new ChatBridgeManager(this, chatBridgeCommands);
+		this.events = new EventCollection(this, events);
+		this.logHandler = new LogHandler(this, logBuffer);
+		this.log = this.logHandler.log.bind(this.logHandler);
 	}
 
 	override get config() {

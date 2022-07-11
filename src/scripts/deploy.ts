@@ -1,10 +1,18 @@
 import { argv, env, exit } from 'node:process';
+import { URL } from 'node:url';
 import { Routes } from 'discord.js';
 import { logger } from '#logger';
 import { LunarClient } from '#structures/LunarClient';
 
 const GUILD_ID = argv[2];
 const client = new LunarClient({
+	// custom
+	applicationCommands: new URL('../commands/', import.meta.url),
+	chatBridgeCommands: new URL('../lib/chatBridge/commands/', import.meta.url),
+	events: new URL('../events/', import.meta.url),
+	logBuffer: new URL('../../log_buffer/', import.meta.url),
+
+	// discord.js
 	intents: 0,
 });
 

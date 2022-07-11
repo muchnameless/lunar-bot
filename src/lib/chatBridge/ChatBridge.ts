@@ -80,6 +80,9 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * discord related functions
 	 */
 	discord: DiscordManager = new DiscordManager(this);
+	/**
+	 * ChatBridge events
+	 */
 	events = new EventCollection(this, new URL('./events/', import.meta.url));
 
 	constructor(client: LunarClient, mcAccount: number) {
