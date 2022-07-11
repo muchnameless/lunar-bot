@@ -116,7 +116,6 @@
 		"@sapphire/utilities": "3.7.1-next.26774e0.0",
 		"discord-api-types": "0.36.2-next.d503c71.1657211525",
 		"discord.js@14.0.0-dev.1657411900-f0b68d5": "patch:discord.js@npm:14.0.0-dev.1657411900-f0b68d5#.yarn/patches/discord.js-npm-14.0.0-dev.1657411900-f0b68d5-c14126668c.patch",
-		"minecraft-protocol@^1.35.0": "patch:minecraft-protocol@npm:1.35.0#.yarn/patches/minecraft-protocol-npm-1.35.0-d5ba667cea.patch",
-		"sequelize@^6.21.2": "patch:sequelize@npm:6.21.2#.yarn/patches/sequelize-npm-6.21.2-a0519a6da0.patch"
+		"minecraft-protocol@^1.35.0": "patch:minecraft-protocol@npm:1.35.0#.yarn/patches/minecraft-protocol-npm-1.35.0-d5ba667cea.patch"
 	}
 }
