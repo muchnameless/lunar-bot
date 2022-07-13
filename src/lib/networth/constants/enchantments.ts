@@ -5,8 +5,6 @@ export const BLOCKED_ENCHANTS = {
 	[ItemId.DeathBow]: [Enchantment.Overload, Enchantment.Power, Enchantment.UltimateSoulEater],
 } as const;
 
-export const REDUCED_VALUE_ENCHANTS = new Set<string>([Enchantment.Overload, Enchantment.UltimateSoulEater]);
-
 export const enum Enchantment {
 	Angler = 'angler',
 	AquaAffinity = 'aqua_affinity',

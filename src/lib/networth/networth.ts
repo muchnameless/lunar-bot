@@ -5,6 +5,7 @@ import { hypixel } from '#api';
 import {
 	calculatePetSkillLevel,
 	getEnchantment,
+	getEnchantmentModifier,
 	getUpgradeMaterialPrice,
 	isVanillaItem,
 	transformItemData,
@@ -16,7 +17,6 @@ import {
 	ItemId,
 	MASTER_STARS,
 	PriceModifier,
-	REDUCED_VALUE_ENCHANTS,
 	REFORGES,
 	SKYBLOCK_INVENTORIES,
 } from './constants';
@@ -136,9 +136,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 			// applied enchantments are worth less
 			if (itemId !== ItemId.EnchantedBook) {
-				enchantmentPrice *= PriceModifier.AppliedEnchantment;
-
-				if (REDUCED_VALUE_ENCHANTS.has(enchantment)) enchantmentPrice *= PriceModifier.AppliedEnchantmentReduced;
+				enchantmentPrice *= getEnchantmentModifier(enchantment as Enchantment);
 			}
 
 			price += enchantmentPrice;

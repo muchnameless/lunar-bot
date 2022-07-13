@@ -2,8 +2,9 @@
  * multiplicative price modifier for the applied item
  */
 export const enum PriceModifier {
-	AppliedEnchantment = 0.85,
-	AppliedEnchantmentReduced = 0.35,
+	AppliedEnchantmentDefault = 0.85,
+	AppliedEnchantment35 = 0.35,
+	AppliedEnchantment20 = 0.2,
 	ArtOfWar = 0.6,
 	DrillUpgrade = 1,
 	DungeonMasterStar = 1,
