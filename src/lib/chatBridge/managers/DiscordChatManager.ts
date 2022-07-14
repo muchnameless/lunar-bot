@@ -19,6 +19,7 @@ import { ChatManager } from './ChatManager';
 import type {
 	Attachment,
 	Collection,
+	CommandInteractionOption,
 	Message,
 	MessageCollectorOptions,
 	MessageOptions,
@@ -29,6 +30,7 @@ import type {
 	WebhookMessageOptions,
 } from 'discord.js';
 import type { ChatBridge, MessageForwardOptions } from '../ChatBridge';
+import type { DualCommand } from '#structures/commands/DualCommand';
 import type { ChatBridgeChannel } from '#structures/database/models/HypixelGuild';
 import type { HypixelMessage } from '../HypixelMessage';
 
@@ -494,15 +496,49 @@ export class DiscordChatManager extends ChatManager {
 		if (messageInteraction) {
 			const interaction = this.client.chatBridges.interactionCache.get(messageInteraction.id);
 
-			// cached interaction from the bot or interaction from another bot
-			if (interaction || message.author.id !== message.client.user!.id) {
-				void this.minecraft.chat({
-					content: `${this.client.config.get('PREFIXES')[0]}${
-						interaction
-							?.toString()
+			// cached interaction from the bot
+			if (interaction) {
+				const command = this.client.commands.get(interaction.commandName) as DualCommand | undefined;
+
+				if (command?.parseArgsOptions) {
+					const commandParts: (string | null)[] = [
+						interaction.commandName,
+						interaction.options.getSubcommandGroup(),
+						interaction.options.getSubcommand(),
+					];
+
+					// @ts-expect-error
+					for (const { name, value } of interaction.options._hoistedOptions as CommandInteractionOption[]) {
+						if (name === 'visibility') continue;
+
+						if (Reflect.has(command.parseArgsOptions, name)) {
+							commandParts.push(`--${name}`);
+						}
+
+						commandParts.push(`${value}`);
+					}
+
+					void this.minecraft.chat({
+						content: `${this.client.config.get('PREFIXES')[0]}${commandParts.filter(Boolean).join(' ')}`,
+						prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
+							player?.ign ?? messageInteraction.user.username,
+						)}: `,
+					});
+				} else {
+					void this.minecraft.chat({
+						content: `${this.client.config.get('PREFIXES')[0]}${interaction
+							.toString()
 							.slice(1)
-							.replace(/ visibility:[a-z]+/, '') ?? messageInteraction.commandName
-					}`,
+							.replace(/ visibility:[a-z]+/, '')}`,
+						prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
+							player?.ign ?? messageInteraction.user.username,
+						)}: `,
+					});
+				}
+			} else if (message.author.id !== message.client.user!.id) {
+				// interaction from another bot
+				void this.minecraft.chat({
+					content: `${this.client.config.get('PREFIXES')[0]}${messageInteraction.commandName}`,
 					prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
 						player?.ign ?? messageInteraction.user.username,
 					)}: `,
