@@ -361,22 +361,22 @@ export class DiscordChatManager extends ChatManager {
 			logger.error(error);
 		}
 
+		// resolve parseContent prior to queuePromise
 		const _options: SendViaBotOptions = {
 			content: await this.chatBridge.discord.parseContent(
-				`${
-					discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
-				}${content}`,
+				content,
+				// `${
+				// 	discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
+				// }${content}`,
 				fromMinecraft,
 			),
-			reply: {
-				messageReference: discordMessage as Message,
-			},
 			...options,
 		};
 
 		await queuePromise;
 
 		try {
+			if (discordMessage) return await MessageUtil.reply(discordMessage, _options);
 			return await ChannelUtil.send(this.channel, _options);
 		} finally {
 			this.queue.shift();
@@ -496,6 +496,8 @@ export class DiscordChatManager extends ChatManager {
 		if (messageInteraction) {
 			const interaction = this.client.chatBridges.interactionCache.get(messageInteraction.id);
 
+			let content: string | undefined;
+
 			// cached interaction from the bot
 			if (interaction) {
 				const command = this.client.commands.get(interaction.commandName) as DualCommand | undefined;
@@ -518,27 +520,21 @@ export class DiscordChatManager extends ChatManager {
 						commandParts.push(`${value}`);
 					}
 
-					void this.minecraft.chat({
-						content: `${this.client.config.get('PREFIXES')[0]}${commandParts.filter(Boolean).join(' ')}`,
-						prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
-							player?.ign ?? messageInteraction.user.username,
-						)}: `,
-					});
+					content = commandParts.filter(Boolean).join(' ');
 				} else {
-					void this.minecraft.chat({
-						content: `${this.client.config.get('PREFIXES')[0]}${interaction
-							.toString()
-							.slice(1)
-							.replace(/ visibility:[a-z]+/, '')}`,
-						prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
-							player?.ign ?? messageInteraction.user.username,
-						)}: `,
-					});
+					content = interaction
+						.toString()
+						.slice(1)
+						.replace(/ visibility:[a-z]+/, '');
 				}
 			} else if (message.author.id !== message.client.user!.id) {
 				// interaction from another bot
+				content = messageInteraction.commandName;
+			}
+
+			if (content) {
 				void this.minecraft.chat({
-					content: `${this.client.config.get('PREFIXES')[0]}${messageInteraction.commandName}`,
+					content: `${this.client.config.get('PREFIXES')[0]}${content}`,
 					prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
 						player?.ign ?? messageInteraction.user.username,
 					)}: `,
