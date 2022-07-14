@@ -572,7 +572,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		return (
 			cleanFormattedNumber(
 				// @mentions
-				await asyncReplace(string, /<@!?(\d{17,19})>/g, async (match) => {
+				await asyncReplace(string, /<@!?(\d{17,20})>/g, async (match) => {
 					const user = this.client.users.cache.get(match[1]!);
 					if (user) {
 						const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
@@ -588,7 +588,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				}),
 			)
 				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
-				.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
+				.replace(/<a?:(\w{2,32}):\d{17,20}>/g, ':$1:') // custom emojis
 				.replace(TwemojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
 				// replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
 				.replace(/(?<![¯\\])\\(?=[^a-z\d\\ \n])/gi, '')
@@ -600,7 +600,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				})
 				.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
 				.replaceAll('`', "'") // better single quotes
-				.replace(/<(#|@&)(\d{17,19})>/g, (match, type: '#' | '@&', id: Snowflake) => {
+				.replace(/<(#|@&)(\d{17,20})>/g, (match, type: '#' | '@&', id: Snowflake) => {
 					switch (type) {
 						// channels
 						case '#': {
@@ -617,6 +617,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 						}
 					}
 				})
+				// application command mentions
+				.replace(/<\/([-\w]{1,32}(?: [-\w]{1,32})?(?: [-\w]{1,32})?):\d{17,20}/, (_, name: string) => name)
 				.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1: string, p2: string) => {
 					// dates
 					const date = new Date(seconds(Number(p1)));

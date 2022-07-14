@@ -18,7 +18,7 @@ export const validateDiscordTag = (string: string | null): string is `${string}#
  * checks if the string can be a discord ID
  * @param string
  */
-export const validateDiscordId = (string: unknown): string is Snowflake => /^\d{17,19}$/.test(string as string);
+export const validateDiscordId = (string: unknown): string is Snowflake => /^\d{17,20}$/.test(string as string);
 
 const ignRegExp = new RegExp(`^${IGN_DEFAULT}$`);
 /**

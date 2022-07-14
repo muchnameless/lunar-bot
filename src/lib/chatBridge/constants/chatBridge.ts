@@ -94,4 +94,4 @@ export const NON_WHITESPACE_REGEXP = new RegExp(
  * https://cdn.discordapp.com/emojis/830971380283605042.png?size=96
  */
 export const DISCORD_CDN_URL_REGEXP =
-	/\b((?:https:\/\/)?(?:cdn|media)\.discord(?:app)?\.(?:com|net)\/(?:attachments\/\d{17,19}\/\d{17,19}\/.+|emojis\/\d{17,19})\.(?:jpeg|jpg|png))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/g;
+	/\b((?:https:\/\/)?(?:cdn|media)\.discord(?:app)?\.(?:com|net)\/(?:attachments\/\d{17,20}\/\d{17,20}\/.+|emojis\/\d{17,20})\.(?:jpeg|jpg|png))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/g;

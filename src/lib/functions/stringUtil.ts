@@ -55,7 +55,7 @@ export const escapeIgn = (string: string | null) => string?.replaceAll('_', '\\_
  * extracts user IDs from @mentions
  * @param string to analyze
  */
-export const getIdFromString = (string: string) => /(?<=^(?:<@!?)?)\d{17,19}(?=>?$)/.exec(string)?.[0] ?? null;
+export const getIdFromString = (string: string) => /(?<=^(?:<@!?)?)\d{17,20}(?=>?$)/.exec(string)?.[0] ?? null;
 
 /**
  * aBc -> Abc

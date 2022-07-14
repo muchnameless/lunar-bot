@@ -333,10 +333,10 @@ export class HypixelMessage {
 			}));
 
 			// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
-			if (/<@&\d{17,19}>/.test(discordMessage.content)) {
+			if (/<@&\d{17,20}>/.test(discordMessage.content)) {
 				void this.author.send('you do not have permission to ping roles from in-game chat');
 				void MessageUtil.react(discordMessage, UnicodeEmoji.NoPing);
-			} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content)) {
+			} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,20}>/.test(discordMessage.content)) {
 				void this.author.send('you do not have permission to ping users from in-game chat');
 				void MessageUtil.react(discordMessage, UnicodeEmoji.NoPing);
 			}

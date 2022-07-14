@@ -1,5 +1,6 @@
-import { Collection, escapeMarkdown as djsEscapeMarkdown, userMention } from 'discord.js';
+import { Collection, escapeMarkdown as djsEscapeMarkdown, time, TimestampStyles, userMention } from 'discord.js';
 import { Op } from 'sequelize';
+import ms from 'ms';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
 import { DiscordChatManager } from './DiscordChatManager';
@@ -97,7 +98,7 @@ export class DiscordManager {
 			djsEscapeMarkdown(
 				// @mentions
 				(
-					await asyncReplace(string, /(?<!<)@(?<type>!|&)?(?<name>\w+)(?!\d{17,19}>)/g, async (match) => {
+					await asyncReplace(string, /(?<!<)@(?<type>!|&)?(?<name>\w+)(?!\d{17,20}>)/g, async (match) => {
 						switch (match.groups!.type) {
 							// members/users
 							case '!': {
@@ -146,7 +147,7 @@ export class DiscordManager {
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 					.replace(
 						// emojis (custom and default)
-						/(?<!<[at]?):(\S+):(?!\d{17,19}>)/g,
+						/(?<!<[at]?):(\S+):(?!\d{17,20}>)/g,
 						(match, p1: string) =>
 							this._findEmojiByName(match, p1) ??
 							match.replace(/:(\S+?):/g, (_match, _p1: string) =>
@@ -165,6 +166,18 @@ export class DiscordManager {
 									.find(({ name }) => replaceSmallLatinCapitalLetters(name).replace(/[^a-z]/gi, '') === TO_SEARCH)
 									?.toString() ?? match
 							);
+						},
+					)
+					// timestamps
+					.replace(
+						/(\bin )?(\ban?|\d+) ([a-z]+)( ago\b)?/gi,
+						(match, future: string, quantifier: string, timestring: string, past: string) => {
+							if (!future && !past) return match;
+
+							const date = new Date(Date.now() + ms(`${Number(quantifier) || 1} ${timestring}`) * (future ? 1 : -1));
+							if (Number.isNaN(date.getTime())) return match;
+
+							return time(date, TimestampStyles.RelativeTime);
 						},
 					),
 				{
