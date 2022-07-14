@@ -203,28 +203,28 @@ export class DiscordManager {
 									const group = command.options.find(({ name }) => name === groupOrSubcommand);
 
 									switch (group?.type) {
+										case undefined:
+											return `</${commandName}:${command.id}> ${groupOrSubcommand} ${subcommand}`;
+
 										case ApplicationCommandOptionType.Subcommand:
 											if (group.options?.some(({ name }) => name === subcommand)) {
 												return `</${commandName} ${groupOrSubcommand} ${subcommand}:${command.id}>`;
 											}
-											return `</${commandName} ${groupOrSubcommand}:${command.id}>`;
-
-										case undefined:
-											return `</${commandName}:${command.id}>`;
+										// fallthrough
 
 										default:
-											return `</${commandName} ${groupOrSubcommand}:${command.id}>`;
+											return `</${commandName} ${groupOrSubcommand}:${command.id}> ${subcommand}`;
 									}
 								}
 
 								case ApplicationCommandOptionType.Subcommand:
 									if (command.options.some(({ name }) => name === groupOrSubcommand)) {
-										return `</${commandName} ${groupOrSubcommand}:${command.id}>`;
+										return `</${commandName} ${groupOrSubcommand}:${command.id}> ${subcommand}`;
 									}
-									return `</${commandName}:${command.id}>`;
+								// fallthrough
 
 								default:
-									return `</${commandName}:${command.id}>`;
+									return `</${commandName}:${command.id}> ${groupOrSubcommand} ${subcommand}`;
 							}
 						},
 					),
