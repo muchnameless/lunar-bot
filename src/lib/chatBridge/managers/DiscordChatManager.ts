@@ -506,7 +506,7 @@ export class DiscordChatManager extends ChatManager {
 					const commandParts: (string | null)[] = [
 						interaction.commandName,
 						interaction.options.getSubcommandGroup(),
-						interaction.options.getSubcommand(),
+						interaction.options.getSubcommand(false),
 					];
 
 					// @ts-expect-error
