@@ -618,7 +618,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					}
 				})
 				// application command mentions
-				.replace(/<\/([-\w]{1,32}(?: [-\w]{1,32})?(?: [-\w]{1,32})?):\d{17,20}/, (_, name: string) => name)
+				.replace(/<(\/[-\w]{1,32}(?: [-\w]{1,32})?(?: [-\w]{1,32})?):\d{17,20}>/, (_, name: string) => name)
 				.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1: string, p2: string) => {
 					// dates
 					const date = new Date(seconds(Number(p1)));
