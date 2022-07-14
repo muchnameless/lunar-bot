@@ -28,7 +28,6 @@ const client = new LunarClient({
 	// discord.js
 	makeCache: Options.cacheWithLimits({
 		...Options.DefaultMakeCacheSettings,
-		ApplicationCommandManager: 0,
 		GuildBanManager: 0,
 		GuildInviteManager: 0,
 		GuildScheduledEventManager: 0,

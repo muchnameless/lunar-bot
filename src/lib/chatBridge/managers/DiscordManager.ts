@@ -1,4 +1,11 @@
-import { Collection, escapeMarkdown as djsEscapeMarkdown, time, TimestampStyles, userMention } from 'discord.js';
+import {
+	ApplicationCommandOptionType,
+	Collection,
+	escapeMarkdown as djsEscapeMarkdown,
+	time,
+	TimestampStyles,
+	userMention,
+} from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
@@ -178,6 +185,47 @@ export class DiscordManager {
 							if (Number.isNaN(date.getTime())) return match;
 
 							return time(date, TimestampStyles.RelativeTime);
+						},
+					)
+					// /commands
+					.replace(
+						/\/([-\w]{1,32})(?: ([-\w]{1,32}))?(?: ([-\w]{1,32}))?/g,
+						(match, _commandName: string, _groupOrSubcommand: string | undefined, _subcommand: string | undefined) => {
+							const commandName = _commandName.toLowerCase();
+							const groupOrSubcommand = _groupOrSubcommand?.toLowerCase();
+							const subcommand = _subcommand?.toLowerCase();
+
+							const command = this.client.application!.commands.cache.find(({ name }) => name === commandName);
+							if (!command) return match;
+
+							switch (command.options[0]?.type) {
+								case ApplicationCommandOptionType.SubcommandGroup: {
+									const group = command.options.find(({ name }) => name === groupOrSubcommand);
+
+									switch (group?.type) {
+										case ApplicationCommandOptionType.Subcommand:
+											if (group.options?.some(({ name }) => name === subcommand)) {
+												return `</${commandName} ${groupOrSubcommand} ${subcommand}:${command.id}>`;
+											}
+											return `</${commandName} ${groupOrSubcommand}:${command.id}>`;
+
+										case undefined:
+											return `</${commandName}:${command.id}>`;
+
+										default:
+											return `</${commandName} ${groupOrSubcommand}:${command.id}>`;
+									}
+								}
+
+								case ApplicationCommandOptionType.Subcommand:
+									if (command.options.some(({ name }) => name === groupOrSubcommand)) {
+										return `</${commandName} ${groupOrSubcommand}:${command.id}>`;
+									}
+									return `</${commandName}:${command.id}>`;
+
+								default:
+									return `</${commandName}:${command.id}>`;
+							}
 						},
 					),
 				{
