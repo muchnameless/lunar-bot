@@ -198,34 +198,44 @@ export class DiscordManager {
 							const command = this.client.application!.commands.cache.find(({ name }) => name === commandName);
 							if (!command) return match;
 
+							const replaced: (string | undefined)[] = [];
+
 							switch (command.options[0]?.type) {
 								case ApplicationCommandOptionType.SubcommandGroup: {
 									const group = command.options.find(({ name }) => name === groupOrSubcommand);
 
 									switch (group?.type) {
 										case undefined:
-											return `</${commandName}:${command.id}> ${groupOrSubcommand} ${subcommand}`;
+											replaced.push(`</${commandName}:${command.id}>`, groupOrSubcommand, subcommand);
+											break;
 
 										case ApplicationCommandOptionType.Subcommand:
 											if (group.options?.some(({ name }) => name === subcommand)) {
-												return `</${commandName} ${groupOrSubcommand} ${subcommand}:${command.id}>`;
+												replaced.push(`</${commandName} ${groupOrSubcommand} ${subcommand}:${command.id}>`);
+												break;
 											}
 										// fallthrough
 
 										default:
-											return `</${commandName} ${groupOrSubcommand}:${command.id}> ${subcommand}`;
+											replaced.push(`</${commandName} ${groupOrSubcommand}:${command.id}>`, subcommand);
+											break;
 									}
+									break;
 								}
 
 								case ApplicationCommandOptionType.Subcommand:
 									if (command.options.some(({ name }) => name === groupOrSubcommand)) {
-										return `</${commandName} ${groupOrSubcommand}:${command.id}> ${subcommand}`;
+										replaced.push(`</${commandName} ${groupOrSubcommand}:${command.id}>`, subcommand);
+										break;
 									}
 								// fallthrough
 
 								default:
-									return `</${commandName}:${command.id}> ${groupOrSubcommand} ${subcommand}`;
+									replaced.push(`</${commandName}:${command.id}>`, groupOrSubcommand, subcommand);
+									break;
 							}
+
+							return replaced.filter(Boolean).join(' ');
 						},
 					),
 				{
