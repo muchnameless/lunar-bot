@@ -110,31 +110,29 @@ export class DiscordManager {
 							// members/users
 							case '!': {
 								const TO_SEARCH = match.groups!.name!.toLowerCase();
-								const MENTION =
-									this.chatBridge.hypixelGuild?.discordGuild?.members.cache
-										.find(({ displayName }) => displayName.toLowerCase() === TO_SEARCH)
-										?.toString() ?? // members
-									this.client.users.cache.find(({ username }) => username.toLowerCase() === TO_SEARCH)?.toString(); // users
+								const memberOrUser =
+									this.chatBridge.hypixelGuild?.discordGuild?.members.cache.find(
+										({ displayName }) => displayName.toLowerCase() === TO_SEARCH,
+									) ?? // members
+									this.client.users.cache.find(({ username }) => username.toLowerCase() === TO_SEARCH); // users
 
-								if (MENTION) return MENTION;
-								break;
+								return memberOrUser?.toString() ?? match[0]!;
 							}
 
 							// roles
 							case '&': {
 								const TO_SEARCH = match.groups!.name!.toLowerCase();
-								const MENTION = this.chatBridge.hypixelGuild?.discordGuild?.roles.cache
-									.find(({ name }) => name.toLowerCase() === TO_SEARCH)
-									?.toString(); // roles
+								const role = this.chatBridge.hypixelGuild?.discordGuild?.roles.cache.find(
+									({ name }) => name.toLowerCase() === TO_SEARCH,
+								);
 
-								if (MENTION) return MENTION;
-								break;
+								return role?.toString() ?? match[0]!;
 							}
 
 							// players, members/users, roles
 							default: {
 								const TO_SEARCH = match.groups!.name!.toLowerCase();
-								if (!TO_SEARCH) break;
+								if (!TO_SEARCH) return match[0]!;
 
 								const player =
 									this.client.players.cache.find(({ ign }) => ign.toLowerCase() === TO_SEARCH) ??
@@ -144,10 +142,10 @@ export class DiscordManager {
 								if (player?.inDiscord || (player?.discordId && !player.discordId.includes('#'))) {
 									return userMention(player.discordId!);
 								}
+
+								return match[0]!;
 							}
 						}
-
-						return match[0]!;
 					})
 				)
 					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible mc characters
