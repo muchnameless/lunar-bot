@@ -361,22 +361,22 @@ export class DiscordChatManager extends ChatManager {
 			logger.error(error);
 		}
 
-		// resolve parseContent prior to queuePromise
 		const _options: SendViaBotOptions = {
 			content: await this.chatBridge.discord.parseContent(
-				content,
-				// `${
-				// 	discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
-				// }${content}`,
+				`${
+					discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
+				}${content}`,
 				fromMinecraft,
 			),
+			reply: {
+				messageReference: discordMessage as Message,
+			},
 			...options,
 		};
 
 		await queuePromise;
 
 		try {
-			if (discordMessage) return await MessageUtil.reply(discordMessage, _options);
 			return await ChannelUtil.send(this.channel, _options);
 		} finally {
 			this.queue.shift();
@@ -524,7 +524,7 @@ export class DiscordChatManager extends ChatManager {
 				} else {
 					content = interaction
 						.toString()
-						.slice(1)
+						.slice(1) // remove /
 						.replace(/ visibility:[a-z]+/, '');
 				}
 			} else if (message.author.id !== message.client.user!.id) {
