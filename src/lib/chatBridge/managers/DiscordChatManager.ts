@@ -436,7 +436,7 @@ export class DiscordChatManager extends ChatManager {
 			void DiscordChatManager._dmMuteInfo(
 				message.author,
 				`the bot's mute expires ${time(
-					this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid)!,
+					this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid!)!,
 					TimestampStyles.RelativeTime,
 				)}`,
 			);
