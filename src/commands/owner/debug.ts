@@ -1,4 +1,4 @@
-import { memoryUsage, version as processVersion } from 'node:process';
+import { env, memoryUsage, version as processVersion } from 'node:process';
 import {
 	ActionRowBuilder,
 	ChannelType,
@@ -54,6 +54,7 @@ export default class DebugCommand extends ApplicationCommand {
 								Uptime: ${ms(this.client.uptime!)}
 								Discord.js v${djsVersion}
 								Node.js ${processVersion}
+								Env: ${env.NODE_ENV}
 							`,
 						},
 						{
