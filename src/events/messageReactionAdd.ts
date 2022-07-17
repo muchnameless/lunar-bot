@@ -1,7 +1,7 @@
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event';
 import { UnicodeEmoji } from '#constants';
-import type { Message, MessageReaction, User } from 'discord.js';
+import type { ClientEvents, Events, Message } from 'discord.js';
 
 export default class MessageReactionAddEvent extends Event {
 	/**
@@ -9,7 +9,10 @@ export default class MessageReactionAddEvent extends Event {
 	 * @param reaction
 	 * @param user
 	 */
-	override async run(reaction: MessageReaction, { id: userId }: User) {
+	override async run(
+		reaction: ClientEvents[Events.MessageReactionAdd][0],
+		{ id: userId }: ClientEvents[Events.MessageReactionAdd][1],
+	) {
 		// reaction.message is not from the announcement channel or not the broadcast emoji
 		if (
 			reaction.emoji.name !== UnicodeEmoji.Broadcast ||

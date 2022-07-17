@@ -1,7 +1,7 @@
 import { MessageUtil, UserUtil } from '#utils';
 import { Event } from '#structures/events/Event';
 import { UnicodeEmoji } from '#constants';
-import type { Message } from 'discord.js';
+import type { ClientEvents, Events, Message } from 'discord.js';
 
 export default class MessageCreateEvent extends Event {
 	/**
@@ -27,7 +27,7 @@ export default class MessageCreateEvent extends Event {
 	 * event listener callback
 	 * @param message
 	 */
-	override run(message: Message) {
+	override run(message: ClientEvents[Events.MessageCreate][0]) {
 		return this._handleDiscordMessage(message, false);
 	}
 }

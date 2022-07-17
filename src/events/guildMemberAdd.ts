@@ -3,14 +3,14 @@ import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '#utils';
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event';
-import type { GuildMember } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 
 export default class GuildMemberAddEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param member
 	 */
-	override run(member: GuildMember) {
+	override run(member: ClientEvents[Events.GuildMemberAdd][0]) {
 		// check new discord members for tag in player database and link them if found
 		const player = GuildMemberUtil.getPlayer(member);
 

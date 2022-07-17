@@ -3,7 +3,7 @@ import { ChannelUtil } from '#utils';
 import { logger } from '#logger';
 import { minutes } from '#functions';
 import MessageCreateEvent from './messageCreate';
-import type { Message } from 'discord.js';
+import type { ClientEvents, Events, Message } from 'discord.js';
 
 export default class MessageUpdateEvent extends MessageCreateEvent {
 	/**
@@ -12,7 +12,10 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 	 * @param newMessage
 	 */
 	// @ts-expect-error
-	override async run(oldMessage: Message, newMessage: Message) {
+	override async run(
+		oldMessage: ClientEvents[Events.MessageUpdate][0],
+		newMessage: ClientEvents[Events.MessageUpdate][1],
+	) {
 		if (
 			Date.now() - newMessage.createdTimestamp >= minutes(10) || // original message is older than 10 min
 			(oldMessage.content === newMessage.content && newMessage.content) || // pinned or embed added
@@ -29,6 +32,6 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 			}
 		}
 
-		this._handleDiscordMessage(newMessage, true);
+		this._handleDiscordMessage(newMessage as Message, true);
 	}
 }

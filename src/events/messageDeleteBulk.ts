@@ -1,5 +1,5 @@
 import MessageDeleteEvent from './messageDelete';
-import type { Collection, Message, Snowflake } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 
 export default class MessageDeleteBulkEvent extends MessageDeleteEvent {
 	/**
@@ -7,7 +7,10 @@ export default class MessageDeleteBulkEvent extends MessageDeleteEvent {
 	 * @param messages
 	 */
 	// @ts-expect-error
-	override run(messages: Collection<Snowflake, Message>) {
+	override run(
+		//
+		messages: ClientEvents[Events.MessageBulkDelete][0],
+	) {
 		for (const message of messages.values()) {
 			this._handleDelete(message);
 		}

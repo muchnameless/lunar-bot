@@ -28,7 +28,8 @@ import type {
 	BaseGuildTextChannel,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
-	Interaction,
+	ClientEvents,
+	Events,
 	JSONEncodable,
 	MessageActionRowComponentBuilder,
 	MessageContextMenuCommandInteraction,
@@ -483,7 +484,7 @@ export default class InteractionCreateEvent extends Event {
 	 * event listener callback
 	 * @param interaction
 	 */
-	override async run(interaction: Interaction) {
+	override async run(interaction: ClientEvents[Events.InteractionCreate][0]) {
 		if (!InteractionUtil.inCachedGuildOrDM(interaction)) return;
 
 		try {

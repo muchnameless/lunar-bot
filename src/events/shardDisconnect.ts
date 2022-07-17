@@ -1,16 +1,16 @@
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event';
 import { exitProcess } from '#root/process';
-import type { CloseEvent } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 
 export default class ShardDisconnectEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param closeEvent
-	 * @param id
+	 * @param shardId
 	 */
-	override run(closeEvent: CloseEvent, id: number) {
-		logger.error(closeEvent, `[SHARD #${id} DISCONNECT]`);
+	override run(closeEvent: ClientEvents[Events.ShardDisconnect][0], shardId: ClientEvents[Events.ShardDisconnect][1]) {
+		logger.error(closeEvent, `[SHARD #${shardId} DISCONNECT]`);
 
 		void exitProcess(-1);
 	}

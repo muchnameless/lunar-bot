@@ -3,14 +3,14 @@ import { stripIndents } from 'common-tags';
 import { logger } from '#logger';
 import { EmbedUtil, GuildMemberUtil } from '#utils';
 import { Event } from '#structures/events/Event';
-import type { GuildMember } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 
 export default class GuildMemberRemoveEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param member
 	 */
-	override run(member: GuildMember) {
+	override run(member: ClientEvents[Events.GuildMemberRemove][0]) {
 		// uncache user
 		if (
 			!this.client.guilds.cache.some((guild) => guild.members.cache.has(member.id)) &&

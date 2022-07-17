@@ -2,7 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '#utils';
 import { Event } from '#structures/events/Event';
-import type { GuildMember } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 
 export default class GuildMemberUpdateEvent extends Event {
 	/**
@@ -10,7 +10,10 @@ export default class GuildMemberUpdateEvent extends Event {
 	 * @param oldMember
 	 * @param newMember
 	 */
-	override async run(oldMember: GuildMember, newMember: GuildMember) {
+	override async run(
+		oldMember: ClientEvents[Events.GuildMemberUpdate][0],
+		newMember: ClientEvents[Events.GuildMemberUpdate][1],
+	) {
 		const discordGuild = this.client.discordGuilds.cache.get(newMember.guild.id);
 		if (!discordGuild) return;
 

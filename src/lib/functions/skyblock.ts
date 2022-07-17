@@ -96,13 +96,13 @@ export function findSkyblockProfile(
 	profiles: SkyBlockProfiles | null,
 	uuid: string,
 	findProfileStrategy?: FindProfileStrategy | null,
-) {
+): SkyBlockProfile | null {
 	if (!profiles?.length) return null;
-	if (profiles.length === 1) return profiles[0];
+	if (profiles.length === 1) return profiles[0]!;
 
 	switch (findProfileStrategy ?? FindProfileStrategy.MaxWeight) {
 		case FindProfileStrategy.MaxWeight: {
-			let mainProfile = null;
+			let mainProfile: SkyBlockProfile | null = null;
 			let maxWeight = -1;
 
 			for (const profile of profiles) {
@@ -120,7 +120,7 @@ export function findSkyblockProfile(
 		}
 
 		case FindProfileStrategy.LastActive: {
-			let mainProfile = null;
+			let mainProfile: SkyBlockProfile | null = null;
 			let lastActive = -1;
 
 			for (const profile of profiles) {

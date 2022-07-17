@@ -1,14 +1,14 @@
 import ms from 'ms';
 import { logger } from '#logger';
 import { RESTEvent } from '#structures/events/RESTEvent';
-import type { RateLimitData } from '@discordjs/rest';
+import type { RESTEvents, RestEvents } from '@discordjs/rest';
 
 export default class RateLimitedEvent extends RESTEvent {
 	/**
 	 * event listener callback
 	 * @param rateLimitInfo
 	 */
-	override run(rateLimitInfo: RateLimitData) {
+	override run(rateLimitInfo: RestEvents[RESTEvents.RateLimited][0]) {
 		if (rateLimitInfo.global) {
 			return logger.error({ timeoutReadable: ms(rateLimitInfo.timeToReset), ...rateLimitInfo }, '[GLOBAL RATE LIMIT]');
 		}

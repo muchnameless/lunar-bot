@@ -14,7 +14,7 @@ import {
 	SLAYERS,
 } from '../constants';
 import { GuildUtil, UserUtil } from '.';
-import type { GuildMember, Message, Snowflake, Role } from 'discord.js';
+import type { GuildMember, Message, Snowflake, Role, PartialGuildMember } from 'discord.js';
 import type { Player } from '#structures/database/models/Player';
 import type { RoleCollection, RoleResolvables, SendDMOptions } from '.';
 
@@ -30,7 +30,7 @@ export class GuildMemberUtil extends null {
 	/**
 	 * @param member
 	 */
-	static getPlayer(member: GuildMember | null | undefined) {
+	static getPlayer(member: GuildMember | PartialGuildMember | null | undefined) {
 		return UserUtil.getPlayer(member?.user);
 	}
 

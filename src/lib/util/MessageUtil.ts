@@ -18,6 +18,7 @@ import type {
 	MessageEditOptions,
 	MessageOptions,
 	MessageReaction,
+	PartialMessage,
 	Snowflake,
 	TextChannel,
 } from 'discord.js';
@@ -45,7 +46,7 @@ export class MessageUtil extends null {
 
 	static DELETE_TIMEOUT_CACHE = new Map<Snowflake, QueuedDeletionTimeout>();
 
-	static DELETED_MESSAGES = new WeakSet<Message>();
+	static DELETED_MESSAGES = new WeakSet<Message | PartialMessage>();
 
 	/**
 	 * @param message

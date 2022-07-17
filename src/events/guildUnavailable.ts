@@ -3,14 +3,14 @@ import { GuildUtil } from '#utils';
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event';
 import { minutes } from '#functions';
-import type { Guild } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 
 export default class GuildUnavailableEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param guild
 	 */
-	override run(guild: Guild) {
+	override run(guild: ClientEvents[Events.GuildUnavailable][0]) {
 		logger.info(`[GUILD UNAVAILABLE]: ${guild.name}`);
 
 		// sweep linked discord members cache
