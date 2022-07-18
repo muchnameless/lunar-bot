@@ -73,7 +73,7 @@
 		"sequelize": "^6.21.3",
 		"timezonecomplete": "^5.12.4",
 		"tslib": "^2.4.0",
-		"undici": "^5.7.0",
+		"undici": "^5.8.0",
 		"utf-8-validate": "^5.0.9",
 		"zlib-sync": "^0.1.7"
 	},
