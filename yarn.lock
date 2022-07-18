@@ -485,10 +485,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/snowflake@npm:^3.2.2":
-  version: 3.2.2
-  resolution: "@sapphire/snowflake@npm:3.2.2"
-  checksum: 315fecef4738092c2a2f3509b132b811fcbfa6c98d5d45d951adaf3ca21608be69043bcc137cc6933a7c3e55cbdc066daa5bb484603e6575422b335445b59315
+"@sapphire/snowflake@npm:3.2.3-next.f731c3c.0":
+  version: 3.2.3-next.f731c3c.0
+  resolution: "@sapphire/snowflake@npm:3.2.3-next.f731c3c.0"
+  checksum: 14abc61211ff37784ae74a7e9abc9ac31ef9365a8f9f3210a5a898e38abb88fd3dce7cb6c024a3c78cf8ac0b9b0f46ae52b74015bb4275329946278c80b37c6f
   languageName: node
   linkType: hard
 
