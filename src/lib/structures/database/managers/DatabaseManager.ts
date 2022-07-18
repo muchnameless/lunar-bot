@@ -14,7 +14,7 @@ import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';
 import { TaxCollectorManager } from './TaxCollectorManager';
 import { ModelManager } from './ModelManager';
-import type { EmbedFieldData, GuildChannel, Message } from 'discord.js';
+import type { APIEmbedField, GuildChannel, Message } from 'discord.js';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
 import type { ChatTrigger } from '../models/ChatTrigger';
@@ -170,7 +170,7 @@ export class DatabaseManager {
 		const TAX_AMOUNT = config.get('TAX_AMOUNT');
 		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS');
 		const availableAuctionsLog: { ign: string | null; auctions: string | number }[] = [];
-		const dbPromises: Promise<EmbedFieldData | undefined>[] = [];
+		const dbPromises: Promise<APIEmbedField | undefined>[] = [];
 
 		let apiError = false;
 
@@ -278,7 +278,7 @@ export class DatabaseManager {
 		// update database
 		if (dbPromises.length) {
 			setTimeout(async () => {
-				const taxPaidLog = (await Promise.all(dbPromises)).filter((x) => x != null) as EmbedFieldData[];
+				const taxPaidLog = (await Promise.all(dbPromises)).filter((x) => x != null) as APIEmbedField[];
 
 				// logging
 				if (taxPaidLog.length) {
@@ -333,7 +333,7 @@ export class DatabaseManager {
 	 */
 	private _createTaxEmbedFields() {
 		const { config, hypixelGuilds } = this.modelManagers;
-		const fields: EmbedFieldData[] = [];
+		const fields: APIEmbedField[] = [];
 
 		for (const hypixelGuild of hypixelGuilds.cache.values()) {
 			const GUILD_PLAYER_COUNT = hypixelGuild.playerCount;
@@ -384,7 +384,7 @@ export class DatabaseManager {
 	 */
 	createTaxEmbed(
 		description: string = this._createTaxEmbedDescription(),
-		fields: EmbedFieldData[] = this._createTaxEmbedFields(),
+		fields: APIEmbedField[] = this._createTaxEmbedFields(),
 	) {
 		return this.client.defaultEmbed
 			.setTitle('Guild Tax')

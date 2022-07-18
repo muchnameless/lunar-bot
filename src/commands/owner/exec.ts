@@ -24,6 +24,7 @@ import type {
 	MessageContextMenuCommandInteraction,
 	ModalActionRowComponentBuilder,
 	ModalSubmitInteraction,
+	JSONEncodable,
 } from 'discord.js';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 
@@ -65,7 +66,7 @@ export default class ExecCommand extends BaseOwnerCommand {
 
 			stopwatch.stop();
 
-			const files: AttachmentPayload[] = [];
+			const files: JSONEncodable<AttachmentPayload>[] = [];
 
 			for (const std of [stdout, stderr]) {
 				if (!std) continue;

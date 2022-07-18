@@ -13,6 +13,7 @@ import type {
 	MessageActionRowComponentBuilder,
 	MessageComponentInteraction,
 	EmbedBuilder,
+	JSONEncodable,
 } from 'discord.js';
 import type { RepliableInteraction } from '#utils';
 
@@ -25,7 +26,6 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 	/**
 	 * replaces the client's token in 'text' and escapes `
 	 * @param input
-	 * @param depth
 	 */
 	protected _cleanOutput(input: string) {
 		return (
@@ -62,10 +62,9 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 		void InteractionUtil.defer(interaction);
 
 		return [
-			new AttachmentBuilder() //
+			new AttachmentBuilder()
 				.setFile(Buffer.from(content).subarray(0, BaseOwnerCommand.MAX_FILE_SIZE))
-				.setName('result.js')
-				.toJSON(),
+				.setName('result.js'),
 		];
 	}
 
@@ -125,7 +124,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 	) {
 		const cleanedOutput = this._cleanOutput(output);
 
-		let files: AttachmentPayload[] | undefined;
+		let files: JSONEncodable<AttachmentPayload>[] | undefined;
 		let length = embedLength(responseEmbed.data) + '\u200B'.length + (footerField?.length ?? 0);
 
 		// add output fields till embed character limit is reached
@@ -173,7 +172,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 	) {
 		const CLEANED_OUTPUT = this._cleanOutput(inspect(error, { depth: Number.POSITIVE_INFINITY }));
 
-		let files: AttachmentPayload[] | undefined;
+		let files: JSONEncodable<AttachmentPayload>[] | undefined;
 		let length = embedLength(responseEmbed.data) + '\u200B'.length + (footerField?.length ?? 0);
 
 		for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
@@ -213,7 +212,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 	protected _respond(
 		interaction: RepliableInteraction<'cachedOrDM'>,
 		responseEmbed: EmbedBuilder,
-		files: AttachmentPayload[] | undefined,
+		files: JSONEncodable<AttachmentPayload>[] | undefined,
 		inspectDepth?: number,
 	) {
 		const customId = typeof inspectDepth === 'number' ? `:${inspectDepth}` : '';

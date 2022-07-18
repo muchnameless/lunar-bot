@@ -146,7 +146,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 	) {
 		return super._respondWithError(
 			interaction,
-			util.inspect(error, { depth: Number.POSITIVE_INFINITY }),
+			error,
 			responseEmbed,
 			`discord.js ${Discord.version} • type: \`${new Type(error)}\` • time taken: \`${stopwatch}\``,
 			inspectDepth,

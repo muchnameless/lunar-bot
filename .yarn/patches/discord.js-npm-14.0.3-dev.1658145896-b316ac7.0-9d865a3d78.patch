@@ -37,7 +37,7 @@ index 379b0e1f43273c4f979203e4087af3a4f654df19..fabdac796e2005ab2e03704c3cf18fbb
     * Creates a new action row builder from JSON data
     * @param {JSONEncodable<APIActionRowComponent<APIActionRowComponentTypes>>
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
-index f904cb84b34ef249eba111282e28b6307695ce4d..528843909e65ff4293b1a9efc71ec757402d7a38 100644
+index f904cb84b34ef249eba111282e28b6307695ce4d..16f37c229486000d68bed7001a9fb8d761bd1d00 100644
 --- a/src/structures/AttachmentBuilder.js
 +++ b/src/structures/AttachmentBuilder.js
 @@ -1,31 +1,25 @@
@@ -53,7 +53,7 @@ index f904cb84b34ef249eba111282e28b6307695ce4d..528843909e65ff4293b1a9efc71ec757
    /**
 -   * @param {BufferResolvable|Stream} attachment The file
 -   * @param {APIAttachment} [data] Extra data
-+   * @param {AttachmentPayload} payload Attachment and extra data
++   * @param {AttachmentPayload} [payload] Attachment and extra data
     */
 -  constructor(attachment, data = {}) {
 +  constructor({ attachment, ...data } = {}) {
@@ -96,7 +96,7 @@ index f904cb84b34ef249eba111282e28b6307695ce4d..528843909e65ff4293b1a9efc71ec757
      return this;
    }
  
-@@ -68,7 +62,7 @@ class AttachmentBuilder {
+@@ -68,11 +62,11 @@ class AttachmentBuilder {
  
      if (!spoiler) {
        while (this.spoiler) {
@@ -105,12 +105,17 @@ index f904cb84b34ef249eba111282e28b6307695ce4d..528843909e65ff4293b1a9efc71ec757
        }
        return this;
      }
+-    this.name = `SPOILER_${this.name}`;
++    this.data.name = `SPOILER_${this.name}`;
+     return this;
+   }
+ 
 @@ -82,11 +76,11 @@ class AttachmentBuilder {
     * @readonly
     */
    get spoiler() {
 -    return basename(this.name).startsWith('SPOILER_');
-+    return basename(this.data.name ?? '').startsWith('SPOILER_');
++    return this.data.name ? basename(this.data.name).startsWith('SPOILER_') : false;
    }
  
    toJSON() {
@@ -169,6 +174,24 @@ index 671a77a8f574c3892055bc6d073fa5439c14cbc9..fe7c86df56acdf30b510bd7ec2f3e4bf
    /**
     * Creates a new button builder from JSON data
     * @param {JSONEncodable<APIButtonComponent>|APIButtonComponent} other The other data
+diff --git a/src/structures/Embed.js b/src/structures/Embed.js
+index 2566c8336a23f9de408d4c9767fef231eea80a81..60f0407b63658ce0a85d411cdde77a6e43cdf5f1 100644
+--- a/src/structures/Embed.js
++++ b/src/structures/Embed.js
+@@ -17,11 +17,11 @@ class Embed {
+ 
+   /**
+    * An array of fields of this embed.
+-   * @type {Array<APIEmbedField>}
++   * @type {?Array<APIEmbedField>}
+    * @readonly
+    */
+   get fields() {
+-    return this.data.fields ?? [];
++    return this.data.fields ?? null;
+   }
+ 
+   /**
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
 index baf328ccb44b53c8725e5ea7204f6cb8c4b29945..a85daccc3cd649fd0c42313b1f1108cc52259eb4 100644
 --- a/src/structures/GuildEmoji.js
@@ -475,7 +498,7 @@ index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..169d6a4aea38e134b574dbf60ed07ed8
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 896df62d27d717c73dcee68ea077db1fe32a935d..114788b6c7502f79184dc475a86731d077206f44 100644
+index 4a12394713bf5382f370cebe7726792d0e9ebfaf..06524ccb52e330e4464d58377c19994c02272a10 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -107,7 +107,7 @@ class MessagePayload {
@@ -496,6 +519,27 @@ index 896df62d27d717c73dcee68ea077db1fe32a935d..114788b6c7502f79184dc475a86731d0
  
      let username;
      let avatarURL;
+@@ -217,9 +217,9 @@ class MessagePayload {
+    * @returns {Promise<MessagePayload>}
+    */
+   async resolveFiles() {
+-    if (this.files) return this;
++    if (this.files || !this.options.files) return this;
+ 
+-    this.files = await Promise.all(this.options.files?.map(file => this.constructor.resolveFile(file)) ?? []);
++    this.files = await Promise.all(this.options.files.map(file => this.constructor.resolveFile(file)));
+     return this;
+   }
+ 
+@@ -251,6 +251,8 @@ class MessagePayload {
+       attachment = fileLike;
+       name = findName(attachment);
+     } else {
++      if (isJSONEncodable(fileLike)) fileLike = fileLike.toJSON();
++
+       attachment = fileLike.attachment;
+       name = fileLike.name ?? findName(attachment);
+     }
 diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
 index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cbb4db6129 100644
 --- a/src/structures/ModalSubmitFields.js
@@ -624,7 +668,7 @@ index c5f0bd136b60f4ba424d9b6450c9524298d661b3..137cc4590ce3ec9240b03db0c2a7bb68
     * Creates a new select menu option builder from JSON data
     * @param {JSONEncodable<APISelectMenuOption>|APISelectMenuOption} other The other data
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 82050d77ded515e3c4f235b0d24a9b22832a32c1..df8c063049b6074d9afada51a66811c16c8e25eb 100644
+index 9409dbcd3aa4d83c3ae18096b894ee01e187c91f..9f4abde2d2040c2ce720f0598c71c5485b1c9920 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -345,17 +345,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
@@ -646,7 +690,7 @@ index 82050d77ded515e3c4f235b0d24a9b22832a32c1..df8c063049b6074d9afada51a66811c1
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495f241e5f6 100644
+index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f9c27a358 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -260,7 +260,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -658,7 +702,16 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -1473,7 +1474,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -697,7 +697,7 @@ export class EmbedBuilder extends BuildersEmbed {
+ export class Embed {
+   private constructor(data: APIEmbed);
+   public readonly data: Readonly<APIEmbed>;
+-  public get fields(): APIEmbedField[];
++  public get fields(): APIEmbedField[] | null;
+   public get footer(): EmbedFooterData | null;
+   public get title(): string | null;
+   public get description(): string | null;
+@@ -1469,7 +1469,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -667,7 +720,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1481,12 +1482,18 @@ export type CacheTypeReducer<
+@@ -1477,12 +1477,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -686,7 +739,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1508,7 +1515,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1504,7 +1510,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -696,7 +749,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1516,7 +1524,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1512,7 +1519,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -705,7 +758,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1740,16 +1748,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1736,16 +1743,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -726,7 +779,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1945,12 +1952,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1941,12 +1947,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -745,7 +798,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1959,6 +1971,7 @@ export class ModalSubmitFields {
+@@ -1955,6 +1966,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -753,7 +806,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3246,7 +3259,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3249,7 +3261,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -762,7 +815,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3703,11 +3715,6 @@ export interface BaseApplicationCommandData {
+@@ -3702,11 +3714,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -774,7 +827,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5026,10 +5033,8 @@ export interface MessageEditOptions {
+@@ -5017,10 +5024,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -786,7 +839,7 @@ index 07012bcc2b8566dae3b02e113a8f47b0a1207c0f..17e9260cffab7fd211206efaac712495
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5084,10 +5089,8 @@ export interface MessageOptions {
+@@ -5075,10 +5080,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
