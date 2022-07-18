@@ -93,7 +93,7 @@
 		"eslint-plugin-import": "^2.26.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-regexp": "^1.7.0",
-		"eslint-plugin-unicorn": "^43.0.1",
+		"eslint-plugin-unicorn": "^43.0.2",
 		"husky": "^8.0.1",
 		"ley": "^0.7.1",
 		"lint-staged": "^13.0.3",
