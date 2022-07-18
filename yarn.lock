@@ -500,15 +500,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/time-utilities@npm:1.7.5-next.688ed4a.0":
-  version: 1.7.5-next.688ed4a.0
-  resolution: "@sapphire/time-utilities@npm:1.7.5-next.688ed4a.0"
-  dependencies:
-    "@sapphire/utilities": ^3.7.0
-  checksum: 74ef4cef2c23bfd5fba6606e99f43a544c5be3375b785342360b285782f4b104b443af0c0b09d6fbca7aa36f137abb43c61d9533d98aa94a15145b4d43873d69
-  languageName: node
-  linkType: hard
-
 "@sapphire/type@npm:2.2.5-next.cf34f61.0":
   version: 2.2.5-next.cf34f61.0
   resolution: "@sapphire/type@npm:2.2.5-next.cf34f61.0"
@@ -3610,7 +3601,6 @@ __metadata:
     "@sapphire/discord-utilities": 2.11.5-next.688ed4a.0
     "@sapphire/shapeshift": 3.5.1-next.31b762e.0
     "@sapphire/stopwatch": 1.4.2-next.688ed4a.0
-    "@sapphire/time-utilities": 1.7.5-next.688ed4a.0
     "@sapphire/type": 2.2.5-next.cf34f61.0
     "@sapphire/utilities": 3.7.1-next.688ed4a.0
     "@skyra/jaro-winkler": ^1.1.0
