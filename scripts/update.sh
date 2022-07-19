@@ -9,6 +9,7 @@ set current = `git rev-parse --short HEAD`
 git pull
 
 if (`git rev-parse --short HEAD` != $current) then
+	echo ""
 	./scripts/bot.sh status
 
 	echo ""
