@@ -1,0 +1,70 @@
+diff --git a/dist/components/ActionRow.d.ts b/dist/components/ActionRow.d.ts
+index d7d849539c30a3ea410310e6f406da420f857b19..792bd3705d04670789de0a4b5da81a516935571a 100644
+--- a/dist/components/ActionRow.d.ts
++++ b/dist/components/ActionRow.d.ts
+@@ -7,7 +7,7 @@ import { type RestOrArray } from '../util/normalizeArray';
+ export declare type MessageComponentBuilder = MessageActionRowComponentBuilder | ActionRowBuilder<MessageActionRowComponentBuilder>;
+ export declare type ModalComponentBuilder = ModalActionRowComponentBuilder | ActionRowBuilder<ModalActionRowComponentBuilder>;
+ export declare type MessageActionRowComponentBuilder = ButtonBuilder | SelectMenuBuilder;
+-export declare type ModalActionRowComponentBuilder = TextInputBuilder;
++export declare type ModalActionRowComponentBuilder = TextInputBuilder | SelectMenuBuilder;
+ export declare type AnyComponentBuilder = MessageActionRowComponentBuilder | ModalActionRowComponentBuilder;
+ /**
+  * Represents an action row component
+diff --git a/dist/messages/formatters.cjs b/dist/messages/formatters.cjs
+index e0d24d6819dad4259417fd3f597e00c4a89d7435..4c6e1fad47399c0b10f271037c6003136d10b695 100644
+--- a/dist/messages/formatters.cjs
++++ b/dist/messages/formatters.cjs
+@@ -51,9 +51,9 @@ function formatEmoji(emojiId, animated = false) {
+ }
+ function time(timeOrSeconds, style) {
+   if (typeof timeOrSeconds !== "number") {
+-    timeOrSeconds = Math.floor((timeOrSeconds?.getTime() ?? Date.now()) / 1e3);
++    timeOrSeconds = timeOrSeconds?.getTime() ?? Date.now();
+   }
+-  return typeof style === "string" ? `<t:${timeOrSeconds}:${style}>` : `<t:${timeOrSeconds}>`;
++  return typeof style === "string" ? `<t:${Math.floor(timeOrSeconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrSeconds / 1e3)}>`;
+ }
+ const TimestampStyles = {
+   ShortTime: "t",
+diff --git a/dist/messages/formatters.d.ts b/dist/messages/formatters.d.ts
+index 5bdc93810bf487c83b2853407573ad0a07ed4110..766116527918b7728dde42083a9b799114ffc898 100644
+--- a/dist/messages/formatters.d.ts
++++ b/dist/messages/formatters.d.ts
+@@ -151,16 +151,16 @@ export declare function time<S extends TimestampStylesString>(date: Date, style:
+ /**
+  * Formats the given timestamp into a short date-time string
+  *
+- * @param seconds - The time to format, represents an UNIX timestamp in seconds
++ * @param seconds - The time to format, represents an UNIX timestamp in milliseconds
+  */
+-export declare function time<C extends number>(seconds: C): `<t:${C}>`;
++export declare function time<C extends number>(milliseconds: C): `<t:${C}>`;
+ /**
+  * Formats the given timestamp into a short date-time string
+  *
+- * @param seconds - The time to format, represents an UNIX timestamp in seconds
++ * @param seconds - The time to format, represents an UNIX timestamp in milliseconds
+  * @param style - The style to use
+  */
+-export declare function time<C extends number, S extends TimestampStylesString>(seconds: C, style: S): `<t:${C}:${S}>`;
++export declare function time<C extends number, S extends TimestampStylesString>(milliseconds: C, style: S): `<t:${C}:${S}>`;
+ /**
+  * The [message formatting timestamp styles](https://discord.com/developers/docs/reference#message-formatting-timestamp-styles) supported by Discord
+  */
+diff --git a/dist/messages/formatters.mjs b/dist/messages/formatters.mjs
+index a63971207ed3d8b6298f6b56c224430d9aff6e3e..085798c143e22cca79b071131f946d3390726c15 100644
+--- a/dist/messages/formatters.mjs
++++ b/dist/messages/formatters.mjs
+@@ -47,9 +47,9 @@ function formatEmoji(emojiId, animated = false) {
+ }
+ function time(timeOrSeconds, style) {
+   if (typeof timeOrSeconds !== "number") {
+-    timeOrSeconds = Math.floor((timeOrSeconds?.getTime() ?? Date.now()) / 1e3);
++    timeOrSeconds = timeOrSeconds?.getTime() ?? Date.now();
+   }
+-  return typeof style === "string" ? `<t:${timeOrSeconds}:${style}>` : `<t:${timeOrSeconds}>`;
++  return typeof style === "string" ? `<t:${Math.floor(timeOrSeconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrSeconds / 1e3)}>`;
+ }
+ const TimestampStyles = {
+   ShortTime: "t",
