@@ -105,7 +105,7 @@
 		"node": ">=v18.0.0",
 		"npm": ">=8.7.0"
 	},
-	"packageManager": "yarn@3.2.1",
+	"packageManager": "yarn@3.2.2",
 	"resolutions": {
 		"@discordjs/builders": "patch:@discordjs/builders@npm:1.0.1-dev.1658330984-a05386a.0#.yarn/patches/@discordjs-builders-npm-1.0.1-dev.1658330984-a05386a.0-9c08bf2635.patch",
 		"@discordjs/collection": "1.0.1-dev.1658330950-a05386a.0",
