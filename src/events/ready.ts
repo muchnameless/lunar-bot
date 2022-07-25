@@ -1,4 +1,5 @@
-import { safePromiseAll } from '#functions';
+import { setTimeout as sleep } from 'node:timers/promises';
+import { minutes, safePromiseAll } from '#functions';
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event';
 
@@ -20,6 +21,17 @@ export default class ReadyEvent extends Event {
 		}
 	}
 
+	async fetchApplicationCommands(retries = 0): Promise<void> {
+		try {
+			await this.client.application!.commands.fetch();
+		} catch (error) {
+			logger.error(error, '[READY]: fetchApplicationCommands');
+
+			await sleep(Math.max(retries * minutes(1), minutes(30)));
+			return this.fetchApplicationCommands(retries + 1);
+		}
+	}
+
 	/**
 	 * event listener callback
 	 */
@@ -28,11 +40,7 @@ export default class ReadyEvent extends Event {
 
 		this.client.db.schedule();
 
-		await safePromiseAll([
-			this.client.logHandler.init(),
-			this.connectChatBridges(),
-			this.client.application!.commands.fetch(),
-		]);
+		await safePromiseAll([this.client.logHandler.init(), this.connectChatBridges(), this.fetchApplicationCommands()]);
 
 		// log ready
 		logger.info(

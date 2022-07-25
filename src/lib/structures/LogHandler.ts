@@ -87,7 +87,7 @@ export class LogHandler {
 		try {
 			await this._postFileLogs(); // repost logs that failed to be posted during the last uptime
 		} catch (error) {
-			logger.error(error, '[LOG HANDLER]');
+			logger.error(error, '[LOG HANDLER]: init');
 		}
 
 		return this;
