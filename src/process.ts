@@ -12,13 +12,15 @@ import { jobs } from '#root/jobs/index';
 export const IGNORED_ERRORS: string[] = [];
 
 process
-	.on('unhandledRejection', (error) => {
-		logger.error(error, '[UNCAUGHT PROMISE REJECTION]');
+	.on('unhandledRejection', (error, promise) => {
+		logger.error({ err: error, promise }, '[UNCAUGHT PROMISE REJECTION]');
 	})
-	.once('uncaughtException', (error) => {
-		if (IGNORED_ERRORS.includes(error?.message ?? error)) return logger.error(error, '[UNCAUGHT EXCEPTION]');
+	.once('uncaughtException', (error, origin) => {
+		if (IGNORED_ERRORS.includes(error?.message ?? error)) {
+			return logger.error({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
+		}
 
-		logger.fatal(error, '[UNCAUGHT EXCEPTION]');
+		logger.fatal({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
 		void exitProcess(-1);
 	})
 	.once('SIGINT', () => {
