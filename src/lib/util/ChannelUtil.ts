@@ -140,7 +140,17 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
-		if (Reflect.has(_options, 'reply')) requiredChannelPermissions |= PermissionFlagsBits.ReadMessageHistory;
+		if (Reflect.has(_options, 'reply')) {
+			if ((_options.reply!.messageReference as Message).system) {
+				const MESSAGE = 'cannot reply to a system message';
+
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+				return null;
+			}
+
+			requiredChannelPermissions |= PermissionFlagsBits.ReadMessageHistory;
+		}
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > MessageLimits.MaximumEmbeds) {
