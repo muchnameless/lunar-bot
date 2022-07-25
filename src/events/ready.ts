@@ -27,7 +27,7 @@ export default class ReadyEvent extends Event {
 		} catch (error) {
 			logger.error(error, '[READY]: fetchApplicationCommands');
 
-			await sleep(Math.max(retries * minutes(1), minutes(30)));
+			await sleep(Math.min(retries * minutes(1), minutes(30)));
 			return this.fetchApplicationCommands(retries + 1);
 		}
 	}
