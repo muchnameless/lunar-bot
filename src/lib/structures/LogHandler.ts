@@ -43,7 +43,7 @@ export class LogHandler {
 			return null;
 		}
 
-		if (!ChannelUtil.botPermissions(channel).has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
+		if (!ChannelUtil.botPermissions(channel).has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS, false)) {
 			logger.error(
 				`[LOG HANDLER]: missing ${commaListAnd(
 					ChannelUtil.botPermissions(channel)

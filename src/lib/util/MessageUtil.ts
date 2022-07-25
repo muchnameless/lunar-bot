@@ -126,6 +126,7 @@ export class MessageUtil extends null {
 		if (
 			!ChannelUtil.botPermissions(channel).has(
 				PermissionFlagsBits.AddReactions | PermissionFlagsBits.ViewChannel | PermissionFlagsBits.ReadMessageHistory,
+				false,
 			)
 		) {
 			logger.warn(
@@ -387,7 +388,7 @@ export class MessageUtil extends null {
 
 		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
-		if (!permissions.has(requiredChannelPermissions)) {
+		if (!permissions.has(requiredChannelPermissions, false)) {
 			const missingChannelPermissions = permissions
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);

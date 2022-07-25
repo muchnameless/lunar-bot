@@ -80,7 +80,7 @@ export class ChannelUtil extends null {
 
 				default: {
 					if (Array.isArray(IdOrIds)) {
-						if (this.botPermissions(channel).has(PermissionFlagsBits.ManageMessages)) {
+						if (this.botPermissions(channel).has(PermissionFlagsBits.ManageMessages, false)) {
 							return await channel.bulkDelete(IdOrIds);
 						}
 
@@ -177,7 +177,7 @@ export class ChannelUtil extends null {
 		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
 		// permission checks
-		if (!permissions.has(requiredChannelPermissions)) {
+		if (!permissions.has(requiredChannelPermissions, false)) {
 			const missingChannelPermissions = permissions
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);

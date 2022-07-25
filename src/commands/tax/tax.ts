@@ -418,7 +418,7 @@ export default class TaxCommand extends ApplicationCommand {
 
 								const { channel } = logMessage;
 
-								if (!ChannelUtil.botPermissions(channel).has(PermissionFlagsBits.ManageMessages)) return;
+								if (!ChannelUtil.botPermissions(channel).has(PermissionFlagsBits.ManageMessages, false)) return;
 
 								const pinnedMessages = await channel.messages.fetchPinned();
 
