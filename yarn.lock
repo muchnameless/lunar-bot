@@ -3863,7 +3863,7 @@ __metadata:
 
 "minecraft-protocol@patch:minecraft-protocol@npm:1.35.1#.yarn/patches/minecraft-protocol-npm-1.35.1-bc03e71596.patch::locator=lunar-bot%40workspace%3A.":
   version: 1.35.1
-  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.35.1#.yarn/patches/minecraft-protocol-npm-1.35.1-bc03e71596.patch::version=1.35.1&hash=987c94&locator=lunar-bot%40workspace%3A."
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.35.1#.yarn/patches/minecraft-protocol-npm-1.35.1-bc03e71596.patch::version=1.35.1&hash=10ae8c&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -3882,7 +3882,7 @@ __metadata:
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 20ac50ebd70bc67f2a65a2a8a2691bd4516e316e1f067ab942a38298d017d25ac72c25ba783069ffb9957f4b8412f07b02ef1098276d6bb11ddf3b395547561a
+  checksum: a97a6f99cba44d38328ba973e4319ec7b5eb2fecd19d94b60e642d061ca7e6123cb3561b4a8cd4652cd1a9178ca2f543877b81196e5778c5de0c2f551b0040a2
   languageName: node
   linkType: hard
 
