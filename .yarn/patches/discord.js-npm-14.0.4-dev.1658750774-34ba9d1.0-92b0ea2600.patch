@@ -148,10 +148,10 @@ index baf328ccb44b53c8725e5ea7204f6cb8c4b29945..a85daccc3cd649fd0c42313b1f1108cc
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index b0ee8458c90ee81551e90a0e29d15c25802fa5f8..6293abd97123cdf7c09d668319d150bcf5879a8f 100644
+index c9002ddd4f822af68cef16c8193d457b965ee839..6293abd97123cdf7c09d668319d150bcf5879a8f 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
-@@ -239,8 +239,9 @@ class GuildMember extends Base {
+@@ -248,8 +239,9 @@ class GuildMember extends Base {
      if (this.user.id === this.guild.ownerId) return false;
      if (this.user.id === this.client.user.id) return false;
      if (this.client.user.id === this.guild.ownerId) return true;
@@ -163,7 +163,7 @@ index b0ee8458c90ee81551e90a0e29d15c25802fa5f8..6293abd97123cdf7c09d668319d150bc
    }
  
    /**
-@@ -249,7 +250,6 @@ class GuildMember extends Base {
+@@ -258,7 +250,6 @@ class GuildMember extends Base {
     * @readonly
     */
    get kickable() {
@@ -171,7 +171,7 @@ index b0ee8458c90ee81551e90a0e29d15c25802fa5f8..6293abd97123cdf7c09d668319d150bc
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers);
    }
  
-@@ -259,7 +259,6 @@ class GuildMember extends Base {
+@@ -268,7 +259,6 @@ class GuildMember extends Base {
     * @readonly
     */
    get bannable() {
@@ -179,7 +179,7 @@ index b0ee8458c90ee81551e90a0e29d15c25802fa5f8..6293abd97123cdf7c09d668319d150bc
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.BanMembers);
    }
  
-@@ -272,7 +271,7 @@ class GuildMember extends Base {
+@@ -281,7 +271,7 @@ class GuildMember extends Base {
      return (
        !this.permissions.has(PermissionFlagsBits.Administrator) &&
        this.manageable &&
@@ -207,7 +207,7 @@ index 68699aba7207575a849b0610a2852ce029dd4795..06684efdb77f0f59a3768f7d531c6af6
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 3b8b12a3612c244ee2dbcf2588fc15f6d63a024c..169d6a4aea38e134b574dbf60ed07ed80a6b6896 100644
+index f2b54386ba411155127e3eaf3ed35b39a5030c8c..169d6a4aea38e134b574dbf60ed07ed80a6b6896 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -275,10 +275,13 @@ class Message extends Base {
@@ -522,10 +522,10 @@ index 9409dbcd3aa4d83c3ae18096b894ee01e187c91f..9f4abde2d2040c2ce720f0598c71c548
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f9c27a358 100644
+index a4ef21181b829fe1e2822330263b027a2c8d883c..9ce0a7822e20117962b6e2ec55ab6d9f9c27a358 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -260,7 +260,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+@@ -261,7 +260,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
  }
  
  export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
@@ -534,7 +534,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -697,7 +697,7 @@ export class EmbedBuilder extends BuildersEmbed {
+@@ -698,7 +697,7 @@ export class EmbedBuilder extends BuildersEmbed {
  export class Embed {
    private constructor(data: APIEmbed);
    public readonly data: Readonly<APIEmbed>;
@@ -543,7 +543,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1469,7 +1469,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1471,7 +1469,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -552,7 +552,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1477,12 +1477,18 @@ export type CacheTypeReducer<
+@@ -1479,12 +1477,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -571,7 +571,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1504,7 +1510,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1506,7 +1510,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -581,7 +581,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1512,7 +1519,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1514,7 +1519,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -590,7 +590,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1736,16 +1743,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1742,16 +1743,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -611,7 +611,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1941,12 +1947,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1947,12 +1947,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -630,7 +630,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1955,6 +1966,7 @@ export class ModalSubmitFields {
+@@ -1961,6 +1966,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -638,7 +638,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3249,7 +3261,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3255,7 +3261,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -647,7 +647,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3702,11 +3714,6 @@ export interface BaseApplicationCommandData {
+@@ -3708,11 +3714,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -659,7 +659,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5017,10 +5024,8 @@ export interface MessageEditOptions {
+@@ -5023,10 +5024,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -671,7 +671,7 @@ index 1d92593497d5cd120cd8a6ab20c9b99c85f5e176..9ce0a7822e20117962b6e2ec55ab6d9f
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5075,10 +5080,8 @@ export interface MessageOptions {
+@@ -5081,10 +5080,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
