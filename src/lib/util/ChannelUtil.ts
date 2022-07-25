@@ -179,7 +179,7 @@ export class ChannelUtil extends null {
 		// permission checks
 		if (!permissions.has(requiredChannelPermissions, false)) {
 			const missingChannelPermissions = permissions
-				.missing(requiredChannelPermissions)
+				.missing(requiredChannelPermissions, false)
 				.map((permission) => `'${permission}'`);
 			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${
 				missingChannelPermissions?.length === 1 ? '' : 's'

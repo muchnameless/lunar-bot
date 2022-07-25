@@ -47,7 +47,7 @@ export class LogHandler {
 			logger.error(
 				`[LOG HANDLER]: missing ${commaListAnd(
 					ChannelUtil.botPermissions(channel)
-						.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
+						.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS, false)
 						.map((permission) => `'${permission}'`),
 				)}
 				`,
