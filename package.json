@@ -115,6 +115,6 @@
 		"@sapphire/snowflake": "3.2.3-next.c412812.0",
 		"discord-api-types": "0.36.3-next.0a2e778.1658329032",
 		"discord.js@14.0.4-dev.1658331001-a05386a.0": "patch:discord.js@npm:14.0.4-dev.1658331001-a05386a.0#.yarn/patches/discord.js-npm-14.0.4-dev.1658331001-a05386a.0-9140602659.patch",
-		"minecraft-protocol@^1.35.0": "patch:minecraft-protocol@npm:1.35.0#.yarn/patches/minecraft-protocol-npm-1.35.0-d5ba667cea.patch"
+		"minecraft-protocol": "patch:minecraft-protocol@npm:1.35.0#.yarn/patches/minecraft-protocol-npm-1.35.0-d5ba667cea.patch"
 	}
 }
