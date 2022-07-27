@@ -12,10 +12,10 @@ index d7d849539c30a3ea410310e6f406da420f857b19..dc36422942f745e0965c8c661bc50c8c
  /**
   * Represents an action row component
 diff --git a/dist/messages/formatters.cjs b/dist/messages/formatters.cjs
-index e0d24d6819dad4259417fd3f597e00c4a89d7435..4c6e1fad47399c0b10f271037c6003136d10b695 100644
+index 4983b883b375d697b5e103cf13c590418d7c324f..4c6e1fad47399c0b10f271037c6003136d10b695 100644
 --- a/dist/messages/formatters.cjs
 +++ b/dist/messages/formatters.cjs
-@@ -51,9 +51,9 @@ function formatEmoji(emojiId, animated = false) {
+@@ -53,9 +51,9 @@ function formatEmoji(emojiId, animated = false) {
  }
  function time(timeOrSeconds, style) {
    if (typeof timeOrSeconds !== "number") {
@@ -28,7 +28,7 @@ index e0d24d6819dad4259417fd3f597e00c4a89d7435..4c6e1fad47399c0b10f271037c600313
  const TimestampStyles = {
    ShortTime: "t",
 diff --git a/dist/messages/formatters.d.ts b/dist/messages/formatters.d.ts
-index 5bdc93810bf487c83b2853407573ad0a07ed4110..65743e31a9d55a00adaa0b551b92233407162039 100644
+index d130c417d4ce9e72eebbcd21aecd1c018297d364..65743e31a9d55a00adaa0b551b92233407162039 100644
 --- a/dist/messages/formatters.d.ts
 +++ b/dist/messages/formatters.d.ts
 @@ -151,16 +151,16 @@ export declare function time<S extends TimestampStylesString>(date: Date, style:
@@ -53,10 +53,10 @@ index 5bdc93810bf487c83b2853407573ad0a07ed4110..65743e31a9d55a00adaa0b551b922334
   * The [message formatting timestamp styles](https://discord.com/developers/docs/reference#message-formatting-timestamp-styles) supported by Discord
   */
 diff --git a/dist/messages/formatters.mjs b/dist/messages/formatters.mjs
-index a63971207ed3d8b6298f6b56c224430d9aff6e3e..085798c143e22cca79b071131f946d3390726c15 100644
+index b6d7cd7f773df5b4d78bdc9e193e6fe998510842..085798c143e22cca79b071131f946d3390726c15 100644
 --- a/dist/messages/formatters.mjs
 +++ b/dist/messages/formatters.mjs
-@@ -47,9 +47,9 @@ function formatEmoji(emojiId, animated = false) {
+@@ -49,9 +47,9 @@ function formatEmoji(emojiId, animated = false) {
  }
  function time(timeOrSeconds, style) {
    if (typeof timeOrSeconds !== "number") {
