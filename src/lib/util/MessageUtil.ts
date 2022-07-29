@@ -13,6 +13,7 @@ import { logger } from '#logger';
 import { commaListAnd, seconds } from '#functions';
 import { ChannelUtil, EmbedUtil } from '.';
 import type {
+	DiscordErrorData,
 	EmojiIdentifierResolvable,
 	Message,
 	MessageEditOptions,
@@ -22,7 +23,6 @@ import type {
 	Snowflake,
 	TextChannel,
 } from 'discord.js';
-import type { DiscordErrorData } from '@discordjs/rest';
 import type { SendOptions } from '.';
 
 interface AwaitReplyOptions extends MessageOptions {
