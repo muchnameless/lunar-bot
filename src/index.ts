@@ -8,10 +8,10 @@ import {
 	Options,
 	Partials,
 	PresenceUpdateStatus,
+	RequestMethod,
 	Routes,
 	Sweepers,
 } from 'discord.js';
-import { RequestMethod } from '@discordjs/rest';
 import { LunarClient } from '#structures/LunarClient';
 import { seconds } from '#functions';
 import { startJobs } from './jobs';

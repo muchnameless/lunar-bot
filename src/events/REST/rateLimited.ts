@@ -1,7 +1,7 @@
 import ms from 'ms';
 import { logger } from '#logger';
 import { RESTEvent } from '#structures/events/RESTEvent';
-import type { RESTEvents, RestEvents } from '@discordjs/rest';
+import type { RESTEvents, RestEvents } from 'discord.js';
 
 export default class RateLimitedEvent extends RESTEvent {
 	/**

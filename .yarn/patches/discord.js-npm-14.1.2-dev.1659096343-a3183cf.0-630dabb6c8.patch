@@ -207,10 +207,10 @@ index 68699aba7207575a849b0610a2852ce029dd4795..06684efdb77f0f59a3768f7d531c6af6
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197db8075fd 100644
+index 2ce960c03aa8a045c9413da782ace6a9c497146b..fe208f43b16cd02bdd414d6f5d14e6561cf9c009 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
-@@ -283,10 +275,13 @@ class Message extends Base {
+@@ -284,10 +283,13 @@ class Message extends Base {
        this.client.channels._add(data.thread, this.guild);
      }
  
@@ -228,7 +228,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      }
  
      if ('flags' in data) {
-@@ -561,11 +556,16 @@ class Message extends Base {
+@@ -562,11 +564,16 @@ class Message extends Base {
     * @readonly
     */
    get editable() {
@@ -248,7 +248,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      }
      return precheck;
    }
-@@ -576,23 +576,27 @@ class Message extends Base {
+@@ -577,23 +584,27 @@ class Message extends Base {
     * @readonly
     */
    get deletable() {
@@ -281,7 +281,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      );
    }
  
-@@ -605,9 +609,10 @@ class Message extends Base {
+@@ -606,9 +617,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
@@ -295,7 +295,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      );
    }
  
-@@ -636,10 +641,10 @@ class Message extends Base {
+@@ -637,10 +649,10 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildNews &&
@@ -310,7 +310,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      );
    }
  
-@@ -670,8 +675,9 @@ class Message extends Base {
+@@ -671,8 +683,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -322,7 +322,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
    }
  
    /**
-@@ -686,8 +692,9 @@ class Message extends Base {
+@@ -687,8 +700,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -334,7 +334,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
    }
  
    /**
-@@ -701,8 +708,9 @@ class Message extends Base {
+@@ -702,8 +716,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -346,7 +346,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      return this;
    }
  
-@@ -717,8 +725,9 @@ class Message extends Base {
+@@ -718,8 +733,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -358,7 +358,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      return this;
    }
  
-@@ -738,13 +747,14 @@ class Message extends Base {
+@@ -739,13 +755,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -376,7 +376,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
          message: this,
          emoji: resolvePartialEmoji(emoji),
        },
-@@ -762,8 +772,9 @@ class Message extends Base {
+@@ -763,8 +780,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -388,7 +388,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      return this;
    }
  
-@@ -786,7 +797,8 @@ class Message extends Base {
+@@ -787,7 +805,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -398,7 +398,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -799,7 +811,7 @@ class Message extends Base {
+@@ -800,7 +819,7 @@ class Message extends Base {
          },
        });
      }
@@ -407,7 +407,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
    }
  
    /**
-@@ -819,12 +831,13 @@ class Message extends Base {
+@@ -820,12 +839,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -424,7 +424,7 @@ index 5e4753021f9db23a1ba31534d54d238157396d9a..00765bde1bec74e12193a4cd62c5c197
    }
  
    /**
-@@ -833,8 +846,9 @@ class Message extends Base {
+@@ -834,8 +854,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -500,7 +500,7 @@ index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cb
  
  module.exports = ModalSubmitFields;
 diff --git a/src/util/Util.js b/src/util/Util.js
-index 41e06eb8b28023f1304439d343f5b3f2489ce937..9f4abde2d2040c2ce720f0598c71c5485b1c9920 100644
+index 41e06eb8b28023f1304439d343f5b3f2489ce937..1741ceec2ef623a6bd79f9e28108465cc75fb01a 100644
 --- a/src/util/Util.js
 +++ b/src/util/Util.js
 @@ -345,17 +345,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
@@ -522,7 +522,7 @@ index 41e06eb8b28023f1304439d343f5b3f2489ce937..9f4abde2d2040c2ce720f0598c71c548
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index b12a61a739279bbdc1eed01cc4b8adb405b5e496..650623910902b1e79f8302127fa5f1c3c5f50eef 100644
+index a81f8375240233050f256950efe7b831418bde75..015db4b92c1bb3d03b8afe7dee54d02655c76ebb 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -261,7 +261,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -611,7 +611,7 @@ index b12a61a739279bbdc1eed01cc4b8adb405b5e496..650623910902b1e79f8302127fa5f1c3
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1947,12 +1953,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1949,12 +1953,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -630,7 +630,7 @@ index b12a61a739279bbdc1eed01cc4b8adb405b5e496..650623910902b1e79f8302127fa5f1c3
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1961,6 +1972,7 @@ export class ModalSubmitFields {
+@@ -1963,6 +1972,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -638,7 +638,7 @@ index b12a61a739279bbdc1eed01cc4b8adb405b5e496..650623910902b1e79f8302127fa5f1c3
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3272,7 +3267,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3274,7 +3284,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -647,7 +647,7 @@ index b12a61a739279bbdc1eed01cc4b8adb405b5e496..650623910902b1e79f8302127fa5f1c3
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3725,11 +3720,6 @@ export interface BaseApplicationCommandData {
+@@ -3727,11 +3737,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -659,7 +659,7 @@ index b12a61a739279bbdc1eed01cc4b8adb405b5e496..650623910902b1e79f8302127fa5f1c3
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5040,10 +5030,8 @@ export interface MessageEditOptions {
+@@ -5042,10 +5047,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -671,7 +671,7 @@ index b12a61a739279bbdc1eed01cc4b8adb405b5e496..650623910902b1e79f8302127fa5f1c3
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5098,10 +5086,8 @@ export interface MessageOptions {
+@@ -5100,10 +5103,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
