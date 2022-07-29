@@ -1,5 +1,5 @@
 diff --git a/dist/components/ActionRow.d.ts b/dist/components/ActionRow.d.ts
-index d7d849539c30a3ea410310e6f406da420f857b19..dc36422942f745e0965c8c661bc50c8c302311ba 100644
+index d7d849539c30a3ea410310e6f406da420f857b19..792bd3705d04670789de0a4b5da81a516935571a 100644
 --- a/dist/components/ActionRow.d.ts
 +++ b/dist/components/ActionRow.d.ts
 @@ -7,7 +7,7 @@ import { type RestOrArray } from '../util/normalizeArray';
@@ -12,26 +12,30 @@ index d7d849539c30a3ea410310e6f406da420f857b19..dc36422942f745e0965c8c661bc50c8c
  /**
   * Represents an action row component
 diff --git a/dist/messages/formatters.cjs b/dist/messages/formatters.cjs
-index 4983b883b375d697b5e103cf13c590418d7c324f..4c6e1fad47399c0b10f271037c6003136d10b695 100644
+index 563e4b4e7f39ca4842b92e33d259a3e82a4f44d3..56b231acfbdbf46c6ee88c7e997953d41ec5557e 100644
 --- a/dist/messages/formatters.cjs
 +++ b/dist/messages/formatters.cjs
-@@ -53,9 +51,9 @@ function formatEmoji(emojiId, animated = false) {
+@@ -57,11 +57,11 @@ function channelLink(channelId, guildId) {
+ function messageLink(channelId, messageId, guildId) {
+   return `${typeof guildId === "undefined" ? channelLink(channelId) : channelLink(channelId, guildId)}/${messageId}`;
  }
- function time(timeOrSeconds, style) {
-   if (typeof timeOrSeconds !== "number") {
+-function time(timeOrSeconds, style) {
+-  if (typeof timeOrSeconds !== "number") {
 -    timeOrSeconds = Math.floor((timeOrSeconds?.getTime() ?? Date.now()) / 1e3);
-+    timeOrSeconds = timeOrSeconds?.getTime() ?? Date.now();
++function time(timeOrMilliseconds, style) {
++  if (typeof timeOrMilliseconds !== "number") {
++    timeOrMilliseconds = timeOrMilliseconds?.getTime() ?? Date.now();
    }
 -  return typeof style === "string" ? `<t:${timeOrSeconds}:${style}>` : `<t:${timeOrSeconds}>`;
-+  return typeof style === "string" ? `<t:${Math.floor(timeOrSeconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrSeconds / 1e3)}>`;
++  return typeof style === "string" ? `<t:${Math.floor(timeOrMilliseconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrMilliseconds / 1e3)}>`;
  }
  const TimestampStyles = {
    ShortTime: "t",
 diff --git a/dist/messages/formatters.d.ts b/dist/messages/formatters.d.ts
-index d130c417d4ce9e72eebbcd21aecd1c018297d364..65743e31a9d55a00adaa0b551b92233407162039 100644
+index 191718e4684059f5f88c8635622f5cae2e353511..a771adbd4e2880c924329bdbdf814a6442e2e54d 100644
 --- a/dist/messages/formatters.d.ts
 +++ b/dist/messages/formatters.d.ts
-@@ -151,16 +151,16 @@ export declare function time<S extends TimestampStylesString>(date: Date, style:
+@@ -179,16 +179,16 @@ export declare function time<S extends TimestampStylesString>(date: Date, style:
  /**
   * Formats the given timestamp into a short date-time string
   *
@@ -50,21 +54,25 @@ index d130c417d4ce9e72eebbcd21aecd1c018297d364..65743e31a9d55a00adaa0b551b922334
 -export declare function time<C extends number, S extends TimestampStylesString>(seconds: C, style: S): `<t:${C}:${S}>`;
 +export declare function time<C extends number, S extends TimestampStylesString>(milliseconds: C, style: S): `<t:${C}:${S}>`;
  /**
-  * The [message formatting timestamp styles](https://discord.com/developers/docs/reference#message-formatting-timestamp-styles) supported by Discord
+  * The {@link https://discord.com/developers/docs/reference#message-formatting-timestamp-styles | message formatting timestamp styles} supported by Discord
   */
 diff --git a/dist/messages/formatters.mjs b/dist/messages/formatters.mjs
-index b6d7cd7f773df5b4d78bdc9e193e6fe998510842..085798c143e22cca79b071131f946d3390726c15 100644
+index c376d71f527f24908672a72d6e4a43ea4c51acab..0fa532102022081b6a749b2c3387a4759e3a9df8 100644
 --- a/dist/messages/formatters.mjs
 +++ b/dist/messages/formatters.mjs
-@@ -49,9 +47,9 @@ function formatEmoji(emojiId, animated = false) {
+@@ -53,11 +53,11 @@ function channelLink(channelId, guildId) {
+ function messageLink(channelId, messageId, guildId) {
+   return `${typeof guildId === "undefined" ? channelLink(channelId) : channelLink(channelId, guildId)}/${messageId}`;
  }
- function time(timeOrSeconds, style) {
-   if (typeof timeOrSeconds !== "number") {
+-function time(timeOrSeconds, style) {
+-  if (typeof timeOrSeconds !== "number") {
 -    timeOrSeconds = Math.floor((timeOrSeconds?.getTime() ?? Date.now()) / 1e3);
-+    timeOrSeconds = timeOrSeconds?.getTime() ?? Date.now();
++function time(timeOrMilliseconds, style) {
++  if (typeof timeOrMilliseconds !== "number") {
++    timeOrMilliseconds = timeOrMilliseconds?.getTime() ?? Date.now();
    }
 -  return typeof style === "string" ? `<t:${timeOrSeconds}:${style}>` : `<t:${timeOrSeconds}>`;
-+  return typeof style === "string" ? `<t:${Math.floor(timeOrSeconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrSeconds / 1e3)}>`;
++  return typeof style === "string" ? `<t:${Math.floor(timeOrMilliseconds / 1e3)}:${style}>` : `<t:${Math.floor(timeOrMilliseconds / 1e3)}>`;
  }
  const TimestampStyles = {
    ShortTime: "t",
