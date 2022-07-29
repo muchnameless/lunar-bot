@@ -29,7 +29,8 @@
 				"matchPackagePatterns": ["^@sapphire"],
 				"matchPackageNames": ["discord-api-types"],
 				"followTag": "next",
-				"groupName": "sapphire"
+				"groupName": "sapphire",
+				"automerge": true
 			},
 			{
 				"matchDepTypes": ["engines"],
