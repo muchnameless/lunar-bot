@@ -1,8 +1,33 @@
 import { type Components } from '@zikeji/hypixel';
-import { type Awaitable, type ChatInputCommandInteraction, type SlashCommandBuilder } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	InteractionType,
+	ModalBuilder,
+	SelectMenuOptionBuilder,
+	StringSelectMenuBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+	type Awaitable,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type MessageActionRowComponentBuilder,
+	type ModalActionRowComponentBuilder,
+	type ModalSubmitInteraction,
+	type SlashCommandBuilder,
+	type Snowflake,
+} from 'discord.js';
 import { getSkyBlockProfiles } from '#api';
 import { type HypixelUserMessage, type ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
-import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES } from '#constants';
+import {
+	FindProfileStrategy,
+	MAX_IGN_INPUT_LENGTH,
+	NON_LETTER_REGEXP,
+	PROFILE_EMOJIS,
+	PROFILE_NAMES,
+	UnicodeEmoji,
+} from '#constants';
 import {
 	autocorrect,
 	commaListOr,
@@ -25,7 +50,7 @@ import {
 	skyblockFindProfileOptionName,
 	skyblockProfileOption,
 } from '#structures/commands/commonOptions.js';
-import { InteractionUtil } from '#utils';
+import { InteractionUtil, type ModalRepliableInteraction, type RepliableInteraction } from '#utils';
 
 export type FetchedData = Awaited<ReturnType<BaseSkyBlockCommand['_fetchData']>>;
 
@@ -82,12 +107,14 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	/**
 	 * @param ctx
 	 * @param ignOrUuid
+	 * @param profileName
+	 * @param findProfileStrategy
 	 */
 	protected async _fetchData(
-		ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage,
+		ctx: HypixelUserMessage | RepliableInteraction,
 		ignOrUuid: string | null | undefined,
 		profileName: string | null | undefined,
-		findProfileStrategy: FindProfileStrategy | null,
+		findProfileStrategy?: FindProfileStrategy | null,
 	) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 		const profiles = await getSkyBlockProfiles(uuid);
@@ -155,29 +182,173 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	}
 
 	/**
+	 * @param userId
+	 * @param subcommand
+	 * @param ign
+	 * @param profile
+	 */
+	protected _generateCustomId(userId: Snowflake, subcommand: string, ign?: string | null, profile?: string | null) {
+		return `${this.baseCustomId}:${subcommand}:${ign ?? ''}:${profile ?? ''}:${userId}` as const;
+	}
+
+	/**
+	 * @param customId
+	 * @param ign
+	 * @param profile
+	 */
+	private _buildEditModal(customId: string, ign?: string | null, profile?: string | null) {
+		return new ModalBuilder()
+			.setTitle(this.name)
+			.setCustomId(customId)
+			.addComponents([
+				new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
+					new TextInputBuilder()
+						.setCustomId('ign')
+						.setStyle(TextInputStyle.Short)
+						.setLabel('IGN')
+						// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+						.setValue(ign || 'IGN')
+						// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+						.setPlaceholder(ign || 'IGN')
+						.setMaxLength(MAX_IGN_INPUT_LENGTH)
+						.setRequired(false),
+				]),
+				new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+					// @ts-expect-error select in modal
+					new StringSelectMenuBuilder()
+						.setCustomId('profile')
+						.setPlaceholder('Profile')
+						.addOptions(
+							PROFILE_NAMES.map((name) =>
+								new SelectMenuOptionBuilder()
+									.setLabel(`${PROFILE_EMOJIS[name]} ${name}`)
+									.setValue(name)
+									.setDefault(name === profile),
+							),
+						)
+						.setMinValues(0),
+				),
+			]);
+	}
+
+	/**
+	 * execute the command
+	 *
+	 * @param interaction
+	 * @param args parsed customId, split by ':'
+	 */
+	public override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
+		const [subcommand, ign, profile] = args;
+
+		switch (subcommand) {
+			case 'edit': {
+				return InteractionUtil.showModal(interaction, this._buildEditModal(interaction.customId, ign, profile));
+			}
+
+			default:
+				throw new Error(`unknown subcommand '${subcommand}'`);
+		}
+	}
+
+	/**
+	 * @param interaction
+	 * @param ign
+	 * @param profile
+	 * @param findProfileStrategy
+	 */
+	private async _sharedRun(
+		interaction: RepliableInteraction,
+		ign?: string | null,
+		profile?: string | null,
+		findProfileStrategy?: FindProfileStrategy | null,
+	) {
+		try {
+			return InteractionUtil.reply(
+				interaction,
+				this._finalizeReply(
+					await this._generateReply(await this._fetchData(interaction, ign, profile, findProfileStrategy)),
+				),
+			);
+		} catch (error) {
+			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
+
+			if (interaction.type === InteractionType.ModalSubmit) {
+				return this._replyWithError(interaction, error, ign, profile);
+			}
+
+			try {
+				// eslint-disable-next-line @typescript-eslint/return-await
+				return await InteractionUtil.showModal(
+					interaction as ModalRepliableInteraction,
+					this._buildEditModal('edit', ign, profile),
+				);
+			} catch (_error) {
+				logger.error({ err: _error, msg: `[${this.name.toUpperCase()} CMD]` });
+
+				return this._replyWithError(interaction, error, ign, profile);
+			}
+		}
+	}
+
+	/**
+	 * @param interaction
+	 * @param error
+	 * @param ign
+	 * @param profile
+	 */
+	private _replyWithError(
+		interaction: RepliableInteraction,
+		error: unknown,
+		ign?: string | null,
+		profile?: string | null,
+	) {
+		return InteractionUtil.reply(interaction, {
+			content: formatError(error),
+			components: [
+				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents([
+					new ButtonBuilder()
+						.setCustomId(this._generateCustomId(interaction.user.id, 'edit', ign, profile))
+						.setEmoji({ name: UnicodeEmoji.EditMessage })
+						.setStyle(ButtonStyle.Secondary),
+				]),
+			],
+		});
+	}
+
+	/**
+	 * execute the command
+	 *
+	 * @param interaction
+	 * @param args parsed customId, split by ':'
+	 */
+	public override async modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]) {
+		const [subcommand] = args;
+
+		switch (subcommand) {
+			case 'edit':
+				return this._sharedRun(
+					interaction,
+					interaction.fields.getTextInputValue('ign'),
+					interaction.fields.getSelectMenuValues('profile')[0],
+				);
+
+			default:
+				throw new Error(`unknown subcommand '${subcommand}'`);
+		}
+	}
+
+	/**
 	 * execute the command
 	 *
 	 * @param interaction
 	 */
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		try {
-			return InteractionUtil.reply(
-				interaction,
-				this._finalizeReply(
-					await this._generateReply(
-						await this._fetchData(
-							interaction,
-							interaction.options.getString('ign'),
-							interaction.options.getString('profile'),
-							interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
-						),
-					),
-				),
-			);
-		} catch (error) {
-			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return InteractionUtil.reply(interaction, formatError(error));
-		}
+		return this._sharedRun(
+			interaction,
+			interaction.options.getString('ign'),
+			interaction.options.getString('profile'),
+			interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
+		);
 	}
 
 	/**
