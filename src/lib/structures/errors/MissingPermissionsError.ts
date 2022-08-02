@@ -6,20 +6,27 @@ import type { Interaction, Guild, Snowflake } from 'discord.js';
  * @param message
  * @param interaction
  * @param guild
- * @param requiredRolesRaw
+ * @param requiredRoleIds
  */
 export const missingPermissionsError = (
 	message: string,
 	interaction: Interaction,
 	guild: Guild | null,
-	requiredRolesRaw: Snowflake[],
+	requiredRoleIds?: Iterable<Snowflake> | null,
 ) => {
-	const requiredRoles = requiredRolesRaw.map((roleId) => {
-		const role = guild?.roles.cache.get(roleId);
-		if (!role) return roleId;
+	const requiredRoles: string[] = [];
 
-		return interaction.guildId === guild!.id ? `${role}` : role.name;
-	});
+	if (requiredRoleIds) {
+		for (const roleId of requiredRoleIds) {
+			const role = guild?.roles.cache.get(roleId);
+
+			if (role) {
+				requiredRoles.push(interaction.guildId === guild!.id ? `${role}` : role.name);
+			} else {
+				requiredRoles.push(roleId);
+			}
+		}
+	}
 
 	return `missing permissions for \`${InteractionUtil.fullCommandName(interaction)}\` (${
 		requiredRoles.length

@@ -10,6 +10,7 @@ import type { PlayerManager } from '#structures/database/managers/PlayerManager'
 import type { TaxCollectorManager } from '#structures/database/managers/TaxCollectorManager';
 import type { ChatTrigger } from '#structures/database/models/ChatTrigger';
 import type { DiscordGuild } from '#structures/database/models/DiscordGuild';
+import type { PermissionsManager } from '#structures/commands/PermissionsManager';
 import type { EventCollection } from '#structures/events/EventCollection';
 import type { LogHandler } from '#structures/LogHandler';
 
@@ -21,6 +22,7 @@ declare module 'discord.js' {
 		cronJobs: CronJobManager;
 		chatBridges: ChatBridgeManager;
 		commands: ApplicationCommandCollection;
+		permissions: PermissionsManager;
 		events: EventCollection;
 		log: LogHandler['log'];
 
