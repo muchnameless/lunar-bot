@@ -10,6 +10,7 @@ import { DatabaseManager } from './database/managers/DatabaseManager';
 import { LogHandler } from './LogHandler';
 import { CronJobManager } from './CronJobManager';
 import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
+import { PermissionsManager } from './commands/PermissionsManager';
 import { EventCollection } from './events/EventCollection';
 import { db } from './database';
 import type { URL } from 'node:url';
@@ -27,6 +28,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	override db: DatabaseManager = new DatabaseManager(this, db);
 	override logHandler: LogHandler;
 	override cronJobs: CronJobManager = new CronJobManager(this);
+	override permissions: PermissionsManager = new PermissionsManager(this);
 	override chatBridges: ChatBridgeManager;
 	override commands: ApplicationCommandCollection;
 	override events: EventCollection;

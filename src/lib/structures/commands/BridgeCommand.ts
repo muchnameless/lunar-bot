@@ -72,6 +72,14 @@ export class BridgeCommand extends BaseCommand {
 		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category!);
 	}
 
+	/**
+	 * discord application command id (null for this type of command)
+	 */
+	// eslint-disable-next-line class-methods-use-this
+	get commandId() {
+		return null;
+	}
+
 	/* eslint-disable @typescript-eslint/no-unused-vars */
 
 	/**

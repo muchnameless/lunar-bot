@@ -1,5 +1,4 @@
 import {
-	ApplicationCommandPermissionType,
 	ApplicationCommandType,
 	PermissionFlagsBits,
 	SlashCommandSubcommandBuilder,
@@ -13,10 +12,10 @@ import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
 import type { Awaitable } from '@sapphire/utilities';
 import type {
-	APIApplicationCommandPermission,
 	AutocompleteInteraction,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
+	CommandInteraction,
 	ContextMenuCommandBuilder,
 	GuildMember,
 	Interaction,
@@ -171,6 +170,15 @@ export class ApplicationCommand extends BaseCommand {
 	}
 
 	/**
+	 * discord application command id (throws if not found in cache)
+	 */
+	get commandId() {
+		const commandId = this.client.application?.commands.cache.findKey(({ name }) => name === this.name);
+		if (!commandId) throw new Error(`Command '${this.name}' not found in application commands cache`);
+		return commandId;
+	}
+
+	/**
 	 * component customId to identify this command in the handler. everything after it gets provided as args split by ':'
 	 */
 	get baseCustomId() {
@@ -240,72 +248,17 @@ export class ApplicationCommand extends BaseCommand {
 			| Pick<SlashCommandBuilder, 'setDMPermission' | 'setDefaultMemberPermissions'>
 			| Pick<ContextMenuCommandBuilder, 'setDMPermission' | 'setDefaultMemberPermissions'>,
 	) {
-		if (command._requiredRoles) {
-			return void builder.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
-		}
-
 		switch (command.category) {
 			case 'staff':
 			case 'moderation':
 			case 'tax':
 			case 'manager':
-				builder.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
-				break;
+				return builder.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 			case 'owner':
 				// disable command
-				builder.setDefaultMemberPermissions('0');
-				break;
+				return builder.setDefaultMemberPermissions(0n);
 		}
-	}
-
-	/**
-	 * returns discord application command permission data
-	 */
-	permissionsFor(guildId: Snowflake) {
-		const discordGuild = this.client.discordGuilds.cache.get(guildId);
-		if (!discordGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no discord guild`);
-
-		const permissions: APIApplicationCommandPermission[] = [];
-
-		for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
-			const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
-			if (!hypixelGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no hypixel guild`);
-
-			const requiredRoles = this.requiredRoles(hypixelGuild);
-
-			// no roles to add
-			if (!requiredRoles) continue;
-
-			for (const roleId of requiredRoles) {
-				// role already added (by another hypixel guild)
-				if (permissions.some(({ id }) => id === roleId)) continue;
-
-				permissions.push({
-					id: roleId,
-					type: ApplicationCommandPermissionType.Role,
-					permission: true,
-				});
-			}
-		}
-
-		// disallow for everyone but the owner by default
-		if (permissions.length || this.category === 'owner') {
-			permissions.push(
-				{
-					id: this.client.ownerId, // allow all commands for the bot owner
-					type: ApplicationCommandPermissionType.User,
-					permission: true,
-				},
-				{
-					id: discordGuild.discordId, // deny for the guild @everyone role
-					type: ApplicationCommandPermissionType.Role,
-					permission: false,
-				},
-			);
-		}
-
-		return permissions;
 	}
 
 	/**
@@ -324,34 +277,51 @@ export class ApplicationCommand extends BaseCommand {
 		if (interaction.user.id === this.client.ownerId) return;
 
 		// user is not the owner at this point
-		if (this.category === 'owner') {
+		if (
+			this.category === 'owner' ||
+			(interaction as AutocompleteInteraction | CommandInteraction).command?.defaultMemberPermissions?.bitfield === 0n
+		) {
 			throw `${interaction.user} is not in the sudoers file. This incident will be reported.`;
 		}
 
-		if (!roleIds) return; // no role requirements
+		/**
+		 * wether the interaction is from the hypixel guild's linked discord guild
+		 */
+		const IS_IN_LINKED_GUILD = interaction.guildId !== null && interaction.guildId === hypixelGuild.discordId;
 
-		const member =
-			interaction.guildId !== null && interaction.guildId === hypixelGuild.discordId
-				? interaction.member!
-				: await (async () => {
-						const { discordGuild } = hypixelGuild;
+		let member: GuildMember;
 
-						if (!discordGuild) {
-							throw missingPermissionsError('discord server unreachable', interaction, discordGuild, roleIds);
-						}
+		if (IS_IN_LINKED_GUILD) {
+			member = interaction.member!;
+		} else {
+			const { discordGuild } = hypixelGuild;
 
-						try {
-							return await discordGuild.members.fetch(interaction.user);
-						} catch (error) {
-							logger.error(error, '[CHECK PERMISSIONS]: error while fetching member to test for permissions');
-							throw missingPermissionsError('unknown discord member', interaction, discordGuild, roleIds);
-						}
-				  })();
+			if (!discordGuild) {
+				throw missingPermissionsError('discord server unreachable', interaction, discordGuild, roleIds);
+			}
 
-		// check for req roles
-		if (!member.roles.cache.hasAny(...roleIds)) {
+			try {
+				member = await discordGuild.members.fetch(interaction.user);
+			} catch (error) {
+				logger.error(error, '[ASSERT PERMISSIONS]: error while fetching member');
+				throw missingPermissionsError('unknown discord member', interaction, discordGuild, roleIds);
+			}
+		}
+
+		// hardcoded role ids
+		if (roleIds && !member.roles.cache.hasAny(...roleIds)) {
 			throw missingPermissionsError('missing required role', interaction, hypixelGuild.discordGuild, roleIds);
 		}
+
+		// discord already checked the permissions
+		if (IS_IN_LINKED_GUILD) return;
+
+		return this.client.permissions.assert(
+			hypixelGuild.discordId!,
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+			(interaction as AutocompleteInteraction | CommandInteraction).commandId ?? this.commandId,
+			member,
+		);
 	}
 
 	/* eslint-disable @typescript-eslint/no-unused-vars */

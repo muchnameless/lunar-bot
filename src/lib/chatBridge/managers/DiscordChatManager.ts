@@ -205,7 +205,7 @@ export class DiscordChatManager extends ChatManager {
 		if (this._fetchOrCreateWebhookPromise) return this._fetchOrCreateWebhookPromise;
 
 		try {
-			return await (this._fetchOrCreateWebhookPromise = this.__fetchOrCreateWebhook());
+			return await (this._fetchOrCreateWebhookPromise = this.#fetchOrCreateWebhook());
 		} finally {
 			this._fetchOrCreateWebhookPromise = null;
 		}
@@ -214,7 +214,7 @@ export class DiscordChatManager extends ChatManager {
 	 * should only ever be called from within _fetchOrCreateWebhook
 	 * @internal
 	 */
-	private async __fetchOrCreateWebhook() {
+	async #fetchOrCreateWebhook() {
 		if (!this.hypixelGuild) {
 			logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
 			return this;
@@ -342,7 +342,7 @@ export class DiscordChatManager extends ChatManager {
 		await (queuePromise ?? this.queuePromise(abortController?.signal));
 
 		try {
-			return await this._sendViaWebhook(options);
+			return await this.#sendViaWebhook(options);
 		} finally {
 			this.queue.shift();
 		}
@@ -352,7 +352,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param options
 	 * @internal
 	 */
-	async _sendViaWebhook(options: WebhookMessageOptions): Promise<Message> {
+	async #sendViaWebhook(options: WebhookMessageOptions): Promise<Message> {
 		try {
 			// fetch / create webhook if non existent
 			if (!this.isReady()) {
@@ -373,7 +373,7 @@ export class DiscordChatManager extends ChatManager {
 				await this._fetchOrCreateWebhook();
 
 				// resend
-				return this._sendViaWebhook(options);
+				return this.#sendViaWebhook(options);
 			}
 
 			throw error;

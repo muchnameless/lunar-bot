@@ -456,14 +456,14 @@ export class HypixelGuild extends Model<
 		}
 
 		// immediate unmute
-		if (!timeout) return this._unmute(target);
+		if (!timeout) return this.#unmute(target);
 
 		// schedule unmute
 		return new Promise((resolve) => {
 			this._unmuteTimeouts.set(
 				target.minecraftUuid,
 				setTimeout(() => {
-					resolve(this._unmute(target));
+					resolve(this.#unmute(target));
 				}, timeout),
 			);
 		});
@@ -472,7 +472,7 @@ export class HypixelGuild extends Model<
 	 * @param target
 	 * @internal
 	 */
-	private async _unmute(target: Player) {
+	async #unmute(target: Player) {
 		// prevent circular calls when syncing
 		if (!this.checkMute(target)) return;
 
@@ -618,7 +618,7 @@ export class HypixelGuild extends Model<
 		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
-			return await (this._updateDataPromise = this._updateData(options));
+			return await (this._updateDataPromise = this.#updateData(options));
 		} finally {
 			this._updateDataPromise = null;
 		}
@@ -627,7 +627,7 @@ export class HypixelGuild extends Model<
 	 * should only ever be called from within updateData
 	 * @internal
 	 */
-	private async _updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
+	async #updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
 		try {
 			const { guild } = await hypixel.guild.id(this.guildId, { force: true });
 
@@ -994,7 +994,7 @@ export class HypixelGuild extends Model<
 		if (this._syncRanksPromise) return this._syncRanksPromise;
 
 		try {
-			return await (this._syncRanksPromise = this._syncRanks());
+			return await (this._syncRanksPromise = this.#syncRanks());
 		} finally {
 			this._syncRanksPromise = null;
 		}
@@ -1003,7 +1003,7 @@ export class HypixelGuild extends Model<
 	 * should only ever be called from within syncRanks
 	 * @internal
 	 */
-	private async _syncRanks() {
+	async #syncRanks() {
 		try {
 			const nonStaffWithWeight: PlayerWithWeight[] = [];
 

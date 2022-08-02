@@ -1,3 +1,4 @@
+import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
 import { opendir } from 'node:fs/promises';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
@@ -247,3 +248,21 @@ export function sortCache<T>(
  * @param error
  */
 export const formatError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/s, '');
+
+/**
+ * retries if func rejects
+ * @param func
+ * @param delay
+ * @param maxDelay
+ * @param retries
+ */
+export async function retry<T>(func: () => Promise<T>, delay: number, maxDelay: number, retries = 0): Promise<T> {
+	try {
+		return await func();
+	} catch (error) {
+		logger.error({ err: error, retries }, '[RETRY]');
+
+		await sleep(Math.min(retries * delay, maxDelay));
+		return retry(func, delay, maxDelay, retries + 1);
+	}
+}
