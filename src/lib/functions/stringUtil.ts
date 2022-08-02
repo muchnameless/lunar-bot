@@ -276,7 +276,7 @@ export function splitForEmbedFields(
 		maxLength: EmbedLimits.MaximumFieldValueLength,
 		char: [char, ''],
 		prepend: `\`\`\`${code}\n`,
-		append: '```',
+		append: '\n```',
 	});
 }
 

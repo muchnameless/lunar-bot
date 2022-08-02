@@ -40,7 +40,11 @@ export default class ReadyEvent extends Event {
 
 		this.client.db.schedule();
 
-		await safePromiseAll([this.client.logHandler.init(), this.connectChatBridges(), this.fetchApplicationCommands()]);
+		await safePromiseAll([
+			this.client.logHandler.init(), //
+			this.connectChatBridges(),
+			this.fetchApplicationCommands(),
+		]);
 
 		// log ready
 		logger.info(
