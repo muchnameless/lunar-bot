@@ -1319,10 +1319,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:^3.9.0":
-  version: 3.9.0
-  resolution: "chart.js@npm:3.9.0"
-  checksum: 12ee2264a33da2d1fd0ed1d0969c47ca9b4128a126cd22d0823e9369201a33bf1833bc929509696d13fe2464d6d7278ad3307e5a2ef61fa3edc30a27c2940f58
+"chart.js@npm:^3.9.1":
+  version: 3.9.1
+  resolution: "chart.js@npm:3.9.1"
+  checksum: 9ab0c0ac01215af0b3f020f2e313030fd6e347b48ed17d5484ee9c4e8ead45e78ae71bea16c397621c386b409ce0b14bf17f9f6c2492cd15b56c0f433efdfff6
   languageName: node
   linkType: hard
 
@@ -3651,7 +3651,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.32.0
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#b8e9632211c09bb6e97c7a9a96fe34109fcb2055"
     bufferutil: ^4.0.6
-    chart.js: ^3.9.0
+    chart.js: ^3.9.1
     chartjs-node-canvas: ^4.1.6
     common-tags: ^1.8.2
     cron: ^2.1.0
