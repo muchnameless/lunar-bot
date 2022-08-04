@@ -3,7 +3,7 @@ import { parentPort } from 'node:worker_threads';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { clearTimeout, setTimeout } from 'node:timers';
 import EventEmitter from 'node:events';
-import { fetch } from 'undici';
+import { request } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
 import { CronJob } from 'cron';
@@ -106,9 +106,9 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
  * fetches bazaar products
  */
 async function fetchBazaarPrices(ac: AbortController) {
-	const res = await fetch('https://api.hypixel.net/skyblock/bazaar', { signal: ac.signal });
+	const res = await request('https://api.hypixel.net/skyblock/bazaar', { signal: ac.signal });
 
-	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockBazaarResponse>;
+	if (res.statusCode === 200) return res.body.json() as Promise<Components.Schemas.SkyBlockBazaarResponse>;
 
 	void consumeBody(res);
 	throw new FetchError('FetchBazaarError', res);
@@ -182,14 +182,14 @@ async function fetchAuctionPage(
 	ac: AbortController,
 	page: number,
 ): Promise<Pick<Components.Schemas.SkyBlockAuctionsResponse, 'auctions' | 'lastUpdated' | 'success' | 'totalPages'>> {
-	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`, { signal: ac.signal });
+	const res = await request(`https://api.hypixel.net/skyblock/auctions?page=${page}`, { signal: ac.signal });
 
-	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
+	if (res.statusCode === 200) return res.body.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
 
 	void consumeBody(res);
 
 	// page does not exist -> no-op
-	if (res.status === 404) return { success: false, lastUpdated: -1, totalPages: -1, auctions: [] };
+	if (res.statusCode === 404) return { success: false, lastUpdated: -1, totalPages: -1, auctions: [] };
 
 	// different error -> abort process
 	throw new FetchError('FetchAuctionError', res);
@@ -354,11 +354,11 @@ async function updateAuctionPrices(ac: AbortController) {
 	};
 
 	const fetchAndProcessEndedAuctions = async () => {
-		const res = await fetch('https://api.hypixel.net/skyblock/auctions_ended', { signal: ac.signal });
+		const res = await request('https://api.hypixel.net/skyblock/auctions_ended', { signal: ac.signal });
 
-		if (res.status === 200) {
+		if (res.statusCode === 200) {
 			return Promise.all(
-				((await res.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions.map((auction) =>
+				((await res.body.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions.map((auction) =>
 					processAuction(auction, auction.price),
 				),
 			);
@@ -466,14 +466,14 @@ const reduceCostsArray = (costs: (EssenceUpgrade | ItemUpgrade)[]) =>
  * @param ac
  */
 async function updateSkyBlockItems(ac: AbortController) {
-	const res = await fetch('https://api.hypixel.net/resources/skyblock/items', { signal: ac.signal });
+	const res = await request('https://api.hypixel.net/resources/skyblock/items', { signal: ac.signal });
 
-	if (res.status !== 200) {
+	if (res.statusCode !== 200) {
 		void consumeBody(res);
 		throw new FetchError('FetchBazaarError', res);
 	}
 
-	const { success, items } = (await res.json()) as { success: boolean; items: SkyBlockItem[] };
+	const { success, items } = (await res.body.json()) as { success: boolean; items: SkyBlockItem[] };
 
 	if (!success) return;
 
@@ -548,9 +548,9 @@ const xmlParser = new XMLParser({ ignoreDeclaration: true });
  * @param forum
  */
 async function fetchForumEntries(ac: AbortController, forum: string) {
-	const res = await fetch(`https://hypixel.net/forums/${forum}/index.rss`, { signal: ac.signal });
+	const res = await request(`https://hypixel.net/forums/${forum}/index.rss`, { signal: ac.signal });
 
-	if (res.status === 200) return (xmlParser.parse(await res.text()) as HypixelForumResponse).rss.channel.item;
+	if (res.statusCode === 200) return (xmlParser.parse(await res.body.text()) as HypixelForumResponse).rss.channel.item;
 
 	void consumeBody(res);
 	throw new FetchError('FetchError', res);
