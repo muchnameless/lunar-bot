@@ -468,17 +468,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/async-queue@npm:1.3.2-next.72c0714.0":
-  version: 1.3.2-next.72c0714.0
-  resolution: "@sapphire/async-queue@npm:1.3.2-next.72c0714.0"
-  checksum: f0ad5359aedcec1f089ee3eb80f8b1340c9b7563e997285113fdf75e12e33c9fae74025f372b17c3b61f1ea6ce59d59e21a58c0fede04094cceac6626bc6c3ff
+"@sapphire/async-queue@npm:1.3.2-next.cbe76e4.0":
+  version: 1.3.2-next.cbe76e4.0
+  resolution: "@sapphire/async-queue@npm:1.3.2-next.cbe76e4.0"
+  checksum: 52d955c3a61d05bd156339faf1d1f26b2489e947943162d22c8260886cde96bb2998b9a8672e9a35165368530f5e2c564ec8458fda117a36eed28c99a3d60248
   languageName: node
   linkType: hard
 
-"@sapphire/discord-utilities@npm:2.11.6-next.72c0714.0":
-  version: 2.11.6-next.72c0714.0
-  resolution: "@sapphire/discord-utilities@npm:2.11.6-next.72c0714.0"
-  checksum: 1c061830a3f73e54a8e208ebb70754b16bf9ba21adc608ddacb4f7096a2af10a28b9e49626a23eb798a090048a19038664c62bc4bb3f26363c6c7400d35ac5af
+"@sapphire/discord-utilities@npm:2.11.6-next.cbe76e4.0":
+  version: 2.11.6-next.cbe76e4.0
+  resolution: "@sapphire/discord-utilities@npm:2.11.6-next.cbe76e4.0"
+  checksum: 2dab44cedb582256f6b619beafcac97da9b0ebe91c54f689b68c35869067b200d2ba87d3a6bd4c6489d33b0262631a7b2e6642d89199418f5a7837dd5e3a8c32
   languageName: node
   linkType: hard
 
@@ -492,19 +492,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/snowflake@npm:3.2.3-next.72c0714.0":
-  version: 3.2.3-next.72c0714.0
-  resolution: "@sapphire/snowflake@npm:3.2.3-next.72c0714.0"
-  checksum: a237dc6f30eeca852f44731e014e9223f406be94de8267ec16898a3337c6efaef9a7beff70c38f0c60fcc2e3aa9be0798798538ac00de7013f3a31048de64b16
+"@sapphire/snowflake@npm:3.2.3-next.cbe76e4.0":
+  version: 3.2.3-next.cbe76e4.0
+  resolution: "@sapphire/snowflake@npm:3.2.3-next.cbe76e4.0"
+  checksum: 3aa51b97347df8a0cc0d5d58bb17f24376560e841369db6ccb2a23659ab4a0431ba24481b05b0954645994589491f45fe95002184d96de63d919e5837b58a2c6
   languageName: node
   linkType: hard
 
-"@sapphire/stopwatch@npm:1.4.2-next.72c0714.0":
-  version: 1.4.2-next.72c0714.0
-  resolution: "@sapphire/stopwatch@npm:1.4.2-next.72c0714.0"
+"@sapphire/stopwatch@npm:1.4.2-next.cbe76e4.0":
+  version: 1.4.2-next.cbe76e4.0
+  resolution: "@sapphire/stopwatch@npm:1.4.2-next.cbe76e4.0"
   dependencies:
     tslib: ^2.4.0
-  checksum: 4503623d26f350dc5d91d0a2b4701e0dcc70febfd0b3835bca4ea7d512c181ba312c29344029957d366c5fe49a408d9e3f48bcf1299eae8f105835493939ba2e
+  checksum: 1ea7569773b56269ce677c3cc730da9f2afd0f3ff03a22adb8f59cb6f13ce2cf8bbf4ecc5c4a3ac39c0724a4d801a51c41f993e4eded016a1eae45e23b1da1c0
   languageName: node
   linkType: hard
 
@@ -519,10 +519,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/utilities@npm:3.8.1-next.72c0714.0":
-  version: 3.8.1-next.72c0714.0
-  resolution: "@sapphire/utilities@npm:3.8.1-next.72c0714.0"
-  checksum: 99ec8b9076ed86e9e1374e67f6ed22ef0e8383ff0810c28dce255a3d60c52218fec06fbe1a068274da3fa61ddf03aacaabba5b79e486b63f9841d1ab7885f334
+"@sapphire/utilities@npm:3.9.1-next.cbe76e4.0":
+  version: 3.9.1-next.cbe76e4.0
+  resolution: "@sapphire/utilities@npm:3.9.1-next.cbe76e4.0"
+  checksum: 487301df97c8ea6d68434c3a21920eea5d03a9ed333e4121ba624438a4874dc6496f5e6cd23dd5c71dc238bcfe695e34d5ab8d2ef0a990b96cce4426ac764c87
   languageName: node
   linkType: hard
 
@@ -3634,12 +3634,12 @@ __metadata:
     "@discordjs/builders": 1.1.1-dev.1659096379-a3183cf.0
     "@discordjs/collection": 1.0.2-dev.1659096321-a3183cf.0
     "@discordjs/rest": 1.0.2-dev.1659096359-a3183cf.0
-    "@sapphire/async-queue": 1.3.2-next.72c0714.0
-    "@sapphire/discord-utilities": 2.11.6-next.72c0714.0
+    "@sapphire/async-queue": 1.3.2-next.cbe76e4.0
+    "@sapphire/discord-utilities": 2.11.6-next.cbe76e4.0
     "@sapphire/shapeshift": 3.5.2-next.a124bbe.0
-    "@sapphire/stopwatch": 1.4.2-next.72c0714.0
+    "@sapphire/stopwatch": 1.4.2-next.cbe76e4.0
     "@sapphire/type": 2.2.5-next.cf34f61.0
-    "@sapphire/utilities": 3.8.1-next.72c0714.0
+    "@sapphire/utilities": 3.9.1-next.cbe76e4.0
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^2.0.0
