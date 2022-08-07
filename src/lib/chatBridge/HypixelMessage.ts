@@ -8,11 +8,12 @@ import { mojang } from '#api';
 import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, HypixelMessageType, spamMessages } from './constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { PrismarineMessage } from './PrismarineMessage';
+import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
 import type { Player } from '#structures/database/models/Player';
 import type { GuildMember, Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
-import type { BroadcastOptions, ChatBridge, ChatOptions } from './ChatBridge';
+import type { BroadcastOptions, ChatBridge } from './ChatBridge';
 import type { ChatPacket } from './botEvents/chat';
 import type { BridgeCommand } from '#structures/commands/BridgeCommand';
 import type { DualCommand } from '#structures/commands/DualCommand';
@@ -25,7 +26,7 @@ type CommandData = {
 };
 
 type AwaitConfirmationOptions = Partial<BroadcastOptions> &
-	Partial<ChatOptions> & {
+	Partial<MinecraftChatOptions> & {
 		question?: string;
 		/** time in milliseconds to wait for a response */
 		time?: number;
@@ -260,7 +261,7 @@ export class HypixelMessage {
 	 * replies in-game (and on discord if guild chat) to the message
 	 * @param options
 	 */
-	async reply(options: string | (BroadcastOptions & ChatOptions)) {
+	async reply(options: string | (BroadcastOptions & MinecraftChatOptions)) {
 		const { ephemeral = false, ..._options } = typeof options === 'string' ? { content: options } : options;
 
 		// to be compatible to Interactions
@@ -353,7 +354,7 @@ export class HypixelMessage {
 	 */
 	private async _forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
 		return discordChatManager.sendViaWebhook({
-			queuePromise: discordChatManager.queue.wait(),
+			queuePromise: discordChatManager.queuePromise,
 			content: await this.chatBridge.discord.parseContent(this.prefixReplacedContent, true),
 			username: member?.displayName ?? player?.ign ?? this.author!.ign,
 			avatarURL:

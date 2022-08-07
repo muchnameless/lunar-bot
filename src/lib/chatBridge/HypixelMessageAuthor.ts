@@ -1,8 +1,9 @@
 import { logger } from '#logger';
 import { mojang } from '#api';
 import type { GuildMember } from 'discord.js';
-import type { ChatBridge, ChatOptions } from './ChatBridge';
 import type { Player } from '#structures/database/models/Player';
+import type { ChatBridge } from './ChatBridge';
+import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
 
 interface AuthorData {
 	ign: string;
@@ -66,7 +67,7 @@ export class HypixelMessageAuthor {
 	 * whisper a message to the author
 	 * @param options
 	 */
-	send(options: string | ChatOptions) {
+	send(options: string | MinecraftChatOptions) {
 		const { prefix = '', ..._options } = typeof options === 'string' ? { content: options } : options;
 
 		return this.chatBridge.minecraft.chat({

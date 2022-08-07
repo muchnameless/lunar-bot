@@ -10,21 +10,17 @@ import { DiscordManager } from './managers/DiscordManager';
 import type { Awaitable, Message as DiscordMessage, MessageOptions } from 'discord.js';
 import type { LunarClient } from '#structures/LunarClient';
 import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
-import type { SendToChatOptions } from './managers/MinecraftChatManager';
+import type { Player } from '#structures/database/models/Player';
 import type { DiscordChatManagerResolvable } from './managers/DiscordManager';
 import type { HypixelMessage } from './HypixelMessage';
-import type { Player } from '#structures/database/models/Player';
-
-export interface ChatOptions extends SendToChatOptions {
-	maxParts?: number;
-}
+import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
 
 export interface BroadcastOptions {
 	content: string;
 	type?: DiscordChatManagerResolvable;
 	hypixelMessage?: HypixelMessage | null;
-	discord?: MessageOptions;
-	minecraft?: Omit<ChatOptions, 'content'>;
+	discord?: Omit<MessageOptions, 'content'>;
+	minecraft?: Omit<MinecraftChatOptions, 'content'>;
 }
 
 export interface MessageForwardOptions {
@@ -297,7 +293,6 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 			// discord
 			discordChatManager?.sendViaBot({
-				// @ts-expect-error idk why content is of type 'string | null' here
 				content,
 				hypixelMessage,
 				...discord,

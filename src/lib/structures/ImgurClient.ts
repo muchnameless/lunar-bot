@@ -185,7 +185,7 @@ export class ImgurClient {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
-		await this.queue.wait();
+		await this.queue.wait({ signal: requestOptions.signal });
 
 		try {
 			// check rate limit

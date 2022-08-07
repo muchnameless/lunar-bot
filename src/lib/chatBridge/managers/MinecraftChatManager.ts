@@ -42,14 +42,15 @@ import type { HypixelMessageCollectorOptions } from '../HypixelMessageCollector'
 import type { Player } from '#structures/database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 import type { If } from '#types';
-import type { ChatOptions } from '../ChatBridge';
 
-export interface SendToChatOptions {
+export interface MinecraftChatOptions {
+	maxParts?: number;
 	content: string;
 	prefix?: string;
 	discordMessage?: Message | null;
 	/** whether to whisper to the author */
 	ephemeral?: boolean;
+	signal?: AbortSignal;
 }
 
 export interface CommandOptions {
@@ -69,6 +70,8 @@ export interface CommandOptions {
 	rejectOnTimeout?: boolean;
 	/** whether to reject the promise if the abortRegExp triggered */
 	rejectOnAbort?: boolean;
+	/** AbortSignal to abort the command */
+	signal?: AbortSignal;
 }
 
 type FilterPromise = ChatResponse | HypixelMessage;
@@ -716,7 +719,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * send a message to in-game guild chat
 	 * @param options
 	 */
-	gchat(options: string | ChatOptions) {
+	gchat(options: string | MinecraftChatOptions) {
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
@@ -736,7 +739,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * send a message to in-game guild chat
 	 * @param options
 	 */
-	ochat(options: string | ChatOptions) {
+	ochat(options: string | MinecraftChatOptions) {
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
 		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
@@ -746,7 +749,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * send a message to in-game party chat
 	 * @param options
 	 */
-	pchat(options: string | ChatOptions) {
+	pchat(options: string | MinecraftChatOptions) {
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
 		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
@@ -756,7 +759,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * resolves content or options to an options object
 	 * @param options
 	 */
-	static resolveInput(options: string | ChatOptions) {
+	static resolveInput(options: string | MinecraftChatOptions) {
 		return typeof options === 'string' ? { content: options } : options;
 	}
 
@@ -765,7 +768,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 * @returns success - whether all message parts were send
 	 */
-	async chat(options: string | ChatOptions) {
+	async chat(options: string | MinecraftChatOptions) {
 		const {
 			content,
 			prefix = '',
@@ -825,7 +828,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * queue a message for the in-game chat
 	 * @param options
 	 */
-	async sendToChat(options: string | ChatOptions) {
+	async sendToChat(options: string | MinecraftChatOptions) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		if (_options.discordMessage && MessageUtil.DELETED_MESSAGES.has(_options.discordMessage)) {
@@ -833,7 +836,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return false;
 		}
 
-		await this.queue.wait();
+		await this.queue.wait({ signal: _options.signal });
 
 		try {
 			await this._sendToChat(_options);
@@ -852,7 +855,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 * @internal
 	 */
-	private async _sendToChat({ content, prefix = '', discordMessage = null }: SendToChatOptions): Promise<unknown> {
+	private async _sendToChat({
+		content,
+		prefix = '',
+		discordMessage = null,
+	}: Pick<MinecraftChatOptions, 'content' | 'prefix' | 'discordMessage'>): Promise<unknown> {
 		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
 		let message = `${prefix}${content}`;
@@ -970,9 +977,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'),
 			rejectOnTimeout = false,
 			rejectOnAbort = false,
+			signal,
 		} = typeof options === 'string' ? ({ command: options } as CommandOptions) : options;
-		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
-		await this.queue.wait(); // only start the collector if the chat queue is free
+		await this.commandQueue.wait({ signal }); // only have one collector active at a time (prevent collecting messages from other command calls)
+		await this.queue.wait({ signal }); // only start the collector if the chat queue is free
 
 		const collector = this.createMessageCollector({
 			filter: (hypixelMessage) =>

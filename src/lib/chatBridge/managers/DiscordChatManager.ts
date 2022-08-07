@@ -7,13 +7,13 @@ import {
 	time,
 	TimestampStyles,
 } from 'discord.js';
+import { AsyncQueue } from '@sapphire/async-queue';
 import { ChannelUtil, MessageUtil, UserUtil } from '#utils';
 import { logger } from '#logger';
 import { UnicodeEmoji, MAX_WEBHOOKS_PER_CHANNEL } from '#constants';
 import { WebhookError } from '#structures/errors/WebhookError';
-import { TimeoutAsyncQueue } from '#structures/TimeoutAsyncQueue';
 import { imgur } from '#api';
-import { asyncReplace } from '#functions';
+import { asyncReplace, minutes } from '#functions';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { ChatManager } from './ChatManager';
 import type {
@@ -52,8 +52,7 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * chat queue
 	 */
-	// @ts-expect-error
-	override queue = new TimeoutAsyncQueue();
+	override queue = new AsyncQueue();
 	/**
 	 * hypixel message type
 	 */
@@ -168,6 +167,14 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	get minecraft() {
 		return this.chatBridge.minecraft;
+	}
+
+	get queuePromise() {
+		return this.queue.wait({
+			signal: AbortSignal
+				// @ts-expect-error
+				.timeout(minutes(1)),
+		});
 	}
 
 	/**
@@ -304,7 +311,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// async queue
-		await (queuePromise ?? this.queue.wait());
+		await (queuePromise ?? this.queuePromise);
 
 		try {
 			return await this._sendViaWebhook(options);
@@ -352,7 +359,7 @@ export class DiscordChatManager extends ChatManager {
 	async sendViaBot({ hypixelMessage, content, fromMinecraft, ...options }: SendViaBotOptions) {
 		if (!this.chatBridge.isEnabled()) return null;
 
-		const queuePromise = this.queue.wait();
+		const queuePromise = this.queuePromise;
 
 		let discordMessage: Message | null | undefined;
 		try {
