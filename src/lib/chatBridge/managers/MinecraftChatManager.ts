@@ -996,7 +996,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			// message is line separator
 			if (/^-{29,}/.test(hypixelMessage.content)) {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
-				if (/[^-]-{29,}$/.test(hypixelMessage.content)) return collector.stop();
+				if (/[^-]-{29,}$/.test(hypixelMessage.content)) {
+					// remove all other collected messages
+					if (collector.collected.length !== 1) collector.collected = [hypixelMessage];
+					return collector.stop();
+				}
 
 				collector.collected.pop(); // remove line separator from collected messages
 				if (collector.collected.length) collector.stop(); // stop collector if messages before this line separator were already collected
