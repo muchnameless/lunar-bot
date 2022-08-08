@@ -477,8 +477,8 @@ __metadata:
 
 "@sapphire/async-queue@patch:@sapphire/async-queue@npm:1.4.0-next.c0629e7.0#.yarn/patches/@sapphire-async-queue-npm-1.4.0-next.c0629e7.0-87690fa8f4.patch::locator=lunar-bot%40workspace%3A.":
   version: 1.4.0-next.c0629e7.0
-  resolution: "@sapphire/async-queue@patch:@sapphire/async-queue@npm%3A1.4.0-next.c0629e7.0#.yarn/patches/@sapphire-async-queue-npm-1.4.0-next.c0629e7.0-87690fa8f4.patch::version=1.4.0-next.c0629e7.0&hash=62d2b3&locator=lunar-bot%40workspace%3A."
-  checksum: a61bd31aac0b2417090bab71bc6c0f76ca492160081eec2c60ce39df0477b5aa1e0ac4986d0641a276bb763fddc035132275f7707107f1249e0a3a037c2a4e99
+  resolution: "@sapphire/async-queue@patch:@sapphire/async-queue@npm%3A1.4.0-next.c0629e7.0#.yarn/patches/@sapphire-async-queue-npm-1.4.0-next.c0629e7.0-87690fa8f4.patch::version=1.4.0-next.c0629e7.0&hash=ef3879&locator=lunar-bot%40workspace%3A."
+  checksum: 876c64c835687fb7d37830d95e2735a167aba5643c5d544ee61479a5d39fc6fa894d589690de740bc3a8a543d182ccf8b8516bb441701daa4c37accdf9ea5baf
   languageName: node
   linkType: hard
 
