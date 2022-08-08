@@ -1,5 +1,5 @@
 diff --git a/dist/components/ActionRow.d.ts b/dist/components/ActionRow.d.ts
-index d7d849539c30a3ea410310e6f406da420f857b19..792bd3705d04670789de0a4b5da81a516935571a 100644
+index d7d849539c30a3ea410310e6f406da420f857b19..dc36422942f745e0965c8c661bc50c8c302311ba 100644
 --- a/dist/components/ActionRow.d.ts
 +++ b/dist/components/ActionRow.d.ts
 @@ -7,7 +7,7 @@ import { type RestOrArray } from '../util/normalizeArray';
@@ -32,7 +32,7 @@ index 563e4b4e7f39ca4842b92e33d259a3e82a4f44d3..56b231acfbdbf46c6ee88c7e997953d4
  const TimestampStyles = {
    ShortTime: "t",
 diff --git a/dist/messages/formatters.d.ts b/dist/messages/formatters.d.ts
-index 191718e4684059f5f88c8635622f5cae2e353511..a771adbd4e2880c924329bdbdf814a6442e2e54d 100644
+index 191718e4684059f5f88c8635622f5cae2e353511..6cec0e3243d25bf0739e0f5ab2bdbb3c2909f123 100644
 --- a/dist/messages/formatters.d.ts
 +++ b/dist/messages/formatters.d.ts
 @@ -179,16 +179,16 @@ export declare function time<S extends TimestampStylesString>(date: Date, style:
