@@ -475,6 +475,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sapphire/async-queue@patch:@sapphire/async-queue@npm:1.4.0-next.c0629e7.0#.yarn/patches/@sapphire-async-queue-npm-1.4.0-next.c0629e7.0-87690fa8f4.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.4.0-next.c0629e7.0
+  resolution: "@sapphire/async-queue@patch:@sapphire/async-queue@npm%3A1.4.0-next.c0629e7.0#.yarn/patches/@sapphire-async-queue-npm-1.4.0-next.c0629e7.0-87690fa8f4.patch::version=1.4.0-next.c0629e7.0&hash=62d2b3&locator=lunar-bot%40workspace%3A."
+  checksum: a61bd31aac0b2417090bab71bc6c0f76ca492160081eec2c60ce39df0477b5aa1e0ac4986d0641a276bb763fddc035132275f7707107f1249e0a3a037c2a4e99
+  languageName: node
+  linkType: hard
+
 "@sapphire/discord-utilities@npm:2.11.6-next.c0629e7.0":
   version: 2.11.6-next.c0629e7.0
   resolution: "@sapphire/discord-utilities@npm:2.11.6-next.c0629e7.0"

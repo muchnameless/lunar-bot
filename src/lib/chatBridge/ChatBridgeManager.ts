@@ -237,4 +237,19 @@ export class ChatBridgeManager {
 			void MessageUtil.react(message, UnicodeEmoji.X);
 		}
 	}
+
+	/**
+	 * aborts the AbortController if the message was sent in a bridge channel
+	 * @param message
+	 */
+	handleMessageDelete({ id: messageId, channelId }: Pick<Message, 'id' | 'channelId'>) {
+		if (!this.channelIds.has(channelId)) return;
+
+		for (const chatBridge of this.cache) {
+			chatBridge.minecraft.abortControllers.get(messageId)?.abort(
+				// @ts-expect-error
+				'discord message deleted',
+			);
+		}
+	}
 }

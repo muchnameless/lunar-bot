@@ -42,6 +42,7 @@ interface SendViaBotOptions extends MessageOptions {
 
 interface SendViaWebhookOptions extends WebhookMessageOptions {
 	queuePromise?: Promise<void>;
+	abortController?: AbortController;
 }
 
 export class DiscordChatManager extends ChatManager {
@@ -169,12 +170,16 @@ export class DiscordChatManager extends ChatManager {
 		return this.chatBridge.minecraft;
 	}
 
-	get queuePromise() {
-		return this.queue.wait({
-			signal: AbortSignal
-				// @ts-expect-error
-				.timeout(minutes(1)),
-		});
+	/**
+	 * returns the promise from queueing the promise
+	 * @param signal
+	 */
+	queuePromise(
+		signal: AbortSignal = AbortSignal
+			// @ts-expect-error
+			.timeout(minutes(1)),
+	) {
+		return this.queue.wait({ signal });
 	}
 
 	/**
@@ -291,27 +296,21 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the chatBridge webhook
 	 * @param options
 	 */
-	async sendViaWebhook({ queuePromise, ...options }: SendViaWebhookOptions) {
+	async sendViaWebhook({ queuePromise, abortController, ...options }: SendViaWebhookOptions) {
 		// chat bridge disabled
 		if (!this.chatBridge.isEnabled()) {
-			if (queuePromise) {
-				await queuePromise;
-				this.queue.shift();
-			}
+			abortController?.abort();
 			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: not enabled`);
 		}
 
 		// no content
 		if (!options.content) {
-			if (queuePromise) {
-				await queuePromise;
-				this.queue.shift();
-			}
+			abortController?.abort();
 			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: no content`);
 		}
 
 		// async queue
-		await (queuePromise ?? this.queuePromise);
+		await (queuePromise ?? this.queuePromise(abortController?.signal));
 
 		try {
 			return await this._sendViaWebhook(options);
@@ -359,7 +358,7 @@ export class DiscordChatManager extends ChatManager {
 	async sendViaBot({ hypixelMessage, content, fromMinecraft, ...options }: SendViaBotOptions) {
 		if (!this.chatBridge.isEnabled()) return null;
 
-		const queuePromise = this.queuePromise;
+		const queuePromise = this.queuePromise();
 
 		let discordMessage: Message | null | undefined;
 		try {

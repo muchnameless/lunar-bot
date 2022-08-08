@@ -1,4 +1,3 @@
-import { setTimeout, clearTimeout } from 'node:timers';
 import {
 	DiscordAPIError,
 	MessageFlags,
@@ -19,8 +18,6 @@ import type {
 	MessageEditOptions,
 	MessageOptions,
 	MessageReaction,
-	PartialMessage,
-	Snowflake,
 	TextChannel,
 } from 'discord.js';
 import type { SendOptions } from '.';
@@ -35,18 +32,8 @@ export interface EditOptions extends MessageEditOptions {
 	rejectOnError?: boolean;
 }
 
-interface QueuedDeletionTimeout {
-	timeout: NodeJS.Timeout;
-	promise: Promise<Message>;
-	executionTime: number;
-}
-
 export class MessageUtil extends null {
 	static DEFAULT_REPLY_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
-
-	static DELETE_TIMEOUT_CACHE = new Map<Snowflake, QueuedDeletionTimeout>();
-
-	static DELETED_MESSAGES = new WeakSet<Message | PartialMessage>();
 
 	/**
 	 * @param message
@@ -118,7 +105,7 @@ export class MessageUtil extends null {
 	 * @param emojis
 	 */
 	static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
-		if (!message || this.DELETED_MESSAGES.has(message) || this.isEphemeral(message)) return null;
+		if (!message || this.isEphemeral(message)) return null;
 
 		// permission checks
 		const { channel } = message;
@@ -184,55 +171,22 @@ export class MessageUtil extends null {
 	 * @param message
 	 * @param options message delete options
 	 */
-	static async delete(message: Message, { timeout = 0 }: { timeout?: number } = {}): Promise<Message> {
+	static async delete(message: Message): Promise<Message> {
+		// permission check
 		if (!message.deletable) {
-			// permission check
 			logger.warn(
-				{ message, data: { timeout } },
+				message,
 				`[MESSAGE DELETE]: missing permissions to delete message in ${this.channelLogInfo(message)}`,
 			);
 			return message;
 		}
 
-		// no timeout
-		if (timeout <= 0) {
-			this.DELETE_TIMEOUT_CACHE.delete(message.id);
-
-			try {
-				return await message.delete();
-			} catch (error) {
-				logger.error(
-					{ message, err: error, data: { timeout } },
-					`[MESSAGE DELETE]: in ${this.channelLogInfo(message)}`,
-				);
-				return message;
-			}
+		try {
+			return await message.delete();
+		} catch (error) {
+			logger.error({ message, err: error }, `[MESSAGE DELETE]: in ${this.channelLogInfo(message)}`);
+			return message;
 		}
-
-		// check if timeout is already queued
-		const existing = this.DELETE_TIMEOUT_CACHE.get(message.id);
-		if (existing) {
-			// queued timeout resolves earlier than new one
-			if (existing.executionTime - Date.now() <= timeout) return existing.promise;
-
-			// delete queued timeout and requeue newer one
-			clearTimeout(existing.timeout);
-		}
-
-		// timeout
-		let res: (value: Promise<Message>) => void;
-		const promise = new Promise<Message>((r) => (res = r));
-
-		this.DELETE_TIMEOUT_CACHE.set(message.id, {
-			timeout: setTimeout(() => {
-				this.DELETE_TIMEOUT_CACHE.delete(message.id);
-				res(this.delete(message));
-			}, timeout),
-			promise,
-			executionTime: Date.now() + timeout,
-		});
-
-		return promise;
 	}
 
 	/**

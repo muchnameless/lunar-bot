@@ -353,8 +353,11 @@ export class HypixelMessage {
 	 * @internal
 	 */
 	private async _forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
+		const abortController = new AbortController();
+
 		return discordChatManager.sendViaWebhook({
-			queuePromise: discordChatManager.queuePromise,
+			queuePromise: discordChatManager.queuePromise(abortController.signal),
+			abortController,
 			content: await this.chatBridge.discord.parseContent(this.prefixReplacedContent, true),
 			username: member?.displayName ?? player?.ign ?? this.author!.ign,
 			avatarURL:

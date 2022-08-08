@@ -50,7 +50,7 @@ export interface MinecraftChatOptions {
 	discordMessage?: Message | null;
 	/** whether to whisper to the author */
 	ephemeral?: boolean;
-	signal?: AbortSignal;
+	signal?: AbortSignal | null;
 }
 
 export interface CommandOptions {
@@ -202,6 +202,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * anti spam checker
 	 */
 	private _lastMessages = [new LastMessages(), new LastMessages()];
+	/**
+	 * AbortSignals
+	 */
+	abortControllers = new Map<Snowflake, AbortController>();
 	/**
 	 * minecraft bot client
 	 */
@@ -816,12 +820,27 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return false;
 		}
 
+		const signal = discordMessage && this._getAbortSignal(discordMessage);
+
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of contentParts) {
-			success = (await this.sendToChat({ content: part, prefix, discordMessage })) && success;
+			success = (await this.sendToChat({ content: part, prefix, discordMessage, signal })) && success;
 		}
 
+		if (discordMessage) this.abortControllers.delete(discordMessage.id);
+
 		return success;
+	}
+
+	/**
+	 * instantiates and caches the AbortController, returns the AbortSignal
+	 * @param discordMessage
+	 * @internal
+	 */
+	private _getAbortSignal(discordMessage: Message) {
+		const abortController = new AbortController();
+		this.abortControllers.set(discordMessage.id, abortController);
+		return abortController.signal;
 	}
 
 	/**
@@ -831,18 +850,19 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	async sendToChat(options: string | MinecraftChatOptions) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
-		if (_options.discordMessage && MessageUtil.DELETED_MESSAGES.has(_options.discordMessage)) {
-			logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${_options.prefix ?? ''}${_options.content}'`);
-			return false;
+		// queue and catch AbortSignal abortions, abort already shifts the queue
+		try {
+			await this.queue.wait({ signal: _options.signal });
+		} catch (error) {
+			logger.error(error, '[SEND TO CHAT]');
+			return true; // to not try to react with :x: since the message was deleted
 		}
-
-		await this.queue.wait({ signal: _options.signal });
 
 		try {
 			await this._sendToChat(_options);
 			return true;
 		} catch (error) {
-			logger.error(error, '[CHATBRIDGE MC CHAT]');
+			logger.error(error, '[SEND TO CHAT]');
 			return false;
 		} finally {
 			this._retries = 0;
@@ -894,7 +914,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		try {
 			this.bot.write('chat', { message });
 		} catch (error) {
-			logger.error(error, '[CHATBRIDGE _SEND TO CHAT]');
+			logger.error(error, '[_SEND TO CHAT]');
 			void MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
 			this._resetFilter();
@@ -954,8 +974,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 						? this.delay
 						: (this._tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
 				);
-
-				return;
 			}
 		}
 	}
