@@ -180,7 +180,7 @@ export default class TrackCommand extends ApplicationCommand {
 						url: player.url,
 					})
 					.setTitle(`${upperCaseFirstChar(datasets[0]!.label)} history (${days} days)`)
-					.setImage(`attachment://${attachment.data.name}`),
+					.setImage(`attachment://${attachment.name}`),
 			],
 			files: [attachment],
 		});
