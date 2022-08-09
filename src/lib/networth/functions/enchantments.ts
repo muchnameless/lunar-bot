@@ -22,9 +22,11 @@ interface EnchantmentData {
 export const getEnchantment = (enchantment: Enchantment, level: number): EnchantmentData => {
 	switch (enchantment) {
 		// not combinable, upgradable via usage
+		case Enchantment.Champion:
 		case Enchantment.Compact:
 		case Enchantment.Cultivating:
 		case Enchantment.Expertise:
+		case Enchantment.Hecatomb:
 			return { itemId: `${enchantment}_1`, count: 1, higherBaseLvls: null };
 
 		// not combinable
@@ -144,6 +146,10 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Vicious:
 			return { itemId: `${enchantment}_3`, count: 2 ** (level - 3), higherBaseLvls: null };
 
+		// combinable 4->5
+		case Enchantment.Cayenne:
+			return { itemId: `${enchantment}_4`, count: 2 ** (level - 4), higherBaseLvls: null };
+
 		// combinable 1->x
 		case Enchantment.TurboCactus: // turbo
 		case Enchantment.TurboCane:
@@ -158,6 +164,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.UltimateBank: // ultimate
 		case Enchantment.UltimateChimera:
 		case Enchantment.UltimateCombo:
+		case Enchantment.UltimateDuplex:
 		case Enchantment.UltimateFatalTempo:
 		case Enchantment.UltimateFlash:
 		case Enchantment.UltimateInferno:
@@ -166,7 +173,6 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.UltimateLegion:
 		case Enchantment.UltimateNoPainNoGain:
 		case Enchantment.UltimateOneForAll:
-		case Enchantment.UltimateReiterate:
 		case Enchantment.UltimateRend:
 		case Enchantment.UltimateSoulEater:
 		case Enchantment.UltimateSwarm:
