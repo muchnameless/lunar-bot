@@ -70,7 +70,7 @@ export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('
  */
 const PADDING_CHUNKS = (['----', '____', '////'] as const).map((chunk) => ` ${chunk}` as const);
 
-export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PADDING_CHUNKS.length)];
+export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PADDING_CHUNKS.length)]!;
 
 /**
  * any non-'-' and non-whitespace
