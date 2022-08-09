@@ -11,7 +11,7 @@ index 541ec0ca36351f414207fa96434ab5b68bb8e9f0..3ac1d6fa6ad5b56a94654fdd5c887831
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
-index e2e7cf5179cd1250aedf0d7cf51b044daecab703..eca8fafe4cf87d6a743b4aab16f237fab1c24127 100644
+index e2e7cf5179cd1250aedf0d7cf51b044daecab703..4b20611eaf9d7e72b10a8c4a6066689ba4f4959b 100644
 --- a/src/structures/AttachmentBuilder.js
 +++ b/src/structures/AttachmentBuilder.js
 @@ -7,10 +7,9 @@ const { basename, flatten } = require('../util/Util');
@@ -27,6 +27,21 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..eca8fafe4cf87d6a743b4aab16f237fa
      /**
       * The file associated with this attachment.
       * @type {BufferResolvable|Stream}
+@@ -20,12 +19,12 @@ class AttachmentBuilder {
+      * The name of this attachment
+      * @type {?string}
+      */
+-    this.name = data.name;
++    this.name = name;
+     /**
+      * The description of the attachment
+      * @type {?string}
+      */
+-    this.description = data.description;
++    this.description = description;
+   }
+ 
+   /**
 @@ -82,7 +81,7 @@ class AttachmentBuilder {
     * @readonly
     */
