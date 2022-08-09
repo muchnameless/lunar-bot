@@ -68,7 +68,7 @@ export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('
 /**
  * chunks of text which can be used to pad a message to bypass hypixel's spam filter
  */
-const PADDING_CHUNKS = (['----', '____', '////'] as const).map((chunk) => ` ${chunk}` as const);
+const PADDING_CHUNKS = ['-', '_', '/'].map((chunk) => ` ${chunk.repeat(4)}` as const);
 
 export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PADDING_CHUNKS.length)]!;
 
