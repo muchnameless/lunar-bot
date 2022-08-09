@@ -102,7 +102,7 @@ class LastMessages {
 	/**
 	 * treshold above which the message to send gets additional random padding
 	 */
-	private static JARO_WINKLER_THRESHOLD = 0.985 as const;
+	private static JARO_WINKLER_THRESHOLD = 0.98 as const;
 
 	/**
 	 * current buffer index
@@ -139,7 +139,7 @@ class LastMessages {
 	 */
 	check(content: string, retry: number) {
 		const CLEANED_CONTENT = LastMessages._cleanContent(content);
-		const THRESHOLD = LastMessages.JARO_WINKLER_THRESHOLD - 0.005 * retry;
+		const THRESHOLD = LastMessages.JARO_WINKLER_THRESHOLD - 0.01 * retry;
 
 		return this.cache.some((cached) => {
 			// exact match
@@ -898,13 +898,16 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		if (lastMessages) {
 			let index = this._retries;
+			let paddedContent = _content!;
 
 			// 1 for each retry + additional if _lastMessages includes curent padding
 			while (
-				(--index >= 0 || lastMessages.check(_content!, this._retries)) &&
+				(--index >= 0 || lastMessages.check(paddedContent, this._retries)) &&
 				message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH
 			) {
-				message += randomPadding();
+				const padding = randomPadding();
+				message += padding;
+				paddedContent += padding;
 			}
 		}
 
