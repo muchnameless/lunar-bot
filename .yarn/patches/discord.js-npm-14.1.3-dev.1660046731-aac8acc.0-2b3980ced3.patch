@@ -11,17 +11,10 @@ index 541ec0ca36351f414207fa96434ab5b68bb8e9f0..3ac1d6fa6ad5b56a94654fdd5c887831
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
-index e2e7cf5179cd1250aedf0d7cf51b044daecab703..16f37c229486000d68bed7001a9fb8d761bd1d00 100644
+index e2e7cf5179cd1250aedf0d7cf51b044daecab703..eca8fafe4cf87d6a743b4aab16f237fab1c24127 100644
 --- a/src/structures/AttachmentBuilder.js
 +++ b/src/structures/AttachmentBuilder.js
-@@ -1,31 +1,25 @@
- 'use strict';
- 
--const { basename, flatten } = require('../util/Util');
-+const { basename } = require('../util/Util');
- 
- /**
-  * Represents an attachment builder
+@@ -7,10 +7,9 @@ const { basename, flatten } = require('../util/Util');
   */
  class AttachmentBuilder {
    /**
@@ -30,75 +23,20 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..16f37c229486000d68bed7001a9fb8d7
 +   * @param {AttachmentPayload} [payload] Attachment and extra data
     */
 -  constructor(attachment, data = {}) {
-+  constructor({ attachment, ...data } = {}) {
++  constructor({ attachment, name, description } = {}) {
      /**
       * The file associated with this attachment.
       * @type {BufferResolvable|Stream}
-      */
-     this.attachment = attachment;
-     /**
--     * The name of this attachment
--     * @type {?string}
--     */
--    this.name = data.name;
--    /**
--     * The description of the attachment
--     * @type {?string}
-+     * The API data associated with this attachment.
-+     * @type {APIAttachment}
-      */
--    this.description = data.description;
-+    this.data = data;
-   }
- 
-   /**
-@@ -34,7 +28,7 @@ class AttachmentBuilder {
-    * @returns {AttachmentBuilder} This attachment
-    */
-   setDescription(description) {
--    this.description = description;
-+    this.data.description = description;
-     return this;
-   }
- 
-@@ -54,7 +48,7 @@ class AttachmentBuilder {
-    * @returns {AttachmentBuilder} This attachment
-    */
-   setName(name) {
--    this.name = name;
-+    this.data.name = name;
-     return this;
-   }
- 
-@@ -68,11 +62,11 @@ class AttachmentBuilder {
- 
-     if (!spoiler) {
-       while (this.spoiler) {
--        this.name = this.name.slice('SPOILER_'.length);
-+        this.data.name = this.data.name.slice('SPOILER_'.length);
-       }
-       return this;
-     }
--    this.name = `SPOILER_${this.name}`;
-+    this.data.name = `SPOILER_${this.name}`;
-     return this;
-   }
- 
-@@ -82,11 +76,11 @@ class AttachmentBuilder {
+@@ -82,7 +81,7 @@ class AttachmentBuilder {
     * @readonly
     */
    get spoiler() {
 -    return basename(this.name).startsWith('SPOILER_');
-+    return this.data.name ? basename(this.data.name).startsWith('SPOILER_') : false;
++    return this.name ? basename(this.name).startsWith('SPOILER_') : false;
    }
  
    toJSON() {
--    return flatten(this);
-+    return { ...this.data, attachment: this.attachment };
-   }
- 
-   /**
-@@ -95,10 +89,10 @@ class AttachmentBuilder {
+@@ -95,10 +94,10 @@ class AttachmentBuilder {
     * @returns {AttachmentBuilder}
     */
    static from(other) {
@@ -114,7 +52,7 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..16f37c229486000d68bed7001a9fb8d7
  }
  
 diff --git a/src/structures/Embed.js b/src/structures/Embed.js
-index a84223ac8f68ab8584e938ff0a7c04b57669b48e..60f0407b63658ce0a85d411cdde77a6e43cdf5f1 100644
+index a84223ac8f68ab8584e938ff0a7c04b57669b48e..764eeff7453244ebf346269cfb811f7416bcdc10 100644
 --- a/src/structures/Embed.js
 +++ b/src/structures/Embed.js
 @@ -17,11 +17,11 @@ class Embed {
@@ -522,7 +460,7 @@ index 41e06eb8b28023f1304439d343f5b3f2489ce937..1741ceec2ef623a6bd79f9e28108465c
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df76af3363e 100644
+index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..314fe1c6e2c3967ac80facbed86d2e2b6223c531 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -261,7 +261,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -543,7 +481,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1472,7 +1471,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1472,7 +1472,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -552,7 +490,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1480,12 +1479,18 @@ export type CacheTypeReducer<
+@@ -1480,12 +1480,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -571,7 +509,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1507,7 +1512,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1507,7 +1513,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -581,7 +519,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1515,7 +1521,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1515,7 +1522,7 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
    public get guild(): CacheTypeReducer<Cached, Guild, null>;
    public guildId: CacheTypeReducer<Cached, Snowflake>;
    public id: Snowflake;
@@ -590,16 +528,15 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
    public readonly token: string;
    public type: InteractionType;
    public user: User;
-@@ -1743,16 +1749,15 @@ export class Message<Cached extends boolean = boolean> extends Base {
+@@ -1743,16 +1750,16 @@ export class Message<Cached extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
 -  public constructor(attachment: BufferResolvable | Stream, data?: AttachmentData);
 +  public constructor(data?: Partial<AttachmentPayload>);
    public attachment: BufferResolvable | Stream;
--  public description: string | null;
--  public name: string | null;
-+  public data: Exclude<AttachmentPayload, 'attachment'>;
+   public description: string | null;
+   public name: string | null;
    public get spoiler(): boolean;
    public setDescription(description: string): this;
 -  public setFile(attachment: BufferResolvable | Stream, name?: string): this;
@@ -611,7 +548,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1951,12 +1955,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1951,12 +1958,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -630,7 +567,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1965,6 +1974,7 @@ export class ModalSubmitFields {
+@@ -1965,6 +1977,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -638,7 +575,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -3276,7 +3286,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3276,7 +3289,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -647,7 +584,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3729,11 +3739,6 @@ export interface BaseApplicationCommandData {
+@@ -3729,11 +3742,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -659,7 +596,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5044,10 +5049,8 @@ export interface MessageEditOptions {
+@@ -5044,10 +5052,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -671,7 +608,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..abd21cb4f69ec0358264d8fb76ff7df7
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5102,10 +5105,8 @@ export interface MessageOptions {
+@@ -5102,10 +5108,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream
