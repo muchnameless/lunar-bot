@@ -11,17 +11,18 @@ index 541ec0ca36351f414207fa96434ab5b68bb8e9f0..3ac1d6fa6ad5b56a94654fdd5c887831
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
-index e2e7cf5179cd1250aedf0d7cf51b044daecab703..de20d30f7d64e671c48aa7bbf7eb3dae8d0a3849 100644
+index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1350d92fc 100644
 --- a/src/structures/AttachmentBuilder.js
 +++ b/src/structures/AttachmentBuilder.js
-@@ -1,5 +1,6 @@
+@@ -1,16 +1,16 @@
  'use strict';
  
+-const { basename, flatten } = require('../util/Util');
 +const { isJSONEncodable } = require('@discordjs/builders');
- const { basename, flatten } = require('../util/Util');
++const { basename } = require('../util/Util');
  
  /**
-@@ -7,10 +8,9 @@ const { basename, flatten } = require('../util/Util');
+  * Represents an attachment builder
   */
  class AttachmentBuilder {
    /**
@@ -435,15 +436,6 @@ index 4a12394713bf5382f370cebe7726792d0e9ebfaf..eb2e2a7fe96f480fdfb3166e321dad44
      return this;
    }
  
-@@ -251,6 +251,8 @@ class MessagePayload {
-       attachment = fileLike;
-       name = findName(attachment);
-     } else {
-+      if (isJSONEncodable(fileLike)) fileLike = fileLike.toJSON();
-+
-       attachment = fileLike.attachment;
-       name = fileLike.name ?? findName(attachment);
-     }
 diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
 index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cbb4db6129 100644
 --- a/src/structures/ModalSubmitFields.js
