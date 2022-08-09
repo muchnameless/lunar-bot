@@ -11,10 +11,17 @@ index 541ec0ca36351f414207fa96434ab5b68bb8e9f0..3ac1d6fa6ad5b56a94654fdd5c887831
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
-index e2e7cf5179cd1250aedf0d7cf51b044daecab703..4b20611eaf9d7e72b10a8c4a6066689ba4f4959b 100644
+index e2e7cf5179cd1250aedf0d7cf51b044daecab703..de20d30f7d64e671c48aa7bbf7eb3dae8d0a3849 100644
 --- a/src/structures/AttachmentBuilder.js
 +++ b/src/structures/AttachmentBuilder.js
-@@ -7,10 +7,9 @@ const { basename, flatten } = require('../util/Util');
+@@ -1,5 +1,6 @@
+ 'use strict';
+ 
++const { isJSONEncodable } = require('@discordjs/builders');
+ const { basename, flatten } = require('../util/Util');
+ 
+ /**
+@@ -7,10 +8,9 @@ const { basename, flatten } = require('../util/Util');
   */
  class AttachmentBuilder {
    /**
@@ -27,7 +34,7 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..4b20611eaf9d7e72b10a8c4a6066689b
      /**
       * The file associated with this attachment.
       * @type {BufferResolvable|Stream}
-@@ -20,12 +19,12 @@ class AttachmentBuilder {
+@@ -20,12 +20,12 @@ class AttachmentBuilder {
       * The name of this attachment
       * @type {?string}
       */
@@ -42,7 +49,7 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..4b20611eaf9d7e72b10a8c4a6066689b
    }
  
    /**
-@@ -82,7 +81,7 @@ class AttachmentBuilder {
+@@ -82,11 +82,11 @@ class AttachmentBuilder {
     * @readonly
     */
    get spoiler() {
@@ -51,7 +58,12 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..4b20611eaf9d7e72b10a8c4a6066689b
    }
  
    toJSON() {
-@@ -95,10 +94,10 @@ class AttachmentBuilder {
+-    return flatten(this);
++    return { ...this };
+   }
+ 
+   /**
+@@ -95,10 +95,10 @@ class AttachmentBuilder {
     * @returns {AttachmentBuilder}
     */
    static from(other) {
@@ -390,7 +402,7 @@ index 2ce960c03aa8a045c9413da782ace6a9c497146b..0d992255f56474c83b40e69a20ecb950
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 4a12394713bf5382f370cebe7726792d0e9ebfaf..06524ccb52e330e4464d58377c19994c02272a10 100644
+index 4a12394713bf5382f370cebe7726792d0e9ebfaf..eb2e2a7fe96f480fdfb3166e321dad44aa665dd5 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -107,7 +107,7 @@ class MessagePayload {
