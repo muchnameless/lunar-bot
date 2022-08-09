@@ -27,6 +27,7 @@ import {
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
+	DELETED_MESSAGE_REASON,
 	MEME_REGEXP,
 	MinecraftChatManagerState,
 	NON_WHITESPACE_REGEXP,
@@ -855,7 +856,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			await this.queue.wait({ signal: _options.signal });
 		} catch (error) {
 			logger.error(error, '[SEND TO CHAT]');
-			return true; // to not try to react with :x: since the message was deleted
+			// @ts-expect-error
+			return _options.signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
 		}
 
 		try {

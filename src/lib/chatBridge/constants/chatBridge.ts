@@ -95,3 +95,5 @@ export const NON_WHITESPACE_REGEXP = new RegExp(
  */
 export const DISCORD_CDN_URL_REGEXP =
 	/\b((?:https:\/\/)?(?:cdn|media)\.discord(?:app)?\.(?:com|net)\/(?:attachments\/\d{17,20}\/\d{17,20}\/.+|emojis\/\d{17,20})\.(?:jpeg|jpg|png))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/g;
+
+export const DELETED_MESSAGE_REASON = 'DELETED_MESSAGE';

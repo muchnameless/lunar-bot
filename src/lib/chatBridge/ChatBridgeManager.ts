@@ -10,6 +10,7 @@ import { BridgeCommandCollection } from '#structures/commands/BridgeCommandColle
 import { minutes } from '#functions';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
+import { DELETED_MESSAGE_REASON } from './constants';
 import type { URL } from 'node:url';
 import type { ChatInputCommandInteraction, Message, Snowflake } from 'discord.js';
 import type { MessageForwardOptions } from './ChatBridge';
@@ -248,7 +249,7 @@ export class ChatBridgeManager {
 		for (const chatBridge of this.cache) {
 			chatBridge.minecraft.abortControllers.get(messageId)?.abort(
 				// @ts-expect-error
-				'discord message deleted',
+				DELETED_MESSAGE_REASON,
 			);
 		}
 	}
