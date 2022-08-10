@@ -867,8 +867,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const { content, prefix = '', signal, ..._options } = MinecraftChatManager.resolveInput(options);
 
 		let lastMessages: LastMessages | undefined;
-		let commandPrefix = prefix;
-		let prefixedContent = content;
+		let commandPrefix: string;
+		let prefixedContent: string;
 
 		if (prefix.startsWith('/gc ') || prefix.startsWith('/oc ')) {
 			// guild and officer chat
@@ -883,6 +883,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			const index = prefix.indexOf(' ', '/w '.length) + 1;
 			commandPrefix = prefix.slice(0, index);
 			prefixedContent = prefix.slice(index);
+		} else {
+			// unknown prefix
+			commandPrefix = prefix;
+			prefixedContent = content;
 		}
 
 		// queue and catch AbortSignal abortions, abort already shifts the queue
