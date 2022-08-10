@@ -1,7 +1,7 @@
 import { ApplicationCommand } from './ApplicationCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { Awaitable } from '@sapphire/utilities';
-import type { ParseArgsOptions } from 'node:util';
+import type { ParseArgsConfig } from 'node:util';
 import type { CommandContext } from './BaseCommand';
 import type { ApplicationCommandData } from './ApplicationCommand';
 import type { BridgeCommand, BridgeCommandData } from './BridgeCommand';
@@ -15,7 +15,7 @@ export class DualCommand
 	aliasesInGame: string[] | null;
 	guildOnly: boolean;
 	args: number | boolean = false;
-	parseArgsOptions?: ParseArgsOptions;
+	parseArgsOptions?: ParseArgsConfig['options'];
 
 	/**
 	 * create a new command

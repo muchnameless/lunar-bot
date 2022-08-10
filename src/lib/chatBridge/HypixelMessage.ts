@@ -8,6 +8,7 @@ import { mojang } from '#api';
 import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, HypixelMessageType, spamMessages } from './constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { PrismarineMessage } from './PrismarineMessage';
+import type { ParseArgsConfig } from 'node:util';
 import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
 import type { Player } from '#structures/database/models/Player';
@@ -18,10 +19,16 @@ import type { ChatPacket } from './botEvents/chat';
 import type { BridgeCommand } from '#structures/commands/BridgeCommand';
 import type { DualCommand } from '#structures/commands/DualCommand';
 
-type CommandData = {
+// ts shenanigans to extract a generic return type
+class Wrapper<T extends ParseArgsConfig['options']> {
+	// eslint-disable-next-line class-methods-use-this
+	method = (options: T) => parseArgs({ options, strict: true, allowPositionals: true });
+}
+
+type CommandData<T extends ParseArgsConfig['options'] = ParseArgsConfig['options']> = {
 	name: string | null;
 	command: BridgeCommand | DualCommand | null;
-	args: ReturnType<typeof parseArgs>;
+	args: ReturnType<Wrapper<T>['method']>;
 	prefix: string | null;
 };
 
@@ -39,12 +46,13 @@ interface ForwardToDiscordOptions {
 	member: GuildMember | null;
 }
 
-export interface HypixelUserMessage extends HypixelMessage {
+export interface HypixelUserMessage<T extends ParseArgsConfig['options'] = ParseArgsConfig['options']>
+	extends HypixelMessage {
 	position: 'CHAT';
 	type: NonNullable<HypixelMessage['type']>;
 	author: NonNullable<HypixelMessage['author']>;
 	spam: false;
-	commandData: NonNullable<HypixelMessage['commandData']>;
+	commandData: CommandData<T>;
 }
 
 export class HypixelMessage {
@@ -167,7 +175,7 @@ export class HypixelMessage {
 							name: COMMAND_NAME,
 							command,
 							args: command.parseArgsOptions
-								? parseArgs({ args, options: command.parseArgsOptions, strict: false })
+								? parseArgs({ args, options: command.parseArgsOptions, strict: true, allowPositionals: true })
 								: { values: {}, positionals: args },
 							prefix: prefixMatched,
 					  }

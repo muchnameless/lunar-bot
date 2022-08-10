@@ -1,7 +1,7 @@
 import { BaseCommand } from './BaseCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { Awaitable } from '@sapphire/utilities';
-import type { ParseArgsOptions } from 'node:util';
+import type { ParseArgsConfig } from 'node:util';
 import type { CommandContext, CommandData } from './BaseCommand';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type { BridgeCommandCollection } from './BridgeCommandCollection';
@@ -11,7 +11,7 @@ export interface BridgeCommandData extends CommandData {
 	description?: string;
 	guildOnly?: boolean;
 	args?: number | boolean;
-	parseArgsOptions?: ParseArgsOptions;
+	parseArgsOptions?: ParseArgsConfig['options'];
 	usage?: string | (() => string);
 }
 
@@ -20,7 +20,7 @@ export class BridgeCommand extends BaseCommand {
 	description: string | null;
 	guildOnly = false;
 	args: number | boolean = false;
-	parseArgsOptions?: ParseArgsOptions;
+	parseArgsOptions?: ParseArgsConfig['options'];
 	declare collection: BridgeCommandCollection;
 
 	/**

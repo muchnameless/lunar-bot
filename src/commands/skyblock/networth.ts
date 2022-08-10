@@ -10,12 +10,18 @@ import {
 } from '#structures/commands/commonOptions';
 import { autocorrect, formatError, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
 import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
-import type { ParseArgsResult } from 'node:util';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { BaseSkyBlockSlashData } from './~base-skyblock-command';
+import type { BaseSkyBlockSlashData, baseParseArgsOptions } from './~base-skyblock-command';
 import type { BridgeCommandData } from '#structures/commands/BridgeCommand';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+
+const parseArgsOptions = {
+	auctions: {
+		type: 'boolean',
+		short: 'a',
+	},
+} as const;
 
 export default class NetworthCommand extends BaseSkyBlockCommand {
 	constructor(context: CommandContext, slashData?: BaseSkyBlockSlashData, bridgeData?: BridgeCommandData) {
@@ -29,12 +35,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 			},
 			{
 				aliases: ['nw'],
-				parseArgsOptions: {
-					auctions: {
-						type: 'boolean',
-						short: 'a',
-					},
-				},
+				parseArgsOptions,
 				usage: '--auctions | -a',
 				...bridgeData,
 			},
@@ -86,13 +87,13 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(
+		hypixelMessage: HypixelUserMessage<typeof parseArgsOptions & typeof baseParseArgsOptions>,
+	) {
 		const {
 			values: { profile, latest, auctions },
 			positionals: [IGN, PROFILE_NAME_INPUT],
-		} = hypixelMessage.commandData.args as ParseArgsResult & {
-			values: { profile?: string; latest?: boolean; auctions?: boolean };
-		};
+		} = hypixelMessage.commandData.args;
 
 		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(/[^a-z]/gi, '');
 		if (profileName) {

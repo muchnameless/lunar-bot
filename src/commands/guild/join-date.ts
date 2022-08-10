@@ -17,6 +17,13 @@ interface JoinInfo {
 	timestamp: number;
 }
 
+const parseArgsOptions = {
+	guild: {
+		type: 'string',
+		short: 'g',
+	},
+} as const;
+
 export default class JoinDateCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(
@@ -31,12 +38,7 @@ export default class JoinDateCommand extends DualCommand {
 			},
 			{
 				aliases: ['joined'],
-				parseArgsOptions: {
-					guild: {
-						type: 'string',
-						short: 'g',
-					},
-				},
+				parseArgsOptions,
 				usage: '<`IGN`>',
 			},
 		);
@@ -164,7 +166,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage<typeof parseArgsOptions>) {
 		const {
 			values: { guild: HYPIXEL_GUILD_NAME },
 			positionals,

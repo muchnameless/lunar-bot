@@ -18,7 +18,6 @@ import {
 	commaListOr,
 } from '#functions';
 import { hypixel } from '#api';
-import type { ParseArgsResult } from 'node:util';
 import type { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import type { SkyBlockProfile } from '#functions';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
@@ -29,6 +28,17 @@ import type { ApplicationCommandData, SlashCommandOption } from '#structures/com
 export type FetchedData = Awaited<ReturnType<BaseSkyBlockCommand['_fetchData']>>;
 
 export type BaseSkyBlockSlashData = ApplicationCommandData & { additionalOptions?: SlashCommandOption[] };
+
+export const baseParseArgsOptions = {
+	profile: {
+		type: 'string',
+		short: 'p',
+	},
+	latest: {
+		type: 'boolean',
+		short: 'l',
+	},
+} as const;
 
 export default class BaseSkyBlockCommand extends DualCommand {
 	constructor(
@@ -48,14 +58,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 		}
 
 		bridgeData.parseArgsOptions = {
-			profile: {
-				type: 'string',
-				short: 'p',
-			},
-			latest: {
-				type: 'boolean',
-				short: 'l',
-			},
+			...baseParseArgsOptions,
 			...bridgeData.parseArgsOptions,
 		};
 
@@ -158,11 +161,11 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage<typeof baseParseArgsOptions>) {
 		const {
 			values: { profile, latest },
 			positionals: [IGN, PROFILE_NAME_INPUT],
-		} = hypixelMessage.commandData.args as ParseArgsResult & { values: { profile?: string; latest?: boolean } };
+		} = hypixelMessage.commandData.args;
 
 		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(/[^a-z]/gi, '');
 		if (profileName) {
