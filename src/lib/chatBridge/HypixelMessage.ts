@@ -274,10 +274,7 @@ export class HypixelMessage {
 
 		// to be compatible to Interactions
 		if (ephemeral) {
-			return this.author!.send({
-				maxParts: Number.POSITIVE_INFINITY,
-				..._options,
-			});
+			return this.author!.send(_options);
 		}
 
 		switch (this.type) {
@@ -293,7 +290,7 @@ export class HypixelMessage {
 
 				// DM author the message if sending to gchat failed
 				if (!result[0]) {
-					void this.author!.send(_options.content);
+					void this.author!.send(_options);
 				}
 
 				return result;
@@ -306,10 +303,7 @@ export class HypixelMessage {
 				});
 
 			case HypixelMessageType.Whisper:
-				return this.author!.send({
-					maxParts: Number.POSITIVE_INFINITY,
-					..._options,
-				});
+				return this.author!.send(_options);
 
 			default:
 				throw new Error(`unknown type to reply to: ${this.type}: ${this.rawContent}`);

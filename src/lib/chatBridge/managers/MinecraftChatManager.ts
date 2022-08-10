@@ -314,6 +314,29 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		: (256 as const);
 
 	/**
+	 * removes line formatters from the beginning and end
+	 * @param messages
+	 */
+	static cleanCommandResponse(messages: HypixelMessage[]) {
+		return messages.map(({ content }) => content.replace(/^-{29,}|-{29,}$/g, '').trim()).join('\n');
+	}
+
+	/**
+	 * resolves content or options to an options object
+	 * @param options
+	 */
+	static resolveChatInput(options: string | MinecraftChatOptions) {
+		return typeof options === 'string' ? { content: options } : options;
+	}
+
+	/**
+	 * increasing delay
+	 */
+	get delay() {
+		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
+	}
+
+	/**
 	 * reacts to the message and DMs the author
 	 * @param discordMessage
 	 * @param reason
@@ -409,21 +432,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 						cooldown: hours(24),
 				  },
 		);
-	}
-
-	/**
-	 * removes line formatters from the beginning and end
-	 * @param messages
-	 */
-	static cleanCommandResponse(messages: HypixelMessage[]) {
-		return messages.map(({ content }) => content.replace(/^-{29,}|-{29,}$/g, '').trim()).join('\n');
-	}
-
-	/**
-	 * increasing delay
-	 */
-	get delay() {
-		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
 	}
 
 	/**
@@ -725,7 +733,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 */
 	gchat(options: string | MinecraftChatOptions) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
 			logger.trace(
@@ -745,7 +753,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 */
 	ochat(options: string | MinecraftChatOptions) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
@@ -755,7 +763,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 */
 	pchat(options: string | MinecraftChatOptions) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
@@ -766,21 +774,13 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 */
 	whisper(ign: string, options: string | MinecraftChatOptions) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		return this.chat({
 			prefix: `/w ${ign} ${prefix}${prefix.length ? ' ' : ''}`,
 			maxParts: Number.POSITIVE_INFINITY,
 			..._options,
 		});
-	}
-
-	/**
-	 * resolves content or options to an options object
-	 * @param options
-	 */
-	static resolveInput<T>(options: string | T): T {
-		return typeof options === 'string' ? ({ content: options } as T) : options;
 	}
 
 	/**
@@ -794,7 +794,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			prefix = '',
 			maxParts = this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS'),
 			discordMessage = null,
-		} = MinecraftChatManager.resolveInput(options);
+		} = MinecraftChatManager.resolveChatInput(options);
 
 		if (!content) return false;
 
@@ -864,7 +864,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 */
 	async sendToChat(options: string | MinecraftChatOptions) {
-		const { content, prefix = '', signal, ..._options } = MinecraftChatManager.resolveInput(options);
+		const { content, prefix = '', signal, ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		let lastMessages: LastMessages | undefined;
 		let commandPrefix: string;
@@ -875,14 +875,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			lastMessages = this._lastMessages[LastMessagesType.Guild];
 
 			commandPrefix = prefix.slice(0, '/gc '.length);
-			prefixedContent = prefix.slice('/gc '.length) + content;
+			prefixedContent = `${prefix.slice('/gc '.length)}${content}`;
 		} else if (prefix.startsWith('/w ')) {
 			// whispers
 			lastMessages = this._lastMessages[LastMessagesType.Whisper];
 
 			const index = prefix.indexOf(' ', '/w '.length) + 1;
 			commandPrefix = prefix.slice(0, index);
-			prefixedContent = prefix.slice(index);
+			prefixedContent = `${prefix.slice(index)}${content}`;
 		} else {
 			// unknown prefix
 			commandPrefix = prefix;
@@ -1028,7 +1028,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			rejectOnTimeout = false,
 			rejectOnAbort = false,
 			signal,
-		} = MinecraftChatManager.resolveInput(options);
+		} = typeof options === 'string' ? ({ command: options } as CommandOptions) : options;
 
 		await this.commandQueue.wait({ signal }); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait({ signal }); // only start the collector if the chat queue is free
