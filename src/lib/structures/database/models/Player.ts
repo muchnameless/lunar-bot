@@ -60,7 +60,7 @@ import {
 	XP_OFFSETS,
 	XP_TYPES,
 	STATS_URL_BASE,
-} from '../../../constants';
+} from '#constants';
 import { TransactionType } from './Transaction';
 import type { ArrayElementType } from '@sapphire/utilities';
 import type LilyWeight from 'lilyweight';
@@ -76,13 +76,14 @@ import type {
 } from 'sequelize';
 import type { Snowflake, GuildResolvable, Guild, User } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
+import type { ErrorWithCode } from '#root/lib/types/error.d';
+import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '#constants';
+import type { RoleResolvables } from '#utils';
+import type { LunarClient } from '#structures/LunarClient';
 import type { GuildRank, HypixelGuild } from './HypixelGuild';
 import type { Transaction } from './Transaction';
-import type { LunarClient } from '../../LunarClient';
 import type { TaxCollector } from './TaxCollector';
 import type { ModelResovable } from '../managers/ModelManager';
-import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '#constants';
-import type { RoleResolvables } from '../../../util';
 
 interface ParsedTransaction extends InferAttributes<Transaction> {
 	fromIGN: string | null;
@@ -1751,7 +1752,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// prevent further auto updates
 			void this.client.config.set('MOJANG_API_ERROR', true);
 
-			if ((error as any)?.code === ErrorCode.AbortErr) {
+			if ((error as ErrorWithCode)?.code === ErrorCode.AbortErr) {
 				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
 			}
 

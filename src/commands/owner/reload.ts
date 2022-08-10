@@ -282,8 +282,6 @@ export default class ReloadCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(
-			await this._sharedRun(...(hypixelMessage.commandData.args.positionals as [string, string])),
-		);
+		return hypixelMessage.reply(await this._sharedRun(...(hypixelMessage.commandData.args as [string, string])));
 	}
 }

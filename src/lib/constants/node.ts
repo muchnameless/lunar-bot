@@ -3,4 +3,8 @@
  */
 export const enum ErrorCode {
 	AbortErr = 'ABORT_ERR',
+	ErrInvalidArgType = 'ERR_INVALID_ARG_TYPE',
+	ErrParseArgsInvalidOptionValue = 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE',
+	ErrParseArgsUnexpectedPositional = 'ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL',
+	ErrParseArgsUnknownOption = 'ERR_PARSE_ARGS_UNKNOWN_OPTION',
 }

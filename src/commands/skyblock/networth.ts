@@ -87,13 +87,11 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(
-		hypixelMessage: HypixelUserMessage<typeof parseArgsOptions & typeof baseParseArgsOptions>,
-	) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const {
 			values: { profile, latest, auctions },
 			positionals: [IGN, PROFILE_NAME_INPUT],
-		} = hypixelMessage.commandData.args;
+		} = hypixelMessage.commandData.parseArgs<typeof parseArgsOptions & typeof baseParseArgsOptions>();
 
 		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(/[^a-z]/gi, '');
 		if (profileName) {

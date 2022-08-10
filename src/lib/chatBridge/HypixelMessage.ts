@@ -19,18 +19,20 @@ import type { ChatPacket } from './botEvents/chat';
 import type { BridgeCommand } from '#structures/commands/BridgeCommand';
 import type { DualCommand } from '#structures/commands/DualCommand';
 
-// ts shenanigans to extract a generic return type
-class Wrapper<T extends ParseArgsConfig['options']> {
-	// eslint-disable-next-line class-methods-use-this
-	method = (options: T) => parseArgs({ options, strict: true, allowPositionals: true });
-}
+type ParseArgsConfigOptions = NonNullable<ParseArgsConfig['options']>;
 
-type CommandData<T extends ParseArgsConfig['options'] = ParseArgsConfig['options']> = {
+type CommandData = {
 	name: string | null;
 	command: BridgeCommand | DualCommand | null;
-	args: ReturnType<Wrapper<T>['method']>;
+	args: string[];
+	parseArgs: <T extends ParseArgsConfigOptions = ParseArgsConfigOptions>() => ReturnType<
+		typeof _parseArgsWithOptionsApplied<T>
+	>;
 	prefix: string | null;
 };
+
+const _parseArgsWithOptionsApplied = <T extends ParseArgsConfigOptions>(args: string[], options: T) =>
+	parseArgs({ args, options, strict: true, allowPositionals: true });
 
 type AwaitConfirmationOptions = Partial<BroadcastOptions> &
 	Partial<MinecraftChatOptions> & {
@@ -46,13 +48,12 @@ interface ForwardToDiscordOptions {
 	member: GuildMember | null;
 }
 
-export interface HypixelUserMessage<T extends ParseArgsConfig['options'] = ParseArgsConfig['options']>
-	extends HypixelMessage {
+export interface HypixelUserMessage extends HypixelMessage {
 	position: 'CHAT';
 	type: NonNullable<HypixelMessage['type']>;
 	author: NonNullable<HypixelMessage['author']>;
 	spam: false;
-	commandData: CommandData<T>;
+	commandData: CommandData;
 }
 
 export class HypixelMessage {
@@ -164,27 +165,28 @@ export class HypixelMessage {
 				this.commandData = {
 					name: null,
 					command: null,
-					args: { values: {}, positionals: args },
+					args,
+					parseArgs() {
+						throw 'unknown command';
+					},
 					prefix: null,
 				};
 			} else {
 				const command = this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase());
 
-				this.commandData = command
-					? {
-							name: COMMAND_NAME,
-							command,
-							args: command.parseArgsOptions
-								? parseArgs({ args, options: command.parseArgsOptions, strict: true, allowPositionals: true })
-								: { values: {}, positionals: args },
-							prefix: prefixMatched,
-					  }
-					: {
-							name: COMMAND_NAME,
-							command,
-							args: { values: {}, positionals: args },
-							prefix: prefixMatched,
-					  };
+				this.commandData = {
+					name: COMMAND_NAME,
+					command,
+					args,
+					parseArgs: () =>
+						parseArgs({
+							args,
+							options: command?.parseArgsOptions,
+							strict: true,
+							allowPositionals: true,
+						}) as any,
+					prefix: prefixMatched,
+				};
 			}
 		} else {
 			this.type = null;

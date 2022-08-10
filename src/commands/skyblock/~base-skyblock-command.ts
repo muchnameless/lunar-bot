@@ -161,11 +161,11 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage<typeof baseParseArgsOptions>) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const {
 			values: { profile, latest },
 			positionals: [IGN, PROFILE_NAME_INPUT],
-		} = hypixelMessage.commandData.args;
+		} = hypixelMessage.commandData.parseArgs<typeof baseParseArgsOptions>();
 
 		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(/[^a-z]/gi, '');
 		if (profileName) {

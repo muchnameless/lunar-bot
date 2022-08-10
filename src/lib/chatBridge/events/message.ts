@@ -2,7 +2,7 @@ import { setTimeout } from 'node:timers';
 import ms from 'ms';
 import { GuildMemberUtil, MessageUtil } from '#utils';
 import { logger } from '#logger';
-import { UnicodeEmoji } from '#constants';
+import { ErrorCode, UnicodeEmoji } from '#constants';
 import { assertNever, asyncCollectionFilter, commaListOr, getLilyWeight, stringToMS } from '#functions';
 import { hypixel, mojang } from '#api';
 import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent';
@@ -16,6 +16,7 @@ import {
 	promoteSuccess,
 	unmuteSuccess,
 } from '../constants';
+import type { ErrorWithCode } from '#root/lib/types/error.d';
 import type { SkyBlockProfile, WeightData } from '#functions';
 import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type MathsCommand from '#root/commands/general/maths';
@@ -549,8 +550,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			}
 		}
 
-		// positional argument handling
-		if (command.args && hypixelMessage.commandData.args.positionals.length < command.args) {
+		// legacy argument handling
+		if (command.args && hypixelMessage.commandData.args.length < command.args) {
 			const reply: string[] = [];
 
 			reply.push(
@@ -588,9 +589,26 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				channel: hypixelMessage.type,
 			});
 
-			void hypixelMessage.author.send(
-				typeof error === 'string' ? error : `an error occured while executing the '${command.name}' command:\n${error}`,
-			);
+			// user facing errors
+			if (typeof error === 'string') {
+				return void hypixelMessage.author.send(error);
+			}
+
+			if (error instanceof Error) {
+				if (
+					[
+						ErrorCode.ErrInvalidArgType,
+						ErrorCode.ErrParseArgsInvalidOptionValue,
+						ErrorCode.ErrParseArgsUnexpectedPositional,
+						ErrorCode.ErrParseArgsUnknownOption,
+					].includes((error as ErrorWithCode).code)
+				) {
+					// parseArgs errors
+					return void hypixelMessage.author.send(error.message);
+				}
+
+				return void hypixelMessage.author.send(`an unexpected error occurred: ${error.message}`);
+			}
 		}
 	}
 

@@ -15,7 +15,7 @@ export default class BaseStatsCommand extends DualCommand {
 	 * @param ignOrUuid
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	async _fetchData(ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid: string | null) {
+	async _fetchData(ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid?: string | null) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 
 		return {
@@ -66,7 +66,7 @@ export default class BaseStatsCommand extends DualCommand {
 	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		try {
 			return hypixelMessage.reply(
-				this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args.positionals[0]!)),
+				this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0])),
 			);
 		} catch (error) {
 			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });

@@ -536,7 +536,7 @@ export default class MathsCommand extends DualCommand {
 	 */
 	override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		try {
-			const { input, formattedOutput } = this.calculate(hypixelMessage.commandData.args.positionals.join(''));
+			const { input, formattedOutput } = this.calculate(hypixelMessage.commandData.args.join(''));
 
 			return hypixelMessage.reply(`${input} = ${formattedOutput}`);
 		} catch (error) {

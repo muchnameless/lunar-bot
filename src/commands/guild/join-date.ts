@@ -166,11 +166,11 @@ export default class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage<typeof parseArgsOptions>) {
+	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const {
 			values: { guild: HYPIXEL_GUILD_NAME },
 			positionals,
-		} = hypixelMessage.commandData.args;
+		} = hypixelMessage.commandData.parseArgs<typeof parseArgsOptions>();
 
 		let chatBridge: ChatBridge | undefined;
 

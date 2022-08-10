@@ -203,7 +203,7 @@ export default class PollCommand extends DualCommand {
 			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()!),
 			pollOptionNames: inputMatched,
-			duration: hypixelMessage.commandData.args.positionals[0],
+			duration: hypixelMessage.commandData.args[0],
 			ign: hypixelMessage.author.ign,
 		});
 

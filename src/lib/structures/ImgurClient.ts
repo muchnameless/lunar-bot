@@ -7,6 +7,7 @@ import { ErrorCode } from '#constants';
 import { consumeBody, seconds } from '#functions';
 import { keys } from '#types';
 import { FetchError } from './errors/FetchError';
+import type { ErrorWithCode } from '../types/error';
 import type { RequestInit, Response } from 'undici';
 
 export interface ImageData {
@@ -279,7 +280,7 @@ export class ImgurClient {
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
-			if ((error as any)?.code === ErrorCode.AbortErr && retries !== this.retries) {
+			if ((error as ErrorWithCode)?.code === ErrorCode.AbortErr && retries !== this.retries) {
 				return this._request(endpoint, { headers, ...options }, retries + 1);
 			}
 
