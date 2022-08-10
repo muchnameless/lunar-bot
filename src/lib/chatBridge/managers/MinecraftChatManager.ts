@@ -761,11 +761,26 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
+	 * whisper a message to another player
+	 * @param ign
+	 * @param options
+	 */
+	whisper(ign: string, options: string | MinecraftChatOptions) {
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
+
+		return this.chat({
+			prefix: `/w ${ign} ${prefix}${prefix.length ? ' ' : ''}`,
+			maxParts: Number.POSITIVE_INFINITY,
+			..._options,
+		});
+	}
+
+	/**
 	 * resolves content or options to an options object
 	 * @param options
 	 */
-	static resolveInput(options: string | MinecraftChatOptions) {
-		return typeof options === 'string' ? { content: options } : options;
+	static resolveInput<T>(options: string | T): T {
+		return typeof options === 'string' ? ({ content: options } as T) : options;
 	}
 
 	/**
@@ -849,19 +864,38 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 */
 	async sendToChat(options: string | MinecraftChatOptions) {
-		const _options = typeof options === 'string' ? { content: options } : options;
+		const { content, prefix = '', signal, ..._options } = MinecraftChatManager.resolveInput(options);
+
+		let lastMessages: LastMessages | undefined;
+		let commandPrefix = prefix;
+		let prefixedContent = content;
+
+		if (prefix.startsWith('/gc ') || prefix.startsWith('/oc ')) {
+			// guild and officer chat
+			lastMessages = this._lastMessages[LastMessagesType.Guild];
+
+			commandPrefix = prefix.slice(0, '/gc '.length);
+			prefixedContent = prefix.slice('/gc '.length) + content;
+		} else if (prefix.startsWith('/w ')) {
+			// whispers
+			lastMessages = this._lastMessages[LastMessagesType.Whisper];
+
+			const index = prefix.indexOf(' ', '/w '.length) + 1;
+			commandPrefix = prefix.slice(0, index);
+			prefixedContent = prefix.slice(index);
+		}
 
 		// queue and catch AbortSignal abortions, abort already shifts the queue
 		try {
-			await this.queue.wait({ signal: _options.signal });
+			await this.queue.wait({ signal });
 		} catch (error) {
 			logger.error(error, '[SEND TO CHAT]');
 			// @ts-expect-error
-			return _options.signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
+			return signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
 		}
 
 		try {
-			await this._sendToChat(_options);
+			await this._sendToChat({ prefix: commandPrefix, content: prefixedContent, lastMessages, ..._options });
 			return true;
 		} catch (error) {
 			logger.error(error, '[SEND TO CHAT]');
@@ -881,37 +915,26 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		content,
 		prefix = '',
 		discordMessage = null,
-	}: Pick<MinecraftChatOptions, 'content' | 'prefix' | 'discordMessage'>): Promise<unknown> {
+		lastMessages,
+	}: Pick<MinecraftChatOptions, 'content' | 'prefix' | 'discordMessage'> & {
+		lastMessages?: LastMessages;
+	}): Promise<unknown> {
 		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, UnicodeEmoji.X);
-
-		let message = `${prefix}${content}`;
-		let _content: string | undefined;
-		let lastMessages: LastMessages | undefined;
-
-		if (message.startsWith('/gc ') || message.startsWith('/oc ')) {
-			lastMessages = this._lastMessages[LastMessagesType.Guild];
-			_content = message.slice('/gc '.length);
-		} else if (message.startsWith('/w ')) {
-			lastMessages = this._lastMessages[LastMessagesType.Whisper];
-			_content = message.slice(message.indexOf(' ', '/w '.length) + 1);
-		}
 
 		if (lastMessages) {
 			let index = this._retries;
-			let paddedContent = _content!;
 
-			// 1 for each retry + additional if _lastMessages includes curent padding
+			// 1 for each retry + additional if lastMessages includes curent padding
 			while (
-				(--index >= 0 || lastMessages.check(paddedContent, this._retries)) &&
-				message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH
+				(--index >= 0 || lastMessages.check(content, this._retries)) &&
+				prefix.length + content.length <= MinecraftChatManager.MAX_MESSAGE_LENGTH
 			) {
-				const padding = randomPadding();
-				message += padding;
-				paddedContent += padding;
+				// eslint-disable-next-line no-param-reassign
+				content += randomPadding();
 			}
 		}
 
-		message = trim(message, MinecraftChatManager.MAX_MESSAGE_LENGTH);
+		const message = trim(`${prefix}${content}`, MinecraftChatManager.MAX_MESSAGE_LENGTH);
 
 		// create listener
 		const listener = this._listenFor(content);
@@ -943,7 +966,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					throw response;
 				}
 
-				lastMessages?.add(_content!);
+				lastMessages?.add(content);
 
 				return;
 			}
@@ -960,7 +983,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				}
 
 				await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				return this._sendToChat({ content, prefix, discordMessage }); // retry sending
+				return this._sendToChat({ content, prefix, discordMessage, lastMessages }); // retry sending
 			}
 
 			// hypixel filter blocked message
@@ -972,7 +995,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// message sent successfully
 			default: {
-				lastMessages!.add(_content!); // listener doesn't collect command responses -> lastMessages is always defined
+				lastMessages!.add(content); // listener doesn't collect command responses -> lastMessages is always defined
 
 				await sleep(
 					[HypixelMessageType.Guild, HypixelMessageType.Party, HypixelMessageType.Officer].includes(response.type!)
@@ -1001,7 +1024,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			rejectOnTimeout = false,
 			rejectOnAbort = false,
 			signal,
-		} = typeof options === 'string' ? ({ command: options } as CommandOptions) : options;
+		} = MinecraftChatManager.resolveInput(options);
+
 		await this.commandQueue.wait({ signal }); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait({ signal }); // only start the collector if the chat queue is free
 

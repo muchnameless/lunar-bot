@@ -68,13 +68,7 @@ export class HypixelMessageAuthor {
 	 * @param options
 	 */
 	send(options: string | MinecraftChatOptions) {
-		const { prefix = '', ..._options } = typeof options === 'string' ? { content: options } : options;
-
-		return this.chatBridge.minecraft.chat({
-			prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`,
-			maxParts: Number.POSITIVE_INFINITY,
-			..._options,
-		});
+		return this.chatBridge.minecraft.whisper(this.ign, options);
 	}
 
 	/**
