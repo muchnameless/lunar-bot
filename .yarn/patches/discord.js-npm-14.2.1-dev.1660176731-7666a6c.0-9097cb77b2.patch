@@ -456,6 +456,114 @@ index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cb
  }
  
  module.exports = ModalSubmitFields;
+diff --git a/src/util/Options.js b/src/util/Options.js
+index 078b93d31f5e7c52fb9a4aa915eb59ab8add6477..c213fcaf94d73abb815fad151f80663d2a72bf73 100644
+--- a/src/util/Options.js
++++ b/src/util/Options.js
+@@ -49,7 +49,7 @@ const { toSnakeCase } = require('./Transformers');
+ /**
+  * Options for sweeping a single type of item from cache
+  * @typedef {Object} SweepOptions
+- * @property {number} interval The interval (in seconds) at which to perform sweeping of the item
++ * @property {number} interval The interval at which to perform sweeping of the item
+  * @property {number} [lifetime] How long an item should stay in cache until it is considered sweepable.
+  * <warn>This property is only valid for the `invites`, `messages`, and `threads` keys. The `filter` property
+  * is mutually exclusive to this property and takes priority</warn>
+@@ -172,14 +172,14 @@ class Options extends null {
+    * The sweepers that this changes are:
+    * * `threads` - Sweep archived threads every hour, removing those archived more than 4 hours ago
+    * <info>If you want to keep default behavior and add on top of it you can use this object and add on to it, e.g.
+-   * `sweepers: { ...Options.DefaultSweeperSettings, messages: { interval: 300, lifetime: 600 } })`</info>
++   * `sweepers: { ...Options.DefaultSweeperSettings, messages: { interval: 300_000, lifetime: 600_000 } })`</info>
+    * @type {SweeperOptions}
+    */
+   static get DefaultSweeperSettings() {
+     return {
+       threads: {
+-        interval: 3600,
+-        lifetime: 14400,
++        interval: 3_600_000,
++        lifetime: 14_400_000,
+       },
+     };
+   }
+diff --git a/src/util/Sweepers.js b/src/util/Sweepers.js
+index dd9c1626473ea1911ca6b39681b8c3ce78972d4f..f1aa3016bdbf29eaa15ad3f2fd900ce4f3607d92 100644
+--- a/src/util/Sweepers.js
++++ b/src/util/Sweepers.js
+@@ -308,7 +308,7 @@ class Sweepers {
+    * @returns {GlobalSweepFilter}
+    */
+   static filterByLifetime({
+-    lifetime = 14400,
++    lifetime = 14_400_000,
+     getComparisonTimestamp = e => e?.createdTimestamp,
+     excludeFromSweep = () => false,
+   } = {}) {
+@@ -323,7 +323,6 @@ class Sweepers {
+     }
+     return () => {
+       if (lifetime <= 0) return null;
+-      const lifetimeMs = lifetime * 1_000;
+       const now = Date.now();
+       return (entry, key, coll) => {
+         if (excludeFromSweep(entry, key, coll)) {
+@@ -331,17 +330,17 @@ class Sweepers {
+         }
+         const comparisonTimestamp = getComparisonTimestamp(entry, key, coll);
+         if (!comparisonTimestamp || typeof comparisonTimestamp !== 'number') return false;
+-        return now - comparisonTimestamp > lifetimeMs;
++        return now - comparisonTimestamp > lifetime;
+       };
+     };
+   }
+ 
+   /**
+    * Creates a sweep filter that sweeps archived threads
+-   * @param {number} [lifetime=14400] How long a thread has to be archived to be valid for sweeping
++   * @param {number} [lifetime=14_400_000] How long a thread has to be archived to be valid for sweeping
+    * @returns {GlobalSweepFilter}
+    */
+-  static archivedThreadSweepFilter(lifetime = 14400) {
++  static archivedThreadSweepFilter(lifetime = 14_400_000) {
+     return this.filterByLifetime({
+       lifetime,
+       getComparisonTimestamp: e => e.archiveTimestamp,
+@@ -351,10 +350,10 @@ class Sweepers {
+ 
+   /**
+    * Creates a sweep filter that sweeps expired invites
+-   * @param {number} [lifetime=14400] How long ago an invite has to have expired to be valid for sweeping
++   * @param {number} [lifetime=14_400_000] How long ago an invite has to have expired to be valid for sweeping
+    * @returns {GlobalSweepFilter}
+    */
+-  static expiredInviteSweepFilter(lifetime = 14400) {
++  static expiredInviteSweepFilter(lifetime = 14_400_000) {
+     return this.filterByLifetime({
+       lifetime,
+       getComparisonTimestamp: i => i.expiresTimestamp,
+@@ -363,10 +362,10 @@ class Sweepers {
+ 
+   /**
+    * Creates a sweep filter that sweeps outdated messages (edits taken into account)
+-   * @param {number} [lifetime=3600] How long ago a message has to have been sent or edited to be valid for sweeping
++   * @param {number} [lifetime=3_600_000] How long ago a message has to have been sent or edited to be valid for sweeping
+    * @returns {GlobalSweepFilter}
+    */
+-  static outdatedMessageSweepFilter(lifetime = 3600) {
++  static outdatedMessageSweepFilter(lifetime = 3_600_000) {
+     return this.filterByLifetime({
+       lifetime,
+       getComparisonTimestamp: m => m.editedTimestamp ?? m.createdTimestamp,
+@@ -450,7 +449,7 @@ class Sweepers {
+       if (sweepFn === null) return;
+       if (typeof sweepFn !== 'function') throw new TypeError(ErrorCodes.SweepFilterReturn);
+       this[sweepKey](sweepFn);
+-    }, opts.interval * 1_000).unref();
++    }, opts.interval).unref();
+   }
+ }
+ 
 diff --git a/src/util/Util.js b/src/util/Util.js
 index 41e06eb8b28023f1304439d343f5b3f2489ce937..1741ceec2ef623a6bd79f9e28108465cc75fb01a 100644
 --- a/src/util/Util.js
@@ -479,7 +587,7 @@ index 41e06eb8b28023f1304439d343f5b3f2489ce937..1741ceec2ef623a6bd79f9e28108465c
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 07bc24a3d25bc57676c43fb9f3f730dd6c268307..314fe1c6e2c3967ac80facbed86d2e2b6223c531 100644
+index 07bc24a3d25bc57676c43fb9f3f730dd6c268307..eda54aa6f4d954e8014254f473f8b4c954ede8ea 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -261,7 +261,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -615,7 +723,7 @@ index 07bc24a3d25bc57676c43fb9f3f730dd6c268307..314fe1c6e2c3967ac80facbed86d2e2b
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5088,10 +5052,8 @@ export interface MessageEditOptions {
+@@ -5088,10 +5096,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -627,7 +735,7 @@ index 07bc24a3d25bc57676c43fb9f3f730dd6c268307..314fe1c6e2c3967ac80facbed86d2e2b
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5146,10 +5108,8 @@ export interface MessageOptions {
+@@ -5146,10 +5152,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream

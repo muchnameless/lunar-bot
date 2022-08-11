@@ -10,11 +10,12 @@ import {
 	PresenceUpdateStatus,
 	RequestMethod,
 	Routes,
-	Sweepers,
 } from 'discord.js';
+import { lazy } from '@sapphire/utilities';
 import { LunarClient } from '#structures/LunarClient';
-import { seconds } from '#functions';
+import { hours, minutes, seconds } from '#functions';
 import { startJobs } from './jobs';
+import type { Snowflake } from 'discord.js';
 
 if (env.NODE_ENV !== 'development') disableValidators();
 
@@ -43,23 +44,34 @@ const client = new LunarClient({
 	sweepers: {
 		...Options.DefaultSweeperSettings,
 		messages: {
-			interval: 600,
-			filter: Sweepers.filterByLifetime({
-				lifetime: 1_800, // 30 min
-				getComparisonTimestamp: (e) => e.editedTimestamp ?? e.createdTimestamp,
-				excludeFromSweep: (e) => e.id === e.client.config.get('TAX_MESSAGE_ID'),
-			}),
+			interval: minutes(10),
+			filter() {
+				const TAX_MESSAGE_ID = client.config.get('TAX_MESSAGE_ID');
+				const now = Date.now();
+				const lifetime = minutes(30);
+
+				return (entry, key) => {
+					if (key === TAX_MESSAGE_ID) return false;
+					return now - (entry.editedTimestamp ?? entry.createdTimestamp) > lifetime;
+				};
+			},
 		},
 		users: {
-			interval: 21_600, // 6h
-			filter: Sweepers.filterByLifetime({
-				lifetime: 1, // 0 cancles the filter
-				getComparisonTimestamp: () => -1,
-				excludeFromSweep: (e) =>
-					e.client.guilds.cache.some((guild) => guild.members.cache.has(e.id)) || // user is part of a member
-					e.client.channels.cache.some((channel) => channel.type === ChannelType.DM && channel.recipientId === e.id) || // user has a DM channel
-					e.discriminator === '0000', // webhook message 'author'
-			}),
+			interval: hours(6),
+			filter() {
+				const dmChannelRecipients = lazy(() => {
+					const recipients = new Set<Snowflake>();
+					for (const channel of client.channels.cache.values()) {
+						if (channel.type === ChannelType.DM) recipients.add(channel.recipientId);
+					}
+					return recipients;
+				});
+
+				return (user, userId) =>
+					!user.client.guilds.cache.some((guild) => guild.members.cache.has(userId)) && // user is part of a member
+					user.discriminator !== '0000' && // webhook message "author"
+					!dmChannelRecipients().has(userId); // user has a cached DM channel
+			},
 		},
 	},
 	allowedMentions: { parse: ['users'], repliedUser: true },
