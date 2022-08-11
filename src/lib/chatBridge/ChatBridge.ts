@@ -154,10 +154,8 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param guildName
 	 */
 	async link(guildName: string | null = null): Promise<this> {
-		if (!this.minecraft.isReady()) {
+		while (!this.minecraft.isReady()) {
 			await sleep(Math.min(++this.guildLinkAttempts * seconds(5), minutes(5)));
-
-			return this.link(guildName);
 		}
 
 		try {
