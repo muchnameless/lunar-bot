@@ -56,10 +56,10 @@ class InteractionCache {
 
 class AbortControllers {
 	private _cache = new Collection<Snowflake, AbortController>();
-	private maxAge = minutes(10);
+	private maxAge = minutes(5);
 
 	constructor() {
-		setInterval(() => this.sweep(), this.maxAge);
+		setInterval(() => this.sweep(), 2 * this.maxAge);
 	}
 
 	/**
@@ -78,7 +78,7 @@ class AbortControllers {
 	abort(message: Pick<Message, 'id' | 'createdTimestamp'>, reason?: string) {
 		let abortController = this._cache.get(message.id);
 
-		if (!abortController && Date.now() - message.createdTimestamp > this.maxAge) return;
+		if (!abortController && Date.now() - message.createdTimestamp > this.maxAge) return null;
 
 		(abortController ??= new AbortController()).abort(
 			// @ts-expect-error
@@ -86,6 +86,8 @@ class AbortControllers {
 		);
 
 		this._cache.set(message.id, abortController);
+
+		return abortController;
 	}
 
 	/**
