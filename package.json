@@ -109,7 +109,7 @@
 		"@discordjs/builders": "patch:@discordjs/builders@npm:1.1.1-dev.1660176707-7666a6c.0#.yarn/patches/@discordjs-builders-npm-1.1.1-dev.1660176707-7666a6c.0-cef863cdff.patch",
 		"@discordjs/collection": "1.0.2-dev.1660176713-7666a6c.0",
 		"@discordjs/rest": "1.0.2-dev.1660176752-7666a6c.0",
-		"@sapphire/async-queue": "patch:@sapphire/async-queue@npm:1.4.1-next.b51fee4.0#.yarn/patches/@sapphire-async-queue-npm-1.4.0-next.c0629e7.0-87690fa8f4.patch",
+		"@sapphire/async-queue": "patch:@sapphire/async-queue@npm:1.4.1-next.b51fee4.0#.yarn/patches/@sapphire-async-queue-npm-1.4.1-next.b51fee4.0-f8fdea0cd2.patch",
 		"@sapphire/shapeshift": "3.5.2-next.edd92b9.0",
 		"@sapphire/snowflake": "3.2.3-next.b51fee4.0",
 		"discord-api-types": "0.37.2-next.4732f1a.1660142287",
