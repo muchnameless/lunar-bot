@@ -3,7 +3,7 @@
  */
 export const BLOCKED_WORDS_REGEXP = new RegExp(
 	[
-		/\b(?:cyber)?s[3e]x\b/,
+		/\b(?:e|cyber)?s[3e]x+\b/,
 		/seks/,
 		/\bsemen\b/,
 		/nutte[dr]/,
