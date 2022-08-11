@@ -60,7 +60,7 @@ class AbortControllers {
 
 	constructor() {
 		setInterval(
-			() => this._cache.sweep((_, messageId) => SnowflakeUtil.timestampFrom(messageId) - Date.now() > this.maxAge),
+			() => this._cache.sweep((_, messageId) => Date.now() - SnowflakeUtil.timestampFrom(messageId) > this.maxAge),
 			this.maxAge,
 		);
 	}
