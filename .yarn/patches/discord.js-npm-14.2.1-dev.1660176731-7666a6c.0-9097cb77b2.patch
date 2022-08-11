@@ -479,7 +479,7 @@ index 41e06eb8b28023f1304439d343f5b3f2489ce937..1741ceec2ef623a6bd79f9e28108465c
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..314fe1c6e2c3967ac80facbed86d2e2b6223c531 100644
+index 07bc24a3d25bc57676c43fb9f3f730dd6c268307..314fe1c6e2c3967ac80facbed86d2e2b6223c531 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -261,7 +261,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -615,7 +615,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..314fe1c6e2c3967ac80facbed86d2e2b
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5044,10 +5052,8 @@ export interface MessageEditOptions {
+@@ -5088,10 +5052,8 @@ export interface MessageEditOptions {
    files?: (
      | BufferResolvable
      | Stream
@@ -627,7 +627,7 @@ index 617e96c90fc4e4b2a8173d975fd12acc8cbe06b4..314fe1c6e2c3967ac80facbed86d2e2b
    )[];
    flags?: BitFieldResolvable<MessageFlagsString, number>;
    allowedMentions?: MessageMentionOptions;
-@@ -5102,10 +5108,8 @@ export interface MessageOptions {
+@@ -5146,10 +5108,8 @@ export interface MessageOptions {
    files?: (
      | BufferResolvable
      | Stream

@@ -268,9 +268,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/builders@patch:@discordjs/builders@npm:1.1.1-dev.1660176707-7666a6c.0#.yarn/patches/@discordjs-builders-npm-1.1.1-dev.1660046791-aac8acc.0-aca06d0905.patch::locator=lunar-bot%40workspace%3A.":
+"@discordjs/builders@patch:@discordjs/builders@npm:1.1.1-dev.1660176707-7666a6c.0#.yarn/patches/@discordjs-builders-npm-1.1.1-dev.1660176707-7666a6c.0-cef863cdff.patch::locator=lunar-bot%40workspace%3A.":
   version: 1.1.1-dev.1660176707-7666a6c.0
-  resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A1.1.1-dev.1660176707-7666a6c.0#.yarn/patches/@discordjs-builders-npm-1.1.1-dev.1660046791-aac8acc.0-aca06d0905.patch::version=1.1.1-dev.1660176707-7666a6c.0&hash=f4e5c7&locator=lunar-bot%40workspace%3A."
+  resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A1.1.1-dev.1660176707-7666a6c.0#.yarn/patches/@discordjs-builders-npm-1.1.1-dev.1660176707-7666a6c.0-cef863cdff.patch::version=1.1.1-dev.1660176707-7666a6c.0&hash=f4e5c7&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@sapphire/shapeshift": ^3.5.1
     discord-api-types: ^0.36.3
@@ -1770,6 +1770,25 @@ __metadata:
     undici: ^5.8.2
     ws: ^8.8.1
   checksum: 90a3f9532723a6405ad4036443473f4747944283ae546eba80565ba22cae569011c1a6c0f4f1e6163a0d85e0eccf5b7c6175ca5c53a5d5e8c641b6aeda6c1451
+  languageName: node
+  linkType: hard
+
+"discord.js@patch:discord.js@npm:14.2.1-dev.1660176731-7666a6c.0#.yarn/patches/discord.js-npm-14.2.1-dev.1660176731-7666a6c.0-9097cb77b2.patch::locator=lunar-bot%40workspace%3A.":
+  version: 14.2.1-dev.1660176731-7666a6c.0
+  resolution: "discord.js@patch:discord.js@npm%3A14.2.1-dev.1660176731-7666a6c.0#.yarn/patches/discord.js-npm-14.2.1-dev.1660176731-7666a6c.0-9097cb77b2.patch::version=14.2.1-dev.1660176731-7666a6c.0&hash=415aff&locator=lunar-bot%40workspace%3A."
+  dependencies:
+    "@discordjs/builders": ^1.1.0
+    "@discordjs/collection": ^1.0.1
+    "@discordjs/rest": ^1.0.1
+    "@sapphire/snowflake": ^3.2.2
+    "@types/ws": ^8.5.3
+    discord-api-types: ^0.36.3
+    fast-deep-equal: ^3.1.3
+    lodash.snakecase: ^4.1.1
+    tslib: ^2.4.0
+    undici: ^5.8.2
+    ws: ^8.8.1
+  checksum: d60f41eb2a45d8850dfd9e0dbab2b73e2c3aa95333c668f5936fcb259d27c0e33f0b39be52cdb8e03c2ddc10e9044fc334278491d82e1dca1695e70cf638317d
   languageName: node
   linkType: hard
 
