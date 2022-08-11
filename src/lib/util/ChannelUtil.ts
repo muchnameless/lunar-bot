@@ -140,8 +140,8 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
-		if (_options.reply?.messageReference) {
-			if ((_options.reply.messageReference as Message).system) {
+		if (_options.reply) {
+			if (channel.messages.resolve(_options.reply.messageReference)?.system) {
 				const MESSAGE = 'cannot reply to a system message';
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);

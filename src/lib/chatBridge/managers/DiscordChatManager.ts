@@ -400,9 +400,11 @@ export class DiscordChatManager extends ChatManager {
 				}${content}`,
 				fromMinecraft,
 			),
-			reply: {
-				messageReference: discordMessage as Message,
-			},
+			reply: discordMessage
+				? {
+						messageReference: discordMessage,
+				  }
+				: undefined,
 			...options,
 		};
 
