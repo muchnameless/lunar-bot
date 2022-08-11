@@ -96,9 +96,13 @@ export class ChatBridgeManager {
 	 */
 	commands: BridgeCommandCollection;
 	/**
-	 * discord channel IDs of all ChatBridge channels
+	 * discord channel ids of all ChatBridge channels
 	 */
 	channelIds = new Set<Snowflake>();
+	/**
+	 * webhook ids of all ChatBridge channels
+	 */
+	webhookIds = new Set<Snowflake>();
 	/**
 	 * interaction cache
 	 */
@@ -240,12 +244,24 @@ export class ChatBridgeManager {
 	}
 
 	/**
+	 * whether the message is not for a bridge channel, from a bridge webhook or all bridges are disabled
+	 * @param message
+	 */
+	shouldIgnoreMessage(message: Pick<Message, 'id' | 'channelId' | 'webhookId'>) {
+		return (
+			!this.channelIds.has(message.channelId) ||
+			(message.webhookId && this.webhookIds.has(message.webhookId)) ||
+			!this.client.config.get('CHATBRIDGE_ENABLED')
+		);
+	}
+
+	/**
 	 * forwards the discord message if a chat bridge for that channel is found
 	 * @param message
 	 * @param options
 	 */
 	handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
-		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return; // not a chat bridge message or bridge disabled
+		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
@@ -262,18 +278,6 @@ export class ChatBridgeManager {
 				return;
 			}
 
-			// check if the message was sent from the bot, don't react with X_EMOJI in this case
-			if (
-				message.webhookId &&
-				this.cache.reduce(
-					(acc, chatBridge) =>
-						acc || message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id,
-					false,
-				)
-			) {
-				return; // message was sent by one of the ChatBridges's webhooks
-			}
-
 			// no ChatBridge for the message's channel found
 			void MessageUtil.react(message, UnicodeEmoji.X);
 		} catch (error) {
@@ -286,9 +290,9 @@ export class ChatBridgeManager {
 	 * aborts the AbortController if the message was sent in a bridge channel
 	 * @param message
 	 */
-	handleMessageDelete({ id: messageId, channelId }: Pick<Message, 'id' | 'channelId'>) {
-		if (!this.channelIds.has(channelId)) return;
+	handleMessageDelete(message: Pick<Message, 'id' | 'channelId' | 'webhookId'>) {
+		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 
-		this.abortControllers.abort(messageId, DELETED_MESSAGE_REASON);
+		this.abortControllers.abort(message.id, DELETED_MESSAGE_REASON);
 	}
 }

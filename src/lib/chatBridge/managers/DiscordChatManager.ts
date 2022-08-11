@@ -218,8 +218,6 @@ export class DiscordChatManager extends ChatManager {
 	 * @internal
 	 */
 	private async __fetchOrCreateWebhook() {
-		this.ready = false;
-
 		if (!this.hypixelGuild) {
 			logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
 			return this;
@@ -238,15 +236,14 @@ export class DiscordChatManager extends ChatManager {
 
 			const webhooks = await channel.fetchWebhooks();
 
-			this.webhook =
-				webhooks.find((webhook) => webhook.isIncoming() && webhook.owner?.id === this.client.user!.id) ?? null;
+			let webhook = webhooks.find((wh) => wh.isIncoming() && wh.owner?.id === this.client.user!.id) ?? null;
 
-			if (!this.webhook) {
+			if (!webhook) {
 				if (webhooks.size >= MAX_WEBHOOKS_PER_CHANNEL) {
 					throw new WebhookError('cannot create more webhooks', channel, this.hypixelGuild);
 				}
 
-				this.webhook = await channel.createWebhook({
+				webhook = await channel.createWebhook({
 					name: `${this.hypixelGuild} Chat Bridge`,
 					avatar: (channel.guild?.members.me ?? this.client.user!).displayAvatarURL(),
 					reason: 'no Webhooks in Chat Bridge Channel found',
@@ -261,7 +258,7 @@ export class DiscordChatManager extends ChatManager {
 				);
 			}
 
-			this.ready = true;
+			this._setWebhook(webhook);
 
 			logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild}: #${channel.name} webhook fetched and cached`);
 			return this;
@@ -283,11 +280,20 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * uncaches the webhook
+	 * (un)caches the bridge's webhook
 	 */
-	private _uncacheWebhook() {
-		this.webhook = null;
-		this.ready = false;
+	private _setWebhook(webhook: Webhook | null) {
+		if (webhook) {
+			this.client.chatBridges.webhookIds.add(webhook.id);
+			this.webhook = webhook;
+
+			this.ready = true;
+		} else {
+			this.client.chatBridges.webhookIds.delete(this.webhook?.id!);
+			this.webhook = null;
+
+			this.ready = false;
+		}
 
 		return this;
 	}
@@ -340,7 +346,7 @@ export class DiscordChatManager extends ChatManager {
 				logger.error(error, `[SEND VIA WEBHOOK]: ${this.logInfo}: webhook deleted -> recreating & resending`);
 
 				// try to obtain another webhook
-				this._uncacheWebhook();
+				this._setWebhook(null);
 				await this._fetchOrCreateWebhook();
 
 				// resend
@@ -398,7 +404,6 @@ export class DiscordChatManager extends ChatManager {
 		message: Message,
 		{ player: playerInput, isEdit = false, signal }: MessageForwardOptions & { signal: AbortSignal },
 	) {
-		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, UnicodeEmoji.X);
 
 		const messageInteraction =
