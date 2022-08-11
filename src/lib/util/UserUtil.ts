@@ -89,16 +89,16 @@ export class UserUtil extends null {
 			return null;
 		}
 
-		if (Reflect.has(_options, 'embeds')) {
-			if (_options.embeds!.length > MessageLimits.MaximumEmbeds) {
-				const MESSAGE = `embeds length ${_options.embeds!.length} > ${MessageLimits.MaximumEmbeds}`;
+		if (_options.embeds) {
+			if (_options.embeds.length > MessageLimits.MaximumEmbeds) {
+				const MESSAGE = `embeds length ${_options.embeds.length} > ${MessageLimits.MaximumEmbeds}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);
 				return null;
 			}
 
-			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
+			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds);
 
 			if (TOTAL_LENGTH > EmbedLimits.MaximumTotalCharacters) {
 				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EmbedLimits.MaximumTotalCharacters}`;

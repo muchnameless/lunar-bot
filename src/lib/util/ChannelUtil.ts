@@ -140,8 +140,8 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
-		if (Reflect.has(_options, 'reply')) {
-			if ((_options.reply!.messageReference as Message).system) {
+		if (_options.reply?.messageReference) {
+			if ((_options.reply.messageReference as Message).system) {
 				const MESSAGE = 'cannot reply to a system message';
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
@@ -152,16 +152,16 @@ export class ChannelUtil extends null {
 			requiredChannelPermissions |= PermissionFlagsBits.ReadMessageHistory;
 		}
 
-		if (Reflect.has(_options, 'embeds')) {
-			if (_options.embeds!.length > MessageLimits.MaximumEmbeds) {
-				const MESSAGE = `embeds length ${_options.embeds!.length} > ${MessageLimits.MaximumEmbeds}`;
+		if (_options.embeds) {
+			if (_options.embeds.length > MessageLimits.MaximumEmbeds) {
+				const MESSAGE = `embeds length ${_options.embeds.length} > ${MessageLimits.MaximumEmbeds}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 				return null;
 			}
 
-			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
+			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds);
 
 			if (TOTAL_LENGTH > EmbedLimits.MaximumTotalCharacters) {
 				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EmbedLimits.MaximumTotalCharacters}`;
@@ -174,7 +174,7 @@ export class ChannelUtil extends null {
 			requiredChannelPermissions |= PermissionFlagsBits.EmbedLinks;
 		}
 
-		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
+		if (_options.files) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
 		// permission checks
 		if (!permissions.has(requiredChannelPermissions, false)) {

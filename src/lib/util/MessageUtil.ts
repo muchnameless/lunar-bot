@@ -318,16 +318,16 @@ export class MessageUtil extends null {
 			return message;
 		}
 
-		if (Reflect.has(_options, 'embeds')) {
-			if (_options.embeds!.length > MessageLimits.MaximumEmbeds) {
-				const MESSAGE = `embeds length ${_options.embeds!.length} > ${MessageLimits.MaximumEmbeds}`;
+		if (_options.embeds) {
+			if (_options.embeds.length > MessageLimits.MaximumEmbeds) {
+				const MESSAGE = `embeds length ${_options.embeds.length} > ${MessageLimits.MaximumEmbeds}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
 				return message;
 			}
 
-			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
+			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds);
 
 			if (TOTAL_LENGTH > EmbedLimits.MaximumTotalCharacters) {
 				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EmbedLimits.MaximumTotalCharacters}`;
@@ -340,7 +340,7 @@ export class MessageUtil extends null {
 			requiredChannelPermissions |= PermissionFlagsBits.EmbedLinks;
 		}
 
-		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
+		if (_options.files) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
 		if (!permissions.has(requiredChannelPermissions, false)) {
 			const missingChannelPermissions = permissions
