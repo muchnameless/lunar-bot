@@ -1,8 +1,8 @@
 import { once } from 'node:events';
 import { env } from 'node:process';
-import { clearTimeout, setTimeout } from 'node:timers';
+import { clearTimeout, setInterval, setTimeout } from 'node:timers';
 import { stripIndents } from 'common-tags';
-import { MessageFlags } from 'discord.js';
+import { Collection, MessageFlags, SnowflakeUtil } from 'discord.js';
 import { MessageUtil } from '#utils';
 import { logger } from '#logger';
 import { UnicodeEmoji } from '#constants';
@@ -54,6 +54,38 @@ class InteractionCache {
 	}
 }
 
+class AbortControllers {
+	private _cache = new Collection<Snowflake, AbortController>();
+	private maxAge = minutes(10);
+
+	constructor() {
+		setInterval(
+			() => this._cache.sweep((_, messageId) => SnowflakeUtil.timestampFrom(messageId) - Date.now() > this.maxAge),
+			this.maxAge,
+		);
+	}
+
+	/**
+	 * returns either the cached or a new AbortController
+	 * @param messageId
+	 */
+	get(messageId: string) {
+		return this._cache.ensure(messageId, () => new AbortController());
+	}
+
+	/**
+	 * aborts either the cached AbortController or creates a new one and aborts it
+	 * @param messageId
+	 * @param reason
+	 */
+	abort(messageId: string, reason?: string) {
+		return this.get(messageId).abort(
+			// @ts-expect-error
+			reason,
+		);
+	}
+}
+
 export class ChatBridgeManager {
 	/**
 	 * the client that instantiated the ChatBridgeArray
@@ -75,6 +107,10 @@ export class ChatBridgeManager {
 	 * individual chat bridges
 	 */
 	cache: ChatBridge[] = [];
+	/**
+	 * AbortSignals
+	 */
+	abortControllers = new AbortControllers();
 
 	constructor(client: LunarClient, commandsURL: URL) {
 		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {
@@ -213,9 +249,16 @@ export class ChatBridgeManager {
 		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
+		const _options = {
+			signal: this.abortControllers.get(message.id).signal,
+			...options,
+		};
+
+		if (_options.signal.aborted) return; // ignore deleted messages
+
 		try {
 			// a ChatBridge for the message's channel was found
-			if (this.cache.reduce((acc, chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) {
+			if (this.cache.reduce((acc, chatBridge) => chatBridge.handleDiscordMessage(message, _options) || acc, false)) {
 				return;
 			}
 
@@ -246,11 +289,6 @@ export class ChatBridgeManager {
 	handleMessageDelete({ id: messageId, channelId }: Pick<Message, 'id' | 'channelId'>) {
 		if (!this.channelIds.has(channelId)) return;
 
-		for (const chatBridge of this.cache) {
-			chatBridge.minecraft.abortControllers.get(messageId)?.abort(
-				// @ts-expect-error
-				DELETED_MESSAGE_REASON,
-			);
-		}
+		this.abortControllers.abort(messageId, DELETED_MESSAGE_REASON);
 	}
 }

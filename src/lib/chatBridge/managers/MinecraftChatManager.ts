@@ -204,10 +204,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	private _lastMessages = [new LastMessages(), new LastMessages()];
 	/**
-	 * AbortSignals
-	 */
-	abortControllers = new Map<Snowflake, AbortController>();
-	/**
 	 * minecraft bot client
 	 */
 	bot: If<loggedIn, MinecraftBot> = null as If<loggedIn, MinecraftBot>;
@@ -794,6 +790,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			prefix = '',
 			maxParts = this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS'),
 			discordMessage = null,
+			signal,
 		} = MinecraftChatManager.resolveChatInput(options);
 
 		if (!content) return false;
@@ -836,27 +833,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return false;
 		}
 
-		const signal = discordMessage && this._getAbortSignal(discordMessage);
-
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of contentParts) {
 			success = (await this.sendToChat({ content: part, prefix, discordMessage, signal })) && success;
 		}
 
-		if (discordMessage) this.abortControllers.delete(discordMessage.id);
-
 		return success;
-	}
-
-	/**
-	 * instantiates and caches the AbortController, returns the AbortSignal
-	 * @param discordMessage
-	 * @internal
-	 */
-	private _getAbortSignal(discordMessage: Message) {
-		const abortController = new AbortController();
-		this.abortControllers.set(discordMessage.id, abortController);
-		return abortController.signal;
 	}
 
 	/**

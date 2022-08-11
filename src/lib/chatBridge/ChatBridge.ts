@@ -29,6 +29,7 @@ export interface MessageForwardOptions {
 	player?: Player;
 	/** whether the message is an edit instead of a new message */
 	isEdit?: boolean;
+	signal?: AbortSignal;
 }
 
 export const enum ChatBridgeEvent {
@@ -256,7 +257,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param message
 	 * @param options
 	 */
-	handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions = {}) {
+	handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions & { signal: AbortSignal }) {
 		return Boolean(this.discord.channelsByIds.get(message.channelId)?.forwardToMinecraft(message, options));
 	}
 

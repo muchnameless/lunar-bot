@@ -394,7 +394,10 @@ export class DiscordChatManager extends ChatManager {
 	 * @param message
 	 * @param options
 	 */
-	async forwardToMinecraft(message: Message, { player: playerInput, isEdit = false }: MessageForwardOptions = {}) {
+	async forwardToMinecraft(
+		message: Message,
+		{ player: playerInput, isEdit = false, signal }: MessageForwardOptions & { signal: AbortSignal },
+	) {
 		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, UnicodeEmoji.X);
 
@@ -464,7 +467,7 @@ export class DiscordChatManager extends ChatManager {
 				messageContent = await asyncReplace(messageContent, DISCORD_CDN_URL_REGEXP, async (match) => {
 					try {
 						// try to upload URL without query parameters
-						return (await imgur.upload(match[1]!)).data.link;
+						return (await imgur.upload(match[1]!, { signal })).data.link;
 					} catch (error) {
 						logger.error(error, '[FORWARD DC TO MC]');
 						return match[0]!;
@@ -555,6 +558,7 @@ export class DiscordChatManager extends ChatManager {
 				message.author.id !== message.client.user!.id ? `${DiscordChatManager.getPlayerName(message)}: ` : ''
 			}`,
 			discordMessage: message,
+			signal,
 		});
 	}
 

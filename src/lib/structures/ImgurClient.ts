@@ -1,3 +1,4 @@
+import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { fetch, FormData } from 'undici';
@@ -154,7 +155,7 @@ export class ImgurClient {
 	 * @param url
 	 * @param type
 	 */
-	upload(url: string, type = 'url') {
+	upload(url: string, { type = 'url', signal }: { type?: 'url' | 'file'; signal?: AbortSignal } = {}) {
 		const form = new FormData();
 
 		form.append('image', url);
@@ -165,6 +166,7 @@ export class ImgurClient {
 			{
 				method: 'POST',
 				body: form,
+				signal,
 			},
 			{
 				checkRateLimit: true,
@@ -268,15 +270,23 @@ export class ImgurClient {
 	 * @param retries current retry
 	 */
 	private async _request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
+		// internal AbortSignal (to have a timeout without having to abort the external signal)
+		const controller = new AbortController();
+		const listener = () => controller.abort();
+		const timeout = setTimeout(listener, this.timeout);
+
+		// external AbortSignal
+		// @ts-expect-error
+		options.signal?.addEventListener('abort', listener);
+
 		try {
 			return await fetch(`${this.baseURL}${endpoint}`, {
 				headers: {
 					Authorization: this.#authorisation,
 					...headers,
 				},
-				// @ts-expect-error
-				signal: AbortSignal.timeout(this.timeout),
 				...options,
+				signal: controller.signal,
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
@@ -285,6 +295,11 @@ export class ImgurClient {
 			}
 
 			throw error;
+		} finally {
+			clearTimeout(timeout);
+
+			// @ts-expect-error
+			options.signal?.removeEventListener('abort', listener);
 		}
 	}
 }
