@@ -1,110 +1,21 @@
 import { once } from 'node:events';
 import { env } from 'node:process';
-import { clearTimeout, setInterval, setTimeout } from 'node:timers';
 import { stripIndents } from 'common-tags';
-import { Collection, MessageFlags, SnowflakeUtil } from 'discord.js';
+import { MessageFlags } from 'discord.js';
 import { MessageUtil } from '#utils';
 import { logger } from '#logger';
 import { UnicodeEmoji } from '#constants';
 import { BridgeCommandCollection } from '#structures/commands/BridgeCommandCollection';
-import { minutes } from '#functions';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import { DELETED_MESSAGE_REASON } from './constants';
+import { InteractionCache } from './caches/InteractionCache';
+import { AbortControllerCache } from './caches/AbortControllerCache';
+import type { RepliableInteraction } from '#utils';
 import type { URL } from 'node:url';
-import type { ChatInputCommandInteraction, Message, Snowflake } from 'discord.js';
+import type { Message, Snowflake } from 'discord.js';
 import type { MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '#structures/LunarClient';
-
-class InteractionCache {
-	private _cache = new Map<
-		Snowflake,
-		{ interaction: ChatInputCommandInteraction<'cachedOrDM'>; timeout: NodeJS.Timeout }
-	>();
-	private _channelIds: ChatBridgeManager['channelIds'];
-
-	constructor({ channelIds }: ChatBridgeManager) {
-		this._channelIds = channelIds;
-	}
-
-	/**
-	 * adds the interaction to the cache if the channel is a chat bridge channel
-	 * @param interaction
-	 */
-	add(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		if (!this._channelIds.has(interaction.channelId)) return;
-
-		this._cache.set(interaction.id, {
-			interaction,
-			timeout: setTimeout(() => this._cache.delete(interaction.id), minutes(15)),
-		});
-	}
-
-	/**
-	 * retrieves an interaction from the cache and deletes it from the cache if found
-	 * @param interactionId
-	 */
-	get(interactionId: Snowflake) {
-		const cached = this._cache.get(interactionId);
-		if (!cached) return null;
-
-		this._cache.delete(interactionId);
-		clearTimeout(cached.timeout);
-		return cached.interaction;
-	}
-}
-
-class AbortControllers {
-	private _cache = new Collection<Snowflake, AbortController>();
-	private maxAge = minutes(5);
-
-	constructor() {
-		setInterval(() => this.sweep(), 2 * this.maxAge);
-	}
-
-	/**
-	 * returns either the cached or a new AbortController
-	 * @param messageId
-	 */
-	get(messageId: string) {
-		return this._cache.ensure(messageId, () => new AbortController());
-	}
-
-	/**
-	 * aborts either the cached AbortController or creates a new one (if the message is not too old) and aborts it
-	 * @param message
-	 * @param reason
-	 */
-	abort(message: Pick<Message, 'id' | 'createdTimestamp'>, reason?: string) {
-		let abortController = this._cache.get(message.id);
-
-		if (!abortController && Date.now() - message.createdTimestamp > this.maxAge) return null;
-
-		(abortController ??= new AbortController()).abort(
-			// @ts-expect-error
-			reason,
-		);
-
-		this._cache.set(message.id, abortController);
-
-		return abortController;
-	}
-
-	/**
-	 * deletes the cached AbortController
-	 * @param messageId
-	 */
-	delete(messageId: string) {
-		return this._cache.delete(messageId);
-	}
-
-	/**
-	 * sweeps the AbortController cache and deletes all that were created before the max age
-	 */
-	private sweep() {
-		return this._cache.sweep((_, messageId) => Date.now() - SnowflakeUtil.timestampFrom(messageId) > this.maxAge);
-	}
-}
 
 export class ChatBridgeManager {
 	/**
@@ -124,17 +35,17 @@ export class ChatBridgeManager {
 	 */
 	webhookIds = new Set<Snowflake>();
 	/**
-	 * interaction cache
-	 */
-	interactionCache = new InteractionCache(this);
-	/**
 	 * individual chat bridges
 	 */
 	cache: ChatBridge[] = [];
 	/**
-	 * AbortSignals
+	 * interaction cache
 	 */
-	abortControllers = new AbortControllers();
+	interactionCache = new InteractionCache();
+	/**
+	 * AbortControllers for discord messages
+	 */
+	abortControllers = new AbortControllerCache();
 
 	constructor(client: LunarClient, commandsURL: URL) {
 		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {
@@ -314,5 +225,19 @@ export class ChatBridgeManager {
 		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 
 		this.abortControllers.abort(message, DELETED_MESSAGE_REASON);
+	}
+
+	/**
+	 * caches interactions in chat bridge channels
+	 * @param interaction
+	 */
+	handleInteractionCreate(interaction: RepliableInteraction) {
+		if (!this.channelIds.has(interaction.channelId!)) return;
+
+		if (interaction.isChatInputCommand()) this.interactionCache.add(interaction);
+
+		for (const chatBridge of this.cache) {
+			chatBridge.discord.channelsByIds.get(interaction.channelId!)?.interactionUserCache.add(interaction);
+		}
 	}
 }

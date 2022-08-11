@@ -418,10 +418,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				return assertNever(reason);
 		}
 
-		void UserUtil.sendDM(
+		void (this.chatBridge.discord.channelsByIds.get(discordMessage.channelId) ?? UserUtil).sendDM(
 			discordMessage.author,
 			reason === ForwardRejectionReason.HypixelBlocked
-				? content
+				? { content }
 				: {
 						content,
 						redisKey: `dm:${discordMessage.author.id}:chatbridge:blocked`,

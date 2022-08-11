@@ -561,6 +561,20 @@ export class InteractionUtil extends null {
 	/**
 	 * @param interaction
 	 * @param options
+	 */
+	static async followUp(interaction: RepliableInteraction, options: InteractionUtilReplyOptions) {
+		try {
+			return await interaction.followUp(options);
+		} catch (error) {
+			if (options.rejectOnError) throw error;
+			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION FOLLOW UP]');
+			return null;
+		}
+	}
+
+	/**
+	 * @param interaction
+	 * @param options
 	 * @param message optional followUp Message to edit
 	 */
 	static async editReply(

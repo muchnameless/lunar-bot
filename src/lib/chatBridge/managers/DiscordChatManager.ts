@@ -8,12 +8,13 @@ import {
 	TimestampStyles,
 } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
-import { ChannelUtil, MessageUtil, UserUtil } from '#utils';
+import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
 import { logger } from '#logger';
 import { UnicodeEmoji, MAX_WEBHOOKS_PER_CHANNEL } from '#constants';
 import { WebhookError } from '#structures/errors/WebhookError';
 import { imgur } from '#api';
 import { asyncReplace, minutes } from '#functions';
+import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { ChatManager } from './ChatManager';
 import type {
@@ -29,9 +30,10 @@ import type {
 	Webhook,
 	WebhookMessageOptions,
 } from 'discord.js';
-import type { ChatBridge, MessageForwardOptions } from '../ChatBridge';
 import type { DualCommand } from '#structures/commands/DualCommand';
 import type { ChatBridgeChannel } from '#structures/database/models/HypixelGuild';
+import type { InteractionUtilReplyOptions, SendDMOptions } from '#utils';
+import type { ChatBridge, MessageForwardOptions } from '../ChatBridge';
 import type { HypixelMessage } from '../HypixelMessage';
 
 interface SendViaBotOptions extends MessageOptions {
@@ -74,6 +76,10 @@ export class DiscordChatManager extends ChatManager {
 	 * chat bridge status
 	 */
 	ready = false;
+	/**
+	 * interaction user cache
+	 */
+	interactionUserCache = new InteractionUserCache();
 
 	/**
 	 * @param chatBridge
@@ -142,18 +148,6 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		return urls;
-	}
-
-	/**
-	 * DMs the message author with the content if they have not been DMed in the last hour
-	 * @param user
-	 * @param content
-	 */
-	static _dmMuteInfo(user: User, content: string) {
-		return UserUtil.sendDM(user, {
-			content,
-			redisKey: `dm:${user.id}:chatbridge:muted`,
-		});
 	}
 
 	/**
@@ -299,6 +293,32 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
+	 * tries to send an ephemeral message via a cached interaction or DMs the message author
+	 * @param user
+	 * @param options
+	 */
+	async sendDM(user: User, options: SendDMOptions & InteractionUtilReplyOptions) {
+		// try ephemeral interaction followUp
+		const interaction = this.interactionUserCache.get(user.id);
+
+		if (interaction) {
+			try {
+				await InteractionUtil.followUp(interaction, { ...options, ephemeral: true, rejectOnError: true });
+				return; // successfull
+			} catch (error) {
+				logger.error(error, `[SEND PRIVATE MESSAGE]: ${this.logInfo}`);
+
+				if (InteractionUtil.isInteractionError(error)) {
+					this.interactionUserCache.delete(user.id);
+				}
+			}
+		}
+
+		// fallback to regular DM
+		void UserUtil.sendDM(user, options);
+	}
+
+	/**
 	 * sends a message via the chatBridge webhook
 	 * @param options
 	 */
@@ -370,7 +390,7 @@ export class DiscordChatManager extends ChatManager {
 		try {
 			discordMessage = await hypixelMessage?.discordMessage;
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, `[SEND VIA BOT]: ${this.logInfo}`);
 		}
 
 		const _options: SendViaBotOptions = {
@@ -417,43 +437,45 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (this.hypixelGuild!.checkMute(player)) {
-			void DiscordChatManager._dmMuteInfo(
-				message.author,
-				`your mute expires ${time(
+			void this.sendDM(message.author, {
+				content: `your mute expires ${time(
 					this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!,
 					TimestampStyles.RelativeTime,
 				)}`,
-			);
+				redisKey: `dm:${message.author.id}:chatbridge:muted`,
+			});
 			return MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if the player is auto muted
 		if (player?.infractions! >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
-			void DiscordChatManager._dmMuteInfo(message.author, 'you are currently muted due to continues infractions');
-			return MessageUtil.react(message, UnicodeEmoji.Muted);
+			void this.sendDM(message.author, {
+				content: 'you are currently muted due to continues infractions',
+				redisKey: `dm:${message.author.id}:chatbridge:muted`,
+			});
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild!.muted && (!player || !this.hypixelGuild!.checkStaff(player))) {
-			void DiscordChatManager._dmMuteInfo(
-				message.author,
-				`${this.hypixelGuild!.name}'s guild chat mute expires ${time(
+			void this.sendDM(message.author, {
+				content: `${this.hypixelGuild!.name}'s guild chat mute expires ${time(
 					this.hypixelGuild!.mutedTill,
 					TimestampStyles.RelativeTime,
 				)}`,
-			);
+				redisKey: `dm:${message.author.id}:chatbridge:muted`,
+			});
 			return MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.hypixelGuild!.checkMute(this.minecraft.botPlayer)) {
-			void DiscordChatManager._dmMuteInfo(
-				message.author,
-				`the bot's mute expires ${time(
+			void this.sendDM(message.author, {
+				content: `the bot's mute expires ${time(
 					this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid!)!,
 					TimestampStyles.RelativeTime,
 				)}`,
-			);
+				redisKey: `dm:${message.author.id}:chatbridge:muted`,
+			});
 			return MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
@@ -474,7 +496,7 @@ export class DiscordChatManager extends ChatManager {
 						// try to upload URL without query parameters
 						return (await imgur.upload(match[1]!, { signal })).data.link;
 					} catch (error) {
-						logger.error(error, '[FORWARD DC TO MC]');
+						logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}`);
 						return match[0]!;
 					}
 				});
@@ -502,7 +524,7 @@ export class DiscordChatManager extends ChatManager {
 					contentParts.unshift(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
 				}
 			} catch (error) {
-				logger.error(error, '[FORWARD DC TO MC]: error fetching reference');
+				logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}: error fetching reference`);
 			}
 		}
 
@@ -538,7 +560,7 @@ export class DiscordChatManager extends ChatManager {
 				} else {
 					content = interaction
 						.toString()
-						.slice(1) // remove /
+						.slice('/'.length)
 						.replace(/ visibility:[a-z]+/, '');
 				}
 			} else if (message.author.id !== message.client.user!.id) {

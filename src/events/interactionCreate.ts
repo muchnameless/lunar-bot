@@ -60,8 +60,6 @@ export default class InteractionCreateEvent extends Event {
 			'INTERACTION_CREATE',
 		);
 
-		this.client.chatBridges.interactionCache.add(interaction);
-
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) {
@@ -491,6 +489,7 @@ export default class InteractionCreateEvent extends Event {
 			switch (interaction.type) {
 				case InteractionType.ApplicationCommand:
 					InteractionUtil.add(interaction);
+					this.client.chatBridges.handleInteractionCreate(interaction);
 
 					switch (interaction.commandType) {
 						case ApplicationCommandType.ChatInput:
@@ -511,6 +510,7 @@ export default class InteractionCreateEvent extends Event {
 
 				case InteractionType.MessageComponent:
 					InteractionUtil.add(interaction);
+					this.client.chatBridges.handleInteractionCreate(interaction);
 
 					switch (interaction.componentType) {
 						case ComponentType.Button:
@@ -525,6 +525,8 @@ export default class InteractionCreateEvent extends Event {
 
 				case InteractionType.ModalSubmit:
 					InteractionUtil.add(interaction);
+					this.client.chatBridges.handleInteractionCreate(interaction);
+
 					return void (await this._handleModalSubmitInteraction(interaction));
 
 				default:
