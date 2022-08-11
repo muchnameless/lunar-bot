@@ -56,7 +56,6 @@
 		"fast-xml-parser": "^4.0.9",
 		"ioredis": "^5.2.2",
 		"js-big-decimal": "github:muchnameless/js-big-decimal",
-		"lex": "^1.7.9",
 		"lilyweight": "^2.6.3",
 		"minecraft-data": "^3.9.1",
 		"minecraft-protocol": "1.35.1",

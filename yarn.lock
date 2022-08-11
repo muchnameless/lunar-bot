@@ -3383,13 +3383,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lex@npm:^1.7.9":
-  version: 1.7.9
-  resolution: "lex@npm:1.7.9"
-  checksum: 4593125ada61dac3e15e936227c07271e591f0c7ba56231aa21108123b635a4117e3125baeb33a230f665f7e8b3f5f1ca74b6a4d16883a497fff33c376edae9f
-  languageName: node
-  linkType: hard
-
 "ley@npm:^0.7.1":
   version: 0.7.1
   resolution: "ley@npm:0.7.1"
@@ -3674,7 +3667,6 @@ __metadata:
     husky: ^8.0.1
     ioredis: ^5.2.2
     js-big-decimal: "github:muchnameless/js-big-decimal"
-    lex: ^1.7.9
     ley: ^0.7.1
     lilyweight: ^2.6.3
     lint-staged: ^13.0.3

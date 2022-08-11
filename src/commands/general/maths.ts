@@ -9,116 +9,16 @@ import {
 } from 'discord.js';
 import { TextInputLimits } from '@sapphire/discord-utilities';
 import BigDecimal from 'js-big-decimal';
-import Lexer from 'lex';
 import { InteractionUtil } from '#utils';
 import { logger } from '#logger';
 import { DualCommand } from '#structures/commands/DualCommand';
 import { formatNumber, trim } from '#functions';
+import { Lexer } from '#structures/Lexer';
+import { OperatorAssociativity, Parser } from '#structures/Parser';
 import type { ChatInputCommandInteraction, ModalActionRowComponentBuilder, ModalSubmitInteraction } from 'discord.js';
 import type { RepliableInteraction, ModalRepliableInteraction } from '#utils';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-
-const enum OperatorAssociativity {
-	Left,
-	Right,
-}
-
-interface Operator {
-	precedence: number;
-	associativity: OperatorAssociativity;
-}
-
-class Parser {
-	table: Record<string, Operator>;
-
-	constructor(table: Record<string, Operator>) {
-		this.table = table;
-	}
-
-	/**
-	 * parses a token list into reverse polish notation
-	 * @param input
-	 */
-	parse(input: string[]) {
-		const output: string[] = [];
-		const stack: string[] = [];
-
-		for (let token of input) {
-			switch (token) {
-				case '(':
-					stack.push(token);
-					break;
-
-				case ')':
-					while (stack.length) {
-						token = stack.pop()!;
-						if (token === '(') break;
-						output.push(token);
-					}
-
-					if (token !== '(') throw new Error('ParserError: mismatched parentheses');
-					break;
-
-				default: {
-					// token is an operator
-					if (Reflect.has(this.table, token)) {
-						let shouldWriteToStack = true;
-
-						while (stack.length) {
-							const punctuator = stack.at(-1)!;
-							const operator = this.table[token]!;
-
-							if (punctuator === '(') {
-								if (operator.associativity === OperatorAssociativity.Right) {
-									shouldWriteToStack = false;
-									output.push(token);
-								}
-
-								break;
-							}
-
-							const { precedence } = operator;
-							const antecedence = this.table[punctuator]!.precedence;
-
-							if (
-								precedence > antecedence ||
-								(precedence === antecedence && operator.associativity === OperatorAssociativity.Right)
-							) {
-								break;
-							}
-
-							output.push(stack.pop()!);
-						}
-
-						if (shouldWriteToStack) stack.push(token);
-
-						continue;
-					}
-
-					// token is not an operator
-					output.push(token);
-
-					// check if token is followed by a unary operator
-					const nonBracketIndex = stack.findLastIndex((x) => x !== '(');
-
-					if (
-						nonBracketIndex !== -1 &&
-						this.table[stack[nonBracketIndex]!]?.associativity === OperatorAssociativity.Right
-					) {
-						output.push(stack.splice(nonBracketIndex, 1)[0]!);
-					}
-				}
-			}
-		}
-
-		if (stack.includes('(')) throw 'ParserError: mismatched parentheses';
-
-		output.push(...stack.reverse());
-
-		return output;
-	}
-}
 
 export default class MathsCommand extends DualCommand {
 	/**
@@ -308,15 +208,13 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * lexer for mathematical expressions
 	 */
-	static lexer = new Lexer((c: string) => {
-		throw `LexerError: unexpected character \`${c}\` at index ${this.lexer.index}`;
-	})
-		.addRule(/,/, () => void 0) // ignore ','
-		.addRule(/(?:(?<=[(*+/^-])-)?(?:\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
-		.addRule(/(?<![+-])[)/^*]/, (lexeme: string) => lexeme) // operators which should not follow after unary prefix operators
-		.addRule(/\(/, (lexeme: string) => lexeme) // operators which can be anywhere
-		.addRule(/[+-](?!$)/, (lexeme: string) => lexeme) // unary prefix
-		.addRule(/(?<!^|[(/^*+-])[°!]/, (lexeme: string) => lexeme) // unary postfix (include prev rules matches in lookbehind)
+	static lexer = new Lexer()
+		.addRule(/,/, () => null) // ignore ','
+		.addRule(/(?:(?<=[(*+/^-])-)?(?:\d+(?:\.\d+)?|\.\d+)/) // numbers
+		.addRule(/(?<![+-])[)/^*]/) // operators which should not follow after unary prefix operators
+		.addRule(/\(/) // operators which can be anywhere
+		.addRule(/[+-](?!$)/) // unary prefix
+		.addRule(/(?<!^|[(/^*+-])[°!]/) // unary postfix (include prev rules matches in lookbehind)
 		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 		.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 		.addRule(/tan(?:gen[st])?/i, () => 'tan')
@@ -328,7 +226,7 @@ export default class MathsCommand extends DualCommand {
 		.addRule(/%/, () => 'percent')
 		.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 		.addRule(/e(?:uler)?/i, () => Math.E)
-		.addRule(/(?<=\d)[mk]/i, (lexeme: string) => lexeme.toLowerCase()); // multiplier
+		.addRule(/(?<=\d)[mk]/i, (x) => x.toLowerCase()); // multiplier
 
 	/**
 	 * parser for reverse polish notation
@@ -355,9 +253,9 @@ export default class MathsCommand extends DualCommand {
 	});
 
 	static parse(input: string) {
-		const tokens: string[] = [];
+		const tokens: (string | number)[] = [];
 
-		let token: string | undefined;
+		let token: string | number | null;
 
 		MathsCommand.lexer.setInput(input);
 
@@ -405,7 +303,7 @@ export default class MathsCommand extends DualCommand {
 			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
 			.replace(/=$/, ''); // 5*3= -> 5*3
 
-		let parsed: string[];
+		let parsed: (string | number)[];
 
 		// parse
 		try {
@@ -444,11 +342,11 @@ export default class MathsCommand extends DualCommand {
 			}
 
 			output = pop();
-
-			if (stack.length !== 0) throw new Error('unprocessed parts');
 		} catch (error) {
 			throw `CalculationError: ${error instanceof Error ? error.message : error}, input: \`${INPUT}\``;
 		}
+
+		if (stack.length) throw `CalculationError: unprocessed parts, input: \`${INPUT}\``;
 
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
