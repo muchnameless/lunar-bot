@@ -16,7 +16,6 @@ import {
 	promoteSuccess,
 	unmuteSuccess,
 } from '../constants';
-import type { ErrorWithCode } from '#root/lib/types/error.d';
 import type { SkyBlockProfile, WeightData } from '#functions';
 import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type MathsCommand from '#root/commands/general/maths';
@@ -601,7 +600,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 						ErrorCode.ErrParseArgsInvalidOptionValue,
 						ErrorCode.ErrParseArgsUnexpectedPositional,
 						ErrorCode.ErrParseArgsUnknownOption,
-					].includes((error as ErrorWithCode).code)
+					].includes(
+						// @ts-expect-error
+						error.code,
+					)
 				) {
 					// parseArgs errors
 					return void hypixelMessage.author.send(error.message);

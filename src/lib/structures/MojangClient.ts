@@ -1,8 +1,13 @@
 import { fetch } from 'undici';
-import { ErrorCode } from '#constants';
-import { /* days, */ consumeBody, seconds, validateMinecraftIgn, validateMinecraftUuid } from '#functions';
+import {
+	consumeBody,
+	// days,
+	isAbortError,
+	seconds,
+	validateMinecraftIgn,
+	validateMinecraftUuid,
+} from '#functions';
 import { MojangAPIError } from './errors/MojangAPIError';
-import type { ErrorWithCode } from '../types/error';
 import type { Response } from 'undici';
 
 export interface MojangResult {
@@ -245,7 +250,7 @@ export class MojangClient {
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
-			if ((error as ErrorWithCode)?.code === ErrorCode.AbortErr && retries !== this.retries) {
+			if (isAbortError(error) && retries !== this.retries) {
 				return this._request(url, retries + 1);
 			}
 

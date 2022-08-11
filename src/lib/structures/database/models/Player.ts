@@ -17,14 +17,15 @@ import { hypixel, mojang } from '#api';
 import {
 	days,
 	escapeIgn,
-	getLilyWeightRaw,
 	findSkyblockProfile,
+	getLilyWeightRaw,
 	getSenitherDungeonWeight,
 	getSenitherSkillWeight,
 	getSenitherSlayerWeight,
 	getSkillLevel,
 	getSlayerLevel,
 	hours,
+	isAbortError,
 	minutes,
 	safePromiseAll,
 	seconds,
@@ -41,7 +42,6 @@ import {
 	DUNGEON_CLASSES,
 	DUNGEON_TYPES,
 	DUNGEON_TYPES_AND_CLASSES,
-	ErrorCode,
 	FindProfileStrategy,
 	GUILD_ID_ERROR,
 	isXPType,
@@ -76,7 +76,6 @@ import type {
 } from 'sequelize';
 import type { Snowflake, GuildResolvable, Guild, User } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
-import type { ErrorWithCode } from '#root/lib/types/error.d';
 import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '#constants';
 import type { RoleResolvables } from '#utils';
 import type { LunarClient } from '#structures/LunarClient';
@@ -1752,7 +1751,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// prevent further auto updates
 			void this.client.config.set('MOJANG_API_ERROR', true);
 
-			if ((error as ErrorWithCode)?.code === ErrorCode.AbortErr) {
+			if (isAbortError(error)) {
 				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
 			}
 

@@ -4,11 +4,10 @@ import { AsyncQueue } from '@sapphire/async-queue';
 import { fetch, FormData } from 'undici';
 import ms from 'ms';
 import { logger } from '#logger';
-import { ErrorCode } from '#constants';
-import { consumeBody, seconds } from '#functions';
+import { consumeBody, isAbortError, seconds } from '#functions';
 import { keys } from '#types';
 import { FetchError } from './errors/FetchError';
-import type { ErrorWithCode } from '../types/error';
+import { AbortError } from './errors/AbortError';
 import type { RequestInit, Response } from 'undici';
 
 export interface ImageData {
@@ -270,6 +269,8 @@ export class ImgurClient {
 	 * @param retries current retry
 	 */
 	private async _request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
+		if (options.signal?.aborted) throw new AbortError();
+
 		// internal AbortSignal (to have a timeout without having to abort the external signal)
 		const controller = new AbortController();
 		const listener = () => controller.abort();
@@ -290,7 +291,7 @@ export class ImgurClient {
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
-			if ((error as ErrorWithCode)?.code === ErrorCode.AbortErr && retries !== this.retries) {
+			if (isAbortError(error) && retries !== this.retries) {
 				return this._request(endpoint, { headers, ...options }, retries + 1);
 			}
 
