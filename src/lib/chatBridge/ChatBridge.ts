@@ -12,8 +12,9 @@ import type { LunarClient } from '#structures/LunarClient';
 import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
 import type { Player } from '#structures/database/models/Player';
 import type { DiscordChatManagerResolvable } from './managers/DiscordManager';
-import type { HypixelMessage } from './HypixelMessage';
 import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
+import type { ChatBridgeManager } from './ChatBridgeManager';
+import type { HypixelMessage } from './HypixelMessage';
 
 export interface BroadcastOptions {
 	content: string;
@@ -58,6 +59,10 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 */
 	client: LunarClient;
 	/**
+	 * manager that instantiated the chat bridge
+	 */
+	manager: ChatBridgeManager;
+	/**
 	 * position in the mcAccount array
 	 */
 	mcAccount: number;
@@ -82,10 +87,11 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 */
 	events = new EventCollection(this, new URL('./events/', import.meta.url));
 
-	constructor(client: LunarClient, mcAccount: number) {
+	constructor(client: LunarClient, manager: ChatBridgeManager, mcAccount: number) {
 		super({ captureRejections: true });
 
 		this.client = client;
+		this.manager = manager;
 		this.mcAccount = mcAccount;
 		void this.events.loadAll();
 	}

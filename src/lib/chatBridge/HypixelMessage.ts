@@ -172,7 +172,7 @@ export class HypixelMessage {
 					prefix: null,
 				};
 			} else {
-				const command = this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase());
+				const command = this.chatBridge.manager.commands.getByName(COMMAND_NAME.toLowerCase());
 
 				this.commandData = {
 					name: COMMAND_NAME,

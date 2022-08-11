@@ -838,6 +838,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			success = (await this.sendToChat({ content: part, prefix, discordMessage, signal })) && success;
 		}
 
+		// don't need to listen for deletes anymore
+		if (discordMessage) this.chatBridge.manager.abortControllers.delete(discordMessage.id);
+
 		return success;
 	}
 

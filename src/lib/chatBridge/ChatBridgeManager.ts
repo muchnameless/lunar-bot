@@ -59,10 +59,7 @@ class AbortControllers {
 	private maxAge = minutes(10);
 
 	constructor() {
-		setInterval(
-			() => this._cache.sweep((_, messageId) => Date.now() - SnowflakeUtil.timestampFrom(messageId) > this.maxAge),
-			this.maxAge,
-		);
+		setInterval(() => this.sweep(), this.maxAge);
 	}
 
 	/**
@@ -74,15 +71,36 @@ class AbortControllers {
 	}
 
 	/**
-	 * aborts either the cached AbortController or creates a new one and aborts it
-	 * @param messageId
+	 * aborts either the cached AbortController or creates a new one (if the message is not too old) and aborts it
+	 * @param message
 	 * @param reason
 	 */
-	abort(messageId: string, reason?: string) {
-		return this.get(messageId).abort(
+	abort(message: Pick<Message, 'id' | 'createdTimestamp'>, reason?: string) {
+		let abortController = this._cache.get(message.id);
+
+		if (!abortController && Date.now() - message.createdTimestamp > this.maxAge) return;
+
+		(abortController ??= new AbortController()).abort(
 			// @ts-expect-error
 			reason,
 		);
+
+		this._cache.set(message.id, abortController);
+	}
+
+	/**
+	 * deletes the cached AbortController
+	 * @param messageId
+	 */
+	delete(messageId: string) {
+		return this._cache.delete(messageId);
+	}
+
+	/**
+	 * sweeps the AbortController cache and deletes all that were created before the max age
+	 */
+	private sweep() {
+		return this._cache.sweep((_, messageId) => Date.now() - SnowflakeUtil.timestampFrom(messageId) > this.maxAge);
 	}
 }
 
@@ -118,7 +136,7 @@ export class ChatBridgeManager {
 
 	constructor(client: LunarClient, commandsURL: URL) {
 		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {
-			this.cache.push(new ChatBridge(client, i));
+			this.cache.push(new ChatBridge(client, this, i));
 		}
 
 		this.client = client;
@@ -290,9 +308,9 @@ export class ChatBridgeManager {
 	 * aborts the AbortController if the message was sent in a bridge channel
 	 * @param message
 	 */
-	handleMessageDelete(message: Pick<Message, 'id' | 'channelId' | 'webhookId'>) {
+	handleMessageDelete(message: Pick<Message, 'id' | 'channelId' | 'webhookId' | 'createdTimestamp'>) {
 		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 
-		this.abortControllers.abort(message.id, DELETED_MESSAGE_REASON);
+		this.abortControllers.abort(message, DELETED_MESSAGE_REASON);
 	}
 }

@@ -284,12 +284,12 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	private _setWebhook(webhook: Webhook | null) {
 		if (webhook) {
-			this.client.chatBridges.webhookIds.add(webhook.id);
+			this.chatBridge.manager.webhookIds.add(webhook.id);
 			this.webhook = webhook;
 
 			this.ready = true;
 		} else {
-			this.client.chatBridges.webhookIds.delete(this.webhook?.id!);
+			this.chatBridge.manager.webhookIds.delete(this.webhook?.id!);
 			this.webhook = null;
 
 			this.ready = false;
@@ -508,7 +508,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// send interaction "command" for initial application command reply
 		if (messageInteraction) {
-			const interaction = this.client.chatBridges.interactionCache.get(messageInteraction.id);
+			const interaction = this.chatBridge.manager.interactionCache.get(messageInteraction.id);
 
 			let content: string | undefined;
 
