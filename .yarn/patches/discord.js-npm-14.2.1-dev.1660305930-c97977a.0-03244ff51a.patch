@@ -80,7 +80,7 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1
  }
  
 diff --git a/src/structures/Embed.js b/src/structures/Embed.js
-index a84223ac8f68ab8584e938ff0a7c04b57669b48e..764eeff7453244ebf346269cfb811f7416bcdc10 100644
+index 7d80390575b83f98a18f1f193ff3c819f0ab931c..764eeff7453244ebf346269cfb811f7416bcdc10 100644
 --- a/src/structures/Embed.js
 +++ b/src/structures/Embed.js
 @@ -17,11 +17,11 @@ class Embed {
@@ -587,10 +587,22 @@ index 41e06eb8b28023f1304439d343f5b3f2489ce937..1741ceec2ef623a6bd79f9e28108465c
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 07bc24a3d25bc57676c43fb9f3f730dd6c268307..eda54aa6f4d954e8014254f473f8b4c954ede8ea 100644
+index 07bc24a3d25bc57676c43fb9f3f730dd6c268307..72bfa0cf9e26724cd00733cf2d4516217ddee192 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -261,7 +261,7 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+@@ -253,15 +253,15 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+       | APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
+     >,
+   );
+-  public static from(
++  public static from<T extends AnyComponentBuilder = AnyComponentBuilder>(
+     other:
+-      | JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>>
+-      | APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>,
+-  ): ActionRowBuilder;
++      | JSONEncodable<APIActionRowComponent<ReturnType<T['toJSON']>>>
++      | APIActionRowComponent<ReturnType<T['toJSON']>>,
++  ): ActionRowBuilder<T>;
  }
  
  export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
