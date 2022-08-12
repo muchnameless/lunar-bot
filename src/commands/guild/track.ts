@@ -40,7 +40,7 @@ export default class TrackCommand extends ApplicationCommand {
 
 		switch (type) {
 			case 'lily-weight': {
-				const weightHistory = [...Array.from({ length: days }).keys()].map((x) => player.getLilyWeightHistory(x));
+				const weightHistory = Array.from({ length: days }, (_, i) => player.getLilyWeightHistory(i));
 
 				datasets = [
 					{
@@ -66,7 +66,7 @@ export default class TrackCommand extends ApplicationCommand {
 			}
 
 			case 'senither-weight': {
-				const weightHistory = [...Array.from({ length: days }).keys()].map((x) => player.getSenitherWeightHistory(x));
+				const weightHistory = Array.from({ length: days }, (_, i) => player.getSenitherWeightHistory(i));
 
 				datasets = [
 					{
@@ -92,9 +92,7 @@ export default class TrackCommand extends ApplicationCommand {
 			}
 
 			case 'skill-average': {
-				const skillAverageHistory = [...Array.from({ length: days }).keys()].map((x) =>
-					player.getSkillAverageHistory(x),
-				);
+				const skillAverageHistory = Array.from({ length: days }, (_, i) => player.getSkillAverageHistory(i));
 
 				datasets = [
 					{
@@ -119,7 +117,7 @@ export default class TrackCommand extends ApplicationCommand {
 						label: 'Slayer XP',
 						backgroundColor: 'rgba(0, 0, 255, 0.25)',
 						borderColor: 'rgb(0, 0, 128)',
-						data: [...Array.from({ length: days }).keys()].map((x) => player.getSlayerTotalHistory(x)),
+						data: Array.from({ length: days }, (_, i) => player.getSlayerTotalHistory(i)),
 					},
 				];
 				break;
@@ -136,7 +134,7 @@ export default class TrackCommand extends ApplicationCommand {
 						label: `${upperCaseFirstChar(type)} XP`,
 						backgroundColor: 'rgba(0, 0, 255, 0.25)',
 						borderColor: 'rgb(0, 0, 128)',
-						data: [...Array.from({ length: days }).keys()].map((x) => player[`${type}XpHistory`][x]!),
+						data: Array.from({ length: days }, (_, i) => player[`${type}XpHistory`][i]!),
 					},
 				];
 				break;
@@ -148,9 +146,7 @@ export default class TrackCommand extends ApplicationCommand {
 						label: `${upperCaseFirstChar(type)} XP`,
 						backgroundColor: 'rgba(0, 0, 255, 0.25)',
 						borderColor: 'rgb(0, 0, 128)',
-						data: [...Array.from({ length: days }).keys()].map(
-							(x) => player.getSkillLevelHistory(type, x).nonFlooredLevel,
-						),
+						data: Array.from({ length: days }, (_, i) => player.getSkillLevelHistory(type, i).nonFlooredLevel),
 					},
 				];
 			}
@@ -163,13 +159,13 @@ export default class TrackCommand extends ApplicationCommand {
 		const image = await canvas.renderToBuffer({
 			type: 'line',
 			data: {
-				labels: [...Array.from({ length: days }).keys()].map((x) => days - 1 - x),
+				labels: Array.from({ length: days }, (_, i) => days - 1 - i),
 				datasets,
 			},
 		});
 		const attachment = new AttachmentBuilder() //
 			.setFile(image)
-			.setName('file.jpg');
+			.setName('graph.jpg');
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [

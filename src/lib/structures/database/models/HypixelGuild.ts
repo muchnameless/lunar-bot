@@ -245,7 +245,7 @@ export class HypixelGuild extends Model<
 				},
 				statsHistory: {
 					type: DataTypes.ARRAY(DataTypes.JSONB),
-					defaultValue: Array.from({ length: 30 }).map(() => ({
+					defaultValue: Array.from({ length: 30 }, () => ({
 						playerCount: 0,
 						weightAverage: 0,
 						skillAverage: 0,
@@ -857,7 +857,7 @@ export class HypixelGuild extends Model<
 									player.resetXp({ offsetToReset: Offset.Week }),
 								config.get(XP_OFFSETS_TIME[Offset.Month]) >= XP_LAST_UPDATED_AT &&
 									player.resetXp({ offsetToReset: Offset.Month }),
-								...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }).map(() =>
+								...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }, () =>
 									player.resetXp({ offsetToReset: Offset.Day }),
 								),
 							]);

@@ -390,7 +390,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			attributes[`${type}XpHistory`] = {
 				type: DataTypes.ARRAY(DataTypes.DECIMAL),
-				defaultValue: Array.from({ length: 30 }).fill(0),
+				defaultValue: Array.from({ length: 30 }, () => 0),
 				allowNull: false,
 			};
 
@@ -419,13 +419,13 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			attributes[`${type}CompletionsHistory`] = {
 				type: DataTypes.ARRAY(DataTypes.JSONB),
-				defaultValue: Array.from({ length: 30 }).fill({}),
+				defaultValue: Array.from({ length: 30 }, () => ({})),
 				allowNull: false,
 			};
 
 			attributes[`${type}MasterCompletionsHistory`] = {
 				type: DataTypes.ARRAY(DataTypes.JSONB),
-				defaultValue: Array.from({ length: 30 }).fill({}),
+				defaultValue: Array.from({ length: 30 }, () => ({})),
 				allowNull: false,
 			};
 
