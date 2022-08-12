@@ -3411,12 +3411,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lilyweight@npm:^2.6.3":
-  version: 2.6.3
-  resolution: "lilyweight@npm:2.6.3"
+"lilyweight@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "lilyweight@npm:2.7.0"
   dependencies:
     node-fetch: ^2.6.1
-  checksum: 44532a436d9ba54e7d5892b9618ce408754a9efd6c4cedce5e14f64be347dd09ab4bf3259fee60dde985559de96ad5e8fbec2eb75202ee4312c7646f4c520e7b
+  checksum: 2fcfa0d274d2c32d36a9ca3bea95819da655fff4ad24f538845c029a25c95283201b57f1704ece5624d0ef534285e1811990f0ea0ab25832b67a6500c5f4d9ac
   languageName: node
   linkType: hard
 
@@ -3675,7 +3675,7 @@ __metadata:
     ioredis: ^5.2.2
     js-big-decimal: "github:muchnameless/js-big-decimal"
     ley: ^0.7.1
-    lilyweight: ^2.6.3
+    lilyweight: ^2.7.0
     lint-staged: ^13.0.3
     minecraft-data: ^3.10.1
     minecraft-protocol: 1.35.1
