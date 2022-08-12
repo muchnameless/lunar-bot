@@ -168,11 +168,7 @@ export class DiscordChatManager extends ChatManager {
 	 * returns the promise from queueing the promise
 	 * @param signal
 	 */
-	queuePromise(
-		signal: AbortSignal = AbortSignal
-			// @ts-expect-error
-			.timeout(minutes(1)),
-	) {
+	queuePromise(signal: AbortSignal = AbortSignal.timeout(minutes(1))) {
 		return this.queue.wait({ signal });
 	}
 

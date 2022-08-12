@@ -7,7 +7,6 @@ import { logger } from '#logger';
 import { consumeBody, isAbortError, seconds } from '#functions';
 import { keys } from '#types';
 import { FetchError } from './errors/FetchError';
-import { AbortError } from './errors/AbortError';
 import type { RequestInit, Response } from 'undici';
 
 export interface ImageData {
@@ -269,7 +268,7 @@ export class ImgurClient {
 	 * @param retries current retry
 	 */
 	private async _request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
-		if (options.signal?.aborted) throw new AbortError();
+		options.signal?.throwIfAborted();
 
 		// internal AbortSignal (to have a timeout without having to abort the external signal)
 		const controller = new AbortController();
@@ -277,7 +276,6 @@ export class ImgurClient {
 		const timeout = setTimeout(listener, this.timeout);
 
 		// external AbortSignal
-		// @ts-expect-error
 		options.signal?.addEventListener('abort', listener);
 
 		try {
@@ -299,7 +297,6 @@ export class ImgurClient {
 		} finally {
 			clearTimeout(timeout);
 
-			// @ts-expect-error
 			options.signal?.removeEventListener('abort', listener);
 		}
 	}

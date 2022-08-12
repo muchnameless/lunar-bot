@@ -876,7 +876,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			await this.queue.wait({ signal });
 		} catch (error) {
 			logger.error(error, '[SEND TO CHAT]');
-			// @ts-expect-error
 			return signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
 		}
 

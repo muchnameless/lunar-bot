@@ -245,7 +245,6 @@ export class MojangClient {
 	private async _request(url: string, retries = 0): Promise<Response> {
 		try {
 			return await fetch(url, {
-				// @ts-expect-error
 				signal: AbortSignal.timeout(this.timeout),
 			});
 		} catch (error) {

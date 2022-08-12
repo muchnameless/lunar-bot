@@ -28,10 +28,7 @@ export class AbortControllerCache extends BaseCache<AbortController> {
 
 		if (!abortController && Date.now() - message.createdTimestamp > AbortControllerCache._maxAge) return null;
 
-		(abortController ??= new AbortController()).abort(
-			// @ts-expect-error
-			reason,
-		);
+		(abortController ??= new AbortController()).abort(reason);
 
 		this._cache.set(message.id, abortController);
 
