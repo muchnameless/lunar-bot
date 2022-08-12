@@ -23,7 +23,7 @@ export class AbortControllerCache extends BaseCache<AbortController> {
 	 * @param message
 	 * @param reason
 	 */
-	abort(message: Pick<Message, 'id' | 'createdTimestamp'>, reason?: string) {
+	abort(message: Pick<Message, 'id' | 'createdTimestamp'>, reason?: unknown) {
 		let abortController = this._cache.get(message.id);
 
 		if (!abortController && Date.now() - message.createdTimestamp > AbortControllerCache._maxAge) return null;
