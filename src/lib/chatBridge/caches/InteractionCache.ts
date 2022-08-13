@@ -5,10 +5,6 @@ import type { ChatInputCommandInteraction, Snowflake } from 'discord.js';
 export class InteractionCache extends BaseCache<ChatInputCommandInteraction<'cachedOrDM'>> {
 	protected static override _maxAge = minutes(15);
 
-	constructor() {
-		super(minutes(15));
-	}
-
 	/**
 	 * adds the interaction to the cache if the channel is a chat bridge channel
 	 * @param interaction
@@ -32,7 +28,7 @@ export class InteractionCache extends BaseCache<ChatInputCommandInteraction<'cac
 	/**
 	 * sweeps the interaction cache and deletes all that were created before the max age
 	 */
-	protected _sweep() {
+	sweep() {
 		return this._cache.sweep(({ createdTimestamp }) => Date.now() - createdTimestamp > InteractionCache._maxAge);
 	}
 }

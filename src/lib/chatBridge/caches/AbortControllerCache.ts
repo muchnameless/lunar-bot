@@ -1,3 +1,4 @@
+import { setInterval } from 'node:timers';
 import { SnowflakeUtil } from 'discord.js';
 import { minutes } from '#functions';
 import { BaseCache } from './BaseCache';
@@ -5,10 +6,7 @@ import type { Message, Snowflake } from 'discord.js';
 
 export class AbortControllerCache extends BaseCache<AbortController> {
 	protected static override _maxAge = minutes(5);
-
-	constructor() {
-		super(minutes(10));
-	}
+	protected _sweepInterval = setInterval(() => this.sweep(), minutes(10));
 
 	/**
 	 * returns either the cached or a new AbortController
@@ -46,7 +44,7 @@ export class AbortControllerCache extends BaseCache<AbortController> {
 	/**
 	 * sweeps the AbortController cache and deletes all that were created before the max age
 	 */
-	protected _sweep() {
+	sweep() {
 		return this._cache.sweep(
 			(_, messageId) => Date.now() - SnowflakeUtil.timestampFrom(messageId) > AbortControllerCache._maxAge,
 		);

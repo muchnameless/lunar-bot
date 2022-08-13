@@ -6,10 +6,6 @@ import type { RepliableInteraction } from '#utils';
 export class InteractionUserCache extends BaseCache<RepliableInteraction> {
 	protected static override _maxAge = minutes(15);
 
-	constructor() {
-		super(minutes(15));
-	}
-
 	/**
 	 * adds the interaction to the cache if the channel is a chat bridge channel
 	 * @param interaction
@@ -45,7 +41,7 @@ export class InteractionUserCache extends BaseCache<RepliableInteraction> {
 	/**
 	 * sweeps the interaction cache and deletes all that were created before the max age
 	 */
-	protected _sweep() {
+	sweep() {
 		return this._cache.sweep(({ createdTimestamp }) => Date.now() - createdTimestamp > InteractionUserCache._maxAge);
 	}
 }

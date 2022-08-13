@@ -1,11 +1,13 @@
 import { once } from 'node:events';
 import { env } from 'node:process';
+import { setInterval } from 'node:timers';
 import { stripIndents } from 'common-tags';
 import { MessageFlags } from 'discord.js';
 import { MessageUtil } from '#utils';
 import { logger } from '#logger';
 import { UnicodeEmoji } from '#constants';
 import { BridgeCommandCollection } from '#structures/commands/BridgeCommandCollection';
+import { minutes } from '../functions/time';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import { DELETED_MESSAGE_REASON } from './constants';
@@ -39,21 +41,33 @@ export class ChatBridgeManager {
 	 */
 	cache: ChatBridge[] = [];
 	/**
+	 * AbortControllers for discord messages
+	 */
+	abortControllers = new AbortControllerCache();
+	/**
 	 * interaction cache
 	 */
 	interactionCache = new InteractionCache();
 	/**
-	 * AbortControllers for discord messages
+	 * interval to sweep this manager's and it's cached bridges' interaction caches
 	 */
-	abortControllers = new AbortControllerCache();
+	interactionCacheSweeperInterval = setInterval(() => {
+		this.interactionCache.sweep();
+
+		for (const { discord } of this.cache) {
+			for (const { interactionUserCache } of discord.channels.values()) {
+				interactionUserCache.sweep();
+			}
+		}
+	}, minutes(15));
 
 	constructor(client: LunarClient, commandsURL: URL) {
+		this.client = client;
+		this.commands = new BridgeCommandCollection(client, commandsURL);
+
 		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {
 			this.cache.push(new ChatBridge(client, this, i));
 		}
-
-		this.client = client;
-		this.commands = new BridgeCommandCollection(client, commandsURL);
 	}
 
 	/**
