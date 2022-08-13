@@ -114,7 +114,7 @@
 		"@sapphire/snowflake": "3.2.3-next.b51fee4.0",
 		"@types/node": "patch:@types/node@npm:^18.7.3#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch",
 		"discord-api-types": "0.37.2-next.4732f1a.1660142287",
-		"discord.js@14.2.1-dev.1660305930-c97977a.0": "patch:discord.js@npm:14.2.1-dev.1660305930-c97977a.0#.yarn/patches/discord.js-npm-14.2.1-dev.1660305930-c97977a.0-03244ff51a.patch",
-		"minecraft-protocol@1.35.1": "patch:minecraft-protocol@npm:1.35.1#.yarn/patches/minecraft-protocol-npm-1.35.1-bc03e71596.patch"
+		"discord.js": "patch:discord.js@npm:14.2.1-dev.1660305930-c97977a.0#.yarn/patches/discord.js-npm-14.2.1-dev.1660305930-c97977a.0-03244ff51a.patch",
+		"minecraft-protocol": "patch:minecraft-protocol@npm:1.35.1#.yarn/patches/minecraft-protocol-npm-1.35.1-bc03e71596.patch"
 	}
 }
