@@ -1,11 +1,10 @@
 import { HypixelMessage } from '../HypixelMessage';
 import { ChatBridgeEvent } from '../ChatBridge';
 import type { ChatBridge } from '../ChatBridge';
-import type { MESSAGE_POSITIONS } from '../constants';
 
 export interface ChatPacket {
-	message: string;
-	position: keyof typeof MESSAGE_POSITIONS;
+	content: string;
+	type: number;
 }
 
 /**

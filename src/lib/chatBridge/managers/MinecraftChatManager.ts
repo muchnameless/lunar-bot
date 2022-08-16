@@ -470,8 +470,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		++this.loginAttempts;
 
 		(this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
-			host: env.MINECRAFT_SERVER_HOST,
-			port: Number(env.MINECRAFT_SERVER_PORT),
+			host: 'mc.hypixel.net',
+			port: 25_565,
 			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
 			password: env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
 			version: MC_CLIENT_VERSION,
@@ -925,9 +925,16 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const listener = this._listenFor(content);
 
 		try {
-			this.bot.write('chat', { message });
+			const timestamp = BigInt(Date.now());
+
+			this.bot.write('chat_message', {
+				message,
+				timestamp,
+				salt: 0,
+				signature: this.bot.signMessage(message, timestamp),
+			});
 		} catch (error) {
-			logger.error(error, '[_SEND TO CHAT]');
+			logger.error(error, '[_SEND TO CHAT]: bot.write error');
 			void MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
 			this._resetFilter();
