@@ -5,5 +5,4 @@ export * from './itemId';
 export * from './itemRarity';
 export * from './modifiers';
 export * from './pets';
-export * from './reforges';
 export * from './stars';

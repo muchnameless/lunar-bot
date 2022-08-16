@@ -6,6 +6,7 @@ import {
 	calculatePetSkillLevel,
 	getEnchantment,
 	getEnchantmentModifier,
+	getReforgeStone,
 	getUpgradeMaterialPrice,
 	isVanillaItem,
 	transformItemData,
@@ -17,7 +18,6 @@ import {
 	ItemId,
 	MASTER_STARS,
 	PriceModifier,
-	REFORGES,
 	SKYBLOCK_INVENTORIES,
 } from './constants';
 import { accessories, getPrice, itemUpgrades, prices } from './prices';
@@ -73,7 +73,7 @@ export type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		farming_for_dummies_count: number;
 		gems: Record<string, string>;
 		gemstone_slots: number;
-		modifier: keyof typeof REFORGES;
+		modifier: string;
 		petInfo: string;
 		skin: string;
 		talisman_enrichment: string;
@@ -267,6 +267,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// gemstones
 	if (extraAttributes.gems) {
+		// TODO: https://github.com/HypixelDev/PublicAPI/discussions/549
 		/**
 		 * API example:
 		 *
@@ -299,11 +300,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// reforge
 	if (extraAttributes.modifier && !accessories.has(itemId)) {
-		// TODO: make dynamic if possible
-		price +=
-			getPrice(
-				REFORGES[extraAttributes.modifier] ?? logger.warn(`[NETWORTH]: unknown reforge '${extraAttributes.modifier}'`),
-			) * PriceModifier.Reforge;
+		price += getPrice(getReforgeStone(extraAttributes.modifier, itemId)!) * PriceModifier.Reforge;
 	}
 
 	// scrolls (Necron's Blade)

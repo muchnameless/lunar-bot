@@ -8,6 +8,8 @@ export const enum ItemId {
 	ArmorshredArrow = 'ARMORSHRED_ARROW',
 	ArrowBundleMagma = 'ARROW_BUNDLE_MAGMA',
 	ArtOfWar = 'THE_ART_OF_WAR',
+	AspectOfTheEnd = 'ASPECT_OF_THE_END',
+	AspectOfTheVoid = 'ASPECT_OF_THE_VOID',
 	BeatingHeart = 'BEATING_HEART',
 	BlazeWax = 'BLAZE_WAX',
 	BlessedFruit = 'BLESSED_FRUIT',
