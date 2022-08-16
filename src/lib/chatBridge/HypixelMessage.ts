@@ -5,17 +5,18 @@ import { logger } from '#logger';
 import { NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
 import { seconds, uuidToBustURL } from '#functions';
 import { mojang } from '#api';
-import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, HypixelMessageType, spamMessages } from './constants';
+import { HypixelMessageType, INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, spamMessages } from './constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { PrismarineMessage } from './PrismarineMessage';
 import type { ParseArgsConfig } from 'node:util';
+import type { ArrayElementType } from '@sapphire/utilities';
 import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
 import type { Player } from '#structures/database/models/Player';
 import type { GuildMember, Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
 import type { BroadcastOptions, ChatBridge } from './ChatBridge';
-import type { ChatPacket } from './botEvents/chat';
+import type { ChatPacket } from './botEvents/player_chat';
 import type { BridgeCommand } from '#structures/commands/BridgeCommand';
 import type { DualCommand } from '#structures/commands/DualCommand';
 
@@ -68,7 +69,7 @@ export class HypixelMessage {
 	/**
 	 * in-game message position
 	 */
-	position: typeof MESSAGE_POSITIONS[keyof typeof MESSAGE_POSITIONS];
+	position: ArrayElementType<typeof MESSAGE_POSITIONS> | null;
 	/**
 	 * forwarded message
 	 */
@@ -94,10 +95,10 @@ export class HypixelMessage {
 	 * @param chatBridge
 	 * @param packet
 	 */
-	constructor(chatBridge: ChatBridge, { message, position }: ChatPacket) {
+	constructor(chatBridge: ChatBridge, { content, type }: ChatPacket) {
 		this.chatBridge = chatBridge;
-		this.prismarineMessage = PrismarineMessage.fromNotch(message);
-		this.position = MESSAGE_POSITIONS[position] ?? null;
+		this.prismarineMessage = PrismarineMessage.fromNotch(content);
+		this.position = MESSAGE_POSITIONS[type] ?? null;
 		this.rawContent = this.prismarineMessage.toString();
 		this.cleanedContent = this.rawContent.replace(INVISIBLE_CHARACTER_REGEXP, '').trim();
 

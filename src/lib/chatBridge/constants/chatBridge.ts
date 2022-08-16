@@ -3,11 +3,19 @@
  */
 export const SPAWN_EVENTS = new Set(['login', 'keep_alive'] as const);
 
-export const MESSAGE_POSITIONS = {
-	0: 'CHAT',
-	1: 'SYSTEM',
-	2: 'GAME_INFO',
-} as const;
+/**
+ * https://wiki.vg/Protocol -> Player Chat Message -> Type
+ */
+export const MESSAGE_POSITIONS = [
+	'CHAT',
+	'SYSTEM',
+	'GAME_INFO',
+	'SAY_CMD',
+	'MSG_CMD',
+	'TEAM_MSG_CMD',
+	'EMOTE',
+	'TELLRAW',
+] as const;
 
 export const enum HypixelMessageType {
 	Whisper = 'WHISPER',
