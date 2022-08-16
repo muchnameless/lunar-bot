@@ -1,6 +1,7 @@
 import { basename } from 'node:path';
 import { URL } from 'node:url';
 import { createClient } from 'minecraft-protocol';
+import { lazy } from '@sapphire/utilities';
 import { logger } from '#logger';
 import { readJSFiles } from '#functions';
 import { SPAWN_EVENTS } from './constants';
@@ -15,7 +16,7 @@ interface MinecraftBotEvent {
 /**
  * load events from files
  */
-async function getEvents() {
+const getEvents = lazy(async () => {
 	const events: MinecraftBotEvent[] = [];
 
 	for await (const path of readJSFiles(new URL('./botEvents/', import.meta.url))) {
@@ -26,9 +27,7 @@ async function getEvents() {
 	}
 
 	return events;
-}
-
-let events: MinecraftBotEvent[];
+});
 
 /**
  * returns a mc bot client
@@ -41,11 +40,11 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 	/**
 	 * load (and cache) bot events
 	 */
-	for (const { name, callback } of (events ??= await getEvents())) {
+	for (const { name, callback } of await getEvents()) {
 		bot[SPAWN_EVENTS.has(name as any) ? 'once' : 'on'](name, callback.bind(null, chatBridge));
 	}
 
-	logger.debug(`[CREATE BOT]: ${events.length} event${events.length !== 1 ? 's' : ''} loaded`);
+	logger.debug(`[CREATE BOT]: ${getEvents.length} event${getEvents.length !== 1 ? 's' : ''} loaded`);
 
 	return bot;
 }
