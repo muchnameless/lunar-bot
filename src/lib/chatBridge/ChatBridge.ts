@@ -1,9 +1,11 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
-import { EventEmitter } from 'node:events';
+import { EventEmitter, once } from 'node:events';
 import { logger } from '#logger';
 import { EventCollection } from '#structures/events/EventCollection';
 import { minutes, seconds } from '#functions';
+import { UnicodeEmoji } from '../constants/emojiCharacters';
+import { MessageUtil } from '../util/MessageUtil';
 import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants';
 import { MinecraftChatManager } from './managers/MinecraftChatManager';
 import { DiscordManager } from './managers/DiscordManager';
@@ -37,6 +39,7 @@ export const enum ChatBridgeEvent {
 	Connect = 'connect',
 	Disconnect = 'disconnect',
 	Error = 'error',
+	Linked = 'linked',
 	Message = 'message',
 	Ready = 'ready',
 }
@@ -161,8 +164,8 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param guildName
 	 */
 	async link(guildName: string | null = null): Promise<this> {
-		while (!this.minecraft.isReady()) {
-			await sleep(Math.min(++this.guildLinkAttempts * seconds(5), minutes(5)));
+		if (!this.minecraft.isReady()) {
+			await once(this, ChatBridgeEvent.Ready);
 		}
 
 		try {
@@ -202,6 +205,8 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 			hypixelGuild.chatBridge = this;
 			this.hypixelGuild = hypixelGuild;
+
+			this.emit(ChatBridgeEvent.Linked);
 
 			logger.info(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot!.username}`);
 
@@ -263,8 +268,34 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param message
 	 * @param options
 	 */
-	handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions & { signal: AbortSignal }) {
-		return Boolean(this.discord.channelsByIds.get(message.channelId)?.forwardToMinecraft(message, options));
+	async handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions & { signal: AbortSignal }) {
+		if (!this.hypixelGuild?.chatBridgeEnabled) {
+			// linked but not enabled
+			if (this.hypixelGuild) {
+				if (this.discord.channelsByIds.has(message.channelId)) void MessageUtil.react(message, UnicodeEmoji.X);
+				return;
+			}
+
+			// not linked yet
+			try {
+				await once(this, ChatBridgeEvent.Linked, { signal: AbortSignal.timeout(minutes(1)) });
+			} catch (error) {
+				logger.error(error, `[HANDLE DISCORD MESSAGE]: ${this.logInfo}: not linked`);
+				return MessageUtil.react(message, UnicodeEmoji.X);
+			}
+		}
+
+		// mc bot not ready yet
+		if (!this.minecraft.isReady()) {
+			try {
+				await once(this, ChatBridgeEvent.Ready, { signal: AbortSignal.timeout(minutes(1)) });
+			} catch (error) {
+				logger.error(error, `[HANDLE DISCORD MESSAGE]: ${this.logInfo}: minecraft not ready`);
+				return MessageUtil.react(message, UnicodeEmoji.X);
+			}
+		}
+
+		return this.discord.channelsByIds.get(message.channelId)?.forwardToMinecraft(message, options);
 	}
 
 	/**

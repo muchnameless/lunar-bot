@@ -265,7 +265,7 @@ export class DiscordChatManager extends ChatManager {
 				);
 			}
 
-			throw error;
+			throw new Error('failed to fetch and cache the webhook', { cause: error });
 		}
 	}
 
@@ -422,8 +422,6 @@ export class DiscordChatManager extends ChatManager {
 		message: Message,
 		{ player: playerInput, isEdit = false, signal }: MessageForwardOptions & { signal: AbortSignal },
 	) {
-		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, UnicodeEmoji.X);
-
 		const messageInteraction =
 			message.interaction ??
 			// followUp to an interaction

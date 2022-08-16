@@ -217,17 +217,8 @@ export class ChatBridgeManager {
 
 		if (_options.signal.aborted) return; // ignore deleted messages
 
-		try {
-			// a ChatBridge for the message's channel was found
-			if (this.cache.reduce((acc, chatBridge) => chatBridge.handleDiscordMessage(message, _options) || acc, false)) {
-				return;
-			}
-
-			// no ChatBridge for the message's channel found
-			void MessageUtil.react(message, UnicodeEmoji.X);
-		} catch (error) {
-			logger.error(error, '[CHAT BRIDGES]: handleDiscordMessage');
-			void MessageUtil.react(message, UnicodeEmoji.X);
+		for (const chatBridge of this.cache) {
+			void chatBridge.handleDiscordMessage(message, _options);
 		}
 	}
 
