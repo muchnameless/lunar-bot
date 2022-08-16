@@ -3,6 +3,12 @@ import { ItemId } from '../constants';
 
 const warnings = new Set<string>();
 
+/**
+ * https://hypixel-skyblock.fandom.com/wiki/Reforging
+ * https://wiki.hypixel.net/Reforging
+ * @param modifier
+ * @param itemId
+ */
 export const getReforgeStone = (modifier: string, itemId: string) => {
 	switch (modifier) {
 		case "jerry's":
