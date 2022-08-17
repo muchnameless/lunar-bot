@@ -3669,7 +3669,7 @@ __metadata:
     pg: ^8.7.3
     pg-hstore: ^2.3.4
     pino: ^8.4.1
-    pino-pretty: ^9.0.0
+    pino-pretty: ^9.0.1
     postgres: 3.2.4
     prettier: ^2.7.1
     pretty-quick: ^3.1.3
@@ -4590,9 +4590,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "pino-pretty@npm:9.0.0"
+"pino-pretty@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "pino-pretty@npm:9.0.1"
   dependencies:
     colorette: ^2.0.7
     dateformat: ^4.6.3
@@ -4610,7 +4610,7 @@ __metadata:
     strip-json-comments: ^3.1.1
   bin:
     pino-pretty: bin.js
-  checksum: d1b730337036fad02ba3f6712b13d36731189d3a1b95624c2577f403329fe172353810b38ae4bba2e3709edd6ef65fc5beb113969737a8e6f6ac877e7025b3c3
+  checksum: 60344b50b1a51f96b7b4be068fba3a31112324d26c0d9ed47ccf0e79f2b1fc5cca315bd67080dac4c2e5143f2b775d13c5b00fae7f401e6b5cfb0258d1f7e58c
   languageName: node
   linkType: hard
 
