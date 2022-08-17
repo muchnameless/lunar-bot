@@ -8,7 +8,9 @@ echo "pulling from git"
 set current = `git rev-parse --short HEAD`
 git pull
 
-if (`git rev-parse --short HEAD` != $current) then
+@ outdated = `git rev-parse --short HEAD` != $current
+
+if ($outdated) then
 	echo ""
 	./scripts/bot.sh status
 
@@ -25,3 +27,5 @@ echo ""
 echo "done"
 
 cd $curdir
+
+if ($outdated == 0) exit 1
