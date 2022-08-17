@@ -205,7 +205,7 @@ export class ChatBridgeManager {
 	 * @param message
 	 * @param options
 	 */
-	handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
+	async handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
 		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
@@ -217,9 +217,12 @@ export class ChatBridgeManager {
 
 		if (_options.signal.aborted) return; // ignore deleted messages
 
-		for (const chatBridge of this.cache) {
-			void chatBridge.handleDiscordMessage(message, _options);
-		}
+		const res = await Promise.all(this.cache.map((chatBridge) => chatBridge.handleDiscordMessage(message, _options)));
+
+		if (res.includes(true)) return;
+
+		// no chat bridge found to handle the message
+		void MessageUtil.react(message, UnicodeEmoji.X);
 	}
 
 	/**

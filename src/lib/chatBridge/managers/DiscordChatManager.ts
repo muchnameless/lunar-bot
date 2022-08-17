@@ -440,7 +440,7 @@ export class DiscordChatManager extends ChatManager {
 				)}`,
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,
 			});
-			return MessageUtil.react(message, UnicodeEmoji.Muted);
+			return void MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if the player is auto muted
@@ -460,7 +460,7 @@ export class DiscordChatManager extends ChatManager {
 				)}`,
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,
 			});
-			return MessageUtil.react(message, UnicodeEmoji.Muted);
+			return void MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if the chatBridge bot is muted
@@ -472,7 +472,7 @@ export class DiscordChatManager extends ChatManager {
 				)}`,
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,
 			});
-			return MessageUtil.react(message, UnicodeEmoji.Muted);
+			return void MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// build content
@@ -508,7 +508,7 @@ export class DiscordChatManager extends ChatManager {
 		if (message.attachments.size) contentParts.push(...(await this._uploadAttachments(message.attachments)));
 
 		// empty message (e.g. only embeds)
-		if (!contentParts.length) return MessageUtil.react(message, UnicodeEmoji.Stop);
+		if (!contentParts.length) return void MessageUtil.react(message, UnicodeEmoji.Stop);
 
 		// @referencedMessageAuthor if normal reply
 		if (MessageUtil.isNormalReplyMessage(message)) {

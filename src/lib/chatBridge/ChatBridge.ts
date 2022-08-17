@@ -264,24 +264,33 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	}
 
 	/**
+	 * reacts with :X: if this ChatBridge is responsible for handling the message
+	 * @param message
+	 */
+	handleError(message: DiscordMessage) {
+		if (!this.discord.channelsByIds.has(message.channelId)) return false;
+
+		void MessageUtil.react(message, UnicodeEmoji.X);
+		return true;
+	}
+
+	/**
 	 * forwards the discord message to minecraft chat if the ChatBridge has a DiscordChatManager for the message's channel, returning true if so, false otherwise
 	 * @param message
 	 * @param options
+	 * @returns true if the ChatBridge handled the message, false otherwise
 	 */
 	async handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions & { signal: AbortSignal }) {
 		if (!this.hypixelGuild?.chatBridgeEnabled) {
 			// linked but not enabled
-			if (this.hypixelGuild) {
-				if (this.discord.channelsByIds.has(message.channelId)) void MessageUtil.react(message, UnicodeEmoji.X);
-				return;
-			}
+			if (this.hypixelGuild) return this.handleError(message);
 
 			// not linked yet
 			try {
 				await once(this, ChatBridgeEvent.Linked, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {
 				logger.error(error, `[HANDLE DISCORD MESSAGE]: ${this.logInfo}: not linked`);
-				return MessageUtil.react(message, UnicodeEmoji.X);
+				return this.handleError(message);
 			}
 		}
 
@@ -291,11 +300,15 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 				await once(this, ChatBridgeEvent.Ready, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {
 				logger.error(error, `[HANDLE DISCORD MESSAGE]: ${this.logInfo}: minecraft not ready`);
-				return MessageUtil.react(message, UnicodeEmoji.X);
+				return this.handleError(message);
 			}
 		}
 
-		return this.discord.channelsByIds.get(message.channelId)?.forwardToMinecraft(message, options);
+		const discordChatManager = this.discord.channelsByIds.get(message.channelId);
+		if (!discordChatManager) return false;
+
+		void discordChatManager.forwardToMinecraft(message, options);
+		return true;
 	}
 
 	/**
