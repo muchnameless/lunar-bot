@@ -13,7 +13,7 @@ import { RateLimitError } from '@zikeji/hypixel';
 import { GuildMemberLimits } from '@sapphire/discord-utilities';
 import { logger } from '#logger';
 import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil } from '#utils';
-import { hypixel, mojang } from '#api';
+import { getSkyBlockProfiles, hypixel, mojang } from '#api';
 import {
 	days,
 	escapeIgn,
@@ -837,7 +837,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			if (!this.mainProfileId) await this.fetchMainProfile(); // detect main profile if it is unknown
 
 			// hypixel API call
-			const playerData = (await hypixel.skyblock.profile(this.mainProfileId!))?.members?.[this.minecraftUuid];
+			const playerData = (await hypixel.skyblock.profile(this.mainProfileId!)).profile?.members?.[this.minecraftUuid];
 
 			if (!playerData) {
 				this.update({ mainProfileId: null }).catch((error) => logger.error(error));
@@ -873,10 +873,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				/**
 				 * request achievements api
 				 */
-				const { achievements } = await hypixel.player.uuid(this.minecraftUuid);
+				const { player } = await hypixel.player.uuid(this.minecraftUuid);
 
-				for (const skill of SKILLS) {
-					this[`${skill}Xp`] = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
+				if (player?.achievements) {
+					for (const skill of SKILLS) {
+						this[`${skill}Xp`] = SKILL_XP_TOTAL[player.achievements[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
+					}
 				}
 			}
 
@@ -1669,7 +1671,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 */
 	async fetchDiscordTag() {
 		try {
-			return (await hypixel.player.uuid(this.minecraftUuid)).socialMedia?.links?.DISCORD ?? null;
+			return (await hypixel.player.uuid(this.minecraftUuid)).player?.socialMedia?.links?.DISCORD ?? null;
 		} catch (error) {
 			logger.error(error, `[FETCH DISCORD TAG]: ${this.logInfo}`);
 			return null;
@@ -1683,7 +1685,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		let profiles = null;
 
 		try {
-			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
+			profiles = await getSkyBlockProfiles(this.minecraftUuid);
 		} catch (error) {
 			logger.error(error, '[MAIN PROFILE]');
 		}

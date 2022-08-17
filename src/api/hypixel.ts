@@ -4,7 +4,7 @@ import { logger } from '#logger';
 import { RedisKey } from '#constants';
 import { days, minutes, seconds } from '#functions';
 import { redis } from '.';
-import type { DefaultMeta } from '@zikeji/hypixel';
+import type { Components, DefaultMeta } from '@zikeji/hypixel';
 
 export const SKYBLOCK_PROFILE_TTL = seconds(30);
 
@@ -21,11 +21,12 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 
 			if (key.startsWith('skyblock:profiles')) {
 				ttl = SKYBLOCK_PROFILE_TTL;
-			} else if (key.startsWith('guild')) {
-				ttl = seconds(10);
-			} else if (key.startsWith('player') || key.startsWith('skyblock:auction')) {
-				ttl = minutes(1);
-			} else if (key.startsWith('skyblock:profile')) {
+			} else if (
+				key.startsWith('guild') ||
+				key.startsWith('player') ||
+				key.startsWith('skyblock:auction') ||
+				key.startsWith('skyblock:profile')
+			) {
 				ttl = minutes(2);
 			} else if (key.startsWith('status')) {
 				ttl = seconds(20);
@@ -48,3 +49,8 @@ hypixel
 		logger.warn(`[HYPIXEL API]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`),
 	)
 	.on('reset', () => logger.info('[HYPIXEL API]: ratelimit reset'));
+
+export const getSkyBlockProfiles = async (uuid: string) =>
+	((await hypixel.skyblock.profiles.uuid(uuid)).profiles?.filter(Boolean) ?? null) as
+		| NonNullable<Components.Schemas.SkyBlockProfileCuteName>[]
+		| null;

@@ -34,11 +34,13 @@ export default class GuildOfCommand extends DualCommand {
 	private async _generateReply(ignOrUuid: string) {
 		try {
 			const { uuid, ign } = await mojang.ignOrUuid(ignOrUuid);
-			const { name, tag, members } = await hypixel.guild.player(uuid);
+			const { guild } = await hypixel.guild.player(uuid);
 
-			if (!name) return `${ign}: no guild`;
+			if (!guild) return `${ign}: no guild`;
 
-			return `${escapeIgn(ign)}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`;
+			return `${escapeIgn(ign)}: ${guild.name}${guild.tag ? ` [${guild.tag}]` : ''} ${
+				guild.members.length
+			}/125 members`;
 		} catch (error) {
 			logger.error(error, '[GUILDOF CMD]');
 

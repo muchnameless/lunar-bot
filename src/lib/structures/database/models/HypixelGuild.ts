@@ -627,20 +627,9 @@ export class HypixelGuild extends Model<
 	 */
 	private async _updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
 		try {
-			const {
-				meta: { cached },
-				name: guildName,
-				ranks,
-				chatMute,
-				members: currentGuildMembers,
-			} = await hypixel.guild.id(this.guildId);
+			const { guild } = await hypixel.guild.id(this.guildId, { force: true });
 
-			if (cached) {
-				logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
-				return this;
-			}
-
-			if (!guildName) {
+			if (!guild) {
 				logger.error(`[UPDATE GUILD]: ${this.name}: no data`);
 				return this;
 			}
@@ -650,10 +639,10 @@ export class HypixelGuild extends Model<
 			 */
 
 			// update name
-			this.name = guildName;
+			this.name = guild.name;
 
 			// update ranks
-			for (const { name, priority } of ranks ?? []) {
+			for (const { name, priority } of guild.ranks) {
 				const dbEntryRank = this.ranks.find(({ priority: rankPriority }) => rankPriority === priority);
 
 				if (!dbEntryRank) {
@@ -677,13 +666,13 @@ export class HypixelGuild extends Model<
 			}
 
 			// sync guild mutes
-			this.mutedTill = chatMute!;
+			if (guild.chatMute !== undefined) this.mutedTill = guild.chatMute;
 
 			/**
 			 * update guild players
 			 */
 
-			if (!currentGuildMembers.length) {
+			if (!guild.members.length) {
 				await this.save();
 				throw `[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`; // API error
 			}
@@ -691,7 +680,7 @@ export class HypixelGuild extends Model<
 			const { players, config } = this.client;
 			const guildPlayers = this.players;
 			const playersLeft = guildPlayers.filter(
-				(_, minecraftUuid) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUuid),
+				(_, minecraftUuid) => !guild.members.some(({ uuid }) => uuid === minecraftUuid),
 			);
 			const PLAYERS_LEFT_AMOUNT = playersLeft.size;
 			const PLAYERS_OLD_AMOUNT = guildPlayers.size;
@@ -703,7 +692,7 @@ export class HypixelGuild extends Model<
 			}
 
 			// check if the player is either not in the cache or not in a guild
-			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.cache.get(uuid)?.guildId);
+			const membersJoined = guild.members.filter(({ uuid }) => !players.cache.get(uuid)?.guildId);
 
 			let leftLog: string[] = [];
 			let joinedLog: string[] = [];
@@ -744,7 +733,7 @@ export class HypixelGuild extends Model<
 						let discordTag: string | null = null;
 
 						try {
-							discordTag = (await hypixel.player.uuid(minecraftUuid)).socialMedia?.links?.DISCORD ?? null;
+							discordTag = (await hypixel.player.uuid(minecraftUuid)).player?.socialMedia?.links?.DISCORD ?? null;
 						} catch (error) {
 							logger.error(error, `[GET DISCORD TAG]: ${ign} (${this.name})`);
 						}
@@ -906,7 +895,7 @@ export class HypixelGuild extends Model<
 			// sync guild xp, mutedTill & guild ranks
 			const NOW = Date.now();
 
-			for (const hypixelGuildMember of currentGuildMembers) {
+			for (const hypixelGuildMember of guild.members) {
 				const player = players.cache.get(hypixelGuildMember.uuid);
 				if (!player) {
 					logger.warn(`[UPDATE GUILD PLAYERS] ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);

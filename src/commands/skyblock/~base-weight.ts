@@ -1,11 +1,11 @@
 import { UnicodeEmoji } from '#constants';
-import { hypixel } from '#api';
+import { getSkyBlockProfiles } from '#api';
 import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn } from '#functions';
 import BaseSkyBlockCommand from './~base-skyblock-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type { Components } from '@zikeji/hypixel';
-import type { SkyBlockProfile, WeightData } from '#functions';
+import type { WeightData } from '#functions';
 
 export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	/**
@@ -41,7 +41,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	) {
 		// API requests
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-		const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
+		const profiles = await getSkyBlockProfiles(uuid);
 
 		if (!profiles?.length) throw `\`${ign}\` has no SkyBlock profiles`;
 

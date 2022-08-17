@@ -149,7 +149,7 @@ export default class DebugCommand extends ApplicationCommand {
 						{
 							name: 'Hypixel',
 							// @ts-expect-error
-							value: `Queue: ${hypixel.queue.promises.length}`,
+							value: `Queue: ${hypixel.queue.remaining}`,
 						},
 						{
 							name: 'Imgur',

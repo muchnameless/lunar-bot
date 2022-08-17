@@ -17,9 +17,9 @@ import {
 	upperCaseFirstChar,
 	commaListOr,
 } from '#functions';
-import { hypixel } from '#api';
+import { getSkyBlockProfiles } from '#api';
+import type { Components } from '@zikeji/hypixel';
 import type { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import type { SkyBlockProfile } from '#functions';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { BridgeCommandData } from '#structures/commands/BridgeCommand';
@@ -83,11 +83,11 @@ export default class BaseSkyBlockCommand extends DualCommand {
 		findProfileStrategy: FindProfileStrategy | null,
 	) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-		const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
+		const profiles = await getSkyBlockProfiles(uuid);
 
 		if (!profiles?.length) throw `\`${ign}\` has no SkyBlock profiles`;
 
-		let profile: SkyBlockProfile | null | undefined;
+		let profile: Components.Schemas.SkyBlockProfileCuteName | undefined;
 
 		if (!profileName) {
 			profile = findSkyblockProfile(profiles, uuid, findProfileStrategy);
@@ -111,7 +111,11 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * @param ign
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	protected _findProfileByName(profiles: SkyBlockProfile[], profileName: string, ign: string): SkyBlockProfile {
+	protected _findProfileByName(
+		profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[],
+		profileName: string,
+		ign: string,
+	) {
 		const profile = profiles.find(({ cute_name: name }) => name === profileName);
 
 		if (!profile) {

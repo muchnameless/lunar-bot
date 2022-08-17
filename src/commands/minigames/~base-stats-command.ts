@@ -20,7 +20,7 @@ export default class BaseStatsCommand extends DualCommand {
 
 		return {
 			ign,
-			playerData: await hypixel.player.uuid(uuid),
+			playerData: (await hypixel.player.uuid(uuid)).player,
 		};
 	}
 

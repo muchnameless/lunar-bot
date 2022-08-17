@@ -4,7 +4,7 @@ import { GuildMemberUtil, MessageUtil } from '#utils';
 import { logger } from '#logger';
 import { ErrorCode, UnicodeEmoji } from '#constants';
 import { assertNever, asyncCollectionFilter, commaListOr, getLilyWeight, stringToMS } from '#functions';
-import { hypixel, mojang } from '#api';
+import { getSkyBlockProfiles, mojang } from '#api';
 import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent';
 import {
 	demoteSuccess,
@@ -16,7 +16,7 @@ import {
 	promoteSuccess,
 	unmuteSuccess,
 } from '../constants';
-import type { SkyBlockProfile, WeightData } from '#functions';
+import type { WeightData } from '#functions';
 import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMessage';
 import type MathsCommand from '#root/commands/general/maths';
 
@@ -327,7 +327,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				// weight req check
 				if (hypixelMessage.hypixelGuild.weightReq !== null) {
-					const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
+					const profiles = await getSkyBlockProfiles(uuid);
 
 					if (!profiles?.length) {
 						return logger.info(

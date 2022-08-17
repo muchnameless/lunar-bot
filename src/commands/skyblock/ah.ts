@@ -17,7 +17,7 @@ import {
 	skyblockFindProfileOptionName,
 	skyblockProfileOption,
 } from '#structures/commands/commonOptions';
-import { hypixel } from '#api';
+import { getSkyBlockProfiles, hypixel } from '#api';
 import {
 	formatError,
 	findSkyblockProfile,
@@ -27,6 +27,7 @@ import {
 	upperCaseFirstChar,
 	uuidToBustURL,
 } from '#functions';
+import type { Components } from '@zikeji/hypixel';
 import type { FindProfileStrategy } from '#constants';
 import type {
 	APISelectMenuOption,
@@ -36,7 +37,6 @@ import type {
 	SelectMenuInteraction,
 	Snowflake,
 } from 'discord.js';
-import type { SkyBlockProfile } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 
 interface GenerateCustomIdOptions {
@@ -85,7 +85,7 @@ export default class AhCommand extends ApplicationCommand {
 			});
 
 		try {
-			const auctions = (await hypixel.skyblock.auction.profile(profileId))
+			const auctions = (await hypixel.skyblock.auction.profile(profileId)).auctions
 				.filter(({ claimed }) => !claimed)
 				.sort(({ end: a }, { end: b }) => a - b);
 
@@ -178,7 +178,7 @@ export default class AhCommand extends ApplicationCommand {
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	private _generateProfileOptions(profiles: SkyBlockProfile[]) {
+	private _generateProfileOptions(profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[]) {
 		return profiles.map(({ cute_name, profile_id }) =>
 			new SelectMenuOptionBuilder()
 				// eslint-disable-next-line camelcase
@@ -258,7 +258,7 @@ export default class AhCommand extends ApplicationCommand {
 	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
-			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
+			const profiles = await getSkyBlockProfiles(uuid);
 			const embed = this.client.defaultEmbed;
 
 			if (!profiles?.length) return this._handleNoProfiles(interaction, embed, ign, uuid);

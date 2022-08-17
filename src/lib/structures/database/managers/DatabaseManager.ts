@@ -189,7 +189,7 @@ export class DatabaseManager {
 			}
 
 			try {
-				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUuid);
+				const { auctions } = await hypixel.skyblock.auction.player(taxCollector.minecraftUuid);
 
 				// collector has no auctions in the API
 				if (!auctions.length) {

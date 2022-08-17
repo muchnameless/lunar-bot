@@ -40,7 +40,7 @@ export default class LinkCommand extends ApplicationCommand {
 
 		try {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
-			({ _id: guildId } = await hypixel.guild.player(uuid));
+			guildId = (await hypixel.guild.player(uuid)).guild?._id ?? null;
 		} catch (error) {
 			logger.error(error, '[LINK]');
 		}

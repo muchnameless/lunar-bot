@@ -36,15 +36,15 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	// eslint-disable-next-line class-methods-use-this
 	override async _fetchData(ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid: string) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-		const [playerData, guildData, friendsData] = await Promise.all([
+		const [{ player: playerData }, { guild: guildData }, { records: friendsData }] = await Promise.all([
 			hypixel.player.uuid(uuid),
 			hypixel.guild.player(uuid),
 			hypixel.friends.uuid(uuid),
 		]);
 		const statusData =
-			Reflect.has(playerData, 'lastLogin') && Reflect.has(playerData, 'lastLogout')
-				? playerData.lastLogin! > playerData.lastLogout!
-				: (await hypixel.status.uuid(uuid)).online;
+			playerData?.lastLogin && playerData.lastLogout
+				? playerData.lastLogin > playerData.lastLogout
+				: (await hypixel.status.uuid(uuid)).session.online;
 
 		return {
 			ign,
@@ -60,9 +60,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	 * @param data
 	 */
 	override _generateReply({ ign, playerData, guildData, friendsData, statusData }: FetchedData) {
-		const { _id, lastLogin, achievementPoints = 0, karma = 0 } = playerData ?? {};
-
-		if (!_id) return `\`${ign}\` never logged into hypixel`;
+		if (!playerData?._id) return `\`${ign}\` never logged into hypixel`;
 
 		const { cleanName: RANK_NAME } = getPlayerRank(playerData);
 		const level = Number(getNetworkLevel(playerData).preciseLevel.toFixed(2));
@@ -72,12 +70,12 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			rank: ${RANK_NAME},
 			guild: ${guildData?.name ?? 'none'},
 			status: ${statusData ? 'online' : 'offline'},
-			friends: ${formatNumber(friendsData?.length ?? 0)},
+			friends: ${formatNumber(friendsData.length)},
 			level: ${level},
-			achievement points: ${formatNumber(achievementPoints)},
-			karma: ${formatNumber(karma)},
-			first joined: ${time(seconds(Number.parseInt(_id.slice(0, 8), 16)))},
-			last joined: ${lastLogin ? time(lastLogin) : 'unknown'}
+			achievement points: ${formatNumber(playerData.achievementPoints)},
+			karma: ${formatNumber(playerData.karma ?? 0)},
+			first joined: ${time(seconds(Number.parseInt(playerData._id.slice(0, 8), 16)))},
+			last joined: ${playerData.lastLogin ? time(playerData.lastLogin) : 'unknown'}
 		`;
 	}
 }

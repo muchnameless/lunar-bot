@@ -7,6 +7,7 @@ import { request } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
 import { CronJob } from 'cron';
+import { Client } from '@zikeji/hypixel';
 import { logger } from '#logger';
 import { FetchError } from '#structures/errors/FetchError';
 import { getEnchantment } from '#networth/functions/enchantments'; // separate imports to not import unused files in the worker
@@ -16,11 +17,13 @@ import { ItemId } from '#networth/constants/itemId';
 import { ItemRarity } from '#networth/constants/itemRarity';
 import { sql } from '#structures/database/sql';
 import { JobType } from '.';
-import type { Enchantment } from '#networth/constants/enchantments';
 import type { Components } from '@zikeji/hypixel';
+import type { Enchantment } from '#networth/constants/enchantments';
 
 // because a single AbortController is used for all fetches
 EventEmitter.setMaxListeners(100);
+
+const hypixel = new Client('unused key', { retries: 1 });
 
 /**
  * prices
@@ -102,22 +105,10 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
 }
 
 /**
- * fetches bazaar products
- */
-async function fetchBazaarPrices(ac: AbortController) {
-	const res = await request('https://api.hypixel.net/skyblock/bazaar', { signal: ac.signal });
-
-	if (res.statusCode === 200) return res.body.json() as Promise<Components.Schemas.SkyBlockBazaarResponse>;
-
-	void res.body.dump();
-	throw new FetchError('FetchBazaarError', res);
-}
-
-/**
  * fetches and processes bazaar products
  */
 async function updateBazaarPrices(ac: AbortController) {
-	let { lastUpdated, products } = await fetchBazaarPrices(ac);
+	let { lastUpdated, products } = await hypixel.skyblock.bazaar({ signal: ac.signal });
 
 	// check if API data is updated
 	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
@@ -140,8 +131,8 @@ async function updateBazaarPrices(ac: AbortController) {
 			logger.warn(`[UPDATE BAZAAR PRICES]: refetching Bazaar: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
 			await sleep(5_000);
 
-			// fetch first auction page
-			({ lastUpdated, products } = await fetchBazaarPrices(ac));
+			// refetch bazaar products
+			({ lastUpdated, products } = await hypixel.skyblock.bazaar({ signal: ac.signal }));
 		}
 	}
 
@@ -174,27 +165,6 @@ async function updateBazaarPrices(ac: AbortController) {
 }
 
 /**
- * fetches a single auction page
- * @param page
- */
-async function fetchAuctionPage(
-	ac: AbortController,
-	page: number,
-): Promise<Pick<Components.Schemas.SkyBlockAuctionsResponse, 'auctions' | 'lastUpdated' | 'success' | 'totalPages'>> {
-	const res = await request(`https://api.hypixel.net/skyblock/auctions?page=${page}`, { signal: ac.signal });
-
-	if (res.statusCode === 200) return res.body.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
-
-	void res.body.dump();
-
-	// page does not exist -> no-op
-	if (res.statusCode === 404) return { success: false, lastUpdated: -1, totalPages: -1, auctions: [] };
-
-	// different error -> abort process
-	throw new FetchError('FetchAuctionError', res);
-}
-
-/**
  * fetches and processes all auction pages
  */
 async function updateAuctionPrices(ac: AbortController) {
@@ -202,7 +172,7 @@ async function updateAuctionPrices(ac: AbortController) {
 	 * fetches all auction pages
 	 */
 	// fetch first auction page
-	let { success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(ac, 0);
+	let { success, lastUpdated, totalPages, auctions } = await hypixel.skyblock.auctions.page(0, { signal: ac.signal });
 
 	const binAuctions = new Collection<string, number[]>();
 
@@ -236,7 +206,7 @@ async function updateAuctionPrices(ac: AbortController) {
 			await sleep(5_000);
 
 			// fetch first auction page
-			({ success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(ac, 0));
+			({ success, lastUpdated, totalPages, auctions } = await hypixel.skyblock.auctions.page(0, { signal: ac.signal }));
 
 			// abort on error
 			if (!success) {
@@ -334,7 +304,9 @@ async function updateAuctionPrices(ac: AbortController) {
 	let retries = 0;
 
 	const fetchAndProcessAuctions = async (page: number): Promise<unknown> => {
-		const { auctions: _auctions, lastUpdated: _lastUpdated } = await fetchAuctionPage(ac, page);
+		const { auctions: _auctions, lastUpdated: _lastUpdated } = await hypixel.skyblock.auctions.page(page, {
+			signal: ac.signal,
+		});
 
 		if (_lastUpdated !== lastUpdated) {
 			if (_lastUpdated < lastUpdated && ++retries <= MAX_RETRIES) {
@@ -352,20 +324,12 @@ async function updateAuctionPrices(ac: AbortController) {
 		return processAuctions(_auctions);
 	};
 
-	const fetchAndProcessEndedAuctions = async () => {
-		const res = await request('https://api.hypixel.net/skyblock/auctions_ended', { signal: ac.signal });
-
-		if (res.statusCode === 200) {
-			return Promise.all(
-				((await res.body.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions.map((auction) =>
-					processAuction(auction, auction.price),
-				),
-			);
-		}
-
-		void res.body.dump();
-		throw new FetchError('FetchAuctionError', res);
-	};
+	const fetchAndProcessEndedAuctions = async () =>
+		Promise.all(
+			(await hypixel.skyblock.auctionsEnded({ signal: ac.signal })).auctions.map((auction) =>
+				processAuction(auction, auction.price),
+			),
+		);
 
 	const promises: Promise<unknown>[] = [processAuctions(auctions), fetchAndProcessEndedAuctions()];
 
@@ -410,25 +374,6 @@ async function updatePrices(ac: AbortController) {
 	return Promise.all(binAuctions.map((_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
 }
 
-interface SkyBlockItem {
-	material: string;
-	durability: number;
-	skin: string;
-	name: string;
-	category: string;
-	stats?: Record<string, number>;
-	soulbound?: 'COOP' | 'SOLO';
-	tier: 'RARE';
-	npc_sell_price: number;
-	dungeon_item_conversion_cost?: EssenceUpgrade;
-	upgrade_costs?: (EssenceUpgrade | ItemUpgrade)[][];
-	id: string;
-	prestige?: {
-		item_id: string;
-		costs: (EssenceUpgrade | ItemUpgrade)[];
-	};
-}
-
 interface Upgrade {
 	amount: number;
 }
@@ -465,14 +410,7 @@ const reduceCostsArray = (costs: (EssenceUpgrade | ItemUpgrade)[]) =>
  * @param ac
  */
 async function updateSkyBlockItems(ac: AbortController) {
-	const res = await request('https://api.hypixel.net/resources/skyblock/items', { signal: ac.signal });
-
-	if (res.statusCode !== 200) {
-		void res.body.dump();
-		throw new FetchError('FetchBazaarError', res);
-	}
-
-	const { success, items } = (await res.body.json()) as { success: boolean; items: SkyBlockItem[] };
+	const { success, items } = await hypixel.resources.skyblock.items({ signal: ac.signal });
 
 	if (!success) return;
 

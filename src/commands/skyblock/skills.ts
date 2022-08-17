@@ -37,16 +37,18 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 			}
 		} else {
 			// API disabled -> get level from achievements
-			const { achievements } = await hypixel.player.uuid(uuid);
+			const { player } = await hypixel.player.uuid(uuid);
 
-			for (const skill of SKILLS) {
-				const XP = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
-				const { progressLevel, nonFlooredLevel } = getSkillLevel(skill, XP, 60);
+			if (player?.achievements) {
+				for (const skill of SKILLS) {
+					const XP = SKILL_XP_TOTAL[player.achievements[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
+					const { progressLevel, nonFlooredLevel } = getSkillLevel(skill, XP, 60);
 
-				totalXp += XP;
-				totalLevel += nonFlooredLevel;
+					totalXp += XP;
+					totalLevel += nonFlooredLevel;
 
-				reply.push(`${upperCaseFirstChar(skill)} ${progressLevel}`);
+					reply.push(`${upperCaseFirstChar(skill)} ${progressLevel}`);
+				}
 			}
 
 			reply.push(`${UnicodeEmoji.X} API disabled`);

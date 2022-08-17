@@ -11,10 +11,6 @@ import { assertNever, getLilyWeight } from '.';
 import type { Components } from '@zikeji/hypixel';
 import type { DungeonTypes, SkillTypes } from '#constants';
 
-export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string };
-
-type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
-
 /**
  * returns the true and progression level for the provided skill type
  * @param type the skill or dungeon type
@@ -93,21 +89,19 @@ export function getSlayerLevel(xp = 0) {
  * @param findProfileStrategy
  */
 export function findSkyblockProfile(
-	profiles: SkyBlockProfiles | null,
+	profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[] | null,
 	uuid: string,
 	findProfileStrategy?: FindProfileStrategy | null,
-): SkyBlockProfile | null {
+): Components.Schemas.SkyBlockProfileCuteName {
 	if (!profiles?.length) return null;
 	if (profiles.length === 1) return profiles[0]!;
 
 	switch (findProfileStrategy ?? FindProfileStrategy.MaxWeight) {
 		case FindProfileStrategy.MaxWeight: {
-			let mainProfile: SkyBlockProfile | null = null;
+			let mainProfile: Components.Schemas.SkyBlockProfileCuteName = null;
 			let maxWeight = -1;
 
 			for (const profile of profiles) {
-				if (!profile) continue;
-
 				const { totalWeight } = getLilyWeight(profile.members[uuid]!);
 
 				if (maxWeight > totalWeight) continue;
@@ -120,12 +114,10 @@ export function findSkyblockProfile(
 		}
 
 		case FindProfileStrategy.LastActive: {
-			let mainProfile: SkyBlockProfile | null = null;
+			let mainProfile: Components.Schemas.SkyBlockProfileCuteName = null;
 			let lastActive = -1;
 
 			for (const profile of profiles) {
-				if (!profile) continue;
-
 				profile.members[uuid]!.last_save;
 
 				if (lastActive > profile.members[uuid]!.last_save) continue;

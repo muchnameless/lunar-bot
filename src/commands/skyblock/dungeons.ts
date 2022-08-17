@@ -24,8 +24,8 @@ export default class DungeonsCommand extends BaseSkyBlockCommand {
 	 * @param data
 	 */
 	override async _generateReply({ ign, uuid, profile }: FetchedData) {
-		const player = await hypixel.player.uuid(uuid);
-		const SECRETS_FOUND = player.achievements?.skyblock_treasure_hunter ?? 0;
+		const { player } = await hypixel.player.uuid(uuid);
+		const SECRETS_FOUND = player?.achievements?.skyblock_treasure_hunter ?? 0;
 		const member = profile.members[uuid]!;
 		const XP = member.dungeons?.dungeon_types?.catacombs?.experience ?? 0;
 		const { progressLevel: catacombsLvl, trueLevel } = getSkillLevel('catacombs', XP);

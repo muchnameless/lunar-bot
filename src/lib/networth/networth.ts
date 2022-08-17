@@ -22,7 +22,6 @@ import {
 } from './constants';
 import { accessories, getPrice, itemUpgrades, prices } from './prices';
 import type { ItemUpgrade } from './prices';
-import type { SkyBlockProfile } from '#functions';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 
 /**
@@ -417,7 +416,7 @@ const getRunningAuctionWorth = async (auction: Components.Schemas.SkyBlockAuctio
  * @param uuid
  */
 export async function getAuctionNetworth(profileId: string, uuid?: string) {
-	const auctions = await hypixel.skyblock.auction.profile(profileId);
+	const { auctions } = await hypixel.skyblock.auction.profile(profileId);
 
 	if (!auctions.length) return 0;
 
@@ -453,7 +452,7 @@ export async function getAuctionNetworth(profileId: string, uuid?: string) {
  * @param options
  */
 export async function getNetworth(
-	{ banking, members, profile_id: profileId }: SkyBlockProfile,
+	{ banking, members, profile_id: profileId }: NonNullable<Components.Schemas.SkyBlockProfileCuteName>,
 	uuid: string,
 	{ addBanking = true, addAuctions = false } = {},
 ) {

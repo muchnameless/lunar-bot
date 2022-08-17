@@ -49,13 +49,13 @@ export default class VerifyCommand extends ApplicationCommand {
 
 		let uuid: string;
 		let ign: string;
-		let hypixelPlayer: Components.Schemas.Player;
+		let hypixelPlayer: Components.Schemas.NullablePlayer;
 
 		// API requests
 		try {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN));
 
-			hypixelPlayer = await hypixel.player.uuid(uuid);
+			({ player: hypixelPlayer } = await hypixel.player.uuid(uuid));
 		} catch (error) {
 			logger.error(error);
 			return InteractionUtil.reply(interaction, formatError(error));
