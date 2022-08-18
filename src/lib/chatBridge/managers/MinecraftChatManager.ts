@@ -103,19 +103,23 @@ class LastMessages {
 	 * treshold above which the message to send gets additional random padding
 	 */
 	private static JARO_WINKLER_THRESHOLD = 0.98 as const;
+	/**
+	 * time in ms after which the cached entry is no longer checked
+	 */
+	private static EXPIRATION_TIME = minutes(4);
 
 	/**
 	 * current buffer index
 	 */
-	private index = -1;
+	private _index = -1;
 	/**
 	 * ring buffer
 	 */
-	private cache: string[] = [];
+	private _cache: { message: string; timestamp: number }[] = [];
 
 	constructor() {
 		for (let i = 0; i < LastMessages.MAX_INDEX; ++i) {
-			this.cache.push('');
+			this._cache.push({ message: '', timestamp: Number.POSITIVE_INFINITY });
 		}
 	}
 
@@ -140,14 +144,23 @@ class LastMessages {
 	check(content: string, retry: number) {
 		const CLEANED_CONTENT = LastMessages._cleanContent(content);
 		const THRESHOLD = LastMessages.JARO_WINKLER_THRESHOLD - 0.01 * retry;
+		const EXPIRE_TIMESTAMP = Date.now() - LastMessages.EXPIRATION_TIME;
 
-		return this.cache.some((cached) => {
-			// exact match
-			if (cached === CLEANED_CONTENT) return true;
-			if (CLEANED_CONTENT.length <= 7) return false;
-			// fuzzy match
-			return jaroWinkler(CLEANED_CONTENT, cached) >= THRESHOLD;
-		});
+		for (const { message, timestamp } of this._cache) {
+			// expired
+			if (timestamp < EXPIRE_TIMESTAMP) continue;
+
+			if (
+				// exact match
+				message === CLEANED_CONTENT ||
+				// fuzzy match
+				(CLEANED_CONTENT.length > 7 && jaroWinkler(CLEANED_CONTENT, message) >= THRESHOLD)
+			) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -156,9 +169,9 @@ class LastMessages {
 	 */
 	add(content: string) {
 		// increment ring buffer index, reset cycle if max index
-		if (++this.index === LastMessages.MAX_INDEX) this.index = 0;
+		if (++this._index === this._cache.length) this._index = 0;
 
-		this.cache[this.index] = LastMessages._cleanContent(content);
+		this._cache[this._index] = { message: LastMessages._cleanContent(content), timestamp: Date.now() };
 	}
 }
 
