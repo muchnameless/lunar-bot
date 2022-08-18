@@ -35,11 +35,11 @@ type SkyBlockAuctionEndedItem = Components.Schemas.SkyBlockAuctionsEndedResponse
 const MAX_RETRIES = 3;
 
 /**
- * updates the database and the prices map with the median of the buy price
+ * upserts an item
  * @param itemId
  * @param currentPrice
  */
-async function updateItem(itemId: string, currentPrice: number) {
+async function upsertItem(itemId: string, currentPrice: number) {
 	// history is a circular buffer with length 1440 (24*60, each minute for 1 day), index points to the next element, $2 is currentPrice
 	const [{ median, new_entry }] = await sql<[{ median: number; new_entry: boolean }]>`
 		INSERT INTO prices (
@@ -64,6 +64,43 @@ async function updateItem(itemId: string, currentPrice: number) {
 
 	// eslint-disable-next-line camelcase
 	if (new_entry) {
+		logger.debug(
+			{
+				itemId,
+				currentPrice,
+			},
+			'[UPDATE ITEM]: new database entry',
+		);
+	}
+}
+
+/**
+ * inserts an item, ignoring already existing ones
+ * @param itemId
+ * @param currentPrice
+ */
+async function insertItem(itemId: string, currentPrice: number) {
+	// history is a circular buffer with length 1440 (24*60, each minute for 1 day), index points to the next element, $2 is currentPrice
+	const [res] = await sql<{ median: number; new_entry: boolean }[]>`
+		INSERT INTO prices (
+			id,
+			history
+		) VALUES (
+			${itemId},
+			ARRAY [${currentPrice}::NUMERIC]
+		)
+		ON CONFLICT (id) DO NOTHING
+		RETURNING
+			median(history),
+			array_length(history, 1) = 1 AS new_entry
+	`;
+
+	// item already exists
+	if (!res) return;
+
+	parentPort?.postMessage({ op: JobType.SkyBlockPriceUpdate, d: { itemId, price: res.median } });
+
+	if (res.new_entry) {
 		logger.debug(
 			{
 				itemId,
@@ -139,7 +176,7 @@ async function updateBazaarPrices(ac: AbortController) {
 	// update database and prices map
 	await Promise.all(
 		Object.entries(products).map(([item, data]) =>
-			updateItem(
+			upsertItem(
 				item,
 				data.quick_status.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
 					? data.quick_status.buyPrice
@@ -176,10 +213,12 @@ async function updateAuctionPrices(ac: AbortController) {
 
 	const binAuctions = new Collection<string, number[]>();
 
+	let endedAuctions = 0;
+
 	// abort on error
 	if (!success) {
 		logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
-		return binAuctions;
+		return { endedAuctions, binAuctions };
 	}
 
 	// check if API data is updated
@@ -197,7 +236,7 @@ async function updateAuctionPrices(ac: AbortController) {
 		while (lastUpdated <= lastUpdatedEntryParsed) {
 			if (++retries > MAX_RETRIES) {
 				logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE AUCTION PRICES]');
-				return binAuctions;
+				return { endedAuctions, binAuctions };
 			}
 
 			logger.warn(
@@ -211,7 +250,7 @@ async function updateAuctionPrices(ac: AbortController) {
 			// abort on error
 			if (!success) {
 				logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
-				return binAuctions;
+				return { endedAuctions, binAuctions };
 			}
 		}
 	}
@@ -324,12 +363,12 @@ async function updateAuctionPrices(ac: AbortController) {
 		return processAuctions(_auctions);
 	};
 
-	const fetchAndProcessEndedAuctions = async () =>
-		Promise.all(
-			(await hypixel.skyblock.auctionsEnded({ signal: ac.signal })).auctions.map((auction) =>
-				processAuction(auction, auction.price),
-			),
-		);
+	const fetchAndProcessEndedAuctions = async () => {
+		const { auctions: _auctions } = await hypixel.skyblock.auctionsEnded({ signal: ac.signal });
+
+		endedAuctions = _auctions.length;
+		return Promise.all(_auctions.map((auction) => processAuction(auction, auction.price)));
+	};
 
 	const promises: Promise<unknown>[] = [processAuctions(auctions), fetchAndProcessEndedAuctions()];
 
@@ -353,10 +392,12 @@ async function updateAuctionPrices(ac: AbortController) {
 		UPDATE SET value = excluded.value
 	`;
 
-	logger.debug(`[UPDATE AUCTION PRICES]: updated ${binAuctions.size} items from ${totalPages} auction pages`);
+	logger.debug(
+		`[UPDATE AUCTION PRICES]: updated ${binAuctions.size} items from ${totalPages} auction pages, ${endedAuctions} auctions ended`,
+	);
 
 	// return auctions to update db
-	return binAuctions;
+	return { endedAuctions, binAuctions };
 }
 
 /**
@@ -364,12 +405,17 @@ async function updateAuctionPrices(ac: AbortController) {
  * @param ac
  */
 async function updatePrices(ac: AbortController) {
-	const [binAuctions, bazaarItems] = await Promise.all([updateAuctionPrices(ac), updateBazaarPrices(ac)]);
+	const [{ endedAuctions, binAuctions }, bazaarItems] = await Promise.all([
+		updateAuctionPrices(ac),
+		updateBazaarPrices(ac),
+	]);
 
 	// remove auctioned items that are available in the bazaar
 	for (const itemId of bazaarItems) {
 		binAuctions.delete(itemId);
 	}
+
+	const updateItem = endedAuctions ? upsertItem : insertItem;
 
 	return Promise.all(binAuctions.map((_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
 }
