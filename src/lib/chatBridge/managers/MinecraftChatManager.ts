@@ -456,7 +456,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * reconnect the bot if it hasn't successfully spawned in 60 seconds
 	 * @param time
 	 */
-	scheduleAbortLoginTimeout(time = seconds(60)) {
+	scheduleAbortLoginTimeout(time = minutes(1)) {
 		clearTimeout(this._abortLoginTimeout!);
 
 		this._abortLoginTimeout = setTimeout(() => {

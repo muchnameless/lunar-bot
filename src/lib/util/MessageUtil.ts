@@ -9,7 +9,7 @@ import {
 import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
 import { logger } from '#logger';
-import { commaListAnd, seconds } from '#functions';
+import { commaListAnd, minutes } from '#functions';
 import { ChannelUtil, EmbedUtil } from '.';
 import type {
 	DiscordErrorData,
@@ -197,7 +197,7 @@ export class MessageUtil extends null {
 	static async awaitReply(message: Message, options: string | AwaitReplyOptions = {}) {
 		const {
 			question = 'confirm this action?',
-			time = seconds(60),
+			time = minutes(1),
 			..._options
 		} = typeof options === 'string' ? { question: options } : options;
 

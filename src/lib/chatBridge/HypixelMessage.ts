@@ -3,7 +3,7 @@ import { regExpEsc } from '@sapphire/utilities';
 import { MessageUtil } from '#utils';
 import { logger } from '#logger';
 import { NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
-import { seconds, uuidToBustURL } from '#functions';
+import { minutes, uuidToBustURL } from '#functions';
 import { mojang } from '#api';
 import { HypixelMessageType, INVISIBLE_CHARACTER_REGEXP, spamMessages } from './constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
@@ -385,7 +385,7 @@ export class HypixelMessage {
 	async awaitConfirmation(options: string | AwaitConfirmationOptions = {}) {
 		const {
 			question = 'confirm this action?',
-			time = seconds(60),
+			time = minutes(1),
 			errorMessage = 'the command has been cancelled',
 			..._options
 		} = typeof options === 'string' ? ({ question: options } as AwaitConfirmationOptions) : options;

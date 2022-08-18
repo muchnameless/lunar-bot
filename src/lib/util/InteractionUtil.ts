@@ -23,6 +23,7 @@ import {
 	assertNever,
 	buildVisibilityButton,
 	makeContent,
+	minutes,
 	seconds,
 	validateDiscordId,
 	validateMinecraftUuid,
@@ -777,7 +778,7 @@ export class InteractionUtil extends null {
 	static async awaitReply(interaction: RepliableInteraction, options: string | AwaitReplyOptions = {}) {
 		const {
 			question = 'confirm this action?',
-			time = seconds(60),
+			time = minutes(1),
 			..._options
 		} = typeof options === 'string' ? { question: options } : options;
 
@@ -817,7 +818,7 @@ export class InteractionUtil extends null {
 	static async awaitConfirmation(interaction: RepliableInteraction, options: string | AwaitConfirmationOptions = {}) {
 		const {
 			question = 'confirm this action?',
-			time = seconds(60),
+			time = minutes(1),
 			errorMessage = 'the command has been cancelled',
 			..._options
 		} = typeof options === 'string' ? { question: options } : options;
