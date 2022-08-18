@@ -526,7 +526,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 
 	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });
 
-	logger.debug({ items: items.length, parsedItems: parsedItems.length }, '[UPDATE SKYBLOCK ITEMS]: completed');
+	logger.debug({ items: items.length }, '[UPDATE SKYBLOCK ITEMS]: completed');
 }
 
 /**
