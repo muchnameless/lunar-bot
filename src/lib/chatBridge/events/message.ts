@@ -8,10 +8,11 @@ import { getSkyBlockProfiles, mojang } from '#api';
 import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent';
 import {
 	demoteSuccess,
-	IGN_DEFAULT,
-	kickSuccess,
-	INVISIBLE_CHARACTERS,
 	HypixelMessageType,
+	IGN_DEFAULT,
+	INVISIBLE_CHARACTERS,
+	kickSuccess,
+	MessagePosition,
 	muteSuccess,
 	promoteSuccess,
 	unmuteSuccess,
@@ -622,7 +623,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		// check if the message is a response for ChatBridge#_chat
 		this.chatBridge.minecraft.collect(hypixelMessage);
 
-		logger.trace(`[${hypixelMessage.position} #${this.chatBridge.mcAccount}]: ${hypixelMessage.cleanedContent}`);
+		logger.trace(
+			`[${MessagePosition[hypixelMessage.position]} #${this.chatBridge.mcAccount}]: ${hypixelMessage.cleanedContent}`,
+		);
 
 		if (!hypixelMessage.rawContent.length) return;
 

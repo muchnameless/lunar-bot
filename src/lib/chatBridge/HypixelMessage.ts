@@ -5,11 +5,11 @@ import { logger } from '#logger';
 import { NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
 import { seconds, uuidToBustURL } from '#functions';
 import { mojang } from '#api';
-import { HypixelMessageType, INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, spamMessages } from './constants';
+import { HypixelMessageType, INVISIBLE_CHARACTER_REGEXP, spamMessages } from './constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { PrismarineMessage } from './PrismarineMessage';
+import type { MessagePosition } from './constants';
 import type { ParseArgsConfig } from 'node:util';
-import type { ArrayElementType } from '@sapphire/utilities';
 import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
 import type { Player } from '#structures/database/models/Player';
@@ -50,7 +50,6 @@ interface ForwardToDiscordOptions {
 }
 
 export interface HypixelUserMessage extends HypixelMessage {
-	position: 'CHAT';
 	type: NonNullable<HypixelMessage['type']>;
 	author: NonNullable<HypixelMessage['author']>;
 	spam: false;
@@ -69,7 +68,7 @@ export class HypixelMessage {
 	/**
 	 * in-game message position
 	 */
-	position: ArrayElementType<typeof MESSAGE_POSITIONS> | null;
+	position: MessagePosition;
 	/**
 	 * forwarded message
 	 */
@@ -98,7 +97,7 @@ export class HypixelMessage {
 	constructor(chatBridge: ChatBridge, { content, type }: ChatPacket) {
 		this.chatBridge = chatBridge;
 		this.prismarineMessage = PrismarineMessage.fromNotch(content);
-		this.position = MESSAGE_POSITIONS[type] ?? null;
+		this.position = type;
 		this.rawContent = this.prismarineMessage.toString();
 		this.cleanedContent = this.rawContent.replace(INVISIBLE_CHARACTER_REGEXP, '').trim();
 
