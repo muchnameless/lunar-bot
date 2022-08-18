@@ -3,6 +3,7 @@ import { cleanCodeBlockContent, codeBlock, escapeCodeBlock } from 'discord.js';
 import { EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
 import { SMALL_LATIN_CAPITAL_LETTERS, AnsiFormat } from '#constants';
+import type { StringValue } from 'ms';
 import type { AnsiBackground, AnsiColour } from '#constants';
 import type { Merge } from '#types';
 
@@ -90,10 +91,11 @@ export const replaceSmallLatinCapitalLetters = (string: string) =>
 	Object.entries(SMALL_LATIN_CAPITAL_LETTERS).reduce((s, [normal, small]) => s.replaceAll(small, normal), string);
 
 /**
- * '30d1193h71585m4295001s' -> 15_476_901_000
+ * '30d1193h71585m4295001s' -> ['30d', '1193h', '71585m', '4295001s'] -> 15_476_901_000
  * @param string
  */
-export const stringToMS = (string: string) => string.split(/(?<=[a-z])(?=\d)/).reduce((acc, cur) => acc + ms(cur), 0);
+export const stringToMS = (string: string) =>
+	string.split(/(?<=[a-z])(?=\d)/).reduce((acc, cur) => acc + ms(cur as StringValue), 0);
 
 /**
  * removes minecraft formatting codes

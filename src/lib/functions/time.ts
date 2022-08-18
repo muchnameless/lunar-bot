@@ -2,11 +2,12 @@
 const enum Time {
 	Millisecond = 1,
 	Second = 1_000,
-	Minute = 60_000,
-	Hour = 3_600_000,
-	Day = 86_400_000,
-	Month = 2_628_000_000,
-	Year = 31_536_000_000,
+	Minute = Second * 60,
+	Hour = Minute * 60,
+	Day = Hour * 24,
+	Week = Day * 7,
+	Year = Day * 365.25,
+	Month = Year / 12,
 }
 
 /**
@@ -32,6 +33,12 @@ export const hours = (hours: number) => hours * Time.Hour;
  * @param days
  */
 export const days = (days: number) => days * Time.Day;
+
+/**
+ * converts a number of days to milliseconds
+ * @param weeks
+ */
+export const weeks = (weeks: number) => weeks * Time.Week;
 
 /**
  * converts a number of months to milliseconds.

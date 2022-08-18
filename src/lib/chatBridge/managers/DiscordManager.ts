@@ -9,8 +9,10 @@ import {
 import { Op } from 'sequelize';
 import ms from 'ms';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
+import { logger } from '#logger';
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
 import { DiscordChatManager } from './DiscordChatManager';
+import type { StringValue } from 'ms';
 import type { GuildEmoji, Snowflake } from 'discord.js';
 import type { HypixelMessageType } from '../constants';
 import type { ChatBridge } from '../ChatBridge';
@@ -179,10 +181,17 @@ export class DiscordManager {
 						(match, future: string, quantifier: string, timestring: string, past: string) => {
 							if (!future && !past) return match;
 
-							const date = new Date(Date.now() + ms(`${Number(quantifier) || 1} ${timestring}`) * (future ? 1 : -1));
-							if (Number.isNaN(date.getTime())) return match;
+							try {
+								const date = new Date(
+									Date.now() + ms(`${Number(quantifier) || 1} ${timestring}` as StringValue) * (future ? 1 : -1),
+								);
+								if (Number.isNaN(date.getTime())) return match;
 
-							return time(date, TimestampStyles.RelativeTime);
+								return time(date, TimestampStyles.RelativeTime);
+							} catch (error) {
+								logger.error({ err: error, match, future, quantifier, timestring, past }, 'parseContent');
+								return match;
+							}
 						},
 					)
 					// /commands
