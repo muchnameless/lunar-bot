@@ -23,8 +23,8 @@ import {
 	commaListOr,
 	escapeIgn,
 	getIdFromString,
+	minutes,
 	removeMcFormatting,
-	seconds,
 	sortCache,
 	stringToMS,
 	trim,
@@ -471,7 +471,7 @@ export default class GuildCommand extends ApplicationCommand {
 				responseRegExp: kick.success(target.ign, chatBridge.bot.username),
 				abortRegExp: kick.error(target.ign),
 				rejectOnAbort: true,
-				timeout: seconds(60),
+				timeout: minutes(1),
 				rejectOnTimeout: true,
 			});
 

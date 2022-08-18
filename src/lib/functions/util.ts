@@ -2,7 +2,7 @@ import { URL } from 'node:url';
 import { opendir } from 'node:fs/promises';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import { logger } from '#logger';
-import { days, jaroWinklerSimilarity } from '.';
+import { jaroWinklerSimilarity, weeks } from '.';
 import type { Awaitable, PickByValue } from '@sapphire/utilities';
 import type { Collection } from 'discord.js';
 
@@ -24,7 +24,7 @@ export function getWeekOfYear(date: Date) {
 		target.setUTCMonth(0, 1 + ((4 - target.getUTCDay() + 7) % 7));
 	}
 
-	return Math.ceil((firstThursday - target.getTime()) / days(7)) + 1;
+	return Math.ceil((firstThursday - target.getTime()) / weeks(1)) + 1;
 }
 
 interface AutocorrectResult<T> {

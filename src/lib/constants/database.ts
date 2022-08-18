@@ -1,4 +1,4 @@
-import { days, minutes, seconds } from '#functions';
+import { minutes, seconds, weeks } from '#functions';
 import {
 	COSMETIC_SKILLS,
 	DUNGEON_TYPES,
@@ -42,7 +42,7 @@ export const DEFAULT_CONFIG = {
 	IGN_UPDATE_INTERVAL: 20,
 	IMGUR_UPLOADER_CONTENT_TYPE: ['image'],
 	IMGUR_UPLOADER_ENABLED: true,
-	INACTIVE_ROLE_TIME: days(7),
+	INACTIVE_ROLE_TIME: weeks(1),
 	INGAME_RESPONSE_TIMEOUT: seconds(5),
 	LAST_DAILY_STATS_SAVE_TIME: 0,
 	LAST_DAILY_XP_RESET_TIME: 0,

@@ -16,7 +16,7 @@ import {
 	assertNever,
 	asyncReplace,
 	cleanFormattedNumber,
-	hours,
+	days,
 	minutes,
 	replaceSmallLatinCapitalLetters,
 	seconds,
@@ -438,7 +438,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				: {
 						content,
 						redisKey: `dm:${discordMessage.author.id}:chatbridge:blocked`,
-						cooldown: hours(24),
+						cooldown: days(1),
 				  },
 		);
 	}

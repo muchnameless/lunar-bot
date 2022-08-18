@@ -15,7 +15,6 @@ import { logger } from '#logger';
 import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil } from '#utils';
 import { getSkyBlockProfiles, hypixel, mojang } from '#api';
 import {
-	days,
 	escapeIgn,
 	findSkyblockProfile,
 	getLilyWeightRaw,
@@ -33,6 +32,7 @@ import {
 	uuidToBustURL,
 	validateDiscordId,
 	validateNumber,
+	weeks,
 } from '#functions';
 import { toUpperCase } from '#types';
 import {
@@ -1477,7 +1477,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			const EX_GUILD_ROLE_ID = this.hypixelGuild?.EX_GUILD_ROLE_ID;
 			const rolesToAdd =
 				EX_GUILD_ROLE_ID &&
-				Date.now() - this.createdAt.getTime() >= days(7) &&
+				Date.now() - this.createdAt.getTime() >= weeks(1) &&
 				!member.roles.cache.has(EX_GUILD_ROLE_ID)
 					? [EX_GUILD_ROLE_ID] // add ex guild role if player stayed for more than 1 week
 					: [];

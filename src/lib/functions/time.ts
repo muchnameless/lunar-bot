@@ -35,7 +35,7 @@ export const hours = (hours: number) => hours * Time.Hour;
 export const days = (days: number) => days * Time.Day;
 
 /**
- * converts a number of days to milliseconds
+ * converts a number of weeks to milliseconds
  * @param weeks
  */
 export const weeks = (weeks: number) => weeks * Time.Week;
