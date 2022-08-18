@@ -176,11 +176,13 @@ async function updateBazaarPrices(ac: AbortController) {
 		}
 	}
 
+	const bazaarItems = Object.values(products);
+
 	// update database and prices map
 	await Promise.all(
-		Object.entries(products).map(([item, data]) =>
+		bazaarItems.map((data) =>
 			upsertItem(
-				item,
+				data.product_id,
 				data.quick_status.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
 					? data.quick_status.buyPrice
 					: getBuyPrice(data.buy_summary),
@@ -201,7 +203,7 @@ async function updateBazaarPrices(ac: AbortController) {
 		UPDATE SET value = excluded.value
 	`;
 
-	return Object.keys(products);
+	return bazaarItems;
 }
 
 /**
@@ -221,7 +223,7 @@ async function updateAuctionPrices(ac: AbortController) {
 	// abort on error
 	if (!success) {
 		logger.error({ success }, '[UPDATE AUCTION PRICES]');
-		return { endedAuctions, binAuctions };
+		return { endedAuctions, totalPages, binAuctions };
 	}
 
 	// check if API data is updated
@@ -247,7 +249,7 @@ async function updateAuctionPrices(ac: AbortController) {
 					},
 					'[UPDATE AUCTION PRICES]: max retries reached',
 				);
-				return { endedAuctions, binAuctions };
+				return { endedAuctions, totalPages, binAuctions };
 			}
 
 			logger.warn(
@@ -267,7 +269,7 @@ async function updateAuctionPrices(ac: AbortController) {
 			// abort on error
 			if (!success) {
 				logger.error({ success }, '[UPDATE AUCTION PRICES]');
-				return { endedAuctions, binAuctions };
+				return { endedAuctions, totalPages, binAuctions };
 			}
 		}
 	}
@@ -368,9 +370,9 @@ async function updateAuctionPrices(ac: AbortController) {
 			if (_lastUpdated < lastUpdated && ++retries <= MAX_RETRIES) {
 				logger.warn(
 					{
-						previous: _lastUpdated,
-						current: lastUpdated,
-						page: 0,
+						previous: lastUpdated,
+						current: _lastUpdated,
+						page,
 						totalPages,
 					},
 					'[UPDATE AUCTION PRICES]: refetching',
@@ -382,9 +384,9 @@ async function updateAuctionPrices(ac: AbortController) {
 
 			logger.error(
 				{
-					previous: _lastUpdated,
-					current: lastUpdated,
-					page: 0,
+					previous: lastUpdated,
+					current: _lastUpdated,
+					page,
 					totalPages,
 				},
 				'[UPDATE AUCTION PRICES]: max retries reached',
@@ -423,10 +425,8 @@ async function updateAuctionPrices(ac: AbortController) {
 		UPDATE SET value = excluded.value
 	`;
 
-	logger.debug({ binAuctions: binAuctions.size, totalPages, endedAuctions }, '[UPDATE AUCTION PRICES]: completed');
-
 	// return auctions to update db
-	return { endedAuctions, binAuctions };
+	return { endedAuctions, totalPages, binAuctions };
 }
 
 /**
@@ -434,15 +434,20 @@ async function updateAuctionPrices(ac: AbortController) {
  * @param ac
  */
 async function updatePrices(ac: AbortController) {
-	const [{ endedAuctions, binAuctions }, bazaarItems] = await Promise.all([
+	const [{ endedAuctions, totalPages, binAuctions }, bazaarItems] = await Promise.all([
 		updateAuctionPrices(ac),
 		updateBazaarPrices(ac),
 	]);
 
 	// remove auctioned items that are available in the bazaar
-	for (const itemId of bazaarItems) {
-		binAuctions.delete(itemId);
+	for (const { product_id } of bazaarItems) {
+		binAuctions.delete(product_id);
 	}
+
+	logger.debug(
+		{ binAuctions: binAuctions.size, totalPages, endedAuctions, bazaarItems: bazaarItems.length },
+		'[UPDATE PRICES]: completed',
+	);
 
 	const updateItem = endedAuctions ? upsertItem : insertItem;
 
