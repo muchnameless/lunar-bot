@@ -69,7 +69,7 @@ async function upsertItem(itemId: string, currentPrice: number) {
 				itemId,
 				currentPrice,
 			},
-			'[UPDATE ITEM]: new database entry',
+			'[UPSERT ITEM]: new database entry',
 		);
 	}
 }
@@ -106,7 +106,7 @@ async function insertItem(itemId: string, currentPrice: number) {
 				itemId,
 				currentPrice,
 			},
-			'[UPDATE ITEM]: new database entry',
+			'[INSERT ITEM]: new database entry',
 		);
 	}
 }
@@ -161,11 +161,14 @@ async function updateBazaarPrices(ac: AbortController) {
 
 		while (lastUpdated <= lastUpdatedEntryParsed) {
 			if (++retries > MAX_RETRIES) {
-				logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE BAZAAR PRICES]');
+				logger.error(
+					{ previous: lastUpdatedEntryParsed, current: lastUpdated },
+					'[UPDATE BAZAAR PRICES]: max retries reached',
+				);
 				return [];
 			}
 
-			logger.warn(`[UPDATE BAZAAR PRICES]: refetching Bazaar: ${lastUpdatedEntryParsed} <> ${lastUpdated}`);
+			logger.warn({ previous: lastUpdatedEntryParsed, current: lastUpdated }, '[UPDATE BAZAAR PRICES]: refetching');
 			await sleep(5_000);
 
 			// refetch bazaar products
@@ -217,7 +220,7 @@ async function updateAuctionPrices(ac: AbortController) {
 
 	// abort on error
 	if (!success) {
-		logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+		logger.error({ success }, '[UPDATE AUCTION PRICES]');
 		return { endedAuctions, binAuctions };
 	}
 
@@ -235,12 +238,26 @@ async function updateAuctionPrices(ac: AbortController) {
 
 		while (lastUpdated <= lastUpdatedEntryParsed) {
 			if (++retries > MAX_RETRIES) {
-				logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntryParsed }, '[UPDATE AUCTION PRICES]');
+				logger.error(
+					{
+						previous: lastUpdatedEntryParsed,
+						current: lastUpdated,
+						page: 0,
+						totalPages,
+					},
+					'[UPDATE AUCTION PRICES]: max retries reached',
+				);
 				return { endedAuctions, binAuctions };
 			}
 
 			logger.warn(
-				`[UPDATE AUCTION PRICES]: refetching page 0/${totalPages}: ${lastUpdatedEntryParsed} <> ${lastUpdated}`,
+				{
+					previous: lastUpdatedEntryParsed,
+					current: lastUpdated,
+					page: 0,
+					totalPages,
+				},
+				'[UPDATE AUCTION PRICES]: refetching',
 			);
 			await sleep(5_000);
 
@@ -249,7 +266,7 @@ async function updateAuctionPrices(ac: AbortController) {
 
 			// abort on error
 			if (!success) {
-				logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+				logger.error({ success }, '[UPDATE AUCTION PRICES]');
 				return { endedAuctions, binAuctions };
 			}
 		}
@@ -349,14 +366,28 @@ async function updateAuctionPrices(ac: AbortController) {
 
 		if (_lastUpdated !== lastUpdated) {
 			if (_lastUpdated < lastUpdated && ++retries <= MAX_RETRIES) {
-				logger.warn(`[FETCH AUCTIONS]: refetching page ${page}/${totalPages}: ${lastUpdated} <> ${_lastUpdated}`);
+				logger.warn(
+					{
+						previous: _lastUpdated,
+						current: lastUpdated,
+						page: 0,
+						totalPages,
+					},
+					'[UPDATE AUCTION PRICES]: refetching',
+				);
 				await sleep(5_000);
 
 				return fetchAndProcessAuctions(page);
 			}
 
 			logger.error(
-				`[FETCH AUCTIONS]: page ${page}/${totalPages}'s lastUpdated does not match: ${lastUpdated} <> ${_lastUpdated}`,
+				{
+					previous: _lastUpdated,
+					current: lastUpdated,
+					page: 0,
+					totalPages,
+				},
+				'[UPDATE AUCTION PRICES]: max retries reached',
 			);
 		}
 
@@ -392,9 +423,7 @@ async function updateAuctionPrices(ac: AbortController) {
 		UPDATE SET value = excluded.value
 	`;
 
-	logger.debug(
-		`[UPDATE AUCTION PRICES]: updated ${binAuctions.size} items from ${totalPages} auction pages, ${endedAuctions} auctions ended`,
-	);
+	logger.debug({ binAuctions: binAuctions.size, totalPages, endedAuctions }, '[UPDATE AUCTION PRICES]: completed');
 
 	// return auctions to update db
 	return { endedAuctions, binAuctions };
@@ -458,7 +487,7 @@ const reduceCostsArray = (costs: (EssenceUpgrade | ItemUpgrade)[]) =>
 async function updateSkyBlockItems(ac: AbortController) {
 	const { success, items } = await hypixel.resources.skyblock.items({ signal: ac.signal });
 
-	if (!success) return;
+	if (!success) return logger.error({ success }, '[UPDATE SKYBLOCK ITEMS]');
 
 	const parsedItems: ParsedSkyBlockItem[] = items.map((item) => ({
 		id: item.id,
@@ -492,7 +521,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 
 	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });
 
-	logger.debug(`[UPDATE SKYBLOCK ITEMS]: updated ${parsedItems.length} items`);
+	logger.debug({ items: items.length, parsedItems: parsedItems.length }, '[UPDATE SKYBLOCK ITEMS]: completed');
 }
 
 /**
@@ -613,7 +642,7 @@ async function updatePatchNotes(ac: AbortController) {
 		`;
 	}
 
-	logger.debug(`[UPDATE PATCH NOTES]: new forum entry with guid '${lastGuid}'`);
+	logger.debug({ guid: lastGuid }, '[UPDATE PATCH NOTES]: new forum entry');
 }
 
 /**
@@ -628,7 +657,7 @@ parentPort?.on('message', async (message) => {
 			await updateSkyBlockItems(ac);
 			clearTimeout(timeout);
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, '[ON MESSAGE]');
 		}
 	}
 });
