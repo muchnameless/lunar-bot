@@ -1,6 +1,6 @@
 import { Enchantment, PriceModifier } from '../constants';
 
-export function getEnchantmentModifier(enchantment: Enchantment) {
+export function getAppliedEnchantmentModifier(enchantment: Enchantment) {
 	switch (enchantment) {
 		case Enchantment.Overload:
 		case Enchantment.UltimateSoulEater:

@@ -12,6 +12,8 @@ interface EnchantmentData {
 	higherBaseLvls: string[] | null;
 }
 
+// TODO: use this in calculateItemPrice? ex: ue_lvl_3 -> Math.min(ue_lvl_1 * ..., ue_lvl_2 * ..., ue_lvl_3 * 1);
+
 /**
  * returns the enchantment id (name_level) and count
  * @link https://hypixel-skyblock.fandom.com/wiki/Enchantments
