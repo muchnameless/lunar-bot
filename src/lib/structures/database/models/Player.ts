@@ -1247,7 +1247,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		if (!member) return null;
 
 		logger.info(
-			{ ign: this.ign, discordId: member.id, tag: member.user.tag, guild: this.guildName },
+			{ ...this.logInfo, discordId: member.id, tag: member.user.tag },
 			'[LINK USING CACHE]: discord data found',
 		);
 
@@ -1255,7 +1255,15 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		try {
 			await this.link(member);
 		} catch (error) {
-			logger.error({ err: error, ...this.logInfo }, '[LINK USING CACHE]');
+			logger.error(
+				{
+					err: error instanceof UniqueConstraintError ? undefined : error,
+					...this.logInfo,
+					old: this.discordId,
+					new: member.id,
+				},
+				'[SET UNIQUE DISCORD ID]: linking error',
+			);
 		}
 
 		return member;
@@ -1284,8 +1292,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			logger.error(
 				{
+					err: error instanceof UniqueConstraintError ? undefined : error,
 					...this.logInfo,
-					fields: error instanceof UniqueConstraintError ? error.fields : undefined,
 					old: this.discordId,
 					new: value,
 				},
