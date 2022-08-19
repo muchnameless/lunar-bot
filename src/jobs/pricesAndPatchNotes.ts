@@ -2,7 +2,7 @@
 import { parentPort } from 'node:worker_threads';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { clearTimeout, setTimeout } from 'node:timers';
-import EventEmitter from 'node:events';
+import { EventEmitter } from 'node:events';
 import { request } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';

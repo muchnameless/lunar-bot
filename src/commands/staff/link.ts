@@ -121,11 +121,11 @@ export default class LinkCommand extends ApplicationCommand {
 				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownUser) {
 					linkedUserIsDeleted = true;
 					logger.error(
-						error,
-						`[LINK]: ${playerLinkedToId.logInfo}: deleted discord user: ${playerLinkedToId.discordId}`,
+						{ err: error, ...player.logInfo, discordId: playerLinkedToId.discordId },
+						'[LINK]: deleted discord user',
 					);
 				} else {
-					logger.error(error, `[LINK]: ${playerLinkedToId.logInfo}: error fetching already linked user`);
+					logger.error({ err: error, ...player.logInfo }, '[LINK]: error fetching already linked user');
 				}
 			}
 
@@ -161,11 +161,10 @@ export default class LinkCommand extends ApplicationCommand {
 					allowedMentions: { parse: [] },
 				});
 			} catch (error) {
-				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownUser) {
-					logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordId}`);
-				} else {
-					logger.error(error, `[LINK]: ${player.logInfo}: error fetching already linked user`);
-				}
+				logger.error(
+					{ err: error, ...player.logInfo, discordId: player.discordId },
+					'[LINK]: overwrite already linked user',
+				);
 			}
 
 			if (!(await player.unlink(`unlinked by ${interaction.user.tag}`)) && linkedUser) {

@@ -751,16 +751,8 @@ export class HypixelGuild extends Model<
 						}
 
 						// update player
-						setTimeout(async () => {
-							try {
-								await player.setUniqueDiscordId(discordMember?.id ?? discordTag);
-							} catch (error) {
-								logger.error(
-									{ err: error, toSet: discordMember?.id ?? discordTag, existing: player.discordId },
-									`[UPDATE GUILD PLAYERS] ${this.name}`,
-								);
-							}
-
+						setTimeout(() => {
+							void player.setUniqueDiscordId(discordMember?.id ?? discordTag, false);
 							player.update({ ign }).catch((error) => logger.error(error));
 							void player.updateData({ reason: `joined ${this.name}` });
 						}, 0);
@@ -793,14 +785,7 @@ export class HypixelGuild extends Model<
 
 								if (!discordMember) {
 									if (/\D/.test(player.discordId!)) {
-										try {
-											await player.setUniqueDiscordId(discordTag); // save tag if no id is known
-										} catch (error) {
-											logger.error(
-												{ err: error, toSet: discordTag, existing: player.discordId },
-												`[UPDATE GUILD PLAYERS] ${this.name}`,
-											);
-										}
+										void player.setUniqueDiscordId(discordTag, false); // save tag if no id is known
 									}
 
 									player.inDiscord = false;

@@ -626,7 +626,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				guild = this.client.guilds.resolve(guildResolvable);
 
 				if (!guild?.available) {
-					logger.warn(`[FETCH DISCORD MEMBER] ${this.logInfo}: discord guild ${guild ? 'unavailable' : 'uncached'}`);
+					logger.warn(this.logInfo, `[FETCH DISCORD MEMBER] discord guild ${guild ? 'unavailable' : 'uncached'}`);
 					return null;
 				}
 			} else {
@@ -642,7 +642,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			return discordMember;
 		} catch (error) {
 			// prevent further fetches and try to link via cache in the next updateDiscordMember calls
-			logger.error(error, `[FETCH DISCORD MEMBER]: ${this.logInfo}`);
+			logger.error({ err: error, ...this.logInfo }, '[FETCH DISCORD MEMBER]');
 			void this.setDiscordMember(null, error instanceof DiscordAPIError);
 			return null;
 		}
@@ -721,10 +721,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	}
 
 	/**
-	 * returns a string with the ign and guild name
+	 * returns an object with the ign and guild name
 	 */
-	get logInfo(): NonAttribute<string> {
-		return `${this.ign} (${this.guildName})`;
+	get logInfo(): NonAttribute<Record<string, unknown>> {
+		return { ign: this.ign, guild: this.guildName };
 	}
 
 	/**
@@ -817,7 +817,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		if (shouldOnlyAwaitUpdateXp) {
 			this.updateDiscordMember({ reason, shouldSendDm }).catch((error) =>
-				logger.error(error, `[UPDATE DATA]: ${this.logInfo}`),
+				logger.error({ err: error, ...this.logInfo }, '[UPDATE DATA]'),
 			);
 		} else {
 			await this.updateDiscordMember({ reason, shouldSendDm });
@@ -857,7 +857,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				if (this.tamingXp !== 0) {
 					for (const offset of XP_OFFSETS) {
 						if (this[`tamingXp${offset}`] === 0) {
-							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' skill xp`);
+							logger.info({ ...this.logInfo, offset }, '[UPDATE XP]: resetting skill xp');
 							await this.resetXp({ offsetToReset: offset, typesToReset: [...SKILLS, ...COSMETIC_SKILLS] });
 						}
 					}
@@ -865,7 +865,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			} else {
 				// log once every hour (during the first update)
 				if (!new Date().getHours() && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
-					logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
+					logger.warn(this.logInfo, '[UPDATE XP]: skill API disabled');
 				}
 
 				this.notes = 'skill api disabled';
@@ -893,7 +893,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			if (this.zombieXp !== 0) {
 				for (const offset of XP_OFFSETS) {
 					if (this[`zombieXp${offset}`] === 0) {
-						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' slayer xp`);
+						logger.info({ ...this.logInfo, offset }, '[UPDATE XP]: resetting slayer xp');
 						await this.resetXp({ offsetToReset: offset, typesToReset: SLAYERS });
 					}
 				}
@@ -905,7 +905,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				!new Date().getHours() &&
 				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
 			) {
-				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
+				logger.warn(this.logInfo, '[UPDATE XP]: no slayer data found');
 			}
 
 			/**
@@ -926,7 +926,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			if (this.catacombsXp !== 0) {
 				for (const offset of XP_OFFSETS) {
 					if (this[`catacombsXp${offset}`] === 0) {
-						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
+						logger.info({ ...this.logInfo, offset }, '[UPDATE XP]: resetting dungeon xp');
 						await this.resetXp({
 							offsetToReset: offset,
 							typesToReset: [
@@ -944,7 +944,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				!new Date().getHours() &&
 				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
 			) {
-				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
+				logger.warn(this.logInfo, '[UPDATE XP]: no dungeons data found');
 			}
 
 			/**
@@ -955,17 +955,17 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				!new Date().getHours() &&
 				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
 			) {
-				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
+				logger.warn(this.logInfo, '[UPDATE XP]: collections API disabled');
 			}
 
 			return await this.save();
 		} catch (error) {
 			if (typeof error === 'string') {
-				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
+				logger.error(this.logInfo, `[UPDATE XP]: ${error}`);
 				return this;
 			}
 
-			logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
+			logger.error({ err: error, ...this.logInfo }, '[UPDATE XP]');
 
 			if (error instanceof Error && error.name.startsWith('Sequelize')) return this;
 
@@ -1006,7 +1006,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		if (MANDATORY_ROLE_ID && !member.roles.cache.has(MANDATORY_ROLE_ID)) {
 			return logger.warn(
-				`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing mandatory role`,
+				{ ...this.logInfo, userId: member.id, tag: member.user.tag },
+				'[UPDATE DISCORD MEMBER]: missing mandatory role',
 			);
 		}
 
@@ -1245,13 +1246,16 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		if (!member) return null;
 
-		logger.info(`[LINK USING CACHE] ${this.logInfo}: discord data found: ${member.user.tag}`);
+		logger.info(
+			{ ign: this.ign, discordId: member.id, tag: member.user.tag, guild: this.guildName },
+			'[LINK USING CACHE]: discord data found',
+		);
 
 		// catch potential sequelize errors propagated from setUniqueDiscordId
 		try {
 			await this.link(member);
 		} catch (error) {
-			logger.error(error, `[LINK USING CACHE] ${this.logInfo}`);
+			logger.error({ err: error, ...this.logInfo }, '[LINK USING CACHE]');
 		}
 
 		return member;
@@ -1261,7 +1265,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * validates the discordId and only updates it if the validation passes
 	 * @param value
 	 */
-	async setUniqueDiscordId(value: string | null) {
+	async setUniqueDiscordId(value: string | null, rejectOnError: boolean) {
 		try {
 			// use the static method because this.update sets the value temporarily in case of an exception
 			await Player.update(
@@ -1276,10 +1280,17 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// update local instance if the update method didn't reject
 			this.discordId = value;
 		} catch (error) {
-			if (error instanceof UniqueConstraintError) {
-				throw `[SET UNIQUE DISCORD ID] ${this.logInfo}: error updating discordId from '${this.discordId}' to '${value}'`;
-			}
-			throw error;
+			if (rejectOnError) throw error;
+
+			logger.error(
+				{
+					...this.logInfo,
+					fields: error instanceof UniqueConstraintError ? error.fields : undefined,
+					old: this.discordId,
+					new: value,
+				},
+				'[SET UNIQUE DISCORD ID]',
+			);
 		}
 	}
 
@@ -1290,26 +1301,31 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 */
 	async link(idOrDiscordMember: GuildMember | Snowflake, reason?: string) {
 		if (idOrDiscordMember instanceof GuildMember) {
-			await this.setUniqueDiscordId(idOrDiscordMember.id);
+			await this.setUniqueDiscordId(idOrDiscordMember.id, true);
 
 			if (this.hypixelGuild?.discordId === idOrDiscordMember.guild.id) {
-				this.update({ inDiscord: true }).catch((error) => logger.error(error, `[LINK]: ${this.logInfo}`));
+				this.update({ inDiscord: true }).catch((error) => logger.error({ err: error, ...this.logInfo }, '[LINK]'));
 				void this.setDiscordMember(idOrDiscordMember);
 
 				if (reason) await this.updateData({ reason });
 			}
 
-			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
+			logger.info(
+				{ ...this.logInfo, discordId: idOrDiscordMember.id, tag: idOrDiscordMember.user.tag },
+				'[LINK]: linked',
+			);
 
 			return this;
 		}
 
 		if (typeof idOrDiscordMember === 'string' && validateNumber(idOrDiscordMember)) {
-			await this.setUniqueDiscordId(idOrDiscordMember);
+			await this.setUniqueDiscordId(idOrDiscordMember, true);
 			return this.update({ inDiscord: false });
 		}
 
-		throw new Error(`[LINK]: ${this.logInfo}: input must be either a discord GuildMember or a discord ID`);
+		throw new TypeError(
+			`Input must be either a discord GuildMember or a discord ID, received '${idOrDiscordMember}' (${typeof idOrDiscordMember})`,
+		);
 	}
 
 	/**
@@ -1487,15 +1503,17 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			if (!(await this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason: `left ${this.guildName}` }))) {
 				// error updating roles
-				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
-				this.update({ guildId: GUILD_ID_ERROR }).catch((error) => logger.error(error));
+				logger.warn(this.logInfo, '[REMOVE FROM GUILD]: unable to update roles');
+				this.update({ guildId: GUILD_ID_ERROR }).catch((error) =>
+					logger.error({ err: error, ...this.logInfo }, 'REMOVE FROM GUILD'),
+				);
 				return false;
 			}
 
 			// keep entry in cache but uncache discord member
 			void this.uncacheMember();
 		} else {
-			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
+			logger.info(this.logInfo, '[REMOVE FROM GUILD]: left without being in the discord');
 
 			// no linked member -> uncache entry
 			await this.uncache();
@@ -1577,10 +1595,11 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		if (me!.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
 		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
 		if (!me!.permissions.has(PermissionFlagsBits.ManageNicknames)) {
-			return (
-				logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`),
-				false
+			logger.warn(
+				{ guildId: member.guild.id, guildName: member.guild.name, ...this.logInfo },
+				"[SYNC IGN DISPLAYNAME]: missing 'ManageNicknames'",
 			);
+			return false;
 		}
 
 		const { displayName: PREV_NAME } = member;
@@ -1655,12 +1674,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						logger.error(`[SYNC IGN DISPLAYNAME]: unknown reason: ${reason}`);
 				}
 
-				logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`);
+				logger.info(this.logInfo, '[SYNC IGN DISPLAYNAME]: sent nickname info DM');
 			}
 
 			return true;
 		} catch (error) {
-			logger.error(error, `[SYNC IGN DISPLAYNAME]: ${this.logInfo}`);
+			logger.error({ err: error, ...this.logInfo }, '[SYNC IGN DISPLAYNAME]');
 			void this.setDiscordMember(null, error instanceof DiscordAPIError);
 			return false;
 		}
@@ -1673,7 +1692,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		try {
 			return (await hypixel.player.uuid(this.minecraftUuid)).player?.socialMedia?.links?.DISCORD ?? null;
 		} catch (error) {
-			logger.error(error, `[FETCH DISCORD TAG]: ${this.logInfo}`);
+			logger.error({ err: error, ...this.logInfo }, '[FETCH DISCORD TAG]');
 			return null;
 		}
 	}
@@ -1687,7 +1706,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		try {
 			profiles = await getSkyBlockProfiles(this.minecraftUuid);
 		} catch (error) {
-			logger.error(error, '[MAIN PROFILE]');
+			logger.error({ err: error, ...this.logInfo }, '[FETCH MAIN PROFILE]');
 		}
 
 		const mainProfile = findSkyblockProfile(profiles, this.minecraftUuid, FindProfileStrategy.MaxWeight);
@@ -1705,7 +1724,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		if (PROFILE_ID === this.mainProfileId) return null;
 
-		const { mainProfileName } = this;
+		const { mainProfileName, mainProfileId } = this;
 
 		await this.update({
 			mainProfileId: PROFILE_ID,
@@ -1713,7 +1732,14 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			xpUpdatesDisabled: false,
 		});
 
-		logger.info(`[MAIN PROFILE]: ${this.logInfo} -> ${PROFILE_NAME}`);
+		logger.info(
+			{
+				...this.logInfo,
+				old: { mainProfileName, mainProfileId },
+				new: { mainProfileId: PROFILE_ID, mainProfileName: PROFILE_NAME },
+			},
+			'[FETCH MAIN PROFILE]',
+		);
 
 		return {
 			oldProfileName: mainProfileName,
@@ -1736,7 +1762,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				await this.update({ ign: CURRENT_IGN });
 			} catch (error) {
 				this.ign = OLD_IGN;
-				return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
+				return logger.error({ err: error, ...this.logInfo }, '[UPDATE IGN]');
 			}
 
 			void this.syncIgnWithDisplayName(false);
@@ -1747,17 +1773,17 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			};
 		} catch (error) {
 			if (error instanceof Error && error.name.startsWith('Sequelize')) {
-				return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
+				return logger.error({ err: error, ...this.logInfo }, '[UPDATE IGN]');
 			}
 
 			// prevent further auto updates
 			void this.client.config.set('MOJANG_API_ERROR', true);
 
 			if (isAbortError(error)) {
-				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
+				return logger.error(this.logInfo, '[UPDATE IGN]: request timeout');
 			}
 
-			return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
+			return logger.error({ err: error, ...this.logInfo }, '[UPDATE IGN]');
 		}
 	}
 
@@ -1994,7 +2020,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		try {
 			return await this.save();
 		} catch (error) {
-			logger.error({ err: error, data: { expHistory, rank } }, `[SYNC WITH GUILD DATA]: ${this.logInfo}`);
+			logger.error({ err: error, ...this.logInfo, data: { expHistory, rank } }, '[SYNC WITH GUILD DATA]');
 			return this;
 		}
 	}
