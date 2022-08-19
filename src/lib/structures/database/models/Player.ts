@@ -1259,10 +1259,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				{
 					err: error instanceof UniqueConstraintError ? undefined : error,
 					...this.logInfo,
-					old: this.discordId,
-					new: member.id,
+					discordId: member.id,
 				},
-				'[SET UNIQUE DISCORD ID]: linking error',
+				'[LINK USING CACHE]: linking error',
 			);
 		}
 
