@@ -229,8 +229,7 @@ export class ImgurClient {
 			const res = await this._request(endpoint, requestOptions);
 
 			// get server time
-			const date = res.headers.date;
-			const NOW = date ? Date.parse(date) || Date.now() : Date.now();
+			const NOW = Date.parse(res.headers.date!) || Date.now();
 
 			// get ratelimit headers
 			for (const type of keys(this.rateLimit)) {
