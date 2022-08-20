@@ -4,10 +4,8 @@ import { logger } from '#logger';
 import { hypixel } from '#api';
 import {
 	calculatePetSkillLevel,
-	getEnchantment,
-	getEnchantmentModifier,
+	getAppliedEnchantmentModifier,
 	getReforgeStone,
-	getUpgradeMaterialPrice,
 	isVanillaItem,
 	transformItemData,
 } from './functions';
@@ -116,29 +114,16 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		for (let [enchantment, level] of Object.entries(extraAttributes.enchantments)) {
 			if (BLOCKED_ENCHANTS[itemId as keyof typeof BLOCKED_ENCHANTS]?.includes(enchantment as any)) continue;
 
-			let enchantmentPrice = 0;
-
 			if (enchantment === Enchantment.Efficiency && level > 5) {
 				if (itemId === ItemId.Stonk) continue;
 				price += getPrice(ItemId.Silex) * PriceModifier.Silex * (level - 5);
 				level = 5;
 			}
 
-			const { itemId: enchantmentId, count, higherBaseLvls } = getEnchantment(enchantment as Enchantment, level);
-
-			enchantmentPrice = higherBaseLvls
-				? Math.min(
-						getPrice(enchantmentId) * count,
-						...higherBaseLvls.map((higherEnchantment) => getPrice(higherEnchantment)),
-				  )
-				: getPrice(enchantmentId) * count;
-
-			// applied enchantments are worth less
-			if (itemId !== ItemId.EnchantedBook) {
-				enchantmentPrice *= getEnchantmentModifier(enchantment as Enchantment);
-			}
-
-			price += enchantmentPrice;
+			price +=
+				getPrice(`ENCHANTMENT_${enchantment.toUpperCase()}_${level}`) *
+				// applied enchantments are worth less
+				(itemId !== ItemId.EnchantedBook ? getAppliedEnchantmentModifier(enchantment as Enchantment) : 1);
 		}
 	}
 
@@ -190,14 +175,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			if (itemUpgrade.stars) {
 				for (const star of itemUpgrade.stars) {
 					for (const [material, amount] of Object.entries(star)) {
-						essencePrice += getUpgradeMaterialPrice(material) * amount;
+						essencePrice += getPrice(material) * amount;
 					}
 				}
 			}
 
 			// prestige
 			for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
-				essencePrice += getUpgradeMaterialPrice(material) * amount;
+				essencePrice += getPrice(material) * amount;
 			}
 
 			// try to add "base item"
@@ -220,7 +205,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			// initial dungeon conversion cost
 			if (itemUpgrade.dungeon_conversion) {
 				for (const [material, amount] of Object.entries(itemUpgrade.dungeon_conversion)) {
-					essencePrice += getUpgradeMaterialPrice(material) * amount;
+					essencePrice += getPrice(material) * amount;
 				}
 			}
 
@@ -230,7 +215,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 					// item api has required materials
 					if (itemUpgrade.stars[star]) {
 						for (const [material, amount] of Object.entries(itemUpgrade.stars[star]!)) {
-							essencePrice += getUpgradeMaterialPrice(material) * amount;
+							essencePrice += getPrice(material) * amount;
 						}
 					} else {
 						// dungeon items require master stars for stars 6 - 10

@@ -4,4 +4,3 @@ export * from './modifiers';
 export * from './nbt';
 export * from './pets';
 export * from './reforges';
-export * from './stars';

@@ -10,15 +10,14 @@ import { CronJob } from 'cron';
 import { Client } from '@zikeji/hypixel';
 import { logger } from '#logger';
 import { FetchError } from '#structures/errors/FetchError';
-import { getEnchantment } from '#networth/functions/enchantments'; // separate imports to not import unused files in the worker
-import { transformItemData } from '#networth/functions/nbt';
+import { transformItemData } from '#networth/functions/nbt'; // separate imports to not import unused files in the worker
 import { calculatePetSkillLevel } from '#networth/functions/pets';
 import { ItemId } from '#networth/constants/itemId';
 import { ItemRarity } from '#networth/constants/itemRarity';
 import { sql } from '#structures/database/sql';
 import { JobType } from '.';
+import type { ArrayElementType } from '@sapphire/utilities';
 import type { Components } from '@zikeji/hypixel';
-import type { Enchantment } from '#networth/constants/enchantments';
 
 // because a single AbortController is used for all fetches
 EventEmitter.setMaxListeners(100);
@@ -29,8 +28,8 @@ const hypixel = new Client('unused key', { retries: 1 });
  * prices
  */
 
-type SkyBlockAuctionItem = Components.Schemas.SkyBlockAuctionsResponse['auctions'][0];
-type SkyBlockAuctionEndedItem = Components.Schemas.SkyBlockAuctionsEndedResponse['auctions'][0];
+type SkyBlockAuctionItem = ArrayElementType<Components.Schemas.SkyBlockAuctionsResponse['auctions']>;
+type SkyBlockAuctionEndedItem = ArrayElementType<Components.Schemas.SkyBlockAuctionsEndedResponse['auctions']>;
 
 const MAX_RETRIES = 3;
 
@@ -279,22 +278,8 @@ async function updateAuctionPrices(ac: AbortController) {
 		const [item] = await transformItemData(auction.item_bytes);
 
 		let itemId = item.tag?.ExtraAttributes?.id;
-		let count = item.Count;
 
 		switch (itemId) {
-			case ItemId.EnchantedBook: {
-				const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
-
-				// ignore books with multiple enchantments
-				if (enchants.length !== 1) return;
-
-				({ itemId, count } = getEnchantment(
-					enchants[0] as Enchantment,
-					item.tag!.ExtraAttributes!.enchantments[enchants[0]!]!,
-				));
-				break;
-			}
-
 			case ItemId.Pet: {
 				const pet = JSON.parse(item.tag!.ExtraAttributes!.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
 
@@ -353,7 +338,7 @@ async function updateAuctionPrices(ac: AbortController) {
 				return;
 		}
 
-		binAuctions.get(itemId)?.push(price / count) ?? binAuctions.set(itemId, [price / count]);
+		binAuctions.get(itemId)?.push(price / item.Count) ?? binAuctions.set(itemId, [price / item.Count]);
 	};
 
 	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
@@ -454,18 +439,6 @@ async function updatePrices(ac: AbortController) {
 	return Promise.all(binAuctions.map((_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
 }
 
-interface Upgrade {
-	amount: number;
-}
-
-interface EssenceUpgrade extends Upgrade {
-	essence_type: string;
-}
-
-interface ItemUpgrade extends Upgrade {
-	item_id: string;
-}
-
 interface Prestige {
 	item: string;
 	costs: Record<string, number>;
@@ -479,9 +452,9 @@ export type ParsedSkyBlockItem = {
 	prestige: Prestige | null;
 };
 
-const reduceCostsArray = (costs: (EssenceUpgrade | ItemUpgrade)[]) =>
+const reduceCostsArray = (costs: ArrayElementType<NonNullable<Components.Schemas.SkyBlockItem['upgrade_costs']>>) =>
 	costs.reduce((acc, cur) => {
-		acc[(cur as EssenceUpgrade).essence_type ?? (cur as ItemUpgrade).item_id] = cur.amount;
+		acc['essence_type' in cur ? `ESSENCE_${cur.essence_type}` : cur.item_id] = cur.amount;
 		return acc;
 	}, {} as Record<string, number>);
 
@@ -497,7 +470,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 	const parsedItems: ParsedSkyBlockItem[] = items.map((item) => ({
 		id: item.id,
 		dungeon_conversion: item.dungeon_item_conversion_cost
-			? { [item.dungeon_item_conversion_cost.essence_type]: item.dungeon_item_conversion_cost.amount }
+			? { [`ESSENCE_${item.dungeon_item_conversion_cost.essence_type}`]: item.dungeon_item_conversion_cost.amount }
 			: null,
 		stars: item.upgrade_costs?.map((entry) => reduceCostsArray(entry)) ?? null,
 		category: item.category ?? null,
@@ -673,12 +646,12 @@ parentPort?.on('message', async (message) => {
 let ac: AbortController | null = null;
 
 async function runJobs() {
-	logger.debug('[WORKER]: running jobs');
-
 	if (ac) {
-		logger.error('[WORKER]: aborting current jobs');
+		logger.error('[WORKER]: aborting last jobs');
 		ac.abort();
 	}
+
+	logger.debug('[WORKER]: running jobs');
 
 	ac = new AbortController();
 
