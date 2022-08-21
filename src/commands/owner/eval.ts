@@ -19,7 +19,6 @@ import Discord, {
 Routes; // unused imports are 'used' so that tsc doesn't remove them
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
-import { TextInputLimits } from '@sapphire/discord-utilities';
 import { fetch } from 'undici';
 fetch;
 import { format } from 'prettier';
@@ -62,6 +61,7 @@ hypixel;
 imgur;
 mojang;
 import * as functions from '#functions';
+functions;
 import * as nwFunctions from '#networth/functions/index';
 nwFunctions;
 import { IGNORED_ERRORS } from '#root/process';
@@ -80,8 +80,6 @@ import type {
 } from 'discord.js';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '#utils';
-
-const { trim } = functions;
 
 export default class EvalCommand extends BaseOwnerCommand {
 	constructor(context: CommandContext) {
@@ -316,24 +314,13 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 		switch (subcommand) {
 			case 'edit': {
-				const OLD_INPUT =
-					interaction.message.embeds[0]?.fields?.[0]!.value.replace(/^```[a-z]*\n|```$/g, '') ?? 'code to evaluate';
-
 				return InteractionUtil.showModal(
 					interaction,
 					new ModalBuilder()
 						.setTitle(this.name)
 						.setCustomId(interaction.customId)
 						.addComponents(
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-								new TextInputBuilder()
-									.setCustomId('input')
-									.setStyle(TextInputStyle.Paragraph)
-									.setLabel('Input')
-									.setValue(trim(OLD_INPUT, TextInputLimits.MaximumValueCharacters))
-									.setPlaceholder(trim(OLD_INPUT, TextInputLimits.MaximumPlaceholderCharacters))
-									.setRequired(false),
-							),
+							EvalCommand._buildInputTextInput(interaction),
 							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('inspectDepth')

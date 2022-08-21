@@ -1,19 +1,29 @@
 import { Buffer } from 'node:buffer';
 import { env } from 'node:process';
 import { inspect } from 'node:util';
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, embedLength } from 'discord.js';
+import {
+	ActionRowBuilder,
+	AttachmentBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	embedLength,
+	TextInputBuilder,
+	TextInputStyle,
+} from 'discord.js';
 import { regExpEsc } from '@sapphire/utilities';
-import { EmbedLimits } from '@sapphire/discord-utilities';
+import { EmbedLimits, TextInputLimits } from '@sapphire/discord-utilities';
 import { InteractionUtil } from '#utils';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { UnicodeEmoji } from '#constants';
-import { buildDeleteButton, buildPinButton, splitForEmbedFields } from '#functions';
+import { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } from '#functions';
 import type {
 	AttachmentPayload,
-	MessageActionRowComponentBuilder,
-	MessageComponentInteraction,
+	ButtonInteraction,
 	EmbedBuilder,
 	JSONEncodable,
+	MessageActionRowComponentBuilder,
+	MessageComponentInteraction,
+	ModalActionRowComponentBuilder,
 } from 'discord.js';
 import type { RepliableInteraction } from '#utils';
 
@@ -86,6 +96,26 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 		}
 
 		return input;
+	}
+
+	/**
+	 * returns an ActionRowBuilder with a TextInputBuilder which has the old input as a prefilled value
+	 * @param interaction
+	 * @returns
+	 */
+	protected static _buildInputTextInput(interaction: ButtonInteraction) {
+		const OLD_INPUT =
+			interaction.message.embeds[0]?.fields?.[0]!.value.replace(/^```[a-z]*\n|```$/g, '').trim() ?? 'code';
+
+		return new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+			new TextInputBuilder()
+				.setCustomId('input')
+				.setStyle(TextInputStyle.Paragraph)
+				.setLabel('Input')
+				.setValue(trim(OLD_INPUT, TextInputLimits.MaximumValueCharacters))
+				.setPlaceholder(trim(OLD_INPUT, TextInputLimits.MaximumPlaceholderCharacters))
+				.setRequired(false),
+		);
 	}
 
 	/**

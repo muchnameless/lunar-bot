@@ -1,19 +1,10 @@
 import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 import { env } from 'node:process';
-import {
-	ActionRowBuilder,
-	ModalBuilder,
-	SlashCommandBuilder,
-	TextInputBuilder,
-	TextInputStyle,
-	userMention,
-} from 'discord.js';
+import { ModalBuilder, SlashCommandBuilder, userMention } from 'discord.js';
 import { Stopwatch } from '@sapphire/stopwatch';
-import { TextInputLimits } from '@sapphire/discord-utilities';
 import { InteractionUtil } from '#utils';
 import { logger } from '#logger';
-import { trim } from '#functions';
 import BaseOwnerCommand from './~base';
 import type { RepliableInteraction } from '#utils';
 import type {
@@ -22,7 +13,6 @@ import type {
 	ChatInputCommandInteraction,
 	Message,
 	MessageContextMenuCommandInteraction,
-	ModalActionRowComponentBuilder,
 	ModalSubmitInteraction,
 	JSONEncodable,
 } from 'discord.js';
@@ -57,7 +47,7 @@ export default class ExecCommand extends BaseOwnerCommand {
 				iconURL: (me ?? this.client.user!).displayAvatarURL(),
 			});
 
-		BaseOwnerCommand._addInputToResponseEmbed(responseEmbed, input, 'bash');
+		ExecCommand._addInputToResponseEmbed(responseEmbed, input, 'bash');
 
 		const stopwatch = new Stopwatch();
 
@@ -127,30 +117,17 @@ export default class ExecCommand extends BaseOwnerCommand {
 
 		switch (subcommand) {
 			case 'edit': {
-				const OLD_INPUT =
-					interaction.message.embeds[0]?.fields?.[0]!.value.replace(/^```[a-z]*\n|```$/g, '') ?? 'code to execute';
-
 				return InteractionUtil.showModal(
 					interaction,
 					new ModalBuilder()
 						.setTitle(this.name)
 						.setCustomId(interaction.customId)
-						.addComponents(
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-								new TextInputBuilder()
-									.setCustomId('input')
-									.setStyle(TextInputStyle.Paragraph)
-									.setLabel('Input')
-									.setValue(trim(OLD_INPUT, TextInputLimits.MaximumValueCharacters))
-									.setPlaceholder(trim(OLD_INPUT, TextInputLimits.MaximumPlaceholderCharacters))
-									.setRequired(false),
-							),
-						),
+						.addComponents(ExecCommand._buildInputTextInput(interaction)),
 				);
 			}
 
 			case 'repeat': {
-				const input = BaseOwnerCommand._getInputFromMessage(interaction.message);
+				const input = ExecCommand._getInputFromMessage(interaction.message);
 
 				return this._sharedRun(interaction, input);
 			}
@@ -172,7 +149,7 @@ export default class ExecCommand extends BaseOwnerCommand {
 			case 'edit':
 				return this._sharedRun(
 					interaction,
-					interaction.fields.getTextInputValue('input') || BaseOwnerCommand._getInputFromMessage(interaction.message),
+					interaction.fields.getTextInputValue('input') || ExecCommand._getInputFromMessage(interaction.message),
 				);
 
 			default:
