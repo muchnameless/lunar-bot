@@ -221,7 +221,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 				useTabs: true,
 			});
 		} catch (error) {
-			BaseOwnerCommand._addInputToResponseEmbed(responseEmbed, _input, 'ts', isAsync);
+			EvalCommand._addInputToResponseEmbed(responseEmbed, _input, 'ts', isAsync);
 
 			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
 		}
@@ -248,7 +248,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 			toEvaluate = input;
 		}
 
-		BaseOwnerCommand._addInputToResponseEmbed(responseEmbed, input, 'ts', isAsync);
+		EvalCommand._addInputToResponseEmbed(responseEmbed, input, 'ts', isAsync);
 
 		try {
 			stopwatch.restart();
@@ -335,7 +335,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 			}
 
 			case 'repeat': {
-				const input = BaseOwnerCommand._getInputFromMessage(interaction.message);
+				const input = EvalCommand._getInputFromMessage(interaction.message);
 
 				return this._sharedRun(interaction, input, { inspectDepth: Number(inspectDepth) });
 			}
@@ -357,7 +357,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 			case 'edit':
 				return this._sharedRun(
 					interaction,
-					interaction.fields.getTextInputValue('input') || BaseOwnerCommand._getInputFromMessage(interaction.message),
+					interaction.fields.getTextInputValue('input') || EvalCommand._getInputFromMessage(interaction.message),
 					{
 						// use parseInt over Number so that 12a is still a valid input
 						inspectDepth: Number.parseInt(

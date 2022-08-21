@@ -101,7 +101,6 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 	/**
 	 * returns an ActionRowBuilder with a TextInputBuilder which has the old input as a prefilled value
 	 * @param interaction
-	 * @returns
 	 */
 	protected static _buildInputTextInput(interaction: ButtonInteraction) {
 		const OLD_INPUT =
