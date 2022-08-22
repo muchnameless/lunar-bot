@@ -650,17 +650,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.7.9":
-  version: 18.7.9
-  resolution: "@types/node@npm:18.7.9"
-  checksum: 691ea1b734c0a39c4fe03c104fed18e0148bda6f2504dd341f84be8153d28e74d8114198d2d064ab7fdd2ece3ee16c60b78eea0101fb004f6e4595a631bc3839
+"@types/node@npm:^18.7.10":
+  version: 18.7.10
+  resolution: "@types/node@npm:18.7.10"
+  checksum: 4e9d883762db9d854ba462d89014d4eb4fc90027c33a3573af9e4e7a0fe161f05b7b5382083c9305ce60a5c84622eae42d1bf19c5103859e69b135a2f8278e12
   languageName: node
   linkType: hard
 
-"@types/node@patch:@types/node@npm:^18.7.9#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch::locator=lunar-bot%40workspace%3A.":
-  version: 18.7.9
-  resolution: "@types/node@patch:@types/node@npm%3A18.7.9#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch::version=18.7.9&hash=63f278&locator=lunar-bot%40workspace%3A."
-  checksum: 094ec7caea2ae060c3a1e92492b970ffe2fca4bd6f16ece96e8ba173ff551687ff5e62d4539feb57233cf0ff2b26253e19f2acd659ec9f8b5865358fe8dd9070
+"@types/node@patch:@types/node@npm:^18.7.10#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch::locator=lunar-bot%40workspace%3A.":
+  version: 18.7.10
+  resolution: "@types/node@patch:@types/node@npm%3A18.7.10#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch::version=18.7.10&hash=63f278&locator=lunar-bot%40workspace%3A."
+  checksum: 350077a4d626b9b0e634e8d9a32a0f23460d62fd44d22140a87b0f7186e696b7fcf8ab33bef2aaee3b80879f7e6ffb5cb94edaddde732d724119732b0a344941
   languageName: node
   linkType: hard
 
@@ -3636,7 +3636,7 @@ __metadata:
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^2.0.0
-    "@types/node": ^18.7.9
+    "@types/node": ^18.7.10
     "@types/pg": ^8.6.5
     "@types/prettier": ^2.7.0
     "@typescript-eslint/eslint-plugin": ^5.33.1
