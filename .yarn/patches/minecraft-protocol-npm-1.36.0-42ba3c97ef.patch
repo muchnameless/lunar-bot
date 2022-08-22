@@ -11,16 +11,3 @@ index 03e2c9bf1300fddad0d627942e60c14e5ad438ad..633f2cbca6b90edabcb4c389b599fe43
      this.customPackets = customPackets
      this.version = version
      this.isServer = !!isServer
-diff --git a/src/index.d.ts b/src/index.d.ts
-index 2725b8114565ae2decb35725c8c722312a880a8b..40f3376135152ce2760e2ed575b7f3ef0ec08045 100644
---- a/src/index.d.ts
-+++ b/src/index.d.ts
-@@ -130,7 +130,7 @@ declare module 'minecraft-protocol' {
- 		session?: SessionOption
- 		validateChannelProtocol?: boolean,
- 		// 1.19+
--		disableChatSigning: boolean
-+		disableChatSigning?: boolean
- 	}
- 
- 	export class Server extends EventEmitter {

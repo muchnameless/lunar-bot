@@ -3663,7 +3663,7 @@ __metadata:
     lilyweight: ^2.7.0
     lint-staged: ^13.0.3
     minecraft-data: ^3.10.2
-    minecraft-protocol: 1.36.0
+    minecraft-protocol: 1.36.1
     ms: 3.0.0-canary.1
     pg: ^8.7.3
     pg-hstore: ^2.3.4
@@ -3838,9 +3838,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:1.36.0":
-  version: 1.36.0
-  resolution: "minecraft-protocol@npm:1.36.0"
+"minecraft-protocol@npm:1.36.1":
+  version: 1.36.1
+  resolution: "minecraft-protocol@npm:1.36.1"
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -3859,13 +3859,13 @@ __metadata:
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 44a7836feadfa9960d3f966a2e30c1c6272e9a1f02b218d6064022ce67376ebe2f734963fa2339521b1238dbd9bb875d3bc84b2580d736277fc0bce40f0be687
+  checksum: 865c8dcd0a405b35da2927923dfb1466162a8f7efac99240de8560e4c48bfd8e3509f8e633f25feb39b10777e6004a6be3f092ae7f0a8238ef1adc69041f69cb
   languageName: node
   linkType: hard
 
-"minecraft-protocol@patch:minecraft-protocol@npm:1.36.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
-  version: 1.36.0
-  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.36.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.36.0&hash=5c6461&locator=lunar-bot%40workspace%3A."
+"minecraft-protocol@patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.36.1
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.36.1&hash=0fed28&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -3884,7 +3884,7 @@ __metadata:
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 651c221ac599a7386d43f916d4f93c0ba9ec0a00dcd47b8a7255815ea328b9c3fab8c2a48904d297ead99528183a86b2e76a74f2887855d9f5a6d153cc08d5eb
+  checksum: 5523176afebe400833be660956758c9a4e70907a2af14eaadc1034c948404246237af80e406a56c19588cb453bd33bdca50e6514debc054af662e064a50cb77c
   languageName: node
   linkType: hard
 
