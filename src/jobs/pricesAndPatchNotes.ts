@@ -10,7 +10,8 @@ import { CronJob } from 'cron';
 import { Client } from '@zikeji/hypixel';
 import { logger } from '#logger';
 import { FetchError } from '#structures/errors/FetchError';
-import { transformItemData } from '#networth/functions/nbt'; // separate imports to not import unused files in the worker
+import { getEnchantment } from '#networth/functions/enchantments'; // separate imports to not import unused files in the worker
+import { transformItemData } from '#networth/functions/nbt';
 import { calculatePetSkillLevel } from '#networth/functions/pets';
 import { ItemId } from '#networth/constants/itemId';
 import { ItemRarity } from '#networth/constants/itemRarity';
@@ -18,6 +19,7 @@ import { sql } from '#structures/database/sql';
 import { JobType } from '.';
 import type { ArrayElementType } from '@sapphire/utilities';
 import type { Components } from '@zikeji/hypixel';
+import type { Enchantment } from '#networth/constants/enchantments';
 
 // because a single AbortController is used for all fetches
 EventEmitter.setMaxListeners(100);
@@ -31,7 +33,7 @@ const hypixel = new Client('unused key', { retries: 1 });
 type SkyBlockAuctionItem = ArrayElementType<Components.Schemas.SkyBlockAuctionsResponse['auctions']>;
 type SkyBlockAuctionEndedItem = ArrayElementType<Components.Schemas.SkyBlockAuctionsEndedResponse['auctions']>;
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
 /**
  * upserts an item
@@ -143,7 +145,7 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
 /**
  * fetches and processes bazaar products
  */
-async function updateBazaarPrices(ac: AbortController) {
+async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac: AbortController) {
 	let { lastUpdated, products } = await hypixel.skyblock.bazaar({ signal: ac.signal });
 
 	// check if API data is updated
@@ -179,14 +181,24 @@ async function updateBazaarPrices(ac: AbortController) {
 
 	// update database and prices map
 	await Promise.all(
-		bazaarItems.map((data) =>
-			upsertItem(
-				data.product_id,
+		bazaarItems.map((data) => {
+			const price =
 				data.quick_status.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
 					? data.quick_status.buyPrice
-					: getBuyPrice(data.buy_summary),
-			),
-		),
+					: getBuyPrice(data.buy_summary);
+
+			if (data.product_id.startsWith('ENCHANTMENT_')) {
+				const lastUnderscore = data.product_id.lastIndexOf('_');
+				const { itemId, count } = getEnchantment(
+					data.product_id.slice('ENCHANTMENT_'.length, lastUnderscore).toLowerCase() as Enchantment,
+					Number(data.product_id.slice(lastUnderscore + 1)),
+				);
+
+				binAuctions.ensure(itemId, () => []).push(price / count);
+			}
+
+			return upsertItem(data.product_id, price);
+		}),
 	);
 
 	// update config key
@@ -208,21 +220,19 @@ async function updateBazaarPrices(ac: AbortController) {
 /**
  * fetches and processes all auction pages
  */
-async function updateAuctionPrices(ac: AbortController) {
+async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac: AbortController) {
 	/**
 	 * fetches all auction pages
 	 */
 	// fetch first auction page
 	let { success, lastUpdated, totalPages, auctions } = await hypixel.skyblock.auctions.page(0, { signal: ac.signal });
 
-	const binAuctions = new Collection<string, number[]>();
-
 	let endedAuctions = 0;
 
 	// abort on error
 	if (!success) {
 		logger.error({ success }, '[UPDATE AUCTION PRICES]');
-		return { endedAuctions, totalPages, binAuctions };
+		return { endedAuctions, totalPages };
 	}
 
 	// check if API data is updated
@@ -248,7 +258,7 @@ async function updateAuctionPrices(ac: AbortController) {
 					},
 					'[UPDATE AUCTION PRICES]: max retries reached',
 				);
-				return { endedAuctions, totalPages, binAuctions };
+				return { endedAuctions, totalPages };
 			}
 
 			logger.warn(
@@ -268,7 +278,7 @@ async function updateAuctionPrices(ac: AbortController) {
 			// abort on error
 			if (!success) {
 				logger.error({ success }, '[UPDATE AUCTION PRICES]');
-				return { endedAuctions, totalPages, binAuctions };
+				return { endedAuctions, totalPages };
 			}
 		}
 	}
@@ -278,8 +288,22 @@ async function updateAuctionPrices(ac: AbortController) {
 		const [item] = await transformItemData(auction.item_bytes);
 
 		let itemId = item.tag?.ExtraAttributes?.id;
+		let count = item.Count;
 
 		switch (itemId) {
+			case ItemId.EnchantedBook: {
+				const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
+
+				// ignore books with multiple enchantments
+				if (enchants.length !== 1) return;
+
+				({ itemId, count } = getEnchantment(
+					enchants[0] as Enchantment,
+					item.tag!.ExtraAttributes!.enchantments[enchants[0]!]!,
+				));
+				break;
+			}
+
 			case ItemId.Pet: {
 				const pet = JSON.parse(item.tag!.ExtraAttributes!.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
 
@@ -338,7 +362,7 @@ async function updateAuctionPrices(ac: AbortController) {
 				return;
 		}
 
-		binAuctions.get(itemId)?.push(price / item.Count) ?? binAuctions.set(itemId, [price / item.Count]);
+		binAuctions.ensure(itemId, () => []).push(price / count);
 	};
 
 	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
@@ -351,8 +375,8 @@ async function updateAuctionPrices(ac: AbortController) {
 			signal: ac.signal,
 		});
 
-		if (_lastUpdated !== lastUpdated) {
-			if (_lastUpdated < lastUpdated && ++retries <= MAX_RETRIES) {
+		if (_lastUpdated < lastUpdated) {
+			if (++retries <= MAX_RETRIES) {
 				logger.warn(
 					{
 						previous: lastUpdated,
@@ -411,7 +435,7 @@ async function updateAuctionPrices(ac: AbortController) {
 	`;
 
 	// return auctions to update db
-	return { endedAuctions, totalPages, binAuctions };
+	return { endedAuctions, totalPages };
 }
 
 /**
@@ -419,9 +443,11 @@ async function updateAuctionPrices(ac: AbortController) {
  * @param ac
  */
 async function updatePrices(ac: AbortController) {
-	const [{ endedAuctions, totalPages, binAuctions }, bazaarItems] = await Promise.all([
-		updateAuctionPrices(ac),
-		updateBazaarPrices(ac),
+	const binAuctions = new Collection<string, number[]>();
+
+	const [{ endedAuctions, totalPages }, bazaarItems] = await Promise.all([
+		updateAuctionPrices(binAuctions, ac),
+		updateBazaarPrices(binAuctions, ac),
 	]);
 
 	// remove auctioned items that are available in the bazaar

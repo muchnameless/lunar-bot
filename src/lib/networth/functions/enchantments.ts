@@ -12,8 +12,6 @@ interface EnchantmentData {
 	higherBaseLvls: string[] | null;
 }
 
-// TODO: use this in calculateItemPrice? ex: ue_lvl_3 -> Math.min(ue_lvl_1 * ..., ue_lvl_2 * ..., ue_lvl_3 * 1);
-
 /**
  * returns the enchantment id (name_level) and count
  * @link https://hypixel-skyblock.fandom.com/wiki/Enchantments
@@ -107,7 +105,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Power:
 		case Enchantment.Pristine:
 		case Enchantment.ProjectileProtection:
-		case Enchantment.Prosecute:
+		case 'prosecute' as Enchantment:
 		case Enchantment.Protection:
 		case Enchantment.Rejuvenate:
 		case Enchantment.Respite:
@@ -123,6 +121,13 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Venomous:
 			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
 			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+
+		// API casing inconsistency
+		case Enchantment.Prosecute:
+			if (level <= 5) {
+				return { itemId: `${enchantment.toLowerCase()}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
+			}
+			return { itemId: `${enchantment.toLowerCase()}_${level}`, count: 1, higherBaseLvls: null };
 
 		// combinable 1->10
 		case Enchantment.FerociousMana:
@@ -143,14 +148,21 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 			}
 			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
 
+		// combinable 2->3
+		case Enchantment.Tabasco:
+			if (level <= 3) return { itemId: `${enchantment}_2`, count: 2 ** (level - 2), higherBaseLvls: null };
+			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+
 		// combinable 3->5
 		case Enchantment.BigBrain:
 		case Enchantment.Vicious:
-			return { itemId: `${enchantment}_3`, count: 2 ** (level - 3), higherBaseLvls: null };
+			if (level <= 5) return { itemId: `${enchantment}_3`, count: 2 ** (level - 3), higherBaseLvls: null };
+			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
 
 		// combinable 4->5
 		case Enchantment.Cayenne:
-			return { itemId: `${enchantment}_4`, count: 2 ** (level - 4), higherBaseLvls: null };
+			if (level <= 5) return { itemId: `${enchantment}_4`, count: 2 ** (level - 4), higherBaseLvls: null };
+			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
 
 		// combinable 1->x
 		case Enchantment.TurboCactus: // turbo
@@ -169,6 +181,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.UltimateDuplex:
 		case Enchantment.UltimateFatalTempo:
 		case Enchantment.UltimateFlash:
+		case Enchantment.UltimateHabaneroTactics:
 		case Enchantment.UltimateInferno:
 		case Enchantment.UltimateJerry:
 		case Enchantment.UltimateLastStand:

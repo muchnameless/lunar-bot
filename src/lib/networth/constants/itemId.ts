@@ -14,6 +14,7 @@ export const enum ItemId {
 	BlazeWax = 'BLAZE_WAX',
 	BlessedFruit = 'BLESSED_FRUIT',
 	Bonemerang = 'BONE_BOOMERANG',
+	BookOfStats = 'BOOK_OF_STATS',
 	BouncyArrow = 'BOUNCY_ARROW',
 	BulkyStone = 'BULKY_STONE',
 	CampfireTalisman10 = 'CAMPFIRE_TALISMAN_10',

@@ -5,6 +5,7 @@ import { hypixel } from '#api';
 import {
 	calculatePetSkillLevel,
 	getAppliedEnchantmentModifier,
+	getEnchantment,
 	getReforgeStone,
 	isVanillaItem,
 	transformItemData,
@@ -73,6 +74,7 @@ export type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		modifier: string;
 		petInfo: string;
 		skin: string;
+		stats_book: number;
 		talisman_enrichment: string;
 		tuned_transmission: number;
 		upgrade_level: number;
@@ -120,10 +122,21 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				level = 5;
 			}
 
-			price +=
-				getPrice(`ENCHANTMENT_${enchantment.toUpperCase()}_${level}`) *
-				// applied enchantments are worth less
-				(itemId !== ItemId.EnchantedBook ? getAppliedEnchantmentModifier(enchantment as Enchantment) : 1);
+			const { itemId: enchantmentId, count, higherBaseLvls } = getEnchantment(enchantment as Enchantment, level);
+
+			let enchantmentPrice = higherBaseLvls
+				? Math.min(
+						getPrice(enchantmentId) * count,
+						...higherBaseLvls.map((higherEnchantment) => getPrice(higherEnchantment)),
+				  )
+				: getPrice(enchantmentId) * count;
+
+			// applied enchantments are worth less
+			if (itemId !== ItemId.EnchantedBook) {
+				enchantmentPrice *= getAppliedEnchantmentModifier(enchantment as Enchantment);
+			}
+
+			price += enchantmentPrice;
 		}
 	}
 
@@ -132,6 +145,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		for (const [rune, level] of Object.entries(extraAttributes.runes)) {
 			price += getPrice(`RUNE_${rune}_${level}`) * PriceModifier.Rune;
 		}
+	}
+
+	// dyes
+	if (extraAttributes.dye_item) {
+		price += getPrice(extraAttributes.dye_item) * PriceModifier.Dye;
 	}
 
 	// hot potato books + fuming potato books
@@ -145,9 +163,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		}
 	}
 
-	// dyes
-	if (extraAttributes.dye_item) {
-		price += getPrice(extraAttributes.dye_item) * PriceModifier.Dye;
+	// book of stats, if applied stats_books is the number of kills, can be zero
+	if (Reflect.has(extraAttributes, 'stats_book')) {
+		price += getPrice(ItemId.BookOfStats) * PriceModifier.BookOfStats;
 	}
 
 	// art of war
@@ -289,7 +307,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// scrolls (Necron's Blade)
 	if (extraAttributes.ability_scroll) {
-		for (const _item of Object.values(extraAttributes.ability_scroll)) {
+		for (const _item of extraAttributes.ability_scroll) {
 			price += getPrice(_item) * PriceModifier.NecronBladeScroll;
 		}
 	}

@@ -84,6 +84,7 @@ export const enum Enchantment {
 	StrongMana = 'strong_mana',
 	SugarRush = 'sugar_rush',
 	Syphon = 'syphon',
+	Tabasco = 'tabasco',
 	Telekinesis = 'telekinesis', // removed
 	Thorns = 'thorns',
 	Thunderbolt = 'thunderbolt',
@@ -107,6 +108,7 @@ export const enum Enchantment {
 	UltimateDuplex = 'ultimate_reiterate', // API still uses old name
 	UltimateFatalTempo = 'ultimate_fatal_tempo',
 	UltimateFlash = 'ultimate_flash',
+	UltimateHabaneroTactics = 'ultimate_habanero_tactics',
 	UltimateInferno = 'ultimate_inferno',
 	UltimateJerry = 'ultimate_jerry',
 	UltimateLastStand = 'ultimate_last_stand',
