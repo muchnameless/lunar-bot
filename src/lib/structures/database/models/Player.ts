@@ -1246,20 +1246,23 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		if (!member) return null;
 
-		logger.info(
-			{ ...this.logInfo, discordId: member.id, tag: member.user.tag },
-			'[LINK USING CACHE]: discord data found',
-		);
-
 		// catch potential sequelize errors propagated from setUniqueDiscordId
 		try {
 			await this.link(member);
+
+			logger.info(
+				{ ...this.logInfo, discordId: member.id, tag: member.user.tag },
+				'[LINK USING CACHE]: discord data found',
+			);
 		} catch (error) {
-			logger.error(
+			const isUniqueConstraintError = error instanceof UniqueConstraintError;
+
+			logger[isUniqueConstraintError ? 'warn' : 'error'](
 				{
-					err: error instanceof UniqueConstraintError ? undefined : error,
+					err: isUniqueConstraintError ? undefined : error,
 					...this.logInfo,
 					discordId: member.id,
+					tag: member.user.tag,
 				},
 				'[LINK USING CACHE]: linking error',
 			);
