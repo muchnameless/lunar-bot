@@ -6,7 +6,16 @@ import { TransactionType } from '#structures/database/models/Transaction';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { hypixelGuildOption, optionalPlayerOption, requiredPlayerOption } from '#structures/commands/commonOptions';
 import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '#functions';
-import type { APIEmbed, ChatInputCommandInteraction, JSONEncodable, TextChannel } from 'discord.js';
+import type { LunarClient } from '#structures/LunarClient';
+import type {
+	APIEmbed,
+	ChatInputCommandInteraction,
+	Collection,
+	JSONEncodable,
+	Message,
+	Snowflake,
+	TextChannel,
+} from 'discord.js';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
@@ -281,7 +290,7 @@ export default class TaxCommand extends ApplicationCommand {
 						if (!SHOULD_GHOST_PING) return;
 
 						const replyMessage = await interaction.fetchReply();
-						const fetched = await interaction.channel?.messages
+						const fetched: Collection<Snowflake, Message> | void = await interaction.channel?.messages
 							.fetch({ after: replyMessage.id })
 							.catch((error) => logger.error(error, '[TAX REMINDER]: ghost ping'));
 						if (!fetched) return;
@@ -404,7 +413,7 @@ export default class TaxCommand extends ApplicationCommand {
 						// logging
 						void (async () => {
 							try {
-								let logMessage = await this.client.log(
+								let logMessage: Awaited<ReturnType<LunarClient['log']>> | undefined = await this.client.log(
 									currentTaxEmbed,
 									currentTaxCollectedEmbed,
 									this.client.defaultEmbed

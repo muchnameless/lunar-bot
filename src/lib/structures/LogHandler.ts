@@ -97,12 +97,12 @@ export class LogHandler {
 	 * logs embeds to console and to the logging channel
 	 * @param input embeds to log
 	 */
-	log(input: LogInput): Promise<void | Message>;
-	log(...input: LogInput[]): Promise<void | Message> | Promise<(void | Message)[]>;
-	log(...input: LogInput[]) {
+	log(input: LogInput): Promise<Message | null>;
+	log(...input: LogInput[]): Promise<Message | null | (Message | null)[]>;
+	log(...input: LogInput[]): Promise<Message | null | (Message | null)[]> {
 		const embeds = this._transformInput(input);
 
-		if (!embeds.length) return null; // nothing to log
+		if (!embeds.length) return Promise.resolve(null); // nothing to log
 
 		// send 1 message
 		if (
@@ -113,7 +113,7 @@ export class LogHandler {
 		}
 
 		// split into multiple messages
-		const returnValue: Promise<Message | void>[] = [];
+		const returnValue: Promise<Message | null>[] = [];
 
 		for (let total = 0; total < embeds.length; ++total) {
 			const embedChunk: APIEmbed[] = [];
@@ -230,6 +230,8 @@ export class LogHandler {
 		} catch (error) {
 			logger.error(error, '[LOG TO FILE]');
 		}
+
+		return null;
 	}
 
 	/**

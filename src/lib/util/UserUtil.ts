@@ -63,7 +63,7 @@ export class UserUtil extends null {
 	 */
 	static async sendDM(user: User, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
 	static async sendDM(user: User, options: string | SendDMOptions): Promise<Message | null>;
-	static async sendDM(user: User, options: string | SendDMOptions) {
+	static async sendDM(user: User, options: string | SendDMOptions): Promise<Message | null> {
 		const { cooldown, redisKey, ..._options } =
 			typeof options === 'string' ? ({ content: options } as SendDMOptions) : options;
 
