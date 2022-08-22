@@ -126,7 +126,7 @@ export class ChannelUtil extends null {
 		channel: TextBasedChannel,
 		options: string | SendOptions,
 		permissions = this.botPermissions(channel),
-	) {
+	): Promise<Message | null> {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		// guild -> requires permission
