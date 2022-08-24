@@ -23,11 +23,11 @@ export const logger = isMainThread
 			error: ((...args: LogArguments) =>
 				parentPort!.postMessage({
 					op: JobType.LogMessage,
-					d: { lvl: 'error', args: args.map((x) => stdSerializers.err(x as Error)) },
+					d: { lvl: 'error', args: args.map((x) => (x instanceof Error ? stdSerializers.err(x) : x)) },
 				})) as pino.LogFn,
 			fatal: ((...args: LogArguments) =>
 				parentPort!.postMessage({
 					op: JobType.LogMessage,
-					d: { lvl: 'fatal', args: args.map((x) => stdSerializers.err(x as Error)) },
+					d: { lvl: 'fatal', args: args.map((x) => (x instanceof Error ? stdSerializers.err(x) : x)) },
 				})) as pino.LogFn,
 	  };
