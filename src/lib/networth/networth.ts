@@ -11,9 +11,9 @@ import {
 	transformItemData,
 } from './functions';
 import {
-	BLOCKED_ENCHANTS,
 	CRAFTING_RECIPES,
 	Enchantment,
+	ITEM_SPECIFIC_IGNORED_ENCHANTS,
 	ItemId,
 	MASTER_STARS,
 	PriceModifier,
@@ -113,27 +113,26 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// enchantments
 	if (extraAttributes.enchantments) {
 		// eslint-disable-next-line prefer-const
-		for (let [enchantment, level] of Object.entries(extraAttributes.enchantments)) {
-			if (BLOCKED_ENCHANTS[itemId as keyof typeof BLOCKED_ENCHANTS]?.includes(enchantment as any)) continue;
+		for (let [enchantment, level] of Object.entries(extraAttributes.enchantments) as [Enchantment, number][]) {
+			if (ITEM_SPECIFIC_IGNORED_ENCHANTS[itemId as keyof typeof ITEM_SPECIFIC_IGNORED_ENCHANTS]?.has(enchantment)) {
+				continue;
+			}
 
 			if (enchantment === Enchantment.Efficiency && level > 5) {
-				if (itemId === ItemId.Stonk) continue;
-				price += getPrice(ItemId.Silex) * PriceModifier.Silex * (level - 5);
+				// Stonk has efficiency 6 by default, for other items 5 is the max level without Silex
+				const isStonk = itemId === ItemId.Stonk;
+				price += getPrice(ItemId.Silex) * PriceModifier.Silex * (level - (isStonk ? 6 : 5));
+				if (isStonk) continue;
 				level = 5;
 			}
 
-			const { itemId: enchantmentId, count, higherBaseLvls } = getEnchantment(enchantment as Enchantment, level);
+			const { itemId: enchantmentId, count } = getEnchantment(enchantment, level);
 
-			let enchantmentPrice = higherBaseLvls
-				? Math.min(
-						getPrice(enchantmentId) * count,
-						...higherBaseLvls.map((higherEnchantment) => getPrice(higherEnchantment)),
-				  )
-				: getPrice(enchantmentId) * count;
+			let enchantmentPrice = getPrice(enchantmentId) * count;
 
 			// applied enchantments are worth less
 			if (itemId !== ItemId.EnchantedBook) {
-				enchantmentPrice *= getAppliedEnchantmentModifier(enchantment as Enchantment);
+				enchantmentPrice *= getAppliedEnchantmentModifier(enchantment);
 			}
 
 			price += enchantmentPrice;
@@ -261,7 +260,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// recombed
 	if (
 		extraAttributes.rarity_upgrades! > 0 &&
-		extraAttributes.originTag &&
+		!extraAttributes.item_tier &&
 		(extraAttributes.enchantments || accessories.has(itemId))
 	) {
 		price += getPrice(ItemId.Recombobulator) * PriceModifier.Recomb;
@@ -290,7 +289,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		}
 	}
 
-	// wooden singularity
+	// wood singularity
 	if (extraAttributes.wood_singularity_count) {
 		price += getPrice(ItemId.WoodSingularity) * PriceModifier.WoodSingularity;
 	}

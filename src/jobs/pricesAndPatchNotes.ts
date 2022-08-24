@@ -187,6 +187,8 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 					? data.quick_status.buyPrice
 					: getBuyPrice(data.buy_summary);
 
+			if (price === 0) return Promise.resolve();
+
 			if (data.product_id.startsWith('ENCHANTMENT_')) {
 				const lastUnderscore = data.product_id.lastIndexOf('_');
 				const { itemId, count } = getEnchantment(
@@ -288,21 +290,10 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 		const [item] = await transformItemData(auction.item_bytes);
 
 		let itemId = item.tag?.ExtraAttributes?.id;
-		let count = item.Count;
 
 		switch (itemId) {
-			case ItemId.EnchantedBook: {
-				const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
-
-				// ignore books with multiple enchantments
-				if (enchants.length !== 1) return;
-
-				({ itemId, count } = getEnchantment(
-					enchants[0] as Enchantment,
-					item.tag!.ExtraAttributes!.enchantments[enchants[0]!]!,
-				));
-				break;
-			}
+			case ItemId.EnchantedBook:
+				return;
 
 			case ItemId.Pet: {
 				const pet = JSON.parse(item.tag!.ExtraAttributes!.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
@@ -362,7 +353,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 				return;
 		}
 
-		binAuctions.ensure(itemId, () => []).push(price / count);
+		binAuctions.ensure(itemId, () => []).push(price / item.Count);
 	};
 
 	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>

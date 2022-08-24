@@ -29,6 +29,6 @@ export const enum PriceModifier {
 	Rune = 0.5,
 	Silex = 0.7,
 	TalismanEnrichment = 0.75,
-	TransmissionTuner = 1,
-	WoodSingularity = 1,
+	TransmissionTuner = 0.7,
+	WoodSingularity = 0.5,
 }

@@ -6,10 +6,6 @@ const warnings = new Set<string>();
 interface EnchantmentData {
 	itemId: string;
 	count: number;
-	/**
-	 * if there are multiple base levels to upgrade, e.g. 1->5, 6->10 would include 6 for levels below 6
-	 */
-	higherBaseLvls: string[] | null;
 }
 
 /**
@@ -27,7 +23,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Cultivating:
 		case Enchantment.Expertise:
 		case Enchantment.Hecatomb:
-			return { itemId: `${enchantment}_1`, count: 1, higherBaseLvls: null };
+			return { itemId: `${enchantment}_1`, count: 1 };
 
 		// not combinable
 		case Enchantment.AquaAffinity:
@@ -41,15 +37,15 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.SmeltingTouch:
 		case Enchantment.Telekinesis:
 		case Enchantment.TrueProtection:
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 1->2
 		case Enchantment.FireAspect:
 		case Enchantment.FrostWalker:
 		case Enchantment.Knockback:
 		case Enchantment.Punch:
-			if (level <= 2) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 2) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 1->3
 		case Enchantment.Chance:
@@ -66,14 +62,14 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.SugarRush:
 		case Enchantment.Syphon:
 		case Enchantment.Thorns:
-			if (level <= 3) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 3) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 1->4
 		case Enchantment.FirstStrike:
 		case Enchantment.TripleStrike:
-			if (level <= 4) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 4) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 1->5
 		case Enchantment.Angler:
@@ -119,50 +115,50 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.TitanKiller:
 		case Enchantment.Vampirism:
 		case Enchantment.Venomous:
-			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// API casing inconsistency
 		case Enchantment.Prosecute:
 			if (level <= 5) {
-				return { itemId: `${enchantment.toLowerCase()}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
+				return { itemId: `${enchantment.toLowerCase()}_1`, count: 2 ** (level - 1) };
 			}
-			return { itemId: `${enchantment.toLowerCase()}_${level}`, count: 1, higherBaseLvls: null };
+			return { itemId: `${enchantment.toLowerCase()}_${level}`, count: 1 };
 
 		// combinable 1->10
 		case Enchantment.FerociousMana:
 		case Enchantment.HardenedMana:
 		case Enchantment.ManaVampire:
 		case Enchantment.StrongMana:
-			if (level <= 10) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 10) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 1->5, 6->10
 		case Enchantment.FeatherFalling:
 		case Enchantment.InfiniteQuiver:
 			if (level <= 5) {
-				return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: [`${enchantment}_6`] };
+				return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			}
 			if (level <= 10) {
-				return { itemId: `${enchantment}_6`, count: 2 ** (level - 6), higherBaseLvls: null };
+				return { itemId: `${enchantment}_6`, count: 2 ** (level - 6) };
 			}
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 2->3
 		case Enchantment.Tabasco:
-			if (level <= 3) return { itemId: `${enchantment}_2`, count: 2 ** (level - 2), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 3) return { itemId: `${enchantment}_2`, count: 2 ** (level - 2) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 3->5
 		case Enchantment.BigBrain:
 		case Enchantment.Vicious:
-			if (level <= 5) return { itemId: `${enchantment}_3`, count: 2 ** (level - 3), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 5) return { itemId: `${enchantment}_3`, count: 2 ** (level - 3) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 4->5
 		case Enchantment.Cayenne:
-			if (level <= 5) return { itemId: `${enchantment}_4`, count: 2 ** (level - 4), higherBaseLvls: null };
-			return { itemId: `${enchantment}_${level}`, count: 1, higherBaseLvls: null };
+			if (level <= 5) return { itemId: `${enchantment}_4`, count: 2 ** (level - 4) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		// combinable 1->x
 		case Enchantment.TurboCactus: // turbo
@@ -193,7 +189,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.UltimateSwarm:
 		case Enchantment.UltimateWisdom:
 		case Enchantment.UltimateWise:
-			return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
+			return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 
 		default: {
 			// make sure TS errors if the switch is not exhaustive
@@ -208,11 +204,11 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 
 			// unknown ultimate and turbo enchantments fallback
 			if (itemId.startsWith('ultimate_') || itemId.startsWith('turbo_')) {
-				return { itemId: `${enchantment}_1`, count: 2 ** (level - 1), higherBaseLvls: null };
+				return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			}
 
 			// generic fallback
-			return { itemId, count: 1, higherBaseLvls: null };
+			return { itemId, count: 1 };
 		}
 	}
 };

@@ -1,8 +1,17 @@
 import { ItemId } from '.';
 
-export const BLOCKED_ENCHANTS = {
-	[ItemId.Bonemerang]: [Enchantment.Overload, Enchantment.Power],
-	[ItemId.DeathBow]: [Enchantment.Overload, Enchantment.Power, Enchantment.UltimateSoulEater],
+export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
+	[ItemId.Bonemerang]: new Set([
+		//
+		Enchantment.Overload,
+		Enchantment.Power,
+	]),
+	[ItemId.DeathBow]: new Set([
+		//
+		Enchantment.Overload,
+		Enchantment.Power,
+		Enchantment.UltimateSoulEater,
+	]),
 } as const;
 
 export const enum Enchantment {
