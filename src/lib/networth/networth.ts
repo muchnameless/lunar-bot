@@ -112,8 +112,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// enchantments
 	if (extraAttributes.enchantments) {
-		// eslint-disable-next-line prefer-const
 		for (let [enchantment, level] of Object.entries(extraAttributes.enchantments) as [Enchantment, number][]) {
+			enchantment = enchantment.toLowerCase() as Enchantment;
+
 			if (ITEM_SPECIFIC_IGNORED_ENCHANTS[itemId as keyof typeof ITEM_SPECIFIC_IGNORED_ENCHANTS]?.has(enchantment)) {
 				continue;
 			}

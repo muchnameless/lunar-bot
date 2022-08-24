@@ -187,8 +187,10 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 					? data.quick_status.buyPrice
 					: getBuyPrice(data.buy_summary);
 
+			// ignore items which are not sold
 			if (price === 0) return Promise.resolve();
 
+			// enchantments
 			if (data.product_id.startsWith('ENCHANTMENT_')) {
 				const lastUnderscore = data.product_id.lastIndexOf('_');
 				const { itemId, count } = getEnchantment(
@@ -197,8 +199,10 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 				);
 
 				binAuctions.ensure(itemId, () => []).push(price / count);
+				return Promise.resolve();
 			}
 
+			// other items
 			return upsertItem(data.product_id, price);
 		}),
 	);

@@ -43,7 +43,7 @@ export const enum Enchantment {
 	Experience = 'experience',
 	Expertise = 'expertise',
 	FeatherFalling = 'feather_falling',
-	FerociousMana = 'ferocious_mana', // more info needed
+	FerociousMana = 'ferocious_mana',
 	FireAspect = 'fire_aspect',
 	FireProtection = 'fire_protection',
 	FirstStrike = 'first_strike',
@@ -73,7 +73,7 @@ export const enum Enchantment {
 	Power = 'power',
 	Pristine = 'pristine',
 	ProjectileProtection = 'projectile_protection',
-	Prosecute = 'PROSECUTE', // API casing inconsistency
+	Prosecute = 'prosecute', // API shows it as 'PROSECUTE'
 	Protection = 'protection',
 	Punch = 'punch',
 	Rainbow = 'rainbow',
