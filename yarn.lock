@@ -3679,7 +3679,7 @@ __metadata:
     timezonecomplete: ^5.12.4
     tslib: ^2.4.0
     typescript: ^4.9.0-dev.20220823
-    undici: ^5.9.1
+    undici: ^5.10.0
     utf-8-validate: ^5.0.9
     zlib-sync: ^0.1.7
   languageName: unknown
@@ -5980,17 +5980,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.9.1":
-  version: 5.9.1
-  resolution: "undici@npm:5.9.1"
-  checksum: 8acabbac8e18943ff822574f831d03d65e697e66ef486a679763f7778f37b28980caf7097ededf4017b58c099809e8efd8509a6688f60638360fb86ef47a59df
+"undici@npm:^5.10.0":
+  version: 5.10.0
+  resolution: "undici@npm:5.10.0"
+  checksum: 7ba2b71dccc74cd2bdf645b83e9aaef374ae04855943d0a2f42a3d0b9e5556f37cc9b5156fb5288277a2fa95fd46a56f3ae0d5cf73db3f008d75ec41104b136c
   languageName: node
   linkType: hard
 
-"undici@patch:undici@npm:^5.9.1#.yarn/patches/undici-npm-5.8.2-bdd4575aa8.patch::locator=lunar-bot%40workspace%3A.":
-  version: 5.9.1
-  resolution: "undici@patch:undici@npm%3A5.9.1#.yarn/patches/undici-npm-5.8.2-bdd4575aa8.patch::version=5.9.1&hash=620e11&locator=lunar-bot%40workspace%3A."
-  checksum: 6e48a5c7856fb7044f50d66d7246bcb9e5c2aad64ab3719353138d082cece9dc49bfd6f6134a9d856a0c976b1218f1c398bf6f0dd457d82398cee29e2422697b
+"undici@patch:undici@npm:^5.10.0#.yarn/patches/undici-npm-5.8.2-bdd4575aa8.patch::locator=lunar-bot%40workspace%3A.":
+  version: 5.10.0
+  resolution: "undici@patch:undici@npm%3A5.10.0#.yarn/patches/undici-npm-5.8.2-bdd4575aa8.patch::version=5.10.0&hash=620e11&locator=lunar-bot%40workspace%3A."
+  checksum: f0972859671ebc43130ed469a28e61bf30c816e9f9a80eaca812d2b25c8e9a257116c1cef3a741e7d862ad8c3966893120639f93dc78c742120e1cf634bf65a6
   languageName: node
   linkType: hard
 
