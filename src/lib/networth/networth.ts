@@ -163,7 +163,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	// book of stats, if applied stats_books is the number of kills, can be zero
-	if (Reflect.has(extraAttributes, 'stats_book')) {
+	if (typeof extraAttributes.stats_book === 'number') {
 		price += getPrice(ItemId.BookOfStats) * PriceModifier.BookOfStats;
 	}
 
