@@ -163,6 +163,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'hasty':
 		case 'heavy':
 		case 'heroic':
+		case 'keen':
 		case 'legendary':
 		case 'light':
 		case 'lumberjack':
@@ -170,7 +171,9 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'mythic':
 		case 'neat':
 		case 'odd_sword':
+		case 'ominous':
 		case 'peasant':
+		case 'pretty':
 		case 'prospector':
 		case 'pure':
 		case 'rapid':
@@ -178,14 +181,21 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'robust':
 		case 'rugged':
 		case 'sharp':
+		case 'shiny':
+		case 'simple':
 		case 'smart':
 		case 'spicy':
+		case 'strange':
+		case 'strong':
 		case 'sturdy':
 		case 'superior':
 		case 'titanic':
+		case 'unpleasant':
 		case 'unreal':
 		case 'unyielding':
+		case 'vivid':
 		case 'wise':
+		case 'zealous':
 		case 'zooming':
 			return null;
 
