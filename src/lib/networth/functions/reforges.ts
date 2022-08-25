@@ -20,7 +20,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'ancient':
 			return ItemId.PrecursorGear;
 		case 'aote_stone':
-			return ItemId.AoteStone;
+			return ItemId.WarpedStone;
 		case 'auspicious':
 			return ItemId.RockGemstone;
 		case 'bizarre':
