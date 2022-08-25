@@ -113,6 +113,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// enchantments
 	if (extraAttributes.enchantments) {
 		for (let [enchantment, level] of Object.entries(extraAttributes.enchantments) as [Enchantment, number][]) {
+			// handle API inconsistencies with e.g. 'PROSECUTE'
 			enchantment = enchantment.toLowerCase() as Enchantment;
 
 			if (ITEM_SPECIFIC_IGNORED_ENCHANTS[itemId as keyof typeof ITEM_SPECIFIC_IGNORED_ENCHANTS]?.has(enchantment)) {
@@ -255,7 +256,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// enrichments
 	if (extraAttributes.talisman_enrichment) {
-		price += getPrice(`TALISMAN_ENRICHMENT_${extraAttributes.talisman_enrichment}`) * PriceModifier.TalismanEnrichment;
+		price +=
+			getPrice(`TALISMAN_ENRICHMENT_${extraAttributes.talisman_enrichment.toUpperCase()}`) *
+			PriceModifier.TalismanEnrichment;
 	}
 
 	// recombed
