@@ -147,7 +147,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'awkward':
 		case 'clean':
 		case 'deadly':
-		case 'double-bit':
+		case 'double_bit':
 		case 'epic':
 		case 'excellent':
 		case 'fair':
