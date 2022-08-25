@@ -305,7 +305,8 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// reforge
 	if (extraAttributes.modifier && !accessories.has(itemId)) {
-		price += getPrice(getReforgeStone(extraAttributes.modifier, itemId)!) * PriceModifier.Reforge;
+		const reforgeStone = getReforgeStone(extraAttributes.modifier, itemId);
+		if (reforgeStone) price += getPrice(reforgeStone) * PriceModifier.Reforge;
 	}
 
 	// scrolls (Necron's Blade)

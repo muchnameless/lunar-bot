@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers';
 import { logger } from '#logger';
 import { minutes } from '#functions';
 import { sql } from '#db';
+import { Warnings } from '#structures/Warnings';
 import { ItemId } from './constants';
 import type { ParsedSkyBlockItem } from '#root/jobs/pricesAndPatchNotes';
 
@@ -10,7 +11,11 @@ export type ItemUpgrade = Pick<ParsedSkyBlockItem, 'dungeon_conversion' | 'stars
 export const prices = new Map<string, number>();
 export const itemUpgrades = new Map<string, ItemUpgrade>();
 export const accessories = new Set<string>();
-export const getPrice = (item: string) => prices.get(item) ?? 0;
+
+const warnings = new Warnings<string>();
+
+export const getPrice = (itemId: string) =>
+	prices.get(itemId) ?? (warnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0);
 
 /**
  * queries the prices database

@@ -1,7 +1,7 @@
-import { logger } from '#logger';
+import { Warnings } from '#structures/Warnings';
 import { Enchantment } from '../constants';
 
-const warnings = new Set<string>();
+const warnings = new Warnings<string>();
 
 interface EnchantmentData {
 	itemId: `ENCHANTMENT_${string}`;
@@ -189,11 +189,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 			const e: never = enchantment;
 			const itemId = `${e}_${level}`;
 
-			// log warning only once
-			if (!warnings.has(itemId)) {
-				warnings.add(itemId);
-				logger.warn({ enchantment, lvl: level }, '[GET ENCHANTMENT]: unknown enchantment');
-			}
+			warnings.emit(itemId, { enchantment, lvl: level }, '[GET ENCHANTMENT]: unknown enchantment');
 
 			// unknown ultimate and turbo enchantments fallback
 			if (itemId.startsWith('ultimate_') || itemId.startsWith('turbo_')) {

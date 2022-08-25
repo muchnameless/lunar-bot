@@ -1,7 +1,7 @@
-import { logger } from '#logger';
+import { Warnings } from '#structures/Warnings';
 import { ItemId } from '../constants';
 
-const warnings = new Set<string>();
+const warnings = new Warnings<string>();
 
 /**
  * https://hypixel-skyblock.fandom.com/wiki/Reforging
@@ -205,11 +205,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 			return null;
 
 		default:
-			// log warning only once
-			if (!warnings.has(modifier)) {
-				warnings.add(modifier);
-				logger.warn({ modifier, itemId }, '[GET REFORGE STONE]: unknown modifier');
-			}
+			warnings.emit(modifier, { modifier, itemId }, '[GET REFORGE STONE]: unknown modifier');
 
 			return null;
 	}

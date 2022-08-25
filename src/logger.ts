@@ -2,7 +2,7 @@ import { isMainThread, parentPort } from 'node:worker_threads';
 import { pino, stdSerializers } from 'pino';
 import { JobType } from './jobs';
 
-type LogArguments = [Record<string, unknown> | Error, string];
+type LogArguments = Parameters<pino.LogFn>;
 
 export const logger = isMainThread
 	? pino({
@@ -23,11 +23,11 @@ export const logger = isMainThread
 			error: ((...args: LogArguments) =>
 				parentPort!.postMessage({
 					op: JobType.LogMessage,
-					d: { lvl: 'error', args: args.map((x) => (x instanceof Error ? stdSerializers.err(x) : x)) },
+					d: { lvl: 'error', args: args.map((x) => stdSerializers.err(x)) },
 				})) as pino.LogFn,
 			fatal: ((...args: LogArguments) =>
 				parentPort!.postMessage({
 					op: JobType.LogMessage,
-					d: { lvl: 'fatal', args: args.map((x) => (x instanceof Error ? stdSerializers.err(x) : x)) },
+					d: { lvl: 'fatal', args: args.map((x) => stdSerializers.err(x)) },
 				})) as pino.LogFn,
 	  };
