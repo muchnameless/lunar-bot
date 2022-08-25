@@ -11,7 +11,7 @@ const warnings = new Set<string>();
  */
 export const getReforgeStone = (modifier: string, itemId: string) => {
 	switch (modifier) {
-		case "jerry's":
+		case 'jerry_stone':
 			return ItemId.JerryStone;
 		case 'adept':
 			return ItemId.EndStoneShulker;
@@ -156,6 +156,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'fine':
 		case 'fortunate':
 		case 'gentle':
+		case 'godly':
 		case 'grand':
 		case 'great':
 		case 'green thumb':
@@ -164,22 +165,23 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'heroic':
 		case 'legendary':
 		case 'light':
-		case "lumberjack's":
+		case 'lumberjack':
 		case 'lush':
 		case 'mythic':
 		case 'neat':
-		case 'odd':
-		case "peasant's":
-		case "prospector's":
+		case 'odd_sword':
+		case 'peasant':
+		case 'prospector':
 		case 'pure':
 		case 'rapid':
-		case 'rich':
+		case 'rich_bow':
 		case 'robust':
 		case 'rugged':
 		case 'sharp':
 		case 'smart':
 		case 'spicy':
 		case 'sturdy':
+		case 'superior':
 		case 'titanic':
 		case 'unreal':
 		case 'unyielding':
