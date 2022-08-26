@@ -39,9 +39,7 @@ export class MessageUtil extends null {
 	 * @param message
 	 */
 	static channelLogInfo(message: Message) {
-		const { channel } = message;
-		if (!channel) return message.channelId;
-		return ChannelUtil.logInfo(channel);
+		return ChannelUtil.logInfo(message.channel) ?? message.channelId;
 	}
 
 	/**
@@ -56,7 +54,7 @@ export class MessageUtil extends null {
 	 * @param message
 	 */
 	static isUserMessage(message: Message) {
-		return !message.author?.bot && !message.webhookId && !message.system;
+		return !message.author.bot && !message.webhookId && !message.system;
 	}
 
 	/**
@@ -123,6 +121,7 @@ export class MessageUtil extends null {
 			return null;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
 			logger.warn(
 				{ message, data: emojis },
@@ -169,7 +168,6 @@ export class MessageUtil extends null {
 	/**
 	 * delete the message, added check for already deleted after timeout
 	 * @param message
-	 * @param options message delete options
 	 */
 	static async delete(message: Message): Promise<Message> {
 		// permission check
@@ -245,7 +243,7 @@ export class MessageUtil extends null {
 			if (
 				error instanceof DiscordAPIError &&
 				error.code === RESTJSONErrorCodes.InvalidFormBodyOrContentType &&
-				((error.rawError as DiscordErrorData).errors as Record<string, unknown>)?.message_reference
+				((error.rawError as DiscordErrorData).errors as Record<string, unknown> | undefined)?.message_reference
 			) {
 				logger.error({ err: error, data: _options }, `[MESSAGE REPLY]: in ${this.channelLogInfo(message)}`);
 
@@ -347,7 +345,7 @@ export class MessageUtil extends null {
 				.missing(requiredChannelPermissions, false)
 				.map((permission) => `'${permission}'`);
 			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${
-				missingChannelPermissions?.length === 1 ? '' : 's'
+				missingChannelPermissions.length === 1 ? '' : 's'
 			}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);

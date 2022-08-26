@@ -327,6 +327,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 		return Promise.all([
 			// minecraft
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			this.minecraft[CHAT_FUNCTION_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]]?.(
 				{ content, prefix: minecraftPrefix, maxParts, ..._options },
 			) ??

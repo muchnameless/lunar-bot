@@ -779,7 +779,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 	// player requesting entry
 	const playerRequestingIndex = playerData.findIndex((player) => player.discordId === user.id);
 
-	let playerRequestingEntry!: string;
+	let playerRequestingEntry: string | undefined;
 
 	if (playerRequestingIndex !== -1) {
 		const playerRequesting = playerData[playerRequestingIndex]!;
@@ -1013,7 +1013,7 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 	// 'your placement'
 	const playerRequestingIndex = playerData.findIndex((player) => player.discordId === user.id);
 
-	let playerRequestingEntry!: string;
+	let playerRequestingEntry: string;
 
 	if (playerRequestingIndex !== -1) {
 		const playerRequesting = playerData[playerRequestingIndex]!;

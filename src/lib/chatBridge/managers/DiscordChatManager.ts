@@ -154,7 +154,7 @@ export class DiscordChatManager extends ChatManager {
 	 * chat bridge channel
 	 */
 	get channel() {
-		return this.client.channels.cache.get(this.channelId) as TextChannel;
+		return this.client.channels.cache.get(this.channelId) as TextChannel | undefined;
 	}
 
 	/**
@@ -235,7 +235,7 @@ export class DiscordChatManager extends ChatManager {
 
 				webhook = await channel.createWebhook({
 					name: `${this.hypixelGuild} Chat Bridge`,
-					avatar: (channel.guild?.members.me ?? this.client.user!).displayAvatarURL(),
+					avatar: (channel.guild.members.me ?? this.client.user!).displayAvatarURL(),
 					reason: 'no Webhooks in Chat Bridge Channel found',
 				});
 
@@ -407,7 +407,7 @@ export class DiscordChatManager extends ChatManager {
 		await queuePromise;
 
 		try {
-			return await ChannelUtil.send(this.channel, _options);
+			return await ChannelUtil.send(this.channel!, _options);
 		} finally {
 			this.queue.shift();
 		}
@@ -516,7 +516,7 @@ export class DiscordChatManager extends ChatManager {
 				const referencedMessage = await message.fetchReference();
 
 				// author found and author is not already pinged
-				if (referencedMessage.author && !new RegExp(`<@!?${referencedMessage.author.id}>`).test(message.content)) {
+				if (!new RegExp(`<@!?${referencedMessage.author.id}>`).test(message.content)) {
 					contentParts.unshift(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
 				}
 			} catch (error) {
@@ -590,6 +590,6 @@ export class DiscordChatManager extends ChatManager {
 	 * @param options
 	 */
 	override createMessageCollector(options?: MessageCollectorOptions) {
-		return new MessageCollector(this.channel, options);
+		return new MessageCollector(this.channel!, options);
 	}
 }

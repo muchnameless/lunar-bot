@@ -24,6 +24,7 @@ export default class SlayersCommand extends BaseSkyBlockCommand {
 		let totalXp = 0;
 
 		for (const slayer of SLAYERS) {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			const XP = member.slayer_bosses?.[slayer]?.xp ?? 0;
 
 			totalXp += XP;

@@ -114,7 +114,7 @@ export class HypixelMessage {
 
 		if (matched) {
 			this.type =
-				(matched.groups!.type?.toUpperCase() as HypixelMessageType) ??
+				(matched.groups!.type?.toUpperCase() as HypixelMessageType | undefined) ??
 				(matched.groups!.whisper ? HypixelMessageType.Whisper : null);
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,

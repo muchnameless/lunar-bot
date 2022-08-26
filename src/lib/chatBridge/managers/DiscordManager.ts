@@ -84,6 +84,7 @@ export class DiscordManager {
 		const emoji =
 			EMOJI_NAME_TO_UNICODE[fullMatch.replaceAll('_', '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (emoji) return emoji;
 
 		const { value, similarity } = autocorrect(

@@ -494,6 +494,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 			? { [`ESSENCE_${item.dungeon_item_conversion_cost.essence_type}`]: item.dungeon_item_conversion_cost.amount }
 			: null,
 		stars: item.upgrade_costs?.map((entry) => reduceCostsArray(entry)) ?? null,
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		category: item.category ?? null,
 		prestige: null,
 	}));

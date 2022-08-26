@@ -53,7 +53,7 @@ export default class InteractionCreateEvent extends Event {
 				command: interaction.toString(),
 				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 					: 'DM',
 				guild: interaction.guild?.name ?? null,
 			},
@@ -99,7 +99,7 @@ export default class InteractionCreateEvent extends Event {
 				customId: interaction.customId,
 				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 					: 'DM',
 				guild: interaction.guild?.name ?? null,
 			},
@@ -229,7 +229,7 @@ export default class InteractionCreateEvent extends Event {
 				values: interaction.values,
 				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 					: 'DM',
 				guild: interaction.guild?.name ?? null,
 			},
@@ -386,7 +386,7 @@ export default class InteractionCreateEvent extends Event {
 				command: interaction.commandName,
 				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 					: 'DM',
 				guild: interaction.guild?.name ?? null,
 			},
@@ -415,7 +415,7 @@ export default class InteractionCreateEvent extends Event {
 				command: interaction.commandName,
 				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 					: 'DM',
 				guild: interaction.guild?.name ?? null,
 			},
@@ -446,7 +446,7 @@ export default class InteractionCreateEvent extends Event {
 				customId: interaction.customId,
 				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
 				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 					: 'DM',
 				guild: interaction.guild?.name ?? null,
 			},

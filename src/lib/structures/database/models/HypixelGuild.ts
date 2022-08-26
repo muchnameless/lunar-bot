@@ -344,6 +344,7 @@ export class HypixelGuild extends Model<
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
 	get chatBridge(): NonAttribute<ChatBridge<true>> {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
 		if (!this._chatBridge?.minecraft.isReady()) {
 			throw `${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`;
@@ -394,6 +395,7 @@ export class HypixelGuild extends Model<
 	 * whether the player is muted and that mute is not expired
 	 */
 	get muted(): NonAttribute<boolean> {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (this.mutedTill) {
 			// mute hasn't expired
 			if (Date.now() < this.mutedTill) return true;
@@ -986,6 +988,7 @@ export class HypixelGuild extends Model<
 	 * syncs guild ranks with the weight leaderboard
 	 */
 	async syncRanks() {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.client.config.get('AUTO_GUILD_RANKS') || !this.syncRanksEnabled) return this;
 
 		if (this._syncRanksPromise) return this._syncRanksPromise;
@@ -1056,6 +1059,7 @@ export class HypixelGuild extends Model<
 			this.save().catch((error) => logger.error(error));
 
 			// update player ranks
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (!this.chatBridgeEnabled) return this;
 
 			const { chatBridge } = this;
@@ -1108,6 +1112,7 @@ export class HypixelGuild extends Model<
 	 * update discord stat channel names
 	 */
 	async updateStatDiscordChannels() {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.updateStatDiscordChannelsEnabled || !this.statDiscordChannels) return;
 
 		for (const [type, value] of Object.entries(this.formattedStats)) {

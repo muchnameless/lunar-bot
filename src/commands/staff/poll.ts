@@ -95,7 +95,7 @@ export default class PollCommand extends DualCommand {
 				time: DURATION,
 			}) as Promise<HypixelUserMessage[]>;
 			const discordChannel = chatBridge.discord.channelsByType.get(HypixelMessageType.Guild)!.channel;
-			const discordMessages = discordChannel.awaitMessages({
+			const discordMessages = discordChannel?.awaitMessages({
 				filter: (discordMessage) => MessageUtil.isUserMessage(discordMessage),
 				time: DURATION,
 			});
@@ -118,13 +118,15 @@ export default class PollCommand extends DualCommand {
 			}
 
 			// aquire discord votes
-			for (const msg of (await discordMessages).values()) {
-				const votedFor = Number.parseInt(msg.content, 10);
+			if (discordMessages) {
+				for (const msg of (await discordMessages).values()) {
+					const votedFor = Number.parseInt(msg.content, 10);
 
-				// doesn't start with a number or out of range
-				if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
+					// doesn't start with a number or out of range
+					if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
-				pollOptions[votedFor - 1]!.votes.add(UserUtil.getPlayer(msg.author)?.minecraftUuid ?? msg.author.id);
+					pollOptions[votedFor - 1]!.votes.add(UserUtil.getPlayer(msg.author)?.minecraftUuid ?? msg.author.id);
+				}
 			}
 
 			// count votes and sort options by them
@@ -140,14 +142,16 @@ export default class PollCommand extends DualCommand {
 			);
 
 			// reply with result
-			void ChannelUtil.send(discordChannel, {
-				embeds: [
-					this.client.defaultEmbed
-						.setTitle(question)
-						.setDescription(resultString.join('\n\n'))
-						.setFooter({ text: `Poll by ${ign}` }), // no markdown in footer -> no need to escape IGN
-				],
-			});
+			if (discordChannel) {
+				void ChannelUtil.send(discordChannel, {
+					embeds: [
+						this.client.defaultEmbed
+							.setTitle(question)
+							.setDescription(resultString.join('\n\n'))
+							.setFooter({ text: `Poll by ${ign}` }), // no markdown in footer -> no need to escape IGN
+					],
+				});
+			}
 
 			resultString.unshift(question);
 

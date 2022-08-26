@@ -32,6 +32,7 @@
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/no-shadow": "error",
 		"@typescript-eslint/no-this-alias": "off",
+		"@typescript-eslint/no-unnecessary-condition": "error",
 		"@typescript-eslint/no-unused-vars": "error",
 		"unicorn/better-regex": "off",
 		"unicorn/consistent-destructuring": "off",

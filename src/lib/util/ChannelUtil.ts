@@ -182,7 +182,7 @@ export class ChannelUtil extends null {
 				.missing(requiredChannelPermissions, false)
 				.map((permission) => `'${permission}'`);
 			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${
-				missingChannelPermissions?.length === 1 ? '' : 's'
+				missingChannelPermissions.length === 1 ? '' : 's'
 			} in ${this.logInfo(channel)}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
@@ -190,6 +190,7 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
 			const MESSAGE = `bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
 				(channel as TextChannel).guild.members.me!.communicationDisabledUntilTimestamp! - Date.now(),

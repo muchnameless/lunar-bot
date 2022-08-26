@@ -176,6 +176,7 @@ export class DatabaseManager {
 
 		// update db
 		for (const taxCollector of taxCollectors.cache.values()) {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (!taxCollector.isCollecting) continue; // skip retired collectors
 
 			if (apiError) {
@@ -346,6 +347,7 @@ export class DatabaseManager {
 
 				for (const player of hypixelGuild.players.values()) {
 					values[Math.trunc(++index / ENTRIES_PER_ROW)] += `\n${
+						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 						player.paid ? UnicodeEmoji.VarY : UnicodeEmoji.X
 					}\u00A0${player.ign.slice(0, 15)}`;
 				}
@@ -442,6 +444,7 @@ export class DatabaseManager {
 
 			if (
 				!taxChannel?.isTextBased() ||
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)
 			) {
 				logger.warn('[TAX MESSAGE] tax channel error');

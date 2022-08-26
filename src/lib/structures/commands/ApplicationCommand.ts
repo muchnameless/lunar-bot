@@ -99,7 +99,8 @@ export class ApplicationCommand extends BaseCommand {
 				this.aliases ??= [];
 				this.aliases.push(...aliases);
 
-				this.slashAliases = aliases.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
+				const nonEmptyAliases = aliases.map((alias) => alias.toLowerCase()).filter(Boolean);
+				this.slashAliases = nonEmptyAliases.length ? nonEmptyAliases : null;
 			}
 
 			if (!slash.name) {
@@ -330,8 +331,8 @@ export class ApplicationCommand extends BaseCommand {
 		if (!roleIds) return; // no role requirements
 
 		const member =
-			interaction.guildId === hypixelGuild.discordId
-				? interaction.member
+			interaction.guildId !== null && interaction.guildId === hypixelGuild.discordId
+				? interaction.member!
 				: await (async () => {
 						const { discordGuild } = hypixelGuild;
 

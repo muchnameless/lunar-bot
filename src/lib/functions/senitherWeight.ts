@@ -44,6 +44,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const slayer of SLAYERS) {
 		const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(
 			slayer,
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0,
 		);
 
@@ -57,6 +58,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const type of DUNGEON_TYPES) {
 		const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(
 			type,
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			skyblockMember.dungeons?.dungeon_types?.[type]?.experience ?? 0,
 		);
 
@@ -68,6 +70,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const dungeonClass of DUNGEON_CLASSES) {
 		const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(
 			dungeonClass,
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			skyblockMember.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0,
 		);
 

@@ -28,7 +28,7 @@ export class Job {
 		this.name = basename(file.href, '.js');
 		this._options = listeners ? (options as WorkerOptions) : undefined;
 
-		const _listeners = listeners ?? (options as Partial<Listeners>);
+		const _listeners = listeners ?? (options as Partial<Listeners> | undefined);
 
 		this._listeners = {
 			error: _listeners?.error ?? this.onError.bind(this),

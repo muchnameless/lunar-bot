@@ -37,6 +37,7 @@ export class LogHandler {
 		if (!channel?.isTextBased()) {
 			logger.error(
 				`[LOG HANDLER]: ${
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 					channel ? `#${(channel as GuildChannel).name ?? channel.id}` : this.client.config.get('LOGGING_CHANNEL_ID')
 				} is not a cached text based channel (id)`,
 			);
@@ -55,6 +56,7 @@ export class LogHandler {
 			return null;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
 			const {
 				members: { me },

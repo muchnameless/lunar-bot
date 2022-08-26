@@ -233,12 +233,6 @@ export default class AhCommand extends ApplicationCommand {
 		const [profileId] = interaction.values as [string];
 		const profiles = interaction.component.options;
 
-		if (!profiles) {
-			await InteractionUtil.update(interaction, { components: [] });
-
-			throw 'an error occurred';
-		}
-
 		// interaction from original requester -> edit message
 		if (interaction.user.id === userId) {
 			return InteractionUtil.update(interaction, await this._generateReply({ uuid, ign, profileId, profiles, userId }));

@@ -53,7 +53,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				const senderDiscordId = this.client.players.findByIgn(sender)?.discordId;
 
 				// react to latest message from 'sender' with that content
-				const cache = this.chatBridge.discord.channelsByType.get(hypixelMessage.type!)?.channel.messages.cache;
+				const cache = this.chatBridge.discord.channelsByType.get(hypixelMessage.type!)?.channel?.messages.cache;
 
 				if (cache) {
 					void MessageUtil.react(

@@ -120,7 +120,9 @@ export class ImgurClient {
 		// restore cached rateLimit data
 		void (async () => {
 			try {
-				const data = (await cache?.get('ratelimits')) as { rateLimit: RateLimitData; postRateLimit: PostRateLimitData };
+				const data = (await cache?.get('ratelimits')) as
+					| { rateLimit: RateLimitData; postRateLimit: PostRateLimitData }
+					| undefined;
 
 				// no cached data or rateLimit data is already present
 				if (!data || this.rateLimit.userlimit !== null) return;

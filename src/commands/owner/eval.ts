@@ -196,12 +196,13 @@ export default class EvalCommand extends BaseOwnerCommand {
 		const player = UserUtil.getPlayer(user);
 		const p = player;
 		const bridges = client.chatBridges.cache;
+		/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 		const mention = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getMentionable('mention');
 		const channel =
 			(interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getChannel('channel') ?? interaction.channel;
 		const ch = channel;
 		const attachment = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getAttachment('attachment');
-		/* eslint-enable @typescript-eslint/no-unused-vars */
+		/* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-unnecessary-condition */
 
 		const responseEmbed = this.client.defaultEmbed //
 			.setFooter({

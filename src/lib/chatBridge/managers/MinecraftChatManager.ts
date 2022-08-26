@@ -263,7 +263,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					max: 1,
 				});
 
-				return (JSON.parse(result).server as string) ?? null;
+				return (JSON.parse(result).server as string | undefined) ?? null;
 			} catch (error) {
 				logger.error(error, '[GET SERVER]');
 				return null;
@@ -614,6 +614,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			)
 				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 				.replace(/<a?:(\w{2,32}):\d{17,20}>/g, ':$1:') // custom emojis
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				.replace(TwemojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
 				// replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
 				.replace(/(?<![¯\\])\\(?=[^a-z\d\\ \n])/gi, '')
@@ -629,6 +630,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					switch (type) {
 						// channels
 						case '#': {
+							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 							const CHANNEL_NAME = (this.client.channels.cache.get(id) as GuildChannel)?.name;
 							if (CHANNEL_NAME) return `#${replaceSmallLatinCapitalLetters(CHANNEL_NAME)}`;
 							return match;
@@ -833,6 +835,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				}),
 		);
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!success) {
 			// messageParts blocked
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);

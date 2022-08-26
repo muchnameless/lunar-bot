@@ -100,6 +100,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 
 		for (const taxCollector of this.cache.values()) {
 			embed.addFields({
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				name: `${escapeIgn(`${taxCollector}`)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
 				value: stripIndents`
 					tax: ${formatNumber(taxCollector.collectedTax)}

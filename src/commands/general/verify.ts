@@ -61,6 +61,7 @@ export default class VerifyCommand extends ApplicationCommand {
 			return InteractionUtil.reply(interaction, formatError(error));
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag

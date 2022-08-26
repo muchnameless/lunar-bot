@@ -27,10 +27,7 @@ export default class GuildMemberUpdateEvent extends Event {
 
 		// changed nickname -> check if new name includes ign
 		if (oldMember.nickname !== newMember.nickname) {
-			void player.syncIgnWithDisplayName(
-				newMember.nickname !== null || // added or updated nickname
-					(oldMember.nickname !== null && newMember.nickname === null), // removed nickname
-			);
+			void player.syncIgnWithDisplayName(true);
 		}
 
 		// guild member timeout change

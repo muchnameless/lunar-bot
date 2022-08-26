@@ -613,10 +613,11 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * fetches the discord member if the discord id is valid and the player is in the hypixel guild's discord server
-	 * @param discordGuild
+	 * @param guildResolvable
 	 */
 	async fetchDiscordMember(guildResolvable?: GuildResolvable | null) {
 		if (this._discordMember) return this._discordMember;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 		try {
@@ -635,7 +636,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				if (!guild) return null;
 			}
 
-			const discordMember = (await guild.members.fetch(this.discordId)) ?? null;
+			const discordMember = await guild.members.fetch(this.discordId);
 
 			void this.setDiscordMember(discordMember);
 
@@ -681,6 +682,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		GuildMemberUtil.setPlayer(member, this);
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.inDiscord) {
 			try {
 				await this.update({ inDiscord: true });
@@ -831,6 +833,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * @param rejectOnAPIError
 	 */
 	async updateXp(rejectOnAPIError = false) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (this.xpUpdatesDisabled) return this;
 
 		try {
@@ -983,6 +986,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * @param options.shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async updateDiscordMember({ reason: reasonInput = 'synced with in-game stats', shouldSendDm = false } = {}) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (this.discordMemberUpdatesDisabled || !this.guildId) return;
 
 		let reason = reasonInput;
@@ -1874,6 +1878,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * resets the guild tax paid
 	 */
 	async resetTax() {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.paid) return this;
 
 		const result = await this.client.db.models.Transaction.findAll({
@@ -1913,6 +1918,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		collectedBy = this.minecraftUuid,
 		auctionId = null,
 	}: SetToPaidOptions = {}) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (this.paid) {
 			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: TransactionType.Donation }));
 			return this;

@@ -12,6 +12,7 @@ import {
 	InteractionResponse,
 	InteractionType,
 	isJSONEncodable,
+	Message,
 	RESTJSONErrorCodes,
 	SnowflakeUtil,
 } from 'discord.js';
@@ -43,7 +44,6 @@ import type {
 	InteractionDeferUpdateOptions,
 	InteractionReplyOptions,
 	InteractionUpdateOptions,
-	Message,
 	MessageActionRowComponentBuilder,
 	MessageResolvable,
 	ModalBuilder,
@@ -222,7 +222,7 @@ export class InteractionUtil extends null {
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
 							guild: interaction.guild?.name ?? null,
 						};
@@ -236,7 +236,7 @@ export class InteractionUtil extends null {
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
 							guild: interaction.guild?.name ?? null,
 						};
@@ -254,7 +254,7 @@ export class InteractionUtil extends null {
 						? `${interaction.member.displayName} | ${interaction.user.tag}`
 						: interaction.user.tag,
 					channel: interaction.guildId
-						? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+						? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 						: 'DM',
 					guild: interaction.guild?.name ?? null,
 				};
@@ -269,7 +269,7 @@ export class InteractionUtil extends null {
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
 							guild: interaction.guild?.name ?? null,
 						};
@@ -283,7 +283,7 @@ export class InteractionUtil extends null {
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
 							guild: interaction.guild?.name ?? null,
 						};
@@ -303,7 +303,7 @@ export class InteractionUtil extends null {
 						? `${interaction.member.displayName} | ${interaction.user.tag}`
 						: interaction.user.tag,
 					channel: interaction.guildId
-						? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+						? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 						: 'DM',
 					guild: interaction.guild?.name ?? null,
 				};
@@ -918,7 +918,7 @@ export class InteractionUtil extends null {
 						};
 
 						try {
-							await this.editReply(interaction, editOptions, (res as Message).id ?? '@original');
+							await this.editReply(interaction, editOptions, res instanceof Message ? res.id : '@original');
 						} catch (error) {
 							logger.error(
 								{ err: error, ...this.logInfo(interaction), data: _options },
@@ -1057,6 +1057,7 @@ export class InteractionUtil extends null {
 		interaction: Interaction<'cachedOrDM'>,
 		{ fallbackIfNoInput = true, includeAll = false }: GetHypixelGuildOptions = {},
 	) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		const INPUT = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getString('guild');
 
 		if (INPUT) {

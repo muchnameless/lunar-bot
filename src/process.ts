@@ -16,6 +16,7 @@ process
 		logger.error({ err: error, promise }, '[UNCAUGHT PROMISE REJECTION]');
 	})
 	.once('uncaughtException', (error, origin) => {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (IGNORED_ERRORS.includes(error?.message ?? error)) {
 			return logger.error({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
 		}

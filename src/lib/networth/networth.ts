@@ -116,6 +116,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			// handle API inconsistencies with e.g. 'PROSECUTE'
 			enchantment = enchantment.toLowerCase() as Enchantment;
 
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (ITEM_SPECIFIC_IGNORED_ENCHANTS[itemId as keyof typeof ITEM_SPECIFIC_IGNORED_ENCHANTS]?.has(enchantment)) {
 				continue;
 			}

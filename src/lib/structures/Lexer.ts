@@ -65,9 +65,7 @@ export class Lexer {
 
 				const token = action(...result);
 
-				if (this.reject) {
-					this.index = result.index;
-				} else if (token !== null) {
+				if (token !== null) {
 					if (length) this.remove = 0;
 					return token;
 				}

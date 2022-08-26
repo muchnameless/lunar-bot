@@ -58,6 +58,7 @@ export function autocorrect<T>(
 	let currentBestSimilarity = 0;
 
 	if (attributeToQuery) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, element[attributeToQuery] as unknown as string);
 
@@ -83,6 +84,7 @@ export function autocorrect<T>(
 			'[AUTOCORRECT]',
 		);
 	} else {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, element as unknown as string);
 

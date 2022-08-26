@@ -856,13 +856,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zikeji/hypixel@github:muchnameless/node-hypixel#eba88d97df4e070cf086d9a57e3987e694487598":
+"@zikeji/hypixel@github:muchnameless/node-hypixel#b482f7a4e68f907305dbd5b9ac72443c6e8377c5":
   version: 3.1.1
-  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=eba88d97df4e070cf086d9a57e3987e694487598"
+  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=b482f7a4e68f907305dbd5b9ac72443c6e8377c5"
   dependencies:
     "@sapphire/async-queue": ^1.5.0
     undici: ^5.8.2
-  checksum: 0e706ac04e789661a8c7ec4ddee0cf5ac6faec8bbe11a43a9f2145acc8f342afa791e1d970ec5913cbce5d7007297c96e2c70c75b1f50fc6df5c55e0a080e6af
+  checksum: 46e452f58f38009ef14676b8151c959586b022583bf2ec899fbb7cd7357b31b3af975670d3268277211a20ba88e993f78c9184d8966ab8c7707f617a5c90b6b0
   languageName: node
   linkType: hard
 
@@ -1783,9 +1783,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@patch:discord.js@npm:14.3.1-dev.1661429072-13baf75.0#.yarn/patches/discord.js-npm-14.2.1-dev.1660305930-c97977a.0-03244ff51a.patch::locator=lunar-bot%40workspace%3A.":
+"discord.js@patch:discord.js@npm%3A14.3.1-dev.1661429072-13baf75.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661429072-13baf75.0-a61789f7e5.patch::locator=lunar-bot%40workspace%3A.":
   version: 14.3.1-dev.1661429072-13baf75.0
-  resolution: "discord.js@patch:discord.js@npm%3A14.3.1-dev.1661429072-13baf75.0#.yarn/patches/discord.js-npm-14.2.1-dev.1660305930-c97977a.0-03244ff51a.patch::version=14.3.1-dev.1661429072-13baf75.0&hash=603d41&locator=lunar-bot%40workspace%3A."
+  resolution: "discord.js@patch:discord.js@npm%3A14.3.1-dev.1661429072-13baf75.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661429072-13baf75.0-a61789f7e5.patch::version=14.3.1-dev.1661429072-13baf75.0&hash=71f6ec&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@discordjs/builders": ^1.2.0
     "@discordjs/collection": ^1.1.0
@@ -1798,7 +1798,7 @@ __metadata:
     tslib: ^2.4.0
     undici: ^5.9.1
     ws: ^8.8.1
-  checksum: 19d6dd751f9d5550c420b10628bd1fffdf67bbeae86ebeaf5ea28d87498888c9854be66e8fdfe21ff12d14d2a43a5b44d1bc2e6ac489e91597dafb18c1d8f8c8
+  checksum: 3cf209e475bd09cd35d82c795fc4333a871243568f875bc292bf4cea6389e7ef594dc4253df906d1365e79156ab0541b2016d1b76735a17d50b89119d2108ec9
   languageName: node
   linkType: hard
 
@@ -3641,7 +3641,7 @@ __metadata:
     "@types/prettier": ^2.7.0
     "@typescript-eslint/eslint-plugin": ^5.35.1
     "@typescript-eslint/parser": ^5.35.1
-    "@zikeji/hypixel": "github:muchnameless/node-hypixel#eba88d97df4e070cf086d9a57e3987e694487598"
+    "@zikeji/hypixel": "github:muchnameless/node-hypixel#b482f7a4e68f907305dbd5b9ac72443c6e8377c5"
     bufferutil: ^4.0.6
     chart.js: ^3.9.1
     chartjs-node-canvas: ^4.1.6

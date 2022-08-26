@@ -131,6 +131,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 
 		// return command if it is visible
 		command = this.get(value)!;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		return (command as DualCommand).visible ?? true ? command : null;
 	}
 }

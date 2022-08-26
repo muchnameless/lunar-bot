@@ -8,6 +8,7 @@ export class EmbedUtil extends null {
 	 * @param embeds
 	 */
 	static totalLength(embeds: (JSONEncodable<APIEmbed> | APIEmbed)[]) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		return embeds.reduce((acc, cur) => acc + embedLength((cur as Embed | EmbedBuilder).data ?? cur), 0);
 	}
 

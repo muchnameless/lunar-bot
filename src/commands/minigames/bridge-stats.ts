@@ -30,7 +30,7 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 	 */
 	static _calculateStats(duelStats: Components.Schemas.PlayerStatsGameMode, stat: string) {
 		return ['duel', 'doubles', 'four'].reduce(
-			(acc, cur) => acc + ((duelStats[`bridge_${cur}_${stat}`] as number) ?? 0),
+			(acc, cur) => acc + ((duelStats[`bridge_${cur}_${stat}`] as number | undefined) ?? 0),
 			0,
 		);
 	}

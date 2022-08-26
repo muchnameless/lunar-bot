@@ -350,6 +350,7 @@ export default class TaxCommand extends ApplicationCommand {
 
 								if (
 									!taxChannel?.isTextBased() ||
+									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 									((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)
 								) {
 									logger.warn('[TAX RESET] tax channel error');

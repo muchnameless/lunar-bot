@@ -70,53 +70,54 @@ export default class DebugCommand extends ApplicationCommand {
 											[c.recipient?.tag ?? c.recipientId, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
 									)
 									.sort(([, a], [, b]) => b - a)
-									.map(([name, timestamp]) =>
-										quote(`${name ?? 'unknown channel'}: ${time(timestamp, TimestampStyles.LongDateTime)}`),
-									)
+									.map(([name, timestamp]) => quote(`${name}: ${time(timestamp, TimestampStyles.LongDateTime)}`))
 									.join('\n')}
 								${(channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
 									.map((c) => [c, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const)
 									.sort(([, a], [, b]) => b - a)
-									.map(([c, timestamp]) =>
-										quote(`${c ?? 'unknown channel'}: ${time(timestamp, TimestampStyles.LongDateTime)}`),
-									)
+									.map(([c, timestamp]) => quote(`${c}: ${time(timestamp, TimestampStyles.LongDateTime)}`))
 									.join('\n')}
 								Members: ${formatNumber(guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
 								Users: ${formatNumber(this.client.users.cache.size)}
 								Messages: ${formatNumber(
 									channels.cache.reduce(
+										// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 										(acc, channel) => acc + ((channel as TextBasedChannel).messages?.cache.size ?? 0),
 										0,
 									),
 								)}
-								${(
-									channels.cache.filter((c) => Boolean((c as TextBasedChannel).messages?.cache.size)) as Collection<
-										Snowflake,
-										TextBasedChannel
-									>
-								)
-									.sort(
-										(
-											{
-												messages: {
-													cache: { size: a },
-												},
-											},
-											{
-												messages: {
-													cache: { size: b },
-												},
-											},
-										) => b - a,
+								${
+									/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+									(
+										channels.cache.filter((c) => Boolean((c as TextBasedChannel).messages?.cache.size)) as Collection<
+											Snowflake,
+											TextBasedChannel
+										>
 									)
-									.map((c) =>
-										quote(
-											`${c.type !== ChannelType.DM ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
-												c.messages.cache.size,
-											)}`,
-										),
-									)
-									.join('\n')}
+										/* eslint-enable @typescript-eslint/no-unnecessary-condition */
+										.sort(
+											(
+												{
+													messages: {
+														cache: { size: a },
+													},
+												},
+												{
+													messages: {
+														cache: { size: b },
+													},
+												},
+											) => b - a,
+										)
+										.map((c) =>
+											quote(
+												`${c.type !== ChannelType.DM ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
+													c.messages.cache.size,
+												)}`,
+											),
+										)
+										.join('\n')
+								}
 								DiscordGuilds: ${formatNumber(this.client.discordGuilds.cache.size)}
 								HypixelGuilds: ${formatNumber(this.client.hypixelGuilds.cache.size)}
 								Players: ${formatNumber(players.cache.size)}
