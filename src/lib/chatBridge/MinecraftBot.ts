@@ -38,13 +38,14 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 	const bot = createClient(options);
 
 	/**
-	 * load (and cache) bot events
+	 * load bot events
 	 */
-	for (const { name, callback } of await getEvents()) {
+	const events = await getEvents();
+	for (const { name, callback } of events) {
 		bot[SPAWN_EVENTS.has(name as any) ? 'once' : 'on'](name, callback.bind(null, chatBridge));
 	}
 
-	logger.debug(`[CREATE BOT]: ${getEvents.length} event${getEvents.length !== 1 ? 's' : ''} loaded`);
+	logger.debug(`[CREATE BOT]: ${events.length} event${events.length !== 1 ? 's' : ''} loaded`);
 
 	return bot;
 }
