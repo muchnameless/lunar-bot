@@ -1,5 +1,5 @@
 import { FetchError } from './FetchError';
-import type { Dispatcher } from 'undici';
+import type { Response } from 'undici';
 
 export class MojangAPIError extends FetchError {
 	/**
@@ -7,7 +7,7 @@ export class MojangAPIError extends FetchError {
 	 * @param queryType
 	 * @param input
 	 */
-	constructor(response: Partial<Dispatcher.ResponseData>, queryType?: string | null, input?: string) {
+	constructor(response: Partial<Response>, queryType?: string | null, input?: string) {
 		let message: string;
 
 		switch (queryType) {

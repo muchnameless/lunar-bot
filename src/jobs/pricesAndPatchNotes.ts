@@ -3,7 +3,7 @@ import { parentPort } from 'node:worker_threads';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { clearTimeout, setTimeout } from 'node:timers';
 import { EventEmitter } from 'node:events';
-import { request } from 'undici';
+import { fetch } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
 import { CronJob } from 'cron';
@@ -16,6 +16,7 @@ import { calculatePetSkillLevel } from '#networth/functions/pets';
 import { ItemId } from '#networth/constants/itemId';
 import { ItemRarity } from '#networth/constants/itemRarity';
 import { sql } from '#structures/database/sql';
+import { consumeBody } from '../lib/functions/fetch';
 import { JobType } from '.';
 import type { ArrayElementType } from '@sapphire/utilities';
 import type { Components } from '@zikeji/hypixel';
@@ -560,14 +561,13 @@ const xmlParser = new XMLParser({ ignoreDeclaration: true });
  * @param forum
  */
 async function fetchForumEntries(ac: AbortController, forum: string) {
-	const res = await request(`https://hypixel.net/forums/${forum}/index.rss`, {
+	const res = await fetch(`https://hypixel.net/forums/${forum}/index.rss`, {
 		signal: ac.signal,
-		headers: { 'user-agent': 'undici' },
 	});
 
-	if (res.statusCode === 200) return (xmlParser.parse(await res.body.text()) as HypixelForumResponse).rss.channel.item;
+	if (res.status === 200) return (xmlParser.parse(await res.text()) as HypixelForumResponse).rss.channel.item;
 
-	void res.body.dump();
+	void consumeBody(res);
 	throw new FetchError('FetchError', res);
 }
 

@@ -805,13 +805,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zikeji/hypixel@github:muchnameless/node-hypixel#b482f7a4e68f907305dbd5b9ac72443c6e8377c5":
+"@zikeji/hypixel@github:muchnameless/node-hypixel#fetch":
   version: 3.1.1
-  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=b482f7a4e68f907305dbd5b9ac72443c6e8377c5"
+  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=4f17865f7c73dd7307425541c11f0d87b6ff2fd0"
   dependencies:
     "@sapphire/async-queue": ^1.5.0
     undici: ^5.8.2
-  checksum: 46e452f58f38009ef14676b8151c959586b022583bf2ec899fbb7cd7357b31b3af975670d3268277211a20ba88e993f78c9184d8966ab8c7707f617a5c90b6b0
+  checksum: bbab5a99b786eebfca2c04d4a0da484c36647b26c2c20df7ed964c6061d8f333577a7143446fd26d0c0723b43b1bffc58665b31b997a36ecf8925f5ba4f5d9e3
   languageName: node
   linkType: hard
 
@@ -3560,7 +3560,7 @@ __metadata:
     "@types/prettier": ^2.7.0
     "@typescript-eslint/eslint-plugin": ^5.35.1
     "@typescript-eslint/parser": ^5.35.1
-    "@zikeji/hypixel": "github:muchnameless/node-hypixel#b482f7a4e68f907305dbd5b9ac72443c6e8377c5"
+    "@zikeji/hypixel": "github:muchnameless/node-hypixel#fetch"
     bufferutil: ^4.0.6
     chart.js: ^3.9.1
     chartjs-node-canvas: ^4.1.6
@@ -5854,17 +5854,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.10.0":
+"undici@npm:^5.10.0, undici@npm:^5.8.2, undici@npm:^5.9.1":
   version: 5.10.0
   resolution: "undici@npm:5.10.0"
   checksum: 7ba2b71dccc74cd2bdf645b83e9aaef374ae04855943d0a2f42a3d0b9e5556f37cc9b5156fb5288277a2fa95fd46a56f3ae0d5cf73db3f008d75ec41104b136c
-  languageName: node
-  linkType: hard
-
-"undici@patch:undici@npm:^5.10.0#.yarn/patches/undici-npm-5.8.2-bdd4575aa8.patch::locator=lunar-bot%40workspace%3A.":
-  version: 5.10.0
-  resolution: "undici@patch:undici@npm%3A5.10.0#.yarn/patches/undici-npm-5.8.2-bdd4575aa8.patch::version=5.10.0&hash=620e11&locator=lunar-bot%40workspace%3A."
-  checksum: f0972859671ebc43130ed469a28e61bf30c816e9f9a80eaca812d2b25c8e9a257116c1cef3a741e7d862ad8c3966893120639f93dc78c742120e1cf634bf65a6
   languageName: node
   linkType: hard
 

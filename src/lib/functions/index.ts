@@ -4,6 +4,7 @@ export * from './time';
 export * from './array';
 export * from './components';
 export * from './error';
+export * from './fetch';
 export * from './image';
 export * from './input';
 export * from './leaderboards';
