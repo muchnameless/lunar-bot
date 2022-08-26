@@ -16,7 +16,7 @@ import { calculatePetSkillLevel } from '#networth/functions/pets';
 import { ItemId } from '#networth/constants/itemId';
 import { ItemRarity } from '#networth/constants/itemRarity';
 import { sql } from '#structures/database/sql';
-import { consumeBody } from '../lib/functions/fetch';
+import { consumeBody } from '#root/lib/functions/fetch';
 import { JobType } from '.';
 import type { ArrayElementType } from '@sapphire/utilities';
 import type { Components } from '@zikeji/hypixel';

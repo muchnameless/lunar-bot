@@ -807,11 +807,11 @@ __metadata:
 
 "@zikeji/hypixel@github:muchnameless/node-hypixel#fetch":
   version: 3.1.1
-  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=4f17865f7c73dd7307425541c11f0d87b6ff2fd0"
+  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=47bd4973c23140daaf35b4620f69c4b020298a51"
   dependencies:
     "@sapphire/async-queue": ^1.5.0
     undici: ^5.8.2
-  checksum: bbab5a99b786eebfca2c04d4a0da484c36647b26c2c20df7ed964c6061d8f333577a7143446fd26d0c0723b43b1bffc58665b31b997a36ecf8925f5ba4f5d9e3
+  checksum: 1303ca6a522f67a61773799c9c3e135f888ea4e1db780c305df93b0f7fb5954b8a72b4e9fe2b8c922c7137e75dfbf3c0218fb4b02227791f5124fab88151d31d
   languageName: node
   linkType: hard
 
