@@ -543,13 +543,25 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param hypixelMessage
 	 */
 	collect(hypixelMessage: HypixelMessage) {
+		// collector not running
 		if (!this._collecting) return;
+
+		// message from the bot including the content that's being waited for
 		if (hypixelMessage.me && hypixelMessage.content.includes(this._contentFilter!)) {
 			return this._resolveAndReset(hypixelMessage);
 		}
+
+		// ignore messages from players
 		if (hypixelMessage.type) return;
+
+		// anti-spam response
 		if (hypixelMessage.spam) return this._resolveAndReset(ChatResponse.Spam);
-		if (hypixelMessage.content.startsWith('We blocked your comment')) {
+
+		// blocked response
+		if (
+			hypixelMessage.content.startsWith('We blocked your comment') ||
+			hypixelMessage.content.startsWith('Advertising is against the rules')
+		) {
 			return this._resolveAndReset(ChatResponse.Blocked);
 		}
 	}
