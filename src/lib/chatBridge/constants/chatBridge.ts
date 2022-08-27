@@ -108,7 +108,7 @@ export const DISCORD_CDN_URL_REGEXP =
  * only lower case versions are not blocked by the advertisement filter
  */
 export const ALLOWED_URLS = new RegExp(
-	['hypixel.net', 'discord.gg', 'imgur.com'].map((x) => `\\b${x}($|\\/)`).join('|'),
+	['hypixel.net', 'discord.gg', 'imgur.com'].map((x) => `\\b${x}(?:$|\\/)`).join('|'),
 );
 
 export const DELETED_MESSAGE_REASON = Symbol('ChatBridge:deletedMessage');
