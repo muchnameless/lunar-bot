@@ -1,13 +1,13 @@
 import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { AsyncQueue } from '@sapphire/async-queue';
-import { request, FormData } from 'undici';
+import { fetch, FormData } from 'undici';
 import ms from 'ms';
 import { logger } from '#logger';
-import { isAbortError, seconds } from '#functions';
+import { consumeBody, isAbortError, seconds } from '#functions';
 import { keys } from '#types';
 import { FetchError } from './errors/FetchError';
-import type { Dispatcher } from 'undici';
+import type { Response, RequestInit } from 'undici';
 
 export interface ImageData {
 	id: string;
@@ -72,11 +72,6 @@ interface ImgurClientOptions {
 	retries?: number;
 	rateLimitOffset?: number;
 	rateLimitedWaitTime?: number;
-}
-
-// undici's signal is typed as unknown
-interface RequestOptions extends Dispatcher.RequestOptions {
-	signal?: AbortSignal;
 }
 
 export class ImgurClient {
@@ -187,7 +182,7 @@ export class ImgurClient {
 	 */
 	async request(
 		endpoint: string,
-		requestOptions: RequestOptions,
+		requestOptions: RequestInit,
 		{ checkRateLimit = true, cacheKey }: { checkRateLimit?: boolean; cacheKey: string },
 	) {
 		const cached = await this.cache?.get(cacheKey);
@@ -231,11 +226,11 @@ export class ImgurClient {
 			const res = await this._request(endpoint, requestOptions);
 
 			// get server time
-			const NOW = Date.parse(res.headers.date!) || Date.now();
+			const NOW = Date.parse(res.headers.get('date')!) || Date.now();
 
 			// get ratelimit headers
 			for (const type of keys(this.rateLimit)) {
-				const data = Number.parseInt(res.headers[`x-ratelimit-${type}`] as string, 10);
+				const data = Number.parseInt(res.headers.get(`x-ratelimit-${type}`)!, 10);
 				if (Number.isNaN(data)) continue;
 
 				this.rateLimit[type] = type.endsWith('reset')
@@ -244,7 +239,7 @@ export class ImgurClient {
 			}
 
 			for (const type of keys(this.postRateLimit)) {
-				const data = Number.parseInt(res.headers[`x-post-rate-limit-${type}`] as string, 10);
+				const data = Number.parseInt(res.headers.get(`x-post-rate-limit-${type}`)!, 10);
 				if (Number.isNaN(data)) continue;
 
 				this.postRateLimit[type] = type.endsWith('reset')
@@ -253,12 +248,12 @@ export class ImgurClient {
 			}
 
 			// check response
-			if (res.statusCode !== 200) {
-				void res.body.dump();
+			if (res.status !== 200) {
+				void consumeBody(res);
 				throw new FetchError('ImgurAPIError', res);
 			}
 
-			const parsedRes = await res.body.json();
+			const parsedRes = await res.json();
 			await this.cache?.set(cacheKey, parsedRes); // cache
 
 			return parsedRes;
@@ -273,11 +268,7 @@ export class ImgurClient {
 	 * @param options
 	 * @param retries current retry
 	 */
-	private async _request(
-		endpoint: string,
-		{ headers, ...options }: RequestOptions,
-		retries = 0,
-	): Promise<Dispatcher.ResponseData> {
+	private async _request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
 		options.signal?.throwIfAborted();
 
 		// internal AbortSignal (to have a timeout without having to abort the external signal)
@@ -289,7 +280,7 @@ export class ImgurClient {
 		options.signal?.addEventListener('abort', listener);
 
 		try {
-			return await request(`${this.baseURL}${endpoint}`, {
+			return await fetch(`${this.baseURL}${endpoint}`, {
 				headers: {
 					Authorization: this.#authorisation,
 					...headers,
