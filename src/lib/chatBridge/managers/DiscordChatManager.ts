@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import {
 	bold,
 	DiscordAPIError,
@@ -8,14 +9,21 @@ import {
 	TimestampStyles,
 } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
+import { fetch } from 'undici';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
 import { logger } from '#logger';
-import { UnicodeEmoji, MAX_WEBHOOKS_PER_CHANNEL } from '#constants';
+import {
+	ALLOWED_EXTENSIONS,
+	ALLOWED_MIMES,
+	MAX_IMAGE_UPLOAD_SIZE,
+	MAX_WEBHOOKS_PER_CHANNEL,
+	UnicodeEmoji,
+} from '#constants';
 import { WebhookError } from '#structures/errors/WebhookError';
 import { imgur } from '#api';
 import { asyncReplace, minutes } from '#functions';
 import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache';
-import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
+import { PREFIX_BY_TYPE } from '../constants';
 import { ChatManager } from './ChatManager';
 import type {
 	Attachment,
@@ -124,27 +132,27 @@ export class DiscordChatManager extends ChatManager {
 
 		const urls: string[] = [];
 
-		let hasError = false;
+		/**
+		 * can't send discord CDN URLs in hypixel chat anymore due to the anti-advertising filter
+		 */
+		// let hasError = false;
 
 		for (const { contentType, url, size } of attachments.values()) {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
-			if (
-				!hasError &&
-				this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some((type) => contentType?.startsWith(type)) &&
-				size <= 1e7
-			) {
+			if (/* !hasError && */ ALLOWED_MIMES.has(contentType as any) && size <= MAX_IMAGE_UPLOAD_SIZE) {
 				try {
 					urls.push((await imgur.upload(url)).data.link);
 				} catch (error) {
 					logger.error(error, '[UPLOAD ATTACHMENTS]');
 					urls.push(url);
-					hasError = true;
+					// hasError = true;
+					break;
 				}
 
 				continue;
 			}
 
-			urls.push(url); // no image (e.g. video)
+			// urls.push(url); // no image (e.g. video)
 		}
 
 		return urls;
@@ -488,15 +496,49 @@ export class DiscordChatManager extends ChatManager {
 		if (messageContent) {
 			// parse discord attachment links and replace with imgur uploaded link
 			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
-				messageContent = await asyncReplace(messageContent, DISCORD_CDN_URL_REGEXP, async (match) => {
-					try {
-						// try to upload URL without query parameters
-						return (await imgur.upload(match[1]!, { signal })).data.link;
-					} catch (error) {
-						logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}`);
-						return match[0]!;
-					}
-				});
+				messageContent = await asyncReplace(
+					messageContent,
+					/(?:https?:\/\/(?:www\.|(?!www))[a-z\d][a-z\d-]+[a-z\d]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[a-z\d]+\.\S{2,})/gi,
+					async (match) => {
+						try {
+							const url = new URL(match[0]);
+
+							if (
+								// don't upload imgur links to imgur
+								url.hostname.endsWith('imgur.com') ||
+								// upload only pictures
+								!ALLOWED_EXTENSIONS.some((ext) => url.pathname.endsWith(ext))
+							) {
+								return match[0];
+							}
+
+							// test the content-type header for URLs other than discord's CDN
+							if (!/discord(?:app)?\.net/.test(url.hostname)) {
+								// TODO: cache this via redis?
+								const res = await fetch(url, { method: 'HEAD', signal });
+								const contentType = res.headers.get('content-type');
+								const contentLength = res.headers.get('content-length');
+
+								if (
+									!ALLOWED_MIMES.has(contentType as any) ||
+									!contentLength ||
+									Number(contentLength) > MAX_IMAGE_UPLOAD_SIZE
+								) {
+									return match[0];
+								}
+							}
+
+							// remove query parameters
+							url.search = '';
+
+							// try to upload URL
+							return (await imgur.upload(url.toString(), { signal })).data.link;
+						} catch (error) {
+							logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}`);
+							return match[0];
+						}
+					},
+				);
 			}
 
 			contentParts.push(messageContent);

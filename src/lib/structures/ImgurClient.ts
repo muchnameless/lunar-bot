@@ -1,7 +1,8 @@
+import { URL } from 'node:url';
 import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { AsyncQueue } from '@sapphire/async-queue';
-import { fetch, FormData } from 'undici';
+import { fetch } from 'undici';
 import ms from 'ms';
 import { logger } from '#logger';
 import { consumeBody, isAbortError, seconds } from '#functions';
@@ -152,43 +153,42 @@ export class ImgurClient {
 
 	/**
 	 * uploads an image
-	 * @param url
+	 * @param imageURL
 	 * @param type
 	 */
-	upload(url: string, { type = 'url', signal }: { type?: 'url' | 'file'; signal?: AbortSignal } = {}) {
-		const form = new FormData();
+	upload(imageURL: string, { type = 'url', signal }: { type?: 'url' | 'file'; signal?: AbortSignal } = {}) {
+		const url = new URL('./image', this.baseURL);
 
-		form.append('image', url);
-		form.append('type', type);
+		url.searchParams.append('type', type);
+		url.searchParams.append('image', imageURL);
 
 		return this.request(
-			'image',
+			url,
 			{
 				method: 'POST',
-				body: form,
 				signal,
 			},
 			{
 				checkRateLimit: true,
-				cacheKey: url,
+				cacheKey: imageURL,
 			},
 		) as Promise<UploadResponse>;
 	}
 
 	/**
-	 * @param endpoint
-	 * @param requestOptions
+	 * @param url
+	 * @param requestInit
 	 * @param options
 	 */
 	async request(
-		endpoint: string,
-		requestOptions: RequestInit,
+		url: URL,
+		requestInit: RequestInit,
 		{ checkRateLimit = true, cacheKey }: { checkRateLimit?: boolean; cacheKey: string },
 	) {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
-		await this.queue.wait({ signal: requestOptions.signal });
+		await this.queue.wait({ signal: requestInit.signal });
 
 		try {
 			// check rate limit
@@ -213,7 +213,7 @@ export class ImgurClient {
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
-				if ((requestOptions.method === 'POST' || !requestOptions.method) && this.postRateLimit.remaining === 0) {
+				if ((requestInit.method === 'POST' || !requestInit.method) && this.postRateLimit.remaining === 0) {
 					const RESET_TIME = this.postRateLimit.reset! - Date.now();
 
 					if (RESET_TIME > this.rateLimitedWaitTime) {
@@ -223,7 +223,7 @@ export class ImgurClient {
 				}
 			}
 
-			const res = await this._request(endpoint, requestOptions);
+			const res = await this._request(url, requestInit);
 
 			// get server time
 			const NOW = Date.parse(res.headers.get('date')!) || Date.now();
@@ -264,12 +264,12 @@ export class ImgurClient {
 
 	/**
 	 * make request
-	 * @param endpoint
-	 * @param options
+	 * @param url
+	 * @param requestInit
 	 * @param retries current retry
 	 */
-	private async _request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
-		options.signal?.throwIfAborted();
+	private async _request(url: URL, { headers, signal, ...options }: RequestInit, retries = 0): Promise<Response> {
+		signal?.throwIfAborted();
 
 		// internal AbortSignal (to have a timeout without having to abort the external signal)
 		const controller = new AbortController();
@@ -277,28 +277,28 @@ export class ImgurClient {
 		const timeout = setTimeout(listener, this.timeout);
 
 		// external AbortSignal
-		options.signal?.addEventListener('abort', listener);
+		signal?.addEventListener('abort', listener);
 
 		try {
-			return await fetch(`${this.baseURL}${endpoint}`, {
+			return await fetch(url, {
 				headers: {
 					Authorization: this.#authorisation,
 					...headers,
 				},
-				...options,
 				signal: controller.signal,
+				...options,
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (isAbortError(error) && retries !== this.retries) {
-				return this._request(endpoint, { headers, ...options }, retries + 1);
+				return this._request(url, { headers, ...options }, retries + 1);
 			}
 
 			throw error;
 		} finally {
 			clearTimeout(timeout);
 
-			options.signal?.removeEventListener('abort', listener);
+			signal?.removeEventListener('abort', listener);
 		}
 	}
 }
