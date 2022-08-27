@@ -104,4 +104,9 @@ export const NON_WHITESPACE_REGEXP = new RegExp(
 export const DISCORD_CDN_URL_REGEXP =
 	/\b((?:https:\/\/)?(?:cdn|media)\.discord(?:app)?\.(?:com|net)\/(?:attachments\/\d{17,20}\/\d{17,20}\/.+|emojis\/\d{17,20})\.(?:jpeg|jpg|png))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/g;
 
+/**
+ * only lower case versions are not blocked by the advertisement filter
+ */
+export const ALLOWED_URLS = new RegExp(['hypixel.net', 'discord.gg', 'imgur.com'].map((x) => `\\b${x}$`).join('|'));
+
 export const DELETED_MESSAGE_REASON = Symbol('ChatBridge:deletedMessage');

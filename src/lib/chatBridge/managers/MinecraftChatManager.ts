@@ -24,10 +24,11 @@ import {
 	trim,
 } from '#functions';
 import {
+	ALLOWED_URLS,
+	DELETED_MESSAGE_REASON,
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
-	DELETED_MESSAGE_REASON,
 	MEME_REGEXP,
 	MinecraftChatManagerState,
 	NON_WHITESPACE_REGEXP,
@@ -736,7 +737,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					}
 				})
 				.replace(
-					// hideEmbedLink markdown
+					// hideLinkEmbed markdown
 					/<(https?:\/\/(?:www\.)?[-\w@:%.+~#=]{2,256}\.[a-z]{2,6}\b[-\w@:%+.~#?&/=]*)>/gi,
 					(match, p1: string) => {
 						// return p1 if it is a valid URL
@@ -831,17 +832,27 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					splitMessage(part, { char: [' ', ''], maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length }),
 				)
 				.filter((part) => {
+					// filter out white space only parts
 					if (NON_WHITESPACE_REGEXP.test(part)) {
-						// filter out white space only parts
+						// blocked by the content filter
 						if (ChatManager.BLOCKED_WORDS_REGEXP.test(part) || MEME_REGEXP.test(part)) {
-							logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
+							logger.warn({ prefix, content, part }, '[CHATBRIDGE CHAT]: blocked word');
 							return (success = false);
 						}
+
+						// blocked by the advertisement filter
+						for (const maybeURL of part.matchAll(/(?:\w+\.)+\w{2,}/g)) {
+							if (!ALLOWED_URLS.test(maybeURL[0])) {
+								logger.warn({ prefix, content, part }, '[CHATBRIDGE CHAT]: blocked URL');
+								return (success = false);
+							}
+						}
+
 						return true;
 					}
 
 					// part consists of only whitespace characters -> ignore
-					if (part) logger.trace(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					if (part) logger.trace({ prefix, content, part }, '[CHATBRIDGE CHAT]: ignored whitespace part');
 
 					return false;
 				}),
