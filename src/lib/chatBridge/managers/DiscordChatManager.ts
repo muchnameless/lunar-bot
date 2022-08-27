@@ -449,6 +449,7 @@ export class DiscordChatManager extends ChatManager {
 				content: 'you are currently muted due to continues infractions',
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,
 			});
+			return void MessageUtil.react(message, UnicodeEmoji.Muted);
 		}
 
 		// check if guild chat is muted
