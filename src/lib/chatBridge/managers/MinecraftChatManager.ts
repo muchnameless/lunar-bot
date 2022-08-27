@@ -841,7 +841,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 						}
 
 						// blocked by the advertisement filter
-						for (const maybeURL of part.matchAll(/(?:\w+\.)+\w{2,}/g)) {
+						for (const maybeURL of part.matchAll(/(?:\w+\.)+\w{2,}\/\S*/g)) {
 							if (!ALLOWED_URLS.test(maybeURL[0])) {
 								logger.warn({ prefix, content, part }, '[CHATBRIDGE CHAT]: blocked URL');
 								return (success = false);
