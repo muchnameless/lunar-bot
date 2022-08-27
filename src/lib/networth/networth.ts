@@ -16,6 +16,7 @@ import {
 	ITEM_SPECIFIC_IGNORED_ENCHANTS,
 	ItemId,
 	MASTER_STARS,
+	NON_REDUCED_PETS,
 	PriceModifier,
 	SKYBLOCK_INVENTORIES,
 } from './constants';
@@ -394,7 +395,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 			price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinNoCandy;
 		}
 	} else {
-		if (![ItemId.EnderDragon, ItemId.GoldenDragon].includes(pet.type as ItemId)) {
+		if (!NON_REDUCED_PETS.has(pet.type as ItemId)) {
 			price *= PriceModifier.PetWithCandy;
 		}
 

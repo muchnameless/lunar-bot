@@ -161,6 +161,7 @@ export const enum ItemId {
 	Rune = 'RUNE',
 	SadanBrooch = 'SADAN_BROOCH',
 	SalmonOpal = 'SALMON_OPAL',
+	Scatha = 'SCATHA',
 	ScorchedBooks = 'SCORCHED_BOOKS',
 	SearingStone = 'SEARING_STONE',
 	SecondMasterStar = 'SECOND_MASTER_STAR',

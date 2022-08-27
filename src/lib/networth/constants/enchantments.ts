@@ -1,5 +1,8 @@
 import { ItemId } from '.';
 
+/**
+ * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/src/constants/misc.js#L96
+ */
 export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
 	[ItemId.Bonemerang]: new Set([
 		//

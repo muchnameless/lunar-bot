@@ -1,6 +1,19 @@
 import { toTotal } from '#root/lib/functions/array';
 import { ItemRarity, ItemId } from '.';
 
+/**
+ * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/generators/petGenerator.js#L79
+ */
+export const NON_REDUCED_PETS = new Set([
+	//
+	ItemId.EnderDragon,
+	ItemId.GoldenDragon,
+	ItemId.Scatha,
+]);
+
+/**
+ * https://wiki.hypixel.net/Pets
+ */
 export const PET_XP = [
 	100, 110, 120, 130, 145, 160, 175, 190, 210, 230, 250, 275, 300, 330, 360, 400, 440, 490, 540, 600, 660, 730, 800,
 	880, 960, 1_050, 1_150, 1_260, 1_380, 1_510, 1_650, 1_800, 1_960, 2_130, 2_310, 2_500, 2_700, 2_920, 3_160, 3_420,
@@ -32,7 +45,7 @@ const PET_RARITY_OFFSET = {
 } as const;
 
 // pets start at level 1
-const MAX_LEVEL_DELTA = 99;
+const MAX_LEVEL_DELTA = 100 - 1;
 
 export const PET_XP_TOTAL = {
 	[ItemRarity.Common]: toTotal([

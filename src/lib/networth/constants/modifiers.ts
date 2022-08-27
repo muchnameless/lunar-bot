@@ -1,5 +1,8 @@
 /**
  * multiplicative price modifier for the applied item
+ *
+ * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/generators/itemGenerator.js#L79
+ * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/src/constants/misc.js#L87
  */
 export const enum PriceModifier {
 	AppliedEnchantment20 = 0.2,
