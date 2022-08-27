@@ -32,7 +32,7 @@ export const jobs = new JobManager();
  */
 export function startJobs(client: LunarClient) {
 	jobs.add(
-		new Job(new URL('./pricesAndPatchNotes.js', import.meta.url), {
+		new Job(new URL('pricesAndPatchNotes.js', import.meta.url), {
 			message(message: WorkerMessage) {
 				switch (message.op) {
 					case JobType.HypixelForumLastGUIDUpdate:

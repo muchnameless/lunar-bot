@@ -7,7 +7,7 @@ import type { Models } from './managers/DatabaseManager';
 
 const models = {};
 
-for await (const path of readJSFiles(new URL('./models/', import.meta.url))) {
+for await (const path of readJSFiles(new URL('models/', import.meta.url))) {
 	const model = (await import(path)).default as typeof Model;
 
 	if (

@@ -19,7 +19,7 @@ interface MinecraftBotEvent {
 const getEvents = lazy(async () => {
 	const events: MinecraftBotEvent[] = [];
 
-	for await (const path of readJSFiles(new URL('./botEvents/', import.meta.url))) {
+	for await (const path of readJSFiles(new URL('botEvents/', import.meta.url))) {
 		events.push({
 			name: basename(path, '.js'),
 			callback: (await import(path)).default,

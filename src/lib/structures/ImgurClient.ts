@@ -157,7 +157,7 @@ export class ImgurClient {
 	 * @param type
 	 */
 	upload(imageURL: string, { type = 'url', signal }: { type?: 'url' | 'file'; signal?: AbortSignal } = {}) {
-		const url = new URL('./image', this.baseURL);
+		const url = new URL('image', this.baseURL);
 
 		url.searchParams.append('type', type);
 		url.searchParams.append('image', imageURL);

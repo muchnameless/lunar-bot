@@ -71,7 +71,6 @@
 		"unicorn/prefer-string-replace-all": "error",
 		"unicorn/prefer-top-level-await": "error",
 		"unicorn/prevent-abbreviations": "off",
-		"unicorn/relative-url-style": ["error", "always"],
 		"unicorn/string-content": "error",
 		"unicorn/template-indent": "warn",
 		"regexp/prefer-regexp-exec": "error",

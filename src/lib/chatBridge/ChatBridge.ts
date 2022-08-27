@@ -88,7 +88,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * ChatBridge events
 	 */
-	events = new EventCollection(this, new URL('./events/', import.meta.url));
+	events = new EventCollection(this, new URL('events/', import.meta.url));
 
 	constructor(client: LunarClient, manager: ChatBridgeManager, mcAccount: number) {
 		super({ captureRejections: true });

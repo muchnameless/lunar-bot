@@ -512,8 +512,11 @@ export class DiscordChatManager extends ChatManager {
 								return match[0];
 							}
 
-							// test the content-type header for URLs other than discord's CDN
-							if (!/discord(?:app)?\.net/.test(url.hostname)) {
+							// remove query parameters
+							url.search = '';
+
+							// check headers for URLs other than discord's CDN
+							if (!/discordapp\.(?:net|com)$/.test(url.hostname)) {
 								// TODO: cache this via redis?
 								const res = await fetch(url, { method: 'HEAD', signal });
 								const contentType = res.headers.get('content-type');
@@ -527,9 +530,6 @@ export class DiscordChatManager extends ChatManager {
 									return match[0];
 								}
 							}
-
-							// remove query parameters
-							url.search = '';
 
 							// try to upload URL
 							return (await imgur.upload(url.toString(), { signal })).data.link;
