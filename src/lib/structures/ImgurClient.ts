@@ -291,7 +291,7 @@ export class ImgurClient {
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (isAbortError(error) && retries !== this.retries) {
-				return this._request(url, { headers, ...options }, retries + 1);
+				return this._request(url, { headers, signal, ...options }, retries + 1);
 			}
 
 			throw error;
