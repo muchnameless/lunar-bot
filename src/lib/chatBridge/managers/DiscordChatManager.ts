@@ -106,7 +106,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param message
 	 */
 	static getPlayerName(message: Message) {
-		return this.formatAtMention(
+		return this._formatAtMention(
 			MessageUtil.isNormalWebhookMessage(message)
 				? UserUtil.getPlayer(
 						message.guild?.members.cache.find(({ displayName }) => displayName === message.author.username)?.user,
@@ -119,8 +119,16 @@ export class DiscordChatManager extends ChatManager {
 	 * returns @name if the name passes the BLOCKED_WORDS_REGEXP
 	 * @param name
 	 */
-	static formatAtMention(name: string) {
+	private static _formatAtMention(name: string) {
 		return this.BLOCKED_WORDS_REGEXP.test(name) ? '*blocked name*' : name;
+	}
+
+	/**
+	 * returns the name with dots replaced by spaces or a generic placeholder if no name is passed
+	 * @param name
+	 */
+	private static _getAttachmentName(name: string | null) {
+		return `[${name?.replaceAll('.', ' ') ?? 'attachment'}]`;
 	}
 
 	/**
@@ -128,13 +136,15 @@ export class DiscordChatManager extends ChatManager {
 	 * @param attachments
 	 */
 	private async _uploadAttachments(attachments: Collection<Snowflake, Attachment>) {
-		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
+		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
+			return attachments.map(({ name }) => DiscordChatManager._getAttachmentName(name));
+		}
 
 		const urls: string[] = [];
 
 		for (const { contentType, url, size, name } of attachments.values()) {
 			if (!ALLOWED_MIMES.has(contentType as any) || size > MAX_IMAGE_UPLOAD_SIZE) {
-				urls.push(`[${name?.replaceAll('.', ' ') ?? 'attachment'}]`);
+				urls.push(DiscordChatManager._getAttachmentName(name));
 				continue;
 			}
 
@@ -142,7 +152,7 @@ export class DiscordChatManager extends ChatManager {
 				urls.push((await imgur.upload(url)).data.link);
 			} catch (error) {
 				logger.error(error, '[UPLOAD ATTACHMENTS]');
-				urls.push(`[${name?.replaceAll('.', ' ') ?? 'attachment'}]`);
+				urls.push(DiscordChatManager._getAttachmentName(name));
 			}
 		}
 
@@ -601,7 +611,7 @@ export class DiscordChatManager extends ChatManager {
 			if (content) {
 				void this.minecraft.chat({
 					content: `${this.client.config.get('PREFIXES')[0]}${content}`,
-					prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
+					prefix: `${this.prefix} ${DiscordChatManager._formatAtMention(
 						player?.ign ?? messageInteraction.user.username,
 					)}: `,
 				});
