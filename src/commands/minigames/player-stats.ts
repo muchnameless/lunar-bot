@@ -72,7 +72,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			status: ${statusData ? 'online' : 'offline'},
 			friends: ${formatNumber(friendsData.length)},
 			level: ${level},
-			achievement points: ${formatNumber(playerData.achievementPoints)},
+			achievement points: ${formatNumber(playerData.achievementPoints ?? 0)},
 			karma: ${formatNumber(playerData.karma ?? 0)},
 			first joined: ${time(seconds(Number.parseInt(playerData._id.slice(0, 8), 16)))},
 			last joined: ${playerData.lastLogin ? time(playerData.lastLogin) : 'unknown'}
