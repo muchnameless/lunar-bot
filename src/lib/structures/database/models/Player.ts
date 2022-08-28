@@ -2207,8 +2207,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		} = getLilyWeightRaw(
 			LILY_SKILL_NAMES.map((skill, index_) => getSkillLevel(skill, SKILL_XP_LILY[index_], 60).trueLevel), // skill levels
 			SKILL_XP_LILY, // skill xp
-			this.catacombsCompletionsHistory[index] as Parameters<typeof LilyWeight['getWeightRaw']>[2], // catacombs completions
-			this.catacombsMasterCompletionsHistory[index] as Parameters<typeof LilyWeight['getWeightRaw']>[3], // master catacombs completions
+			(this.catacombsCompletionsHistory[index] ?? {}) as Parameters<typeof LilyWeight['getWeightRaw']>[2], // catacombs completions
+			(this.catacombsMasterCompletionsHistory[index] ?? {}) as Parameters<typeof LilyWeight['getWeightRaw']>[3], // master catacombs completions
 			this.catacombsXpHistory[index] ?? 0, // catacombs xp
 			SLAYERS.map((slayer) => this[`${slayer}XpHistory`][index] ?? 0), // slayer xp
 		);
