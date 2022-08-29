@@ -46,22 +46,22 @@ export default class FetchurCommand extends DualCommand {
 		const today = new Date();
 		today.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
 
-		let resetTime: number;
+		let nextResetDate: Date;
 
 		if (today.getTime() >= Date.now()) {
-			resetTime = today.getTime();
+			nextResetDate = today;
 		} else {
 			// reset already happened today
 			const tomorrow = new Date();
 			tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 			tomorrow.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
 
-			resetTime = tomorrow.getTime();
+			nextResetDate = tomorrow;
 		}
 
 		return `item: ${
 			FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]
-		}, changes ${time(resetTime, TimestampStyles.RelativeTime)}`;
+		}, changes ${time(nextResetDate, TimestampStyles.RelativeTime)}`;
 	}
 
 	/**

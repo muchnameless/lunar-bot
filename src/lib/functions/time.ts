@@ -1,3 +1,5 @@
+import { roundNumber } from '@sapphire/utilities';
+
 /* eslint-disable @typescript-eslint/no-shadow */
 const enum Time {
 	Millisecond = 1,
@@ -15,6 +17,12 @@ const enum Time {
  * @param seconds
  */
 export const seconds = (seconds: number) => seconds * Time.Second;
+
+/**
+ * converts a number of milliseconds to seconds
+ * @param milliseconds
+ */
+seconds.fromMilliseconds = (milliseconds: number) => roundNumber(milliseconds / Time.Second);
 
 /**
  * converts a number of minutes to milliseconds

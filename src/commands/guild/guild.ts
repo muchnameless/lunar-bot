@@ -25,6 +25,7 @@ import {
 	getIdFromString,
 	minutes,
 	removeMcFormatting,
+	seconds,
 	sortCache,
 	stringToMS,
 	trim,
@@ -616,7 +617,7 @@ export default class GuildCommand extends ApplicationCommand {
 			const { date, event } = matched.groups!;
 
 			embed.addFields({
-				name: time(Date.parse(date!)),
+				name: time(seconds.fromMilliseconds(Date.parse(date!))),
 				value: codeBlock(event!),
 			});
 		}

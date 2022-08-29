@@ -3,7 +3,7 @@ import { stripIndents } from 'common-tags';
 import { EmbedUtil, InteractionUtil } from '#utils';
 import { optionalPlayerOption, pageOption, offsetOption } from '#structures/commands/commonOptions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { formatDecimalNumber, formatNumber, getDefaultOffset, upperCaseFirstChar } from '#functions';
+import { formatDecimalNumber, formatNumber, getDefaultOffset, seconds, upperCaseFirstChar } from '#functions';
 import {
 	COSMETIC_SKILLS,
 	DUNGEON_TYPES_AND_CLASSES,
@@ -58,9 +58,11 @@ export default class XpCommand extends ApplicationCommand {
 			})
 			.setDescription(
 				`${`Δ: change since ${time(
-					Math.max(
-						this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]),
-						player.createdAt.getTime(),
+					seconds.fromMilliseconds(
+						Math.max(
+							this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]),
+							player.createdAt.getTime(),
+						),
 					),
 				)} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET as keyof typeof XP_OFFSETS_CONVERTER])})`.padEnd(
 					105,

@@ -29,6 +29,7 @@ import {
 	formatDecimalNumber,
 	formatNumber,
 	minutes,
+	seconds,
 	upperCaseFirstChar,
 } from '.';
 import type { ArrayElementType } from '@sapphire/utilities';
@@ -735,13 +736,13 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 
 	if (xpType !== 'purge') {
 		if (IS_COMPETITION_LB) {
-			description += `Start: ${time(config.get(XP_OFFSETS_TIME[offset]))}\n`;
+			description += `Start: ${time(seconds.fromMilliseconds(config.get(XP_OFFSETS_TIME[offset])))}\n`;
 			description += COMPETITION_RUNNING
-				? `Ends: ${time(COMPETITION_END_TIME, TimestampStyles.RelativeTime)}\n`
-				: `Ended: ${time(COMPETITION_END_TIME)}\n`;
+				? `Ends: ${time(seconds.fromMilliseconds(COMPETITION_END_TIME), TimestampStyles.RelativeTime)}\n`
+				: `Ended: ${time(seconds.fromMilliseconds(COMPETITION_END_TIME))}\n`;
 		} else {
 			description += `Tracking xp gained since ${time(
-				config.get(XP_OFFSETS_TIME[offset as keyof typeof XP_OFFSETS_TIME]),
+				seconds.fromMilliseconds(config.get(XP_OFFSETS_TIME[offset as keyof typeof XP_OFFSETS_TIME])),
 			)}\n`;
 		}
 

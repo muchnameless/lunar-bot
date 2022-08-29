@@ -44,7 +44,7 @@ const client = new LunarClient({
 	sweepers: {
 		...Options.DefaultSweeperSettings,
 		messages: {
-			interval: minutes(10),
+			interval: seconds.fromMilliseconds(minutes(10)),
 			filter() {
 				const TAX_MESSAGE_ID = client.config.get('TAX_MESSAGE_ID');
 				const now = Date.now();
@@ -57,7 +57,7 @@ const client = new LunarClient({
 			},
 		},
 		users: {
-			interval: hours(6),
+			interval: seconds.fromMilliseconds(hours(6)),
 			filter() {
 				const dmChannelRecipients = lazy(() => {
 					const recipients = new Set<Snowflake>();
