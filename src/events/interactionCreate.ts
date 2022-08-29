@@ -137,8 +137,8 @@ export default class InteractionCreateEvent extends Event {
 					!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)
 				) {
 					return InteractionUtil.reply(interaction, {
-						content: 'you need `ManageMessage` permissions to (un)pin messages in this channel',
-						ephemeral: false,
+						content: 'you need the `ManageMessages` permission to (un)pin messages in this channel',
+						ephemeral: true,
 					});
 				}
 

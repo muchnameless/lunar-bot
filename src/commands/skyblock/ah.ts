@@ -142,7 +142,7 @@ export default class AhCommand extends ApplicationCommand {
 								? (++endedAuctions, (totalUnclaimedCoins += highestBid), 'sold')
 								: 'expired'
 							: 'ends'
-					} ${time(end, TimestampStyles.RelativeTime)}`,
+					} ${time(seconds.fromMilliseconds(end), TimestampStyles.RelativeTime)}`,
 				});
 			}
 

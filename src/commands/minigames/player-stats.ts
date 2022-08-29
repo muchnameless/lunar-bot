@@ -3,7 +3,7 @@ import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { optionalIgnOption } from '#structures/commands/commonOptions';
 import { hypixel } from '#api';
-import { escapeIgn, formatNumber, getUuidAndIgn, seconds } from '#functions';
+import { escapeIgn, formatNumber, getUuidAndIgn, parseSecondsFromObjectId, seconds } from '#functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '#structures/commands/BaseCommand';
@@ -74,8 +74,8 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			level: ${level},
 			achievement points: ${formatNumber(playerData.achievementPoints ?? 0)},
 			karma: ${formatNumber(playerData.karma ?? 0)},
-			first joined: ${time(seconds(Number.parseInt(playerData._id.slice(0, 8), 16)))},
-			last joined: ${playerData.lastLogin ? time(playerData.lastLogin) : 'unknown'}
+			first joined: ${time(parseSecondsFromObjectId(playerData))},
+			last joined: ${playerData.lastLogin ? time(seconds.fromMilliseconds(playerData.lastLogin)) : 'unknown'}
 		`;
 	}
 }

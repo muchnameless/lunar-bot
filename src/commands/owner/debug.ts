@@ -15,7 +15,7 @@ import ms from 'ms';
 import { InteractionUtil } from '#utils';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { hypixel, imgur } from '#api';
-import { escapeIgn, formatNumber, buildDeleteButton, trim } from '#functions';
+import { buildDeleteButton, escapeIgn, formatNumber, seconds, trim } from '#functions';
 import type {
 	ChatInputCommandInteraction,
 	Collection,
@@ -50,7 +50,7 @@ export default class DebugCommand extends ApplicationCommand {
 						{
 							name: 'General',
 							value: stripIndents`
-								Ready at: ${time(this.client.readyTimestamp!, TimestampStyles.LongDateTime)}
+								Ready at: ${time(seconds.fromMilliseconds(this.client.readyTimestamp!), TimestampStyles.LongDateTime)}
 								Uptime: ${ms(this.client.uptime!)}
 								Discord.js v${djsVersion}
 								Node.js ${processVersion}
@@ -70,12 +70,16 @@ export default class DebugCommand extends ApplicationCommand {
 											[c.recipient?.tag ?? c.recipientId, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
 									)
 									.sort(([, a], [, b]) => b - a)
-									.map(([name, timestamp]) => quote(`${name}: ${time(timestamp, TimestampStyles.LongDateTime)}`))
+									.map(([name, timestamp]) =>
+										quote(`${name}: ${time(seconds.fromMilliseconds(timestamp), TimestampStyles.LongDateTime)}`),
+									)
 									.join('\n')}
 								${(channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
 									.map((c) => [c, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const)
 									.sort(([, a], [, b]) => b - a)
-									.map(([c, timestamp]) => quote(`${c}: ${time(timestamp, TimestampStyles.LongDateTime)}`))
+									.map(([c, timestamp]) =>
+										quote(`${c}: ${time(seconds.fromMilliseconds(timestamp), TimestampStyles.LongDateTime)}`),
+									)
 									.join('\n')}
 								Members: ${formatNumber(guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
 								Users: ${formatNumber(this.client.users.cache.size)}
@@ -159,7 +163,9 @@ export default class DebugCommand extends ApplicationCommand {
 									.map(([key, value]: [string, number | null]) =>
 										quote(
 											`${key}: ${
-												key.endsWith('reset') && value !== null ? time(value, TimestampStyles.LongDateTime) : value
+												key.endsWith('reset') && value !== null
+													? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime)
+													: value
 											}`,
 										),
 									)
@@ -168,7 +174,9 @@ export default class DebugCommand extends ApplicationCommand {
 									.map(([key, value]: [string, number | null]) =>
 										quote(
 											`post${key}: ${
-												key.endsWith('reset') && value !== null ? time(value, TimestampStyles.LongDateTime) : value
+												key.endsWith('reset') && value !== null
+													? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime)
+													: value
 											}`,
 										),
 									)

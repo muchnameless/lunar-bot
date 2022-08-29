@@ -21,7 +21,7 @@ import {
 } from '#constants';
 import { WebhookError } from '#structures/errors/WebhookError';
 import { imgur } from '#api';
-import { asyncReplace, minutes } from '#functions';
+import { asyncReplace, minutes, seconds } from '#functions';
 import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache';
 import { PREFIX_BY_TYPE } from '../constants';
 import { ChatManager } from './ChatManager';
@@ -442,7 +442,7 @@ export class DiscordChatManager extends ChatManager {
 		if (this.hypixelGuild!.checkMute(player)) {
 			void this.sendDM(message.author, {
 				content: `your mute expires ${time(
-					this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!,
+					seconds.fromMilliseconds(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
 					TimestampStyles.RelativeTime,
 				)}`,
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,
@@ -463,7 +463,7 @@ export class DiscordChatManager extends ChatManager {
 		if (this.hypixelGuild!.muted && (!player || !this.hypixelGuild!.checkStaff(player))) {
 			void this.sendDM(message.author, {
 				content: `${this.hypixelGuild!.name}'s guild chat mute expires ${time(
-					this.hypixelGuild!.mutedTill,
+					seconds.fromMilliseconds(this.hypixelGuild!.mutedTill),
 					TimestampStyles.RelativeTime,
 				)}`,
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,
@@ -475,7 +475,7 @@ export class DiscordChatManager extends ChatManager {
 		if (this.hypixelGuild!.checkMute(this.minecraft.botPlayer)) {
 			void this.sendDM(message.author, {
 				content: `the bot's mute expires ${time(
-					this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid!)!,
+					seconds.fromMilliseconds(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid!)!),
 					TimestampStyles.RelativeTime,
 				)}`,
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,

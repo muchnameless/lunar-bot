@@ -105,7 +105,7 @@
 	},
 	"packageManager": "yarn@3.2.3",
 	"resolutions": {
-		"@discordjs/builders": "patch:@discordjs/builders@npm:1.2.1-dev.1661774647-682e0e1.0#.yarn/patches/@discordjs-builders-npm-1.1.1-dev.1660305925-c97977a.0-ba2033ace3.patch",
+		"@discordjs/builders": "patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#./.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch",
 		"@discordjs/collection": "1.1.1-dev.1661774643-682e0e1.0",
 		"@discordjs/rest": "1.1.1-dev.1661774648-682e0e1.0",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@npm:1.5.1-next.1562630.0#.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.6b2c3aa.0-b9d98a9df6.patch",
@@ -113,7 +113,7 @@
 		"@sapphire/snowflake": "3.2.3-next.1562630.0",
 		"@types/node": "patch:@types/node@npm:^18.7.13#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch",
 		"discord-api-types": "0.37.6-next.48f0f56.1661776556",
-		"discord.js": "patch:discord.js@14.3.1-dev.1661774646-682e0e1.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661429072-13baf75.0-a61789f7e5.patch",
+		"discord.js": "patch:discord.js@npm%3A14.3.1-dev.1661774646-682e0e1.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661774646-682e0e1.0-c4cc9c232f.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
 }

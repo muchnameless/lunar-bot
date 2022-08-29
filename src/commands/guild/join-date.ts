@@ -6,7 +6,7 @@ import { IGN_DEFAULT, logErrors } from '#chatBridge/constants';
 import { forceOption, hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions';
 import { MinecraftChatManager } from '#chatBridge/managers/MinecraftChatManager';
 import { DualCommand } from '#structures/commands/DualCommand';
-import { escapeIgn } from '#functions';
+import { escapeIgn, seconds } from '#functions';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '#structures/commands/BaseCommand';
 import type { ChatBridge } from '#chatBridge/ChatBridge';
@@ -14,7 +14,7 @@ import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 interface JoinInfo {
 	ign: string;
-	timestamp: number;
+	timestampSeconds: number;
 }
 
 const parseArgsOptions = {
@@ -73,11 +73,11 @@ export default class JoinDateCommand extends DualCommand {
 			if (!(invitedRegExp ??= new RegExp(`\\n.+: ${IGN_DEFAULT} invited ${ign}$`)).test(logEntry)) break;
 		}
 
-		const timestamp = Date.parse(matched?.groups!.time!);
+		const timestampSeconds = seconds.fromMilliseconds(Date.parse(matched?.groups!.time!));
 
 		return {
 			ign,
-			timestamp,
+			timestampSeconds,
 		};
 	}
 
@@ -101,9 +101,9 @@ export default class JoinDateCommand extends DualCommand {
 	 */
 	private async _generateReply(chatBridge: ChatBridge, ignInput: string) {
 		try {
-			const { ign, timestamp } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
+			const { ign, timestampSeconds } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
 			return `${escapeIgn(ign)}: joined ${chatBridge.hypixelGuild} at ${
-				!Number.isNaN(timestamp) ? time(timestamp) : 'an unknown date'
+				!Number.isNaN(timestampSeconds) ? time(timestampSeconds) : 'an unknown date'
 			}`;
 		} catch {
 			return `${escapeIgn(ignInput)}: never joined ${chatBridge.hypixelGuild}`;
@@ -150,9 +150,10 @@ export default class JoinDateCommand extends DualCommand {
 
 			return InteractionUtil.reply(interaction, {
 				content: `${bold(hypixelGuild.name)} join dates:\n${joinInfos
-					.sort(({ timestamp: a }, { timestamp: b }) => a - b)
+					.sort(({ timestampSeconds: a }, { timestampSeconds: b }) => a - b)
 					.map(
-						({ ign, timestamp }) => `${!Number.isNaN(timestamp) ? time(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`,
+						({ ign, timestampSeconds }) =>
+							`${!Number.isNaN(timestampSeconds) ? time(timestampSeconds) : 'unknown date'}: ${escapeIgn(ign)}`,
 					)
 					.join('\n')}`,
 				split: true,

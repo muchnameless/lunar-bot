@@ -1,0 +1,1106 @@
+diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
+index 541ec0ca36351f414207fa96434ab5b68bb8e9f0..3ac1d6fa6ad5b56a94654fdd5c88783169756498 100644
+--- a/src/client/websocket/WebSocketShard.js
++++ b/src/client/websocket/WebSocketShard.js
+@@ -270,6 +270,7 @@ class WebSocketShard extends EventEmitter {
+       this.status = this.status === Status.Disconnected ? Status.Reconnecting : Status.Connecting;
+       this.setHelloTimeout();
+ 
++      this.setWsCloseTimeout(-1);
+       this.connectedAt = Date.now();
+ 
+       // Adding a handshake timeout to just make sure no zombie connection appears.
+diff --git a/src/managers/ThreadManager.js b/src/managers/ThreadManager.js
+index 57f2dfd66133eb0a833a32589825ca00f04208c2..f2662d862676858d14fffe8f282bb0552f66fee1 100644
+--- a/src/managers/ThreadManager.js
++++ b/src/managers/ThreadManager.js
+@@ -65,13 +65,13 @@ class ThreadManager extends CachedManager {
+    * @typedef {StartThreadOptions} ThreadCreateOptions
+    * @property {MessageResolvable} [startMessage] The message to start a thread from. <warn>If this is defined then type
+    * of thread gets automatically defined and cannot be changed. The provided `type` field will be ignored</warn>
+-   * @property {ChannelType.GuildNewsThread|ChannelType.GuildPublicThread|ChannelType.GuildPrivateThread} [type]
++   * @property {ChannelType.AnnouncementThread|ChannelType.PublicThread|ChannelType.PrivateThread} [type]
+    * The type of thread to create.
+-   * Defaults to {@link ChannelType.GuildPublicThread} if created in a {@link TextChannel}
++   * Defaults to {@link ChannelType.PublicThread} if created in a {@link TextChannel}
+    * <warn>When creating threads in a {@link NewsChannel} this is ignored and is always
+-   * {@link ChannelType.GuildNewsThread}</warn>
++   * {@link ChannelType.AnnouncementThread}</warn>
+    * @property {boolean} [invitable] Whether non-moderators can add other non-moderators to the thread
+-   * <info>Can only be set when type will be {@link ChannelType.GuildPrivateThread}</info>
++   * <info>Can only be set when type will be {@link ChannelType.PrivateThread}</info>
+    */
+ 
+   /**
+@@ -94,7 +94,7 @@ class ThreadManager extends CachedManager {
+    *   .create({
+    *      name: 'mod-talk',
+    *      autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
+-   *      type: ChannelType.GuildPrivateThread,
++   *      type: ChannelType.PrivateThread,
+    *      reason: 'Needed a separate thread for moderation',
+    *    })
+    *   .then(threadChannel => console.log(threadChannel))
+@@ -113,12 +113,12 @@ class ThreadManager extends CachedManager {
+       throw new TypeError(ErrorCodes.InvalidType, 'type', 'ThreadChannelType or Number');
+     }
+     let resolvedType =
+-      this.channel.type === ChannelType.GuildNews ? ChannelType.GuildNewsThread : ChannelType.GuildPublicThread;
++      this.channel.type === ChannelType.GuildAnnouncement ? ChannelType.AnnouncementThread : ChannelType.PublicThread;
+     let startMessageId;
+     if (startMessage) {
+       startMessageId = this.channel.messages.resolveId(startMessage);
+       if (!startMessageId) throw new TypeError(ErrorCodes.InvalidType, 'startMessage', 'MessageResolvable');
+-    } else if (this.channel.type !== ChannelType.GuildNews) {
++    } else if (this.channel.type !== ChannelType.GuildAnnouncement) {
+       resolvedType = type ?? resolvedType;
+     }
+ 
+@@ -127,7 +127,7 @@ class ThreadManager extends CachedManager {
+         name,
+         auto_archive_duration: autoArchiveDuration,
+         type: resolvedType,
+-        invitable: resolvedType === ChannelType.GuildPrivateThread ? invitable : undefined,
++        invitable: resolvedType === ChannelType.PrivateThread ? invitable : undefined,
+         rate_limit_per_user: rateLimitPerUser,
+       },
+       reason,
+diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
+index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1350d92fc 100644
+--- a/src/structures/AttachmentBuilder.js
++++ b/src/structures/AttachmentBuilder.js
+@@ -1,16 +1,16 @@
+ 'use strict';
+ 
+-const { basename, flatten } = require('../util/Util');
++const { isJSONEncodable } = require('@discordjs/builders');
++const { basename } = require('../util/Util');
+ 
+ /**
+  * Represents an attachment builder
+  */
+ class AttachmentBuilder {
+   /**
+-   * @param {BufferResolvable|Stream} attachment The file
+-   * @param {AttachmentData} [data] Extra data
++   * @param {AttachmentPayload} [payload] Attachment and extra data
+    */
+-  constructor(attachment, data = {}) {
++  constructor({ attachment, name, description } = {}) {
+     /**
+      * The file associated with this attachment.
+      * @type {BufferResolvable|Stream}
+@@ -20,12 +20,12 @@ class AttachmentBuilder {
+      * The name of this attachment
+      * @type {?string}
+      */
+-    this.name = data.name;
++    this.name = name;
+     /**
+      * The description of the attachment
+      * @type {?string}
+      */
+-    this.description = data.description;
++    this.description = description;
+   }
+ 
+   /**
+@@ -82,11 +82,11 @@ class AttachmentBuilder {
+    * @readonly
+    */
+   get spoiler() {
+-    return basename(this.name).startsWith('SPOILER_');
++    return this.name ? basename(this.name).startsWith('SPOILER_') : false;
+   }
+ 
+   toJSON() {
+-    return flatten(this);
++    return { ...this };
+   }
+ 
+   /**
+@@ -95,10 +95,10 @@ class AttachmentBuilder {
+    * @returns {AttachmentBuilder}
+    */
+   static from(other) {
+-    return new AttachmentBuilder(other.attachment, {
+-      name: other.name,
+-      description: other.description,
+-    });
++    if (isJSONEncodable(other)) {
++      return new this(other.toJSON());
++    }
++    return new this(other);
+   }
+ }
+ 
+diff --git a/src/structures/BaseGuildTextChannel.js b/src/structures/BaseGuildTextChannel.js
+index cb0f6ea93d64c2c9d64b5727853811b2522a70ea..12cad909249a4dace19192da751f771089f9c21c 100644
+--- a/src/structures/BaseGuildTextChannel.js
++++ b/src/structures/BaseGuildTextChannel.js
+@@ -92,7 +92,7 @@ class BaseGuildTextChannel extends GuildChannel {
+   /**
+    * Sets the type of this channel.
+    * <info>Only conversion between {@link TextChannel} and {@link NewsChannel} is supported.</info>
+-   * @param {ChannelType.GuildText|ChannelType.GuildNews} type The new channel type
++   * @param {ChannelType.GuildText|ChannelType.GuildAnnouncement} type The new channel type
+    * @param {string} [reason] Reason for changing the channel's type
+    * @returns {Promise<GuildChannel>}
+    */
+diff --git a/src/structures/Embed.js b/src/structures/Embed.js
+index 7d80390575b83f98a18f1f193ff3c819f0ab931c..3838c34f3e096a8f402790cdf9126ace1158b4eb 100644
+--- a/src/structures/Embed.js
++++ b/src/structures/Embed.js
+@@ -17,11 +17,11 @@ class Embed {
+ 
+   /**
+    * An array of fields of this embed.
+-   * @type {Array<APIEmbedField>}
++   * @type {?Array<APIEmbedField>}
+    * @readonly
+    */
+   get fields() {
+-    return this.data.fields ?? [];
++    return this.data.fields ?? null;
+   }
+ 
+   /**
+diff --git a/src/structures/Guild.js b/src/structures/Guild.js
+index 7796f87c7ddf5218b2c56773adb741c30006f25c..dd9bfcee92e29802b62e62db6176e8621392c346 100644
+--- a/src/structures/Guild.js
++++ b/src/structures/Guild.js
+@@ -1278,7 +1278,7 @@ class Guild extends AnonymousGuild {
+    */
+   _sortedChannels(channel) {
+     const category = channel.type === ChannelType.GuildCategory;
+-    const channelTypes = [ChannelType.GuildText, ChannelType.GuildNews];
++    const channelTypes = [ChannelType.GuildText, ChannelType.GuildAnnouncement];
+     return discordSort(
+       this.channels.cache.filter(
+         c =>
+diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
+index baf328ccb44b53c8725e5ea7204f6cb8c4b29945..a85daccc3cd649fd0c42313b1f1108cc52259eb4 100644
+--- a/src/structures/GuildEmoji.js
++++ b/src/structures/GuildEmoji.js
+@@ -55,8 +55,9 @@ class GuildEmoji extends BaseGuildEmoji {
+    * @readonly
+    */
+   get deletable() {
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+-    return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
++    const { me } = this.guild.members;
++    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
++    return !this.managed && me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
+   }
+ 
+   /**
+diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
+index c9002ddd4f822af68cef16c8193d457b965ee839..041a13d4f7d597b12927b8e2fffffb2fd251f089 100644
+--- a/src/structures/GuildMember.js
++++ b/src/structures/GuildMember.js
+@@ -248,8 +248,9 @@ class GuildMember extends Base {
+     if (this.user.id === this.guild.ownerId) return false;
+     if (this.user.id === this.client.user.id) return false;
+     if (this.client.user.id === this.guild.ownerId) return true;
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+-    return this.guild.members.me.roles.highest.comparePositionTo(this.roles.highest) > 0;
++    const { me } = this.guild.members;
++    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
++    return me.roles.highest.comparePositionTo(this.roles.highest) > 0;
+   }
+ 
+   /**
+@@ -258,7 +259,6 @@ class GuildMember extends Base {
+    * @readonly
+    */
+   get kickable() {
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+     return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers);
+   }
+ 
+@@ -268,7 +268,6 @@ class GuildMember extends Base {
+    * @readonly
+    */
+   get bannable() {
+-    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+     return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.BanMembers);
+   }
+ 
+@@ -281,7 +280,7 @@ class GuildMember extends Base {
+     return (
+       !this.permissions.has(PermissionFlagsBits.Administrator) &&
+       this.manageable &&
+-      (this.guild.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers) ?? false)
++      this.guild.members.me.permissions.has(PermissionFlagsBits.ModerateMembers)
+     );
+   }
+ 
+diff --git a/src/structures/Invite.js b/src/structures/Invite.js
+index 68699aba7207575a849b0610a2852ce029dd4795..06684efdb77f0f59a3768f7d531c6af6867e9434 100644
+--- a/src/structures/Invite.js
++++ b/src/structures/Invite.js
+@@ -234,10 +234,11 @@ class Invite extends Base {
+   get deletable() {
+     const guild = this.guild;
+     if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
+-    if (!guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
++    const { me } = guild.members;
++    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
+     return Boolean(
+       this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits.ManageChannels, false) ||
+-        guild.members.me.permissions.has(PermissionFlagsBits.ManageGuild),
++      me.permissions.has(PermissionFlagsBits.ManageGuild),
+     );
+   }
+ 
+diff --git a/src/structures/Message.js b/src/structures/Message.js
+index 2ce960c03aa8a045c9413da782ace6a9c497146b..47204bd2c8b0017339f68f7c3dfe281a7d5201dd 100644
+--- a/src/structures/Message.js
++++ b/src/structures/Message.js
+@@ -284,10 +284,13 @@ class Message extends Base {
+       this.client.channels._add(data.thread, this.guild);
+     }
+ 
+-    if (this.member && data.member) {
+-      this.member._patch(data.member);
+-    } else if (data.member && this.guild && this.author) {
+-      this.guild.members._add(Object.assign(data.member, { user: this.author }));
++    if (data.member) {
++      const { member } = this;
++      if (member) {
++        member._patch(data.member);
++      } else if (this.author) {
++        this.guild?.members._add(Object.assign(data.member, { user: this.author }));
++      }
+     }
+ 
+     if ('flags' in data) {
+@@ -562,11 +565,16 @@ class Message extends Base {
+    * @readonly
+    */
+   get editable() {
+-    const precheck = Boolean(this.author.id === this.client.user.id && (!this.guild || this.channel?.viewable));
++    const { channel } = this;
++    const precheck = Boolean(
++      this.author.id === this.client.user.id &&
++        !this.flags.has(MessageFlags.Ephemeral) &&
++        (!this.guildId || channel?.viewable),
++    );
+     // Regardless of permissions thread messages cannot be edited if
+     // the thread is locked.
+-    if (this.channel?.isThread()) {
+-      return precheck && !this.channel.locked;
++    if (channel?.isThread()) {
++      return precheck && !channel.locked;
+     }
+     return precheck;
+   }
+@@ -577,15 +585,19 @@ class Message extends Base {
+    * @readonly
+    */
+   get deletable() {
+-    if (!this.guild) {
++    if (this.flags.has(MessageFlags.Ephemeral)) {
++      return false;
++    }
++    if (!this.guildId) {
+       return this.author.id === this.client.user.id;
+     }
+     // DMChannel does not have viewable property, so check viewable after proved that message is on a guild.
+-    if (!this.channel?.viewable) {
++    const { channel } = this;
++    if (!channel?.viewable) {
+       return false;
+     }
+ 
+-    const permissions = this.channel?.permissionsFor(this.client.user);
++    const permissions = channel?.permissionsFor(this.client.user);
+     if (!permissions) return false;
+     // This flag allows deleting even if timed out
+     if (permissions.has(PermissionFlagsBits.Administrator, false)) return true;
+@@ -606,7 +618,8 @@ class Message extends Base {
+     const { channel } = this;
+     return Boolean(
+       !this.system &&
+-        (!this.guild ||
++        !this.flags.has(MessageFlags.Ephemeral) &&
++        (!this.guildId ||
+           (channel?.viewable &&
+             channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
+     );
+@@ -636,8 +649,8 @@ class Message extends Base {
+       (this.author.id === this.client.user.id ? PermissionsBitField.DefaultBit : PermissionFlagsBits.ManageMessages);
+     const { channel } = this;
+     return Boolean(
+-      channel?.type === ChannelType.GuildNews &&
+-        !this.flags.has(MessageFlags.Crossposted) &&
++      channel?.type === ChannelType.GuildAnnouncement &&
++        !this.flags.any(MessageFlags.Crossposted | MessageFlags.Ephemeral) &&
+         this.type === MessageType.Default &&
+         channel.viewable &&
+         channel.permissionsFor(this.client.user)?.has(bitfield, false),
+@@ -671,8 +684,9 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   edit(options) {
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    return this.channel.messages.edit(this, options);
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    return channel.messages.edit(this, options);
+   }
+ 
+   /**
+@@ -680,15 +694,16 @@ class Message extends Base {
+    * @returns {Promise<Message>}
+    * @example
+    * // Crosspost a message
+-   * if (message.channel.type === ChannelType.GuildNews) {
++   * if (message.channel.type === ChannelType.GuildAnnouncement) {
+    *   message.crosspost()
+    *     .then(() => console.log('Crossposted message'))
+    *     .catch(console.error);
+    * }
+    */
+   crosspost() {
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    return this.channel.messages.crosspost(this.id);
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    return channel.messages.crosspost(this.id);
+   }
+ 
+   /**
+@@ -702,8 +717,9 @@ class Message extends Base {
+    *   .catch(console.error)
+    */
+   async pin(reason) {
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.pin(this.id, reason);
++    const { channel } = this;
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    await channel.messages.pin(this.id, reason);
+     return this;
+   }
+ 
+@@ -718,8 +734,9 @@ class Message extends Base {
+    *   .catch(console.error)
+    */
+   async unpin(reason) {
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.unpin(this.id, reason);
++    const { channel } = this;
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    await channel.messages.unpin(this.id, reason);
+     return this;
+   }
+ 
+@@ -739,13 +756,14 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   async react(emoji) {
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.react(this.id, emoji);
++    const { channel } = this;
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    await channel.messages.react(this.id, emoji);
+ 
+     return this.client.actions.MessageReactionAdd.handle(
+       {
+         user: this.client.user,
+-        channel: this.channel,
++        channel,
+         message: this,
+         emoji: resolvePartialEmoji(emoji),
+       },
+@@ -763,8 +781,9 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   async delete() {
+-    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.delete(this.id);
++    const { channel } = this;
++    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    await channel.messages.delete(this.id);
+     return this;
+   }
+ 
+@@ -787,7 +806,8 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   reply(options) {
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+     let data;
+ 
+     if (options instanceof MessagePayload) {
+@@ -800,7 +820,7 @@ class Message extends Base {
+         },
+       });
+     }
+-    return this.channel.send(data);
++    return channel.send(data);
+   }
+ 
+   /**
+@@ -820,12 +840,13 @@ class Message extends Base {
+    * @returns {Promise<ThreadChannel>}
+    */
+   startThread(options = {}) {
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    if (![ChannelType.GuildText, ChannelType.GuildNews].includes(this.channel.type)) {
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    if (![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(channel.type)) {
+       return Promise.reject(new Error(ErrorCodes.MessageThreadParent));
+     }
+     if (this.hasThread) return Promise.reject(new Error(ErrorCodes.MessageExistingThread));
+-    return this.channel.threads.create({ ...options, startMessage: this });
++    return channel.threads.create({ ...options, startMessage: this });
+   }
+ 
+   /**
+@@ -834,8 +855,9 @@ class Message extends Base {
+    * @returns {Promise<Message>}
+    */
+   fetch(force = true) {
+-    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    return this.channel.messages.fetch({ message: this.id, force });
++    const { channel } = this;
++    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    return channel.messages.fetch({ message: this.id, force });
+   }
+ 
+   /**
+diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
+index 4a12394713bf5382f370cebe7726792d0e9ebfaf..0522f4d5de8f1b16a0595557d3c0474f7af0b31e 100644
+--- a/src/structures/MessagePayload.js
++++ b/src/structures/MessagePayload.js
+@@ -3,7 +3,6 @@
+ const { Buffer } = require('node:buffer');
+ const { isJSONEncodable } = require('@discordjs/builders');
+ const { MessageFlags } = require('discord-api-types/v10');
+-const ActionRowBuilder = require('./ActionRowBuilder');
+ const { RangeError, ErrorCodes } = require('../errors');
+ const DataResolver = require('../util/DataResolver');
+ const MessageFlagsBitField = require('../util/MessageFlagsBitField');
+@@ -107,7 +106,7 @@ class MessagePayload {
+     if (this.options.content === null) {
+       content = '';
+     } else if (typeof this.options.content !== 'undefined') {
+-      content = verifyString(this.options.content, RangeError, ErrorCodes.MessageContentType, true);
++      content = verifyString(this.options.content, RangeError, ErrorCodes.MessageContentType);
+     }
+ 
+     return content;
+@@ -134,7 +133,9 @@ class MessagePayload {
+       }
+     }
+ 
+-    const components = this.options.components?.map(c => (isJSONEncodable(c) ? c : new ActionRowBuilder(c)).toJSON());
++    const components = this.options.components?.map(c =>
++      isJSONEncodable(c) ? c.toJSON() : this.target.client.options.jsonTransformer(c),
++    );
+ 
+     let username;
+     let avatarURL;
+@@ -217,9 +218,9 @@ class MessagePayload {
+    * @returns {Promise<MessagePayload>}
+    */
+   async resolveFiles() {
+-    if (this.files) return this;
++    if (this.files || !this.options.files) return this;
+ 
+-    this.files = await Promise.all(this.options.files?.map(file => this.constructor.resolveFile(file)) ?? []);
++    this.files = await Promise.all(this.options.files.map(file => this.constructor.resolveFile(file)));
+     return this;
+   }
+ 
+diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
+index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cbb4db6129 100644
+--- a/src/structures/ModalSubmitFields.js
++++ b/src/structures/ModalSubmitFields.js
+@@ -50,6 +50,15 @@ class ModalSubmitFields {
+   getTextInputValue(customId) {
+     return this.getField(customId, ComponentType.TextInput).value;
+   }
++
++  /**
++   * Gets the values of a select menu component given a custom id
++   * @param {string} customId The custom id for the select menu component
++   * @returns {string[]}
++   */
++  getSelectMenuValues(customId) {
++    return this.getField(customId, ComponentType.SelectMenu).values;
++  }
+ }
+ 
+ module.exports = ModalSubmitFields;
+diff --git a/src/structures/NewsChannel.js b/src/structures/NewsChannel.js
+index 9595511793399d70088cdda16ebc3bf3b1a61f85..09f7fcb75d4d1f2efe07c66af6b804ee373e9738 100644
+--- a/src/structures/NewsChannel.js
++++ b/src/structures/NewsChannel.js
+@@ -15,7 +15,7 @@ class NewsChannel extends BaseGuildTextChannel {
+    * @param {string} [reason] Reason for creating the webhook
+    * @returns {Promise<NewsChannel>}
+    * @example
+-   * if (channel.type === ChannelType.GuildNews) {
++   * if (channel.type === ChannelType.GuildAnnouncement) {
+    *   channel.addFollower('222197033908436994', 'Important announcements')
+    *     .then(() => console.log('Added follower'))
+    *     .catch(console.error);
+diff --git a/src/structures/ThreadChannel.js b/src/structures/ThreadChannel.js
+index 14cbe6b84dd99c110ff13e98d5e350187e32b14f..a9cd68bf02644f13333b5820cdbb3319568fa2ee 100644
+--- a/src/structures/ThreadChannel.js
++++ b/src/structures/ThreadChannel.js
+@@ -80,7 +80,7 @@ class ThreadChannel extends BaseChannel {
+        * <info>This property is always `null` in public threads.</info>
+        * @type {?boolean}
+        */
+-      this.invitable = this.type === ChannelType.GuildPrivateThread ? data.thread_metadata.invitable ?? false : null;
++      this.invitable = this.type === ChannelType.PrivateThread ? data.thread_metadata.invitable ?? false : null;
+ 
+       /**
+        * Whether the thread is archived
+@@ -114,7 +114,7 @@ class ThreadChannel extends BaseChannel {
+       this.invitable ??= null;
+     }
+ 
+-    this._createdTimestamp ??= this.type === ChannelType.GuildPrivateThread ? super.createdTimestamp : null;
++    this._createdTimestamp ??= this.type === ChannelType.PrivateThread ? super.createdTimestamp : null;
+ 
+     if ('owner_id' in data) {
+       /**
+@@ -301,7 +301,7 @@ class ThreadChannel extends BaseChannel {
+    * @property {boolean} [locked] Whether the thread is locked
+    * @property {boolean} [invitable] Whether non-moderators can add other non-moderators to a thread
+    * @property {string} [reason] Reason for editing the thread
+-   * <info>Can only be edited on {@link ChannelType.GuildPrivateThread}</info>
++   * <info>Can only be edited on {@link ChannelType.PrivateThread}</info>
+    */
+ 
+   /**
+@@ -322,7 +322,7 @@ class ThreadChannel extends BaseChannel {
+         auto_archive_duration: data.autoArchiveDuration,
+         rate_limit_per_user: data.rateLimitPerUser,
+         locked: data.locked,
+-        invitable: this.type === ChannelType.GuildPrivateThread ? data.invitable : undefined,
++        invitable: this.type === ChannelType.PrivateThread ? data.invitable : undefined,
+       },
+       reason: data.reason,
+     });
+@@ -371,7 +371,7 @@ class ThreadChannel extends BaseChannel {
+    * @returns {Promise<ThreadChannel>}
+    */
+   setInvitable(invitable = true, reason) {
+-    if (this.type !== ChannelType.GuildPrivateThread) {
++    if (this.type !== ChannelType.PrivateThread) {
+       return Promise.reject(new RangeError(ErrorCodes.ThreadInvitableType, this.type));
+     }
+     return this.edit({ invitable, reason });
+@@ -435,7 +435,7 @@ class ThreadChannel extends BaseChannel {
+    */
+   get editable() {
+     return (
+-      (this.ownerId === this.client.user.id && (this.type !== ChannelType.GuildPrivateThread || this.joined)) ||
++      (this.ownerId === this.client.user.id && (this.type !== ChannelType.PrivateThread || this.joined)) ||
+       this.manageable
+     );
+   }
+@@ -450,9 +450,7 @@ class ThreadChannel extends BaseChannel {
+       !this.archived &&
+       !this.joined &&
+       this.permissionsFor(this.client.user)?.has(
+-        this.type === ChannelType.GuildPrivateThread
+-          ? PermissionFlagsBits.ManageThreads
+-          : PermissionFlagsBits.ViewChannel,
++        this.type === ChannelType.PrivateThread ? PermissionFlagsBits.ManageThreads : PermissionFlagsBits.ViewChannel,
+         false,
+       )
+     );
+@@ -500,7 +498,7 @@ class ThreadChannel extends BaseChannel {
+ 
+     return (
+       !(this.archived && this.locked && !this.manageable) &&
+-      (this.type !== ChannelType.GuildPrivateThread || this.joined || this.manageable) &&
++      (this.type !== ChannelType.PrivateThread || this.joined || this.manageable) &&
+       permissions.has(PermissionFlagsBits.SendMessagesInThreads, false) &&
+       this.guild.members.me.communicationDisabledUntilTimestamp < Date.now()
+     );
+diff --git a/src/util/Channels.js b/src/util/Channels.js
+index 07a69984615daaf509147ad1cdcd199fc1e4ccc0..a1dc1de4222dd3fcaaacaf5c2ac88d0391eb28c3 100644
+--- a/src/util/Channels.js
++++ b/src/util/Channels.js
+@@ -47,7 +47,7 @@ function createChannel(client, data, guild, { allowUnknownGuild, fromInteraction
+           channel = new (getCategoryChannel())(guild, data, client);
+           break;
+         }
+-        case ChannelType.GuildNews: {
++        case ChannelType.GuildAnnouncement: {
+           channel = new (getNewsChannel())(guild, data, client);
+           break;
+         }
+@@ -55,9 +55,9 @@ function createChannel(client, data, guild, { allowUnknownGuild, fromInteraction
+           channel = new (getStageChannel())(guild, data, client);
+           break;
+         }
+-        case ChannelType.GuildNewsThread:
+-        case ChannelType.GuildPublicThread:
+-        case ChannelType.GuildPrivateThread: {
++        case ChannelType.AnnouncementThread:
++        case ChannelType.PublicThread:
++        case ChannelType.PrivateThread: {
+           channel = new (getThreadChannel())(guild, data, client, fromInteraction);
+           if (!allowUnknownGuild) channel.parent?.threads.cache.set(channel.id, channel);
+           break;
+diff --git a/src/util/Constants.js b/src/util/Constants.js
+index b9f3060b5ea84e0762d6954b0d287932ea30d916..61a5d191eac7753a5e4be6dcc4fbe85fc042d846 100644
+--- a/src/util/Constants.js
++++ b/src/util/Constants.js
+@@ -79,35 +79,31 @@ exports.NonSystemMessageTypes = [
+  * The types of channels that are text-based. The available types are:
+  * * {@link ChannelType.DM}
+  * * {@link ChannelType.GuildText}
+- * * {@link ChannelType.GuildNews}
+- * * {@link ChannelType.GuildNewsThread}
+- * * {@link ChannelType.GuildPublicThread}
+- * * {@link ChannelType.GuildPrivateThread}
++ * * {@link ChannelType.GuildAnnouncement}
++ * * {@link ChannelType.AnnouncementThread}
++ * * {@link ChannelType.PublicThread}
++ * * {@link ChannelType.PrivateThread}
+  * * {@link ChannelType.GuildVoice}
+  * @typedef {ChannelType[]} TextBasedChannelTypes
+  */
+ exports.TextBasedChannelTypes = [
+   ChannelType.DM,
+   ChannelType.GuildText,
+-  ChannelType.GuildNews,
+-  ChannelType.GuildNewsThread,
+-  ChannelType.GuildPublicThread,
+-  ChannelType.GuildPrivateThread,
++  ChannelType.GuildAnnouncement,
++  ChannelType.AnnouncementThread,
++  ChannelType.PublicThread,
++  ChannelType.PrivateThread,
+   ChannelType.GuildVoice,
+ ];
+ 
+ /**
+  * The types of channels that are threads. The available types are:
+- * * {@link ChannelType.GuildNewsThread}
+- * * {@link ChannelType.GuildPublicThread}
+- * * {@link ChannelType.GuildPrivateThread}
++ * * {@link ChannelType.AnnouncementThread}
++ * * {@link ChannelType.PublicThread}
++ * * {@link ChannelType.PrivateThread}
+  * @typedef {ChannelType[]} ThreadChannelTypes
+  */
+-exports.ThreadChannelTypes = [
+-  ChannelType.GuildNewsThread,
+-  ChannelType.GuildPublicThread,
+-  ChannelType.GuildPrivateThread,
+-];
++exports.ThreadChannelTypes = [ChannelType.AnnouncementThread, ChannelType.PublicThread, ChannelType.PrivateThread];
+ 
+ /**
+  * The types of channels that are voice-based. The available types are:
+diff --git a/src/util/Util.js b/src/util/Util.js
+index 41e06eb8b28023f1304439d343f5b3f2489ce937..1741ceec2ef623a6bd79f9e28108465cc75fb01a 100644
+--- a/src/util/Util.js
++++ b/src/util/Util.js
+@@ -345,17 +345,14 @@ function moveElementInArray(array, element, newIndex, offset = false) {
+  * @param {string} data The string resolvable to resolve
+  * @param {Function} [error] The Error constructor to instantiate. Defaults to Error
+  * @param {string} [errorMessage] The error message to throw with. Defaults to "Expected string, got <data> instead."
+- * @param {boolean} [allowEmpty=true] Whether an empty string should be allowed
+  * @returns {string}
+  */
+ function verifyString(
+   data,
+   error = Error,
+   errorMessage = `Expected a string, got ${data} instead.`,
+-  allowEmpty = true,
+ ) {
+   if (typeof data !== 'string') throw new error(errorMessage);
+-  if (!allowEmpty && data.length === 0) throw new error(errorMessage);
+   return data;
+ }
+ 
+diff --git a/typings/index.d.ts b/typings/index.d.ts
+index 351a33220bcdb56db35fe3fe44a62ed20b730b3b..7747f88d822eb0034d2b51f1576fea6724aedec0 100644
+--- a/typings/index.d.ts
++++ b/typings/index.d.ts
+@@ -257,15 +257,15 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+       | APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
+     >,
+   );
+-  public static from(
++  public static from<T extends AnyComponentBuilder = AnyComponentBuilder>(
+     other:
+-      | JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>>
+-      | APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>,
+-  ): ActionRowBuilder;
++      | JSONEncodable<APIActionRowComponent<ReturnType<T['toJSON']>>>
++      | APIActionRowComponent<ReturnType<T['toJSON']>>,
++  ): ActionRowBuilder<T>;
+ }
+ 
+ export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
+-export type ModalActionRowComponent = TextInputComponent;
++export type ModalActionRowComponent = TextInputComponent | SelectMenuComponent;
+ 
+ export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
+   APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
+@@ -537,7 +537,7 @@ export class BaseGuildTextChannel extends TextBasedChannelMixin(GuildChannel, tr
+   ): Promise<this>;
+   public setTopic(topic: string | null, reason?: string): Promise<this>;
+   public setType(type: ChannelType.GuildText, reason?: string): Promise<TextChannel>;
+-  public setType(type: ChannelType.GuildNews, reason?: string): Promise<NewsChannel>;
++  public setType(type: ChannelType.GuildAnnouncement, reason?: string): Promise<NewsChannel>;
+ }
+ 
+ export class BaseGuildVoiceChannel extends GuildChannel {
+@@ -582,6 +582,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
+     ButtonComponent,
+     APIButtonComponent,
+     ButtonComponent | APIButtonComponent,
++    ButtonComponent | APIButtonComponent,
+     ButtonComponent | APIButtonComponent
+   >;
+   public inGuild(): this is ButtonInteraction<'raw' | 'cached'>;
+@@ -702,7 +703,7 @@ export class EmbedBuilder extends BuildersEmbed {
+ export class Embed {
+   private constructor(data: APIEmbed);
+   public readonly data: Readonly<APIEmbed>;
+-  public get fields(): APIEmbedField[];
++  public get fields(): APIEmbedField[] | null;
+   public get footer(): EmbedFooterData | null;
+   public get title(): string | null;
+   public get description(): string | null;
+@@ -721,7 +722,7 @@ export class Embed {
+ }
+ 
+ export interface MappedChannelCategoryTypes {
+-  [ChannelType.GuildNews]: NewsChannel;
++  [ChannelType.GuildAnnouncement]: NewsChannel;
+   [ChannelType.GuildVoice]: VoiceChannel;
+   [ChannelType.GuildText]: TextChannel;
+   [ChannelType.GuildStageVoice]: StageChannel;
+@@ -732,9 +733,9 @@ export type CategoryChannelType = Exclude<
+   ChannelType,
+   | ChannelType.DM
+   | ChannelType.GroupDM
+-  | ChannelType.GuildPublicThread
+-  | ChannelType.GuildNewsThread
+-  | ChannelType.GuildPrivateThread
++  | ChannelType.PublicThread
++  | ChannelType.AnnouncementThread
++  | ChannelType.PrivateThread
+   | ChannelType.GuildCategory
+   | ChannelType.GuildDirectory
+ >;
+@@ -1478,7 +1479,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+   public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
+ }
+ 
+-export type CacheType = 'cached' | 'raw' | undefined;
++export type CacheType = 'cached' | 'raw' | 'DM' | 'cachedOrDM' | undefined;
+ 
+ export type CacheTypeReducer<
+   State extends CacheType,
+@@ -1486,12 +1487,18 @@ export type CacheTypeReducer<
+   RawType = CachedType,
+   PresentType = CachedType | RawType,
+   Fallback = PresentType | null,
++  DMType = null,
++  CachedOrDMType = CachedType | DMType,
+ > = [State] extends ['cached']
+   ? CachedType
+   : [State] extends ['raw']
+   ? RawType
+   : [State] extends ['raw' | 'cached']
+   ? PresentType
++  : [State] extends ['DM']
++  ? DMType
++  : [State] extends ['cachedOrDM']
++  ? CachedOrDMType
+   : Fallback;
+ 
+ export type Interaction<Cached extends CacheType = CacheType> =
+@@ -1513,7 +1520,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+     GuildTextBasedChannel | null,
+     GuildTextBasedChannel | null,
+     GuildTextBasedChannel | null,
+-    TextBasedChannel | null
++    TextBasedChannel | null,
++    DMChannel | null
+   >;
+   public channelId: Snowflake | null;
+   public get createdAt(): Date;
+@@ -1749,16 +1757,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+ }
+ 
+ export class AttachmentBuilder {
+-  public constructor(attachment: BufferResolvable | Stream, data?: AttachmentData);
++  public constructor(data?: Partial<AttachmentPayload>);
+   public attachment: BufferResolvable | Stream;
+   public description: string | null;
+   public name: string | null;
+   public get spoiler(): boolean;
+   public setDescription(description: string): this;
+-  public setFile(attachment: BufferResolvable | Stream, name?: string): this;
++  public setFile(attachment: BufferResolvable | Stream): this;
+   public setName(name: string): this;
+   public setSpoiler(spoiler?: boolean): this;
+-  public toJSON(): unknown;
++  public toJSON(): AttachmentPayload;
+   public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
+ }
+ 
+@@ -1800,6 +1808,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+     MessageActionRowComponent,
+     Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
+     MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
++    MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
+     MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
+   >;
+   public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
+@@ -1957,12 +1966,17 @@ export interface TextInputModalData extends BaseModalData {
+   value: string;
+ }
+ 
++export interface SelectMenuModalData extends BaseModalData {
++  type: ComponentType.SelectMenu;
++  values: string[];
++}
++
+ export interface ActionRowModalData {
+   type: ComponentType.ActionRow;
+   components: ModalData[];
+ }
+ 
+-export type ModalData = TextInputModalData | ActionRowModalData;
++export type ModalData = ActionRowModalData | TextInputModalData | SelectMenuModalData;
+ 
+ export class ModalSubmitFields {
+   constructor(components: ModalActionRowComponent[][]);
+@@ -1971,6 +1985,7 @@ export class ModalSubmitFields {
+   public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
+   public getField(customId: string, type?: ComponentType): ModalData;
+   public getTextInputValue(customId: string): string;
++  public getSelectMenuValues(customId: string): string[];
+ }
+ 
+ export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
+@@ -2021,7 +2036,7 @@ export class ModalSubmitInteraction<Cached extends CacheType = CacheType> extend
+ 
+ export class NewsChannel extends BaseGuildTextChannel {
+   public threads: ThreadManager<AllowedThreadTypeForNewsChannel>;
+-  public type: ChannelType.GuildNews;
++  public type: ChannelType.GuildAnnouncement;
+   public addFollower(channel: TextChannelResolvable, reason?: string): Promise<NewsChannel>;
+ }
+ 
+@@ -2185,6 +2200,7 @@ export class SelectMenuInteraction<Cached extends CacheType = CacheType> extends
+     SelectMenuComponent,
+     APISelectMenuComponent,
+     SelectMenuComponent | APISelectMenuComponent,
++    SelectMenuComponent | APISelectMenuComponent,
+     SelectMenuComponent | APISelectMenuComponent
+   >;
+   public componentType: ComponentType.SelectMenu;
+@@ -2498,13 +2514,13 @@ export class TextChannel extends BaseGuildTextChannel {
+ export type AnyThreadChannel = PublicThreadChannel | PrivateThreadChannel;
+ 
+ export interface PublicThreadChannel extends ThreadChannel {
+-  type: ChannelType.GuildPublicThread | ChannelType.GuildNewsThread;
++  type: ChannelType.PublicThread | ChannelType.AnnouncementThread;
+ }
+ 
+ export interface PrivateThreadChannel extends ThreadChannel {
+   get createdTimestamp(): number;
+   get createdAt(): Date;
+-  type: ChannelType.GuildPrivateThread;
++  type: ChannelType.PrivateThread;
+ }
+ 
+ export class ThreadChannel extends TextBasedChannelMixin(BaseChannel, true, [
+@@ -3290,7 +3306,7 @@ export class ApplicationCommandPermissionsManager<
+     },
+   ): Promise<boolean>;
+   public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
+-  public fetch(options: BaseOptions): Promise<Collection<Snowflake, ApplicationCommandPermissions[]>>;
++  public fetch(options?: BaseOptions): Promise<Collection<Snowflake, ApplicationCommandPermissions[]>>;
+   public remove(
+     options:
+       | (FetchSingleOptions & {
+@@ -3756,9 +3772,9 @@ export interface AddGuildMemberOptions {
+ 
+ export type AllowedPartial = User | Channel | GuildMember | Message | MessageReaction | ThreadMember;
+ 
+-export type AllowedThreadTypeForNewsChannel = ChannelType.GuildNewsThread;
++export type AllowedThreadTypeForNewsChannel = ChannelType.AnnouncementThread;
+ 
+-export type AllowedThreadTypeForTextChannel = ChannelType.GuildPublicThread | ChannelType.GuildPrivateThread;
++export type AllowedThreadTypeForTextChannel = ChannelType.PublicThread | ChannelType.PrivateThread;
+ 
+ export interface BaseApplicationCommandData {
+   name: string;
+@@ -3767,11 +3783,6 @@ export interface BaseApplicationCommandData {
+   defaultMemberPermissions?: PermissionResolvable | null;
+ }
+ 
+-export interface AttachmentData {
+-  name?: string;
+-  description?: string;
+-}
+-
+ export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
+ 
+ export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
+@@ -4805,9 +4816,9 @@ export interface GuildChannelCreateOptions extends Omit<CategoryCreateChannelOpt
+     ChannelType,
+     | ChannelType.DM
+     | ChannelType.GroupDM
+-    | ChannelType.GuildPublicThread
+-    | ChannelType.GuildNewsThread
+-    | ChannelType.GuildPrivateThread
++    | ChannelType.PublicThread
++    | ChannelType.AnnouncementThread
++    | ChannelType.PrivateThread
+   >;
+ }
+ 
+@@ -4817,7 +4828,7 @@ export interface GuildChannelCloneOptions extends Omit<GuildChannelCreateOptions
+ 
+ export interface GuildChannelEditOptions {
+   name?: string;
+-  type?: ChannelType.GuildText | ChannelType.GuildNews;
++  type?: ChannelType.GuildText | ChannelType.GuildAnnouncement;
+   position?: number;
+   topic?: string | null;
+   nsfw?: boolean;
+@@ -5143,14 +5154,7 @@ export interface MessageEditOptions {
+   attachments?: JSONEncodable<AttachmentPayload>[];
+   content?: string | null;
+   embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[] | null;
+-  files?: (
+-    | BufferResolvable
+-    | Stream
+-    | JSONEncodable<APIAttachment>
+-    | Attachment
+-    | AttachmentBuilder
+-    | AttachmentPayload
+-  )[];
++  files?: (BufferResolvable | Stream | AttachmentPayload | JSONEncodable<AttachmentPayload>)[];
+   flags?: BitFieldResolvable<MessageFlagsString, number>;
+   allowedMentions?: MessageMentionOptions;
+   components?: (
+@@ -5201,14 +5205,7 @@ export interface MessageOptions {
+     | APIActionRowComponent<APIMessageActionRowComponent>
+   )[];
+   allowedMentions?: MessageMentionOptions;
+-  files?: (
+-    | BufferResolvable
+-    | Stream
+-    | JSONEncodable<APIAttachment>
+-    | Attachment
+-    | AttachmentBuilder
+-    | AttachmentPayload
+-  )[];
++  files?: (BufferResolvable | Stream | AttachmentPayload | JSONEncodable<AttachmentPayload>)[];
+   reply?: ReplyOptions;
+   stickers?: StickerResolvable[];
+   attachments?: JSONEncodable<AttachmentPayload>[];
+@@ -5565,15 +5562,12 @@ export type TextBasedChannelResolvable = Snowflake | TextBasedChannel;
+ 
+ export type ThreadChannelResolvable = AnyThreadChannel | Snowflake;
+ 
+-export type ThreadChannelType =
+-  | ChannelType.GuildNewsThread
+-  | ChannelType.GuildPublicThread
+-  | ChannelType.GuildPrivateThread;
++export type ThreadChannelType = ChannelType.AnnouncementThread | ChannelType.PublicThread | ChannelType.PrivateThread;
+ 
+ export interface ThreadCreateOptions<AllowedThreadType> extends StartThreadOptions {
+   startMessage?: MessageResolvable;
+   type?: AllowedThreadType;
+-  invitable?: AllowedThreadType extends ChannelType.GuildPrivateThread ? boolean : never;
++  invitable?: AllowedThreadType extends ChannelType.PrivateThread ? boolean : never;
+ }
+ 
+ export interface ThreadEditData {
+diff --git a/typings/index.test-d.ts b/typings/index.test-d.ts
+index 79c7bf06fa56c8af2682928e4e11bee9def46cf6..6043410a2bf6672612d951bd0529849e4af5d524 100644
+--- a/typings/index.test-d.ts
++++ b/typings/index.test-d.ts
+@@ -254,7 +254,6 @@ client.on('ready', async () => {
+   });
+   // @ts-expect-error
+   await globalPermissionsManager?.has({ command: globalCommandId, permissionId: testGuildId });
+-  // @ts-expect-error
+   await globalPermissionsManager?.fetch();
+   // @ts-expect-error
+   await globalPermissionsManager?.fetch({ command: globalCommandId });
+@@ -721,7 +720,7 @@ client.on('messageCreate', async message => {
+   assertIsMessage(channel.send({}));
+   assertIsMessage(channel.send({ embeds: [] }));
+ 
+-  const attachment = new AttachmentBuilder('file.png');
++  const attachment = new AttachmentBuilder({ attachment: 'file.png' });
+   const embed = new EmbedBuilder();
+   assertIsMessage(channel.send({ files: [attachment] }));
+   assertIsMessage(channel.send({ embeds: [embed] }));
+@@ -906,7 +905,7 @@ client.on('messageCreate', async message => {
+ });
+ 
+ client.on('threadCreate', thread => {
+-  if (thread.type === ChannelType.GuildPrivateThread) {
++  if (thread.type === ChannelType.PrivateThread) {
+     expectType<number>(thread.createdTimestamp);
+     expectType<Date>(thread.createdAt);
+   } else {
+@@ -1057,7 +1056,7 @@ expectType<TextBasedChannelFields<true>['send']>(voiceChannel.send);
+ expectAssignable<PartialTextBasedChannelFields>(user);
+ expectAssignable<PartialTextBasedChannelFields>(guildMember);
+ 
+-expectType<Promise<NewsChannel>>(textChannel.setType(ChannelType.GuildNews));
++expectType<Promise<NewsChannel>>(textChannel.setType(ChannelType.GuildAnnouncement));
+ expectType<Promise<TextChannel>>(newsChannel.setType(ChannelType.GuildText));
+ 
+ expectType<Message | null>(dmChannel.lastMessage);
+@@ -1167,7 +1166,9 @@ declare const categoryChannelChildManager: CategoryChannelChildManager;
+ {
+   expectType<Promise<VoiceChannel>>(categoryChannelChildManager.create({ name: 'name', type: ChannelType.GuildVoice }));
+   expectType<Promise<TextChannel>>(categoryChannelChildManager.create({ name: 'name', type: ChannelType.GuildText }));
+-  expectType<Promise<NewsChannel>>(categoryChannelChildManager.create({ name: 'name', type: ChannelType.GuildNews }));
++  expectType<Promise<NewsChannel>>(
++    categoryChannelChildManager.create({ name: 'name', type: ChannelType.GuildAnnouncement }),
++  );
+   expectType<Promise<StageChannel>>(
+     categoryChannelChildManager.create({ name: 'name', type: ChannelType.GuildStageVoice }),
+   );
+@@ -1184,7 +1185,7 @@ declare const guildChannelManager: GuildChannelManager;
+   expectType<Promise<VoiceChannel>>(guildChannelManager.create({ name: 'name', type: ChannelType.GuildVoice }));
+   expectType<Promise<CategoryChannel>>(guildChannelManager.create({ name: 'name', type: ChannelType.GuildCategory }));
+   expectType<Promise<TextChannel>>(guildChannelManager.create({ name: 'name', type: ChannelType.GuildText }));
+-  expectType<Promise<NewsChannel>>(guildChannelManager.create({ name: 'name', type: ChannelType.GuildNews }));
++  expectType<Promise<NewsChannel>>(guildChannelManager.create({ name: 'name', type: ChannelType.GuildAnnouncement }));
+   expectType<Promise<StageChannel>>(guildChannelManager.create({ name: 'name', type: ChannelType.GuildStageVoice }));
+ 
+   expectType<Promise<Collection<Snowflake, AnyChannel>>>(guildChannelManager.fetch());
+@@ -1626,9 +1627,9 @@ declare const NonThreadGuildBasedChannel: NonThreadGuildBasedChannel;
+ declare const GuildTextBasedChannel: GuildTextBasedChannel;
+ 
+ expectType<TextBasedChannel>(TextBasedChannel);
+-expectType<ChannelType.GuildText | ChannelType.DM | ChannelType.GuildNews | ChannelType.GuildVoice | ThreadChannelType>(
+-  TextBasedChannelTypes,
+-);
++expectType<
++  ChannelType.GuildText | ChannelType.DM | ChannelType.GuildAnnouncement | ChannelType.GuildVoice | ThreadChannelType
++>(TextBasedChannelTypes);
+ expectType<StageChannel | VoiceChannel>(VoiceBasedChannel);
+ expectType<GuildBasedChannel>(GuildBasedChannel);
+ expectType<CategoryChannel | NewsChannel | StageChannel | TextChannel | VoiceChannel>(NonThreadGuildBasedChannel);
