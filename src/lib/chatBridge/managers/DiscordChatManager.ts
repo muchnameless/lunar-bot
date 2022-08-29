@@ -26,8 +26,6 @@ import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache';
 import { PREFIX_BY_TYPE } from '../constants';
 import { ChatManager } from './ChatManager';
 import type {
-	Attachment,
-	Collection,
 	CommandInteractionOption,
 	Message,
 	MessageCollectorOptions,
@@ -135,7 +133,7 @@ export class DiscordChatManager extends ChatManager {
 	 * tries to upload all image attachments to imgur, replacing all successfully uploaded URLs with the imgur URLs
 	 * @param attachments
 	 */
-	private async _uploadAttachments(attachments: Collection<Snowflake, Attachment>) {
+	private async _uploadAttachments(attachments: Message['attachments']) {
 		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
 			return attachments.map(({ name }) => DiscordChatManager._getAttachmentName(name));
 		}
