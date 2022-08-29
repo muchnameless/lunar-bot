@@ -72,6 +72,7 @@ export type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		farming_for_dummies_count: number;
 		gems: Record<string, string>;
 		gemstone_slots: number;
+		mana_disintegrator_count: number;
 		modifier: string;
 		petInfo: string;
 		skin: string;
@@ -340,6 +341,15 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			getPrice(ItemId.EtherwarpConduit) * PriceModifier.EtherwarpConduit +
 			getPrice(ItemId.EtherwarpMerger) * PriceModifier.EtherwarpMerger;
 	}
+
+	// mana disintegrator
+	if (extraAttributes.mana_disintegrator_count) {
+		price +=
+			getPrice(ItemId.ManaDisintegrator) * extraAttributes.mana_disintegrator_count * PriceModifier.ManaDisintegrator;
+	}
+
+	// TODO
+	// jalapeno book
 
 	return price;
 }
