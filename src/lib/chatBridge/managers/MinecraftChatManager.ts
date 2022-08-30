@@ -58,6 +58,8 @@ export interface MinecraftChatOptions {
 export interface CommandOptions {
 	/** can also directly be used as the only parameter */
 	command: string;
+	/** command prefix, defaults to '/' */
+	prefix?: string;
 	/** regex to use as a filter for the message collector */
 	responseRegExp?: RegExp | null;
 	/** regex to detect an abortion response */
@@ -1047,6 +1049,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	async command(options: string | CommandOptions) {
 		const {
 			command,
+			prefix = command.startsWith('/') ? '' : '/',
 			responseRegExp,
 			abortRegExp = /^Unknown command. Type "help" for help\.$/,
 			max = -1,
@@ -1057,8 +1060,16 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			signal,
 		} = typeof options === 'string' ? ({ command: options } as CommandOptions) : options;
 
-		await this.commandQueue.wait({ signal }); // only have one collector active at a time (prevent collecting messages from other command calls)
-		await this.queue.wait({ signal }); // only start the collector if the chat queue is free
+		// only have one collector active at a time (prevent collecting messages from other command calls)
+		await this.commandQueue.wait({ signal });
+
+		// only start the collector if the chat queue is free
+		try {
+			await this.queue.wait({ signal });
+		} catch (error) {
+			this.commandQueue.shift();
+			throw error;
+		}
 
 		const collector = this.createMessageCollector({
 			filter: (hypixelMessage) =>
@@ -1139,7 +1150,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			try {
 				await this._sendToChat({
 					content: command,
-					prefix: command.startsWith('/') ? '' : '/',
+					prefix,
 				});
 			} catch (error) {
 				logger.error(error, '[CHATBRIDGE MC COMMAND]');
