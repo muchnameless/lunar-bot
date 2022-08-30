@@ -37,8 +37,8 @@
 	"license": "GPL-3.0",
 	"dependencies": {
 		"@discordjs/builders": "1.2.1-dev.1661774647-682e0e1.0",
-		"@discordjs/collection": "1.1.1-dev.1661774643-682e0e1.0",
-		"@discordjs/rest": "1.1.1-dev.1661774648-682e0e1.0",
+		"@discordjs/collection": "1.1.1-dev.1661818297-fd97da9.0",
+		"@discordjs/rest": "1.1.1-dev.1661818296-fd97da9.0",
 		"@sapphire/async-queue": "1.5.1-next.834903e.0",
 		"@sapphire/discord-utilities": "2.11.7-next.834903e.0",
 		"@sapphire/shapeshift": "3.6.1-next.c47bed6.0",
@@ -52,7 +52,7 @@
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
 		"cron": "^2.1.0",
-		"discord.js": "14.3.1-dev.1661774646-682e0e1.0",
+		"discord.js": "14.3.1-dev.1661818296-fd97da9.0",
 		"fast-xml-parser": "^4.0.9",
 		"ioredis": "^5.2.3",
 		"js-big-decimal": "github:muchnameless/js-big-decimal",
@@ -106,14 +106,14 @@
 	"packageManager": "yarn@3.2.3",
 	"resolutions": {
 		"@discordjs/builders": "patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#./.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch",
-		"@discordjs/collection": "1.1.1-dev.1661774643-682e0e1.0",
-		"@discordjs/rest": "1.1.1-dev.1661774648-682e0e1.0",
+		"@discordjs/collection": "1.1.1-dev.1661818297-fd97da9.0",
+		"@discordjs/rest": "1.1.1-dev.1661818296-fd97da9.0",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@npm:1.5.1-next.834903e.0#.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.6b2c3aa.0-b9d98a9df6.patch",
 		"@sapphire/shapeshift": "3.6.1-next.c47bed6.0",
 		"@sapphire/snowflake": "3.2.3-next.834903e.0",
 		"@types/node": "patch:@types/node@npm:^18.7.14#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch",
 		"discord-api-types": "0.37.6-next.b7b855b.1661799690",
-		"discord.js": "patch:discord.js@npm%3A14.3.1-dev.1661774646-682e0e1.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661774646-682e0e1.0-c4cc9c232f.patch",
+		"discord.js": "patch:discord.js@14.3.1-dev.1661818296-fd97da9.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661774646-682e0e1.0-c4cc9c232f.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
 }
