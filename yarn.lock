@@ -272,14 +272,14 @@ __metadata:
 
 "@discordjs/builders@patch:@discordjs/builders@npm:1.2.1-dev.1661774647-682e0e1.0#.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch::locator=lunar-bot%40workspace%3A.":
   version: 1.2.1-dev.1661774647-682e0e1.0
-  resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch::version=1.2.1-dev.1661774647-682e0e1.0&hash=7ddf78&locator=lunar-bot%40workspace%3A."
+  resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch::version=1.2.1-dev.1661774647-682e0e1.0&hash=a62d22&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@sapphire/shapeshift": ^3.5.1
     discord-api-types: ^0.37.4
     fast-deep-equal: ^3.1.3
     ts-mixer: ^6.0.1
     tslib: ^2.4.0
-  checksum: 2be02c0259582b77c6c8e7e351c7abac8b632b065e1e7abfe41bb27a9c3206e9d9d38c9885b2c6f3490bafb03a34a48f18edff04ee3593c9879777fa67550b9f
+  checksum: 26539b1596da2c64b4d9e1b6f57a810c80cdad625c17d31990e4f52121c565b6ae12fc53de2d52c52507479da91943a5add4c34ff3e88e086e6f021010d41724
   languageName: node
   linkType: hard
 
