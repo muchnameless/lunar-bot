@@ -270,9 +270,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/builders@patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#./.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch::locator=lunar-bot%40workspace%3A.":
+"@discordjs/builders@patch:@discordjs/builders@npm:1.2.1-dev.1661774647-682e0e1.0#.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch::locator=lunar-bot%40workspace%3A.":
   version: 1.2.1-dev.1661774647-682e0e1.0
-  resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#./.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch::version=1.2.1-dev.1661774647-682e0e1.0&hash=7ddf78&locator=lunar-bot%40workspace%3A."
+  resolution: "@discordjs/builders@patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch::version=1.2.1-dev.1661774647-682e0e1.0&hash=7ddf78&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@sapphire/shapeshift": ^3.5.1
     discord-api-types: ^0.37.4

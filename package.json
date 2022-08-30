@@ -105,7 +105,7 @@
 	},
 	"packageManager": "yarn@3.2.3",
 	"resolutions": {
-		"@discordjs/builders": "patch:@discordjs/builders@npm%3A1.2.1-dev.1661774647-682e0e1.0#./.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch",
+		"@discordjs/builders": "patch:@discordjs/builders@npm:1.2.1-dev.1661774647-682e0e1.0#.yarn/patches/@discordjs-builders-npm-1.2.1-dev.1661774647-682e0e1.0-d278df83c1.patch",
 		"@discordjs/collection": "1.1.1-dev.1661818297-fd97da9.0",
 		"@discordjs/rest": "1.1.1-dev.1661818296-fd97da9.0",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@npm:1.5.1-next.834903e.0#.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.6b2c3aa.0-b9d98a9df6.patch",
