@@ -654,7 +654,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * @param force
 	 */
 	async setDiscordMember(member: GuildMember | null, force = false) {
-		if (member == null) {
+		if (!member) {
 			if (this._discordMember) {
 				GuildMemberUtil.setPlayer(this._discordMember, null);
 			}
@@ -1055,7 +1055,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 					hypixelGuild.checkStaff(this) && hypixelGuild.syncRanksEnabled
 						? hypixelGuild.ranks
 								// filter out non-automated ranks
-								.filter(({ currentWeightReq }) => currentWeightReq != null)
+								.filter(({ currentWeightReq }) => currentWeightReq !== null)
 								// sort descendingly by weight req
 								.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
 								// find first rank that the player is eligable for

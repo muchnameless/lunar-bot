@@ -495,7 +495,7 @@ export class HypixelGuild extends Model<
 	 * @param mutedTill
 	 */
 	async syncMute(player: Player, mutedTill: number | null) {
-		if (mutedTill == null) {
+		if (mutedTill === null) {
 			// delete returns false if the element has not been deleted, true if it has been deleted
 			if (!this.mutedPlayers.delete(player.minecraftUuid)) return this;
 
@@ -1033,7 +1033,7 @@ export class HypixelGuild extends Model<
 			const automatedRanks: AutomatedGuildRank[] = [];
 
 			for (const rank of this.ranks) {
-				if (rank.positionReq == null) continue;
+				if (rank.positionReq === null) continue;
 
 				const positionReq = Math.round(rank.positionReq * nonStaffWithWeight.length);
 				const playerAtReq = nonStaffWithWeight[positionReq];

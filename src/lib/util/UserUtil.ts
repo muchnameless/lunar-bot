@@ -48,7 +48,7 @@ export class UserUtil extends null {
 	 * @param player
 	 */
 	static setPlayer(user: User, player: Player | null) {
-		if (player != null) {
+		if (player) {
 			this.PLAYER_CACHE.set(user, player);
 		} else {
 			this.PLAYER_CACHE.delete(user);

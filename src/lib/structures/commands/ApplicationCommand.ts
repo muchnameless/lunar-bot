@@ -275,7 +275,7 @@ export class ApplicationCommand extends BaseCommand {
 			const requiredRoles = this.requiredRoles(hypixelGuild);
 
 			// no roles to add
-			if (requiredRoles == null) continue;
+			if (!requiredRoles) continue;
 
 			for (const roleId of requiredRoles) {
 				// role already added (by another hypixel guild)

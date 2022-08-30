@@ -408,7 +408,7 @@ async function getLeaderboardMessageOptions(
 			};
 		}
 
-		if (isReloadButton == false) {
+		if (isReloadButton === false) {
 			return {
 				embeds: [],
 				components: createActionRows(client, CACHE_KEY, leaderboardArgs, Number.POSITIVE_INFINITY, true),

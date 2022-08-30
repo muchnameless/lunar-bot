@@ -29,7 +29,7 @@ export default class RanksCommand extends ApplicationCommand {
 		// no player
 		if (!player) {
 			for (const { name, positionReq, currentWeightReq } of hypixelGuild.ranks) {
-				if (positionReq == null || positionReq === 0) continue;
+				if (positionReq === null || positionReq === 0) continue;
 
 				embed.addFields({
 					name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
@@ -53,7 +53,7 @@ export default class RanksCommand extends ApplicationCommand {
 		const weight = player.getLilyWeight().totalWeight;
 
 		for (const { name, positionReq, currentWeightReq } of hypixelGuild.ranks) {
-			if (positionReq == null || positionReq === 0 || currentWeightReq == null) continue;
+			if (positionReq === null || positionReq === 0 || currentWeightReq === null) continue;
 
 			embed.addFields({
 				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,

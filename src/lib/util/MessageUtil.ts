@@ -62,7 +62,7 @@ export class MessageUtil extends null {
 	 * @param message
 	 */
 	static isNormalWebhookMessage(message: Message) {
-		return message.webhookId != null && message.webhookId !== message.applicationId;
+		return message.webhookId !== null && message.webhookId !== message.applicationId;
 	}
 
 	/**
