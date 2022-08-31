@@ -153,7 +153,17 @@ export default class DebugCommand extends ApplicationCommand {
 						},
 						{
 							name: 'Hypixel',
-							value: `Queue: ${hypixel.queue.remaining}`,
+							value: stripIndents`
+								Rate Limits
+								${Object.entries(hypixel.rateLimit).map(([key, value]: [string, number]) =>
+									quote(
+										`${key}: ${
+											key === 'reset' ? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime) : value
+										}`,
+									),
+								)}
+								Queue: ${hypixel.queue.remaining}
+							`,
 						},
 						{
 							name: 'Imgur',
