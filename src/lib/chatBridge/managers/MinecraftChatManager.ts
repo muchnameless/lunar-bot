@@ -874,79 +874,70 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return false;
 		}
 
-		// waits between queueing each part to not clog up the queue if someone spams
-		for (const part of contentParts) {
-			success = (await this.sendToChat({ content: part, prefix, discordMessage, signal })) && success;
-		}
-
-		return success;
-	}
-
-	/**
-	 * queue a message for the in-game chat
-	 * @param options
-	 */
-	async sendToChat(options: string | MinecraftChatOptions) {
-		const { content, prefix = '', signal, ..._options } = MinecraftChatManager.resolveChatInput(options);
-
 		let lastMessages: LastMessages | undefined;
 		let commandPrefix: string;
-		let prefixedContent: string;
+		let contentPrefix: string;
 
 		if (prefix.startsWith('/gc ') || prefix.startsWith('/oc ')) {
 			// guild and officer chat
 			lastMessages = this._lastMessages[LastMessagesType.Guild];
 
 			commandPrefix = prefix.slice(0, '/gc '.length);
-			prefixedContent = `${prefix.slice('/gc '.length)}${content}`;
+			contentPrefix = prefix.slice('/gc '.length);
 		} else if (prefix.startsWith('/w ')) {
 			// whispers
 			lastMessages = this._lastMessages[LastMessagesType.Whisper];
 
 			const index = prefix.indexOf(' ', '/w '.length) + 1;
 			commandPrefix = prefix.slice(0, index);
-			prefixedContent = `${prefix.slice(index)}${content}`;
+			contentPrefix = prefix.slice(index);
 		} else {
 			// unknown prefix
 			commandPrefix = prefix;
-			prefixedContent = content;
+			contentPrefix = '';
 		}
 
-		// queue and catch AbortSignal abortions, abort already shifts the queue
-		try {
-			await this.queue.wait({ signal });
-		} catch (error) {
-			logger.error(error, '[SEND TO CHAT]');
-			return signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
+		// waits between queueing each part to not clog up the queue if someone spams
+		for (const contentPart of contentParts) {
+			// queue and catch AbortSignal abortions, abort already shifts the queue
+			try {
+				await this.queue.wait({ signal });
+			} catch (error) {
+				logger.error(error, '[CHATBRIDGE CHAT]');
+				return signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
+			}
+
+			try {
+				await this._sendToChat(`${contentPrefix}${contentPart}`, commandPrefix, discordMessage, lastMessages);
+			} catch (error) {
+				logger.error(error, '[CHATBRIDGE CHAT]');
+				success = false;
+			} finally {
+				this._retries = 0;
+				this.queue.shift();
+			}
 		}
 
-		try {
-			await this._sendToChat({ prefix: commandPrefix, content: prefixedContent, lastMessages, ..._options });
-			return true;
-		} catch (error) {
-			logger.error(error, '[SEND TO CHAT]');
-			return false;
-		} finally {
-			this._retries = 0;
-			this.queue.shift();
-		}
+		return success;
 	}
 
 	/**
-	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat' or 'command'
-	 * @param options
+	 * internal chat method with error listener and retries, should only ever be called from inside 'chat' or 'command'
+	 * @param content
+	 * @param prefix
+	 * @param discordMessage
+	 * @param lastMessages
 	 * @internal
 	 */
-	private async _sendToChat({
-		content,
+	private async _sendToChat(
+		content: string,
 		prefix = '',
-		discordMessage = null,
-		lastMessages,
-	}: Pick<MinecraftChatOptions, 'content' | 'prefix' | 'discordMessage'> & {
-		lastMessages?: LastMessages;
-	}): Promise<unknown> {
-		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, UnicodeEmoji.X);
+		discordMessage: Message | null = null,
+		lastMessages: LastMessages | null = null,
+	): Promise<void> {
+		if (!this.bot || this.bot.ended) return void MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
+		// anti-spam has to happen here since this function is recursive
 		if (lastMessages) {
 			let index = this._retries;
 
@@ -995,12 +986,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.isReady()) {
 					void MessageUtil.react(discordMessage, UnicodeEmoji.X);
-					logger.error(`timeout while sending '${message}'`);
-					throw response;
+					throw `timeout while sending '${message}'`;
 				}
 
 				lastMessages?.add(content);
-
 				return;
 			}
 
@@ -1016,7 +1005,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				}
 
 				await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				return this._sendToChat({ content, prefix, discordMessage, lastMessages }); // retry sending
+				return this._sendToChat(content, prefix, discordMessage, lastMessages); // retry sending
 			}
 
 			// hypixel filter blocked message
@@ -1148,10 +1137,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// send command to chat
 			try {
-				await this._sendToChat({
-					content: command,
-					prefix,
-				});
+				await this._sendToChat(command, prefix);
 			} catch (error) {
 				logger.error(error, '[CHATBRIDGE MC COMMAND]');
 				reject(error);
