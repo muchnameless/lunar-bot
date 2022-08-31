@@ -356,7 +356,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				}
 
 				// accept invite
-				await hypixelMessage.chatBridge.minecraft.command(`/guild accept ${ign}`);
+				await hypixelMessage.chatBridge.minecraft.command(`guild accept ${ign}`);
 				logger.info(
 					{ ign, status: 'accepted', reason: 'meets requirements' },
 					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request`,
@@ -396,11 +396,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const player = this.client.players.findByIgn(ign);
 
 			if (!player?.guildId) {
-				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: denying f request from ${ign}`);
+				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ignoring friend request from ${ign}`);
 			}
 
-			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepting f request from ${ign}`);
-			return void this.chatBridge.minecraft.sendToChat(`/friend add ${ign}`);
+			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepting friend request from ${ign}`);
+			return void this.chatBridge.minecraft.command(`friend add ${ign}`);
 		}
 	}
 
