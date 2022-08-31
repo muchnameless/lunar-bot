@@ -155,13 +155,15 @@ export default class DebugCommand extends ApplicationCommand {
 							name: 'Hypixel',
 							value: stripIndents`
 								Rate Limits
-								${Object.entries(hypixel.rateLimit).map(([key, value]: [string, number]) =>
-									quote(
-										`${key}: ${
-											key === 'reset' ? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime) : value
-										}`,
-									),
-								)}
+								${Object.entries(hypixel.rateLimit)
+									.map(([key, value]: [string, number]) =>
+										quote(
+											`${key}: ${
+												key === 'reset' ? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime) : value
+											}`,
+										),
+									)
+									.join('\n')}
 								Queue: ${hypixel.queue.remaining}
 							`,
 						},
