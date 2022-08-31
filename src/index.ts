@@ -100,6 +100,7 @@ const client = new LunarClient({
 		GatewayIntentBits.GuildEmojisAndStickers | // to keep the cache updated for the chat bridge
 		GatewayIntentBits.GuildMessages | // chat bridge
 		GatewayIntentBits.GuildMessageReactions | // forward announcements to guild chat
+		GatewayIntentBits.DirectMessages |
 		GatewayIntentBits.MessageContent, // chat bridge
 	rest: {
 		// don't await channel name and topic edits
