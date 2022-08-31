@@ -825,46 +825,39 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		if (!content) return false;
 
-		let success = true;
-
-		const contentParts = new Set(
-			(await this.parseContent(content, discordMessage))
-				.split('\n')
-				.flatMap((part) =>
-					splitMessage(part, { char: [' ', ''], maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length }),
-				)
-				.filter((part) => {
-					// filter out white space only parts
-					if (NON_WHITESPACE_REGEXP.test(part)) {
-						// blocked by the content filter
-						if (ChatManager.BLOCKED_WORDS_REGEXP.test(part) || MEME_REGEXP.test(part)) {
-							logger.warn({ prefix, content, part }, '[CHATBRIDGE CHAT]: blocked word');
-							return (success = false);
-						}
-
-						// blocked by the advertisement filter
-						for (const maybeURL of part.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
-							if (!ALLOWED_URLS.test(maybeURL[0])) {
-								logger.warn({ prefix, content, part }, '[CHATBRIDGE CHAT]: blocked URL');
-								return (success = false);
-							}
-						}
-
-						return true;
-					}
-
-					// part consists of only whitespace characters -> ignore
-					if (part) logger.trace({ prefix, content, part }, '[CHATBRIDGE CHAT]: ignored whitespace part');
-
-					return false;
-				}),
-		);
-
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		if (!success) {
-			// messageParts blocked
+		// blocked by the content filter
+		if (ChatManager.BLOCKED_WORDS_REGEXP.test(content) || MEME_REGEXP.test(content)) {
+			logger.warn({ prefix, content }, '[CHATBRIDGE CHAT]: blocked word');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
+		}
+
+		// blocked by the advertisement filter
+		for (const maybeURL of content.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
+			if (ALLOWED_URLS.test(maybeURL[0])) continue;
+
+			logger.warn({ prefix, content }, '[CHATBRIDGE CHAT]: blocked URL');
+			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
+			return false;
+		}
+
+		// use a set to deduplicate the parts
+		const contentParts = new Set<string>();
+
+		// split message into lines and each line into parts which don't exceed the maximum allowed length
+		for (const line of (await this.parseContent(content, discordMessage)).split('\n')) {
+			for (const part of splitMessage(line, {
+				char: [' ', ''],
+				maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length,
+			})) {
+				// filter out whitespace only parts
+				if (!NON_WHITESPACE_REGEXP.test(part)) {
+					if (part) logger.trace({ prefix, content, part }, '[CHATBRIDGE CHAT]: ignored whitespace part');
+					continue;
+				}
+
+				contentParts.add(part);
+			}
 		}
 
 		if (!contentParts.size) return false;
@@ -874,31 +867,35 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return false;
 		}
 
-		let lastMessages: LastMessages | undefined;
+		let lastMessages: LastMessages | null;
 		let commandPrefix: string;
 		let contentPrefix: string;
 
 		if (prefix.startsWith('/gc ') || prefix.startsWith('/oc ')) {
 			// guild and officer chat
-			lastMessages = this._lastMessages[LastMessagesType.Guild];
+			lastMessages = this._lastMessages[LastMessagesType.Guild]!;
 
 			commandPrefix = prefix.slice(0, '/gc '.length);
 			contentPrefix = prefix.slice('/gc '.length);
 		} else if (prefix.startsWith('/w ')) {
 			// whispers
-			lastMessages = this._lastMessages[LastMessagesType.Whisper];
+			lastMessages = this._lastMessages[LastMessagesType.Whisper]!;
 
 			const index = prefix.indexOf(' ', '/w '.length) + 1;
 			commandPrefix = prefix.slice(0, index);
 			contentPrefix = prefix.slice(index);
 		} else {
 			// unknown prefix
+			lastMessages = null;
+
 			commandPrefix = prefix;
 			contentPrefix = '';
 		}
 
+		let success = true;
+
 		// waits between queueing each part to not clog up the queue if someone spams
-		for (const contentPart of contentParts) {
+		for (const part of contentParts) {
 			// queue and catch AbortSignal abortions, abort already shifts the queue
 			try {
 				await this.queue.wait({ signal });
@@ -908,7 +905,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 
 			try {
-				await this._sendToChat(`${contentPrefix}${contentPart}`, commandPrefix, discordMessage, lastMessages);
+				await this._sendToChat(`${contentPrefix}${part}`, commandPrefix, discordMessage, lastMessages);
 			} catch (error) {
 				logger.error(error, '[CHATBRIDGE CHAT]');
 				success = false;
