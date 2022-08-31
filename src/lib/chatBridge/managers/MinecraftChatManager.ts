@@ -763,15 +763,18 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
 			logger.trace(
-				`[GCHAT]: bot muted for ${ms(this.hypixelGuild.mutedPlayers.get(this.botUuid!)! - Date.now(), {
-					long: true,
-				})}, unable to send '${prefix}${prefix.length ? ' ' : ''}${_options.content}`,
+				{
+					prefix,
+					cotent: _options.content,
+					mutedFor: this.hypixelGuild.mutedPlayers.get(this.botUuid!)! - Date.now(),
+				},
+				'[GCHAT]: bot muted',
 			);
 
 			return false;
 		}
 
-		return this.chat({ prefix: `/gc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
+		return this.chat({ prefix: `/gc ${prefix}${prefix ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
 
 	/**
@@ -781,7 +784,20 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	ochat(options: string | MinecraftChatOptions) {
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
-		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
+		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
+			logger.trace(
+				{
+					prefix,
+					cotent: _options.content,
+					mutedFor: this.hypixelGuild.mutedPlayers.get(this.botUuid!)! - Date.now(),
+				},
+				'[OCHAT]: bot muted',
+			);
+
+			return false;
+		}
+
+		return this.chat({ prefix: `/oc ${prefix}${prefix ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
 
 	/**
@@ -791,7 +807,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	pchat(options: string | MinecraftChatOptions) {
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
-		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
+		return this.chat({ prefix: `/pc ${prefix}${prefix ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
 
 	/**
@@ -803,7 +819,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		return this.chat({
-			prefix: `/w ${ign} ${prefix}${prefix.length ? ' ' : ''}`,
+			prefix: `/w ${ign} ${prefix}${prefix && ' '}`,
 			maxParts: Number.POSITIVE_INFINITY,
 			..._options,
 		});
@@ -833,10 +849,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		}
 
 		// blocked by the advertisement filter
-		for (const maybeURL of content.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
-			if (ALLOWED_URLS.test(maybeURL[0])) continue;
+		for (const [maybeURL] of content.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
+			if (ALLOWED_URLS.test(maybeURL)) continue;
 
-			logger.warn({ prefix, content }, '[CHATBRIDGE CHAT]: blocked URL');
+			logger.warn({ prefix, content, maybeURL }, '[CHATBRIDGE CHAT]: blocked URL');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
 		}
