@@ -24,7 +24,6 @@ import {
 	trim,
 } from '#functions';
 import {
-	ALLOWED_URLS,
 	DELETED_MESSAGE_REASON,
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
@@ -842,7 +841,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		if (!content) return false;
 
 		// blocked by the content filter
-		if (ChatManager.BLOCKED_WORDS_REGEXP.test(content) || MEME_REGEXP.test(content)) {
+		if (MinecraftChatManager.BLOCKED_WORDS_REGEXP.test(content) || MEME_REGEXP.test(content)) {
 			logger.warn({ prefix, content }, '[CHATBRIDGE CHAT]: blocked word');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
@@ -850,7 +849,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		// blocked by the advertisement filter
 		for (const [maybeURL] of content.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
-			if (ALLOWED_URLS.test(maybeURL)) continue;
+			if (MinecraftChatManager.ALLOWED_URLS_REGEXP.test(maybeURL)) continue;
 
 			logger.warn({ prefix, content, maybeURL }, '[CHATBRIDGE CHAT]: blocked URL');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);

@@ -1,5 +1,4 @@
 import { AsyncQueue } from '@sapphire/async-queue';
-import { BLOCKED_WORDS_REGEXP } from '../constants';
 import { HypixelMessageCollectorEvent } from '../HypixelMessageCollector';
 import type { HypixelMessageCollector, HypixelMessageCollectorOptions } from '../HypixelMessageCollector';
 import type { ChatBridge } from '../ChatBridge';
@@ -23,7 +22,21 @@ export abstract class ChatManager {
 	/**
 	 * regexp to check for words that are blocked on hypixel
 	 */
-	static BLOCKED_WORDS_REGEXP = BLOCKED_WORDS_REGEXP;
+	static BLOCKED_WORDS_REGEXP: RegExp;
+	static ALLOWED_URLS_REGEXP: RegExp;
+
+	/**
+	 * reloads a regex filter from a file
+	 * @param fileName
+	 * @param propertyName
+	 */
+	static async reloadFilter(fileName: `${string}.js`, propertyName: keyof typeof ChatManager) {
+		const { [propertyName]: newFilter } = await import(`../constants/${fileName}?update=${Date.now()}`);
+
+		if (!newFilter) throw new Error(`${fileName} has no export named ${propertyName}`);
+
+		ChatManager[propertyName] = newFilter;
+	}
 
 	get mcAccount() {
 		return this.chatBridge.mcAccount;
@@ -64,3 +77,6 @@ export abstract class ChatManager {
 		throw new Error('Method not implemented.');
 	}
 }
+
+await ChatManager.reloadFilter('blockedWords.js', 'BLOCKED_WORDS_REGEXP');
+await ChatManager.reloadFilter('allowedURLs.js', 'ALLOWED_URLS_REGEXP');

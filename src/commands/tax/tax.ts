@@ -103,13 +103,16 @@ export default class TaxCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		switch (interaction.options.getSubcommandGroup()) {
+		const subcommandGroup = interaction.options.getSubcommandGroup();
+		const subcommand = interaction.options.getSubcommand();
+
+		switch (subcommandGroup) {
 			case 'ah': {
 				const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 				let log: string;
 
-				switch (interaction.options.getSubcommand()) {
+				switch (subcommand) {
 					case 'add':
 						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) {
 							return InteractionUtil.reply(interaction, `\`${player}\` is already a tax collector`);
@@ -134,7 +137,7 @@ export default class TaxCommand extends ApplicationCommand {
 					}
 
 					default:
-						throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
+						throw new Error(`unknown subcommand '${subcommand}'`);
 				}
 
 				void this.client.log(
@@ -147,7 +150,7 @@ export default class TaxCommand extends ApplicationCommand {
 			}
 
 			case null: {
-				switch (interaction.options.getSubcommand()) {
+				switch (subcommand) {
 					case 'amount': {
 						const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
@@ -446,12 +449,12 @@ export default class TaxCommand extends ApplicationCommand {
 					}
 
 					default:
-						throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
+						throw new Error(`unknown subcommand '${subcommand}'`);
 				}
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${interaction.options.getSubcommandGroup()}'`);
+				throw new Error(`unknown subcommand group '${subcommandGroup}'`);
 		}
 	}
 }
