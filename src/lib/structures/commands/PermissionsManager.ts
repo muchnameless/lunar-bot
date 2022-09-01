@@ -108,18 +108,13 @@ export class PermissionsManager {
 	async assert(guildId: Snowflake, commandId: Snowflake, member: GuildMember) {
 		if (!this.ready) await this.init();
 
-		const guildPermissions = this.cache.get(guildId);
-		if (!guildPermissions) {
-			throw `unable to find permissions for \`${this.client.guilds.cache.get(guildId)?.name ?? guildId}\``;
-		}
-
-		const commandPermissions = guildPermissions.get(commandId);
+		const permissions = this.cache.get(guildId)?.get(commandId);
 
 		// no permissions to check for the command
-		if (!commandPermissions) return;
+		if (!permissions) return;
 
 		// users
-		switch (commandPermissions.users?.get(member.id)) {
+		switch (permissions.users?.get(member.id)) {
 			case true:
 				return;
 
@@ -132,18 +127,18 @@ export class PermissionsManager {
 		// roles
 		let roleCache: Collection<Snowflake, Role> | undefined;
 
-		if (commandPermissions.roles.allowed) {
+		if (permissions.roles.allowed) {
 			roleCache = member.roles.cache;
 
-			for (const roleId of commandPermissions.roles.allowed) {
+			for (const roleId of permissions.roles.allowed) {
 				if (roleCache.has(roleId)) return;
 			}
 		}
 
-		if (commandPermissions.roles.denied) {
+		if (permissions.roles.denied) {
 			roleCache ??= member.roles.cache;
 
-			for (const roleId of commandPermissions.roles.denied) {
+			for (const roleId of permissions.roles.denied) {
 				if (roleCache.has(roleId)) {
 					throw `the ${this.client.guilds.cache.get(guildId)?.roles.cache.get(roleId)?.name ?? roleId} role in \`${
 						this.client.guilds.cache.get(guildId)?.name ?? guildId
