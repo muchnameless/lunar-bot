@@ -194,7 +194,7 @@ export default class GuildCommand extends ApplicationCommand {
 					.setDescription('top')
 					.addIntegerOption((option) =>
 						option //
-							.setName('days_ago')
+							.setName('days-ago')
 							.setDescription('number of days ago')
 							.setRequired(false),
 					),
@@ -833,7 +833,7 @@ export default class GuildCommand extends ApplicationCommand {
 						abortRegExp: topErrors(),
 					},
 					interaction.user.id,
-					interaction.options.getInteger('days_ago'),
+					interaction.options.getInteger('days-ago'),
 				);
 
 			case 'invite': {
