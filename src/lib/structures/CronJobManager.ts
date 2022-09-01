@@ -4,11 +4,11 @@ import { logger } from '#logger';
 import type { LunarClient } from './LunarClient';
 
 export class CronJobManager {
-	client: LunarClient;
+	declare client: LunarClient;
 	cache = new Collection<string, CronJob>();
 
 	constructor(client: LunarClient) {
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
 	}
 
 	/**

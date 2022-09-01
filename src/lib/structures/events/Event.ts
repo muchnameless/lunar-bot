@@ -7,12 +7,12 @@ export interface EventContext extends BaseEventContext {
 }
 
 export class Event extends BaseEvent {
-	client: LunarClient;
+	declare client: LunarClient;
 
 	constructor(context: EventContext) {
 		super(context);
 
-		this.client = context.emitter;
+		Object.defineProperty(this, 'client', { value: context.emitter });
 	}
 
 	/**

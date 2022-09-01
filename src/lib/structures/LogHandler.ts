@@ -13,7 +13,7 @@ import type { LunarClient } from './LunarClient';
 type LogInput = JSONEncodable<APIEmbed> | APIEmbed | string | number | null | undefined;
 
 export class LogHandler {
-	client: LunarClient;
+	declare client: LunarClient;
 	logURL: URL;
 
 	/**
@@ -21,7 +21,8 @@ export class LogHandler {
 	 * @param logURL
 	 */
 	constructor(client: LunarClient, logURL: URL) {
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
+
 		this.logURL = logURL;
 	}
 

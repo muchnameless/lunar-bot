@@ -16,7 +16,7 @@ interface CommandLoadOptions {
 export type CommandType = DualCommand | ApplicationCommand | BridgeCommand;
 
 export class BaseCommandCollection<C extends CommandType = CommandType> extends Collection<string, C> {
-	client: LunarClient;
+	declare client: LunarClient;
 	/**
 	 * path to the command files
 	 */
@@ -30,7 +30,8 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	constructor(client: LunarClient, dirURL: URL, entries?: readonly [string, C][]) {
 		super(entries);
 
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
+
 		this.dirURL = dirURL;
 	}
 

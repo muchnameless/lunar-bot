@@ -14,7 +14,7 @@ import type { LunarClient } from '../../LunarClient';
 export type ModelResovable<M extends Model> = M | string;
 
 export class ModelManager<M extends Model> {
-	client: LunarClient;
+	declare client: LunarClient;
 	model: ModelStatic<M>;
 	primaryKey: keyof M; // Attributes<M> doesn't work with InferAttributes (sequelize 6.16.1)
 	cache = new Collection<string, M>();
@@ -24,7 +24,8 @@ export class ModelManager<M extends Model> {
 	 * @param model
 	 */
 	constructor(client: LunarClient, model: ModelStatic<M>) {
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
+
 		this.model = model;
 		this.primaryKey = model.primaryKeyAttribute as keyof M; // TODO: remove cast once above typings issue is fixed
 	}

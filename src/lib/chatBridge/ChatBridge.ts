@@ -60,7 +60,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * client that instantiated the chat bridge
 	 */
-	client: LunarClient;
+	declare client: LunarClient;
 	/**
 	 * manager that instantiated the chat bridge
 	 */
@@ -93,7 +93,8 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	constructor(client: LunarClient, manager: ChatBridgeManager, mcAccount: number) {
 		super({ captureRejections: true });
 
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
+
 		this.manager = manager;
 		this.mcAccount = mcAccount;
 		void this.events.loadAll();

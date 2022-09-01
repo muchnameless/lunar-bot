@@ -23,7 +23,7 @@ export interface CommandData {
 type RequiredRoles = (hypixelGuild: HypixelGuild) => Snowflake[];
 
 export class BaseCommand {
-	client: LunarClient;
+	declare client: LunarClient;
 	collection: BaseCommandCollection;
 	/**
 	 * command name (lower case)
@@ -59,7 +59,8 @@ export class BaseCommand {
 		{ client, collection, fileName, category }: CommandContext,
 		{ name, cooldown, requiredRoles }: CommandData = {},
 	) {
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
+
 		this.collection = collection;
 		this.name = (name ?? fileName).toLowerCase();
 		this.category = category;

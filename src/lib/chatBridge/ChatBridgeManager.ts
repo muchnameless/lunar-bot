@@ -23,7 +23,7 @@ export class ChatBridgeManager {
 	/**
 	 * the client that instantiated the ChatBridgeArray
 	 */
-	client: LunarClient;
+	declare client: LunarClient;
 	/**
 	 * minecraft command collection
 	 */
@@ -62,7 +62,8 @@ export class ChatBridgeManager {
 	}, minutes(15));
 
 	constructor(client: LunarClient, commandsURL: URL) {
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
+
 		this.commands = new BridgeCommandCollection(client, commandsURL);
 
 		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {

@@ -17,13 +17,13 @@ type GuildId = Snowflake;
 type CommandId = Snowflake;
 
 export class PermissionsManager {
-	client: LunarClient;
+	declare client: LunarClient;
 	cache = new Collection<GuildId, Collection<CommandId, CommandPermissions>>();
 	ready = false;
 	private _initPromise: null | Promise<void> = null;
 
 	constructor(client: LunarClient) {
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
 	}
 
 	/**

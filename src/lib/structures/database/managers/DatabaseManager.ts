@@ -42,7 +42,7 @@ export interface Models {
 }
 
 export class DatabaseManager {
-	client: LunarClient;
+	declare client: LunarClient;
 	/**
 	 * ModelManagers
 	 */
@@ -68,7 +68,8 @@ export class DatabaseManager {
 	private _updateDataPromise: Promise<this> | null = null;
 
 	constructor(client: LunarClient, db: typeof DbType) {
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
+
 		this.modelManagers = {
 			chatTriggers: new ModelManager(client, db.ChatTrigger),
 			config: new ConfigManager(client, db.Config),
