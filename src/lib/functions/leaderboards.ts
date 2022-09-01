@@ -153,7 +153,7 @@ const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, o
  */
 export const getDefaultOffset = (config: ConfigManager) =>
 	config.get('COMPETITION_RUNNING') ||
-	(Date.now() - config.get(XP_OFFSETS_TIME[Offset.CompetitionEnd]) >= 0 &&
+	(Date.now() >= config.get(XP_OFFSETS_TIME[Offset.CompetitionEnd]) &&
 		Date.now() - config.get(XP_OFFSETS_TIME[Offset.CompetitionEnd]) <= days(1))
 		? Offset.CompetitionStart
 		: config.get('DEFAULT_XP_OFFSET');
