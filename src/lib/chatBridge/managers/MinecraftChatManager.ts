@@ -920,7 +920,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 
 			try {
-				await this._sendToChat(`${contentPrefix}${part}`, commandPrefix, discordMessage, lastMessages);
+				await this.#sendToChat(`${contentPrefix}${part}`, commandPrefix, discordMessage, lastMessages);
 			} catch (error) {
 				logger.error(error, '[CHATBRIDGE CHAT]');
 				success = false;
@@ -941,7 +941,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param lastMessages
 	 * @internal
 	 */
-	private async _sendToChat(
+	async #sendToChat(
 		content: string,
 		prefix = '',
 		discordMessage: Message | null = null,
@@ -1017,7 +1017,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				}
 
 				await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				return this._sendToChat(content, prefix, discordMessage, lastMessages); // retry sending
+				return this.#sendToChat(content, prefix, discordMessage, lastMessages); // retry sending
 			}
 
 			// hypixel filter blocked message
@@ -1149,7 +1149,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// send command to chat
 			try {
-				await this._sendToChat(command, prefix);
+				await this.#sendToChat(command, prefix);
 			} catch (error) {
 				logger.error(error, '[CHATBRIDGE MC COMMAND]');
 				reject(error);

@@ -402,7 +402,7 @@ export class DatabaseManager {
 		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
-			return await (this._updateDataPromise = this._updateData());
+			return await (this._updateDataPromise = this.#updateData());
 		} finally {
 			this._updateDataPromise = null;
 		}
@@ -411,7 +411,7 @@ export class DatabaseManager {
 	 * should only ever be called from within updateData
 	 * @internal
 	 */
-	private async _updateData() {
+	async #updateData() {
 		try {
 			const { config, players, hypixelGuilds } = this.modelManagers;
 

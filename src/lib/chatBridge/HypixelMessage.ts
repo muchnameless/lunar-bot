@@ -331,7 +331,7 @@ export class HypixelMessage {
 		// user message
 		try {
 			const { player } = this;
-			const discordMessage = await (this.discordMessage = this._forwardToDiscord({
+			const discordMessage = await (this.discordMessage = this.#forwardToDiscord({
 				discordChatManager,
 				member: this.member,
 				player,
@@ -356,7 +356,7 @@ export class HypixelMessage {
 	 * @param options
 	 * @internal
 	 */
-	private async _forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
+	async #forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
 		const abortController = new AbortController();
 
 		return discordChatManager.sendViaWebhook({

@@ -9,7 +9,7 @@ import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
 
 export class DualCommand
 	extends ApplicationCommand
-	implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns'>
+	implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns' | 'commandId'>
 {
 	_usage: string | (() => string) | null = null;
 	aliasesInGame: string[] | null;

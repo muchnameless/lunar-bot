@@ -223,7 +223,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (this._updateXpPromise) return this._updateXpPromise;
 
 		try {
-			return await (this._updateXpPromise = this._updateXp(options));
+			return await (this._updateXpPromise = this.#updateXp(options));
 		} finally {
 			this._updateXpPromise = null;
 		}
@@ -232,7 +232,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * should only ever be called from within updateXp
 	 * @internal
 	 */
-	private async _updateXp(options?: PlayerUpdateOptions) {
+	async #updateXp(options?: PlayerUpdateOptions) {
 		try {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
@@ -267,7 +267,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (this._updateIgnPromise) return this._updateIgnPromise;
 
 		try {
-			return await (this._updateIgnPromise = this._updateIgns());
+			return await (this._updateIgnPromise = this.#updateIgns());
 		} finally {
 			this._updateIgnPromise = null;
 		}
@@ -276,7 +276,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * should only ever be called from within updateIgns
 	 * @internal
 	 */
-	private async _updateIgns() {
+	async #updateIgns() {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('MOJANG_API_ERROR')) {
 			// reset error every full hour
@@ -389,7 +389,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (this._updateMainProfilesPromise) return this._updateMainProfilesPromise;
 
 		try {
-			return await (this._updateMainProfilesPromise = this._updateMainProfiles());
+			return await (this._updateMainProfilesPromise = this.#updateMainProfiles());
 		} finally {
 			this._updateMainProfilesPromise = null;
 		}
@@ -398,7 +398,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * should only ever be called from within updateMainProfiles
 	 * @internal
 	 */
-	private async _updateMainProfiles() {
+	async #updateMainProfiles() {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
