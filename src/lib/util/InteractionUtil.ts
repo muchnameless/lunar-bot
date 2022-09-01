@@ -221,10 +221,13 @@ export class InteractionUtil extends null {
 							user: interaction.member
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
+							userId: interaction.user.id,
 							channel: interaction.guildId
 								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
+							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
 						};
 
 					case ApplicationCommandType.Message:
@@ -235,10 +238,13 @@ export class InteractionUtil extends null {
 							user: interaction.member
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
+							userId: interaction.user.id,
 							channel: interaction.guildId
 								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
+							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
 						};
 
 					default:
@@ -253,10 +259,13 @@ export class InteractionUtil extends null {
 					user: interaction.member
 						? `${interaction.member.displayName} | ${interaction.user.tag}`
 						: interaction.user.tag,
+					userId: interaction.user.id,
 					channel: interaction.guildId
 						? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 						: 'DM',
+					channelId: interaction.channelId,
 					guild: interaction.guild?.name ?? null,
+					guildId: interaction.guildId,
 				};
 
 			case InteractionType.MessageComponent:
@@ -268,10 +277,13 @@ export class InteractionUtil extends null {
 							user: interaction.member
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
+							userId: interaction.user.id,
 							channel: interaction.guildId
 								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
+							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
 						};
 
 					case ComponentType.SelectMenu:
@@ -282,31 +294,37 @@ export class InteractionUtil extends null {
 							user: interaction.member
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
+							userId: interaction.user.id,
 							channel: interaction.guildId
 								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 								: 'DM',
+							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
 						};
 
 					default:
 						return assertNever(interaction);
 				}
 
-			// TODO: modal submit
-			// case InteractionType.ModalSubmit:
-			// 	return {};
-
-			default:
+			case InteractionType.ModalSubmit:
 				return {
 					type: InteractionType[interaction.type],
+					customId: interaction.customId,
 					user: interaction.member
 						? `${interaction.member.displayName} | ${interaction.user.tag}`
 						: interaction.user.tag,
+					userId: interaction.user.id,
 					channel: interaction.guildId
 						? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
 						: 'DM',
+					channelId: interaction.channelId,
 					guild: interaction.guild?.name ?? null,
+					guildId: interaction.guildId,
 				};
+
+			default:
+				return assertNever(interaction);
 		}
 	}
 
