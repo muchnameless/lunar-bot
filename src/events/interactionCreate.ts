@@ -20,12 +20,12 @@ import {
 	handleLeaderboardSelectMenuInteraction,
 	sortCache,
 } from '#functions';
+import type { RepliableInteraction } from '#utils';
 import type {
 	APIActionRowComponent,
 	APIMessageActionRowComponent,
 	ApplicationCommandOptionChoiceData,
 	AutocompleteInteraction,
-	BaseGuildTextChannel,
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	ClientEvents,
@@ -47,19 +47,6 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleChatInputCommandInteraction(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		logger.info(
-			{
-				type: InteractionType[interaction.type],
-				command: interaction.toString(),
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			},
-			'INTERACTION_CREATE',
-		);
-
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) {
@@ -93,19 +80,6 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleButtonInteraction(interaction: ButtonInteraction<'cachedOrDM'>) {
-		logger.info(
-			{
-				type: ComponentType[interaction.componentType],
-				customId: interaction.customId,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			},
-			'INTERACTION_CREATE',
-		);
-
 		const args = interaction.customId.split(':');
 		const TYPE = args.shift();
 
@@ -222,20 +196,6 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleSelectMenuInteraction(interaction: SelectMenuInteraction<'cachedOrDM'>) {
-		logger.info(
-			{
-				type: ComponentType[interaction.componentType],
-				customId: interaction.customId,
-				values: interaction.values,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			},
-			'INTERACTION_CREATE',
-		);
-
 		const args = interaction.customId.split(':');
 		const type = args.shift();
 
@@ -380,19 +340,6 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleMessageContextMenuInteraction(interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>) {
-		logger.info(
-			{
-				type: ApplicationCommandType[interaction.commandType],
-				command: interaction.commandName,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			},
-			'INTERACTION_CREATE',
-		);
-
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) {
@@ -409,19 +356,6 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleUserContextMenuInteraction(interaction: UserContextMenuCommandInteraction<'cachedOrDM'>) {
-		logger.info(
-			{
-				type: ApplicationCommandType[interaction.commandType],
-				command: interaction.commandName,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			},
-			'INTERACTION_CREATE',
-		);
-
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) {
@@ -440,19 +374,6 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleModalSubmitInteraction(interaction: ModalSubmitInteraction<'cachedOrDM'>) {
-		logger.info(
-			{
-				type: InteractionType[interaction.type],
-				customId: interaction.customId,
-				user: interaction.member ? `${interaction.member.displayName} | ${interaction.user.tag}` : interaction.user.tag,
-				channel: interaction.guildId
-					? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
-					: 'DM',
-				guild: interaction.guild?.name ?? null,
-			},
-			'INTERACTION_CREATE',
-		);
-
 		const args = interaction.customId.split(':');
 		const TYPE = args.shift();
 
@@ -479,6 +400,15 @@ export default class InteractionCreateEvent extends Event {
 	}
 
 	/**
+	 * @param interaction
+	 */
+	private _handleRepliableInteraction(interaction: RepliableInteraction<'cachedOrDM'>) {
+		InteractionUtil.add(interaction);
+		this.client.chatBridges.handleInteractionCreate(interaction);
+		logger.info(InteractionUtil.logInfo(interaction), '[INTERACTION CREATE]');
+	}
+
+	/**
 	 * event listener callback
 	 * @param interaction
 	 */
@@ -488,8 +418,7 @@ export default class InteractionCreateEvent extends Event {
 		try {
 			switch (interaction.type) {
 				case InteractionType.ApplicationCommand:
-					InteractionUtil.add(interaction);
-					this.client.chatBridges.handleInteractionCreate(interaction);
+					this._handleRepliableInteraction(interaction);
 
 					switch (interaction.commandType) {
 						case ApplicationCommandType.ChatInput:
@@ -509,8 +438,7 @@ export default class InteractionCreateEvent extends Event {
 					return void (await this._handleAutocompleteInteraction(interaction));
 
 				case InteractionType.MessageComponent:
-					InteractionUtil.add(interaction);
-					this.client.chatBridges.handleInteractionCreate(interaction);
+					this._handleRepliableInteraction(interaction);
 
 					switch (interaction.componentType) {
 						case ComponentType.Button:
@@ -524,8 +452,7 @@ export default class InteractionCreateEvent extends Event {
 					}
 
 				case InteractionType.ModalSubmit:
-					InteractionUtil.add(interaction);
-					this.client.chatBridges.handleInteractionCreate(interaction);
+					this._handleRepliableInteraction(interaction);
 
 					return void (await this._handleModalSubmitInteraction(interaction));
 
