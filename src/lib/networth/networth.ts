@@ -20,7 +20,7 @@ import {
 	PriceModifier,
 	SKYBLOCK_INVENTORIES,
 } from './constants';
-import { accessories, getPrice, itemUpgrades, prices } from './prices';
+import { accessories, getPrice, itemUpgrades, prices, unknownItemIdWarnings } from './prices';
 import type { ItemUpgrade } from './prices';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 
@@ -102,11 +102,12 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	const itemId = extraAttributes.id;
 
 	let price =
+		item.Count *
 		(prices.get(itemId) ??
 			// non auctionable craftable items
-			CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + getPrice(id) * count, 0) ??
+			CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + count * getPrice(id), 0) ??
 			// unknown item
-			0) * item.Count;
+			(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 
 	// dark auctions
 	if (extraAttributes.winning_bid && itemId !== ItemId.HegemonyArtifact) {
@@ -127,14 +128,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			if (enchantment === Enchantment.Efficiency && level > 5) {
 				// Stonk has efficiency 6 by default, for other items 5 is the max level without Silex
 				const isStonk = itemId === ItemId.Stonk;
-				price += getPrice(ItemId.Silex) * PriceModifier.Silex * (level - (isStonk ? 6 : 5));
+				price += (level - (isStonk ? 6 : 5)) * getPrice(ItemId.Silex) * PriceModifier.Silex;
 				if (isStonk) continue;
 				level = 5;
 			}
 
 			const { itemId: enchantmentId, count } = getEnchantment(enchantment, level);
 
-			let enchantmentPrice = getPrice(enchantmentId) * count;
+			let enchantmentPrice = count * getPrice(enchantmentId);
 
 			// applied enchantments are worth less
 			if (itemId !== ItemId.EnchantedBook) {
@@ -160,11 +161,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// hot potato books + fuming potato books
 	if (extraAttributes.hot_potato_count) {
 		if (extraAttributes.hot_potato_count > 10) {
-			price += getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook * 10;
+			price += 10 * getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook;
 			price +=
-				getPrice(ItemId.FumingPotatoBook) * PriceModifier.FumingPotatoBook * (extraAttributes.hot_potato_count - 10);
+				(extraAttributes.hot_potato_count - 10) * getPrice(ItemId.FumingPotatoBook) * PriceModifier.FumingPotatoBook;
 		} else {
-			price += getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook * extraAttributes.hot_potato_count;
+			price += extraAttributes.hot_potato_count * getPrice(ItemId.HotPotatoBook) * PriceModifier.HotPotatoBook;
 		}
 	}
 
@@ -175,13 +176,13 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// art of war
 	if (extraAttributes.art_of_war_count) {
-		price += getPrice(ItemId.ArtOfWar) * PriceModifier.ArtOfWar * extraAttributes.art_of_war_count;
+		price += extraAttributes.art_of_war_count * getPrice(ItemId.ArtOfWar) * PriceModifier.ArtOfWar;
 	}
 
 	// farming for dummies
 	if (extraAttributes.farming_for_dummies_count) {
 		price +=
-			getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies * extraAttributes.farming_for_dummies_count;
+			extraAttributes.farming_for_dummies_count * getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies;
 	}
 
 	// upgrades
@@ -198,14 +199,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			if (itemUpgrade.stars) {
 				for (const star of itemUpgrade.stars) {
 					for (const [material, amount] of Object.entries(star)) {
-						essencePrice += getPrice(material) * amount;
+						essencePrice += amount * getPrice(material);
 					}
 				}
 			}
 
 			// prestige
 			for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
-				essencePrice += getPrice(material) * amount;
+				essencePrice += amount * getPrice(material);
 			}
 
 			// try to add "base item"
@@ -228,7 +229,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			// initial dungeon conversion cost
 			if (itemUpgrade.dungeon_conversion) {
 				for (const [material, amount] of Object.entries(itemUpgrade.dungeon_conversion)) {
-					essencePrice += getPrice(material) * amount;
+					essencePrice += amount * getPrice(material);
 				}
 			}
 
@@ -238,7 +239,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 					// item api has required materials
 					if (itemUpgrade.stars[star]) {
 						for (const [material, amount] of Object.entries(itemUpgrade.stars[star]!)) {
-							essencePrice += getPrice(material) * amount;
+							essencePrice += amount * getPrice(material);
 						}
 					} else {
 						// dungeon items require master stars for stars 6 - 10
@@ -299,12 +300,12 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// wood singularity
 	if (extraAttributes.wood_singularity_count) {
-		price += getPrice(ItemId.WoodSingularity) * PriceModifier.WoodSingularity;
+		price += extraAttributes.wood_singularity_count * getPrice(ItemId.WoodSingularity) * PriceModifier.WoodSingularity;
 	}
 
 	// transmission tuners
 	if (extraAttributes.tuned_transmission) {
-		price += getPrice(ItemId.TransmissionTuner) * PriceModifier.TransmissionTuner * extraAttributes.tuned_transmission;
+		price += extraAttributes.tuned_transmission * getPrice(ItemId.TransmissionTuner) * PriceModifier.TransmissionTuner;
 	}
 
 	// reforge
@@ -346,12 +347,12 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// mana disintegrator
 	if (extraAttributes.mana_disintegrator_count) {
 		price +=
-			getPrice(ItemId.ManaDisintegrator) * extraAttributes.mana_disintegrator_count * PriceModifier.ManaDisintegrator;
+			extraAttributes.mana_disintegrator_count * getPrice(ItemId.ManaDisintegrator) * PriceModifier.ManaDisintegrator;
 	}
 
 	// jalapeno book
 	if (extraAttributes.jalapeno_count) {
-		price += getPrice(ItemId.JalapenoBook) * extraAttributes.jalapeno_count * PriceModifier.JalapenoBook;
+		price += extraAttributes.jalapeno_count * getPrice(ItemId.JalapenoBook) * PriceModifier.JalapenoBook;
 	}
 
 	return price;
@@ -527,7 +528,7 @@ export async function getNetworth(
 	// sacks
 	if (member.sacks_counts) {
 		for (const [index, count] of Object.entries(member.sacks_counts)) {
-			networth += getPrice(index) * (count ?? 0);
+			networth += (count ?? 0) * getPrice(index);
 		}
 	}
 

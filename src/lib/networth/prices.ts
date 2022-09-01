@@ -12,10 +12,10 @@ export const prices = new Map<string, number>();
 export const itemUpgrades = new Map<string, ItemUpgrade>();
 export const accessories = new Set<string>();
 
-const warnings = new Warnings<string>();
+export const unknownItemIdWarnings = new Warnings<string>();
 
 export const getPrice = (itemId: string) =>
-	prices.get(itemId) ?? (warnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0);
+	prices.get(itemId) ?? (unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0);
 
 /**
  * queries the prices database
