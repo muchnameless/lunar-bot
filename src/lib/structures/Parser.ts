@@ -93,7 +93,9 @@ export class Parser {
 
 		if (stack.includes('(')) throw 'ParserError: mismatched parentheses';
 
-		output.push(...stack.reverse());
+		for (let index = stack.length - 1; index >= 0; --index) {
+			output.push(stack[index]!);
+		}
 
 		return output;
 	}
