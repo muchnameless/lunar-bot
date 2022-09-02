@@ -840,18 +840,20 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		if (!content) return false;
 
+		const parsedContent = await this.parseContent(content, discordMessage);
+
 		// blocked by the content filter
-		if (MinecraftChatManager.BLOCKED_WORDS_REGEXP.test(content) || MEME_REGEXP.test(content)) {
-			logger.warn({ prefix, content }, '[CHATBRIDGE CHAT]: blocked word');
+		if (MinecraftChatManager.BLOCKED_WORDS_REGEXP.test(parsedContent) || MEME_REGEXP.test(parsedContent)) {
+			logger.warn({ prefix, content, parsedContent }, '[CHATBRIDGE CHAT]: blocked word');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
 		}
 
 		// blocked by the advertisement filter
-		for (const [maybeURL] of content.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
+		for (const [maybeURL] of parsedContent.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
 			if (MinecraftChatManager.ALLOWED_URLS_REGEXP.test(maybeURL)) continue;
 
-			logger.warn({ prefix, content, maybeURL }, '[CHATBRIDGE CHAT]: blocked URL');
+			logger.warn({ prefix, content, parsedContent, maybeURL }, '[CHATBRIDGE CHAT]: blocked URL');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
 		}
@@ -860,14 +862,16 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const contentParts = new Set<string>();
 
 		// split message into lines and each line into parts which don't exceed the maximum allowed length
-		for (const line of (await this.parseContent(content, discordMessage)).split('\n')) {
+		for (const line of parsedContent.split('\n')) {
 			for (const part of splitMessage(line, {
 				char: [' ', ''],
 				maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length,
 			})) {
 				// filter out whitespace only parts
 				if (!NON_WHITESPACE_REGEXP.test(part)) {
-					if (part) logger.trace({ prefix, content, part }, '[CHATBRIDGE CHAT]: ignored whitespace part');
+					if (part) {
+						logger.trace({ prefix, content, parsedContent, part }, '[CHATBRIDGE CHAT]: ignored whitespace part');
+					}
 					continue;
 				}
 
