@@ -561,8 +561,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		// blocked response
 		if (
+			// response to blocked words
 			hypixelMessage.content.startsWith('We blocked your comment') ||
-			hypixelMessage.content.startsWith('Advertising is against the rules')
+			// response to urls
+			hypixelMessage.content.startsWith('Advertising is against the rules') ||
+			// response to anything matching /\${.*}/
+			hypixelMessage.content.startsWith('This message is not allowed')
 		) {
 			return this._resolveAndReset(ChatResponse.Blocked);
 		}
