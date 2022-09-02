@@ -8,6 +8,7 @@ export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
 		//
 		Enchantment.Overload,
 		Enchantment.Power,
+		Enchantment.UltimateSoulEater,
 	]),
 	[ItemId.DeathBow]: new Set([
 		//

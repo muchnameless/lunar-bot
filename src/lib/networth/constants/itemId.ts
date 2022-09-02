@@ -112,6 +112,8 @@ export const enum ItemId {
 	ManaDisintegrator = 'MANA_DISINTEGRATOR',
 	MeteorShard = 'METEOR_SHARD',
 	MidasJewel = 'MIDAS_JEWEL',
+	MidasStaff = 'MIDAS_STAFF',
+	MidasSword = 'MIDAS_SWORD',
 	MoilLog = 'MOIL_LOG',
 	MoltenCube = 'MOLTEN_CUBE',
 	MoogmaLeggings = 'MOOGMA_LEGGINGS',

@@ -109,9 +109,26 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			// unknown item
 			(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 
-	// dark auctions
-	if (extraAttributes.winning_bid && itemId !== ItemId.HegemonyArtifact) {
-		price = extraAttributes.winning_bid;
+	// dark auction items
+	if (extraAttributes.winning_bid) {
+		switch (itemId) {
+			case ItemId.HegemonyArtifact:
+				// price paid does not affect item
+				break;
+
+			case ItemId.MidasStaff:
+				// price paid over 100M does not further affect item
+				price = Math.min(extraAttributes.winning_bid, 100e6);
+				break;
+
+			case ItemId.MidasSword:
+				// price paid over 50M does not further affect item
+				price = Math.min(extraAttributes.winning_bid, 50e6);
+				break;
+
+			default:
+				price = extraAttributes.winning_bid;
+		}
 	}
 
 	// enchantments
