@@ -1,7 +1,7 @@
 import { ApplicationCommandPermissionType, Collection } from 'discord.js';
 import { logger } from '#logger';
 import { assertNever } from '#functions';
-import type { ClientEvents, Events, GuildMember, Snowflake, Role } from 'discord.js';
+import type { ClientEvents, Events, GuildMember, Snowflake } from 'discord.js';
 import type { LunarClient } from '../LunarClient';
 
 interface CommandPermissions {
@@ -81,6 +81,7 @@ export class PermissionsManager {
 		for (const { id, type, permission } of permissions) {
 			switch (type) {
 				case ApplicationCommandPermissionType.Channel:
+					// ignore channel permissions
 					continue;
 
 				case ApplicationCommandPermissionType.Role:
@@ -116,21 +117,24 @@ export class PermissionsManager {
 		// users
 		switch (permissions.users?.get(member.id)) {
 			case true:
+				// explicit allow
 				return;
 
 			case false:
+				// explicit deny
 				throw `you are explicitly denied access to the \`${
 					this.client.application!.commands.cache.get(commandId)?.name ?? commandId
 				}\` command`;
 		}
 
 		// roles
-		let roleCache: Collection<Snowflake, Role> | undefined;
+		let roleCache: GuildMember['roles']['cache'] | undefined;
 
 		if (permissions.roles.allowed) {
 			roleCache = member.roles.cache;
 
 			for (const roleId of permissions.roles.allowed) {
+				// explicit allow
 				if (roleCache.has(roleId)) return;
 			}
 		}
@@ -140,6 +144,7 @@ export class PermissionsManager {
 
 			for (const roleId of permissions.roles.denied) {
 				if (roleCache.has(roleId)) {
+					// explicit deny
 					throw `the ${this.client.guilds.cache.get(guildId)?.roles.cache.get(roleId)?.name ?? roleId} role in \`${
 						this.client.guilds.cache.get(guildId)?.name ?? guildId
 					}\` is denied access to the \`${
