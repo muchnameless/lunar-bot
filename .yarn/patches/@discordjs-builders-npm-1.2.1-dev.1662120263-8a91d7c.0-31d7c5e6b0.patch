@@ -1,10 +1,10 @@
 diff --git a/dist/components/ActionRow.d.ts b/dist/components/ActionRow.d.ts
-index 230ff022be48394c1f1b39e0ff5299024c839fa1..8ac6957c49f928ebfa081edf1bb392d022ed8a0d 100644
+index 9b03460050f40dce964f589fa70d4c1a2cd9d67b..4983bdf3f9708a453e3214c61b8135acd0dfa201 100644
 --- a/dist/components/ActionRow.d.ts
 +++ b/dist/components/ActionRow.d.ts
-@@ -7,7 +7,7 @@ import { type RestOrArray } from '../util/normalizeArray';
- export declare type MessageComponentBuilder = MessageActionRowComponentBuilder | ActionRowBuilder<MessageActionRowComponentBuilder>;
- export declare type ModalComponentBuilder = ModalActionRowComponentBuilder | ActionRowBuilder<ModalActionRowComponentBuilder>;
+@@ -7,7 +7,7 @@ import type { TextInputBuilder } from './textInput/TextInput.js';
+ export declare type MessageComponentBuilder = ActionRowBuilder<MessageActionRowComponentBuilder> | MessageActionRowComponentBuilder;
+ export declare type ModalComponentBuilder = ActionRowBuilder<ModalActionRowComponentBuilder> | ModalActionRowComponentBuilder;
  export declare type MessageActionRowComponentBuilder = ButtonBuilder | SelectMenuBuilder;
 -export declare type ModalActionRowComponentBuilder = TextInputBuilder;
 +export declare type ModalActionRowComponentBuilder = TextInputBuilder | SelectMenuBuilder;
