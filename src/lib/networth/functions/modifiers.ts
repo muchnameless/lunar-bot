@@ -1,4 +1,4 @@
-import { Enchantment, PriceModifier } from '../constants';
+import { Enchantment, PriceModifier } from '../constants/index.js';
 
 export function getAppliedEnchantmentModifier(enchantment: Enchantment) {
 	switch (enchantment) {

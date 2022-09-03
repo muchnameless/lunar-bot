@@ -1,6 +1,6 @@
+import { type NBTInventoryItem } from '@zikeji/hypixel';
+import { ItemRarityColourCode } from '../constants/index.js';
 import { VANILLA_ITEM_DISPLAY_NAMES, VANILLA_ITEM_IDS } from '#constants';
-import { ItemRarityColourCode } from '../constants';
-import type { NBTInventoryItem } from '@zikeji/hypixel';
 
 /**
  * Lore examples
@@ -18,6 +18,7 @@ import type { NBTInventoryItem } from '@zikeji/hypixel';
 
 /**
  * whether the item is a (recombobulated) common item, uses the rarity colour code from the item's lore -> 2nd char of last line
+ *
  * @param item
  */
 export const isCommonItem = (item: NBTInventoryItem) => {
@@ -37,6 +38,7 @@ export const isCommonItem = (item: NBTInventoryItem) => {
 
 /**
  * returns the display name of a common item, doesn't work (and does not need to work) for multiple colour codes
+ *
  * @param item
  */
 export const getDisplayName = (item: NBTInventoryItem) => {
@@ -54,6 +56,7 @@ export const getDisplayName = (item: NBTInventoryItem) => {
 
 /**
  * whether the item is a vanilla mc item and not a custom hypixel skyblock variant
+ *
  * @param item
  */
 export const isVanillaItem = (item: NBTInventoryItem) => {
@@ -71,6 +74,7 @@ export const isVanillaItem = (item: NBTInventoryItem) => {
 			// null items
 			item.tag!.ExtraAttributes!.id.includes(':') ||
 			// BOW, modifier: "rich_bow" instead of "rich"
+			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 			VANILLA_ITEM_IDS.has(item.tag!.ExtraAttributes?.id!) ||
 			// displayName: "Golden ...", itemId: "GOLD_..."; displayName: "Wooden ...", itemId: "WOOD_..."
 			VANILLA_ITEM_DISPLAY_NAMES.has(getDisplayName(item)!)) &&

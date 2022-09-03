@@ -1,11 +1,11 @@
-import { BridgeCommand } from '#structures/commands/BridgeCommand';
+import { type HypixelUserMessage } from '../../HypixelMessage.js';
 import { seconds } from '#functions';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '../../HypixelMessage';
-import type GuildCommand from '../../../../commands/guild/guild';
+import type GuildCommand from '#root/commands/guild/guild.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { BridgeCommand } from '#structures/commands/BridgeCommand.js';
 
 export default class KickBridgeCommand extends BridgeCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			description: 'kick a player from the guild',
 			args: 2,
@@ -17,9 +17,10 @@ export default class KickBridgeCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const targetInput = hypixelMessage.commandData.args.shift()!;
 		const hypixelGuild = hypixelMessage.hypixelGuild ?? hypixelMessage.player?.hypixelGuild;
 

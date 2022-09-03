@@ -1,3 +1,4 @@
+/* eslint-disable typescript-sort-keys/string-enum */
 export const enum UnicodeEmoji {
 	// basic
 	X = '❌',
@@ -23,6 +24,7 @@ export const enum UnicodeEmoji {
 	Eyes = '👀',
 	Pin = '📌',
 }
+/* eslint-enable typescript-sort-keys/string-enum */
 
 // SkyBlock profile emojis
 export const PROFILE_EMOJIS = {

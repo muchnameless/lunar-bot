@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values, typescript-sort-keys/string-enum */
 export const enum ItemRarity {
 	Common = 'COMMON',
 	Uncommon = 'UNCOMMON',
@@ -21,6 +22,7 @@ export const enum ItemRarityColourCode {
 	Special = 'c',
 	VerySpecial = 'c',
 }
+/* eslint-enable @typescript-eslint/no-duplicate-enum-values, typescript-sort-keys/string-enum */
 
 export const colourCodeToRarity = {
 	[ItemRarityColourCode.Common]: ItemRarity.Common,

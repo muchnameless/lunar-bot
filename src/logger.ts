@@ -1,16 +1,16 @@
 import { isMainThread, parentPort } from 'node:worker_threads';
 import { pino, stdSerializers } from 'pino';
-import { JobType } from './jobs';
+import { JobType } from './jobs/index.js';
 
 type LogArguments = Parameters<pino.LogFn>;
 
+/* eslint-disable id-length */
 export const logger = isMainThread
 	? pino({
 			level: 'trace',
 			base: undefined,
 	  })
 	: {
-			// eslint-disable-next-line @typescript-eslint/no-empty-function
 			silent: (() => {}) as pino.LogFn,
 			trace: ((...args: LogArguments) =>
 				parentPort!.postMessage({ op: JobType.LogMessage, d: { lvl: 'trace', args } })) as pino.LogFn,

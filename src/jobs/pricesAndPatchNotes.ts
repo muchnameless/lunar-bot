@@ -1,26 +1,25 @@
-/* eslint-disable unicorn/prefer-top-level-await */
-import { parentPort } from 'node:worker_threads';
-import { setTimeout as sleep } from 'node:timers/promises';
-import { clearTimeout, setTimeout } from 'node:timers';
+/* eslint-disable id-length */
 import { EventEmitter } from 'node:events';
-import { fetch } from 'undici';
+import { clearTimeout, setTimeout } from 'node:timers';
+import { setTimeout as sleep } from 'node:timers/promises';
+import { parentPort } from 'node:worker_threads';
+import { type ArrayElementType } from '@sapphire/utilities';
+import { Client, type Components } from '@zikeji/hypixel';
+import { CronJob } from 'cron';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
-import { CronJob } from 'cron';
-import { Client } from '@zikeji/hypixel';
+import { fetch } from 'undici';
+import { JobType } from './index.js';
 import { logger } from '#logger';
-import { FetchError } from '#structures/errors/FetchError';
-import { getEnchantment } from '#networth/functions/enchantments'; // separate imports to not import unused files in the worker
-import { transformItemData } from '#networth/functions/nbt';
-import { calculatePetSkillLevel } from '#networth/functions/pets';
-import { ItemId } from '#networth/constants/itemId';
-import { ItemRarity } from '#networth/constants/itemRarity';
-import { sql } from '#structures/database/sql';
-import { consumeBody } from '#root/lib/functions/fetch';
-import { JobType } from '.';
-import type { ArrayElementType } from '@sapphire/utilities';
-import type { Components } from '@zikeji/hypixel';
-import type { Enchantment } from '#networth/constants/enchantments';
+import { type Enchantment } from '#networth/constants/enchantments.js';
+import { ItemId } from '#networth/constants/itemId.js';
+import { ItemRarity } from '#networth/constants/itemRarity.js';
+import { getEnchantment } from '#networth/functions/enchantments.js'; // separate imports to not import unused files in the worker
+import { transformItemData } from '#networth/functions/nbt.js';
+import { calculatePetSkillLevel } from '#networth/functions/pets.js';
+import { consumeBody } from '#root/lib/functions/fetch.js';
+import { sql } from '#structures/database/sql.js';
+import { FetchError } from '#structures/errors/FetchError.js';
 
 // because a single AbortController is used for all fetches
 EventEmitter.setMaxListeners(100);
@@ -38,6 +37,7 @@ const MAX_RETRIES = 5;
 
 /**
  * upserts an item
+ *
  * @param itemId
  * @param currentPrice
  */
@@ -64,7 +64,6 @@ async function upsertItem(itemId: string, currentPrice: number) {
 
 	parentPort?.postMessage({ op: JobType.SkyBlockPriceUpdate, d: { itemId, price: median } });
 
-	// eslint-disable-next-line camelcase
 	if (new_entry) {
 		logger.debug(
 			{
@@ -78,6 +77,7 @@ async function upsertItem(itemId: string, currentPrice: number) {
 
 /**
  * inserts an item, ignoring already existing ones
+ *
  * @param itemId
  * @param currentPrice
  */
@@ -116,6 +116,7 @@ async function insertItem(itemId: string, currentPrice: number) {
 /**
  * https://github.com/SkyCryptWebsite/SkyCrypt/blob/481de4411c4093576c728f04540f497ef55ceadf/src/helper.js#L494
  * calculates the product's buyPrice based on the buy_summary
+ *
  * @param orderSummary
  */
 function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy_summary']) {
@@ -182,14 +183,14 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 
 	// update database and prices map
 	await Promise.all(
-		bazaarItems.map((data) => {
+		bazaarItems.map(async (data) => {
 			const price =
 				data.quick_status.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
 					? data.quick_status.buyPrice
 					: getBuyPrice(data.buy_summary);
 
 			// ignore items which are not sold
-			if (price === 0) return Promise.resolve();
+			if (price === 0) return undefined;
 
 			// enchantments
 			if (data.product_id.startsWith('ENCHANTMENT_')) {
@@ -200,7 +201,7 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 				);
 
 				binAuctions.ensure(itemId, () => []).push(price / count);
-				return Promise.resolve();
+				return undefined;
 			}
 
 			// other items
@@ -291,7 +292,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 	}
 
 	// fetch remaining auction pages
-	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem, price: number) => {
+	const processAuction = async (auction: SkyBlockAuctionEndedItem | SkyBlockAuctionItem, price: number) => {
 		const [item] = await transformItemData(auction.item_bytes);
 
 		let itemId = item.tag?.ExtraAttributes?.id;
@@ -351,6 +352,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 						itemId = `POTION_${item.tag!.ExtraAttributes!.potion}_${item.tag!.ExtraAttributes!.potion_level}`;
 						break;
 				}
+
 				break;
 
 			case undefined: // no itemId
@@ -361,7 +363,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 		binAuctions.ensure(itemId, () => []).push(price / item.Count);
 	};
 
-	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
+	const processAuctions = async (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
 		Promise.all(_auctions.map((auction) => auction.bin && processAuction(auction, auction.starting_bid)));
 
 	let retries = 0;
@@ -405,7 +407,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 		const { auctions: _auctions } = await hypixel.skyblock.auctionsEnded({ signal: ac.signal });
 
 		endedAuctions = _auctions.length;
-		return Promise.all(_auctions.map((auction) => processAuction(auction, auction.price)));
+		return Promise.all(_auctions.map(async (auction) => processAuction(auction, auction.price)));
 	};
 
 	const promises: Promise<unknown>[] = [processAuctions(auctions), fetchAndProcessEndedAuctions()];
@@ -436,6 +438,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 
 /**
  * update auction and bazaar prices
+ *
  * @param ac
  */
 async function updatePrices(ac: AbortController) {
@@ -458,36 +461,40 @@ async function updatePrices(ac: AbortController) {
 
 	const updateItem = endedAuctions ? upsertItem : insertItem;
 
-	return Promise.all(binAuctions.map((_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
+	return Promise.all(binAuctions.map(async (_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
 }
 
 interface Prestige {
-	item: string;
 	costs: Record<string, number>;
+	item: string;
 }
 
 export type ParsedSkyBlockItem = {
-	id: string;
-	dungeon_conversion: Record<string, number> | null;
-	stars: Record<string, number>[] | null;
 	category: string | null;
+	dungeon_conversion: Record<string, number> | null;
+	id: string;
 	prestige: Prestige | null;
+	stars: Record<string, number>[] | null;
 };
 
 const reduceCostsArray = (costs: ArrayElementType<NonNullable<Components.Schemas.SkyBlockItem['upgrade_costs']>>) =>
-	costs.reduce((acc, cur) => {
+	costs.reduce<Record<string, number>>((acc, cur) => {
 		acc['essence_type' in cur ? `ESSENCE_${cur.essence_type}` : cur.item_id] = cur.amount;
 		return acc;
-	}, {} as Record<string, number>);
+	}, {});
 
 /**
  * update skyblock items
+ *
  * @param ac
  */
 async function updateSkyBlockItems(ac: AbortController) {
 	const { success, items } = await hypixel.resources.skyblock.items({ signal: ac.signal });
 
-	if (!success) return logger.error({ success }, '[UPDATE SKYBLOCK ITEMS]');
+	if (!success) {
+		logger.error({ success }, '[UPDATE SKYBLOCK ITEMS]');
+		return;
+	}
 
 	const parsedItems: ParsedSkyBlockItem[] = items.map((item) => ({
 		id: item.id,
@@ -495,7 +502,6 @@ async function updateSkyBlockItems(ac: AbortController) {
 			? { [`ESSENCE_${item.dungeon_item_conversion_cost.essence_type}`]: item.dungeon_item_conversion_cost.amount }
 			: null,
 		stars: item.upgrade_costs?.map((entry) => reduceCostsArray(entry)) ?? null,
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		category: item.category ?? null,
 		prestige: null,
 	}));
@@ -532,24 +538,24 @@ async function updateSkyBlockItems(ac: AbortController) {
 interface HypixelForumResponse {
 	rss: {
 		channel: {
-			title: string;
-			description: string;
-			pubDate: string;
-			lastBuildDate: string;
-			generator: string;
-			link: string;
 			'atom:link': '';
+			description: string;
+			generator: string;
 			item: {
-				title: string;
-				pubDate: string;
-				link: string;
-				guid: number;
 				author: string;
 				category: string;
-				'dc:creator': string;
 				'content:encoded': string;
+				'dc:creator': string;
+				guid: number;
+				link: string;
+				pubDate: string;
 				'slash:comments': number;
+				title: string;
 			}[];
+			lastBuildDate: string;
+			link: string;
+			pubDate: string;
+			title: string;
 		};
 	};
 }
@@ -558,6 +564,7 @@ const xmlParser = new XMLParser({ ignoreDeclaration: true });
 
 /**
  * fetch and parse xml data
+ *
  * @param forum
  */
 async function fetchForumEntries(ac: AbortController, forum: string) {
@@ -597,7 +604,7 @@ async function updatePatchNotes(ac: AbortController) {
 	}
 
 	const now = new Date();
-	const parsedItems = skyblockPatchnotes.map(({ guid, title, ['dc:creator']: creator, link }) => ({
+	const parsedItems = skyblockPatchnotes.map(({ guid, title, 'dc:creator': creator, link }) => ({
 		guid,
 		title,
 		creator,

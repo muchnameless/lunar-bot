@@ -1,33 +1,39 @@
 import { setTimeout } from 'node:timers';
-import { codeBlock, DiscordAPIError, PermissionFlagsBits, RESTJSONErrorCodes } from 'discord.js';
-import { CronJob as CronJobConstructor } from 'cron';
+import { type Components } from '@zikeji/hypixel';
 import { stripIndents } from 'common-tags';
-import { Model } from 'sequelize';
-import { ChannelUtil } from '#utils';
-import { logger } from '#logger';
-import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, UnicodeEmoji } from '#constants';
+import { CronJob as CronJobConstructor } from 'cron';
+import {
+	codeBlock,
+	DiscordAPIError,
+	PermissionFlagsBits,
+	RESTJSONErrorCodes,
+	type APIEmbedField,
+	type GuildChannel,
+	type Message,
+} from 'discord.js';
+import { Model, type Sequelize, type ModelStatic } from 'sequelize';
+import { type db as DbType } from '../index.js';
+import { type ChatTrigger } from '../models/ChatTrigger.js';
+import { type Config } from '../models/Config.js';
+import { type DiscordGuild } from '../models/DiscordGuild.js';
+import { type HypixelGuild } from '../models/HypixelGuild.js';
+import { type HypixelGuildBan } from '../models/HypixelGuildBan.js';
+import { type Player } from '../models/Player.js';
+import { type SkyBlockPatchNote } from '../models/SkyBlockPatchNote.js';
+import { type TaxCollector } from '../models/TaxCollector.js';
+import { type Transaction } from '../models/Transaction.js';
+import { ConfigManager } from './ConfigManager.js';
+import { HypixelGuildManager } from './HypixelGuildManager.js';
+import { ModelManager } from './ModelManager.js';
+import { PlayerManager } from './PlayerManager.js';
+import { TaxCollectorManager } from './TaxCollectorManager.js';
 import { hypixel } from '#api';
+import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, UnicodeEmoji } from '#constants';
 import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber } from '#functions';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
 import { entries } from '#types';
-import { ConfigManager } from './ConfigManager';
-import { HypixelGuildManager } from './HypixelGuildManager';
-import { PlayerManager } from './PlayerManager';
-import { TaxCollectorManager } from './TaxCollectorManager';
-import { ModelManager } from './ModelManager';
-import type { APIEmbedField, GuildChannel, Message } from 'discord.js';
-import type { ModelStatic, Sequelize } from 'sequelize';
-import type { Components } from '@zikeji/hypixel';
-import type { ChatTrigger } from '../models/ChatTrigger';
-import type { Config } from '../models/Config';
-import type { DiscordGuild } from '../models/DiscordGuild';
-import type { HypixelGuild } from '../models/HypixelGuild';
-import type { HypixelGuildBan } from '../models/HypixelGuildBan';
-import type { SkyBlockPatchNote } from '../models/SkyBlockPatchNote';
-import type { Player } from '../models/Player';
-import type { TaxCollector } from '../models/TaxCollector';
-import type { db as DbType } from '..';
-import type { Transaction } from '../models/Transaction';
-import type { LunarClient } from '../../LunarClient';
+import { ChannelUtil } from '#utils';
 
 export interface Models {
 	ChatTrigger: ModelStatic<ChatTrigger>;
@@ -42,11 +48,12 @@ export interface Models {
 }
 
 export class DatabaseManager {
-	declare client: LunarClient;
+	public declare readonly client: LunarClient;
+
 	/**
 	 * ModelManagers
 	 */
-	modelManagers: {
+	public readonly modelManagers: {
 		chatTriggers: ModelManager<ChatTrigger>;
 		config: ConfigManager;
 		discordGuilds: ModelManager<DiscordGuild>;
@@ -54,20 +61,23 @@ export class DatabaseManager {
 		players: PlayerManager;
 		taxCollectors: TaxCollectorManager;
 	};
+
 	/**
 	 * Models
 	 */
-	models: Models;
+	public readonly models: Models;
+
 	/**
 	 * Sequelize instance
 	 */
-	sequelize: Sequelize;
+	public readonly sequelize: Sequelize;
+
 	/**
 	 * db data update
 	 */
 	private _updateDataPromise: Promise<this> | null = null;
 
-	constructor(client: LunarClient, db: typeof DbType) {
+	public constructor(client: LunarClient, db: typeof DbType) {
 		Object.defineProperty(this, 'client', { value: client });
 
 		this.modelManagers = {
@@ -83,7 +93,7 @@ export class DatabaseManager {
 				([, value]) =>
 					Object.getPrototypeOf(value) === Model &&
 					Reflect.defineProperty(
-						// @ts-expect-error
+						// @ts-expect-error value 'prototype' does not exist on type ...
 						value.prototype,
 						'client',
 						{ value: client },
@@ -96,7 +106,7 @@ export class DatabaseManager {
 	/**
 	 * update player database and tax message every x min starting at the full hour
 	 */
-	schedule() {
+	public schedule() {
 		const { config } = this.modelManagers;
 
 		this.client.cronJobs.schedule(
@@ -115,7 +125,7 @@ export class DatabaseManager {
 	/**
 	 * initialises the database and cache
 	 */
-	async init() {
+	public async init() {
 		await this.loadCache(); // load caches
 
 		// set default config
@@ -131,8 +141,8 @@ export class DatabaseManager {
 	/**
 	 * loads all db caches (performs a sweep first)
 	 */
-	async loadCache() {
-		await Promise.all(Object.values(this.modelManagers).map((manager) => manager.loadCache()));
+	public async loadCache() {
+		await Promise.all(Object.values(this.modelManagers).map(async (manager) => manager.loadCache()));
 
 		return this;
 	}
@@ -140,7 +150,7 @@ export class DatabaseManager {
 	/**
 	 * sweeps all db caches
 	 */
-	sweepCache() {
+	public sweepCache() {
 		for (const handler of Object.values(this.modelManagers)) {
 			handler.sweepCache();
 		}
@@ -150,6 +160,7 @@ export class DatabaseManager {
 
 	/**
 	 * false if the auctionId is already in the transactions db, true if not
+	 *
 	 * @param auctionId
 	 */
 	private async _validateAuctionId(auctionId: string) {
@@ -170,14 +181,13 @@ export class DatabaseManager {
 		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
 		const TAX_AMOUNT = config.get('TAX_AMOUNT');
 		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS');
-		const availableAuctionsLog: { ign: string | null; auctions: string | number }[] = [];
+		const availableAuctionsLog: { auctions: number | string; ign: string | null }[] = [];
 		const dbPromises: Promise<APIEmbedField | undefined>[] = [];
 
 		let apiError = false;
 
 		// update db
 		for (const taxCollector of taxCollectors.cache.values()) {
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (!taxCollector.isCollecting) continue; // skip retired collectors
 
 			if (apiError) {
@@ -231,6 +241,7 @@ export class DatabaseManager {
 
 				if (taxAuctions.length) {
 					dbPromises.push(
+						// eslint-disable-next-line consistent-return
 						(async () => {
 							const paidLog: string[] = [];
 
@@ -301,6 +312,7 @@ export class DatabaseManager {
 
 	/**
 	 * tax embed description
+	 *
 	 * @param availableAuctionsLog
 	 */
 	private _createTaxEmbedDescription(availableAuctionsLog: string[] | null = null) {
@@ -348,7 +360,6 @@ export class DatabaseManager {
 
 				for (const player of hypixelGuild.players.values()) {
 					values[Math.trunc(++index / ENTRIES_PER_ROW)] += `\n${
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 						player.paid ? UnicodeEmoji.VarY : UnicodeEmoji.X
 					}\u00A0${player.ign.slice(0, 15)}`;
 				}
@@ -382,10 +393,11 @@ export class DatabaseManager {
 
 	/**
 	 * creates and returns a tax embed
+	 *
 	 * @param description
 	 * @param fields
 	 */
-	createTaxEmbed(
+	public createTaxEmbed(
 		description: string = this._createTaxEmbedDescription(),
 		fields: APIEmbedField[] = this._createTaxEmbedFields(),
 	) {
@@ -399,7 +411,7 @@ export class DatabaseManager {
 	/**
 	 * updates the player database and the corresponding tax message
 	 */
-	async updateData() {
+	public async updateData() {
 		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
@@ -408,8 +420,10 @@ export class DatabaseManager {
 			this._updateDataPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within updateData
+	 *
 	 * @internal
 	 */
 	async #updateData() {
@@ -445,12 +459,12 @@ export class DatabaseManager {
 
 			if (
 				!taxChannel?.isTextBased() ||
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)
 			) {
 				logger.warn('[TAX MESSAGE] tax channel error');
 				return this;
 			}
+
 			if (!ChannelUtil.botPermissions(taxChannel).has(PermissionFlagsBits.ViewChannel, false)) {
 				logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 				return this;

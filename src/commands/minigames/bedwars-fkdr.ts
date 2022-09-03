@@ -1,12 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { optionalIgnOption } from '#structures/commands/commonOptions';
+import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
 import { escapeIgn, seconds } from '#functions';
-import BaseStatsCommand from './~base-stats-command';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { FetchedData } from './~base-stats-command';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 
 export default class BedWarsFkdrCommand extends BaseStatsCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -24,9 +23,10 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override _generateReply({ ign, playerData }: FetchedData) {
+	protected override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;
 
 		try {

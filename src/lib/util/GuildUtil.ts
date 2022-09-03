@@ -1,19 +1,19 @@
+import { type Role, type Collection, type Guild, type GuildMember, type Snowflake } from 'discord.js';
 import { logger } from '#logger';
-import type { Role, Collection, Guild, GuildMember, Snowflake } from 'discord.js';
 
 export type RoleCollection = Collection<Snowflake, Role>;
-export type RoleResolvables = (Snowflake | Role | null)[] | RoleCollection;
+export type RoleResolvables = (Role | Snowflake | null)[] | RoleCollection;
 
 export class GuildUtil extends null {
 	/**
 	 * cache
 	 */
-	static fetchAllMembersCache = new Map<Snowflake, Promise<Collection<Snowflake, GuildMember>>>();
+	private static readonly fetchAllMembersCache = new Map<Snowflake, Promise<Collection<Snowflake, GuildMember>>>();
 
 	/**
 	 * @param guild
 	 */
-	static logInfo(guild: Guild) {
+	public static logInfo(guild: Guild) {
 		return {
 			guildId: guild.id,
 			guildName: guild.name,
@@ -24,10 +24,11 @@ export class GuildUtil extends null {
 
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
+	 *
 	 * @param guild
 	 * @param rolesOrIds roles or role ids to verify
 	 */
-	static resolveRoles(guild: Guild, rolesOrIds: RoleResolvables) {
+	public static resolveRoles(guild: Guild, rolesOrIds: RoleResolvables) {
 		const resolvedRoles = new Set<Role>();
 
 		let highest: Role;
@@ -56,10 +57,11 @@ export class GuildUtil extends null {
 
 	/**
 	 * tries to find a discord member by a discord tag
+	 *
 	 * @param guild
 	 * @param tagInput
 	 */
-	static async fetchMemberByTag(guild: Guild | null, tagInput: string) {
+	public static async fetchMemberByTag(guild: Guild | null, tagInput: string) {
 		if (!guild?.available) {
 			if (guild) {
 				logger.warn(
@@ -91,9 +93,10 @@ export class GuildUtil extends null {
 
 	/**
 	 * fetches all guild members if the cache size is not equal to the guild's member count
+	 *
 	 * @param guild
 	 */
-	static async fetchAllMembers(guild: Guild | null) {
+	public static async fetchAllMembers(guild: Guild | null) {
 		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
 
 		if (guild.memberCount === guild.members.cache.size) {

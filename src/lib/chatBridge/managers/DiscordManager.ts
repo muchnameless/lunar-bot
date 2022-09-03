@@ -5,42 +5,43 @@ import {
 	time,
 	TimestampStyles,
 	userMention,
+	type GuildEmoji,
+	type Snowflake,
 } from 'discord.js';
+import ms, { type StringValue } from 'ms';
 import { Op } from 'sequelize';
-import ms from 'ms';
+import { type ChatBridge } from '../ChatBridge.js';
+import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP, type HypixelMessageType } from '../constants/index.js';
+import { DiscordChatManager } from './DiscordChatManager.js';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
 import { logger } from '#logger';
-import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
-import { DiscordChatManager } from './DiscordChatManager';
-import type { StringValue } from 'ms';
-import type { GuildEmoji, Snowflake } from 'discord.js';
-import type { HypixelMessageType } from '../constants';
-import type { ChatBridge } from '../ChatBridge';
 
-export type DiscordChatManagerResolvable = HypixelMessageType | Snowflake | DiscordChatManager;
+export type DiscordChatManagerResolvable = DiscordChatManager | HypixelMessageType | Snowflake;
 
 export class DiscordManager {
-	chatBridge: ChatBridge;
-	channelsByIds = new Collection<string, DiscordChatManager>();
-	channelsByType = new Collection<string, DiscordChatManager>();
+	public readonly chatBridge: ChatBridge;
 
-	constructor(chatBridge: ChatBridge) {
+	public readonly channelsByIds = new Collection<string, DiscordChatManager>();
+
+	public readonly channelsByType = new Collection<string, DiscordChatManager>();
+
+	public constructor(chatBridge: ChatBridge) {
 		this.chatBridge = chatBridge;
 	}
 
-	get client() {
+	public get client() {
 		return this.chatBridge.client;
 	}
 
-	get channels() {
+	public get channels() {
 		return this.channelsByType;
 	}
 
-	get ready() {
+	public get ready() {
 		return this.channels.size ? this.channels.every((channel) => channel.ready) : false;
 	}
 
-	set ready(value) {
+	public set ready(value) {
 		for (const channel of this.channels.values()) {
 			channel.ready = value;
 		}
@@ -48,9 +49,10 @@ export class DiscordManager {
 
 	/**
 	 * resolves the input to a DiscordChatManager instance
+	 *
 	 * @param input
 	 */
-	resolve(input?: DiscordChatManagerResolvable) {
+	public resolve(input?: DiscordChatManagerResolvable) {
 		if (input instanceof DiscordChatManager) return input;
 		return this.channelsByType.get(input!) ?? this.channelsByIds.get(input!) ?? null;
 	}
@@ -58,7 +60,7 @@ export class DiscordManager {
 	/**
 	 * instantiates the DiscordChatManagers
 	 */
-	init() {
+	public async init() {
 		const promises: Promise<DiscordChatManager>[] = [];
 
 		for (const chatBridgeChannel of this.chatBridge.hypixelGuild!.chatBridgeChannels) {
@@ -77,6 +79,7 @@ export class DiscordManager {
 
 	/**
 	 * custom or basic emoji search by name
+	 *
 	 * @param fullMatch
 	 * @param inColon
 	 */
@@ -84,7 +87,6 @@ export class DiscordManager {
 		const emoji =
 			EMOJI_NAME_TO_UNICODE[fullMatch.replaceAll('_', '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
 
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (emoji) return emoji;
 
 		const { value, similarity } = autocorrect(
@@ -95,15 +97,17 @@ export class DiscordManager {
 		);
 
 		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return `${value}`;
+		return null;
 	}
 
 	/**
 	 * readable string -> discord markdown
 	 * async to allow database queries for @uncached_player_ign
+	 *
 	 * @param string
 	 * @param fromMinecraft whether the message was sent in mc chat
 	 */
-	async parseContent(string: string, fromMinecraft = false) {
+	public async parseContent(string: string, fromMinecraft = false) {
 		return escapeMarkdown(
 			djsEscapeMarkdown(
 				// @mentions
@@ -159,7 +163,7 @@ export class DiscordManager {
 						(match, p1: string) =>
 							this._findEmojiByName(match, p1) ??
 							match.replace(/:(\S+?):/g, (_match, _p1: string) =>
-								p1.length !== _p1.length ? this._findEmojiByName(_match, _p1) ?? _match : _match,
+								p1.length === _p1.length ? _match : this._findEmojiByName(_match, _p1) ?? _match,
 							),
 					)
 					.replace(
@@ -197,7 +201,7 @@ export class DiscordManager {
 					)
 					// /commands
 					.replace(
-						/\/([-\w]{1,32})(?: ([-\w]{1,32}))?(?: ([-\w]{1,32}))?/g,
+						/\/([\w-]{1,32})(?: ([\w-]{1,32}))?(?: ([\w-]{1,32}))?/g,
 						(match, _commandName: string, _groupOrSubcommand: string | undefined, _subcommand: string | undefined) => {
 							const commandName = _commandName.toLowerCase();
 							const groupOrSubcommand = _groupOrSubcommand?.toLowerCase();
@@ -228,6 +232,7 @@ export class DiscordManager {
 											replaced.push(`</${commandName} ${groupOrSubcommand}:${command.id}>`, subcommand);
 											break;
 									}
+
 									break;
 								}
 

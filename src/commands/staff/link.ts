@@ -1,17 +1,22 @@
-import { DiscordAPIError, RESTJSONErrorCodes, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { InteractionUtil, UserUtil } from '#utils';
-import { logger } from '#logger';
-import { hypixelGuildOption, requiredIgnOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import {
+	DiscordAPIError,
+	RESTJSONErrorCodes,
+	SlashCommandBuilder,
+	type ChatInputCommandInteraction,
+	type User,
+} from 'discord.js';
 import { hypixel, mojang } from '#api';
 import { seconds, validateNumber } from '#functions';
-import type { ChatInputCommandInteraction, User } from 'discord.js';
-import type { Player } from '#structures/database/models/Player';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption, requiredIgnOption } from '#structures/commands/commonOptions.js';
+import { type Player } from '#structures/database/models/Player.js';
+import { InteractionUtil, UserUtil } from '#utils';
 
 export default class LinkCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('link a discord user to a minecraft ign')
@@ -29,9 +34,10 @@ export default class LinkCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 
 		let uuid: string | undefined;
@@ -200,6 +206,7 @@ export default class LinkCommand extends ApplicationCommand {
 
 		let reply = `\`${player}\` linked to ${discordMember}`;
 
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(hypixelGuild?.discordId!)?.MANDATORY_ROLE_ID;
 
 		if (MANDATORY_ROLE_ID && !discordMember.roles.cache.has(MANDATORY_ROLE_ID)) {

@@ -1,13 +1,12 @@
 import { SlashCommandBuilder } from 'discord.js';
+import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command.js';
+import { hypixel } from '#api';
 import { SKILLS, SKILL_ACHIEVEMENTS, SKILL_XP_TOTAL, UnicodeEmoji } from '#constants';
 import { formatDecimalNumber, getSkillLevel, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
-import { hypixel } from '#api';
-import BaseSkyBlockCommand from './~base-skyblock-command';
-import type { FetchedData } from './~base-skyblock-command';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
 
 export default class SkillsCommand extends BaseSkyBlockCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder().setDescription("shows a player's skills"),
 			cooldown: seconds(1),
@@ -16,9 +15,10 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override async _generateReply({ ign, uuid, profile }: FetchedData) {
+	protected override async _generateReply({ ign, uuid, profile }: FetchedData) {
 		const member = profile.members[uuid]!;
 		const reply = [`${ign} (${profile.cute_name}): `];
 

@@ -1,29 +1,32 @@
-import { Worker } from 'node:worker_threads';
 import { basename } from 'node:path';
+import { type URL } from 'node:url';
+import { Worker, type WorkerOptions } from 'node:worker_threads';
 import { logger } from '#logger';
-import type { WorkerOptions } from 'node:worker_threads';
-import type { URL } from 'node:url';
 
 interface Listeners {
-	error: (err: Error) => void;
-	exit: (exitCode: number) => void;
-	message: (value: any) => void;
-	messageerror: (error: Error) => void;
-	online: () => void;
+	error(err: Error): void;
+	exit(exitCode: number): void;
+	message(value: any): void;
+	messageerror(error: Error): void;
+	online(): void;
 }
 
 export class Job {
 	private _worker: Worker | null = null;
-	private _file: URL;
-	private _options: WorkerOptions | undefined;
-	private _listeners: Listeners;
+
+	private readonly _file: URL;
+
+	private readonly _options: WorkerOptions | undefined;
+
+	private readonly _listeners: Listeners;
+
 	private _shouldRestart = true;
 
-	name: string;
+	public readonly name: string;
 
-	constructor(file: URL, options?: WorkerOptions, listeners?: Partial<Listeners>);
-	constructor(file: URL, listeners?: Partial<Listeners>);
-	constructor(file: URL, options?: WorkerOptions | Partial<Listeners>, listeners?: Partial<Listeners>) {
+	public constructor(file: URL, options?: WorkerOptions, listeners?: Partial<Listeners>);
+	public constructor(file: URL, listeners?: Partial<Listeners>);
+	public constructor(file: URL, options?: Partial<Listeners> | WorkerOptions, listeners?: Partial<Listeners>) {
 		this._file = file;
 		this.name = basename(file.href, '.js');
 		this._options = listeners ? (options as WorkerOptions) : undefined;
@@ -39,11 +42,11 @@ export class Job {
 		};
 	}
 
-	onError(error: Error) {
+	public onError(error: Error) {
 		logger.error(error, `[JOB] ${this.name}: error`);
 	}
 
-	onExit(code: number) {
+	public onExit(code: number) {
 		logger.error(`[JOB] ${this.name}: exited with code ${code}`);
 
 		this._worker = null;
@@ -51,7 +54,7 @@ export class Job {
 		if (this._shouldRestart) this.start();
 	}
 
-	onMessage(message: unknown) {
+	public onMessage(message: unknown) {
 		if (typeof message === 'string') {
 			logger.info(message);
 		} else {
@@ -59,15 +62,15 @@ export class Job {
 		}
 	}
 
-	onMessageerror(error: Error) {
+	public onMessageerror(error: Error) {
 		logger.error(error, `[JOB] ${this.name}: messageerror`);
 	}
 
-	onOnline() {
+	public onOnline() {
 		logger.info(`[JOB] ${this.name}: worker online`);
 	}
 
-	start() {
+	public start() {
 		if (this._worker) throw new Error(`${this.name}: worker is already running`);
 
 		this._worker = new Worker(this._file, this._options);
@@ -77,14 +80,14 @@ export class Job {
 		}
 	}
 
-	stop(restart = false) {
+	public async stop(restart = false) {
 		if (!this._worker) throw new Error(`${this.name}: worker is not running`);
 
 		this._shouldRestart = restart;
 		return this._worker.terminate();
 	}
 
-	postMessage(message: unknown) {
+	public postMessage(message: unknown) {
 		if (!this._worker) throw new Error(`${this.name}: worker is not running`);
 
 		this._worker.postMessage(message);

@@ -1,12 +1,12 @@
+import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { MinecraftChatManagerState } from '../constants/index.js';
 import { logger } from '#logger';
-import { MinecraftChatManagerState } from '../constants';
-import { ChatBridgeEvent } from '../ChatBridgeEvent';
 
 export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 	/**
 	 * event listener callback
 	 */
-	override run() {
+	public override run() {
 		// stop abort controller
 		this.chatBridge.minecraft.clearAbortLoginTimeout();
 

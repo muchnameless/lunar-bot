@@ -1,18 +1,22 @@
-import type { Response } from 'undici';
+import { type Response } from 'undici';
 
 export class FetchError extends Error {
-	type: string | null;
-	url: string | null;
-	status: number | null;
-	statusText: string | null;
-	headers: [string, string][];
+	public readonly type: string | null;
+
+	public readonly url: string | null;
+
+	public readonly status: number | null;
+
+	public readonly statusText: string | null;
+
+	public readonly headers: [string, string][];
 
 	/**
-	 * @param name error name
-	 * @param response fetch response
-	 * @param message optional message to overwrite the default (fetch response statusText)
+	 * @param name - error name
+	 * @param response - fetch response
+	 * @param message - optional message to overwrite the default (fetch response statusText)
 	 */
-	constructor(name: string, { type, url, status, statusText, headers }: Partial<Response>, message?: string) {
+	public constructor(name: string, { type, url, status, statusText, headers }: Partial<Response>, message?: string) {
 		super(message ?? statusText);
 
 		this.name = name;
@@ -23,7 +27,7 @@ export class FetchError extends Error {
 		this.headers = [...(headers?.entries() ?? [])];
 	}
 
-	override toString() {
+	public override toString() {
 		return `${this.name}${this.status ? ` ${this.status}` : ''}: ${this.message}${
 			this.statusText && this.statusText !== this.message && this.statusText !== 'No Content'
 				? ` (${this.statusText})`

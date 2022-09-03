@@ -1,11 +1,10 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { DualCommand } from '#structures/commands/DualCommand';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
 
 export default class MyCommand extends DualCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -21,19 +20,19 @@ export default class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		interaction;
+	public override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		// do stuff
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override minecraftRun(hypixelMessage: HypixelUserMessage) {
-		hypixelMessage;
+	public override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		// do stuff
 	}
 }

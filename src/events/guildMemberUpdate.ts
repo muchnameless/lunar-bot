@@ -1,16 +1,16 @@
-import { EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import { EmbedBuilder, type ClientEvents, type Events } from 'discord.js';
+import { Event } from '#structures/events/Event.js';
 import { GuildMemberUtil } from '#utils';
-import { Event } from '#structures/events/Event';
-import type { ClientEvents, Events } from 'discord.js';
 
 export default class GuildMemberUpdateEvent extends Event {
 	/**
 	 * event listener callback
+	 *
 	 * @param oldMember
 	 * @param newMember
 	 */
-	override async run(
+	public override async run(
 		oldMember: ClientEvents[Events.GuildMemberUpdate][0],
 		newMember: ClientEvents[Events.GuildMemberUpdate][1],
 	) {
@@ -51,7 +51,7 @@ export default class GuildMemberUpdateEvent extends Event {
 			if (oldMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
 				// member lost mandatory role -> log incident
 				if (!newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
-					return void this.client.log(
+					void this.client.log(
 						new EmbedBuilder()
 							.setColor(this.config.get('EMBED_RED'))
 							.setAuthor({
@@ -72,9 +72,9 @@ export default class GuildMemberUpdateEvent extends Event {
 
 				// member was given mandatory role -> update roles
 			} else if (newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
-				return void (await player.updateDiscordMember({
+				await player.updateDiscordMember({
 					reason: `received ${newMember.guild.roles.cache.get(discordGuild.MANDATORY_ROLE_ID)!.name} role`,
-				}));
+				});
 			}
 		}
 	}

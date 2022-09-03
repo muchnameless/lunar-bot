@@ -1,13 +1,13 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getAuctionNetworth, getNetworth } from '#networth/networth';
-import { shortenNumber } from '#functions';
+import NetworthCommand from './networth.js';
+import { type FetchedData } from './~base-skyblock-command.js';
 import { UnicodeEmoji } from '#constants';
-import NetworthCommand from './networth';
-import type { FetchedData } from './~base-skyblock-command';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { shortenNumber } from '#functions';
+import { getAuctionNetworth, getNetworth } from '#networth/networth.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
 
 export default class CoopNetworthCommand extends NetworthCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -23,9 +23,10 @@ export default class CoopNetworthCommand extends NetworthCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override async _generateReply({ ign, uuid, profile }: FetchedData, includeAuctions: boolean) {
+	protected override async _generateReply({ ign, uuid, profile }: FetchedData, includeAuctions: boolean) {
 		const memberUuids = Object.keys(profile.members);
 
 		// use NetworthCommand#_generateReply if no coop

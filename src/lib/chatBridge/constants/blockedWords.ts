@@ -17,7 +17,7 @@ export const BLOCKED_WORDS_REGEXP = new RegExp(
 		/suck +(?:me +off|(?:yo)?ur (?:dad|mom))/,
 		/\bb[0o]n[3e]r\b/,
 		/c *o *c *k\b/,
-		/\bp *[e3] *n *[i1] *s\b/,
+		/\bp *[3e] *n *[1i] *s\b/,
 		/d *(?:i+|1+) *c+ *k/,
 		/schl[0o]ng/,
 		/chode/,
@@ -30,8 +30,8 @@ export const BLOCKED_WORDS_REGEXP = new RegExp(
 		/cuck+o+l+d/,
 		/\ba+n+a+l+\b/,
 		/nude/,
-		/\bh[e3]ntai/,
-		/p[o0]rn/,
+		/\bh[3e]ntai/,
+		/p[0o]rn/,
 		/\bpimp\b/,
 		/pl+a+y+b+o+y/,
 		/onlyfans/,
@@ -84,9 +84,9 @@ export const BLOCKED_WORDS_REGEXP = new RegExp(
 		/\bcok\b/,
 		/kanker/,
 		/\bswastika/,
-		/n[a4]z[i1]/,
+		/n[4a]z[1i]/,
 	]
-		.map((r) => r.source)
+		.map((regex) => regex.source)
 		.join('|'),
 	'i',
 );

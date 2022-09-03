@@ -1,3 +1,4 @@
+import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import {
 	DiscordAPIError,
 	MessageFlags,
@@ -5,26 +6,24 @@ import {
 	PermissionFlagsBits,
 	resolvePartialEmoji,
 	RESTJSONErrorCodes,
+	type DiscordErrorData,
+	type EmojiIdentifierResolvable,
+	type Message,
+	type MessageEditOptions,
+	type MessageOptions,
+	type MessageReaction,
+	type TextChannel,
 } from 'discord.js';
-import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
-import { logger } from '#logger';
+import { ChannelUtil, EmbedUtil, type SendOptions } from './index.js';
 import { commaListAnd, minutes } from '#functions';
-import { ChannelUtil, EmbedUtil } from '.';
-import type {
-	DiscordErrorData,
-	EmojiIdentifierResolvable,
-	Message,
-	MessageEditOptions,
-	MessageOptions,
-	MessageReaction,
-	TextChannel,
-} from 'discord.js';
-import type { SendOptions } from '.';
+import { logger } from '#logger';
 
 interface AwaitReplyOptions extends MessageOptions {
 	question?: string;
-	/** time in milliseconds to wait for a response */
+	/**
+	 * time in milliseconds to wait for a response
+	 */
 	time?: number;
 }
 
@@ -33,51 +32,56 @@ export interface EditOptions extends MessageEditOptions {
 }
 
 export class MessageUtil extends null {
-	static DEFAULT_REPLY_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
+	private static readonly DEFAULT_REPLY_PERMISSIONS =
+		PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
 
 	/**
 	 * @param message
 	 */
-	static channelLogInfo(message: Message) {
+	public static channelLogInfo(message: Message) {
 		return ChannelUtil.logInfo(message.channel) ?? message.channelId;
 	}
 
 	/**
 	 * @param message
 	 */
-	static isEphemeral(message: Message) {
+	public static isEphemeral(message: Message) {
 		return message.flags.has(MessageFlags.Ephemeral);
 	}
 
 	/**
 	 * whether the message was sent by a non-bot user account
+	 *
 	 * @param message
 	 */
-	static isUserMessage(message: Message) {
+	public static isUserMessage(message: Message) {
 		return !message.author.bot && !message.webhookId && !message.system;
 	}
 
 	/**
 	 * whether the message was sent by a non-application-command webhook
+	 *
 	 * @param message
 	 */
-	static isNormalWebhookMessage(message: Message) {
+	public static isNormalWebhookMessage(message: Message) {
 		return message.webhookId !== null && message.webhookId !== message.applicationId;
 	}
 
 	/**
 	 * whether the message is a reply but not to an application command
+	 *
 	 * @param message
 	 */
-	static isNormalReplyMessage(message: Message) {
+	public static isNormalReplyMessage(message: Message) {
 		return message.type === MessageType.Reply && !message.webhookId;
 	}
 
 	/**
 	 * whether the message is from the bot user and not related to application commands
+	 *
 	 * @param message
 	 */
-	static isNormalBotMessage(message: Message) {
+	public static isNormalBotMessage(message: Message) {
 		return (
 			message.author.id === message.client.user!.id &&
 			(message.type === MessageType.Default || this.isNormalReplyMessage(message))
@@ -88,8 +92,9 @@ export class MessageUtil extends null {
 	 * @param message
 	 * @param emojiIndetifier
 	 */
-	private static _reactSingle(message: Message, emojiIndetifier: EmojiIdentifierResolvable) {
+	private static async _reactSingle(message: Message, emojiIndetifier: EmojiIdentifierResolvable) {
 		const emoji = resolvePartialEmoji(emojiIndetifier);
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
 
 		return reaction?.me
@@ -99,10 +104,11 @@ export class MessageUtil extends null {
 
 	/**
 	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
+	 *
 	 * @param message
 	 * @param emojis
 	 */
-	static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
+	public static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
 		if (!message || this.isEphemeral(message)) return null;
 
 		// permission checks
@@ -121,7 +127,6 @@ export class MessageUtil extends null {
 			return null;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
 			logger.warn(
 				{ message, data: emojis },
@@ -167,9 +172,10 @@ export class MessageUtil extends null {
 
 	/**
 	 * delete the message, added check for already deleted after timeout
+	 *
 	 * @param message
 	 */
-	static async delete(message: Message): Promise<Message> {
+	public static async delete(message: Message): Promise<Message> {
 		// permission check
 		if (!message.deletable) {
 			logger.warn(
@@ -189,10 +195,11 @@ export class MessageUtil extends null {
 
 	/**
 	 * posts question in same channel and returns content of first reply or null if timeout
+	 *
 	 * @param message
 	 * @param options
 	 */
-	static async awaitReply(message: Message, options: string | AwaitReplyOptions = {}) {
+	public static async awaitReply(message: Message, options: AwaitReplyOptions | string = {}) {
 		const {
 			question = 'confirm this action?',
 			time = minutes(1),
@@ -221,12 +228,13 @@ export class MessageUtil extends null {
 
 	/**
 	 * replies in nearest #bot-commands or in message's channel if DMs or '-c' flag set
+	 *
 	 * @param message
 	 * @param options
 	 */
-	static async reply(message: Message, options: SendOptions & { rejectOnError: true }): Promise<Message>;
-	static async reply(message: Message, options: string | SendOptions): Promise<Message | null>;
-	static async reply(message: Message, options: string | SendOptions) {
+	public static async reply(message: Message, options: SendOptions & { rejectOnError: true }): Promise<Message>;
+	public static async reply(message: Message, options: SendOptions | string): Promise<Message | null>;
+	public static async reply(message: Message, options: SendOptions | string) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		try {
@@ -281,13 +289,14 @@ export class MessageUtil extends null {
 
 	/**
 	 * edits a message, preserving @mention pings at the beginning
+	 *
 	 * @param message
 	 * @param options
 	 * @param permissions
 	 */
-	static async edit(
+	public static async edit(
 		message: Message,
-		options: string | EditOptions,
+		options: EditOptions | string,
 		permissions = ChannelUtil.botPermissions(message.channel),
 	) {
 		const _options = typeof options === 'string' ? { content: options } : options;
@@ -364,10 +373,11 @@ export class MessageUtil extends null {
 
 	/**
 	 * pins a message
+	 *
 	 * @param message
 	 * @param options
 	 */
-	static async pin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
+	public static async pin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
 		if (message.pinned) {
 			const MESSAGE = 'message is already pinned';
 
@@ -395,10 +405,11 @@ export class MessageUtil extends null {
 
 	/**
 	 * unpins a message
+	 *
 	 * @param message
 	 * @param options
 	 */
-	static async unpin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
+	public static async unpin(message: Message, { rejectOnError }: { rejectOnError?: boolean } = {}) {
 		if (!message.pinned) {
 			const MESSAGE = 'message is not pinned';
 

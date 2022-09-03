@@ -1,57 +1,62 @@
 import { once } from 'node:events';
 import { env } from 'node:process';
 import { setInterval } from 'node:timers';
+import { type URL } from 'node:url';
 import { stripIndents } from 'common-tags';
-import { MessageFlags } from 'discord.js';
-import { MessageUtil } from '#utils';
-import { logger } from '#logger';
+import { MessageFlags, type Message, type Snowflake } from 'discord.js';
+import { ChatBridge, ChatBridgeEvent, type MessageForwardOptions } from './ChatBridge.js';
+import { AbortControllerCache } from './caches/AbortControllerCache.js';
+import { InteractionCache } from './caches/InteractionCache.js';
+import { DELETED_MESSAGE_REASON } from './constants/index.js';
+import { DiscordChatManager } from './managers/DiscordChatManager.js';
 import { UnicodeEmoji } from '#constants';
-import { BridgeCommandCollection } from '#structures/commands/BridgeCommandCollection';
-import { minutes } from '../functions/time';
-import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
-import { DiscordChatManager } from './managers/DiscordChatManager';
-import { DELETED_MESSAGE_REASON } from './constants';
-import { InteractionCache } from './caches/InteractionCache';
-import { AbortControllerCache } from './caches/AbortControllerCache';
-import type { RepliableInteraction } from '#utils';
-import type { URL } from 'node:url';
-import type { Message, Snowflake } from 'discord.js';
-import type { MessageForwardOptions } from './ChatBridge';
-import type { LunarClient } from '#structures/LunarClient';
+import { minutes } from '#functions';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { BridgeCommandCollection } from '#structures/commands/BridgeCommandCollection.js';
+import { type RepliableInteraction, MessageUtil } from '#utils';
 
 export class ChatBridgeManager {
 	/**
 	 * the client that instantiated the ChatBridgeArray
 	 */
-	declare client: LunarClient;
+	public declare readonly client: LunarClient;
+
 	/**
 	 * minecraft command collection
 	 */
-	commands: BridgeCommandCollection;
+	public readonly commands: BridgeCommandCollection;
+
 	/**
 	 * discord channel ids of all ChatBridge channels
 	 */
-	channelIds = new Set<Snowflake>();
+	public readonly channelIds = new Set<Snowflake>();
+
 	/**
 	 * webhook ids of all ChatBridge channels
 	 */
-	webhookIds = new Set<Snowflake>();
+	public readonly webhookIds = new Set<Snowflake>();
+
 	/**
 	 * individual chat bridges
 	 */
-	cache: ChatBridge[] = [];
+	public readonly cache: ChatBridge[] = [];
+
 	/**
 	 * AbortControllers for discord messages
 	 */
-	abortControllers = new AbortControllerCache();
+	public readonly abortControllers = new AbortControllerCache();
+
 	/**
 	 * interaction cache
 	 */
-	interactionCache = new InteractionCache();
+	public readonly interactionCache = new InteractionCache();
+
 	/**
 	 * interval to sweep this manager's and it's cached bridges' interaction caches
 	 */
-	interactionCacheSweeperInterval = setInterval(() => {
+	// eslint-disable-next-line unicorn/consistent-function-scoping
+	public readonly interactionCacheSweeperInterval = setInterval(() => {
 		this.interactionCache.sweep();
 
 		for (const { discord } of this.cache) {
@@ -61,13 +66,13 @@ export class ChatBridgeManager {
 		}
 	}, minutes(15));
 
-	constructor(client: LunarClient, commandsURL: URL) {
+	public constructor(client: LunarClient, commandsURL: URL) {
 		Object.defineProperty(this, 'client', { value: client });
 
 		this.commands = new BridgeCommandCollection(client, commandsURL);
 
-		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {
-			this.cache.push(new ChatBridge(client, this, i));
+		for (let index = 0; index < ChatBridgeManager._accounts.length; ++index) {
+			this.cache.push(new ChatBridge(client, this, index));
 		}
 	}
 
@@ -81,7 +86,7 @@ export class ChatBridgeManager {
 	/**
 	 * loads channelIds from hypixelGuilds
 	 */
-	loadChannelIds() {
+	public loadChannelIds() {
 		this.channelIds.clear();
 
 		for (const { chatBridgeChannels } of this.client.hypixelGuilds.cache.values()) {
@@ -95,9 +100,10 @@ export class ChatBridgeManager {
 
 	/**
 	 * connects a single or all bridges, instantiating them first if not already done
+	 *
 	 * @param index
 	 */
-	async connect(index?: number) {
+	public async connect(index?: number) {
 		// load commands if none are present
 		await this.commands.loadAll();
 
@@ -124,11 +130,12 @@ export class ChatBridgeManager {
 
 	/**
 	 * disconnects a single or all bridges
+	 *
 	 * @param index
 	 */
-	disconnect(index?: undefined): ChatBridge[];
-	disconnect(index: number): ChatBridge;
-	disconnect(index?: number) {
+	public disconnect(index?: undefined): ChatBridge[];
+	public disconnect(index: number): ChatBridge;
+	public disconnect(index?: number) {
 		// single
 		if (typeof index === 'number') {
 			const chatBridge = this.cache[index];
@@ -142,10 +149,14 @@ export class ChatBridgeManager {
 
 	/**
 	 * forwards announcement messages to all chatBridges (via broadcast)
+	 *
 	 * @param message
 	 */
-	async handleAnnouncementMessage(message: Message) {
-		if (!message.content) return MessageUtil.react(message, UnicodeEmoji.Stop);
+	public async handleAnnouncementMessage(message: Message) {
+		if (!message.content) {
+			MessageUtil.react(message, UnicodeEmoji.Stop);
+			return;
+		}
 
 		const res: boolean[] = [];
 
@@ -191,9 +202,10 @@ export class ChatBridgeManager {
 
 	/**
 	 * whether the message is not for a bridge channel, from a bridge webhook or all bridges are disabled
+	 *
 	 * @param message
 	 */
-	shouldIgnoreMessage(message: Pick<Message, 'id' | 'channelId' | 'webhookId'>) {
+	public shouldIgnoreMessage(message: Pick<Message, 'channelId' | 'id' | 'webhookId'>) {
 		return (
 			!this.channelIds.has(message.channelId) ||
 			(message.webhookId && this.webhookIds.has(message.webhookId)) ||
@@ -203,10 +215,11 @@ export class ChatBridgeManager {
 
 	/**
 	 * forwards the discord message if a chat bridge for that channel is found
+	 *
 	 * @param message
 	 * @param options
 	 */
-	async handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
+	public async handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
 		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
@@ -218,7 +231,9 @@ export class ChatBridgeManager {
 
 		if (_options.signal.aborted) return; // ignore deleted messages
 
-		const res = await Promise.all(this.cache.map((chatBridge) => chatBridge.handleDiscordMessage(message, _options)));
+		const res = await Promise.all(
+			this.cache.map(async (chatBridge) => chatBridge.handleDiscordMessage(message, _options)),
+		);
 
 		if (res.includes(true)) return;
 
@@ -228,9 +243,10 @@ export class ChatBridgeManager {
 
 	/**
 	 * aborts the AbortController if the message was sent in a bridge channel
+	 *
 	 * @param message
 	 */
-	handleMessageDelete(message: Pick<Message, 'id' | 'channelId' | 'webhookId' | 'createdTimestamp'>) {
+	public handleMessageDelete(message: Pick<Message, 'channelId' | 'createdTimestamp' | 'id' | 'webhookId'>) {
 		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 
 		this.abortControllers.abort(message, DELETED_MESSAGE_REASON);
@@ -238,9 +254,10 @@ export class ChatBridgeManager {
 
 	/**
 	 * caches interactions in chat bridge channels
+	 *
 	 * @param interaction
 	 */
-	handleInteractionCreate(interaction: RepliableInteraction) {
+	public handleInteractionCreate(interaction: RepliableInteraction) {
 		if (!this.channelIds.has(interaction.channelId!)) return;
 
 		if (interaction.isChatInputCommand()) this.interactionCache.add(interaction);

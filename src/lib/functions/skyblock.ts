@@ -1,3 +1,5 @@
+import { type Components } from '@zikeji/hypixel';
+import { assertNever, getLilyWeight } from './index.js';
 import {
 	DUNGEON_XP_TOTAL,
 	FindProfileStrategy,
@@ -6,18 +8,18 @@ import {
 	SKILL_XP_TOTAL,
 	SLAYER_XP_TOTAL,
 	SOCIAL_XP_TOTAL,
+	type DungeonTypes,
+	type SkillTypes,
 } from '#constants';
-import { assertNever, getLilyWeight } from '.';
-import type { Components } from '@zikeji/hypixel';
-import type { DungeonTypes, SkillTypes } from '#constants';
 
 /**
  * returns the true and progression level for the provided skill type
+ *
  * @param type the skill or dungeon type
  * @param xp
  * @param individualCap individual level cap for the player
  */
-export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individualCap: number | null = null) {
+export function getSkillLevel(type: DungeonTypes | SkillTypes, xp = 0, individualCap: number | null = null) {
 	let totalXp: Readonly<number[]>;
 
 	switch (type) {
@@ -76,6 +78,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 
 /**
  * returns the slayer level for the provided slayer xp
+ *
  * @param xp
  */
 export function getSlayerLevel(xp = 0) {
@@ -84,6 +87,7 @@ export function getSlayerLevel(xp = 0) {
 
 /**
  * returns the main profile, determined by max senither weight
+ *
  * @param profiles SkyBlock profiles
  * @param uuid minecraft uuid
  * @param findProfileStrategy
@@ -118,8 +122,6 @@ export function findSkyblockProfile(
 			let lastActive = -1;
 
 			for (const profile of profiles) {
-				profile.members[uuid]!.last_save;
-
 				if (lastActive > profile.members[uuid]!.last_save) continue;
 
 				mainProfile = profile;
@@ -128,5 +130,8 @@ export function findSkyblockProfile(
 
 			return mainProfile;
 		}
+
+		default:
+			return null;
 	}
 }

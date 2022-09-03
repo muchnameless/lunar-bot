@@ -1,3 +1,4 @@
+/* eslint-disable typescript-sort-keys/string-enum */
 export const enum ItemId {
 	Coins = '$COINS',
 
@@ -193,3 +194,4 @@ export const enum ItemId {
 	WitherBlood = 'WITHER_BLOOD',
 	WoodSingularity = 'WOOD_SINGULARITY',
 }
+/* eslint-enable typescript-sort-keys/string-enum */

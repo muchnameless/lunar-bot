@@ -1,13 +1,12 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '#utils';
-import { hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { formatNumber } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 export default class RanksCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('guild ranks and requirements')
@@ -19,9 +18,10 @@ export default class RanksCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true });
 		const embed = this.client.defaultEmbed.setFooter({ text: hypixelGuild.name });

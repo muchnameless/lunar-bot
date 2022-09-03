@@ -1,14 +1,15 @@
+import { opendir } from 'node:fs/promises';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
-import { opendir } from 'node:fs/promises';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
+import { type Awaitable, type PickByValue } from '@sapphire/utilities';
+import { type Collection } from 'discord.js';
+import { jaroWinklerSimilarity, weeks } from './index.js';
 import { logger } from '#logger';
-import { jaroWinklerSimilarity, weeks } from '.';
-import type { Awaitable, PickByValue } from '@sapphire/utilities';
-import type { Collection } from 'discord.js';
 
 /**
  * returns the ISO week number of the given date
+ *
  * @param date date to analyze
  */
 export function getWeekOfYear(date: Date) {
@@ -29,37 +30,39 @@ export function getWeekOfYear(date: Date) {
 }
 
 interface AutocorrectResult<T> {
-	value: T;
-	/** 0 (no match) to 1 (exact match) */
+	/**
+	 * 0 (no match) to 1 (exact match)
+	 */
 	similarity: number;
+	value: T;
 }
 
 /**
  * checks the query agains the validInput and returns the most likely match
+ *
  * @param query
  * @param validInput
  * @param attributeToQuery
  */
 export function autocorrect(
 	query: string,
-	validInput: readonly string[] | ReadonlyMap<unknown, string> | IterableIterator<string>,
+	validInput: IterableIterator<string> | ReadonlyMap<unknown, string> | readonly string[],
 	attributeToQuery?: undefined,
 ): AutocorrectResult<string>;
 export function autocorrect<T>(
 	query: string,
-	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
+	validInput: IterableIterator<T> | ReadonlyMap<unknown, T> | readonly T[],
 	attributeToQuery: PickByValue<T, string>,
 ): AutocorrectResult<T>;
 export function autocorrect<T>(
 	query: string,
-	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
+	validInput: IterableIterator<T> | ReadonlyMap<unknown, T> | readonly T[],
 	attributeToQuery?: PickByValue<T, string>,
 ) {
 	let currentBestElement!: T;
 	let currentBestSimilarity = 0;
 
 	if (attributeToQuery) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, element[attributeToQuery] as unknown as string);
 
@@ -85,7 +88,6 @@ export function autocorrect<T>(
 			'[AUTOCORRECT]',
 		);
 	} else {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, element as unknown as string);
 
@@ -120,6 +122,7 @@ export function autocorrect<T>(
 
 /**
  * String.prototype.replace with an asynchronous callback function
+ *
  * @param string
  * @param regex
  * @param callback
@@ -127,9 +130,9 @@ export function autocorrect<T>(
 export async function asyncReplace(
 	string: string,
 	regex: RegExp,
-	callback: (match: RegExpMatchArray) => string | Promise<string>,
+	callback: (match: RegExpMatchArray) => Promise<string> | string,
 ) {
-	const promises: Promise<{ start: number; length: number; value: string }>[] = [];
+	const promises: Promise<{ length: number; start: number; value: string }>[] = [];
 
 	for (const match of string.matchAll(regex)) {
 		promises.push(
@@ -155,6 +158,7 @@ export async function asyncReplace(
 
 /**
  * Array.prototype.filter with an asynchronous callback function
+ *
  * @param array
  * @param predicate
  */
@@ -162,14 +166,14 @@ export async function asyncFilter<T>(
 	array: T[],
 	predicate: (value: T, index: number, array: T[]) => Awaitable<boolean>,
 ): Promise<T[]> {
-	const fail = Symbol();
+	const fail = Symbol('fail');
 
 	return (
 		await Promise.all(array.map(async (item, index) => ((await predicate(item, index, array)) ? item : fail)))
 	).filter((x) => x !== fail) as T[];
 }
 
-type CopyFunction<F, R> = F extends (...p: infer P) => any ? (...p: P) => R : never;
+type CopyFunction<F, R> = F extends (...params: infer P) => any ? (...params: P) => R : never;
 type CollectionFilter<I extends Collection<K, V>, K = unknown, V = unknown> = CopyFunction<
 	Parameters<I['filter']>[0],
 	Awaitable<ReturnType<Parameters<I['filter']>[0]>>
@@ -178,6 +182,7 @@ type Value<C> = C extends Collection<any, infer V> ? V : never;
 
 /**
  * Collection.prototype.filter with an asynchronous callback function, returns an array
+ *
  * @param iterable
  * @param predicate
  */
@@ -185,7 +190,7 @@ export async function asyncCollectionFilter<I extends Collection<K, V>, K, V>(
 	iterable: I,
 	predicate: CollectionFilter<I>,
 ): Promise<Value<I>[]> {
-	const fail = Symbol();
+	const fail = Symbol('fail');
 
 	return (
 		await Promise.all(iterable.map(async (item, index) => ((await predicate(item, index, iterable)) ? item : fail)))
@@ -194,6 +199,7 @@ export async function asyncCollectionFilter<I extends Collection<K, V>, K, V>(
 
 /**
  * waits for all promises to settle and logs the errored ones
+ *
  * @param array
  */
 export async function safePromiseAll(array: unknown[]) {
@@ -204,9 +210,10 @@ export async function safePromiseAll(array: unknown[]) {
 
 /**
  * creates an async iterable from all .js files that don't start with a '~'
+ *
  * @param root
  */
-export async function* readJSFiles(root: string | URL): AsyncGenerator<string> {
+export async function* readJSFiles(root: URL | string): AsyncGenerator<string> {
 	for await (const dir of await opendir(root)) {
 		if (dir.name.startsWith('~')) continue;
 		if (dir.isDirectory()) yield* readJSFiles(new URL(`${dir.name}/`, root));
@@ -217,6 +224,7 @@ export async function* readJSFiles(root: string | URL): AsyncGenerator<string> {
 
 /**
  * build autocomplete reponse from cached database entries
+ *
  * @param cache
  * @param value
  * @param nameKey
@@ -245,12 +253,14 @@ export function sortCache<T>(
 
 /**
  * stringifies the error and removes html code from it
+ *
  * @param error
  */
 export const formatError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/s, '');
 
 /**
  * retries if func rejects
+ *
  * @param func
  * @param delay
  * @param maxDelay

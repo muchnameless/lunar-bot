@@ -1,9 +1,9 @@
-import { BridgeCommand } from '#structures/commands/BridgeCommand';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '../../HypixelMessage';
+import { type HypixelUserMessage } from '../../HypixelMessage.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { BridgeCommand } from '#structures/commands/BridgeCommand.js';
 
 export default class MyCommand extends BridgeCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			aliases: [],
 			description: '',
@@ -13,10 +13,10 @@ export default class MyCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override minecraftRun(hypixelMessage: HypixelUserMessage) {
-		hypixelMessage;
+	public override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		// do stuff
 	}
 }

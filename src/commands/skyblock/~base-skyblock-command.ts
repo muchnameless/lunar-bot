@@ -1,13 +1,8 @@
-import { InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { DualCommand } from '#structures/commands/DualCommand';
+import { type Components } from '@zikeji/hypixel';
+import { type SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { getSkyBlockProfiles } from '#api';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, PROFILE_NAMES } from '#constants';
-import {
-	optionalIgnOption,
-	skyblockFindProfileOption,
-	skyblockFindProfileOptionName,
-	skyblockProfileOption,
-} from '#structures/commands/commonOptions';
 import {
 	autocorrect,
 	formatError,
@@ -17,13 +12,18 @@ import {
 	upperCaseFirstChar,
 	commaListOr,
 } from '#functions';
-import { getSkyBlockProfiles } from '#api';
-import type { Components } from '@zikeji/hypixel';
-import type { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { BridgeCommandData } from '#structures/commands/BridgeCommand';
-import type { ApplicationCommandData, SlashCommandOption } from '#structures/commands/ApplicationCommand';
+import { logger } from '#logger';
+import { type ApplicationCommandData, type SlashCommandOption } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { type BridgeCommandData } from '#structures/commands/BridgeCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
+import {
+	optionalIgnOption,
+	skyblockFindProfileOption,
+	skyblockFindProfileOptionName,
+	skyblockProfileOption,
+} from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 export type FetchedData = Awaited<ReturnType<BaseSkyBlockCommand['_fetchData']>>;
 
@@ -41,7 +41,7 @@ export const baseParseArgsOptions = {
 } as const;
 
 export default class BaseSkyBlockCommand extends DualCommand {
-	constructor(
+	public constructor(
 		context: CommandContext,
 		{ additionalOptions, ...slashData }: BaseSkyBlockSlashData,
 		bridgeData: BridgeCommandData = {},
@@ -75,7 +75,6 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * @param ctx
 	 * @param ignOrUuid
 	 */
-	// eslint-disable-next-line class-methods-use-this
 	protected async _fetchData(
 		ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage,
 		ignOrUuid: string | null | undefined,
@@ -89,12 +88,12 @@ export default class BaseSkyBlockCommand extends DualCommand {
 
 		let profile: Components.Schemas.SkyBlockProfileCuteName | undefined;
 
-		if (!profileName) {
+		if (profileName) {
+			profile = this._findProfileByName(profiles, profileName, ign);
+		} else {
 			profile = findSkyblockProfile(profiles, uuid, findProfileStrategy);
 
 			if (!profile) throw `\`${ign}\` has no SkyBlock profiles`;
-		} else {
-			profile = this._findProfileByName(profiles, profileName, ign);
 		}
 
 		return {
@@ -106,11 +105,11 @@ export default class BaseSkyBlockCommand extends DualCommand {
 
 	/**
 	 * find the profile by name, else throw an error message
+	 *
 	 * @param profiles
 	 * @param profileName
 	 * @param ign
 	 */
-	// eslint-disable-next-line class-methods-use-this
 	protected _findProfileByName(
 		profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[],
 		profileName: string,
@@ -131,18 +130,19 @@ export default class BaseSkyBlockCommand extends DualCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected _generateReply(data: FetchedData): string | Promise<string> {
+	protected _generateReply(data: FetchedData): Promise<string> | string {
 		throw new Error('not implemented');
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		try {
 			return InteractionUtil.reply(
 				interaction,
@@ -163,9 +163,10 @@ export default class BaseSkyBlockCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const {
 			values: { profile, latest },
 			positionals: [IGN, PROFILE_NAME_INPUT],

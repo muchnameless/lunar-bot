@@ -1,22 +1,20 @@
-import { AttachmentBuilder, SlashCommandBuilder } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import { AttachmentBuilder, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { seconds, upperCaseFirstChar, type LeaderboardXPTypes } from '#functions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalPlayerOption, xpTypeOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
-import { optionalPlayerOption, xpTypeOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { seconds, upperCaseFirstChar } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { LeaderboardXPTypes } from '#functions';
 
 interface DataSets {
-	label: string;
 	backgroundColor: string;
 	borderColor: string;
 	data: number[];
+	label: string;
 }
 
 export default class TrackCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('stats graph from the last 30 days')
@@ -28,9 +26,10 @@ export default class TrackCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 		const type =
 			(interaction.options.getString('type') as LeaderboardXPTypes) ?? this.config.get('CURRENT_COMPETITION');
@@ -40,7 +39,7 @@ export default class TrackCommand extends ApplicationCommand {
 
 		switch (type) {
 			case 'lily-weight': {
-				const weightHistory = Array.from({ length: days }, (_, i) => player.getLilyWeightHistory(i));
+				const weightHistory = Array.from({ length: days }, (_, index) => player.getLilyWeightHistory(index));
 
 				datasets = [
 					{
@@ -66,7 +65,7 @@ export default class TrackCommand extends ApplicationCommand {
 			}
 
 			case 'senither-weight': {
-				const weightHistory = Array.from({ length: days }, (_, i) => player.getSenitherWeightHistory(i));
+				const weightHistory = Array.from({ length: days }, (_, index) => player.getSenitherWeightHistory(index));
 
 				datasets = [
 					{
@@ -92,7 +91,7 @@ export default class TrackCommand extends ApplicationCommand {
 			}
 
 			case 'skill-average': {
-				const skillAverageHistory = Array.from({ length: days }, (_, i) => player.getSkillAverageHistory(i));
+				const skillAverageHistory = Array.from({ length: days }, (_, index) => player.getSkillAverageHistory(index));
 
 				datasets = [
 					{
@@ -117,7 +116,7 @@ export default class TrackCommand extends ApplicationCommand {
 						label: 'Slayer XP',
 						backgroundColor: 'rgba(0, 0, 255, 0.25)',
 						borderColor: 'rgb(0, 0, 128)',
-						data: Array.from({ length: days }, (_, i) => player.getSlayerTotalHistory(i)),
+						data: Array.from({ length: days }, (_, index) => player.getSlayerTotalHistory(index)),
 					},
 				];
 				break;
@@ -134,7 +133,7 @@ export default class TrackCommand extends ApplicationCommand {
 						label: `${upperCaseFirstChar(type)} XP`,
 						backgroundColor: 'rgba(0, 0, 255, 0.25)',
 						borderColor: 'rgb(0, 0, 128)',
-						data: Array.from({ length: days }, (_, i) => player[`${type}XpHistory`][i]!),
+						data: Array.from({ length: days }, (_, index) => player[`${type}XpHistory`][index]!),
 					},
 				];
 				break;
@@ -146,7 +145,7 @@ export default class TrackCommand extends ApplicationCommand {
 						label: `${upperCaseFirstChar(type)} XP`,
 						backgroundColor: 'rgba(0, 0, 255, 0.25)',
 						borderColor: 'rgb(0, 0, 128)',
-						data: Array.from({ length: days }, (_, i) => player.getSkillLevelHistory(type, i).nonFlooredLevel),
+						data: Array.from({ length: days }, (_, index) => player.getSkillLevelHistory(type, index).nonFlooredLevel),
 					},
 				];
 			}
@@ -159,7 +158,7 @@ export default class TrackCommand extends ApplicationCommand {
 		const image = await canvas.renderToBuffer({
 			type: 'line',
 			data: {
-				labels: Array.from({ length: days }, (_, i) => days - 1 - i),
+				labels: Array.from({ length: days }, (_, index) => days - 1 - index),
 				datasets,
 			},
 		});

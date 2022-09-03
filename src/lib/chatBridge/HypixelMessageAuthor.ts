@@ -1,34 +1,38 @@
-import { logger } from '#logger';
+import { type GuildMember } from 'discord.js';
+import { type ChatBridge } from './ChatBridge.js';
+import { type MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 import { mojang } from '#api';
-import type { GuildMember } from 'discord.js';
-import type { Player } from '#structures/database/models/Player';
-import type { ChatBridge } from './ChatBridge';
-import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
+import { logger } from '#logger';
+import { type Player } from '#structures/database/models/Player.js';
 
-interface AuthorData {
-	ign: string;
+type AuthorData = {
 	guildRank?: string | null;
+	ign: string;
 	uuid?: string | null;
-}
+};
 
 export class HypixelMessageAuthor {
-	chatBridge: ChatBridge;
-	ign: string;
-	guildRank: string | null;
+	public readonly chatBridge: ChatBridge;
+
+	public readonly ign: string;
+
+	public readonly guildRank: string | null;
+
 	/**
 	 * player object of the message author
 	 */
-	player: Player | null;
+	public player: Player | null;
+
 	/**
 	 * discord guild member
 	 */
-	member: GuildMember | null = null;
+	public member: GuildMember | null = null;
 
 	/**
 	 * @param chatBridge
 	 * @param data
 	 */
-	constructor(chatBridge: ChatBridge, { ign, guildRank, uuid }: AuthorData) {
+	public constructor(chatBridge: ChatBridge, { ign, guildRank, uuid }: AuthorData) {
 		this.chatBridge = chatBridge;
 		this.ign = ign;
 		this.guildRank = guildRank ?? null;
@@ -39,14 +43,14 @@ export class HypixelMessageAuthor {
 			: this.client.players.findByIgn(ign);
 	}
 
-	get client() {
+	public get client() {
 		return this.chatBridge.client;
 	}
 
 	/**
 	 * set player and member
 	 */
-	async init() {
+	public async init() {
 		try {
 			if (!this.player) {
 				// check mojang API / cache for the uuid associated with that ign
@@ -65,16 +69,17 @@ export class HypixelMessageAuthor {
 
 	/**
 	 * whisper a message to the author
+	 *
 	 * @param options
 	 */
-	send(options: string | MinecraftChatOptions) {
+	public async send(options: MinecraftChatOptions | string) {
 		return this.chatBridge.minecraft.whisper(this.ign, options);
 	}
 
 	/**
 	 * player IGN
 	 */
-	toString() {
+	public toString() {
 		return this.ign;
 	}
 }

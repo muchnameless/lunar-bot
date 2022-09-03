@@ -1,9 +1,14 @@
-import { bold, codeBlock, EmbedBuilder, SlashCommandBuilder, time } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { EmbedUtil, InteractionUtil } from '#utils';
-import { optionalPlayerOption, pageOption, offsetOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { formatDecimalNumber, formatNumber, getDefaultOffset, seconds, upperCaseFirstChar } from '#functions';
+import {
+	bold,
+	codeBlock,
+	EmbedBuilder,
+	SlashCommandBuilder,
+	time,
+	type APIEmbed,
+	type ChatInputCommandInteraction,
+	type JSONEncodable,
+} from 'discord.js';
 import {
 	COSMETIC_SKILLS,
 	DUNGEON_TYPES_AND_CLASSES,
@@ -11,13 +16,16 @@ import {
 	SLAYERS,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_TIME,
+	type XPOffsets,
 } from '#constants';
-import type { APIEmbed, ChatInputCommandInteraction, JSONEncodable } from 'discord.js';
-import type { XPOffsets } from '#constants';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { formatDecimalNumber, formatNumber, getDefaultOffset, seconds, upperCaseFirstChar } from '#functions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalPlayerOption, pageOption, offsetOption } from '#structures/commands/commonOptions.js';
+import { EmbedUtil, InteractionUtil } from '#utils';
 
 export default class XpCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription("check a player's xp gained")
@@ -36,9 +44,10 @@ export default class XpCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 		const OFFSET = (interaction.options.getString('offset') as XPOffsets) ?? getDefaultOffset(this.config);
 

@@ -1,14 +1,13 @@
-import { codeBlock, SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '#utils';
-import { hypixelGuildOption, pageOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { codeBlock, SlashCommandBuilder, type ButtonInteraction, type ChatInputCommandInteraction } from 'discord.js';
 import { buildPaginationActionRow } from '#functions';
-import type { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption, pageOption } from '#structures/commands/commonOptions.js';
+import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import { InteractionUtil } from '#utils';
 
 export default class FriendCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('Hypixel friend commands for the Chat Bridge bot')
@@ -25,12 +24,13 @@ export default class FriendCommand extends ApplicationCommand {
 
 	/**
 	 * /friend list [page]
+	 *
 	 * @param interaction
 	 * @param hypixelGuild
 	 * @param page
 	 */
 	private async _paginatedRun(
-		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ButtonInteraction<'cachedOrDM'>,
+		interaction: ButtonInteraction<'cachedOrDM'> | ChatInputCommandInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		page: number | null,
 	) {
@@ -56,10 +56,11 @@ export default class FriendCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
+	public override async buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [SUBCOMMAND, HYPIXEL_GUILD_ID, PAGE] = args as [string, string, string];
 
 		switch (SUBCOMMAND) {
@@ -80,9 +81,10 @@ export default class FriendCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommand()) {
 			case 'list':
 				return this._paginatedRun(

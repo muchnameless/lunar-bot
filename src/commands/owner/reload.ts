@@ -1,17 +1,21 @@
 import { basename } from 'node:path';
-import { codeBlock, SlashCommandBooleanOption, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { logger } from '#logger';
+import {
+	codeBlock,
+	SlashCommandBooleanOption,
+	SlashCommandBuilder,
+	type ChatInputCommandInteraction,
+} from 'discord.js';
+import { ChatManager } from '#chatBridge/managers/ChatManager.js';
 import { readJSFiles } from '#functions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { type CommandType } from '#structures/commands/BaseCommandCollection.js';
 import { InteractionUtil } from '#utils';
-import { ChatManager } from '#chatBridge/managers/ChatManager';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandType } from '#structures/commands/BaseCommandCollection';
-import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class ReloadCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		const reloadOption = new SlashCommandBooleanOption()
 			.setName('reload')
 			.setDescription('whether to re-import the file')
@@ -93,9 +97,10 @@ export default class ReloadCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const subcommandGroup = interaction.options.getSubcommandGroup();
 		const subcommand = interaction.options.getSubcommand();
 		const reload = interaction.options.getBoolean('reload') ?? true;
@@ -157,7 +162,11 @@ export default class ReloadCommand extends ApplicationCommand {
 							let command: CommandType | null | undefined;
 
 							// no file found
-							if (!commandFile) {
+							if (commandFile) {
+								// file with exact name match found
+								commandName = basename(commandFile, '.js').toLowerCase();
+								command = this.collection.get(commandName); // try to find already loaded command
+							} else {
 								// try to autocorrect input
 								command = this.collection.getByName(commandName);
 
@@ -171,11 +180,6 @@ export default class ReloadCommand extends ApplicationCommand {
 										break;
 									}
 								}
-
-								// file with exact name match found
-							} else {
-								commandName = basename(commandFile, '.js').toLowerCase();
-								command = this.collection.get(commandName); // try to find already loaded command
 							}
 
 							if (!commandFile) {
@@ -209,7 +213,7 @@ export default class ReloadCommand extends ApplicationCommand {
 
 							return InteractionUtil.reply(
 								interaction,
-								`${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`,
+								`${this.collection.size} command${this.collection.size === 1 ? '' : 's'} were reloaded successfully`,
 							);
 						} catch (error) {
 							logger.error(error, 'an error occurred while reloading all commands');
@@ -265,7 +269,7 @@ export default class ReloadCommand extends ApplicationCommand {
 							return InteractionUtil.reply(
 								interaction,
 								`${this.client.events.size} event${
-									this.client.events.size !== 1 ? 's' : ''
+									this.client.events.size === 1 ? '' : 's'
 								} were reloaded successfully`,
 							);
 						} catch (error) {

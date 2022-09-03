@@ -1,13 +1,14 @@
-import MessageDeleteEvent from './messageDelete';
-import type { ClientEvents, Events } from 'discord.js';
+import { type ClientEvents, type Events } from 'discord.js';
+import MessageDeleteEvent from './messageDelete.js';
 
 export default class MessageDeleteBulkEvent extends MessageDeleteEvent {
 	/**
 	 * event listener callback
+	 *
 	 * @param messages
 	 */
-	// @ts-expect-error
-	override run(
+	// @ts-expect-error override
+	public override run(
 		//
 		messages: ClientEvents[Events.MessageBulkDelete][0],
 	) {

@@ -1,24 +1,23 @@
-import { BaseEvent } from '#structures/events/BaseEvent';
-import type { BaseEventContext } from '#structures/events/BaseEvent';
-import type { ChatBridge } from './ChatBridge';
+import { type ChatBridge } from './ChatBridge.js';
+import { BaseEvent, type BaseEventContext } from '#structures/events/BaseEvent.js';
 
 export interface ChatBridgeEventContext extends BaseEventContext {
 	emitter: ChatBridge;
 }
 export class ChatBridgeEvent extends BaseEvent {
-	chatBridge: ChatBridge;
+	public readonly chatBridge: ChatBridge;
 
-	constructor(context: ChatBridgeEventContext) {
+	public constructor(context: ChatBridgeEventContext) {
 		super(context);
 
 		this.chatBridge = context.emitter;
 	}
 
-	get client() {
+	public get client() {
 		return this.chatBridge.client;
 	}
 
-	get config() {
+	public get config() {
 		return this.client.config;
 	}
 }

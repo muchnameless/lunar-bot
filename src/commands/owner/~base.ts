@@ -1,6 +1,8 @@
 import { Buffer } from 'node:buffer';
 import { env } from 'node:process';
 import { inspect } from 'node:util';
+import { EmbedLimits, TextInputLimits } from '@sapphire/discord-utilities';
+import { regExpEsc } from '@sapphire/utilities';
 import {
 	ActionRowBuilder,
 	AttachmentBuilder,
@@ -9,32 +11,28 @@ import {
 	embedLength,
 	TextInputBuilder,
 	TextInputStyle,
+	type AttachmentPayload,
+	type ButtonInteraction,
+	type EmbedBuilder,
+	type JSONEncodable,
+	type MessageActionRowComponentBuilder,
+	type MessageComponentInteraction,
+	type ModalActionRowComponentBuilder,
 } from 'discord.js';
-import { regExpEsc } from '@sapphire/utilities';
-import { EmbedLimits, TextInputLimits } from '@sapphire/discord-utilities';
-import { InteractionUtil } from '#utils';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { UnicodeEmoji } from '#constants';
 import { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } from '#functions';
-import type {
-	AttachmentPayload,
-	ButtonInteraction,
-	EmbedBuilder,
-	JSONEncodable,
-	MessageActionRowComponentBuilder,
-	MessageComponentInteraction,
-	ModalActionRowComponentBuilder,
-} from 'discord.js';
-import type { RepliableInteraction } from '#utils';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { InteractionUtil, type RepliableInteraction } from '#utils';
 
 export default class BaseOwnerCommand extends ApplicationCommand {
 	/**
 	 * slightly less than 8 MB
 	 */
-	static MAX_FILE_SIZE = 8_387_600;
+	protected static readonly MAX_FILE_SIZE = 8_387_600;
 
 	/**
 	 * replaces the client's token in 'text' and escapes `
+	 *
 	 * @param input
 	 */
 	protected _cleanOutput(input: string) {
@@ -48,7 +46,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 				.replace(
 					new RegExp(
 						Object.entries(env)
-							.filter(([key, value]) => value && /KEY|PASSWORD|TOKEN|URI/i.test(key))
+							.filter(([key, value]) => value && /key|password|token|uri/i.test(key))
 							.flatMap(([, value]) => regExpEsc(value!).split(/\s+/))
 							// sort descendingly by length
 							.sort(({ length: a }, { length: b }) => b - a)
@@ -65,6 +63,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 
 	/**
 	 * returns an attachment trimmed to the max file size
+	 *
 	 * @param content
 	 */
 	protected static _getFiles(interaction: RepliableInteraction, content: string) {
@@ -80,6 +79,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 
 	/**
 	 * gets the original eval input from the result embed
+	 *
 	 * @param message
 	 */
 	protected static _getInputFromMessage(message: MessageComponentInteraction['message'] | null) {
@@ -100,6 +100,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 
 	/**
 	 * returns an ActionRowBuilder with a TextInputBuilder which has the old input as a prefilled value
+	 *
 	 * @param interaction
 	 */
 	protected static _buildInputTextInput(interaction: ButtonInteraction) {
@@ -138,6 +139,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 
 	/**
 	 * removes sensitive information from the output, adds it to the embed and if overflowing returns a files array
+	 *
 	 * @param interaction
 	 * @param responseEmbed
 	 * @param output
@@ -148,7 +150,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 		interaction: RepliableInteraction,
 		responseEmbed: EmbedBuilder,
 		output: string,
-		code: 'ts' | 'bash',
+		code: 'bash' | 'ts',
 		footerField?: string,
 	) {
 		const cleanedOutput = this._cleanOutput(output);

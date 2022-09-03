@@ -1,16 +1,15 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, type ChatInputCommandInteraction, type Snowflake } from 'discord.js';
 import ms from 'ms';
-import { GuildMemberUtil, GuildUtil, InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { hypixelGuildOption } from '#structures/commands/commonOptions';
 import { seconds } from '#functions';
-import type { ChatInputCommandInteraction, Snowflake } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption } from '#structures/commands/commonOptions.js';
+import { GuildMemberUtil, GuildUtil, InteractionUtil } from '#utils';
 
 export default class PurgeRolesCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('removes all roles that the bot manages from non guild members')
@@ -19,18 +18,19 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 		});
 	}
 
-	static running = new Set<Snowflake>();
+	private static readonly running = new Set<Snowflake>();
 
 	/**
 	 * time to wait between role API requests
 	 */
-	static TIMEOUT = seconds(30);
+	private static readonly TIMEOUT = seconds(30);
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
 
 		if (!guild) {
@@ -45,7 +45,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 			PurgeRolesCommand.running.add(guild.id);
 
 			const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(guild.id)?.GUILD_ROLE_ID;
-			const toPurge: { userId: Snowflake; rolesToPurge: Snowflake[] }[] = [];
+			const toPurge: { rolesToPurge: Snowflake[]; userId: Snowflake }[] = [];
 
 			for (const member of (await GuildUtil.fetchAllMembers(guild)).values()) {
 				if (member.roles.cache.has(GUILD_ROLE_ID!)) continue;
@@ -66,7 +66,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 
 			await InteractionUtil.awaitConfirmation(
 				interaction,
-				`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms(
+				`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT === 1 ? '' : 's'}, expected duration: ${ms(
 					(PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT,
 					{ long: true },
 				)}?`,
@@ -91,7 +91,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 
 			return InteractionUtil.reply(
 				interaction,
-				`done, purged roles from ${success}/${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`,
+				`done, purged roles from ${success}/${PURGE_AMOUNT} member${PURGE_AMOUNT === 1 ? '' : 's'}`,
 			);
 		} finally {
 			PurgeRolesCommand.running.delete(guild.id);

@@ -1,15 +1,16 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { Op } from 'sequelize';
-import { InteractionUtil } from '#utils';
-import { optionalPlayerOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { Offset } from '#constants';
 import { seconds } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalPlayerOption } from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 export default class XpResetCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	private readonly OFFSET_TO_RESET = Offset.CompetitionStart;
+
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('reset the competition xp gained')
@@ -18,13 +19,12 @@ export default class XpResetCommand extends ApplicationCommand {
 		});
 	}
 
-	static OFFSET_TO_RESET = Offset.CompetitionStart;
-
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { players } = this.client;
 		const PLAYER_INPUT = interaction.options.getString('player');
 
@@ -44,7 +44,7 @@ export default class XpResetCommand extends ApplicationCommand {
 
 			await InteractionUtil.awaitConfirmation(interaction, `reset xp gained from \`${player}\`?`);
 
-			await player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
+			await player.resetXp({ offsetToReset: this.OFFSET_TO_RESET });
 
 			result = `reset xp gained from \`${player}\``;
 
@@ -61,7 +61,7 @@ export default class XpResetCommand extends ApplicationCommand {
 			await players.sweepDb();
 
 			// reset xp
-			await players.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
+			await players.resetXp({ offsetToReset: this.OFFSET_TO_RESET });
 
 			result = `reset the competition xp gained from ${PLAYER_COUNT} guild members`;
 		}

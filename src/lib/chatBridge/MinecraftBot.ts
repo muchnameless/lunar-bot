@@ -1,17 +1,16 @@
 import { basename } from 'node:path';
 import { URL } from 'node:url';
-import { createClient } from 'minecraft-protocol';
 import { lazy } from '@sapphire/utilities';
-import { logger } from '#logger';
+import { createClient, type ClientOptions } from 'minecraft-protocol';
+import { type ChatBridge } from './ChatBridge.js';
+import { SPAWN_EVENTS } from './constants/index.js';
 import { readJSFiles } from '#functions';
-import { SPAWN_EVENTS } from './constants';
-import type { ClientOptions } from 'minecraft-protocol';
-import type { ChatBridge } from './ChatBridge';
+import { logger } from '#logger';
 
-interface MinecraftBotEvent {
+type MinecraftBotEvent = {
+	callback(chatBridge: ChatBridge): void;
 	name: string;
-	callback: (chatBridge: ChatBridge) => void;
-}
+};
 
 /**
  * load events from files
@@ -31,6 +30,7 @@ const getEvents = lazy(async () => {
 
 /**
  * returns a mc bot client
+ *
  * @param chatBridge
  * @param options
  */
@@ -45,7 +45,7 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 		bot[SPAWN_EVENTS.has(name as any) ? 'once' : 'on'](name, callback.bind(null, chatBridge));
 	}
 
-	logger.debug(`[CREATE BOT]: ${events.length} event${events.length !== 1 ? 's' : ''} loaded`);
+	logger.debug(`[CREATE BOT]: ${events.length} event${events.length === 1 ? '' : 's'} loaded`);
 
 	return bot;
 }

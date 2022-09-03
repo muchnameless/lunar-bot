@@ -1,15 +1,16 @@
-import { Warnings } from '#structures/Warnings';
-import { Enchantment } from '../constants';
+import { Enchantment } from '../constants/index.js';
+import { Warnings } from '#structures/Warnings.js';
 
 const warnings = new Warnings<string>();
 
 interface EnchantmentData {
-	itemId: `ENCHANTMENT_${string}`;
 	count: number;
+	itemId: `ENCHANTMENT_${string}`;
 }
 
 /**
  * returns the enchantment id (name_level) and count
+ *
  * @link https://hypixel-skyblock.fandom.com/wiki/Enchantments
  * @link https://wiki.hypixel.net/Enchantments
  * @param enchantment
@@ -132,9 +133,11 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 			if (level <= 5) {
 				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
 			}
+
 			if (level <= 10) {
 				return { itemId: `ENCHANTMENT_${enchantment}_6`, count: 2 ** (level - 6) } as const;
 			}
+
 			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
 
 		// combinable 2->3
@@ -186,8 +189,8 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 
 		default: {
 			// make sure TS errors if the switch is not exhaustive
-			const e: never = enchantment;
-			const itemId = `${e}_${level}`;
+			const never: never = enchantment;
+			const itemId = `${never}_${level}`;
 
 			warnings.emit(itemId, { enchantment, lvl: level }, '[GET ENCHANTMENT]: unknown enchantment');
 

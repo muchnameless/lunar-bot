@@ -1,3 +1,5 @@
+/* eslint-disable id-length */
+import { TextInputLimits } from '@sapphire/discord-utilities';
 import {
 	ActionRowBuilder,
 	escapeMarkdown,
@@ -6,28 +8,28 @@ import {
 	SlashCommandBuilder,
 	TextInputBuilder,
 	TextInputStyle,
+	type ChatInputCommandInteraction,
+	type ModalActionRowComponentBuilder,
+	type ModalSubmitInteraction,
 } from 'discord.js';
-import { TextInputLimits } from '@sapphire/discord-utilities';
 import BigDecimal from 'js-big-decimal';
-import { InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { DualCommand } from '#structures/commands/DualCommand';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { formatNumber, trim } from '#functions';
-import { Lexer } from '#structures/Lexer';
-import { OperatorAssociativity, Parser } from '#structures/Parser';
-import type { ChatInputCommandInteraction, ModalActionRowComponentBuilder, ModalSubmitInteraction } from 'discord.js';
-import type { RepliableInteraction, ModalRepliableInteraction } from '#utils';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import { logger } from '#logger';
+import { Lexer } from '#structures/Lexer.js';
+import { OperatorAssociativity, Parser } from '#structures/Parser.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
+import { InteractionUtil, type ModalRepliableInteraction, type RepliableInteraction } from '#utils';
 
 export default class MathsCommand extends DualCommand {
 	/**
 	 * >= 10 -> sin(90°) = 0
 	 * >= 18 -> cos(90°) = 1
 	 */
-	precision = 18;
+	private static readonly precision = 18;
 
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -48,89 +50,97 @@ export default class MathsCommand extends DualCommand {
 		);
 	}
 
-	static percent = {
+	private static readonly percent = {
 		precedence: 8,
 		associativity: OperatorAssociativity.Right,
 	} as const;
-	static multiplier = {
+
+	private static readonly multiplier = {
 		precedence: 7,
 		associativity: OperatorAssociativity.Right,
 	} as const;
-	static degree = {
+
+	private static readonly degree = {
 		precedence: 6,
 		associativity: OperatorAssociativity.Right,
 	} as const;
-	static factorialPost = {
+
+	private static readonly factorialPost = {
 		precedence: 5,
 		associativity: OperatorAssociativity.Right,
 	} as const;
-	static factorialPre = {
+
+	private static readonly factorialPre = {
 		precedence: 5,
 		associativity: OperatorAssociativity.Left,
 	} as const;
-	static func = {
+
+	private static readonly func = {
 		precedence: 4,
 		associativity: OperatorAssociativity.Left,
 	} as const;
-	static power = {
+
+	private static readonly power = {
 		precedence: 3,
 		associativity: OperatorAssociativity.Left,
 	} as const;
-	static factor = {
+
+	private static readonly factor = {
 		precedence: 2,
 		associativity: OperatorAssociativity.Left,
 	} as const;
-	static term = {
+
+	private static readonly term = {
 		precedence: 1,
 		associativity: OperatorAssociativity.Left,
 	} as const;
 
-	unaryOperators = {
-		m(x = 1) {
+	private static readonly unaryOperators = {
+		m: (x = 1) => {
 			return BigDecimal.multiply(x, 1_000_000);
 		},
-		k(x = 1) {
+		k: (x = 1) => {
 			return BigDecimal.multiply(x, 1_000);
 		},
 		'°': (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
 			return BigDecimal.multiply(x, BigDecimal.divide(Math.PI, 180, this.precision));
 		},
-		'!'(x?: number) {
+		'!': (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
 			if (x < 0) return Number.NaN;
-			return MathsCommand.factorial(x);
+			return this._factorial(x);
 		},
-		fac(x?: number) {
+		fac: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
 			if (x < 0) return Number.NaN;
-			return MathsCommand.factorial(x);
+			return this._factorial(x);
 		},
 		sin: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-			if (this.isMultipleOfPi(x)) return 0;
+			if (this._isMultipleOfPi(x)) return 0;
 			return Math.sin(x);
 		},
 		cos: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-			if (this.isMultipleOfPiHalf(x)) return 0;
+			if (this._isMultipleOfPiHalf(x)) return 0;
 			return Math.cos(x);
 		},
 		tan: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
-			if (this.isMultipleOfPi(x)) return 0;
-			if (this.isMultipleOfPiHalf(x)) return Number.NaN;
+			if (this._isMultipleOfPi(x)) return 0;
+			if (this._isMultipleOfPiHalf(x)) return Number.NaN;
 			return Math.tan(x);
 		},
-		sqrt(x?: number) {
+		sqrt: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
 			return Math.sqrt(x);
 		},
-		exp(x?: number) {
+		exp: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
 			return Math.exp(x);
 		},
-		ln(x?: number) {
+		ln: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
 			return Math.log(x);
 		},
@@ -140,21 +150,21 @@ export default class MathsCommand extends DualCommand {
 		},
 	} as const;
 
-	binaryOperators = {
-		'^'(a?: number, b?: number) {
+	private static readonly binaryOperators = {
+		'^': (a?: number, b?: number) => {
 			if (typeof a === 'undefined') throw new Error('`^` is not a unary operator');
-			if (a == 0 && b == 0) return Number.NaN;
+			if (a === 0 && b === 0) return Number.NaN;
 			return a ** b!;
 		},
-		'+': (a?: number, b?: number) => (typeof a !== 'undefined' ? BigDecimal.add(a, b) : b!),
-		'-': (a?: number, b?: number) => (typeof a !== 'undefined' ? BigDecimal.subtract(a, b) : BigDecimal.negate(b)),
-		'*'(a?: number, b?: number) {
+		'+': (a?: number, b?: number) => (typeof a === 'undefined' ? b! : BigDecimal.add(a, b)),
+		'-': (a?: number, b?: number) => (typeof a === 'undefined' ? BigDecimal.negate(b) : BigDecimal.subtract(a, b)),
+		'*': (a?: number, b?: number) => {
 			if (typeof a === 'undefined') throw new Error('`*` is not a unary operator');
 			return BigDecimal.multiply(a, b!);
 		},
 		'/': (a?: number, b?: number) => {
 			if (typeof a === 'undefined') throw new Error('`/` is not a unary operator');
-			if (b == 0) return Number.NaN;
+			if (b === 0) return Number.NaN;
 			return BigDecimal.divide(a, b!, this.precision);
 		},
 		log: (a?: number, b?: number) => {
@@ -167,21 +177,23 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * @param start
 	 */
-	static factorial = (start: number) => {
+	private static _factorial(start: number) {
 		let temp = 1;
 		let iterations = start;
 		while (iterations > 0) {
 			temp *= iterations--;
-			this.validateNumber(temp);
+			this._validateNumber(temp);
 		}
+
 		return temp;
-	};
+	}
 
 	/**
 	 * helper method to ensure that sin(pi) = 0
+	 *
 	 * @param x
 	 */
-	isMultipleOfPi(x: number) {
+	private static _isMultipleOfPi(x: number) {
 		return (
 			Number(BigDecimal.divide(x, Math.PI, this.precision)) ===
 			Number(BigDecimal.floor(BigDecimal.divide(x, Math.PI, this.precision)))
@@ -190,9 +202,10 @@ export default class MathsCommand extends DualCommand {
 
 	/**
 	 * helper method to ensure that cos(pi/2) = 0
+	 *
 	 * @param x
 	 */
-	isMultipleOfPiHalf(x: number) {
+	private static _isMultipleOfPiHalf(x: number) {
 		return (
 			Number(
 				BigDecimal.divide(BigDecimal.add(x, BigDecimal.divide(Math.PI, 2, this.precision)), Math.PI, this.precision),
@@ -208,13 +221,13 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * lexer for mathematical expressions
 	 */
-	static lexer = new Lexer()
+	private static lexer = new Lexer()
 		.addRule(/,/, () => null) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-])-)?(?:\d+(?:\.\d+)?|\.\d+)/) // numbers
-		.addRule(/(?<![+-])[)/^*]/) // operators which should not follow after unary prefix operators
+		.addRule(/(?<![+-])[)*/^]/) // operators which should not follow after unary prefix operators
 		.addRule(/\(/) // operators which can be anywhere
 		.addRule(/[+-](?!$)/) // unary prefix
-		.addRule(/(?<!^|[(/^*+-])[°!]/) // unary postfix (include prev rules matches in lookbehind)
+		.addRule(/(?<!^|[(*+/^-])[!°]/) // unary postfix (include prev rules matches in lookbehind)
 		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 		.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 		.addRule(/tan(?:gen[st])?/i, () => 'tan')
@@ -226,12 +239,13 @@ export default class MathsCommand extends DualCommand {
 		.addRule(/%/, () => 'percent')
 		.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 		.addRule(/e(?:uler)?/i, () => Math.E)
-		.addRule(/(?<=\d)[mk]/i, (x) => x.toLowerCase()); // multiplier
+		// eslint-disable-next-line unicorn/consistent-function-scoping
+		.addRule(/(?<=\d)[km]/i, (x) => x.toLowerCase()); // multiplier
 
 	/**
 	 * parser for reverse polish notation
 	 */
-	static parser = new Parser({
+	private static parser = new Parser({
 		m: this.multiplier,
 		k: this.multiplier,
 		'°': this.degree,
@@ -252,10 +266,10 @@ export default class MathsCommand extends DualCommand {
 		percent: this.percent,
 	});
 
-	static parse(input: string) {
-		const tokens: (string | number)[] = [];
+	private static _parse(input: string) {
+		const tokens: (number | string)[] = [];
 
-		let token: string | number | null;
+		let token: number | string | null;
 
 		MathsCommand.lexer.setInput(input);
 
@@ -265,14 +279,15 @@ export default class MathsCommand extends DualCommand {
 
 		if (!tokens.length) throw 'LexerError: token list empty';
 
-		return MathsCommand.parser.parse(tokens);
+		return this.parser.parse(tokens);
 	}
 
 	/**
 	 * throws if the input is larger than Number.MAX_SAFE_INTEGER, returns the value otherwise
+	 *
 	 * @param value
 	 */
-	static validateNumber(value?: string | number) {
+	private static _validateNumber(value?: number | string) {
 		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) {
 			throw `(intermediate) result larger than ${formatNumber(Number.MAX_SAFE_INTEGER)}`;
 		}
@@ -283,15 +298,19 @@ export default class MathsCommand extends DualCommand {
 
 	/**
 	 * formats a number string
-	 * @param x
+	 *
+	 * @param input
 	 */
-	static formatNumberString = (x: string) => x.replace(/(?<!\..*)\B(?=(?:\d{3})+(?!\d))/gs, '\u{202F}');
+	private static _formatNumberString(input: string) {
+		return input.replace(/(?<!\..*)\B(?=(?:\d{3})+(?!\d))/gs, '\u{202F}');
+	}
 
 	/**
 	 * lexes, parses and evaluates the input
+	 *
 	 * @param rawInput
 	 */
-	calculate(rawInput: string) {
+	public calculate(rawInput: string) {
 		// generate input string
 		const INPUT = rawInput
 			.replace(/\s+/g, '') // remove spaces
@@ -303,11 +322,11 @@ export default class MathsCommand extends DualCommand {
 			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
 			.replace(/=$/, ''); // 5*3= -> 5*3
 
-		let parsed: (string | number)[];
+		let parsed: (number | string)[];
 
 		// parse
 		try {
-			parsed = MathsCommand.parse(INPUT);
+			parsed = MathsCommand._parse(INPUT);
 		} catch (error) {
 			throw `${error instanceof Error ? error.message : error}, input: \`${INPUT}\``;
 		}
@@ -320,21 +339,21 @@ export default class MathsCommand extends DualCommand {
 
 		// calculate
 		try {
-			const pop = () => MathsCommand.validateNumber(stack.pop());
+			const pop = () => MathsCommand._validateNumber(stack.pop());
 
 			for (const token of parsed) {
-				if (Reflect.has(this.binaryOperators, token)) {
+				if (Reflect.has(MathsCommand.binaryOperators, token)) {
 					const b = pop();
 					const a = pop();
 
-					stack.push(this.binaryOperators[token as keyof MathsCommand['binaryOperators']](a, b));
+					stack.push(MathsCommand.binaryOperators[token as keyof typeof MathsCommand['binaryOperators']](a, b));
 					continue;
 				}
 
-				if (Reflect.has(this.unaryOperators, token)) {
+				if (Reflect.has(MathsCommand.unaryOperators, token)) {
 					const a = pop();
 
-					stack.push(this.unaryOperators[token as keyof MathsCommand['unaryOperators']](a));
+					stack.push(MathsCommand.unaryOperators[token as keyof typeof MathsCommand['unaryOperators']](a));
 					continue;
 				}
 
@@ -351,21 +370,22 @@ export default class MathsCommand extends DualCommand {
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
 		return {
-			input: MathsCommand.formatNumberString(INPUT)
+			input: MathsCommand._formatNumberString(INPUT)
 				.replace(/(?<=.)[*+/-]/g, ' $& ') // add spaces around operators
 				.replaceAll(',', '$& ') // add space after commas
 				.replace(/pi/gi, '\u{03C0}'), // prettify 'pi'
 			output: Number(output),
-			formattedOutput: MathsCommand.formatNumberString(output?.toString() ?? ''),
+			formattedOutput: MathsCommand._formatNumberString(output?.toString() ?? ''),
 		};
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param rawInput
 	 */
-	private async _sharedRun(interaction: RepliableInteraction | ModalRepliableInteraction, rawInput: string) {
+	private async _sharedRun(interaction: ModalRepliableInteraction | RepliableInteraction, rawInput: string) {
 		try {
 			const { input, formattedOutput } = this.calculate(rawInput);
 
@@ -378,6 +398,7 @@ export default class MathsCommand extends DualCommand {
 			try {
 				const ERROR_MESSAGE = trim(`${error}`, TextInputLimits.MaximumValueCharacters);
 
+				// eslint-disable-next-line @typescript-eslint/return-await
 				return await InteractionUtil.showModal(
 					interaction as ModalRepliableInteraction,
 					new ModalBuilder()
@@ -414,25 +435,28 @@ export default class MathsCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>) {
+	public override async modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>) {
 		return this._sharedRun(interaction, interaction.fields.getTextInputValue('input'));
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return this._sharedRun(interaction, interaction.options.getString('input', true));
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		try {
 			const { input, formattedOutput } = this.calculate(hypixelMessage.commandData.args.join(''));
 

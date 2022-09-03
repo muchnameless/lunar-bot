@@ -1,10 +1,9 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
 
 export default class TestCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder() //
 				.setDescription('generic test command')
@@ -20,10 +19,10 @@ export default class TestCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		interaction;
+	public override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		// do stuff
 	}
 }

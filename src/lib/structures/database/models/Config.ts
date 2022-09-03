@@ -1,32 +1,34 @@
-import { Model, DataTypes } from 'sequelize';
-import type {
-	InferAttributes,
-	InferCreationAttributes,
-	InstanceDestroyOptions,
-	ModelStatic,
-	NonAttribute,
-	Sequelize,
+import {
+	Model,
+	DataTypes,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type InstanceDestroyOptions,
+	type ModelStatic,
+	type NonAttribute,
+	type Sequelize,
 } from 'sequelize';
-import type { LunarClient } from '../../LunarClient';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export class Config extends Model<
 	InferAttributes<Config, { omit: 'parsedValue' }>,
 	InferCreationAttributes<Config, { omit: 'parsedValue' }>
 > {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare key: string;
-	declare value: string | null;
+	public declare key: string;
 
-	parsedValue: unknown;
+	public declare value: string | null;
 
-	constructor(...args: any[]) {
+	public parsedValue: unknown;
+
+	public constructor(...args: any[]) {
 		super(...args);
 
-		this.parsedValue = this.value !== null ? JSON.parse(this.value) : null;
+		this.parsedValue = this.value === null ? null : JSON.parse(this.value);
 	}
 
-	static initialise(sequelize: Sequelize) {
+	public static initialise(sequelize: Sequelize) {
 		return this.init(
 			{
 				key: {
@@ -38,7 +40,7 @@ export class Config extends Model<
 					allowNull: true,
 					set(value) {
 						(this as Config).parsedValue = value;
-						return this.setDataValue('value', JSON.stringify(value));
+						this.setDataValue('value', JSON.stringify(value));
 					},
 				},
 			},
@@ -53,7 +55,7 @@ export class Config extends Model<
 	/**
 	 * destroys the db entry and removes it from cache
 	 */
-	override destroy(options?: InstanceDestroyOptions) {
+	public override async destroy(options?: InstanceDestroyOptions) {
 		this.client.config.cache.delete(this.key);
 		return super.destroy(options);
 	}

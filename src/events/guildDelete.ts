@@ -1,14 +1,15 @@
+import { type ClientEvents, type Events } from 'discord.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event';
+import { Event } from '#structures/events/Event.js';
 import { GuildUtil } from '#utils';
-import type { ClientEvents, Events } from 'discord.js';
 
 export default class GuildDeleteEvent extends Event {
 	/**
 	 * event listener callback
+	 *
 	 * @param guild
 	 */
-	override run(guild: ClientEvents[Events.GuildDelete][0]) {
+	public override run(guild: ClientEvents[Events.GuildDelete][0]) {
 		logger.info(GuildUtil.logInfo(guild), '[GUILD DELETE]');
 
 		this.client.permissions.cache.delete(guild.id);

@@ -1,30 +1,33 @@
-import { DiscordAPIError, RESTJSONErrorCodes } from 'discord.js';
 import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
-import { logger } from '#logger';
-import { hours } from '#functions';
+import { DiscordAPIError, RESTJSONErrorCodes, type Message, type MessageOptions, type User } from 'discord.js';
+import { EmbedUtil } from './index.js';
 import { redis } from '#api';
-import { EmbedUtil } from '.';
-import type { Message, MessageOptions, User } from 'discord.js';
-import type { Player } from '#structures/database/models/Player';
+import { hours } from '#functions';
+import { logger } from '#logger';
+import { type Player } from '#structures/database/models/Player.js';
 
 export interface SendDMOptions extends MessageOptions {
-	rejectOnError?: boolean;
-	/** identifier used to prevent multiple DMs of the same type within `cooldown` ms */
-	redisKey?: string;
-	/** defaults to 1 hour */
+	/**
+	 * defaults to 1 hour
+	 */
 	cooldown?: number;
+	/**
+	 * identifier used to prevent multiple DMs of the same type within `cooldown` ms
+	 */
+	redisKey?: string;
+	rejectOnError?: boolean;
 }
 
 export class UserUtil extends null {
 	/**
 	 * cache
 	 */
-	static PLAYER_CACHE = new WeakMap<User, Player>();
+	private static readonly PLAYER_CACHE = new WeakMap<User, Player>();
 
 	/**
 	 * @param user
 	 */
-	static logInfo(user: User) {
+	public static logInfo(user: User) {
 		return {
 			userId: user.id,
 			tag: user.tag,
@@ -36,7 +39,7 @@ export class UserUtil extends null {
 	/**
 	 * @param user
 	 */
-	static getPlayer(user?: User) {
+	public static getPlayer(user?: User) {
 		const player = this.PLAYER_CACHE.get(user!) ?? null;
 		if (player || !user) return player;
 
@@ -47,7 +50,7 @@ export class UserUtil extends null {
 	 * @param user
 	 * @param player
 	 */
-	static setPlayer(user: User, player: Player | null) {
+	public static setPlayer(user: User, player: Player | null) {
 		if (player) {
 			this.PLAYER_CACHE.set(user, player);
 		} else {
@@ -61,9 +64,9 @@ export class UserUtil extends null {
 	 * @param user
 	 * @param options
 	 */
-	static async sendDM(user: User, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
-	static async sendDM(user: User, options: string | SendDMOptions): Promise<Message | null>;
-	static async sendDM(user: User, options: string | SendDMOptions): Promise<Message | null> {
+	public static async sendDM(user: User, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
+	public static async sendDM(user: User, options: SendDMOptions | string): Promise<Message | null>;
+	public static async sendDM(user: User, options: SendDMOptions | string): Promise<Message | null> {
 		const { cooldown, redisKey, ..._options } =
 			typeof options === 'string' ? ({ content: options } as SendDMOptions) : options;
 
@@ -129,6 +132,8 @@ export class UserUtil extends null {
 					case RESTJSONErrorCodes.OpeningDirectMessagesTooFast:
 						void redis.psetex('dm:channel:creation:error', hours(1), 1);
 						break;
+
+					default:
 				}
 			}
 

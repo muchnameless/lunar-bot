@@ -1,4 +1,4 @@
-import { ItemId } from '.';
+import { ItemId } from './index.js';
 
 export const MASTER_STARS = [
 	ItemId.FirstMasterStar,

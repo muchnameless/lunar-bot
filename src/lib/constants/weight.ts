@@ -1,3 +1,6 @@
+import lilyConstants from 'lilyweight/lib/constants.json' assert { type: 'json' };
+import { keys } from '#types';
+
 /**
  * senither
  * https://github.com/Senither/Hypixel-Skyblock-Assistant/find/master and search for 'weight'
@@ -56,9 +59,6 @@ export const DUNGEON_EXPONENTS = {
  * lily
  * https://github.com/Antonio32A/lilyweight
  */
-
-import lilyConstants from 'lilyweight/lib/constants.json' assert { type: 'json' };
-import { keys } from '#types';
 
 export const LILY_SKILL_NAMES_API = keys(lilyConstants.skillNames);
 export const LILY_SKILL_NAMES = keys(lilyConstants.skillRatioWeight);

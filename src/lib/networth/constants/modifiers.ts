@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 /**
  * multiplicative price modifier for the applied item
  *
@@ -37,3 +38,4 @@ export const enum PriceModifier {
 	TransmissionTuner = 0.7,
 	WoodSingularity = 0.5,
 }
+/* eslint-enable @typescript-eslint/no-duplicate-enum-values */

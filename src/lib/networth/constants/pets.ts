@@ -1,5 +1,5 @@
-import { toTotal } from '#root/lib/functions/array';
-import { ItemRarity, ItemId } from '.';
+import { ItemRarity, ItemId } from './index.js';
+import { toTotal } from '#root/lib/functions/array.js';
 
 /**
  * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/generators/petGenerator.js#L79

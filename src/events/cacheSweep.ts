@@ -1,16 +1,17 @@
 import { env } from 'node:process';
+import { type ClientEvents, type Events } from 'discord.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event';
-import type { ClientEvents, Events } from 'discord.js';
+import { Event } from '#structures/events/Event.js';
 
 export default class CacheSweepEvent extends Event {
-	override enabled = env.NODE_ENV === 'development';
+	public override readonly enabled = env.NODE_ENV === 'development';
 
 	/**
 	 * event listener callback
+	 *
 	 * @param message
 	 */
-	override run(message: ClientEvents[Events.CacheSweep][0]) {
+	public override run(message: ClientEvents[Events.CacheSweep][0]) {
 		logger.debug(`[SWEEPERS]: ${message}`);
 	}
 }

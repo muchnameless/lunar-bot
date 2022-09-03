@@ -1,10 +1,10 @@
-import { Event } from '#structures/events/Event';
+import { Event } from '#structures/events/Event.js';
 
 export default class MyEvent extends Event {
 	/**
 	 * event listener callback
 	 */
-	override async run() {
+	public override async run() {
 		// do stuff
 	}
 }

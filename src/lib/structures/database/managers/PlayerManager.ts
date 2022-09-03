@@ -1,11 +1,20 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { codeBlock, Collection, EmbedBuilder, embedLength } from 'discord.js';
-import { Op } from 'sequelize';
-import { CronJob } from 'cron';
 import { EmbedLimits } from '@sapphire/discord-utilities';
-import { logger } from '#logger';
-import { MAYOR_CHANGE_INTERVAL, Offset, XP_OFFSETS_TIME } from '#constants';
+import { CronJob } from 'cron';
+import { codeBlock, Collection, EmbedBuilder, embedLength, type APIEmbed, type JSONEncodable } from 'discord.js';
+import { Op, type Attributes, type CreationAttributes, type FindOptions } from 'sequelize';
+import { type HypixelGuild } from '../models/HypixelGuild.js';
+import {
+	type Player,
+	type PlayerInGuild,
+	type PlayerUpdateOptions,
+	type ResetXpOptions,
+	type TransferXpOptions,
+} from '../models/Player.js';
+import { sql } from '../sql.js';
+import { ModelManager, type ModelResovable } from './ModelManager.js';
 import { hypixel } from '#api';
+import { MAYOR_CHANGE_INTERVAL, Offset, XP_OFFSETS_TIME } from '#constants';
 import {
 	autocorrect,
 	compareAlphabetically,
@@ -15,23 +24,19 @@ import {
 	splitMessage,
 	upperCaseFirstChar,
 } from '#functions';
-import { sql } from '../sql';
-import { ModelManager } from './ModelManager';
-import type { APIEmbed, JSONEncodable } from 'discord.js';
-import type { Attributes, CreationAttributes, FindOptions } from 'sequelize';
-import type { ModelResovable } from './ModelManager';
-import type { Player, PlayerInGuild, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
-import type { HypixelGuild } from '../models/HypixelGuild';
+import { logger } from '#logger';
 
 export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * player db xp update
 	 */
 	private _updateXpPromise: Promise<this> | null = null;
+
 	/**
 	 * player db ign update
 	 */
 	private _updateIgnPromise: Promise<this> | null = null;
+
 	/**
 	 * player db main SkyBlock profile update
 	 */
@@ -40,15 +45,16 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * get players from all guilds (no bridgers or errors)
 	 */
-	get inGuild(): Collection<string, PlayerInGuild> {
+	public get inGuild(): Collection<string, PlayerInGuild> {
 		return this.cache.filter((player) => player.inGuild()) as Collection<string, PlayerInGuild>;
 	}
 
 	/**
 	 * loads the player cache and sorts alphabetically by IGN
+	 *
 	 * @param condition
 	 */
-	override async loadCache(condition?: FindOptions<Attributes<Player>>) {
+	public override async loadCache(condition?: FindOptions<Attributes<Player>>) {
 		await super.loadCache({
 			where: {
 				[Op.or]: {
@@ -73,10 +79,11 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * add a player to the cache and sweep the player's hypixelGuild's player cache
+	 *
 	 * @param key
 	 * @param value
 	 */
-	set(key: string, value: Player) {
+	public set(key: string, value: Player) {
 		this.client.hypixelGuilds.sweepPlayerCache(value.guildId);
 		this.cache.set(key, value);
 		return this;
@@ -84,9 +91,10 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * delete a player from the cache and sweep the player's hypixelGuild's player cache
+	 *
 	 * @param idOrPlayer
 	 */
-	delete(idOrPlayer: ModelResovable<Player>) {
+	public delete(idOrPlayer: ModelResovable<Player>) {
 		const player = this.resolve(idOrPlayer);
 		if (!player) throw new Error(`[PLAYERS DELETE]: invalid input: ${idOrPlayer}`);
 
@@ -96,9 +104,10 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * sweep the cache and the hypixelGuild players cache
+	 *
 	 * @param fn
 	 */
-	sweep(fn: (value: Player, key: string, collection: this['cache']) => boolean) {
+	public sweep(fn: (value: Player, key: string, collection: this['cache']) => boolean) {
 		this.client.hypixelGuilds.sweepPlayerCache();
 
 		return this.cache.sweep(fn);
@@ -107,7 +116,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * clears the cache and the hypixelGuild players cache
 	 */
-	clear() {
+	public clear() {
 		this.client.hypixelGuilds.sweepPlayerCache();
 		this.cache.clear();
 		return this;
@@ -115,9 +124,12 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * sort the cache and sweeps the hypixelGuild players cache
+	 *
 	 * @param compareFunction
 	 */
-	sort(compareFunction: (firstValue: Player, secondValue: Player, firstKey: string, secondKey: string) => number) {
+	public sort(
+		compareFunction: (firstValue: Player, secondValue: Player, firstKey: string, secondKey: string) => number,
+	) {
 		this.client.hypixelGuilds.sweepPlayerCache();
 		this.cache.sort(compareFunction);
 		return this;
@@ -125,10 +137,11 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * add a player to the db and db cache
-	 * @param options options for the new db entry
-	 * @param isAddingSingleEntry whether to call sortAlphabetically() and updateXp() after adding the new entry
+	 *
+	 * @param options - options for the new db entry
+	 * @param isAddingSingleEntry - whether to call sortAlphabetically() and updateXp() after adding the new entry
 	 */
-	override async add(options: CreationAttributes<Player>, isAddingSingleEntry = true) {
+	public override async add(options: CreationAttributes<Player>, isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);
 
 		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildId);
@@ -145,7 +158,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * deletes all unnecessary db entries
 	 */
-	async sweepDb() {
+	public async sweepDb() {
 		const playersToSweep = await this.model.findAll({
 			where: {
 				guildId: null,
@@ -154,7 +167,7 @@ export class PlayerManager extends ModelManager<Player> {
 			attributes: [this.primaryKey, 'ign'],
 		});
 
-		await safePromiseAll(playersToSweep.map((player) => player.destroy()));
+		await safePromiseAll(playersToSweep.map(async (player) => player.destroy()));
 
 		const AMOUNT = playersToSweep.length;
 
@@ -171,9 +184,10 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
-	 * @param ign ign of the player
+	 *
+	 * @param ign - ign of the player
 	 */
-	getByIgn(ign: string) {
+	public getByIgn(ign: string) {
 		if (!ign) return null;
 
 		const { similarity, value } = autocorrect(ign, this.cache, 'ign');
@@ -183,17 +197,19 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * find a player by their IGN, case sensitive and without auto-correction
-	 * @param ignInput ign of the player
+	 *
+	 * @param ignInput - ign of the player
 	 */
-	findByIgn(ignInput: string) {
+	public findByIgn(ignInput: string) {
 		return this.cache.find(({ ign }) => ign === ignInput) ?? null;
 	}
 
 	/**
 	 * get a player by their discord ID
-	 * @param id discord id of the player
+	 *
+	 * @param id - discord id of the player
 	 */
-	getById(id: string) {
+	public getById(id: string) {
 		if (!id) return null;
 		return this.cache.find(({ discordId }) => discordId === id) ?? null;
 	}
@@ -201,7 +217,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * sort players alphabetically by IGNs
 	 */
-	sortAlphabetically() {
+	public sortAlphabetically() {
 		this.cache.sort(({ ign: a }, { ign: b }) => compareAlphabetically(a, b));
 		return this;
 	}
@@ -209,7 +225,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * uncaches all discord members
 	 */
-	uncacheDiscordMembers() {
+	public uncacheDiscordMembers() {
 		for (const player of this.cache.values()) {
 			void player.setDiscordMember(null, false);
 		}
@@ -217,9 +233,10 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * update Xp for all players
+	 *
 	 * @param options
 	 */
-	async updateXp(options?: PlayerUpdateOptions) {
+	public async updateXp(options?: PlayerUpdateOptions) {
 		if (this._updateXpPromise) return this._updateXpPromise;
 
 		try {
@@ -228,8 +245,10 @@ export class PlayerManager extends ModelManager<Player> {
 			this._updateXpPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within updateXp
+	 *
 	 * @internal
 	 */
 	async #updateXp(options?: PlayerUpdateOptions) {
@@ -263,7 +282,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * updates all IGNs and logs changes via the log handler
 	 */
-	async updateIgns() {
+	public async updateIgns() {
 		if (this._updateIgnPromise) return this._updateIgnPromise;
 
 		try {
@@ -272,8 +291,10 @@ export class PlayerManager extends ModelManager<Player> {
 			this._updateIgnPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within updateIgns
+	 *
 	 * @internal
 	 */
 	async #updateIgns() {
@@ -292,8 +313,8 @@ export class PlayerManager extends ModelManager<Player> {
 			string | null,
 			{
 				guildName: string;
-				playerCount: number;
 				ignChanges: string[];
+				playerCount: number;
 			}
 		>();
 
@@ -303,19 +324,17 @@ export class PlayerManager extends ModelManager<Player> {
 				const result = await player.updateIgn();
 				if (!result) return;
 
-				// first change for this guild
-				if (!log.has(player.guildId)) {
-					const { hypixelGuild } = player;
-
-					return log.set(player.guildId, {
-						guildName: hypixelGuild?.name ?? player.guildName,
-						playerCount: hypixelGuild?.playerCount ?? this.cache.filter(({ guildId: e }) => e === player.guildId).size,
-						ignChanges: [`${result.oldIgn} -> ${result.newIgn}`],
-					});
-				}
-
-				// further change for this guild
-				return log.get(player.guildId)!.ignChanges.push(`${result.oldIgn} -> ${result.newIgn}`);
+				log
+					.ensure(player.guildId, () => {
+						const { hypixelGuild } = player;
+						return {
+							guildName: hypixelGuild?.name ?? player.guildName,
+							playerCount:
+								hypixelGuild?.playerCount ?? this.cache.filter(({ guildId }) => guildId === player.guildId).size,
+							ignChanges: [],
+						};
+					})
+					.ignChanges.push(`${result.oldIgn} -> ${result.newIgn}`);
 			}),
 		);
 
@@ -326,6 +345,7 @@ export class PlayerManager extends ModelManager<Player> {
 		for (const guildId of new Set(log.keys())) {
 			this.client.hypixelGuilds.sweepPlayerCache(guildId);
 		}
+
 		this.sortAlphabetically();
 
 		// logging
@@ -338,7 +358,7 @@ export class PlayerManager extends ModelManager<Player> {
 		 */
 		const createEmbed = (guildName: string | null, playerCount: number, ignChangesAmount: number) => {
 			const embed = this.client.defaultEmbed
-				.setTitle(`${guildName} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
+				.setTitle(`${guildName} Player Database: ${ignChangesAmount} change${ignChangesAmount === 1 ? '' : 's'}`)
 				.setDescription(`Number of players: ${playerCount}`);
 
 			embeds.push(embed);
@@ -385,7 +405,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * checks all players if their current main profile is still valid
 	 */
-	async updateMainProfiles() {
+	public async updateMainProfiles() {
 		if (this._updateMainProfilesPromise) return this._updateMainProfilesPromise;
 
 		try {
@@ -394,8 +414,10 @@ export class PlayerManager extends ModelManager<Player> {
 			this._updateMainProfilesPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within updateMainProfiles
+	 *
 	 * @internal
 	 */
 	async #updateMainProfiles() {
@@ -462,7 +484,7 @@ export class PlayerManager extends ModelManager<Player> {
 				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(
 					`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${
-						mainProfileChangesAmount !== 1 ? 's' : ''
+						mainProfileChangesAmount === 1 ? '' : 's'
 					}`,
 				)
 				.setDescription(`Number of players: ${guild.playerCount}`)
@@ -511,20 +533,22 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * transfers xp of all players
-	 * @param options transfer options
+	 *
+	 * @param options - transfer options
 	 */
-	async transferXp(options: TransferXpOptions) {
-		await safePromiseAll(this.cache.map((player) => player.transferXp(options)));
+	public async transferXp(options: TransferXpOptions) {
+		await safePromiseAll(this.cache.map(async (player) => player.transferXp(options)));
 		return this;
 	}
 
 	/**
 	 * reset xp of all players
-	 * @param options reset options
-	 * @param time last reset config time, defaults to Date.now()
+	 *
+	 * @param options - reset options
+	 * @param time - last reset config time, defaults to Date.now()
 	 */
-	async resetXp(options?: ResetXpOptions, time?: number) {
-		await safePromiseAll(this.cache.map((player) => player.resetXp(options)));
+	public async resetXp(options?: ResetXpOptions, time?: number) {
+		await safePromiseAll(this.cache.map(async (player) => player.resetXp(options)));
 
 		if (options?.offsetToReset) {
 			void this.client.config.set(
@@ -539,7 +563,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * register cron jobs for all xp resets
 	 */
-	override schedule() {
+	public override schedule() {
 		const { config } = this.client;
 
 		// updateIGNs
@@ -557,7 +581,7 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
-				onTick: () => this.updateMainProfiles(),
+				onTick: () => void this.updateMainProfiles(),
 			}),
 		);
 
@@ -570,7 +594,7 @@ export class PlayerManager extends ModelManager<Player> {
 					`${this.constructor.name}:competitionStart`,
 					new CronJob({
 						cronTime: new Date(COMPETITION_START),
-						onTick: () => this._startCompetition(),
+						onTick: () => void this._startCompetition(),
 					}),
 				);
 			} else if (!config.get('COMPETITION_RUNNING')) {
@@ -586,7 +610,7 @@ export class PlayerManager extends ModelManager<Player> {
 				`${this.constructor.name}:competitionEnd`,
 				new CronJob({
 					cronTime: new Date(COMPETITION_END),
-					onTick: () => this._endCompetition(),
+					onTick: () => void this._endCompetition(),
 				}),
 			);
 		} else if (config.get('COMPETITION_RUNNING')) {
@@ -601,7 +625,7 @@ export class PlayerManager extends ModelManager<Player> {
 				`${this.constructor.name}:mayorXpReset`,
 				new CronJob({
 					cronTime: new Date(NEXT_MAYOR_TIME),
-					onTick: () => this._performMayorXpReset(),
+					onTick: () => void this._performMayorXpReset(),
 				}),
 			);
 		} else {
@@ -621,7 +645,7 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
-				onTick: () => this._performDailyXpReset(),
+				onTick: () => void this._performDailyXpReset(),
 			}),
 		);
 
@@ -636,7 +660,7 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: '0 0 0 * * MON',
 				timeZone: 'GMT',
-				onTick: () => this._performWeeklyXpReset(),
+				onTick: () => void this._performWeeklyXpReset(),
 			}),
 		);
 
@@ -651,7 +675,7 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: '0 0 0 1 * *',
 				timeZone: 'GMT',
-				onTick: () => this._performMonthlyXpReset(),
+				onTick: () => void this._performMonthlyXpReset(),
 			}),
 		);
 
@@ -715,7 +739,7 @@ export class PlayerManager extends ModelManager<Player> {
 			`${this.constructor.name}:mayorXpReset`,
 			new CronJob({
 				cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
-				onTick: () => this._performMayorXpReset(),
+				onTick: () => void this._performMayorXpReset(),
 			}),
 		);
 

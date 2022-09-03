@@ -1,9 +1,9 @@
 import { URL } from 'node:url';
-import { logger } from '#logger';
+import { type Model } from 'sequelize';
+import { type Models } from './managers/DatabaseManager.js';
+import { sequelize } from './sequelize.js';
 import { readJSFiles } from '#functions';
-import { sequelize } from './sequelize';
-import type { Model } from 'sequelize';
-import type { Models } from './managers/DatabaseManager';
+import { logger } from '#logger';
 
 const models = {};
 
@@ -11,12 +11,10 @@ for await (const path of readJSFiles(new URL('models/', import.meta.url))) {
 	const model = (await import(path)).default as typeof Model;
 
 	if (
-		!(
-			typeof (
-				// @ts-expect-error
-				model.initialise
-			) === 'function'
-		)
+		typeof (
+			// @ts-expect-error Property 'initialise' does not exist on type 'typeof Model'
+			model.initialise
+		) !== 'function'
 	) {
 		logger.error(`${model.name} is missing an initialise function`);
 	}
@@ -24,7 +22,7 @@ for await (const path of readJSFiles(new URL('models/', import.meta.url))) {
 	Reflect.set(
 		models,
 		model.name,
-		// @ts-expect-error
+		// @ts-expect-error Property 'initialise' does not exist on type 'typeof Model'
 		model.initialise(sequelize),
 	);
 }
@@ -40,5 +38,6 @@ for (const model of Object.values(models) as any[]) {
 	model.associate?.(db);
 }
 
-export { sequelize };
-export { sql } from './sql';
+export { sql } from './sql.js';
+
+export { sequelize } from './sequelize.js';

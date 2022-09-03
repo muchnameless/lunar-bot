@@ -1,13 +1,19 @@
-import { ContextMenuCommandBuilder, SlashCommandBuilder } from 'discord.js';
-import { logger } from '#logger';
-import { GuildMemberUtil, InteractionUtil } from '#utils';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import {
+	ContextMenuCommandBuilder,
+	SlashCommandBuilder,
+	type ChatInputCommandInteraction,
+	type GuildMember,
+	type User,
+	type UserContextMenuCommandInteraction,
+} from 'discord.js';
 import { UNKNOWN_IGN } from '#constants';
-import type { ChatInputCommandInteraction, GuildMember, User, UserContextMenuCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { GuildMemberUtil, InteractionUtil } from '#utils';
 
 export default class UnnickCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			aliases: [],
 			slash: new SlashCommandBuilder()
@@ -89,9 +95,10 @@ export default class UnnickCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override userContextMenuRun(
+	public override async userContextMenuRun(
 		interaction: UserContextMenuCommandInteraction<'cachedOrDM'>,
 		_: User,
 		member: GuildMember | null,
@@ -101,9 +108,10 @@ export default class UnnickCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return this._sharedRun(interaction, interaction.options.getMember('user'));
 	}
 }

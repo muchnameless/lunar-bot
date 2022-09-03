@@ -1,15 +1,14 @@
-import { hideLinkEmbed, hyperlink, SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { DualCommand } from '#structures/commands/DualCommand';
+import { hideLinkEmbed, hyperlink, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { sql } from '#db';
 import { seconds } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import { logger } from '#logger';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
+import { InteractionUtil } from '#utils';
 
 export default class PatchnotesCommand extends DualCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder().setDescription('shows latest SkyBlock patchnotes'),
 			cooldown: seconds(1),
@@ -38,17 +37,19 @@ export default class PatchnotesCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(interaction, await this._generateReply());
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(await this._generateReply());
 	}
 }

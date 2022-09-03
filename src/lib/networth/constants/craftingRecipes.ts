@@ -1,4 +1,4 @@
-import { ItemId } from '.';
+import { ItemId } from './index.js';
 
 const ITEMS_PER_BLOCK = 9;
 
@@ -218,6 +218,7 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 			[ItemId.SlimeBall]: (24 * ITEMS_PER_BLOCK) / 64,
 		},
 		[ItemId.IcyArrow]: {
+			// eslint-disable-next-line sonarjs/no-identical-expressions
 			[ItemId.PackedIce]: 64 / 64,
 		},
 		[ItemId.ArmorshredArrow]: {
@@ -227,6 +228,7 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 			[ItemId.Coal]: (24 * ITEMS_PER_BLOCK) / 64,
 		},
 		[ItemId.GlueArrow]: {
+			// eslint-disable-next-line sonarjs/no-identical-expressions
 			[ItemId.TarantulaWeb]: 64 / 64,
 		},
 		[ItemId.NansorbArrow]: {

@@ -1,10 +1,10 @@
-import { LimitedCollection } from 'discord.js';
-import type { Snowflake } from 'discord.js';
+import { LimitedCollection, type Snowflake } from 'discord.js';
 
 export abstract class BaseCache<V, K = Snowflake> {
-	protected _cache = new LimitedCollection<K, V>({ maxSize: 200 });
-	protected declare static _maxAge: number;
+	protected readonly _cache = new LimitedCollection<K, V>({ maxSize: 200 });
 
-	abstract get(id: K): V | null;
-	abstract sweep(): number;
+	protected declare static readonly _maxAge: number;
+
+	public abstract get(id: K): V | null;
+	public abstract sweep(): number;
 }

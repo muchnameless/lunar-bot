@@ -1,5 +1,5 @@
-import type { EventEmitter } from 'node:events';
-import type { Awaitable } from '@sapphire/utilities';
+import { type EventEmitter } from 'node:events';
+import { type Awaitable } from '@sapphire/utilities';
 
 export interface BaseEventContext {
 	emitter: EventEmitter;
@@ -7,42 +7,46 @@ export interface BaseEventContext {
 }
 
 export class BaseEvent {
-	emitter: EventEmitter;
-	name: string;
-	once = false;
-	enabled = true;
-	callback = this.run.bind(this);
+	public emitter: EventEmitter;
+
+	public readonly name: string;
+
+	public readonly once: boolean = false;
+
+	public readonly enabled: boolean = true;
+
+	private readonly _callback = this.run.bind(this);
 
 	/**
 	 * @param context
 	 */
-	constructor({ emitter, name }: BaseEventContext) {
+	public constructor({ emitter, name }: BaseEventContext) {
 		this.emitter = emitter;
 		this.name = name;
 	}
 
 	/**
 	 * add the event listener
-	 * @param force whether to also load disabled events
+	 *
+	 * @param force - whether to also load disabled events
 	 */
-	load(force = false) {
-		if (this.enabled || force) this.emitter[this.once ? 'once' : 'on'](this.name, this.callback);
+	public load(force = false) {
+		if (this.enabled || force) this.emitter[this.once ? 'once' : 'on'](this.name, this._callback);
 		return this;
 	}
 
 	/**
 	 * remove the event listener
 	 */
-	unload() {
-		this.emitter.off(this.name, this.callback);
+	public unload() {
+		this.emitter.off(this.name, this._callback);
 		return this;
 	}
 
 	/**
 	 * event listener callback
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	run(...args: unknown[]): Awaitable<void> {
+	public run(...args: unknown[]): Awaitable<void> {
 		throw new Error('no run function specified');
 	}
 }

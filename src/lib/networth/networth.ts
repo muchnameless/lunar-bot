@@ -1,15 +1,6 @@
 import { Buffer } from 'node:buffer';
+import { type Components, type NBTExtraAttributes, type NBTInventoryItem } from '@zikeji/hypixel';
 import { parse, simplify } from 'prismarine-nbt';
-import { logger } from '#logger';
-import { hypixel } from '#api';
-import {
-	calculatePetSkillLevel,
-	getAppliedEnchantmentModifier,
-	getEnchantment,
-	getReforgeStone,
-	isVanillaItem,
-	transformItemData,
-} from './functions';
 import {
 	CRAFTING_RECIPES,
 	Enchantment,
@@ -19,13 +10,22 @@ import {
 	NON_REDUCED_PETS,
 	PriceModifier,
 	SKYBLOCK_INVENTORIES,
-} from './constants';
-import { accessories, getPrice, itemUpgrades, prices, unknownItemIdWarnings } from './prices';
-import type { ItemUpgrade } from './prices';
-import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
+} from './constants/index.js';
+import {
+	calculatePetSkillLevel,
+	getAppliedEnchantmentModifier,
+	getEnchantment,
+	getReforgeStone,
+	isVanillaItem,
+	transformItemData,
+} from './functions/index.js';
+import { accessories, getPrice, itemUpgrades, prices, unknownItemIdWarnings, type ItemUpgrade } from './prices.js';
+import { hypixel } from '#api';
+import { logger } from '#logger';
 
 /**
  * parse base64 item_data strings and calculate item prices
+ *
  * @param base64
  */
 async function parseItems(base64: string) {
@@ -137,7 +137,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			// handle API inconsistencies with e.g. 'PROSECUTE'
 			enchantment = enchantment.toLowerCase() as Enchantment;
 
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (ITEM_SPECIFIC_IGNORED_ENCHANTS[itemId as keyof typeof ITEM_SPECIFIC_IGNORED_ENCHANTS]?.has(enchantment)) {
 				continue;
 			}
@@ -347,9 +346,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	if (extraAttributes.drill_part_upgrade_module) {
 		price += getPrice(extraAttributes.drill_part_upgrade_module.toUpperCase()) * PriceModifier.DrillUpgrade;
 	}
+
 	if (extraAttributes.drill_part_fuel_tank) {
 		price += getPrice(extraAttributes.drill_part_fuel_tank.toUpperCase()) * PriceModifier.DrillUpgrade;
 	}
+
 	if (extraAttributes.drill_part_engine) {
 		price += getPrice(extraAttributes.drill_part_engine.toUpperCase()) * PriceModifier.DrillUpgrade;
 	}
@@ -420,12 +421,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 	}
 
 	// candy + skins
-	if (!pet.candyUsed) {
-		if (pet.skin) {
-			// no candy and skin
-			price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinNoCandy;
-		}
-	} else {
+	if (pet.candyUsed) {
 		if (!NON_REDUCED_PETS.has(pet.type as ItemId)) {
 			price *= PriceModifier.PetWithCandy;
 		}
@@ -434,6 +430,9 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 			// candy and skin
 			price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinWithCandy;
 		}
+	} else if (pet.skin) {
+		// no candy and skin
+		price += getPrice(`PET_SKIN_${pet.skin}`) * PriceModifier.PetSkinNoCandy;
 	}
 
 	return price;
@@ -441,6 +440,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 
 /**
  * networth of a single running auction
+ *
  * @param auction
  */
 const getRunningAuctionWorth = async (auction: Components.Schemas.SkyBlockAuctionResponse['auctions'][0]) => {
@@ -536,6 +536,7 @@ export async function getNetworth(
 			promises.push(parseItems(backpack.data));
 		}
 	}
+
 	if (member.backpack_icons) {
 		for (const backpack of Object.values(member.backpack_icons)) {
 			promises.push(parseItems(backpack.data));

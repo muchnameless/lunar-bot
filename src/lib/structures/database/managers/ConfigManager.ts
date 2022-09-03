@@ -1,15 +1,16 @@
+import { type Config } from '../models/Config.js';
+import { ModelManager } from './ModelManager.js';
+import { type ConfigValues } from '#constants';
 import { logger } from '#logger';
-import { ModelManager } from './ModelManager';
-import type { Config } from '../models/Config';
-import type { ConfigValues } from '#constants';
 
 export class ConfigManager extends ModelManager<Config> {
 	/**
 	 * upserts a config entry
-	 * @param key config key
-	 * @param value new value
+	 *
+	 * @param key - config key
+	 * @param value - new value
 	 */
-	set(key: string, value: unknown) {
+	public async set(key: string, value: unknown) {
 		const UPPERCASED_KEY = key.toUpperCase();
 		const dbEntry = this.cache.get(UPPERCASED_KEY);
 
@@ -26,13 +27,15 @@ export class ConfigManager extends ModelManager<Config> {
 
 	/**
 	 * get the value of a config entry or `null` if non-existent
-	 * @param key config key
+	 *
+	 * @param key - config key
 	 */
-	get<T extends keyof ConfigValues>(key: T): ConfigValues[T];
-	get(key: string): unknown;
-	get(key?: null): null;
-	get(key: any) {
+	public get<T extends keyof ConfigValues>(key: T): ConfigValues[T];
+	public get(key: string): unknown;
+	public get(key?: null): null;
+	public get(key: string | null | undefined) {
 		return (
+			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 			this.cache.get(key?.toUpperCase()!)?.parsedValue ??
 			(logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`), null)
 		);

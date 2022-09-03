@@ -1,1 +1,1 @@
-export { default } from './player_chat';
+export { default } from './player_chat.js';

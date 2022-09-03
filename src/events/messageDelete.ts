@@ -1,5 +1,5 @@
-import { Event } from '#structures/events/Event';
-import type { ClientEvents, Events } from 'discord.js';
+import { type ClientEvents, type Events } from 'discord.js';
+import { Event } from '#structures/events/Event.js';
 
 export default class MessageDeleteEvent extends Event {
 	/**
@@ -13,9 +13,10 @@ export default class MessageDeleteEvent extends Event {
 
 	/**
 	 * event listener callback
+	 *
 	 * @param message
 	 */
-	override run(message: ClientEvents[Events.MessageDelete][0]) {
+	public override run(message: ClientEvents[Events.MessageDelete][0]) {
 		this._handleDelete(message);
 	}
 }

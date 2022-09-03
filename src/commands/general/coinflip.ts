@@ -1,13 +1,12 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '#utils';
-import { DualCommand } from '#structures/commands/DualCommand';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { randomNumber } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
+import { InteractionUtil } from '#utils';
 
 export default class CoinFlipCommand extends DualCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -33,17 +32,19 @@ export default class CoinFlipCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(interaction, await this._generateReply());
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(await this._generateReply());
 	}
 }

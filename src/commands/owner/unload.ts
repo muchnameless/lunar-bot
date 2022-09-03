@@ -1,12 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
 import { InteractionUtil } from '#utils';
-import { DualCommand } from '#structures/commands/DualCommand';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class UnloadCommand extends DualCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -45,6 +44,7 @@ export default class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param subcommand
 	 * @param input
 	 */
@@ -75,9 +75,10 @@ export default class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(
 			interaction,
 			this._sharedRun(interaction.options.getSubcommand(), interaction.options.getString('name', true)),
@@ -86,9 +87,10 @@ export default class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
 			this._sharedRun(...(hypixelMessage.commandData.args.map((arg) => arg.toLowerCase()) as [string, string])),
 		);

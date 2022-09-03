@@ -1,13 +1,14 @@
+import { type ClientEvents, type Events } from 'discord.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event';
-import type { ClientEvents, Events } from 'discord.js';
+import { Event } from '#structures/events/Event.js';
 
 export default class WarnEvent extends Event {
 	/**
 	 * event listener callback
+	 *
 	 * @param message
 	 */
-	override run(message: ClientEvents[Events.Warn][0]) {
+	public override run(message: ClientEvents[Events.Warn][0]) {
 		logger.warn(message);
 	}
 }

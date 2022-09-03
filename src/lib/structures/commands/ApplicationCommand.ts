@@ -1,90 +1,91 @@
+import { type Awaitable } from '@sapphire/utilities';
 import {
 	ApplicationCommandType,
 	PermissionFlagsBits,
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
+	type AutocompleteInteraction,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type CommandInteraction,
+	type ContextMenuCommandBuilder,
+	type GuildMember,
+	type Interaction,
+	type Message,
+	type MessageContextMenuCommandInteraction,
+	type ModalSubmitInteraction,
+	type RESTPostAPIApplicationCommandsJSONBody,
+	type RESTPostAPIChatInputApplicationCommandsJSONBody,
+	type RESTPostAPIContextMenuApplicationCommandsJSONBody,
+	type SelectMenuInteraction,
+	type SlashCommandBooleanOption,
+	type SlashCommandBuilder,
+	type SlashCommandChannelOption,
+	type SlashCommandIntegerOption,
+	type SlashCommandMentionableOption,
+	type SlashCommandNumberOption,
+	type SlashCommandOptionsOnlyBuilder,
+	type SlashCommandRoleOption,
+	type SlashCommandStringOption,
+	type SlashCommandSubcommandsOnlyBuilder,
+	type SlashCommandUserOption,
+	type Snowflake,
+	type User,
+	type UserContextMenuCommandInteraction,
 } from 'discord.js';
-import { logger } from '#logger';
-import { InteractionUtil } from '#utils';
+import { BaseCommand, type CommandContext, type CommandData } from './BaseCommand.js';
+import { ephemeralOption } from './commonOptions.js';
 import { CustomIdKey } from '#constants';
-import { missingPermissionsError } from '../errors/MissingPermissionsError';
-import { ephemeralOption } from './commonOptions';
-import { BaseCommand } from './BaseCommand';
-import type { Awaitable } from '@sapphire/utilities';
-import type {
-	AutocompleteInteraction,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	CommandInteraction,
-	ContextMenuCommandBuilder,
-	GuildMember,
-	Interaction,
-	Message,
-	MessageContextMenuCommandInteraction,
-	ModalSubmitInteraction,
-	RESTPostAPIApplicationCommandsJSONBody,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	RESTPostAPIContextMenuApplicationCommandsJSONBody,
-	SelectMenuInteraction,
-	SlashCommandBooleanOption,
-	SlashCommandBuilder,
-	SlashCommandChannelOption,
-	SlashCommandIntegerOption,
-	SlashCommandMentionableOption,
-	SlashCommandNumberOption,
-	SlashCommandOptionsOnlyBuilder,
-	SlashCommandRoleOption,
-	SlashCommandStringOption,
-	SlashCommandSubcommandsOnlyBuilder,
-	SlashCommandUserOption,
-	Snowflake,
-	User,
-	UserContextMenuCommandInteraction,
-} from 'discord.js';
-import type { HypixelGuild } from '../database/models/HypixelGuild';
-import type { CommandContext, CommandData } from './BaseCommand';
+import { logger } from '#logger';
+import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import { missingPermissionsError } from '#structures/errors/MissingPermissionsError.js';
+import { InteractionUtil } from '#utils';
 
 type Slash =
+	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>
 	| SlashCommandBuilder
-	| SlashCommandSubcommandsOnlyBuilder
 	| SlashCommandOptionsOnlyBuilder
-	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+	| SlashCommandSubcommandsOnlyBuilder;
 
 interface AssertPermissionsOptions {
-	roleIds?: Snowflake[] | null;
 	hypixelGuild?: HypixelGuild;
+	roleIds?: Snowflake[] | null;
 }
 
 export type SlashCommandOption =
-	| SlashCommandRoleOption
-	| SlashCommandUserOption
-	| SlashCommandStringOption
-	| SlashCommandNumberOption
 	| SlashCommandBooleanOption
 	| SlashCommandChannelOption
 	| SlashCommandChannelOption
 	| SlashCommandIntegerOption
-	| SlashCommandMentionableOption;
+	| SlashCommandMentionableOption
+	| SlashCommandNumberOption
+	| SlashCommandRoleOption
+	| SlashCommandStringOption
+	| SlashCommandUserOption;
 
 export interface ApplicationCommandData extends CommandData {
 	aliases?: string[];
-	slash?: Slash;
 	message?: ContextMenuCommandBuilder;
+	slash?: Slash;
 	user?: ContextMenuCommandBuilder;
 }
 
 export class ApplicationCommand extends BaseCommand {
-	slash: RESTPostAPIChatInputApplicationCommandsJSONBody | null = null;
-	message: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
-	user: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
-	slashAliases: string[] | null = null;
+	public slash: RESTPostAPIChatInputApplicationCommandsJSONBody | null = null;
+
+	public message: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
+
+	public user: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
+
+	public slashAliases: string[] | null = null;
 
 	/**
 	 * create a new command
+	 *
 	 * @param context
 	 * @param data
 	 */
-	constructor(context: CommandContext, { aliases, slash, message, user, ...data }: ApplicationCommandData) {
+	public constructor(context: CommandContext, { aliases, slash, message, user, ...data }: ApplicationCommandData) {
 		super(context, data);
 
 		/**
@@ -128,8 +129,7 @@ export class ApplicationCommand extends BaseCommand {
 				(slash as SlashCommandBuilder).addStringOption(ephemeralOption);
 			}
 
-			// @ts-expect-error
-			this.slash = slash.toJSON();
+			this.slash = slash.toJSON() as RESTPostAPIChatInputApplicationCommandsJSONBody;
 		}
 
 		/**
@@ -148,8 +148,7 @@ export class ApplicationCommand extends BaseCommand {
 
 			message.setType(ApplicationCommandType.Message);
 
-			// @ts-expect-error
-			this.message = message.toJSON();
+			this.message = message.toJSON() as RESTPostAPIContextMenuApplicationCommandsJSONBody;
 		}
 
 		if (user) {
@@ -164,15 +163,14 @@ export class ApplicationCommand extends BaseCommand {
 
 			user.setType(ApplicationCommandType.User);
 
-			// @ts-expect-error
-			this.user = user.toJSON();
+			this.user = user.toJSON() as RESTPostAPIContextMenuApplicationCommandsJSONBody;
 		}
 	}
 
 	/**
 	 * discord application command id (throws if not found in cache)
 	 */
-	get commandId() {
+	public get commandId() {
 		const commandId = this.client.application?.commands.cache.findKey(({ name }) => name === this.name);
 		if (!commandId) throw new Error(`Command '${this.name}' not found in application commands cache`);
 		return commandId;
@@ -181,14 +179,14 @@ export class ApplicationCommand extends BaseCommand {
 	/**
 	 * component customId to identify this command in the handler. everything after it gets provided as args split by ':'
 	 */
-	get baseCustomId() {
+	public get baseCustomId() {
 		return `${CustomIdKey.Command}:${this.name}` as const;
 	}
 
 	/**
 	 * array of RESTPostAPIApplicationCommandsJSONBody containing all application commands
 	 */
-	get data() {
+	public get data() {
 		const data: RESTPostAPIApplicationCommandsJSONBody[] = [];
 
 		if (this.slash) {
@@ -210,11 +208,12 @@ export class ApplicationCommand extends BaseCommand {
 	/**
 	 * must not exceed 4k
 	 */
-	get dataLength() {
+	public get dataLength() {
 		if (!this.slash) return null;
 
 		/**
 		 * recursively reduces options
+		 *
 		 * @param options
 		 */
 		const reduceOptions = (options?: typeof this.slash.options): number =>
@@ -228,7 +227,7 @@ export class ApplicationCommand extends BaseCommand {
 						0,
 					) ?? 0) +
 					reduceOptions(
-						// @ts-expect-error
+						// @ts-expect-error options does not exist on type ...
 						c1.options,
 					),
 				0,
@@ -239,14 +238,15 @@ export class ApplicationCommand extends BaseCommand {
 
 	/**
 	 * adds permission defaults to a builder based on the command's category
+	 *
 	 * @param command
 	 * @param builder
 	 */
 	private static _setDefaultPermissions(
 		command: ApplicationCommand,
 		builder:
-			| Pick<SlashCommandBuilder, 'setDMPermission' | 'setDefaultMemberPermissions'>
-			| Pick<ContextMenuCommandBuilder, 'setDMPermission' | 'setDefaultMemberPermissions'>,
+			| Pick<ContextMenuCommandBuilder, 'setDefaultMemberPermissions' | 'setDMPermission'>
+			| Pick<SlashCommandBuilder, 'setDefaultMemberPermissions' | 'setDMPermission'>,
 	) {
 		switch (command.category) {
 			case 'staff':
@@ -258,15 +258,19 @@ export class ApplicationCommand extends BaseCommand {
 			case 'owner':
 				// disable command
 				return builder.setDefaultMemberPermissions(0n);
+
+			default:
+				return builder;
 		}
 	}
 
 	/**
 	 * rejects on missing permissions
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	async assertPermissions(
+	public async assertPermissions(
 		interaction: Interaction<'cachedOrDM'>,
 		{
 			hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
@@ -316,24 +320,21 @@ export class ApplicationCommand extends BaseCommand {
 		// discord already checked the permissions
 		if (IS_IN_LINKED_GUILD) return;
 
-		return this.client.permissions.assert(
+		await this.client.permissions.assert(
 			hypixelGuild.discordId!,
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			(interaction as AutocompleteInteraction | CommandInteraction).commandId ?? this.commandId,
 			member,
 		);
 	}
 
-	/* eslint-disable @typescript-eslint/no-unused-vars */
-
 	/**
 	 * @param interaction
-	 * @param value input value
-	 * @param name option name
+	 * @param value - input value
+	 * @param name - option name
 	 */
-	autocompleteRun(
+	public autocompleteRun(
 		interaction: AutocompleteInteraction<'cachedOrDM'>,
-		value: string | number,
+		value: number | string,
 		name: string,
 	): Awaitable<unknown> {
 		throw new Error('no run function specified for autocomplete');
@@ -341,11 +342,12 @@ export class ApplicationCommand extends BaseCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param user
 	 * @param member
 	 */
-	userContextMenuRun(
+	public userContextMenuRun(
 		interaction: UserContextMenuCommandInteraction<'cachedOrDM'>,
 		user: User,
 		member: GuildMember | null,
@@ -355,10 +357,11 @@ export class ApplicationCommand extends BaseCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param message
 	 */
-	messageContextMenuRun(
+	public messageContextMenuRun(
 		interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>,
 		message: Message,
 	): Awaitable<unknown> {
@@ -367,38 +370,40 @@ export class ApplicationCommand extends BaseCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
-	 * @param args parsed customId, split by ':'
+	 * @param args - parsed customId, split by ':'
 	 */
-	selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
+	public selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
 		throw new Error('no run function specified for select menus');
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
-	 * @param args parsed customId, split by ':'
+	 * @param args - parsed customId, split by ':'
 	 */
-	buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
+	public buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
-	 * @param args parsed customId, split by ':'
+	 * @param args - parsed customId, split by ':'
 	 */
-	modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
+	public modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>): Awaitable<unknown> {
+	public chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>): Awaitable<unknown> {
 		throw new Error('no run function specified for slash commands');
 	}
-
-	/* eslint-enable @typescript-eslint/no-unused-vars */
 }

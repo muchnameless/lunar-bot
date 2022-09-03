@@ -1,9 +1,15 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	type MessageActionRowComponentBuilder,
+	type Snowflake,
+} from 'discord.js';
 import { CustomIdKey, UnicodeEmoji } from '#constants';
-import type { MessageActionRowComponentBuilder, Snowflake } from 'discord.js';
 
 /**
  * returns a MessageButton which triggers deleting the Message it is attached to
+ *
  * @param userId
  */
 export const buildDeleteButton = (userId: Snowflake) =>
@@ -31,18 +37,27 @@ export const buildVisibilityButton = () =>
 		.setStyle(ButtonStyle.Secondary);
 
 type PaginationButtonOptions = Partial<{
-	/** disable all but the reload button */
+	/**
+	 * disable all but the reload button
+	 */
 	disablePages: boolean;
-	/** overwrite the first page number, defaults to 1 */
+	/**
+	 * overwrite the first page number, defaults to 1
+	 */
 	firstPage: number;
-	/** page button style */
+	/**
+	 * page button style
+	 */
 	pageStyle: ButtonStyle;
-	/** reload button style */
+	/**
+	 * reload button style
+	 */
 	reloadStyle: ButtonStyle;
 }>;
 
 /**
  * returns an ActionRow with pagination buttons
+ *
  * @param baseCustomId
  * @param currentPage
  * @param totalPages

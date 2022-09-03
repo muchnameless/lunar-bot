@@ -1,13 +1,14 @@
+import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { MinecraftChatManagerState } from '../constants/index.js';
 import { logger } from '#logger';
-import { MinecraftChatManagerState } from '../constants';
-import { ChatBridgeEvent } from '../ChatBridgeEvent';
 
 export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 	/**
 	 * event listener callback
+	 *
 	 * @param error
 	 */
-	override run(error: unknown) {
+	public override run(error: unknown) {
 		logger.error(error, '[CHATBRIDGE ERROR]');
 
 		if (error instanceof Error) {

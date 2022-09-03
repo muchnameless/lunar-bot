@@ -1,15 +1,14 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '#utils';
-import { hypixelGuildOption, targetOption } from '#structures/commands/commonOptions';
-import { DualCommand } from '#structures/commands/DualCommand';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import type GuildCommand from '../guild/guild.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { minutes } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type GuildCommand from '../guild/guild';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
+import { hypixelGuildOption, targetOption } from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 export default class SmiteCommand extends DualCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -28,9 +27,10 @@ export default class SmiteCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 
@@ -39,9 +39,10 @@ export default class SmiteCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 		const TARGET_INPUT = hypixelMessage.commandData.args[0]!.toLowerCase();
 		const target = await guildCommand.getMuteTarget(TARGET_INPUT);

@@ -1,27 +1,28 @@
-import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 import { env } from 'node:process';
-import { ModalBuilder, SlashCommandBuilder, userMention } from 'discord.js';
+import { promisify } from 'node:util';
 import { Stopwatch } from '@sapphire/stopwatch';
-import { InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import BaseOwnerCommand from './~base';
-import type { RepliableInteraction } from '#utils';
-import type {
-	AttachmentPayload,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	Message,
-	MessageContextMenuCommandInteraction,
-	ModalSubmitInteraction,
-	JSONEncodable,
+import {
+	ModalBuilder,
+	SlashCommandBuilder,
+	userMention,
+	type AttachmentPayload,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type Message,
+	type MessageContextMenuCommandInteraction,
+	type ModalSubmitInteraction,
+	type JSONEncodable,
 } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import BaseOwnerCommand from './~base.js';
+import { logger } from '#logger';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { type RepliableInteraction, InteractionUtil } from '#utils';
 
 const pExec = promisify(exec);
 
 export default class ExecCommand extends BaseOwnerCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder() //
 				.setDescription('executes bash code')
@@ -35,7 +36,7 @@ export default class ExecCommand extends BaseOwnerCommand {
 		});
 	}
 
-	protected async _sharedRun(interaction: RepliableInteraction, input: string) {
+	private async _sharedRun(interaction: RepliableInteraction, input: string) {
 		if (interaction.user.id !== this.client.ownerId) {
 			throw `exec is restricted to ${userMention(this.client.ownerId)}`;
 		}
@@ -89,10 +90,11 @@ export default class ExecCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param message
 	 */
-	override messageContextMenuRun(
+	public override async messageContextMenuRun(
 		interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>,
 		{ content, author }: Message,
 	) {
@@ -109,10 +111,11 @@ export default class ExecCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
+	public override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [subcommand] = args as [string];
 
 		switch (subcommand) {
@@ -139,10 +142,11 @@ export default class ExecCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]) {
+	public override async modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]) {
 		const [subcommand] = args as [string];
 
 		switch (subcommand) {
@@ -159,9 +163,10 @@ export default class ExecCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return this._sharedRun(interaction, interaction.options.getString('input', true));
 	}
 }

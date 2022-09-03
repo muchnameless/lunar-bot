@@ -1,12 +1,12 @@
 import { setTimeout } from 'node:timers';
-import { logger } from '#logger';
-import { minutes } from '#functions';
+import { ItemId } from './constants/index.js';
 import { sql } from '#db';
-import { Warnings } from '#structures/Warnings';
-import { ItemId } from './constants';
-import type { ParsedSkyBlockItem } from '#root/jobs/pricesAndPatchNotes';
+import { minutes } from '#functions';
+import { logger } from '#logger';
+import { type ParsedSkyBlockItem } from '#root/jobs/pricesAndPatchNotes.js';
+import { Warnings } from '#structures/Warnings.js';
 
-export type ItemUpgrade = Pick<ParsedSkyBlockItem, 'dungeon_conversion' | 'stars' | 'prestige'>;
+export type ItemUpgrade = Pick<ParsedSkyBlockItem, 'dungeon_conversion' | 'prestige' | 'stars'>;
 
 export const prices = new Map<string, number>();
 export const itemUpgrades = new Map<string, ItemUpgrade>();
@@ -36,7 +36,7 @@ export async function populateCaches() {
 		}
 
 		// item upgrades
-		const itemUpgradesRows = await sql<[Pick<ParsedSkyBlockItem, 'id'> & ItemUpgrade]>`
+		const itemUpgradesRows = await sql<[ItemUpgrade & Pick<ParsedSkyBlockItem, 'id'>]>`
 			SELECT id, dungeon_conversion, stars, prestige from skyblock_items WHERE dungeon_conversion IS NOT NULL OR stars IS NOT NULL OR prestige IS NOT NULL
 		`;
 
@@ -60,9 +60,8 @@ export async function populateCaches() {
 		logger.error(error, '[POPULATE CACHES]');
 
 		// retry
-		setTimeout(() => populateCaches(), minutes(1));
+		setTimeout(() => void populateCaches(), minutes(1));
 	}
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
 void populateCaches();

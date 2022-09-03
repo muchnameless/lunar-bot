@@ -1,4 +1,5 @@
-import { fetch } from 'undici';
+import { fetch, type Response } from 'undici';
+import { MojangAPIError } from './errors/MojangAPIError.js';
 import {
 	// days,
 	consumeBody,
@@ -7,12 +8,10 @@ import {
 	validateMinecraftIgn,
 	validateMinecraftUuid,
 } from '#functions';
-import { MojangAPIError } from './errors/MojangAPIError';
-import type { Response } from 'undici';
 
 export interface MojangResult {
-	uuid: string;
 	ign: string;
+	uuid: string;
 }
 
 interface MojangFetchOptions {
@@ -31,19 +30,21 @@ interface Cache {
 
 interface MojangClientOptions {
 	cache?: Cache;
-	timeout?: number;
 	retries?: number;
+	timeout?: number;
 }
 
 export class MojangClient {
-	cache?: Cache;
-	timeout: number;
-	retries: number;
+	private readonly cache?: Cache;
+
+	private readonly timeout: number;
+
+	private readonly retries: number;
 
 	/**
 	 * @param options
 	 */
-	constructor({ cache, timeout, retries }: MojangClientOptions = {}) {
+	public constructor({ cache, timeout, retries }: MojangClientOptions = {}) {
 		this.cache = cache;
 		this.timeout = timeout ?? seconds(10);
 		this.retries = retries ?? 1;
@@ -51,10 +52,11 @@ export class MojangClient {
 
 	/**
 	 * bulk convertion (1 <= amount  <= 10) for ign -> uuid
+	 *
 	 * @param usernames
 	 * @param options
 	 */
-	async igns(usernames: string[], options?: MojangFetchOptions): Promise<MojangResult[]> {
+	public async igns(usernames: string[], options?: MojangFetchOptions): Promise<MojangResult[]> {
 		if (!usernames.length || usernames.length > 10) throw new MojangAPIError({ statusText: 'wrong input' });
 
 		const res = await fetch('https://api.mojang.com/profiles/minecraft', {
@@ -85,10 +87,11 @@ export class MojangClient {
 
 	/**
 	 * query by ign
+	 *
 	 * @param ign
 	 * @param options
 	 */
-	ign(ign: string, options?: MojangFetchOptions) {
+	public async ign(ign: string, options?: MojangFetchOptions) {
 		if (validateMinecraftIgn(ign)) {
 			return this.request({
 				path: 'https://api.mojang.com/users/profiles/minecraft/',
@@ -98,15 +101,16 @@ export class MojangClient {
 			});
 		}
 
-		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ign', ign));
+		throw new MojangAPIError({ statusText: 'validation' }, 'ign', ign);
 	}
 
 	/**
 	 * query by uuid
+	 *
 	 * @param uuid
 	 * @param options
 	 */
-	uuid(uuid: string, options?: MojangFetchOptions) {
+	public async uuid(uuid: string, options?: MojangFetchOptions) {
 		if (validateMinecraftUuid(uuid)) {
 			return this.request({
 				path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
@@ -116,15 +120,16 @@ export class MojangClient {
 			});
 		}
 
-		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'uuid', uuid));
+		throw new MojangAPIError({ statusText: 'validation' }, 'uuid', uuid);
 	}
 
 	/**
 	 * query by ign or uuid
+	 *
 	 * @param ignOrUuid
 	 * @param options
 	 */
-	ignOrUuid(ignOrUuid: string, options?: MojangFetchOptions) {
+	public async ignOrUuid(ignOrUuid: string, options?: MojangFetchOptions) {
 		if (validateMinecraftIgn(ignOrUuid)) {
 			return this.request({
 				path: 'https://api.mojang.com/users/profiles/minecraft/',
@@ -143,20 +148,19 @@ export class MojangClient {
 			});
 		}
 
-		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ignOrUuid', ignOrUuid));
+		throw new MojangAPIError({ statusText: 'validation' }, 'ignOrUuid', ignOrUuid);
 	}
 
 	/**
-	 * @private
 	 * @param options
 	 */
-	async request({
+	public async request({
 		path,
 		query,
 		queryType = null,
 		cache = true,
 		force = false,
-	}: { path: string; query: string; queryType?: string | null } & MojangFetchOptions): Promise<MojangResult> {
+	}: MojangFetchOptions & { path: string; query: string; queryType?: string | null }): Promise<MojangResult> {
 		const CACHE_KEY = `${queryType}:${query}`;
 
 		if (!force) {
