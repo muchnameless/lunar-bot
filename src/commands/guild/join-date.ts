@@ -162,7 +162,7 @@ export default class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return void InteractionUtil.reply(interaction, await this._generateReply(hypixelGuild.chatBridge, IGN));
+		return InteractionUtil.reply(interaction, await this._generateReply(hypixelGuild.chatBridge, IGN));
 	}
 
 	/**
