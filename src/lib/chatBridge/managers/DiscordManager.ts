@@ -216,66 +216,68 @@ export class DiscordManager {
 					// /commands
 					.replace(
 						/\/([\w-]{1,32})(?: ([\w-]{1,32}))?(?: ([\w-]{1,32}))?/g,
-						(match, _commandName: string, _groupOrSubcommand: string | undefined, _subcommand: string | undefined) => {
+						(
+							match,
+							_commandName: string,
+							_groupOrSubcommandName: string | undefined,
+							_subcommandName: string | undefined,
+						) => {
 							const commandName = _commandName.toLowerCase();
-							const groupOrSubcommand = _groupOrSubcommand?.toLowerCase();
-							const subcommand = _subcommand?.toLowerCase();
+							const groupOrSubcommandName = _groupOrSubcommandName?.toLowerCase();
+							const subcommandName = _subcommandName?.toLowerCase();
 
 							const command = this.client.application!.commands.cache.find(({ name }) => name === commandName);
 							if (!command) return match;
 
 							const replaced: (string | undefined)[] = [];
+							const firstOption = command.options.find(({ name }) => name === groupOrSubcommandName);
 
-							switch (command.options[0]?.type) {
+							switch (firstOption?.type) {
+								// command
+								case undefined:
+									replaced.push(
+										chatInputApplicationCommandMention(commandName, command.id),
+										groupOrSubcommandName,
+										subcommandName,
+									);
+									break;
+
+								// command + subcommand
+								case ApplicationCommandOptionType.Subcommand:
+									replaced.push(
+										chatInputApplicationCommandMention(commandName, groupOrSubcommandName!, command.id),
+										subcommandName,
+									);
+									break;
+
+								// command + subcommand group + ???
 								case ApplicationCommandOptionType.SubcommandGroup: {
-									const group = command.options.find(({ name }) => name === groupOrSubcommand);
+									const secondOption = command.options.find(({ name }) => name === subcommandName);
 
-									switch (group?.type) {
-										case undefined:
+									switch (secondOption?.type) {
+										// command + subcommand group + subcommand
+										case ApplicationCommandOptionType.Subcommand:
 											replaced.push(
-												chatInputApplicationCommandMention(commandName, command.id),
-												groupOrSubcommand,
-												subcommand,
+												chatInputApplicationCommandMention(
+													commandName,
+													groupOrSubcommandName!,
+													subcommandName!,
+													command.id,
+												),
 											);
 											break;
 
-										case ApplicationCommandOptionType.Subcommand:
-											if (group.options?.some(({ name }) => name === subcommand)) {
-												replaced.push(
-													chatInputApplicationCommandMention(commandName, groupOrSubcommand!, subcommand!, command.id),
-												);
-												break;
-											}
-										// fallthrough
-
+										// command + subcommand group
 										default:
 											replaced.push(
-												chatInputApplicationCommandMention(commandName, groupOrSubcommand!, command.id),
-												subcommand,
+												chatInputApplicationCommandMention(commandName, groupOrSubcommandName!, command.id),
+												subcommandName,
 											);
 											break;
 									}
 
 									break;
 								}
-
-								case ApplicationCommandOptionType.Subcommand:
-									if (command.options.some(({ name }) => name === groupOrSubcommand)) {
-										replaced.push(
-											chatInputApplicationCommandMention(commandName, groupOrSubcommand!, command.id),
-											subcommand,
-										);
-										break;
-									}
-								// fallthrough
-
-								default:
-									replaced.push(
-										chatInputApplicationCommandMention(commandName, command.id),
-										groupOrSubcommand,
-										subcommand,
-									);
-									break;
 							}
 
 							return replaced.filter(Boolean).join(' ');
