@@ -57,7 +57,7 @@ export class DiscordManager {
 	/**
 	 * whether all channels are ready
 	 */
-	public isReady() {
+	public isReady(): this is ReadyDiscordManager {
 		return this.ready;
 	}
 
