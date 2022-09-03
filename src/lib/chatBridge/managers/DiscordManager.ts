@@ -252,7 +252,7 @@ export class DiscordManager {
 
 								// command + subcommand group + ???
 								case ApplicationCommandOptionType.SubcommandGroup: {
-									const secondOption = command.options.find(({ name }) => name === subcommandName);
+									const secondOption = firstOption.options!.find(({ name }) => name === subcommandName);
 
 									switch (secondOption?.type) {
 										// command + subcommand group + subcommand
