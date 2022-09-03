@@ -4511,8 +4511,6 @@ __metadata:
     "@types/node": ^18.7.14
     "@types/pg": ^8.6.5
     "@types/prettier": ^2.7.0
-    "@typescript-eslint/eslint-plugin": ^5.36.1
-    "@typescript-eslint/parser": ^5.36.1
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#a9c5722ae4261ac23886ce187401de2639b64e53"
     bufferutil: ^4.0.6
     chart.js: ^3.9.1
