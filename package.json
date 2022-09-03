@@ -91,7 +91,7 @@
 		"lint-staged": "^13.0.3",
 		"pino-pretty": "^9.1.0",
 		"pretty-quick": "^3.1.3",
-		"typescript": "^4.9.0-dev.20220902"
+		"typescript": "^4.9.0-dev.20220903"
 	},
 	"engines": {
 		"node": ">=v18.0.0",
