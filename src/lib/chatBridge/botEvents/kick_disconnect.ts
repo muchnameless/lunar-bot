@@ -1,1 +1,1 @@
-export { default } from './disconnect';
+export { default } from './disconnect.js';

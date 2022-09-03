@@ -1,7 +1,5 @@
 import { GuildMemberLimits } from '@sapphire/discord-utilities';
 import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from 'discord.js';
-import { upperCaseFirstChar } from '#functions';
-import { keys } from '#types';
 import {
 	FindProfileStrategy,
 	LEADERBOARD_XP_TYPES,
@@ -9,7 +7,9 @@ import {
 	PROFILE_NAMES,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_SHORT,
-} from '../../constants';
+} from '#constants';
+import { upperCaseFirstChar } from '#functions';
+import { keys } from '#types';
 
 export const optionalIgnOption = new SlashCommandStringOption()
 	.setName('ign')

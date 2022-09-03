@@ -1,20 +1,27 @@
-import { setInterval } from 'node:timers';
 import { env } from 'node:process';
-import { Client, EmbedBuilder, PresenceUpdateStatus } from 'discord.js';
-import { GuildUtil, UserUtil } from '#utils';
-import { logger } from '#logger';
+import { setInterval } from 'node:timers';
+import { type URL } from 'node:url';
+import {
+	Client,
+	EmbedBuilder,
+	PresenceUpdateStatus,
+	type ActivitiesOptions,
+	type ClientOptions,
+	type MessageOptions,
+	type Snowflake,
+} from 'discord.js';
+import { ChatBridgeManager } from '#chatBridge/ChatBridgeManager.js';
 import { hours, safePromiseAll } from '#functions';
-import { ChatBridgeManager } from '#chatBridge/ChatBridgeManager';
-import { exitProcess } from '../../process';
-import { DatabaseManager } from './database/managers/DatabaseManager';
-import { LogHandler } from './LogHandler';
-import { CronJobManager } from './CronJobManager';
-import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
-import { PermissionsManager } from './commands/PermissionsManager';
-import { EventCollection } from './events/EventCollection';
-import { db } from './database';
-import type { URL } from 'node:url';
-import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
+import { logger } from '#logger';
+import { exitProcess } from '#root/process.js';
+import { CronJobManager } from '#structures/CronJobManager.js';
+import { LogHandler } from '#structures/LogHandler.js';
+import { ApplicationCommandCollection } from '#structures/commands/ApplicationCommandCollection.js';
+import { PermissionsManager } from '#structures/commands/PermissionsManager.js';
+import { db } from '#structures/database/index.js';
+import { DatabaseManager } from '#structures/database/managers/DatabaseManager.js';
+import { EventCollection } from '#structures/events/EventCollection.js';
+import { GuildUtil, UserUtil } from '#utils';
 
 interface DirURLs {
 	applicationCommands: URL;
@@ -24,17 +31,31 @@ interface DirURLs {
 }
 
 export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> {
-	override ownerId: Snowflake;
-	override db: DatabaseManager = new DatabaseManager(this, db);
-	override logHandler: LogHandler;
-	override cronJobs: CronJobManager = new CronJobManager(this);
-	override permissions: PermissionsManager = new PermissionsManager(this);
-	override chatBridges: ChatBridgeManager;
-	override commands: ApplicationCommandCollection;
-	override events: EventCollection;
-	override log: LogHandler['log'];
+	public override readonly ownerId: Snowflake;
 
-	constructor({ applicationCommands, chatBridgeCommands, events, logBuffer, ...options }: ClientOptions & DirURLs) {
+	public override readonly db: DatabaseManager = new DatabaseManager(this, db);
+
+	public override readonly logHandler: LogHandler;
+
+	public override readonly cronJobs: CronJobManager = new CronJobManager(this);
+
+	public override readonly permissions: PermissionsManager = new PermissionsManager(this);
+
+	public override readonly chatBridges: ChatBridgeManager;
+
+	public override readonly commands: ApplicationCommandCollection;
+
+	public override readonly events: EventCollection;
+
+	public override readonly log: LogHandler['log'];
+
+	public constructor({
+		applicationCommands,
+		chatBridgeCommands,
+		events,
+		logBuffer,
+		...options
+	}: ClientOptions & DirURLs) {
 		super(options);
 
 		this.ownerId = env.OWNER as Snowflake;
@@ -45,34 +66,34 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 		this.log = this.logHandler.log.bind(this.logHandler);
 	}
 
-	override get config() {
+	public override get config() {
 		return this.db.modelManagers.config;
 	}
 
-	override get hypixelGuilds() {
+	public override get hypixelGuilds() {
 		return this.db.modelManagers.hypixelGuilds;
 	}
 
-	override get discordGuilds() {
+	public override get discordGuilds() {
 		return this.db.modelManagers.discordGuilds;
 	}
 
-	override get players() {
+	public override get players() {
 		return this.db.modelManagers.players;
 	}
 
-	override get taxCollectors() {
+	public override get taxCollectors() {
 		return this.db.modelManagers.taxCollectors;
 	}
 
-	override get chatTriggers() {
+	public override get chatTriggers() {
 		return this.db.modelManagers.chatTriggers;
 	}
 
 	/**
 	 * default embed, blue border and current timestamp
 	 */
-	override get defaultEmbed() {
+	public override get defaultEmbed() {
 		return new EmbedBuilder({
 			color: this.config.get('EMBED_BLUE'),
 			timestamp: Date.now(),
@@ -81,9 +102,10 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 
 	/**
 	 * loads all commands, events, db caches and logs the client in
-	 * @param token discord bot token
+	 *
+	 * @param token - discord bot token
 	 */
-	override async login(token?: string) {
+	public override async login(token?: string) {
 		try {
 			// load db caches
 			await Promise.all([this.db.init(), this.commands.loadAll(), this.events.loadAll()]);
@@ -99,7 +121,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 				() =>
 					this.isReady() &&
 					this.user.setPresence({
-						status: this.user.presence.status !== PresenceUpdateStatus.Offline ? this.user.presence.status : undefined,
+						status: this.user.presence.status === PresenceUpdateStatus.Offline ? undefined : this.user.presence.status,
 						activities: this.user.presence.activities as ActivitiesOptions[],
 					}),
 				hours(1),
@@ -114,9 +136,10 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 
 	/**
 	 * sends a DM to the bot owner
+	 *
 	 * @param options
 	 */
-	override async dmOwner(options: string | MessageOptions) {
+	public override async dmOwner(options: MessageOptions | string) {
 		try {
 			return UserUtil.sendDM(await this.users.fetch(this.ownerId), options);
 		} catch (error) {
@@ -128,7 +151,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	/**
 	 * fetches and caches all members if the fetchAllMembers client option is set to true
 	 */
-	override fetchAllMembers() {
+	public override fetchAllMembers() {
 		return safePromiseAll(
 			this.guilds.cache.map(async (guild) => {
 				const { size } = await GuildUtil.fetchAllMembers(guild);

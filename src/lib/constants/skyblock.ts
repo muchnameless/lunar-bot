@@ -1,13 +1,13 @@
+import { type ArrayElementType } from '@sapphire/utilities';
 import { days, hours, toTotal } from '#functions';
-import type { ArrayElementType } from '@sapphire/utilities';
 
 /**
  * misc
  */
 
 export const enum FindProfileStrategy {
-	MaxWeight = 'max weight',
 	LastActive = 'last active',
+	MaxWeight = 'max weight',
 }
 
 export const SKYBLOCK_YEAR_0 = 1_560_275_700_000;
@@ -105,7 +105,7 @@ const SKILL_CAP = {
 	social2: 25,
 } as const;
 
-export type SkillTypes = ArrayElementType<typeof SKILLS> | ArrayElementType<typeof COSMETIC_SKILLS>;
+export type SkillTypes = ArrayElementType<typeof COSMETIC_SKILLS> | ArrayElementType<typeof SKILLS>;
 
 /**
  * dungeons

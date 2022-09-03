@@ -1,7 +1,7 @@
-// @ts-expect-error
+// @ts-expect-error no declaration file
 import PostgresQueryGenerator from 'sequelize/lib/dialects/postgres/query-generator';
 
-PostgresQueryGenerator.prototype.pgEnum = function (
+PostgresQueryGenerator.prototype.pgEnum = function pgEnum(
 	tableName: string,
 	attr: string,
 	dataType: Record<string, any>,

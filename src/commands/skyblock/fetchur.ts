@@ -1,13 +1,12 @@
-import { SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
+import { SlashCommandBuilder, time, TimestampStyles, type ChatInputCommandInteraction } from 'discord.js';
 import { zone, TimeStruct, DateFunctions } from 'timezonecomplete';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
 import { InteractionUtil } from '#utils';
-import { DualCommand } from '#structures/commands/DualCommand';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class FetchurCommand extends DualCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -20,7 +19,7 @@ export default class FetchurCommand extends DualCommand {
 		);
 	}
 
-	static FETCHUR_ITEMS = [
+	private static readonly FETCHUR_ITEMS = [
 		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
 		'1 compass (4 iron + 1 redstone)',
 		'20 mithril',
@@ -33,7 +32,7 @@ export default class FetchurCommand extends DualCommand {
 		'1 flint and steel',
 		'50 quartz ore (mine with silk touch)',
 		'50 red wool (Wool Weaver near builder merch in hub)',
-	];
+	] as const;
 
 	/**
 	 * execute the command
@@ -66,17 +65,19 @@ export default class FetchurCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return InteractionUtil.reply(interaction, this._generateReply());
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override minecraftRun(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(this._generateReply());
 	}
 }

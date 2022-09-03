@@ -1,15 +1,14 @@
-import { BaseEvent } from './BaseEvent';
-import type { BaseEventContext } from './BaseEvent';
-import type { LunarClient } from '../LunarClient';
+import { type BaseEventContext, BaseEvent } from './BaseEvent.js';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export interface EventContext extends BaseEventContext {
 	emitter: LunarClient;
 }
 
 export class Event extends BaseEvent {
-	declare client: LunarClient;
+	public declare readonly client: LunarClient;
 
-	constructor(context: EventContext) {
+	public constructor(context: EventContext) {
 		super(context);
 
 		Object.defineProperty(this, 'client', { value: context.emitter });
@@ -18,7 +17,7 @@ export class Event extends BaseEvent {
 	/**
 	 * client config
 	 */
-	get config() {
+	public get config() {
 		return this.client.config;
 	}
 }

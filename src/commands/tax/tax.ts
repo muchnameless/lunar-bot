@@ -1,27 +1,30 @@
-import { codeBlock, PermissionFlagsBits, SlashCommandBuilder, userMention } from 'discord.js';
-import { Op } from 'sequelize';
-import { ChannelUtil, InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { TransactionType } from '#structures/database/models/Transaction';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { hypixelGuildOption, optionalPlayerOption, requiredPlayerOption } from '#structures/commands/commonOptions';
-import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '#functions';
-import type { LunarClient } from '#structures/LunarClient';
-import type {
-	APIEmbed,
-	ChatInputCommandInteraction,
-	Collection,
-	JSONEncodable,
-	Message,
-	Snowflake,
-	TextChannel,
+import {
+	codeBlock,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	userMention,
+	type APIEmbed,
+	type ChatInputCommandInteraction,
+	type Collection,
+	type JSONEncodable,
+	type Message,
+	type Snowflake,
+	type TextChannel,
 } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { Op } from 'sequelize';
+import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '#functions';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption, optionalPlayerOption, requiredPlayerOption } from '#structures/commands/commonOptions.js';
+import { TransactionType } from '#structures/database/models/Transaction.js';
+import { ChannelUtil, InteractionUtil } from '#utils';
 
 export default class TaxCommand extends ApplicationCommand {
-	includeAllHypixelGuilds = true;
+	public readonly includeAllHypixelGuilds = true;
 
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('guild tax')
@@ -100,9 +103,10 @@ export default class TaxCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const subcommandGroup = interaction.options.getSubcommandGroup();
 		const subcommand = interaction.options.getSubcommand();
 
@@ -271,7 +275,7 @@ export default class TaxCommand extends ApplicationCommand {
 						await InteractionUtil.awaitConfirmation(
 							interaction,
 							`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${
-								AMOUNT_TO_PING !== 1 ? 's' : ''
+								AMOUNT_TO_PING === 1 ? '' : 's'
 							} from ${hypixelGuild ?? 'all guilds'}?`,
 						);
 
@@ -280,6 +284,7 @@ export default class TaxCommand extends ApplicationCommand {
 						for (const player of playersPingable.values()) {
 							pingMessage += ` ${userMention(player.discordId!)}`;
 						}
+
 						for (const player of playersOnlyIgn.values()) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 						// send ping message and split between pings if too many chars
@@ -290,13 +295,14 @@ export default class TaxCommand extends ApplicationCommand {
 						});
 
 						// optional ghost ping (delete ping message(s))
-						if (!SHOULD_GHOST_PING) return;
+						if (!SHOULD_GHOST_PING) return null;
 
 						const replyMessage = await interaction.fetchReply();
-						const fetched: Collection<Snowflake, Message> | void = await interaction.channel?.messages
+						// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+						const fetched: Collection<string, Message> | void = await interaction.channel?.messages
 							.fetch({ after: replyMessage.id })
 							.catch((error) => logger.error(error, '[TAX REMINDER]: ghost ping'));
-						if (!fetched) return;
+						if (!fetched) return null;
 
 						return ChannelUtil.deleteMessages(interaction.channel, [
 							replyMessage.id,
@@ -348,24 +354,20 @@ export default class TaxCommand extends ApplicationCommand {
 							await InteractionUtil.awaitConfirmation(interaction, 'reset tax paid from all guild members?');
 
 							// get current tax embed from #guild-tax channel
-							currentTaxEmbed = await (async () => {
-								const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
+							const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
-								if (
-									!taxChannel?.isTextBased() ||
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-									((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)
-								) {
-									logger.warn('[TAX RESET] tax channel error');
-									return;
-								}
-
+							if (
+								taxChannel?.isTextBased() &&
+								(!(taxChannel as TextChannel).guildId || (taxChannel as TextChannel).guild?.available)
+							) {
 								try {
-									return (await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID'))).embeds[0];
+									currentTaxEmbed = (await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID'))).embeds[0];
 								} catch (error) {
 									logger.error(error, '[TAX RESET] TAX_MESSAGE fetch error');
 								}
-							})();
+							} else {
+								logger.warn('[TAX RESET] tax channel error');
+							}
 
 							if (!currentTaxEmbed) {
 								await InteractionUtil.awaitConfirmation(

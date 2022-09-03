@@ -1,15 +1,21 @@
-import { ApplicationCommandPermissionType, Collection } from 'discord.js';
-import { logger } from '#logger';
+import {
+	ApplicationCommandPermissionType,
+	Collection,
+	type ClientEvents,
+	type Events,
+	type GuildMember,
+	type Snowflake,
+} from 'discord.js';
 import { assertNever } from '#functions';
-import type { ClientEvents, Events, GuildMember, Snowflake } from 'discord.js';
-import type { LunarClient } from '../LunarClient';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 interface CommandPermissions {
-	users: Map<Snowflake, boolean> | null;
 	roles: {
 		allowed: Snowflake[] | null;
 		denied: Snowflake[] | null;
 	};
+	users: Map<Snowflake, boolean> | null;
 }
 
 // type aliases
@@ -17,19 +23,22 @@ type GuildId = Snowflake;
 type CommandId = Snowflake;
 
 export class PermissionsManager {
-	declare client: LunarClient;
-	cache = new Collection<GuildId, Collection<CommandId, CommandPermissions>>();
-	ready = false;
-	private _initPromise: null | Promise<void> = null;
+	public declare readonly client: LunarClient;
 
-	constructor(client: LunarClient) {
+	public readonly cache = new Collection<GuildId, Collection<CommandId, CommandPermissions>>();
+
+	private _ready = false;
+
+	private _initPromise: Promise<this> | null = null;
+
+	public constructor(client: LunarClient) {
 		Object.defineProperty(this, 'client', { value: client });
 	}
 
 	/**
 	 * populates the cache with the current permissions
 	 */
-	async init() {
+	public async init() {
 		if (this._initPromise) return this._initPromise;
 
 		try {
@@ -38,6 +47,7 @@ export class PermissionsManager {
 			this._initPromise = null;
 		}
 	}
+
 	/**
 	 * @internal
 	 */
@@ -53,22 +63,25 @@ export class PermissionsManager {
 				}
 			}
 
-			this.ready = true;
+			this._ready = true;
 		} catch (error) {
 			logger.error(error, '[PERMISSIONS]');
 			throw new Error('Error fetching command permissions');
 		}
+
+		return this;
 	}
 
 	/**
 	 * updates the cache
+	 *
 	 * @param data
 	 */
-	update({
+	public update({
 		id: commandId,
 		guildId,
 		permissions,
-	}: Pick<ClientEvents[Events.ApplicationCommandPermissionsUpdate][0], 'id' | 'guildId' | 'permissions'>) {
+	}: Pick<ClientEvents[Events.ApplicationCommandPermissionsUpdate][0], 'guildId' | 'id' | 'permissions'>) {
 		const guildPerms = this.cache.ensure(guildId, () => new Collection<CommandId, CommandPermissions>());
 		const parsedPerms: CommandPermissions = {
 			users: null,
@@ -102,12 +115,13 @@ export class PermissionsManager {
 
 	/**
 	 * throws if the member doesn't have the required permissions
+	 *
 	 * @param guildId
 	 * @param commandId
 	 * @param member
 	 */
-	async assert(guildId: Snowflake, commandId: Snowflake, member: GuildMember) {
-		if (!this.ready) await this.init();
+	public async assert(guildId: Snowflake, commandId: Snowflake, member: GuildMember) {
+		if (!this._ready) await this.init();
 
 		const permissions = this.cache.get(guildId)?.get(commandId);
 
@@ -125,6 +139,8 @@ export class PermissionsManager {
 				throw `you are explicitly denied access to the \`${
 					this.client.application!.commands.cache.get(commandId)?.name ?? commandId
 				}\` command`;
+
+			case undefined:
 		}
 
 		// roles

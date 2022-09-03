@@ -1,16 +1,20 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { Type } from '@sapphire/type';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
+import { Type } from '@sapphire/type';
+import {
+	SlashCommandBuilder,
+	type AutocompleteInteraction,
+	type Collection,
+	type ChatInputCommandInteraction,
+} from 'discord.js';
 import RE2 from 're2';
-import { InteractionUtil } from '#utils';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { formatNumber, sortCache } from '#functions';
-import type { AutocompleteInteraction, Collection, ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { Config } from '#structures/database/models/Config';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { type Config } from '#structures/database/models/Config.js';
+import { InteractionUtil } from '#utils';
 
 export default class ConfigCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription("show and edit the bot's config")
@@ -69,6 +73,7 @@ export default class ConfigCommand extends ApplicationCommand {
 
 	/**
 	 * uppercased and (consecutive) spaces replaces with underscores
+	 *
 	 * @param key
 	 */
 	private static _transformKey(key: string) {
@@ -96,7 +101,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param value input value
 	 */
-	override autocompleteRun(interaction: AutocompleteInteraction<'cachedOrDM'>, value: string) {
+	public override async autocompleteRun(interaction: AutocompleteInteraction<'cachedOrDM'>, value: string) {
 		if (!value) {
 			return interaction.respond(
 				this.config.cache
@@ -129,18 +134,18 @@ export default class ConfigCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
 				const KEY = ConfigCommand._transformKey(interaction.options.getString('key', true));
 				const OLD_VALUE = this.config.get(KEY);
-				const OLD_TYPE = typeof OLD_VALUE;
 
-				let newValue: string | number | boolean | string[] = interaction.options.getString('value', true);
+				let newValue: string[] | boolean | number | string = interaction.options.getString('value', true);
 
-				switch (interaction.options.getString('type')?.toLowerCase() ?? OLD_TYPE) {
+				switch (interaction.options.getString('type')?.toLowerCase() ?? typeof OLD_VALUE) {
 					case 'number':
 						newValue = Number(newValue.replaceAll('_', ''));
 						break;
@@ -154,7 +159,7 @@ export default class ConfigCommand extends ApplicationCommand {
 						break;
 				}
 
-				if (OLD_VALUE !== null && typeof newValue !== OLD_TYPE) {
+				if (OLD_VALUE !== null && typeof newValue !== typeof OLD_VALUE) {
 					await InteractionUtil.awaitConfirmation(
 						interaction,
 						`type change from ${OLD_VALUE} (${new Type(OLD_VALUE)}) to ${newValue} (${new Type(newValue)}). Confirm?`,
@@ -164,7 +169,7 @@ export default class ConfigCommand extends ApplicationCommand {
 				const { key, parsedValue } = await this.config.set(KEY, newValue);
 
 				return InteractionUtil.reply(interaction, {
-					content: `${key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${parsedValue}'`,
+					content: `${key}: ${OLD_VALUE === null ? '' : `'${OLD_VALUE}' -> `}'${parsedValue}'`,
 					code: 'apache',
 				});
 			}

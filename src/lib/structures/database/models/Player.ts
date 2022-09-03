@@ -1,3 +1,7 @@
+import { GuildMemberLimits } from '@sapphire/discord-utilities';
+import { type ArrayElementType } from '@sapphire/utilities';
+import { RateLimitError, type Components } from '@zikeji/hypixel';
+import { stripIndents } from 'common-tags';
 import {
 	bold,
 	codeBlock,
@@ -6,35 +10,31 @@ import {
 	GuildMember,
 	hyperlink,
 	PermissionFlagsBits,
+	type Snowflake,
+	type GuildResolvable,
+	type Guild,
+	type User,
 } from 'discord.js';
-import { DataTypes, fn, Model, UniqueConstraintError } from 'sequelize';
-import { stripIndents } from 'common-tags';
-import { RateLimitError } from '@zikeji/hypixel';
-import { GuildMemberLimits } from '@sapphire/discord-utilities';
-import { logger } from '#logger';
-import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil } from '#utils';
-import { getSkyBlockProfiles, hypixel, mojang } from '#api';
+import type LilyWeight from 'lilyweight';
 import {
-	escapeIgn,
-	findSkyblockProfile,
-	getLilyWeightRaw,
-	getSenitherDungeonWeight,
-	getSenitherSkillWeight,
-	getSenitherSlayerWeight,
-	getSkillLevel,
-	getSlayerLevel,
-	hours,
-	isAbortError,
-	minutes,
-	safePromiseAll,
-	seconds,
-	trim,
-	uuidToBustURL,
-	validateDiscordId,
-	validateNumber,
-	weeks,
-} from '#functions';
-import { toUpperCase } from '#types';
+	DataTypes,
+	fn,
+	Model,
+	UniqueConstraintError,
+	type CreationOptional,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type InstanceDestroyOptions,
+	type ModelStatic,
+	type NonAttribute,
+	type Sequelize,
+	type ModelAttributeColumnOptions,
+} from 'sequelize';
+import { type ModelResovable } from '../managers/ModelManager.js';
+import { type GuildRank, type HypixelGuild } from './HypixelGuild.js';
+import { type TaxCollector } from './TaxCollector.js';
+import { TransactionType, type Transaction } from './Transaction.js';
+import { getSkyBlockProfiles, hypixel, mojang } from '#api';
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
@@ -60,29 +60,36 @@ import {
 	XP_OFFSETS,
 	XP_TYPES,
 	STATS_URL_BASE,
+	type DungeonTypes,
+	type SkillTypes,
+	type SlayerTypes,
+	type XPAndDataTypes,
+	type XPOffsets,
 } from '#constants';
-import { TransactionType } from './Transaction';
-import type { ArrayElementType } from '@sapphire/utilities';
-import type LilyWeight from 'lilyweight';
-import type {
-	CreationOptional,
-	InferAttributes,
-	InferCreationAttributes,
-	InstanceDestroyOptions,
-	ModelStatic,
-	NonAttribute,
-	Sequelize,
-	ModelAttributeColumnOptions,
-} from 'sequelize';
-import type { Snowflake, GuildResolvable, Guild, User } from 'discord.js';
-import type { Components } from '@zikeji/hypixel';
-import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '#constants';
-import type { RoleResolvables } from '#utils';
-import type { LunarClient } from '#structures/LunarClient';
-import type { GuildRank, HypixelGuild } from './HypixelGuild';
-import type { Transaction } from './Transaction';
-import type { TaxCollector } from './TaxCollector';
-import type { ModelResovable } from '../managers/ModelManager';
+import {
+	escapeIgn,
+	findSkyblockProfile,
+	getLilyWeightRaw,
+	getSenitherDungeonWeight,
+	getSenitherSkillWeight,
+	getSenitherSlayerWeight,
+	getSkillLevel,
+	getSlayerLevel,
+	hours,
+	isAbortError,
+	minutes,
+	safePromiseAll,
+	seconds,
+	trim,
+	uuidToBustURL,
+	validateDiscordId,
+	validateNumber,
+	weeks,
+} from '#functions';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { toUpperCase } from '#types';
+import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil, type RoleResolvables } from '#utils';
 
 interface ParsedTransaction extends InferAttributes<Transaction> {
 	fromIGN: string | null;
@@ -90,14 +97,22 @@ interface ParsedTransaction extends InferAttributes<Transaction> {
 }
 
 export interface PlayerUpdateOptions {
-	/** role update reason for discord's audit logs */
+	/**
+	 * role update reason for discord's audit logs
+	 */
 	reason?: string;
-	/** whether to dm the user that they should include their ign somewhere in their nickname */
-	shouldSendDm?: boolean;
-	/** whether to only await the updateXp call and not updateDiscordMember */
-	shouldOnlyAwaitUpdateXp?: boolean;
-	/** whether to reject if the hypixel API reponded with an error */
+	/**
+	 * whether to reject if the hypixel API reponded with an error
+	 */
 	rejectOnAPIError?: boolean;
+	/**
+	 * whether to only await the updateXp call and not updateDiscordMember
+	 */
+	shouldOnlyAwaitUpdateXp?: boolean;
+	/**
+	 * whether to dm the user that they should include their ign somewhere in their nickname
+	 */
+	shouldSendDm?: boolean;
 }
 
 export interface TransferXpOptions {
@@ -107,29 +122,35 @@ export interface TransferXpOptions {
 }
 
 export interface ResetXpOptions {
-	offsetToReset?: XPOffsets | null | Offset.Day | Offset.Current;
+	offsetToReset?: Offset.Current | Offset.Day | XPOffsets | null;
 	typesToReset?: readonly XPAndDataTypes[];
 }
 
 interface SetToPaidOptions {
-	/** paid amount */
+	/**
+	 * paid amount
+	 */
 	amount?: number;
-	/** minecraft uuid of the player who collected */
-	collectedBy?: ModelResovable<TaxCollector>;
-	/** hypixel auction uuid */
+	/**
+	 * hypixel auction uuid
+	 */
 	auctionId?: string | null;
+	/**
+	 * minecraft uuid of the player who collected
+	 */
+	collectedBy?: ModelResovable<TaxCollector>;
 }
 
 interface AddTransferOptions extends SetToPaidOptions {
-	collectedBy: ModelResovable<TaxCollector>;
 	amount: number;
+	collectedBy: ModelResovable<TaxCollector>;
 	notes?: string | null;
 	type?: TransactionType;
 }
 
 export type PlayerInGuild = Player & {
-	hypixelGuild: HypixelGuild;
 	guildId: string;
+	hypixelGuild: HypixelGuild;
 };
 
 const enum NickChangeReason {
@@ -138,245 +159,438 @@ const enum NickChangeReason {
 }
 
 interface MakeNickAPICallOptions {
-	/** new nickname, null to remove the current nickname */
+	/**
+	 * new nickname, null to remove the current nickname
+	 */
 	newNick?: string | null;
-	/** whether to dm the user that they should include their ign somewhere in their nickname */
+	/**
+	 * reason for discord's audit logs and the DM
+	 */
+	reason?: NickChangeReason | string;
+	/**
+	 * whether to dm the user that they should include their ign somewhere in their nickname
+	 */
 	shouldSendDm?: boolean;
-	/** reason for discord's audit logs and the DM */
-	reason?: string | NickChangeReason;
 }
 
 export class Player extends Model<InferAttributes<Player>, InferCreationAttributes<Player>> {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare minecraftUuid: string;
-	declare ign: CreationOptional<string>;
-	declare discordId: string | null;
-	declare inDiscord: CreationOptional<boolean>;
-	declare guildId: string | null;
-	declare guildRankPriority: CreationOptional<number>;
-	declare _infractions: number[] | null;
-	declare hasDiscordPingPermission: CreationOptional<boolean>;
-	declare notes: string | null;
-	declare paid: CreationOptional<boolean>;
-	declare mainProfileId: string | null;
-	declare mainProfileName: string | null;
-	declare xpLastUpdatedAt: Date | null;
-	declare xpUpdatesDisabled: CreationOptional<boolean>;
-	declare discordMemberUpdatesDisabled: CreationOptional<boolean>;
-	declare farmingLvlCap: CreationOptional<number>;
-	declare guildXpDay: string | null;
-	declare guildXpDaily: CreationOptional<number>;
-	declare lastActivityAt: CreationOptional<Date>;
+	public declare minecraftUuid: string;
+
+	public declare ign: CreationOptional<string>;
+
+	public declare discordId: string | null;
+
+	public declare inDiscord: CreationOptional<boolean>;
+
+	public declare guildId: string | null;
+
+	public declare guildRankPriority: CreationOptional<number>;
+
+	public declare _infractions: number[] | null;
+
+	public declare hasDiscordPingPermission: CreationOptional<boolean>;
+
+	public declare notes: string | null;
+
+	public declare paid: CreationOptional<boolean>;
+
+	public declare mainProfileId: string | null;
+
+	public declare mainProfileName: string | null;
+
+	public declare xpLastUpdatedAt: Date | null;
+
+	public declare xpUpdatesDisabled: CreationOptional<boolean>;
+
+	public declare discordMemberUpdatesDisabled: CreationOptional<boolean>;
+
+	public declare farmingLvlCap: CreationOptional<number>;
+
+	public declare guildXpDay: string | null;
+
+	public declare guildXpDaily: CreationOptional<number>;
+
+	public declare lastActivityAt: CreationOptional<Date>;
 
 	// current
-	declare tamingXp: CreationOptional<number>;
-	declare farmingXp: CreationOptional<number>;
-	declare miningXp: CreationOptional<number>;
-	declare combatXp: CreationOptional<number>;
-	declare foragingXp: CreationOptional<number>;
-	declare fishingXp: CreationOptional<number>;
-	declare enchantingXp: CreationOptional<number>;
-	declare alchemyXp: CreationOptional<number>;
-	declare carpentryXp: CreationOptional<number>;
-	declare runecraftingXp: CreationOptional<number>;
-	declare social2Xp: CreationOptional<number>;
-	declare zombieXp: CreationOptional<number>;
-	declare spiderXp: CreationOptional<number>;
-	declare wolfXp: CreationOptional<number>;
-	declare endermanXp: CreationOptional<number>;
-	declare blazeXp: CreationOptional<number>;
-	declare catacombsXp: CreationOptional<number>;
-	declare healerXp: CreationOptional<number>;
-	declare mageXp: CreationOptional<number>;
-	declare berserkXp: CreationOptional<number>;
-	declare archerXp: CreationOptional<number>;
-	declare tankXp: CreationOptional<number>;
-	declare guildXp: CreationOptional<number>;
-	declare catacombsCompletions: CreationOptional<Record<string, number>>;
-	declare catacombsMasterCompletions: CreationOptional<Record<string, number>>;
+	public declare tamingXp: CreationOptional<number>;
+
+	public declare farmingXp: CreationOptional<number>;
+
+	public declare miningXp: CreationOptional<number>;
+
+	public declare combatXp: CreationOptional<number>;
+
+	public declare foragingXp: CreationOptional<number>;
+
+	public declare fishingXp: CreationOptional<number>;
+
+	public declare enchantingXp: CreationOptional<number>;
+
+	public declare alchemyXp: CreationOptional<number>;
+
+	public declare carpentryXp: CreationOptional<number>;
+
+	public declare runecraftingXp: CreationOptional<number>;
+
+	public declare social2Xp: CreationOptional<number>;
+
+	public declare zombieXp: CreationOptional<number>;
+
+	public declare spiderXp: CreationOptional<number>;
+
+	public declare wolfXp: CreationOptional<number>;
+
+	public declare endermanXp: CreationOptional<number>;
+
+	public declare blazeXp: CreationOptional<number>;
+
+	public declare catacombsXp: CreationOptional<number>;
+
+	public declare healerXp: CreationOptional<number>;
+
+	public declare mageXp: CreationOptional<number>;
+
+	public declare berserkXp: CreationOptional<number>;
+
+	public declare archerXp: CreationOptional<number>;
+
+	public declare tankXp: CreationOptional<number>;
+
+	public declare guildXp: CreationOptional<number>;
+
+	public declare catacombsCompletions: CreationOptional<Record<string, number>>;
+
+	public declare catacombsMasterCompletions: CreationOptional<Record<string, number>>;
 
 	// daily array
-	declare tamingXpHistory: CreationOptional<number[]>;
-	declare farmingXpHistory: CreationOptional<number[]>;
-	declare miningXpHistory: CreationOptional<number[]>;
-	declare combatXpHistory: CreationOptional<number[]>;
-	declare foragingXpHistory: CreationOptional<number[]>;
-	declare fishingXpHistory: CreationOptional<number[]>;
-	declare enchantingXpHistory: CreationOptional<number[]>;
-	declare alchemyXpHistory: CreationOptional<number[]>;
-	declare carpentryXpHistory: CreationOptional<number[]>;
-	declare runecraftingXpHistory: CreationOptional<number[]>;
-	declare social2XpHistory: CreationOptional<number[]>;
-	declare zombieXpHistory: CreationOptional<number[]>;
-	declare spiderXpHistory: CreationOptional<number[]>;
-	declare wolfXpHistory: CreationOptional<number[]>;
-	declare endermanXpHistory: CreationOptional<number[]>;
-	declare blazeXpHistory: CreationOptional<number[]>;
-	declare catacombsXpHistory: CreationOptional<number[]>;
-	declare healerXpHistory: CreationOptional<number[]>;
-	declare mageXpHistory: CreationOptional<number[]>;
-	declare berserkXpHistory: CreationOptional<number[]>;
-	declare archerXpHistory: CreationOptional<number[]>;
-	declare tankXpHistory: CreationOptional<number[]>;
-	declare guildXpHistory: CreationOptional<number[]>;
-	declare catacombsCompletionsHistory: CreationOptional<Record<string, number>[]>;
-	declare catacombsMasterCompletionsHistory: CreationOptional<Record<string, number>[]>;
+	public declare tamingXpHistory: CreationOptional<number[]>;
+
+	public declare farmingXpHistory: CreationOptional<number[]>;
+
+	public declare miningXpHistory: CreationOptional<number[]>;
+
+	public declare combatXpHistory: CreationOptional<number[]>;
+
+	public declare foragingXpHistory: CreationOptional<number[]>;
+
+	public declare fishingXpHistory: CreationOptional<number[]>;
+
+	public declare enchantingXpHistory: CreationOptional<number[]>;
+
+	public declare alchemyXpHistory: CreationOptional<number[]>;
+
+	public declare carpentryXpHistory: CreationOptional<number[]>;
+
+	public declare runecraftingXpHistory: CreationOptional<number[]>;
+
+	public declare social2XpHistory: CreationOptional<number[]>;
+
+	public declare zombieXpHistory: CreationOptional<number[]>;
+
+	public declare spiderXpHistory: CreationOptional<number[]>;
+
+	public declare wolfXpHistory: CreationOptional<number[]>;
+
+	public declare endermanXpHistory: CreationOptional<number[]>;
+
+	public declare blazeXpHistory: CreationOptional<number[]>;
+
+	public declare catacombsXpHistory: CreationOptional<number[]>;
+
+	public declare healerXpHistory: CreationOptional<number[]>;
+
+	public declare mageXpHistory: CreationOptional<number[]>;
+
+	public declare berserkXpHistory: CreationOptional<number[]>;
+
+	public declare archerXpHistory: CreationOptional<number[]>;
+
+	public declare tankXpHistory: CreationOptional<number[]>;
+
+	public declare guildXpHistory: CreationOptional<number[]>;
+
+	public declare catacombsCompletionsHistory: CreationOptional<Record<string, number>[]>;
+
+	public declare catacombsMasterCompletionsHistory: CreationOptional<Record<string, number>[]>;
 
 	// competition start
-	declare tamingXpCompetitionStart: CreationOptional<number>;
-	declare farmingXpCompetitionStart: CreationOptional<number>;
-	declare miningXpCompetitionStart: CreationOptional<number>;
-	declare combatXpCompetitionStart: CreationOptional<number>;
-	declare foragingXpCompetitionStart: CreationOptional<number>;
-	declare fishingXpCompetitionStart: CreationOptional<number>;
-	declare enchantingXpCompetitionStart: CreationOptional<number>;
-	declare alchemyXpCompetitionStart: CreationOptional<number>;
-	declare carpentryXpCompetitionStart: CreationOptional<number>;
-	declare runecraftingXpCompetitionStart: CreationOptional<number>;
-	declare social2XpCompetitionStart: CreationOptional<number>;
-	declare zombieXpCompetitionStart: CreationOptional<number>;
-	declare spiderXpCompetitionStart: CreationOptional<number>;
-	declare wolfXpCompetitionStart: CreationOptional<number>;
-	declare endermanXpCompetitionStart: CreationOptional<number>;
-	declare blazeXpCompetitionStart: CreationOptional<number>;
-	declare catacombsXpCompetitionStart: CreationOptional<number>;
-	declare healerXpCompetitionStart: CreationOptional<number>;
-	declare mageXpCompetitionStart: CreationOptional<number>;
-	declare berserkXpCompetitionStart: CreationOptional<number>;
-	declare archerXpCompetitionStart: CreationOptional<number>;
-	declare tankXpCompetitionStart: CreationOptional<number>;
-	declare guildXpCompetitionStart: CreationOptional<number>;
-	declare catacombsCompletionsCompetitionStart: CreationOptional<Record<`${bigint}`, number>>;
-	declare catacombsMasterCompletionsCompetitionStart: CreationOptional<Record<`${bigint}`, number>>;
+	public declare tamingXpCompetitionStart: CreationOptional<number>;
+
+	public declare farmingXpCompetitionStart: CreationOptional<number>;
+
+	public declare miningXpCompetitionStart: CreationOptional<number>;
+
+	public declare combatXpCompetitionStart: CreationOptional<number>;
+
+	public declare foragingXpCompetitionStart: CreationOptional<number>;
+
+	public declare fishingXpCompetitionStart: CreationOptional<number>;
+
+	public declare enchantingXpCompetitionStart: CreationOptional<number>;
+
+	public declare alchemyXpCompetitionStart: CreationOptional<number>;
+
+	public declare carpentryXpCompetitionStart: CreationOptional<number>;
+
+	public declare runecraftingXpCompetitionStart: CreationOptional<number>;
+
+	public declare social2XpCompetitionStart: CreationOptional<number>;
+
+	public declare zombieXpCompetitionStart: CreationOptional<number>;
+
+	public declare spiderXpCompetitionStart: CreationOptional<number>;
+
+	public declare wolfXpCompetitionStart: CreationOptional<number>;
+
+	public declare endermanXpCompetitionStart: CreationOptional<number>;
+
+	public declare blazeXpCompetitionStart: CreationOptional<number>;
+
+	public declare catacombsXpCompetitionStart: CreationOptional<number>;
+
+	public declare healerXpCompetitionStart: CreationOptional<number>;
+
+	public declare mageXpCompetitionStart: CreationOptional<number>;
+
+	public declare berserkXpCompetitionStart: CreationOptional<number>;
+
+	public declare archerXpCompetitionStart: CreationOptional<number>;
+
+	public declare tankXpCompetitionStart: CreationOptional<number>;
+
+	public declare guildXpCompetitionStart: CreationOptional<number>;
+
+	public declare catacombsCompletionsCompetitionStart: CreationOptional<Record<`${bigint}`, number>>;
+
+	public declare catacombsMasterCompletionsCompetitionStart: CreationOptional<Record<`${bigint}`, number>>;
 
 	// competition end
-	declare tamingXpCompetitionEnd: CreationOptional<number>;
-	declare farmingXpCompetitionEnd: CreationOptional<number>;
-	declare miningXpCompetitionEnd: CreationOptional<number>;
-	declare combatXpCompetitionEnd: CreationOptional<number>;
-	declare foragingXpCompetitionEnd: CreationOptional<number>;
-	declare fishingXpCompetitionEnd: CreationOptional<number>;
-	declare enchantingXpCompetitionEnd: CreationOptional<number>;
-	declare alchemyXpCompetitionEnd: CreationOptional<number>;
-	declare carpentryXpCompetitionEnd: CreationOptional<number>;
-	declare runecraftingXpCompetitionEnd: CreationOptional<number>;
-	declare social2XpCompetitionEnd: CreationOptional<number>;
-	declare zombieXpCompetitionEnd: CreationOptional<number>;
-	declare spiderXpCompetitionEnd: CreationOptional<number>;
-	declare wolfXpCompetitionEnd: CreationOptional<number>;
-	declare endermanXpCompetitionEnd: CreationOptional<number>;
-	declare blazeXpCompetitionEnd: CreationOptional<number>;
-	declare catacombsXpCompetitionEnd: CreationOptional<number>;
-	declare healerXpCompetitionEnd: CreationOptional<number>;
-	declare mageXpCompetitionEnd: CreationOptional<number>;
-	declare berserkXpCompetitionEnd: CreationOptional<number>;
-	declare archerXpCompetitionEnd: CreationOptional<number>;
-	declare tankXpCompetitionEnd: CreationOptional<number>;
-	declare guildXpCompetitionEnd: CreationOptional<number>;
-	declare catacombsCompletionsCompetitionEnd: CreationOptional<Record<`${bigint}`, number>>;
-	declare catacombsMasterCompletionsCompetitionEnd: CreationOptional<Record<`${bigint}`, number>>;
+	public declare tamingXpCompetitionEnd: CreationOptional<number>;
+
+	public declare farmingXpCompetitionEnd: CreationOptional<number>;
+
+	public declare miningXpCompetitionEnd: CreationOptional<number>;
+
+	public declare combatXpCompetitionEnd: CreationOptional<number>;
+
+	public declare foragingXpCompetitionEnd: CreationOptional<number>;
+
+	public declare fishingXpCompetitionEnd: CreationOptional<number>;
+
+	public declare enchantingXpCompetitionEnd: CreationOptional<number>;
+
+	public declare alchemyXpCompetitionEnd: CreationOptional<number>;
+
+	public declare carpentryXpCompetitionEnd: CreationOptional<number>;
+
+	public declare runecraftingXpCompetitionEnd: CreationOptional<number>;
+
+	public declare social2XpCompetitionEnd: CreationOptional<number>;
+
+	public declare zombieXpCompetitionEnd: CreationOptional<number>;
+
+	public declare spiderXpCompetitionEnd: CreationOptional<number>;
+
+	public declare wolfXpCompetitionEnd: CreationOptional<number>;
+
+	public declare endermanXpCompetitionEnd: CreationOptional<number>;
+
+	public declare blazeXpCompetitionEnd: CreationOptional<number>;
+
+	public declare catacombsXpCompetitionEnd: CreationOptional<number>;
+
+	public declare healerXpCompetitionEnd: CreationOptional<number>;
+
+	public declare mageXpCompetitionEnd: CreationOptional<number>;
+
+	public declare berserkXpCompetitionEnd: CreationOptional<number>;
+
+	public declare archerXpCompetitionEnd: CreationOptional<number>;
+
+	public declare tankXpCompetitionEnd: CreationOptional<number>;
+
+	public declare guildXpCompetitionEnd: CreationOptional<number>;
+
+	public declare catacombsCompletionsCompetitionEnd: CreationOptional<Record<`${bigint}`, number>>;
+
+	public declare catacombsMasterCompletionsCompetitionEnd: CreationOptional<Record<`${bigint}`, number>>;
 
 	// mayor
-	declare tamingXpOffsetMayor: CreationOptional<number>;
-	declare farmingXpOffsetMayor: CreationOptional<number>;
-	declare miningXpOffsetMayor: CreationOptional<number>;
-	declare combatXpOffsetMayor: CreationOptional<number>;
-	declare foragingXpOffsetMayor: CreationOptional<number>;
-	declare fishingXpOffsetMayor: CreationOptional<number>;
-	declare enchantingXpOffsetMayor: CreationOptional<number>;
-	declare alchemyXpOffsetMayor: CreationOptional<number>;
-	declare carpentryXpOffsetMayor: CreationOptional<number>;
-	declare runecraftingXpOffsetMayor: CreationOptional<number>;
-	declare social2XpOffsetMayor: CreationOptional<number>;
-	declare zombieXpOffsetMayor: CreationOptional<number>;
-	declare spiderXpOffsetMayor: CreationOptional<number>;
-	declare wolfXpOffsetMayor: CreationOptional<number>;
-	declare endermanXpOffsetMayor: CreationOptional<number>;
-	declare blazeXpOffsetMayor: CreationOptional<number>;
-	declare catacombsXpOffsetMayor: CreationOptional<number>;
-	declare healerXpOffsetMayor: CreationOptional<number>;
-	declare mageXpOffsetMayor: CreationOptional<number>;
-	declare berserkXpOffsetMayor: CreationOptional<number>;
-	declare archerXpOffsetMayor: CreationOptional<number>;
-	declare tankXpOffsetMayor: CreationOptional<number>;
-	declare guildXpOffsetMayor: CreationOptional<number>;
-	declare catacombsCompletionsOffsetMayor: CreationOptional<Record<`${bigint}`, number>>;
-	declare catacombsMasterCompletionsOffsetMayor: CreationOptional<Record<`${bigint}`, number>>;
+	public declare tamingXpOffsetMayor: CreationOptional<number>;
+
+	public declare farmingXpOffsetMayor: CreationOptional<number>;
+
+	public declare miningXpOffsetMayor: CreationOptional<number>;
+
+	public declare combatXpOffsetMayor: CreationOptional<number>;
+
+	public declare foragingXpOffsetMayor: CreationOptional<number>;
+
+	public declare fishingXpOffsetMayor: CreationOptional<number>;
+
+	public declare enchantingXpOffsetMayor: CreationOptional<number>;
+
+	public declare alchemyXpOffsetMayor: CreationOptional<number>;
+
+	public declare carpentryXpOffsetMayor: CreationOptional<number>;
+
+	public declare runecraftingXpOffsetMayor: CreationOptional<number>;
+
+	public declare social2XpOffsetMayor: CreationOptional<number>;
+
+	public declare zombieXpOffsetMayor: CreationOptional<number>;
+
+	public declare spiderXpOffsetMayor: CreationOptional<number>;
+
+	public declare wolfXpOffsetMayor: CreationOptional<number>;
+
+	public declare endermanXpOffsetMayor: CreationOptional<number>;
+
+	public declare blazeXpOffsetMayor: CreationOptional<number>;
+
+	public declare catacombsXpOffsetMayor: CreationOptional<number>;
+
+	public declare healerXpOffsetMayor: CreationOptional<number>;
+
+	public declare mageXpOffsetMayor: CreationOptional<number>;
+
+	public declare berserkXpOffsetMayor: CreationOptional<number>;
+
+	public declare archerXpOffsetMayor: CreationOptional<number>;
+
+	public declare tankXpOffsetMayor: CreationOptional<number>;
+
+	public declare guildXpOffsetMayor: CreationOptional<number>;
+
+	public declare catacombsCompletionsOffsetMayor: CreationOptional<Record<`${bigint}`, number>>;
+
+	public declare catacombsMasterCompletionsOffsetMayor: CreationOptional<Record<`${bigint}`, number>>;
 
 	// week
-	declare tamingXpOffsetWeek: CreationOptional<number>;
-	declare farmingXpOffsetWeek: CreationOptional<number>;
-	declare miningXpOffsetWeek: CreationOptional<number>;
-	declare combatXpOffsetWeek: CreationOptional<number>;
-	declare foragingXpOffsetWeek: CreationOptional<number>;
-	declare fishingXpOffsetWeek: CreationOptional<number>;
-	declare enchantingXpOffsetWeek: CreationOptional<number>;
-	declare alchemyXpOffsetWeek: CreationOptional<number>;
-	declare carpentryXpOffsetWeek: CreationOptional<number>;
-	declare runecraftingXpOffsetWeek: CreationOptional<number>;
-	declare social2XpOffsetWeek: CreationOptional<number>;
-	declare zombieXpOffsetWeek: CreationOptional<number>;
-	declare spiderXpOffsetWeek: CreationOptional<number>;
-	declare wolfXpOffsetWeek: CreationOptional<number>;
-	declare endermanXpOffsetWeek: CreationOptional<number>;
-	declare blazeXpOffsetWeek: CreationOptional<number>;
-	declare catacombsXpOffsetWeek: CreationOptional<number>;
-	declare healerXpOffsetWeek: CreationOptional<number>;
-	declare mageXpOffsetWeek: CreationOptional<number>;
-	declare berserkXpOffsetWeek: CreationOptional<number>;
-	declare archerXpOffsetWeek: CreationOptional<number>;
-	declare tankXpOffsetWeek: CreationOptional<number>;
-	declare guildXpOffsetWeek: CreationOptional<number>;
-	declare catacombsCompletionsOffsetWeek: CreationOptional<Record<`${bigint}`, number>>;
-	declare catacombsMasterCompletionsOffsetWeek: CreationOptional<Record<`${bigint}`, number>>;
+	public declare tamingXpOffsetWeek: CreationOptional<number>;
+
+	public declare farmingXpOffsetWeek: CreationOptional<number>;
+
+	public declare miningXpOffsetWeek: CreationOptional<number>;
+
+	public declare combatXpOffsetWeek: CreationOptional<number>;
+
+	public declare foragingXpOffsetWeek: CreationOptional<number>;
+
+	public declare fishingXpOffsetWeek: CreationOptional<number>;
+
+	public declare enchantingXpOffsetWeek: CreationOptional<number>;
+
+	public declare alchemyXpOffsetWeek: CreationOptional<number>;
+
+	public declare carpentryXpOffsetWeek: CreationOptional<number>;
+
+	public declare runecraftingXpOffsetWeek: CreationOptional<number>;
+
+	public declare social2XpOffsetWeek: CreationOptional<number>;
+
+	public declare zombieXpOffsetWeek: CreationOptional<number>;
+
+	public declare spiderXpOffsetWeek: CreationOptional<number>;
+
+	public declare wolfXpOffsetWeek: CreationOptional<number>;
+
+	public declare endermanXpOffsetWeek: CreationOptional<number>;
+
+	public declare blazeXpOffsetWeek: CreationOptional<number>;
+
+	public declare catacombsXpOffsetWeek: CreationOptional<number>;
+
+	public declare healerXpOffsetWeek: CreationOptional<number>;
+
+	public declare mageXpOffsetWeek: CreationOptional<number>;
+
+	public declare berserkXpOffsetWeek: CreationOptional<number>;
+
+	public declare archerXpOffsetWeek: CreationOptional<number>;
+
+	public declare tankXpOffsetWeek: CreationOptional<number>;
+
+	public declare guildXpOffsetWeek: CreationOptional<number>;
+
+	public declare catacombsCompletionsOffsetWeek: CreationOptional<Record<`${bigint}`, number>>;
+
+	public declare catacombsMasterCompletionsOffsetWeek: CreationOptional<Record<`${bigint}`, number>>;
 
 	// month
-	declare tamingXpOffsetMonth: CreationOptional<number>;
-	declare farmingXpOffsetMonth: CreationOptional<number>;
-	declare miningXpOffsetMonth: CreationOptional<number>;
-	declare combatXpOffsetMonth: CreationOptional<number>;
-	declare foragingXpOffsetMonth: CreationOptional<number>;
-	declare fishingXpOffsetMonth: CreationOptional<number>;
-	declare enchantingXpOffsetMonth: CreationOptional<number>;
-	declare alchemyXpOffsetMonth: CreationOptional<number>;
-	declare carpentryXpOffsetMonth: CreationOptional<number>;
-	declare runecraftingXpOffsetMonth: CreationOptional<number>;
-	declare social2XpOffsetMonth: CreationOptional<number>;
-	declare zombieXpOffsetMonth: CreationOptional<number>;
-	declare spiderXpOffsetMonth: CreationOptional<number>;
-	declare wolfXpOffsetMonth: CreationOptional<number>;
-	declare endermanXpOffsetMonth: CreationOptional<number>;
-	declare blazeXpOffsetMonth: CreationOptional<number>;
-	declare catacombsXpOffsetMonth: CreationOptional<number>;
-	declare healerXpOffsetMonth: CreationOptional<number>;
-	declare mageXpOffsetMonth: CreationOptional<number>;
-	declare berserkXpOffsetMonth: CreationOptional<number>;
-	declare archerXpOffsetMonth: CreationOptional<number>;
-	declare tankXpOffsetMonth: CreationOptional<number>;
-	declare guildXpOffsetMonth: CreationOptional<number>;
-	declare catacombsCompletionsOffsetMonth: CreationOptional<Record<`${bigint}`, number>>;
-	declare catacombsMasterCompletionsOffsetMonth: CreationOptional<Record<`${bigint}`, number>>;
+	public declare tamingXpOffsetMonth: CreationOptional<number>;
 
-	declare readonly createdAt: CreationOptional<Date>;
-	declare readonly updatedAt: CreationOptional<Date>;
+	public declare farmingXpOffsetMonth: CreationOptional<number>;
+
+	public declare miningXpOffsetMonth: CreationOptional<number>;
+
+	public declare combatXpOffsetMonth: CreationOptional<number>;
+
+	public declare foragingXpOffsetMonth: CreationOptional<number>;
+
+	public declare fishingXpOffsetMonth: CreationOptional<number>;
+
+	public declare enchantingXpOffsetMonth: CreationOptional<number>;
+
+	public declare alchemyXpOffsetMonth: CreationOptional<number>;
+
+	public declare carpentryXpOffsetMonth: CreationOptional<number>;
+
+	public declare runecraftingXpOffsetMonth: CreationOptional<number>;
+
+	public declare social2XpOffsetMonth: CreationOptional<number>;
+
+	public declare zombieXpOffsetMonth: CreationOptional<number>;
+
+	public declare spiderXpOffsetMonth: CreationOptional<number>;
+
+	public declare wolfXpOffsetMonth: CreationOptional<number>;
+
+	public declare endermanXpOffsetMonth: CreationOptional<number>;
+
+	public declare blazeXpOffsetMonth: CreationOptional<number>;
+
+	public declare catacombsXpOffsetMonth: CreationOptional<number>;
+
+	public declare healerXpOffsetMonth: CreationOptional<number>;
+
+	public declare mageXpOffsetMonth: CreationOptional<number>;
+
+	public declare berserkXpOffsetMonth: CreationOptional<number>;
+
+	public declare archerXpOffsetMonth: CreationOptional<number>;
+
+	public declare tankXpOffsetMonth: CreationOptional<number>;
+
+	public declare guildXpOffsetMonth: CreationOptional<number>;
+
+	public declare catacombsCompletionsOffsetMonth: CreationOptional<Record<`${bigint}`, number>>;
+
+	public declare catacombsMasterCompletionsOffsetMonth: CreationOptional<Record<`${bigint}`, number>>;
+
+	public declare readonly createdAt: CreationOptional<Date>;
+
+	public declare readonly updatedAt: CreationOptional<Date>;
 
 	/**
 	 * linked guild member
 	 */
 	private _discordMember: GuildMember | null = null;
 
-	static initialise(sequelize: Sequelize) {
+	public static initialise(sequelize: Sequelize) {
 		const attributes = {} as Record<
-			| `${ArrayElementType<typeof XP_TYPES>}Xp`
-			| `${ArrayElementType<typeof XP_TYPES>}XpHistory`
-			| `${ArrayElementType<typeof XP_TYPES>}Xp${ArrayElementType<typeof XP_OFFSETS>}`
 			| `${ArrayElementType<typeof DUNGEON_TYPES>}Completions`
-			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletions`
-			| `${ArrayElementType<typeof DUNGEON_TYPES>}CompletionsHistory`
-			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletionsHistory`
 			| `${ArrayElementType<typeof DUNGEON_TYPES>}Completions${ArrayElementType<typeof XP_OFFSETS>}`
-			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletions${ArrayElementType<typeof XP_OFFSETS>}`,
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}CompletionsHistory`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletions`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletions${ArrayElementType<typeof XP_OFFSETS>}`
+			| `${ArrayElementType<typeof DUNGEON_TYPES>}MasterCompletionsHistory`
+			| `${ArrayElementType<typeof XP_TYPES>}Xp`
+			| `${ArrayElementType<typeof XP_TYPES>}Xp${ArrayElementType<typeof XP_OFFSETS>}`
+			| `${ArrayElementType<typeof XP_TYPES>}XpHistory`,
 			ModelAttributeColumnOptions<Player>
 		>;
 
@@ -580,7 +794,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * returns the number of infractions that have not already expired
 	 */
-	get infractions(): NonAttribute<number> {
+	public get infractions(): NonAttribute<number> {
 		if (!this._infractions) return 0;
 
 		// last infraction expired -> remove all infractions
@@ -595,7 +809,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * returns the hypixel guild db object associated with the player
 	 */
-	get hypixelGuild(): NonAttribute<HypixelGuild | null> {
+	public get hypixelGuild(): NonAttribute<HypixelGuild | null> {
 		return (
 			this.client.hypixelGuilds.cache.get(this.guildId!) ??
 			(this.guildId
@@ -607,17 +821,17 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * whether the player is in a cached hypixel guild
 	 */
-	inGuild(): this is PlayerInGuild {
+	public inGuild(): this is PlayerInGuild {
 		return this.client.hypixelGuilds.cache.has(this.guildId!);
 	}
 
 	/**
 	 * fetches the discord member if the discord id is valid and the player is in the hypixel guild's discord server
+	 *
 	 * @param guildResolvable
 	 */
-	async fetchDiscordMember(guildResolvable?: GuildResolvable | null) {
+	public async fetchDiscordMember(guildResolvable?: GuildResolvable | null) {
 		if (this._discordMember) return this._discordMember;
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 		try {
@@ -650,10 +864,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	}
 
 	/**
-	 * @param member discord guild member linked to the player
+	 * @param member - discord guild member linked to the player
 	 * @param force
 	 */
-	async setDiscordMember(member: GuildMember | null, force = false) {
+	public async setDiscordMember(member: GuildMember | null, force = false) {
 		if (!member) {
 			if (this._discordMember) {
 				GuildMemberUtil.setPlayer(this._discordMember, null);
@@ -682,7 +896,6 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		GuildMemberUtil.setPlayer(member, this);
 
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!this.inDiscord) {
 			try {
 				await this.update({ inDiscord: true });
@@ -697,50 +910,50 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * fetches the discord user if the discord id is valid
 	 */
-	get discordUser(): NonAttribute<Promise<User | null>> {
+	public get discordUser(): NonAttribute<Promise<User | null>> {
 		return validateNumber(this.discordId) ? this.client.users.fetch(this.discordId) : Promise.resolve(null);
 	}
 
 	/**
 	 * returns the guild rank of the player
 	 */
-	get guildRank(): NonAttribute<GuildRank | null> {
+	public get guildRank(): NonAttribute<GuildRank | null> {
 		return this.hypixelGuild?.ranks.find(({ priority }) => priority === this.guildRankPriority) ?? null;
 	}
 
 	/**
 	 * returns the player's guild name
 	 */
-	get guildName(): NonAttribute<string> {
+	public get guildName(): NonAttribute<string> {
 		return this.hypixelGuild?.name ?? (this.guildId === GUILD_ID_ERROR ? 'Error' : 'Unknown Guild');
 	}
 
 	/**
 	 * returns a string with the ign and guild name
 	 */
-	get info(): NonAttribute<string> {
+	public get info(): NonAttribute<string> {
 		return `${hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}` as const; // •
 	}
 
 	/**
 	 * returns an object with the ign and guild name
 	 */
-	get logInfo(): NonAttribute<Record<string, unknown>> {
+	public get logInfo(): NonAttribute<Record<string, unknown>> {
 		return { ign: this.ign, guild: this.guildName };
 	}
 
 	/**
 	 * link with a bust url of the player's skin
 	 */
-	get imageURL(): NonAttribute<ReturnType<typeof uuidToBustURL>> {
+	public get imageURL(): NonAttribute<ReturnType<typeof uuidToBustURL>> {
 		return uuidToBustURL(this.minecraftUuid);
 	}
 
 	/**
 	 * returns a sky.shiiyu.moe link for the player
 	 */
-	get url(): NonAttribute<string> {
-		return `${STATS_URL_BASE}${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUuid}/${
+	public get url(): NonAttribute<string> {
+		return `${STATS_URL_BASE}${this.ign === UNKNOWN_IGN ? this.minecraftUuid : this.ign}/${
 			this.mainProfileName ?? ''
 		}` as const;
 	}
@@ -748,7 +961,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * whether the player has an in-game staff rank in their current hypixel guild
 	 */
-	get isStaff(): NonAttribute<boolean> {
+	public get isStaff(): NonAttribute<boolean> {
 		const { hypixelGuild } = this;
 		if (!hypixelGuild) return false;
 		return this.guildRankPriority > hypixelGuild.ranks.length - hypixelGuild.staffRanksAmount;
@@ -757,7 +970,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * amount of the last tax transaction from that player
 	 */
-	get taxAmount(): NonAttribute<Promise<number | null>> {
+	public get taxAmount(): NonAttribute<Promise<number | null>> {
 		return (async () => {
 			const result = await this.client.db.models.Transaction.findAll({
 				limit: 1,
@@ -777,7 +990,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * all transactions from that player
 	 */
-	get transactions(): NonAttribute<Promise<ParsedTransaction[]>> {
+	public get transactions(): NonAttribute<Promise<ParsedTransaction[]>> {
 		return (async () =>
 			Promise.all(
 				(
@@ -802,9 +1015,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * updates the player data and discord member
+	 *
 	 * @param options
 	 */
-	async updateData({
+	public async updateData({
 		reason = 'synced with in-game stats',
 		shouldSendDm = false,
 		shouldOnlyAwaitUpdateXp = false,
@@ -813,8 +1027,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		// uncache non guild members if no activity in the last hour
 		if (!this.guildId && !this.client.taxCollectors.cache.get(this.minecraftUuid)?.isCollecting) {
 			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) void this.uncache();
-			return;
+			return this;
 		}
+
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
 		if (shouldOnlyAwaitUpdateXp) {
@@ -830,10 +1045,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * updates skill and slayer xp
+	 *
 	 * @param rejectOnAPIError
 	 */
-	async updateXp(rejectOnAPIError = false) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	public async updateXp(rejectOnAPIError = false) {
 		if (this.xpUpdatesDisabled) return this;
 
 		try {
@@ -981,22 +1196,26 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * updates discord roles and nickname
 	 * can only reject if `this.guildId === GUILD_ID_ERROR`
+	 *
 	 * @param options
 	 * @param options.reason role update reason for discord's audit logs
 	 * @param options.shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
 	 */
-	async updateDiscordMember({ reason: reasonInput = 'synced with in-game stats', shouldSendDm = false } = {}) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		if (this.discordMemberUpdatesDisabled || !this.guildId) return;
+	public async updateDiscordMember({ reason: reasonInput = 'synced with in-game stats', shouldSendDm = false } = {}) {
+		if (this.discordMemberUpdatesDisabled || !this.guildId) return this;
 
 		let reason = reasonInput;
 
 		const member =
 			(await this.fetchDiscordMember()) ?? ((reason = 'found linked discord tag'), await this._linkUsingCache());
 
-		if (this.guildId === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
+		// player left the guild but discord member couldn't be updated for some reason
+		if (this.guildId === GUILD_ID_ERROR) {
+			await this.removeFromGuild();
+			return this;
+		}
 
-		if (!member) return; // no linked available discord member to update
+		if (!member) return this; // no linked available discord member to update
 
 		// timeout expires before the next update
 		const TIMEOUT_LEFT = (member.communicationDisabledUntilTimestamp ?? 0) - Date.now();
@@ -1009,27 +1228,30 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.MANDATORY_ROLE_ID;
 
 		if (MANDATORY_ROLE_ID && !member.roles.cache.has(MANDATORY_ROLE_ID)) {
-			return logger.warn(
+			logger.warn(
 				{ ...this.logInfo, userId: member.id, tag: member.user.tag },
 				'[UPDATE DISCORD MEMBER]: missing mandatory role',
 			);
+			return this;
 		}
 
 		// actual update(s)
 		await this.updateRoles(reason);
 		await this.syncIgnWithDisplayName(shouldSendDm);
+		return this;
 	}
 
 	/**
 	 * updates the skyblock related discord roles using the db data
+	 *
 	 * @param reasonInput reason for discord's audit logs
 	 */
-	async updateRoles(reasonInput?: string) {
+	public async updateRoles(reasonInput?: string) {
 		const member = await this.fetchDiscordMember();
-		if (!member) return;
+		if (!member) return this;
 
 		const discordGuild = this.client.discordGuilds.cache.get(member.guild.id);
-		if (!discordGuild) return;
+		if (!discordGuild) return this;
 
 		const { cache: roleCache, highest: highestRole } = member.roles;
 		const rolesToAdd: Snowflake[] = [];
@@ -1103,12 +1325,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		}
 
 		// other delimiter roles
-		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
+		for (let index = 1; index < DELIMITER_ROLES.length; ++index) {
 			if (
-				discordGuild[`${DELIMITER_ROLES[i]!}_DELIMITER_ROLE_ID`] &&
-				!roleCache.has(discordGuild[`${DELIMITER_ROLES[i]!}_DELIMITER_ROLE_ID`]!)
+				discordGuild[`${DELIMITER_ROLES[index]!}_DELIMITER_ROLE_ID`] &&
+				!roleCache.has(discordGuild[`${DELIMITER_ROLES[index]!}_DELIMITER_ROLE_ID`]!)
 			) {
-				rolesToAdd.push(discordGuild[`${DELIMITER_ROLES[i]!}_DELIMITER_ROLE_ID`]!);
+				rolesToAdd.push(discordGuild[`${DELIMITER_ROLES[index]!}_DELIMITER_ROLE_ID`]!);
 			}
 		}
 
@@ -1277,9 +1499,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * validates the discordId and only updates it if the validation passes
+	 *
 	 * @param value
 	 */
-	async setUniqueDiscordId(value: string | null, rejectOnError: boolean) {
+	public async setUniqueDiscordId(value: string | null, rejectOnError: boolean) {
 		try {
 			// use the static method because this.update sets the value temporarily in case of an exception
 			await Player.update(
@@ -1310,10 +1533,11 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * links a player to the provided discord guild member, updating roles and nickname
+	 *
 	 * @param idOrDiscordMember the member to link the player to
 	 * @param reason reason for discord's audit logs
 	 */
-	async link(idOrDiscordMember: GuildMember | Snowflake, reason?: string) {
+	public async link(idOrDiscordMember: GuildMember | Snowflake, reason?: string) {
 		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setUniqueDiscordId(idOrDiscordMember.id, true);
 
@@ -1344,9 +1568,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * unlinks a player from a discord member, purging roles and nickname
+	 *
 	 * @param reason reason for discord's audit logs
 	 */
-	async unlink(reason?: string) {
+	public async unlink(reason?: string) {
 		const currentlyLinkedMember = await this.fetchDiscordMember();
 
 		let wasSuccessful = true;
@@ -1379,18 +1604,19 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * adds and/or removes the provided roles and logs it via the log handler, returns true or false depending on the success
+	 *
 	 * @param options.rolesToAdd roles to add to the member
 	 * @param options.rolesToRemove roles to remove from the member
 	 * @param options.reason reason for discord's audit logs
 	 */
-	async makeRoleAPICall({
+	public async makeRoleAPICall({
 		rolesToAdd = [],
 		rolesToRemove = [],
 		reason,
 	}: {
+		reason?: string;
 		rolesToAdd?: RoleResolvables;
 		rolesToRemove?: RoleResolvables;
-		reason?: string;
 	}) {
 		const member = await this.fetchDiscordMember();
 		if (!member) return false;
@@ -1403,7 +1629,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		// permission check
 		if (!member.guild.members.me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
-			return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false;
+			logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`);
+			return false;
 		}
 
 		const { config } = this.client;
@@ -1498,7 +1725,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * removes the discord server in-game guild role & all roles handled automatically by the bot
 	 */
-	async removeFromGuild() {
+	public async removeFromGuild() {
 		void this.client.taxCollectors.setInactive(this.minecraftUuid).catch((error) => logger.error(error));
 
 		const member = await this.fetchDiscordMember();
@@ -1543,13 +1770,14 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * check if the discord member's display name includes the player ign and is unique. Tries to change it if it doesn't / isn't
-	 * @param shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
+	 *
+	 * @param shouldSendDm - whether to dm the user that they should include their ign somewhere in their nickname
 	 */
-	async syncIgnWithDisplayName(shouldSendDm = false) {
-		if (!this.inGuild() || this.guildRankPriority > this.hypixelGuild.syncIgnThreshold) return;
+	public async syncIgnWithDisplayName(shouldSendDm = false) {
+		if (!this.inGuild() || this.guildRankPriority > this.hypixelGuild.syncIgnThreshold) return this;
 
 		const member = await this.fetchDiscordMember();
-		if (!member) return;
+		if (!member) return this;
 
 		let reason: NickChangeReason | null = null;
 
@@ -1570,8 +1798,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			reason = NickChangeReason.NotUnique;
 		}
 
-		if (reason === null) return;
-		if (this.ign === UNKNOWN_IGN) return; // mojang api error
+		if (reason === null) return this;
+		if (this.ign === UNKNOWN_IGN) return this; // mojang api error
 
 		// check if member already has a nick which is not just the current ign (case insensitive)
 		let newNick =
@@ -1598,9 +1826,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * sets a nickname for the player's discord member
+	 *
 	 * @param options
 	 */
-	async makeNickAPICall({ newNick = null, shouldSendDm = false, reason }: MakeNickAPICallOptions = {}) {
+	public async makeNickAPICall({ newNick = null, shouldSendDm = false, reason }: MakeNickAPICallOptions = {}) {
 		const member = await this.fetchDiscordMember();
 		if (!member) return false;
 
@@ -1702,7 +1931,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * fetches the discord tag from hypixel
 	 */
-	async fetchDiscordTag() {
+	public async fetchDiscordTag() {
 		try {
 			return (await hypixel.player.uuid(this.minecraftUuid)).player?.socialMedia?.links?.DISCORD ?? null;
 		} catch (error) {
@@ -1714,7 +1943,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * determines the player's main profile (profile with the most weight)
 	 */
-	async fetchMainProfile() {
+	public async fetchMainProfile() {
 		let profiles = null;
 
 		try {
@@ -1764,7 +1993,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * updates the player's IGN via the mojang API
 	 */
-	async updateIgn() {
+	public async updateIgn() {
 		try {
 			const { ign: CURRENT_IGN } = await mojang.uuid(this.minecraftUuid, { force: true });
 
@@ -1803,12 +2032,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * transfers xp offsets
+	 *
 	 * @param options
-	 * @param options.from
-	 * @param options.to
-	 * @param options.types
 	 */
-	transferXp({ from = '', to = '', types = XP_AND_DATA_TYPES }: TransferXpOptions) {
+	public async transferXp({ from = '', to = '', types = XP_AND_DATA_TYPES }: TransferXpOptions) {
 		for (const type of types) {
 			if (isXPType(type)) {
 				this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
@@ -1822,15 +2049,14 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * resets the xp gained to 0
+	 *
 	 * @param options
-	 * @param options.offsetToReset
-	 * @param options.typesToReset
 	 */
-	async resetXp({ offsetToReset = null, typesToReset = XP_AND_DATA_TYPES }: ResetXpOptions = {}): Promise<this> {
+	public async resetXp({ offsetToReset = null, typesToReset = XP_AND_DATA_TYPES }: ResetXpOptions = {}): Promise<this> {
 		switch (offsetToReset) {
 			case null:
 				// no offset type specifies -> resetting everything
-				await Promise.all(XP_OFFSETS.map((offset) => this.resetXp({ offsetToReset: offset, typesToReset })));
+				await Promise.all(XP_OFFSETS.map(async (offset) => this.resetXp({ offsetToReset: offset, typesToReset })));
 				return this.resetXp({ offsetToReset: Offset.Day, typesToReset });
 
 			case Offset.Day:
@@ -1848,6 +2074,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						this.changed(`${type}History`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
 					}
 				}
+
 				break;
 
 			case Offset.Current:
@@ -1858,6 +2085,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						this[type] = {};
 					}
 				}
+
 				break;
 
 			default:
@@ -1868,6 +2096,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						this[`${type}${offsetToReset}`] = this[type];
 					}
 				}
+
 				break;
 		}
 
@@ -1877,8 +2106,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * resets the guild tax paid
 	 */
-	async resetTax() {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	public async resetTax() {
 		if (!this.paid) return this;
 
 		const result = await this.client.db.models.Transaction.findAll({
@@ -1907,18 +2135,18 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			await transaction.rollback();
 			throw error;
 		}
+
+		return this;
 	}
 
 	/**
 	 * set the player to paid
-	 * @param options
 	 */
-	async setToPaid({
+	public async setToPaid({
 		amount = this.client.config.get('TAX_AMOUNT'),
 		collectedBy = this.minecraftUuid,
 		auctionId = null,
 	}: SetToPaidOptions = {}) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (this.paid) {
 			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: TransactionType.Donation }));
 			return this;
@@ -1939,9 +2167,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * set the player to paid
-	 * @param options
 	 */
-	addTransfer({
+	public addTransfer({
 		amount,
 		collectedBy,
 		auctionId = null,
@@ -1967,7 +2194,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * removes the dual link between a discord member / user and the player
 	 */
-	uncacheMember() {
+	public async uncacheMember() {
 		// remove from user player cache
 		if (this.discordId) {
 			const user = this.client.users.cache.get(this.discordId);
@@ -1981,7 +2208,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * removes the element from member, user, guild, client cache
 	 */
-	async uncache() {
+	public async uncache() {
 		await this.uncacheMember();
 
 		this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
@@ -1993,17 +2220,18 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * destroys the db entry and removes it from cache
 	 */
-	override async destroy(options?: InstanceDestroyOptions) {
+	public override async destroy(options?: InstanceDestroyOptions) {
 		await this.uncache();
 		return super.destroy(options);
 	}
 
 	/**
 	 * updates the guild xp and syncs guild mutes
-	 * @param data from the hypixel guild API
+	 *
+	 * @param data - from the hypixel guild API
 	 * @param hypixelGuild
 	 */
-	async syncWithGuildData(
+	public async syncWithGuildData(
 		{ expHistory = {}, rank }: Components.Schemas.GuildMember,
 		hypixelGuild = this.hypixelGuild!,
 	) {
@@ -2043,11 +2271,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * returns the true and progression level for the provided skill type
-	 * @param type the skill or dungeon type
-	 * @param offset optional offset value to use instead of the current xp value
-	 * @param useIndividualCap whether to use the individual max level cap if existing
+	 *
+	 * @param type - the skill or dungeon type
+	 * @param offset - optional offset value to use instead of the current xp value
+	 * @param useIndividualCap - whether to use the individual max level cap if existing
 	 */
-	getSkillLevel(type: SkillTypes | DungeonTypes, offset: XPOffsets = '', useIndividualCap = true) {
+	public getSkillLevel(type: DungeonTypes | SkillTypes, offset: XPOffsets = '', useIndividualCap = true) {
 		return getSkillLevel(
 			type,
 			this[`${type}Xp${offset}`],
@@ -2057,9 +2286,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * returns the true and progression skill average
-	 * @param offset optional offset value to use instead of the current xp value
+	 *
+	 * @param offset - optional offset value to use instead of the current xp value
 	 */
-	getSkillAverage(offset: XPOffsets = '') {
+	public getSkillAverage(offset: XPOffsets = '') {
 		let skillAverage = 0;
 		let trueAverage = 0;
 
@@ -2080,25 +2310,28 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * returns the slayer level for the provided slayer type
-	 * @param type the slayer type
+	 *
+	 * @param type - the slayer type
 	 */
-	getSlayerLevel(type: SlayerTypes) {
+	public getSlayerLevel(type: SlayerTypes) {
 		return getSlayerLevel(this[`${type}Xp`]);
 	}
 
 	/**
 	 * returns the total slayer xp
-	 * @param offset optional offset value to use instead of the current xp value
+	 *
+	 * @param offset - optional offset value to use instead of the current xp value
 	 */
-	getSlayerTotal(offset: XPOffsets = '') {
+	public getSlayerTotal(offset: XPOffsets = '') {
 		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}Xp${offset}`], 0);
 	}
 
 	/**
 	 * calculates the player's weight using Lily's formula
-	 * @param offset optional offset value to use instead of the current xp value
+	 *
+	 * @param offset - optional offset value to use instead of the current xp value
 	 */
-	getLilyWeight(offset: XPOffsets = '') {
+	public getLilyWeight(offset: XPOffsets = '') {
 		const SKILL_XP_LILY = LILY_SKILL_NAMES.map((skill) => this[`${skill}Xp${offset}`]);
 		const {
 			total,
@@ -2121,9 +2354,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * calculates the player's weight using Senither's formula
-	 * @param offset optional offset value to use instead of the current xp value
+	 *
+	 * @param offset - optional offset value to use instead of the current xp value
 	 */
-	getSenitherWeight(offset: XPOffsets = '') {
+	public getSenitherWeight(offset: XPOffsets = '') {
 		let weight = 0;
 		let overflow = 0;
 
@@ -2157,18 +2391,20 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * returns the true and progression level for the provided skill type
-	 * @param type the skill or dungeon type
-	 * @param index xpHistory array index
+	 *
+	 * @param type - the skill or dungeon type
+	 * @param index - xpHistory array index
 	 */
-	getSkillLevelHistory(type: SkillTypes | DungeonTypes, index: number) {
+	public getSkillLevelHistory(type: DungeonTypes | SkillTypes, index: number) {
 		return getSkillLevel(type, this[`${type}XpHistory`][index], type === 'farming' ? this.farmingLvlCap : null);
 	}
 
 	/**
 	 * returns the true and progression skill average
-	 * @param index xpHistory array index
+	 *
+	 * @param index - xpHistory array index
 	 */
-	getSkillAverageHistory(index: number) {
+	public getSkillAverageHistory(index: number) {
 		let skillAverage = 0;
 		let trueAverage = 0;
 
@@ -2189,17 +2425,19 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * returns the total slayer xp
-	 * @param index xpHistory array index
+	 *
+	 * @param index - xpHistory array index
 	 */
-	getSlayerTotalHistory(index: number) {
+	public getSlayerTotalHistory(index: number) {
 		return SLAYERS.reduce((acc, slayer) => acc + (this[`${slayer}XpHistory`][index] ?? 0), 0);
 	}
 
 	/**
 	 * calculates the player's weight using Lily's formula
-	 * @param index xpHistory array index
+	 *
+	 * @param index - xpHistory array index
 	 */
-	getLilyWeightHistory(index: number) {
+	public getLilyWeightHistory(index: number) {
 		const SKILL_XP_LILY = LILY_SKILL_NAMES.map((skill) => this[`${skill}XpHistory`][index] ?? 0);
 		const {
 			total,
@@ -2222,9 +2460,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * calculates the player's weight using Senither's formula
-	 * @param index xpHistory array index
+	 *
+	 * @param index - xpHistory array index
 	 */
-	getSenitherWeightHistory(index: number) {
+	public getSenitherWeightHistory(index: number) {
 		let weight = 0;
 		let overflow = 0;
 
@@ -2259,7 +2498,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * adds the current timestamp to infractions
 	 */
-	async addInfraction() {
+	public async addInfraction() {
 		this._infractions ??= []; // create infractions array if non-existent
 		this._infractions.push(Date.now()); // add current time
 		this.changed('_infractions', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
@@ -2275,7 +2514,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * player IGN
 	 */
-	override toString() {
+	public override toString() {
 		return this.ign;
 	}
 }

@@ -1,6 +1,6 @@
-import { ItemId } from '../constants';
-import { PET_XP_TOTAL } from '../constants/pets';
-import type { Components } from '@zikeji/hypixel';
+import { type Components } from '@zikeji/hypixel';
+import { ItemId } from '../constants/index.js';
+import { PET_XP_TOTAL } from '../constants/pets.js';
 
 /**
  * @param pet

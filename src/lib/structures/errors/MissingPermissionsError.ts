@@ -1,6 +1,6 @@
-import { InteractionUtil } from '#utils';
+import { type Interaction, type Guild, type Snowflake } from 'discord.js';
 import { commaListOr } from '#functions';
-import type { Interaction, Guild, Snowflake } from 'discord.js';
+import { InteractionUtil } from '#utils';
 
 /**
  * @param message

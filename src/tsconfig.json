@@ -7,17 +7,17 @@
 		"baseUrl": ".",
 		"paths": {
 			"#api": ["api/index.ts"],
-			"#chatBridge/*": ["lib/chatBridge/*.ts"],
+			"#chatBridge/*": ["lib/chatBridge/*"],
 			"#chatBridge/constants": ["lib/chatBridge/constants/index.ts"],
 			"#constants": ["lib/constants/index.ts"],
 			"#db": ["lib/structures/database/index.ts"],
 			"#functions": ["lib/functions/index.ts"],
 			"#logger": ["logger.ts"],
-			"#networth/*": ["lib/networth/*.ts"],
+			"#networth/*": ["lib/networth/*"],
 			"#structures/*": ["lib/structures/*"],
 			"#types": ["lib/types/util.ts"],
 			"#utils": ["lib/util/index.ts"],
-			"#root/*": ["*.ts"]
+			"#root/*": ["*"]
 		}
 	},
 	"exclude": ["./tsconfig.json"]

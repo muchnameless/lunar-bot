@@ -1,16 +1,15 @@
-import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { stripIndent } from 'common-tags';
-import { EmbedUtil, InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { TransactionType } from '#structures/database/models/Transaction';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { codeBlock, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { mojang } from '#api';
 import { formatNumber } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { TransactionType } from '#structures/database/models/Transaction.js';
+import { EmbedUtil, InteractionUtil } from '#utils';
 
 export default class DonationsCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder().setDescription('donations leaderboard'),
 			cooldown: 0,
@@ -19,9 +18,10 @@ export default class DonationsCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		// aquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: TransactionType.Donation },

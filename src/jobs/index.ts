@@ -1,12 +1,12 @@
 import { URL } from 'node:url';
-import { logger } from '#logger';
-import { itemUpgrades, prices, accessories } from '#networth/prices';
-import { Job } from '#structures/jobs/Job';
-import { JobManager } from '#structures/jobs/JobManager';
+import { type LevelWithSilent } from 'pino';
+import { type ParsedSkyBlockItem } from './pricesAndPatchNotes.js';
 import { assertNever } from '#functions';
-import type { LevelWithSilent } from 'pino';
-import type { ParsedSkyBlockItem } from './pricesAndPatchNotes';
-import type { LunarClient } from '#structures/LunarClient';
+import { logger } from '#logger';
+import { itemUpgrades, prices, accessories } from '#networth/prices.js';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { Job } from '#structures/jobs/Job.js';
+import { JobManager } from '#structures/jobs/JobManager.js';
 
 export const enum JobType {
 	HypixelForumLastGUIDUpdate,
@@ -17,17 +17,18 @@ export const enum JobType {
 
 type WorkerMessage =
 	| {
-			op: JobType.HypixelForumLastGUIDUpdate;
 			d: number;
+			op: JobType.HypixelForumLastGUIDUpdate;
 	  }
-	| { op: JobType.LogMessage; d: { lvl: LevelWithSilent; args: [string] } }
-	| { op: JobType.SkyBlockItemUpdate; d: ParsedSkyBlockItem[] }
-	| { op: JobType.SkyBlockPriceUpdate; d: { itemId: string; price: number } };
+	| { d: { args: [string]; lvl: LevelWithSilent }; op: JobType.LogMessage }
+	| { d: { itemId: string; price: number }; op: JobType.SkyBlockPriceUpdate }
+	| { d: ParsedSkyBlockItem[]; op: JobType.SkyBlockItemUpdate };
 
 export const jobs = new JobManager();
 
 /**
  * start jobs and add listeners for messages from worker threads
+ *
  * @param client
  */
 export function startJobs(client: LunarClient) {
@@ -53,6 +54,7 @@ export function startJobs(client: LunarClient) {
 							if (category === 'ACCESSORY') accessories.add(id);
 							if (data.stars) itemUpgrades.set(id, data);
 						}
+
 						break;
 
 					case JobType.SkyBlockPriceUpdate:
@@ -60,7 +62,7 @@ export function startJobs(client: LunarClient) {
 						break;
 
 					default:
-						return assertNever(message);
+						assertNever(message);
 				}
 			},
 		}),

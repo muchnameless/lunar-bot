@@ -1,15 +1,15 @@
 import { env } from 'node:process';
-import { Sequelize, DataTypes } from 'sequelize';
 import pg from 'pg';
+import { Sequelize, DataTypes } from 'sequelize';
 
 // to get bigints as numbers instead of strings
 pg.defaults.parseInt8 = true;
 pg.types.setTypeParser(1_700, Number.parseFloat);
 
 // use floats instead of strings as decimal representation (1/2)
-// @ts-expect-error
+// @ts-expect-error Base constructors must all have the same return type
 class CustomDecimal extends DataTypes.DECIMAL {
-	static parse(value: string) {
+	public static parse(value: string) {
 		return Number.parseFloat(value);
 	}
 }
@@ -29,7 +29,7 @@ export const sequelize = new Sequelize({
 			const dTypes = {
 				DECIMAL: CustomDecimal,
 			};
-			// @ts-expect-error
+			// @ts-expect-error Base constructors must all have the same return type ...
 			this.connectionManager.refreshTypeParser(dTypes);
 		},
 	},

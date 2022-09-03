@@ -1,14 +1,14 @@
-import { MessageUtil, UserUtil } from '#utils';
-import { Event } from '#structures/events/Event';
+import { type ClientEvents, type Events, type Message } from 'discord.js';
 import { UnicodeEmoji } from '#constants';
-import type { ClientEvents, Events, Message } from 'discord.js';
+import { Event } from '#structures/events/Event.js';
+import { MessageUtil, UserUtil } from '#utils';
 
 export default class MessageCreateEvent extends Event {
 	/**
 	 * @param message
 	 * @param isEdit
 	 */
-	_handleDiscordMessage(message: Message, isEdit = false) {
+	protected _handleDiscordMessage(message: Message, isEdit = false) {
 		// chat bridge
 		this.client.chatBridges.handleDiscordMessage(message, { isEdit });
 
@@ -25,9 +25,10 @@ export default class MessageCreateEvent extends Event {
 
 	/**
 	 * event listener callback
+	 *
 	 * @param message
 	 */
-	override run(message: ClientEvents[Events.MessageCreate][0]) {
-		return this._handleDiscordMessage(message, false);
+	public override run(message: ClientEvents[Events.MessageCreate][0]) {
+		this._handleDiscordMessage(message, false);
 	}
 }

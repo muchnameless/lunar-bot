@@ -1,16 +1,16 @@
-import { ChannelType, codeBlock, EmbedBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import { ChannelType, codeBlock, EmbedBuilder, type ClientEvents, type Events } from 'discord.js';
 import { logger } from '#logger';
+import { Event } from '#structures/events/Event.js';
 import { EmbedUtil, GuildMemberUtil } from '#utils';
-import { Event } from '#structures/events/Event';
-import type { ClientEvents, Events } from 'discord.js';
 
 export default class GuildMemberRemoveEvent extends Event {
 	/**
 	 * event listener callback
+	 *
 	 * @param member
 	 */
-	override run(member: ClientEvents[Events.GuildMemberRemove][0]) {
+	public override run(member: ClientEvents[Events.GuildMemberRemove][0]) {
 		// uncache user
 		if (
 			!this.client.guilds.cache.some((guild) => guild.members.cache.has(member.id)) &&

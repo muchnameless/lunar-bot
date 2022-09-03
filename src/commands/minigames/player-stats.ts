@@ -1,19 +1,18 @@
-import { SlashCommandBuilder, time } from 'discord.js';
-import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
-import { optionalIgnOption } from '#structures/commands/commonOptions';
+import { oneLine } from 'common-tags';
+import { SlashCommandBuilder, time, type ChatInputCommandInteraction } from 'discord.js';
+import BaseStatsCommand from './~base-stats-command.js';
 import { hypixel } from '#api';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { escapeIgn, formatNumber, getUuidAndIgn, parseSecondsFromObjectId, seconds } from '#functions';
-import BaseStatsCommand from './~base-stats-command';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { Awaited } from '#types';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalIgnOption } from '#structures/commands/commonOptions.js';
+import { type Awaited } from '#types';
 
 export type FetchedData = Awaited<ReturnType<PlayerStatsCommand['_fetchData']>>;
 
 export default class PlayerStatsCommand extends BaseStatsCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -33,8 +32,10 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	 * @param ctx
 	 * @param ignOrUuid
 	 */
-	// eslint-disable-next-line class-methods-use-this
-	override async _fetchData(ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid: string) {
+	protected override async _fetchData(
+		ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage,
+		ignOrUuid: string,
+	) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 		const [{ player: playerData }, { guild: guildData }, { records: friendsData }] = await Promise.all([
 			hypixel.player.uuid(uuid),
@@ -57,9 +58,10 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override _generateReply({ ign, playerData, guildData, friendsData, statusData }: FetchedData) {
+	protected override _generateReply({ ign, playerData, guildData, friendsData, statusData }: FetchedData) {
 		if (!playerData?._id) return `\`${ign}\` never logged into hypixel`;
 
 		const { cleanName: RANK_NAME } = getPlayerRank(playerData);

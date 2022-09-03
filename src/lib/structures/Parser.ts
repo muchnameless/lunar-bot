@@ -1,6 +1,6 @@
 interface Operator {
-	precedence: number;
 	associativity: OperatorAssociativity;
+	precedence: number;
 }
 
 export const enum OperatorAssociativity {
@@ -9,19 +9,20 @@ export const enum OperatorAssociativity {
 }
 
 export class Parser {
-	table: Record<string, Operator>;
+	private readonly _table: Record<string, Operator>;
 
-	constructor(table: Record<string, Operator>) {
-		this.table = table;
+	public constructor(table: Record<string, Operator>) {
+		this._table = table;
 	}
 
 	/**
 	 * parses a token list into reverse polish notation
+	 *
 	 * @param input
 	 */
-	parse(input: (string | number)[]) {
-		const output: (string | number)[] = [];
-		const stack: (string | number)[] = [];
+	public parse(input: (number | string)[]) {
+		const output: (number | string)[] = [];
+		const stack: (number | string)[] = [];
 
 		for (let token of input) {
 			switch (token) {
@@ -41,12 +42,12 @@ export class Parser {
 
 				default: {
 					// token is an operator
-					if (Reflect.has(this.table, token)) {
+					if (Reflect.has(this._table, token)) {
 						let shouldWriteToStack = true;
 
 						while (stack.length) {
 							const punctuator = stack.at(-1)!;
-							const operator = this.table[token]!;
+							const operator = this._table[token]!;
 
 							if (punctuator === '(') {
 								if (operator.associativity === OperatorAssociativity.Right) {
@@ -58,7 +59,7 @@ export class Parser {
 							}
 
 							const { precedence } = operator;
-							const antecedence = this.table[punctuator]!.precedence;
+							const antecedence = this._table[punctuator]!.precedence;
 
 							if (
 								precedence > antecedence ||
@@ -83,7 +84,7 @@ export class Parser {
 
 					if (
 						nonBracketIndex !== -1 &&
-						this.table[stack[nonBracketIndex]!]?.associativity === OperatorAssociativity.Right
+						this._table[stack[nonBracketIndex]!]?.associativity === OperatorAssociativity.Right
 					) {
 						output.push(stack.splice(nonBracketIndex, 1)[0]!);
 					}

@@ -1,14 +1,13 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { type Components } from '@zikeji/hypixel';
 import { oneLine } from 'common-tags';
-import { optionalIgnOption } from '#structures/commands/commonOptions';
+import { SlashCommandBuilder } from 'discord.js';
+import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
 import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '#functions';
-import BaseStatsCommand from './~base-stats-command';
-import type { Components } from '@zikeji/hypixel';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { FetchedData } from './~base-stats-command';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 
 export default class BridgeStatsCommand extends BaseStatsCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -28,7 +27,7 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 	 * @param duelStats
 	 * @param stat
 	 */
-	static _calculateStats(duelStats: Components.Schemas.PlayerStatsGameMode, stat: string) {
+	private static _calculateStats(duelStats: Components.Schemas.PlayerStatsGameMode, stat: string) {
 		return ['duel', 'doubles', 'four'].reduce(
 			(acc, cur) => acc + ((duelStats[`bridge_${cur}_${stat}`] as number | undefined) ?? 0),
 			0,
@@ -37,15 +36,16 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override _generateReply({ ign, playerData }: FetchedData) {
+	protected override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.Duels) return `\`${ign}\` has no Bridge stats`;
 
 		try {
 			const { bridge_deaths: deaths, bridge_kills: kills } = playerData.stats.Duels;
 
-			if (deaths == null || kills == null) return `\`${ign}\` has no Bridge stats`;
+			if (typeof deaths !== 'number' || typeof kills !== 'number') return `\`${ign}\` has no Bridge stats`;
 
 			const wins = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'wins');
 			const losses = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'losses');

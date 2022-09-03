@@ -1,11 +1,10 @@
 import { CronJob } from 'cron';
-import { logger } from '#logger';
+import { type GuildResolvable, type Snowflake } from 'discord.js';
+import { type FindOptions } from 'sequelize';
+import { type HypixelGuild, type UpdateOptions } from '../models/HypixelGuild.js';
+import { type ModelResovable, ModelManager } from './ModelManager.js';
 import { autocorrect, compareAlphabetically } from '#functions';
-import { ModelManager } from './ModelManager';
-import type { ModelResovable } from './ModelManager';
-import type { GuildResolvable, Snowflake } from 'discord.js';
-import type { FindOptions } from 'sequelize';
-import type { HypixelGuild, UpdateOptions } from '../models/HypixelGuild';
+import { logger } from '#logger';
 
 export type HypixelGuildResolvable = ModelResovable<HypixelGuild>;
 
@@ -18,34 +17,34 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
 	 * `NameOne`|`NameTwo`|`NameThree`
 	 */
-	get guildNames() {
+	public get guildNames() {
 		return this.cache.map(({ name }) => `\`${name.replaceAll(' ', '')}\``).join('|');
 	}
 
 	/**
 	 * `-NameOne`|`-NameTwo`|`-NameThree`
 	 */
-	get guildNamesAsFlags() {
+	public get guildNamesAsFlags() {
 		return this.cache.map(({ name }) => `\`-${name.replaceAll(' ', '')}\``).join('|');
 	}
 
 	/**
 	 * the main guild's hypixelGuild object
 	 */
-	get mainGuild() {
+	public get mainGuild() {
 		return this.cache.get(this.client.config.get('MAIN_GUILD_ID'))!;
 	}
 
 	/**
 	 * linked discord guilds
 	 */
-	get uniqueDiscordGuildIds() {
+	public get uniqueDiscordGuildIds() {
 		return [
 			...new Set(this.client.hypixelGuilds.cache.map(({ discordId }) => discordId).filter(Boolean) as Snowflake[]),
 		];
 	}
 
-	override async loadCache(condition?: FindOptions) {
+	public override async loadCache(condition?: FindOptions) {
 		await super.loadCache(condition);
 
 		this.cache.sort(({ name: a }, { name: b }) => compareAlphabetically(a, b));
@@ -54,9 +53,10 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 	/**
 	 * update all guilds
+	 *
 	 * @param options
 	 */
-	async updateData({ syncRanks = true, rejectOnAPIError = true }: UpdateOptions = {}) {
+	public async updateData({ syncRanks = true, rejectOnAPIError = true }: UpdateOptions = {}) {
 		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
@@ -65,8 +65,10 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			this._updateDataPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within updateData
+	 *
 	 * @internal
 	 */
 	async #updateData(options: UpdateOptions) {
@@ -85,6 +87,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			if (error instanceof Error && !error.name.startsWith('Sequelize')) {
 				void this.client.config.set('HYPIXEL_API_ERROR', true);
 			}
+
 			logger.error(error, '[GUILDS UPDATE]');
 			return this;
 		}
@@ -92,9 +95,10 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 	/**
 	 * sweeps the player cache
+	 *
 	 * @param idOrGuild
 	 */
-	sweepPlayerCache(idOrGuild?: HypixelGuildResolvable | null) {
+	public sweepPlayerCache(idOrGuild?: HypixelGuildResolvable | null) {
 		if (idOrGuild) {
 			const hypixelGuild = this.resolve(idOrGuild);
 
@@ -110,9 +114,10 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 	/**
 	 * find a hypixel guild by its name, case insensitive and with auto-correction
-	 * @param name name of the hypixel guild
+	 *
+	 * @param name - name of the hypixel guild
 	 */
-	findByName(name: string) {
+	public findByName(name: string) {
 		if (!name) return null;
 
 		const { similarity, value } = autocorrect(name, this.cache, 'name');
@@ -122,9 +127,10 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 	/**
 	 * find a hypixel guild by its linked discord guild
+	 *
 	 * @param discordGuildResolvable
 	 */
-	findByDiscordGuild(discordGuildResolvable: GuildResolvable | null) {
+	public findByDiscordGuild(discordGuildResolvable: GuildResolvable | null) {
 		const discordGuildId = this.client.guilds.resolveId(discordGuildResolvable!);
 
 		if (!discordGuildId) return null;
@@ -135,11 +141,12 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
 	 * register cron jobs
 	 */
-	override schedule() {
+	public override schedule() {
 		// daily stats save
 		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) {
 			this.performDailyStatsSave();
 		}
+
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:saveDailyStats`,
@@ -176,7 +183,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
 	 * shifts the daily stats array and updates the config
 	 */
-	performDailyStatsSave() {
+	public performDailyStatsSave() {
 		void this.client.config.set('LAST_DAILY_STATS_SAVE_TIME', Date.now());
 
 		for (const hypixelGuild of this.cache.values()) void hypixelGuild.saveDailyStats();
@@ -189,7 +196,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
 	 * removes mutes from players that have expired. useful since the map can still hold mutes of players who left the guild
 	 */
-	removeExpiredMutes() {
+	public removeExpiredMutes() {
 		for (const hypixelGuild of this.cache.values()) {
 			void hypixelGuild.removeExpiredMutes();
 		}
@@ -198,7 +205,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
 	 * update discord stat channel names
 	 */
-	async updateStatDiscordChannels() {
+	public async updateStatDiscordChannels() {
 		try {
 			for (const hypixelGuild of this.cache.values()) {
 				await hypixelGuild.updateStatDiscordChannels();

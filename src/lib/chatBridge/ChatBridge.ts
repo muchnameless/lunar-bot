@@ -1,37 +1,39 @@
+import { EventEmitter, once } from 'node:events';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
-import { EventEmitter, once } from 'node:events';
-import { logger } from '#logger';
-import { EventCollection } from '#structures/events/EventCollection';
+import { type Awaitable, type Message as DiscordMessage, type MessageOptions } from 'discord.js';
+import { type ChatBridgeManager } from './ChatBridgeManager.js';
+import { type HypixelMessage } from './HypixelMessage.js';
+import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
+import { DiscordManager, type DiscordChatManagerResolvable } from './managers/DiscordManager.js';
+import { MinecraftChatManager, type MinecraftChatOptions } from './managers/MinecraftChatManager.js';
+import { UnicodeEmoji } from '#constants';
 import { minutes, seconds } from '#functions';
-import { UnicodeEmoji } from '../constants/emojiCharacters';
-import { MessageUtil } from '../util/MessageUtil';
-import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants';
-import { MinecraftChatManager } from './managers/MinecraftChatManager';
-import { DiscordManager } from './managers/DiscordManager';
-import type { Awaitable, Message as DiscordMessage, MessageOptions } from 'discord.js';
-import type { LunarClient } from '#structures/LunarClient';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
-import type { Player } from '#structures/database/models/Player';
-import type { DiscordChatManagerResolvable } from './managers/DiscordManager';
-import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
-import type { ChatBridgeManager } from './ChatBridgeManager';
-import type { HypixelMessage } from './HypixelMessage';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import { type Player } from '#structures/database/models/Player.js';
+import { EventCollection } from '#structures/events/EventCollection.js';
+import { MessageUtil } from '#utils';
 
 export interface BroadcastOptions {
 	content: string;
-	type?: DiscordChatManagerResolvable;
-	hypixelMessage?: HypixelMessage | null;
 	discord?: Omit<MessageOptions, 'content'>;
+	hypixelMessage?: HypixelMessage | null;
 	minecraft?: Omit<MinecraftChatOptions, 'content'>;
+	type?: DiscordChatManagerResolvable;
 }
 
 export interface MessageForwardOptions {
-	link?: DiscordChatManagerResolvable;
-	/** player for muted and isStaff check */
-	player?: Player;
-	/** whether the message is an edit instead of a new message */
+	/**
+	 * whether the message is an edit instead of a new message
+	 */
 	isEdit?: boolean;
+	link?: DiscordChatManagerResolvable;
+	/**
+	 * player for muted and isStaff check
+	 */
+	player?: Player;
 	signal?: AbortSignal;
 }
 
@@ -45,52 +47,59 @@ export const enum ChatBridgeEvent {
 }
 
 export interface ChatBridge {
-	on(event: ChatBridgeEvent.Connect, listener: () => Awaitable<void>): this;
+	on(event: ChatBridgeEvent.Connect | ChatBridgeEvent.Ready, listener: () => Awaitable<void>): this;
 	on(event: ChatBridgeEvent.Disconnect, listener: (reason?: string) => Awaitable<void>): this;
 	on(event: ChatBridgeEvent.Error, listener: (error: Error) => Awaitable<void>): this;
 	on(event: ChatBridgeEvent.Message, listener: (hypixelMessage: HypixelMessage) => Awaitable<void>): this;
-	on(event: ChatBridgeEvent.Ready, listener: () => Awaitable<void>): this;
 }
 
 export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter {
 	/**
 	 * increases each link cycle
 	 */
-	guildLinkAttempts = 0;
+	private guildLinkAttempts = 0;
+
 	/**
 	 * client that instantiated the chat bridge
 	 */
-	declare client: LunarClient;
+	public declare readonly client: LunarClient;
+
 	/**
 	 * manager that instantiated the chat bridge
 	 */
-	manager: ChatBridgeManager;
+	public readonly manager: ChatBridgeManager;
+
 	/**
 	 * position in the mcAccount array
 	 */
-	mcAccount: number;
+	public mcAccount: number;
+
 	/**
 	 * linked hypixel guild
 	 */
-	hypixelGuild: HypixelGuild | null = null;
+	public hypixelGuild: HypixelGuild | null = null;
+
 	/**
 	 * whether to retry linking the chat bridge to a guild
 	 */
-	shouldRetryLinking = true;
+	public shouldRetryLinking = true;
+
 	/**
 	 * minecraft related functions
 	 */
-	minecraft: MinecraftChatManager<loggedIn> = new MinecraftChatManager(this);
+	public readonly minecraft: MinecraftChatManager<loggedIn> = new MinecraftChatManager(this);
+
 	/**
 	 * discord related functions
 	 */
-	discord: DiscordManager = new DiscordManager(this);
+	public readonly discord: DiscordManager = new DiscordManager(this);
+
 	/**
 	 * ChatBridge events
 	 */
-	events = new EventCollection(this, new URL('events/', import.meta.url));
+	private readonly events = new EventCollection(this, new URL('events/', import.meta.url));
 
-	constructor(client: LunarClient, manager: ChatBridgeManager, mcAccount: number) {
+	public constructor(client: LunarClient, manager: ChatBridgeManager, mcAccount: number) {
 		super({ captureRejections: true });
 
 		Object.defineProperty(this, 'client', { value: client });
@@ -103,42 +112,42 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * bot ign | guild name
 	 */
-	get logInfo() {
+	public get logInfo() {
 		return `${this.bot?.username ?? 'no bot'} | ${this.hypixelGuild ?? 'no guild'}`;
 	}
 
 	/**
 	 * player object associated with the chatBridge's bot
 	 */
-	get player() {
+	public get player() {
 		return this.minecraft.botPlayer;
 	}
 
 	/**
 	 * minecraft bot
 	 */
-	get bot() {
+	public get bot() {
 		return this.minecraft.bot;
 	}
 
 	/**
 	 * whether the minecraft bot and all discord channel managers (webhooks) are ready
 	 */
-	isReady(): this is ChatBridge<true> {
+	public isReady(): this is ChatBridge<true> {
 		return this.minecraft.isReady() && this.discord.ready;
 	}
 
 	/**
 	 * whether the guild has the chatBridge feature enabled
 	 */
-	isEnabled(): this is ChatBridge & { hypixelGuild: HypixelGuild } {
+	public isEnabled(): this is ChatBridge & { hypixelGuild: HypixelGuild } {
 		return this.hypixelGuild?.chatBridgeEnabled ?? false;
 	}
 
 	/**
 	 * create and log the bot into hypixel
 	 */
-	async connect() {
+	public async connect() {
 		await this.minecraft.connect();
 		return this;
 	}
@@ -146,7 +155,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * destroys the connection to the guild and reconnects the bot
 	 */
-	async reconnect(...args: Parameters<MinecraftChatManager['reconnect']>) {
+	public async reconnect(...args: Parameters<MinecraftChatManager['reconnect']>) {
 		await this.minecraft.reconnect(...args);
 		return this;
 	}
@@ -154,7 +163,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * disconnects the bot and resets the chatBridge
 	 */
-	disconnect() {
+	public disconnect() {
 		this.unlink();
 		this.minecraft.disconnect();
 		return this;
@@ -162,9 +171,10 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 	/**
 	 * links this chatBridge with the bot's guild
+	 *
 	 * @param guildName
 	 */
-	async link(guildName: string | null = null): Promise<this> {
+	public async link(guildName: string | null = null): Promise<this> {
 		if (!this.minecraft.isReady()) {
 			await once(this, ChatBridgeEvent.Ready);
 		}
@@ -234,7 +244,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * unlinks the chatBridge from the linked guild
 	 */
-	unlink() {
+	public unlink() {
 		this.discord.ready = false;
 		if (this.hypixelGuild) this.hypixelGuild.chatBridge = null;
 		this.hypixelGuild = null;
@@ -249,7 +259,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * Increments max listeners by one, if they are not zero.
 	 */
-	incrementMaxListeners() {
+	public incrementMaxListeners() {
 		const maxListeners = this.getMaxListeners();
 
 		if (maxListeners !== 0) this.setMaxListeners(maxListeners + 1);
@@ -258,7 +268,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * Decrements max listeners by one, if they are not zero.
 	 */
-	decrementMaxListeners() {
+	public decrementMaxListeners() {
 		const maxListeners = this.getMaxListeners();
 
 		if (maxListeners !== 0) this.setMaxListeners(maxListeners - 1);
@@ -266,9 +276,10 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 	/**
 	 * reacts with :X: if this ChatBridge is responsible for handling the message
+	 *
 	 * @param message
 	 */
-	handleError(message: DiscordMessage) {
+	public handleError(message: DiscordMessage) {
 		if (!this.discord.channelsByIds.has(message.channelId)) return false;
 
 		void MessageUtil.react(message, UnicodeEmoji.X);
@@ -277,11 +288,12 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 	/**
 	 * forwards the discord message to minecraft chat if the ChatBridge has a DiscordChatManager for the message's channel, returning true if so, false otherwise
+	 *
 	 * @param message
 	 * @param options
 	 * @returns true if the ChatBridge handled the message, false otherwise
 	 */
-	async handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions & { signal: AbortSignal }) {
+	public async handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions & { signal: AbortSignal }) {
 		if (!this.hypixelGuild?.chatBridgeEnabled) {
 			// linked but not enabled
 			if (this.hypixelGuild) return this.handleError(message);
@@ -314,9 +326,10 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 	/**
 	 * send a message both to discord and the in-game guild chat, parsing both
+	 *
 	 * @param options
 	 */
-	broadcast(options: string | BroadcastOptions) {
+	public async broadcast(options: BroadcastOptions | string) {
 		const {
 			content,
 			hypixelMessage,
@@ -328,7 +341,6 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 		return Promise.all([
 			// minecraft
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			this.minecraft[CHAT_FUNCTION_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]]?.(
 				{ content, prefix: minecraftPrefix, maxParts, ..._options },
 			) ??

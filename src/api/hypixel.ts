@@ -1,10 +1,9 @@
 import { env } from 'node:process';
-import { Client } from '@zikeji/hypixel';
-import { logger } from '#logger';
+import { Client, type Components, type DefaultMeta } from '@zikeji/hypixel';
+import { redis } from './index.js';
 import { RedisKey } from '#constants';
 import { days, minutes, seconds } from '#functions';
-import { redis } from '.';
-import type { Components, DefaultMeta } from '@zikeji/hypixel';
+import { logger } from '#logger';
 
 export const SKYBLOCK_PROFILE_TTL = seconds(30);
 
@@ -13,10 +12,10 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 	rateLimitResetOffset: seconds(1),
 	retries: 1,
 	cache: {
-		async get<T>(key: string): Promise<(T & DefaultMeta) | null> {
+		async get<T>(key: string): Promise<(DefaultMeta & T) | null> {
 			return JSON.parse((await redis.get(`${RedisKey.Hypixel}:${key}`))!);
 		},
-		set(key, value) {
+		async set(key, value) {
 			let ttl = minutes(5); // default 5 minute ttl
 
 			if (key.startsWith('skyblock:profiles')) {

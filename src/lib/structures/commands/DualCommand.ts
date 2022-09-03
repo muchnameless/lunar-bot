@@ -1,35 +1,40 @@
-import { ApplicationCommand } from './ApplicationCommand';
-import { BaseCommandCollection } from './BaseCommandCollection';
-import type { Awaitable } from '@sapphire/utilities';
-import type { ParseArgsConfig } from 'node:util';
-import type { CommandContext } from './BaseCommand';
-import type { ApplicationCommandData } from './ApplicationCommand';
-import type { BridgeCommand, BridgeCommandData } from './BridgeCommand';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import { type ParseArgsConfig } from 'node:util';
+import { type Awaitable } from '@sapphire/utilities';
+import { ApplicationCommand, type ApplicationCommandData } from './ApplicationCommand.js';
+import { type CommandContext } from './BaseCommand.js';
+import { BaseCommandCollection } from './BaseCommandCollection.js';
+import { type BridgeCommand, type BridgeCommandData } from './BridgeCommand.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 
 export class DualCommand
 	extends ApplicationCommand
-	implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns' | 'commandId'>
+	implements Omit<BridgeCommand, 'clearCooldowns' | 'collection' | 'commandId' | 'load' | 'unload'>
 {
-	_usage: string | (() => string) | null = null;
-	aliasesInGame: string[] | null;
-	guildOnly: boolean;
-	args: number | boolean = false;
-	parseArgsOptions?: ParseArgsConfig['options'];
+	private _usage: string | (() => string) | null = null;
+
+	public readonly aliasesInGame: string[] | null;
+
+	public readonly guildOnly: boolean;
+
+	public readonly args: boolean | number = false;
+
+	public readonly parseArgsOptions?: ParseArgsConfig['options'];
 
 	/**
 	 * create a new command
+	 *
 	 * @param context
 	 * @param slashData
 	 * @param bridgeData
 	 */
-	constructor(
+	public constructor(
 		context: CommandContext,
 		slashData: ApplicationCommandData,
 		{ aliases, guildOnly, args, parseArgsOptions, usage }: BridgeCommandData = {},
 	) {
 		super(context, slashData);
 
+		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 		this.aliasesInGame = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
@@ -40,32 +45,32 @@ export class DualCommand
 	/**
 	 * whether the command is part of a visible category
 	 */
-	get visible() {
+	public get visible() {
 		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category!);
 	}
 
-	get description() {
+	public get description() {
 		return this.slash?.description ?? null;
-	}
-
-	/**
-	 * @param value
-	 */
-	set usage(value: string | (() => string) | null) {
-		this._usage = typeof value === 'function' || value?.length ? value : null;
 	}
 
 	/**
 	 * @returns command argument usage
 	 */
-	get usage(): string | null {
+	public get usage(): string | null {
 		return typeof this._usage === 'function' ? this._usage() : this._usage;
+	}
+
+	/**
+	 * @param value
+	 */
+	public set usage(value: string | (() => string) | null) {
+		this._usage = typeof value === 'function' || value?.length ? value : null;
 	}
 
 	/**
 	 * prefix name usage
 	 */
-	get usageInfo() {
+	public get usageInfo() {
 		return `\`${this.config.get('PREFIXES')[0]}${
 			this.aliasesInGame?.[0]!.length ?? Number.POSITIVE_INFINITY < this.name.length
 				? this.aliasesInGame![0]
@@ -76,7 +81,7 @@ export class DualCommand
 	/**
 	 * loads the command and possible aliases into their collections
 	 */
-	override load() {
+	public override load() {
 		// load into chatbridge command collection
 		this.client.chatBridges.commands.set(this.name.toLowerCase(), this);
 		if (this.aliasesInGame) {
@@ -92,7 +97,7 @@ export class DualCommand
 	/**
 	 * removes all aliases and the command from the commandsCollection
 	 */
-	override unload() {
+	public override unload() {
 		// unload from chatbridge command collection
 		this.client.chatBridges.commands.delete(this.name.toLowerCase());
 		if (this.aliasesInGame) {
@@ -105,15 +110,12 @@ export class DualCommand
 		return super.unload();
 	}
 
-	/* eslint-disable @typescript-eslint/no-unused-vars */
-
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	minecraftRun(hypixelMessage: HypixelUserMessage): Awaitable<unknown> {
+	public minecraftRun(hypixelMessage: HypixelUserMessage): Awaitable<unknown> {
 		throw new Error('no run function specified for minecraft');
 	}
-
-	/* eslint-enable @typescript-eslint/no-unused-vars */
 }

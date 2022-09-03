@@ -1,8 +1,14 @@
-import { Collection, PermissionFlagsBits } from 'discord.js';
 import { ModerationLimits } from '@sapphire/discord-utilities';
-import { logger } from '#logger';
-import { seconds } from '#functions';
-import { toUpperCase } from '#types';
+import {
+	Collection,
+	PermissionFlagsBits,
+	type GuildMember,
+	type Message,
+	type Snowflake,
+	type Role,
+	type PartialGuildMember,
+} from 'discord.js';
+import { GuildUtil, UserUtil, type RoleCollection, type RoleResolvables, type SendDMOptions } from './index.js';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
@@ -12,17 +18,17 @@ import {
 	SLAYER_ROLES,
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
-} from '../constants';
-import { GuildUtil, UserUtil } from '.';
-import type { GuildMember, Message, Snowflake, Role, PartialGuildMember } from 'discord.js';
-import type { Player } from '#structures/database/models/Player';
-import type { RoleCollection, RoleResolvables, SendDMOptions } from '.';
+} from '#constants';
+import { seconds } from '#functions';
+import { logger } from '#logger';
+import { type Player } from '#structures/database/models/Player.js';
+import { toUpperCase } from '#types';
 
 export class GuildMemberUtil extends null {
 	/**
 	 * @param member
 	 */
-	static logInfo(member: GuildMember) {
+	public static logInfo(member: GuildMember) {
 		if (member.nickname) return `${member.nickname} | ${member.user.tag}`;
 		return member.user.tag;
 	}
@@ -30,7 +36,7 @@ export class GuildMemberUtil extends null {
 	/**
 	 * @param member
 	 */
-	static getPlayer(member: GuildMember | PartialGuildMember | null | undefined) {
+	public static getPlayer(member: GuildMember | PartialGuildMember | null | undefined) {
 		return UserUtil.getPlayer(member?.user);
 	}
 
@@ -38,15 +44,16 @@ export class GuildMemberUtil extends null {
 	 * @param member
 	 * @param player
 	 */
-	static setPlayer(member: GuildMember, player: Player | null) {
+	public static setPlayer(member: GuildMember, player: Player | null) {
 		return UserUtil.setPlayer(member.user, player);
 	}
 
 	/**
 	 * returns an array with the member's roles that the bot manages
+	 *
 	 * @param member
 	 */
-	static getRolesToPurge(member: GuildMember) {
+	public static getRolesToPurge(member: GuildMember) {
 		const { cache: roleCache } = member.roles;
 		const rolesToRemove: Snowflake[] = [];
 		const discordGuild = member.client.discordGuilds.cache.get(member.guild.id);
@@ -83,7 +90,7 @@ export class GuildMemberUtil extends null {
 			}
 
 			// individual skills
-			for (const skill of SKILLS.map((s) => toUpperCase(s))) {
+			for (const skill of SKILLS.map((skill) => toUpperCase(skill))) {
 				for (const level of SKILL_ROLES) {
 					if (roleCache.has(discordGuild[`${skill}_${level}_ROLE_ID`]!)) {
 						rolesToRemove.push(discordGuild[`${skill}_${level}_ROLE_ID`]!);
@@ -99,7 +106,7 @@ export class GuildMemberUtil extends null {
 			}
 
 			// individual slayer
-			for (const slayer of SLAYERS.map((s) => toUpperCase(s))) {
+			for (const slayer of SLAYERS.map((slayer) => toUpperCase(slayer))) {
 				for (const level of SLAYER_ROLES) {
 					if (roleCache.has(discordGuild[`${slayer}_${level}_ROLE_ID`]!)) {
 						rolesToRemove.push(discordGuild[`${slayer}_${level}_ROLE_ID`]!);
@@ -127,10 +134,11 @@ export class GuildMemberUtil extends null {
 
 	/**
 	 * sets a GuildMember's roles, performing permission checks beforehand
+	 *
 	 * @param member
 	 * @param roles
 	 */
-	static async setRoles(member: GuildMember, roles: RoleResolvables) {
+	public static async setRoles(member: GuildMember, roles: RoleResolvables) {
 		const difference: RoleCollection = (
 			Array.isArray(roles)
 				? (() => {
@@ -140,6 +148,7 @@ export class GuildMemberUtil extends null {
 							const role = member.guild.roles.resolve(roleOrId);
 							if (role) resolvedRoles.set(role.id, role);
 						}
+
 						return resolvedRoles;
 				  })()
 				: roles
@@ -171,7 +180,7 @@ export class GuildMemberUtil extends null {
 		}
 
 		try {
-			return await member.roles.set(Array.isArray(roles) ? (roles.filter(Boolean) as (Snowflake | Role)[]) : roles);
+			return await member.roles.set(Array.isArray(roles) ? (roles.filter(Boolean) as (Role | Snowflake)[]) : roles);
 		} catch (error) {
 			logger.error({ member, err: error, data: roles }, '[GUILDMEMBER SET ROLES]');
 			return member;
@@ -180,10 +189,11 @@ export class GuildMemberUtil extends null {
 
 	/**
 	 * add / remove roles from a GuildMember
+	 *
 	 * @param member
 	 * @param options
 	 */
-	static async editRoles(
+	public static async editRoles(
 		member: GuildMember,
 		{ add = [], remove = [] }: { add?: RoleResolvables; remove?: RoleResolvables },
 	) {
@@ -209,9 +219,9 @@ export class GuildMemberUtil extends null {
 	 * @param member
 	 * @param options
 	 */
-	static sendDM(member: GuildMember, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
-	static sendDM(member: GuildMember, options: string | SendDMOptions): Promise<Message | null>;
-	static sendDM(member: GuildMember, options: string | SendDMOptions) {
+	public static sendDM(member: GuildMember, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
+	public static sendDM(member: GuildMember, options: SendDMOptions | string): Promise<Message | null>;
+	public static async sendDM(member: GuildMember, options: SendDMOptions | string) {
 		return UserUtil.sendDM(member.user, options);
 	}
 
@@ -220,13 +230,13 @@ export class GuildMemberUtil extends null {
 	 * @param duration
 	 * @param reason
 	 */
-	static async timeout(member: GuildMember, duration: number | null, reason?: string) {
+	public static async timeout(member: GuildMember, duration: number | null, reason?: string) {
 		if (!member.moderatable) {
 			logger.warn({ member, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]: missing permissions');
 			return member;
 		}
 
-		const DURATION = duration !== null ? Math.min(duration, ModerationLimits.MaximumTimeoutDuration) : null;
+		const DURATION = duration === null ? null : Math.min(duration, ModerationLimits.MaximumTimeoutDuration);
 
 		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - DURATION!) < seconds(1)) {
 			logger.debug({ member, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]: is already in (similar) timeout');

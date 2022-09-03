@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from 'discord.js';
+import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command.js';
+import { hypixel } from '#api';
 import { DUNGEON_CLASSES, DUNGEON_XP_TOTAL, LEVEL_CAP } from '#constants';
 import { formatDecimalNumber, formatNumber, getSkillLevel, seconds, shortenNumber } from '#functions';
-import { hypixel } from '#api';
-import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
 
 export default class DungeonsCommand extends BaseSkyBlockCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -21,20 +21,19 @@ export default class DungeonsCommand extends BaseSkyBlockCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override async _generateReply({ ign, uuid, profile }: FetchedData) {
+	protected override async _generateReply({ ign, uuid, profile }: FetchedData) {
 		const { player } = await hypixel.player.uuid(uuid);
 		const SECRETS_FOUND = player?.achievements?.skyblock_treasure_hunter ?? 0;
 		const member = profile.members[uuid]!;
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		const XP = member.dungeons?.dungeon_types?.catacombs?.experience ?? 0;
 		const { progressLevel: catacombsLvl, trueLevel } = getSkillLevel('catacombs', XP);
 		const XP_TILL_NEXT =
 			trueLevel < LEVEL_CAP.catacombs ? DUNGEON_XP_TOTAL[trueLevel + 1]! - XP : XP - DUNGEON_XP_TOTAL.at(-1)!;
 		const CLASS_AVERAGE =
 			DUNGEON_CLASSES.reduce(
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				(acc, cur) => acc + getSkillLevel(cur, member.dungeons?.player_classes?.[cur]?.experience).nonFlooredLevel,
 				0,
 			) / DUNGEON_CLASSES.length;

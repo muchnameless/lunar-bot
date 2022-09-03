@@ -1,16 +1,19 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import {
+	handleLeaderboardCommandInteraction,
+	seconds,
+	type LeaderboardXPOffsets,
+	type LeaderboardXPTypes,
+} from '#functions';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption, offsetOption, pageOption, xpTypeOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
-import { hypixelGuildOption, offsetOption, pageOption, xpTypeOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { handleLeaderboardCommandInteraction, seconds } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { LeaderboardXPOffsets, LeaderboardXPTypes } from '#functions';
-import type { CommandContext } from '#structures/commands/BaseCommand';
 
 export default class TopCommand extends ApplicationCommand {
-	includeAllHypixelGuilds = true;
+	public readonly includeAllHypixelGuilds = true;
 
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('total leaderboard')
@@ -24,9 +27,10 @@ export default class TopCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return handleLeaderboardCommandInteraction(interaction, {
 			lbType: 'total',
 			xpType: (interaction.options.getString('type') as LeaderboardXPTypes) ?? this.config.get('CURRENT_COMPETITION'),

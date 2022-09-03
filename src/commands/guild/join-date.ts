@@ -1,16 +1,15 @@
-import { bold, SlashCommandBuilder, time } from 'discord.js';
+import { bold, SlashCommandBuilder, time, type ChatInputCommandInteraction } from 'discord.js';
 import ms from 'ms';
-import { logger } from '#logger';
-import { InteractionUtil } from '#utils';
-import { IGN_DEFAULT, logErrors } from '#chatBridge/constants';
-import { forceOption, hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions';
-import { MinecraftChatManager } from '#chatBridge/managers/MinecraftChatManager';
-import { DualCommand } from '#structures/commands/DualCommand';
+import { type ChatBridge } from '#chatBridge/ChatBridge.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { IGN_DEFAULT, logErrors } from '#chatBridge/constants/index.js';
+import { MinecraftChatManager } from '#chatBridge/managers/MinecraftChatManager.js';
 import { escapeIgn, seconds } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { ChatBridge } from '#chatBridge/ChatBridge';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+import { logger } from '#logger';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
+import { forceOption, hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 interface JoinInfo {
 	ign: string;
@@ -25,7 +24,7 @@ const parseArgsOptions = {
 } as const;
 
 export default class JoinDateCommand extends DualCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -44,9 +43,9 @@ export default class JoinDateCommand extends DualCommand {
 		);
 	}
 
-	static running = new Set();
+	public static readonly running = new Set();
 
-	static JOINED_REGEXP = new RegExp(
+	public static readonly JOINED_REGEXP = new RegExp(
 		`(?<time>.+): ${IGN_DEFAULT} (?:joined|created the guild)(?:\\n.+: ${IGN_DEFAULT} invited ${IGN_DEFAULT})*$`,
 	);
 
@@ -54,7 +53,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param chatBridge
 	 * @param ign
 	 */
-	static async getJoinDate(chatBridge: ChatBridge, ign: string) {
+	public static async getJoinDate(chatBridge: ChatBridge, ign: string) {
 		// get first page
 		let logEntry = await this.getLogEntry(chatBridge, ign, 1);
 		let lastPage = Number(/\(Page 1 of (\d+)\)/.exec(logEntry)?.[1]);
@@ -73,6 +72,7 @@ export default class JoinDateCommand extends DualCommand {
 			if (!(invitedRegExp ??= new RegExp(`\\n.+: ${IGN_DEFAULT} invited ${ign}$`)).test(logEntry)) break;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		const timestampSeconds = seconds.fromMilliseconds(Date.parse(matched?.groups!.time!));
 
 		return {
@@ -86,7 +86,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param ign
 	 * @param page
 	 */
-	static getLogEntry(chatBridge: ChatBridge, ign: string, page: number) {
+	public static getLogEntry(chatBridge: ChatBridge, ign: string, page: number) {
 		return chatBridge.minecraft.command({
 			command: `g log ${ign} ${page}`,
 			abortRegExp: logErrors(ign),
@@ -96,6 +96,7 @@ export default class JoinDateCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param chatBridge
 	 * @param ignInput
 	 */
@@ -103,7 +104,7 @@ export default class JoinDateCommand extends DualCommand {
 		try {
 			const { ign, timestampSeconds } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
 			return `${escapeIgn(ign)}: joined ${chatBridge.hypixelGuild} at ${
-				!Number.isNaN(timestampSeconds) ? time(timestampSeconds) : 'an unknown date'
+				Number.isNaN(timestampSeconds) ? 'an unknown date' : time(timestampSeconds)
 			}`;
 		} catch {
 			return `${escapeIgn(ignInput)}: never joined ${chatBridge.hypixelGuild}`;
@@ -112,9 +113,10 @@ export default class JoinDateCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const IGN = InteractionUtil.getIgn(interaction, {
 			fallbackToCurrentUser: !(
@@ -153,21 +155,22 @@ export default class JoinDateCommand extends DualCommand {
 					.sort(({ timestampSeconds: a }, { timestampSeconds: b }) => a - b)
 					.map(
 						({ ign, timestampSeconds }) =>
-							`${!Number.isNaN(timestampSeconds) ? time(timestampSeconds) : 'unknown date'}: ${escapeIgn(ign)}`,
+							`${Number.isNaN(timestampSeconds) ? 'unknown date' : time(timestampSeconds)}: ${escapeIgn(ign)}`,
 					)
 					.join('\n')}`,
 				split: true,
 			});
 		}
 
-		return InteractionUtil.reply(interaction, await this._generateReply(hypixelGuild.chatBridge, IGN));
+		return void InteractionUtil.reply(interaction, await this._generateReply(hypixelGuild.chatBridge, IGN));
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		const {
 			values: { guild: HYPIXEL_GUILD_NAME },
 			positionals,

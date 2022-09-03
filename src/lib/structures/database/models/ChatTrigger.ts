@@ -1,41 +1,47 @@
 import { setTimeout } from 'node:timers';
 import { Collection } from 'discord.js';
-import { Model, DataTypes } from 'sequelize';
-import { NEVER_MATCHING_REGEXP } from '#constants';
-import type {
-	CreationOptional,
-	InferAttributes,
-	InferCreationAttributes,
-	InstanceDestroyOptions,
-	ModelStatic,
-	NonAttribute,
-	Sequelize,
+import {
+	Model,
+	DataTypes,
+	type CreationOptional,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type InstanceDestroyOptions,
+	type ModelStatic,
+	type NonAttribute,
+	type Sequelize,
 } from 'sequelize';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { LunarClient } from '../../LunarClient';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { NEVER_MATCHING_REGEXP } from '#constants';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreationAttributes<ChatTrigger>> {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare regExpString: string;
-	declare response: string;
-	declare cooldown: number | null;
-	declare chatTypes: string[];
+	public declare regExpString: string;
 
-	declare createdAt: CreationOptional<Date>;
-	declare updatedAt: CreationOptional<Date>;
+	public declare response: string;
 
-	private timestamps: Collection<string, number> | null;
+	public declare cooldown: number | null;
+
+	public declare chatTypes: string[];
+
+	public declare createdAt: CreationOptional<Date>;
+
+	public declare updatedAt: CreationOptional<Date>;
+
+	private readonly timestamps: Collection<string, number> | null;
+
 	private _regExp: RegExp | null;
 
-	constructor(...args: any[]) {
+	public constructor(...args: any[]) {
 		super(...args);
 
 		this._regExp = this.regExpString.includes('{') ? null : new RegExp(this.regExpString, 'i');
-		this.timestamps = this.cooldown !== 0 ? new Collection() : null;
+		this.timestamps = this.cooldown === 0 ? null : new Collection();
 	}
 
-	static initialise(sequelize: Sequelize) {
+	public static initialise(sequelize: Sequelize) {
 		return this.init(
 			{
 				regExpString: {
@@ -43,7 +49,7 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 					allowNull: false,
 					set(value: string) {
 						(this as ChatTrigger)._regExp = value.includes('{') ? null : new RegExp(value, 'i');
-						return this.setDataValue('regExpString', value);
+						this.setDataValue('regExpString', value);
 					},
 				},
 				response: {
@@ -85,12 +91,12 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 	/**
 	 * @param hypixelMessage
 	 */
-	testMessage(hypixelMessage: HypixelUserMessage) {
-		if (!this.chatTypes.includes(hypixelMessage.type)) return;
+	public testMessage(hypixelMessage: HypixelUserMessage) {
+		if (!this.chatTypes.includes(hypixelMessage.type)) return null;
 
 		const matched = this._getRegExp(hypixelMessage).exec(hypixelMessage.content);
 
-		if (!matched) return;
+		if (!matched) return null;
 
 		// cooldowns
 		if (this.timestamps) {
@@ -98,7 +104,7 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 				this.timestamps.has(hypixelMessage.author.ign) &&
 				Date.now() < this.timestamps.get(hypixelMessage.author.ign)! + this.cooldown!
 			) {
-				return;
+				return null;
 			}
 
 			this.timestamps.set(hypixelMessage.author.ign, Date.now());
@@ -108,14 +114,14 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 		return hypixelMessage.reply(
 			this.response
 				.replaceAll('{AUTHOR_IGN}', hypixelMessage.author.ign)
-				.replaceAll(/\$(\d+)/g, (m, p0) => matched[p0] ?? m), // replace $number with capture group #number
+				.replaceAll(/\$(\d+)/g, (total, p0) => matched[p0] ?? total), // replace $number with capture group #number
 		);
 	}
 
 	/**
 	 * destroys the db entry and removes it from cache
 	 */
-	override destroy(options?: InstanceDestroyOptions) {
+	public override async destroy(options?: InstanceDestroyOptions) {
 		this.client.chatTriggers.cache.delete(this[this.client.chatTriggers.primaryKey] as string);
 		return super.destroy(options);
 	}

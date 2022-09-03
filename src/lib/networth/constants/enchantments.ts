@@ -1,5 +1,6 @@
-import { ItemId } from '.';
+import { ItemId } from './index.js';
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/src/constants/misc.js#L96
  */
@@ -17,6 +18,7 @@ export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
 		Enchantment.UltimateSoulEater,
 	]),
 } as const;
+/* eslint-enable @typescript-eslint/no-use-before-define */
 
 export const enum Enchantment {
 	Angler = 'angler',

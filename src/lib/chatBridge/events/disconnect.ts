@@ -1,12 +1,13 @@
+import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
 import { logger } from '#logger';
-import { ChatBridgeEvent } from '../ChatBridgeEvent';
 
 export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {
 	/**
 	 * event listener callback
+	 *
 	 * @param reason
 	 */
-	override async run(reason: string | null) {
+	public override async run(reason: string | null) {
 		logger.error(
 			`[CHATBRIDGE DISCONNECT]: ${this.chatBridge.logInfo}: minecraft bot disconnected from server: ${
 				reason ?? 'unknown reason'

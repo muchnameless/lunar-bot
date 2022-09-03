@@ -1,11 +1,12 @@
-import { Warnings } from '#structures/Warnings';
-import { ItemId } from '../constants';
+import { ItemId } from '../constants/index.js';
+import { Warnings } from '#structures/Warnings.js';
 
 const warnings = new Warnings<string>();
 
 /**
  * https://hypixel-skyblock.fandom.com/wiki/Reforging
  * https://wiki.hypixel.net/Reforging
+ *
  * @param modifier
  * @param itemId
  */
@@ -137,6 +138,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 			if ([ItemId.AspectOfTheEnd, ItemId.AspectOfTheVoid].includes(itemId as any)) {
 				return ItemId.WarpedStone; // sword reforge stone
 			}
+
 			return ItemId.EndstoneGeode; // armor reforge stone (warped renamed to hyper for armor)
 		case 'waxed':
 			return ItemId.BlazeWax;

@@ -1,24 +1,23 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { oneLine } from 'common-tags';
 import { getSkyWarsLevelInfo } from '@zikeji/hypixel';
-import { optionalIgnOption } from '#structures/commands/commonOptions';
+import { oneLine } from 'common-tags';
+import { SlashCommandBuilder } from 'discord.js';
+import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
 import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '#functions';
-import BaseStatsCommand from './~base-stats-command';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { FetchedData } from './~base-stats-command';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 
 interface SkyWarsStats {
-	wins: number;
-	losses: number;
 	assists: number;
+	deaths: number;
 	games_played_skywars: number;
 	kills: number;
-	deaths: number;
+	losses: number;
 	win_streak: number;
+	wins: number;
 }
 
 export default class SkyWarsStatsCommand extends BaseStatsCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -36,9 +35,10 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override _generateReply({ ign, playerData }: FetchedData) {
+	protected override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.SkyWars) return `\`${ign}\` has no SkyWars stats`;
 
 		try {

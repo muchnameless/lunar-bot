@@ -1,10 +1,10 @@
 import process, { exit } from 'node:process';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { logger } from '#logger';
+import { imgur, redis } from '#api';
 import { sequelize, sql } from '#db';
 import { seconds } from '#functions';
-import { imgur, redis } from '#api';
-import { jobs } from '#root/jobs/index';
+import { logger } from '#logger';
+import { jobs } from '#root/jobs/index.js';
 
 /**
  * error messages which will only be logged when not being caught
@@ -16,9 +16,10 @@ process
 		logger.error({ err: error, promise }, '[UNCAUGHT PROMISE REJECTION]');
 	})
 	.once('uncaughtException', (error, origin) => {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		// eslint-disable-next-line sonarjs/no-empty-collection
 		if (IGNORED_ERRORS.includes(error?.message ?? error)) {
-			return logger.error({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
+			logger.error({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
+			return;
 		}
 
 		logger.fatal({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
@@ -62,7 +63,8 @@ async function cleanup() {
 
 /**
  * closes all db connections and exits the process
- * @param code exit code
+ *
+ * @param code - exit code
  */
 export async function exitProcess(code = 0) {
 	const hasError = await Promise.race([cleanup(), sleep(seconds(10), true)]);

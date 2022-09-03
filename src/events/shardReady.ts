@@ -1,14 +1,18 @@
+import { type ClientEvents, type Events } from 'discord.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event';
-import type { ClientEvents, Events } from 'discord.js';
+import { Event } from '#structures/events/Event.js';
 
 export default class ShardReadyEvent extends Event {
 	/**
 	 * event listener callback
+	 *
 	 * @param shardId
 	 * @param unavailableGuilds
 	 */
-	override run(shardId: ClientEvents[Events.ShardReady][0], unavailableGuilds?: ClientEvents[Events.ShardReady][1]) {
+	public override run(
+		shardId: ClientEvents[Events.ShardReady][0],
+		unavailableGuilds?: ClientEvents[Events.ShardReady][1],
+	) {
 		if (unavailableGuilds) {
 			logger.info({ unavailableGuilds }, `[SHARD #${shardId} READY]`);
 		} else {

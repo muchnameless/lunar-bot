@@ -1,18 +1,18 @@
-import { PermissionFlagsBits } from 'discord.js';
-import { ChannelUtil } from '#utils';
-import { logger } from '#logger';
+import { PermissionFlagsBits, type ClientEvents, type Events, type Message } from 'discord.js';
+import MessageCreateEvent from './messageCreate.js';
 import { minutes } from '#functions';
-import MessageCreateEvent from './messageCreate';
-import type { ClientEvents, Events, Message } from 'discord.js';
+import { logger } from '#logger';
+import { ChannelUtil } from '#utils';
 
 export default class MessageUpdateEvent extends MessageCreateEvent {
 	/**
 	 * event listener callback
+	 *
 	 * @param oldMessage
 	 * @param newMessage
 	 */
-	// @ts-expect-error
-	override async run(
+	// @ts-expect-error override
+	public override async run(
 		oldMessage: ClientEvents[Events.MessageUpdate][0],
 		newMessage: ClientEvents[Events.MessageUpdate][1],
 	) {
@@ -28,7 +28,8 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 			try {
 				await newMessage.fetch();
 			} catch (error) {
-				return logger.error(error, '[CMD HANDLER]: error while fetching partial message');
+				logger.error(error, '[CMD HANDLER]: error while fetching partial message');
+				return;
 			}
 		}
 

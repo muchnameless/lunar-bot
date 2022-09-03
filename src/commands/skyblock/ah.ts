@@ -1,3 +1,5 @@
+import { type Components } from '@zikeji/hypixel';
+import { stripIndents } from 'common-tags';
 import {
 	ActionRowBuilder,
 	SelectMenuBuilder,
@@ -5,19 +7,15 @@ import {
 	SlashCommandBuilder,
 	time,
 	TimestampStyles,
+	type APISelectMenuOption,
+	type ChatInputCommandInteraction,
+	type EmbedBuilder,
+	type MessageActionRowComponentBuilder,
+	type SelectMenuInteraction,
+	type Snowflake,
 } from 'discord.js';
-import { stripIndents } from 'common-tags';
-import { InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { PROFILE_EMOJIS, STATS_URL_BASE } from '#constants';
-import {
-	optionalIgnOption,
-	skyblockFindProfileOption,
-	skyblockFindProfileOptionName,
-	skyblockProfileOption,
-} from '#structures/commands/commonOptions';
 import { getSkyBlockProfiles, hypixel } from '#api';
+import { PROFILE_EMOJIS, STATS_URL_BASE, type FindProfileStrategy } from '#constants';
 import {
 	formatError,
 	findSkyblockProfile,
@@ -27,34 +25,33 @@ import {
 	upperCaseFirstChar,
 	uuidToBustURL,
 } from '#functions';
-import type { Components } from '@zikeji/hypixel';
-import type { FindProfileStrategy } from '#constants';
-import type {
-	APISelectMenuOption,
-	ChatInputCommandInteraction,
-	EmbedBuilder,
-	MessageActionRowComponentBuilder,
-	SelectMenuInteraction,
-	Snowflake,
-} from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import {
+	optionalIgnOption,
+	skyblockFindProfileOption,
+	skyblockFindProfileOptionName,
+	skyblockProfileOption,
+} from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 interface GenerateCustomIdOptions {
 	ign: string;
-	uuid: string;
 	userId: Snowflake;
+	uuid: string;
 }
 
 interface GenerateReplyOptions {
 	ign: string;
-	uuid: string;
 	profileId: string;
 	profiles: APISelectMenuOption[];
 	userId: Snowflake;
+	uuid: string;
 }
 
 export default class AhCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('SkyBlock auctions')
@@ -177,11 +174,9 @@ export default class AhCommand extends ApplicationCommand {
 		}
 	}
 
-	// eslint-disable-next-line class-methods-use-this
 	private _generateProfileOptions(profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[]) {
 		return profiles.map(({ cute_name, profile_id }) =>
 			new SelectMenuOptionBuilder()
-				// eslint-disable-next-line camelcase
 				.setEmoji({ name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] })
 				.setLabel(cute_name)
 				.setValue(profile_id)
@@ -191,6 +186,7 @@ export default class AhCommand extends ApplicationCommand {
 
 	/**
 	 * replies with 'no profiles found embed'
+	 *
 	 * @param interaction
 	 * @param embed reply embed
 	 * @param ign player ign
@@ -225,10 +221,11 @@ export default class AhCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override async selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]) {
+	public override async selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]) {
 		const [uuid, ign, userId] = args as [string, string, string];
 		const [profileId] = interaction.values as [string];
 		const profiles = interaction.component.options;
@@ -247,9 +244,10 @@ export default class AhCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
 			const profiles = await getSkyBlockProfiles(uuid);
@@ -262,17 +260,7 @@ export default class AhCommand extends ApplicationCommand {
 			let profileId: string | undefined;
 			let profileName: string;
 
-			if (!PROFILE_NAME_INPUT) {
-				const mainProfile = findSkyblockProfile(
-					profiles,
-					uuid,
-					interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
-				);
-
-				if (!mainProfile) return this._handleNoProfiles(interaction, embed, ign, uuid);
-
-				({ profile_id: profileId, cute_name: profileName } = mainProfile);
-			} else {
+			if (PROFILE_NAME_INPUT) {
 				profileName = PROFILE_NAME_INPUT;
 				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
 
@@ -297,6 +285,16 @@ export default class AhCommand extends ApplicationCommand {
 						],
 					});
 				}
+			} else {
+				const mainProfile = findSkyblockProfile(
+					profiles,
+					uuid,
+					interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
+				);
+
+				if (!mainProfile) return this._handleNoProfiles(interaction, embed, ign, uuid);
+
+				({ profile_id: profileId, cute_name: profileName } = mainProfile);
 			}
 
 			return InteractionUtil.reply(

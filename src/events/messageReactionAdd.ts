@@ -1,15 +1,16 @@
-import { logger } from '#logger';
-import { Event } from '#structures/events/Event';
+import { type ClientEvents, type Events, type Message } from 'discord.js';
 import { UnicodeEmoji } from '#constants';
-import type { ClientEvents, Events, Message } from 'discord.js';
+import { logger } from '#logger';
+import { Event } from '#structures/events/Event.js';
 
 export default class MessageReactionAddEvent extends Event {
 	/**
 	 * event listener callback
+	 *
 	 * @param reaction
 	 * @param user
 	 */
-	override async run(
+	public override async run(
 		reaction: ClientEvents[Events.MessageReactionAdd][0],
 		{ id: userId }: ClientEvents[Events.MessageReactionAdd][1],
 	) {
@@ -27,7 +28,8 @@ export default class MessageReactionAddEvent extends Event {
 			if (reaction.partial) await reaction.fetch();
 			if (reaction.message.partial) await reaction.message.fetch();
 		} catch (error) {
-			return logger.error(error, '[MESSAGE REACTION ADD]: error while fetching partial');
+			logger.error(error, '[MESSAGE REACTION ADD]: error while fetching partial');
+			return;
 		}
 
 		if (userId === reaction.message.author?.id) {

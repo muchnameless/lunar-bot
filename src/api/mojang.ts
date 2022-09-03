@@ -1,8 +1,7 @@
-import { MojangClient } from '#structures/MojangClient';
+import { redis } from './index.js';
 import { RedisKey } from '#constants';
 import { days, hours, minutes, seconds } from '#functions';
-import { redis } from '.';
-import type { MojangResult } from '#structures/MojangClient';
+import { MojangClient, type MojangResult } from '#structures/MojangClient.js';
 
 export const mojang = new MojangClient({
 	timeout: seconds(30),
@@ -11,7 +10,7 @@ export const mojang = new MojangClient({
 		async get(key): Promise<MojangResult | null> {
 			return JSON.parse((await redis.get(`${RedisKey.Mojang}:${key}`))!);
 		},
-		set(key, value, isError = false) {
+		async set(key, value, isError = false) {
 			let ttl = minutes(5);
 
 			// 24 hours for successful requests (changed IGNs are reserved for 37 days (30 days name change cooldown + 1 week))

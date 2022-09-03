@@ -1,36 +1,42 @@
 import { AsyncQueue } from '@sapphire/async-queue';
-import { HypixelMessageCollectorEvent } from '../HypixelMessageCollector';
-import type { HypixelMessageCollector, HypixelMessageCollectorOptions } from '../HypixelMessageCollector';
-import type { ChatBridge } from '../ChatBridge';
-import type { HypixelMessage } from '../HypixelMessage';
+import { type ChatBridge } from '../ChatBridge.js';
+import { type HypixelMessage } from '../HypixelMessage.js';
+import {
+	HypixelMessageCollectorEvent,
+	type HypixelMessageCollector,
+	type HypixelMessageCollectorOptions,
+} from '../HypixelMessageCollector.js';
 
-interface AwaitMessagesOptions extends HypixelMessageCollectorOptions {
+type AwaitMessagesOptions = HypixelMessageCollectorOptions & {
 	errors?: string[];
-}
+};
 
 export abstract class ChatManager {
-	chatBridge: ChatBridge;
+	public readonly chatBridge: ChatBridge;
+
 	/**
 	 * chat queue
 	 */
-	queue = new AsyncQueue();
+	public readonly queue = new AsyncQueue();
 
-	constructor(chatBridge: ChatBridge) {
+	public constructor(chatBridge: ChatBridge) {
 		this.chatBridge = chatBridge;
 	}
 
 	/**
 	 * regexp to check for words that are blocked on hypixel
 	 */
-	static BLOCKED_WORDS_REGEXP: RegExp;
-	static ALLOWED_URLS_REGEXP: RegExp;
+	public static BLOCKED_WORDS_REGEXP: RegExp;
+
+	public static ALLOWED_URLS_REGEXP: RegExp;
 
 	/**
 	 * reloads a regex filter from a file
+	 *
 	 * @param fileName
 	 * @param propertyName
 	 */
-	static async reloadFilter(fileName: `${string}.js`, propertyName: keyof typeof ChatManager) {
+	public static async reloadFilter(fileName: `${string}.js`, propertyName: keyof typeof ChatManager) {
 		const { [propertyName]: newFilter } = await import(`../constants/${fileName}?update=${Date.now()}`);
 
 		if (!newFilter) throw new Error(`${fileName} has no export named ${propertyName}`);
@@ -38,27 +44,28 @@ export abstract class ChatManager {
 		ChatManager[propertyName] = newFilter;
 	}
 
-	get mcAccount() {
+	public get mcAccount() {
 		return this.chatBridge.mcAccount;
 	}
 
-	get logInfo() {
+	public get logInfo() {
 		return this.chatBridge.logInfo;
 	}
 
-	get hypixelGuild() {
+	public get hypixelGuild() {
 		return this.chatBridge.hypixelGuild;
 	}
 
-	get client() {
+	public get client() {
 		return this.chatBridge.client;
 	}
 
 	/**
 	 * promisified MessageCollector
+	 *
 	 * @param options
 	 */
-	awaitMessages(options?: AwaitMessagesOptions): Promise<HypixelMessage[]> {
+	public async awaitMessages(options?: AwaitMessagesOptions): Promise<HypixelMessage[]> {
 		return new Promise((resolve, reject) => {
 			const collector = this.createMessageCollector(options) as HypixelMessageCollector;
 
@@ -72,8 +79,7 @@ export abstract class ChatManager {
 		});
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
-	createMessageCollector(options: unknown): unknown {
+	public createMessageCollector(options: unknown): unknown {
 		throw new Error('Method not implemented.');
 	}
 }

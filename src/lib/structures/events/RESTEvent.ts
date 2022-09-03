@@ -1,8 +1,7 @@
-import { Event } from './Event';
-import type { EventContext } from './Event';
+import { Event, type EventContext } from './Event.js';
 
 export class RESTEvent extends Event {
-	constructor(context: EventContext) {
+	public constructor(context: EventContext) {
 		super(context);
 
 		this.emitter = this.client.rest;

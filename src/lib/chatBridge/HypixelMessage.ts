@@ -1,32 +1,35 @@
-import { parseArgs } from 'node:util';
+import { parseArgs, type ParseArgsConfig } from 'node:util';
 import { regExpEsc } from '@sapphire/utilities';
-import { MessageUtil } from '#utils';
-import { logger } from '#logger';
+import { type GuildMember, type Message as DiscordMessage } from 'discord.js';
+import { type ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
+import { type BroadcastOptions, type ChatBridge } from './ChatBridge.js';
+import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
+import { PrismarineMessage } from './PrismarineMessage.js';
+import { type ChatPacket } from './botEvents/player_chat.js';
+import {
+	HypixelMessageType,
+	INVISIBLE_CHARACTER_REGEXP,
+	spamMessages,
+	type MessagePosition,
+} from './constants/index.js';
+import { type DiscordChatManager } from './managers/DiscordChatManager.js';
+import { type MinecraftChatOptions } from './managers/MinecraftChatManager.js';
+import { mojang } from '#api';
 import { NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
 import { minutes, uuidToBustURL } from '#functions';
-import { mojang } from '#api';
-import { HypixelMessageType, INVISIBLE_CHARACTER_REGEXP, spamMessages } from './constants';
-import { HypixelMessageAuthor } from './HypixelMessageAuthor';
-import { PrismarineMessage } from './PrismarineMessage';
-import type { MessagePosition } from './constants';
-import type { ParseArgsConfig } from 'node:util';
-import type { MinecraftChatOptions } from './managers/MinecraftChatManager';
-import type { DiscordChatManager } from './managers/DiscordChatManager';
-import type { Player } from '#structures/database/models/Player';
-import type { GuildMember, Message as DiscordMessage } from 'discord.js';
-import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
-import type { BroadcastOptions, ChatBridge } from './ChatBridge';
-import type { ChatPacket } from './botEvents/player_chat';
-import type { BridgeCommand } from '#structures/commands/BridgeCommand';
-import type { DualCommand } from '#structures/commands/DualCommand';
+import { logger } from '#logger';
+import { type BridgeCommand } from '#structures/commands/BridgeCommand.js';
+import { type DualCommand } from '#structures/commands/DualCommand.js';
+import { type Player } from '#structures/database/models/Player.js';
+import { MessageUtil } from '#utils';
 
 type ParseArgsConfigOptions = NonNullable<ParseArgsConfig['options']>;
 
 type CommandData = {
-	name: string | null;
-	command: BridgeCommand | DualCommand | null;
 	args: string[];
-	parseArgs: <T extends ParseArgsConfigOptions = ParseArgsConfigOptions>() => ReturnType<
+	command: BridgeCommand | DualCommand | null;
+	name: string | null;
+	parseArgs<T extends ParseArgsConfigOptions = ParseArgsConfigOptions>(): ReturnType<
 		typeof _parseArgsWithOptionsApplied<T>
 	>;
 	prefix: string | null;
@@ -37,64 +40,76 @@ const _parseArgsWithOptionsApplied = <T extends ParseArgsConfigOptions>(args: st
 
 type AwaitConfirmationOptions = Partial<BroadcastOptions> &
 	Partial<MinecraftChatOptions> & {
-		question?: string;
-		/** time in milliseconds to wait for a response */
-		time?: number;
 		errorMessage?: string;
+		question?: string;
+		/**
+		 * time in milliseconds to wait for a response
+		 */
+		time?: number;
 	};
 
 interface ForwardToDiscordOptions {
 	discordChatManager: DiscordChatManager;
-	player: Player | null;
 	member: GuildMember | null;
+	player: Player | null;
 }
 
 export interface HypixelUserMessage extends HypixelMessage {
-	type: NonNullable<HypixelMessage['type']>;
 	author: NonNullable<HypixelMessage['author']>;
-	spam: false;
 	commandData: CommandData;
+	spam: false;
+	type: NonNullable<HypixelMessage['type']>;
 }
 
 export class HypixelMessage {
 	/**
 	 * the chat bridge that instantiated the message
 	 */
-	chatBridge: ChatBridge;
+	public readonly chatBridge: ChatBridge;
+
 	/**
 	 * the prismarine-parsed message
 	 */
-	prismarineMessage: PrismarineChatMessage;
+	public readonly prismarineMessage: PrismarineChatMessage;
+
 	/**
 	 * in-game message position
 	 */
-	position: MessagePosition;
+	public readonly position: MessagePosition;
+
 	/**
 	 * forwarded message
 	 */
-	discordMessage: Promise<DiscordMessage | null> = Promise.resolve(null);
+	public discordMessage: Promise<DiscordMessage | null> = Promise.resolve(null);
+
 	/**
 	 * raw content string
 	 */
-	rawContent: string;
+	public readonly rawContent: string;
+
 	/**
 	 * content with invis chars removed
 	 */
-	cleanedContent: string;
+	public readonly cleanedContent: string;
+
 	/**
 	 * message type
 	 */
-	declare type: HypixelMessageType | null;
-	declare author: HypixelMessageAuthor | null;
-	content: string;
-	spam: boolean;
-	declare commandData: CommandData | null;
+	public declare readonly type: HypixelMessageType | null;
+
+	public declare readonly author: HypixelMessageAuthor | null;
+
+	public readonly content: string;
+
+	public readonly spam: boolean;
+
+	public declare readonly commandData: CommandData | null;
 
 	/**
 	 * @param chatBridge
 	 * @param packet
 	 */
-	constructor(chatBridge: ChatBridge, { content, type }: ChatPacket) {
+	public constructor(chatBridge: ChatBridge, { content, type }: ChatPacket) {
 		this.chatBridge = chatBridge;
 		this.prismarineMessage = PrismarineMessage.fromNotch(content);
 		this.position = type;
@@ -108,7 +123,7 @@ export class HypixelMessage {
 		 * From [HypixelRank] ign: message
 		 */
 		const matched =
-			/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /.exec(
+			/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)])?: /.exec(
 				this.cleanedContent,
 			);
 
@@ -118,22 +133,22 @@ export class HypixelMessage {
 				(matched.groups!.whisper ? HypixelMessageType.Whisper : null);
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,
-				matched.groups!.whisper !== 'To'
+				matched.groups!.whisper === 'To'
 					? {
+							ign: this.chatBridge.bot?.username ?? UNKNOWN_IGN,
+							guildRank: null,
+							uuid: this.chatBridge.minecraft.botUuid,
+					  }
+					: {
 							ign: matched.groups!.ign!,
 							guildRank: matched.groups!.guildRank,
 							uuid: matched.groups!.type
 								? // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
-								  // @ts-expect-error
+								  // @ts-expect-error prismarineMessage typings
 								  (this.prismarineMessage.extra?.[0]?.clickEvent?.value as string)
 										.slice('/viewprofile '.length)
 										.replaceAll('-', '')
 								: null,
-					  }
-					: {
-							ign: this.chatBridge.bot?.username ?? UNKNOWN_IGN,
-							guildRank: null,
-							uuid: this.chatBridge.minecraft.botUuid,
 					  },
 			);
 			this.content = this.cleanedContent.slice(matched[0]!.length).trimStart();
@@ -197,11 +212,11 @@ export class HypixelMessage {
 		}
 	}
 
-	get logInfo() {
+	public get logInfo() {
 		return this.author?.ign ?? 'unknown author';
 	}
 
-	get prefixReplacedContent() {
+	public get prefixReplacedContent() {
 		return this.commandData?.command
 			? this.content
 					.replace(this.commandData.prefix!, '/')
@@ -212,14 +227,14 @@ export class HypixelMessage {
 	/**
 	 * discord client that instantiated the chatBridge
 	 */
-	get client() {
+	public get client() {
 		return this.chatBridge.client;
 	}
 
 	/**
 	 * whether the message was sent by the bot
 	 */
-	get me() {
+	public get me() {
 		if (!this.author) return false;
 		return this.author.ign === this.chatBridge.bot?.username;
 	}
@@ -227,51 +242,52 @@ export class HypixelMessage {
 	/**
 	 * the message author's player object
 	 */
-	get player() {
+	public get player() {
 		return this.author?.player ?? null;
 	}
 
 	/**
 	 * the message author's guild object, if the message was sent in guild chat
 	 */
-	get hypixelGuild() {
+	public get hypixelGuild() {
 		return this.chatBridge.hypixelGuild ?? this.player?.hypixelGuild ?? null;
 	}
 
 	/**
 	 * content with minecraft formatting codes
 	 */
-	get formattedContent() {
+	public get formattedContent() {
 		return this.prismarineMessage.toMotd().trim();
 	}
 
 	/**
 	 * to make methods for dc messages compatible with mc messages
 	 */
-	get member() {
+	public get member() {
 		return this.author?.member ?? null;
 	}
 
 	/**
 	 * whether the message was sent by a non-bot user
 	 */
-	isUserMessage(): this is HypixelUserMessage {
+	public isUserMessage(): this is HypixelUserMessage {
 		return this.type !== null && !this.me;
 	}
 
 	/**
 	 * fetch all missing data
 	 */
-	async init() {
+	public async init() {
 		await this.author?.init();
 		return this;
 	}
 
 	/**
 	 * replies in-game (and on discord if guild chat) to the message
+	 *
 	 * @param options
 	 */
-	async reply(options: string | (BroadcastOptions & MinecraftChatOptions)) {
+	public async reply(options: string | (BroadcastOptions & MinecraftChatOptions)) {
 		const { ephemeral = false, ..._options } = typeof options === 'string' ? { content: options } : options;
 
 		// to be compatible to Interactions
@@ -315,7 +331,7 @@ export class HypixelMessage {
 	/**
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
-	async forwardToDiscord(): Promise<DiscordMessage | null> {
+	public async forwardToDiscord(): Promise<DiscordMessage | null> {
 		const discordChatManager = this.chatBridge.discord.channelsByType.get(this.type ?? HypixelMessageType.Guild);
 		if (!discordChatManager) return null;
 
@@ -352,6 +368,7 @@ export class HypixelMessage {
 			return null;
 		}
 	}
+
 	/**
 	 * @param options
 	 * @internal
@@ -380,9 +397,10 @@ export class HypixelMessage {
 
 	/**
 	 * confirms the action via a button collector
+	 *
 	 * @param options
 	 */
-	async awaitConfirmation(options: string | AwaitConfirmationOptions = {}) {
+	public async awaitConfirmation(options: AwaitConfirmationOptions | string = {}) {
 		const {
 			question = 'confirm this action?',
 			time = minutes(1),
@@ -401,7 +419,7 @@ export class HypixelMessage {
 			time,
 		});
 
-		if (!this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase()!)) {
+		if (!this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase() as string)) {
 			throw errorMessage;
 		}
 	}

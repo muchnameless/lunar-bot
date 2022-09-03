@@ -1,33 +1,40 @@
-import { Model, DataTypes } from 'sequelize';
-import type {
-	ModelStatic,
-	Sequelize,
-	CreationOptional,
-	InferAttributes,
-	InferCreationAttributes,
-	NonAttribute,
+import {
+	Model,
+	DataTypes,
+	type ModelStatic,
+	type Sequelize,
+	type CreationOptional,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type NonAttribute,
 } from 'sequelize';
-import type { LunarClient } from '../../LunarClient';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export const enum TransactionType {
-	Tax = 'tax',
 	Donation = 'donation',
+	Tax = 'tax',
 }
 
 export class Transaction extends Model<InferAttributes<Transaction>, InferCreationAttributes<Transaction>> {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare from: string;
-	declare to: string;
-	declare amount: number;
-	declare auctionId: string | null;
-	declare notes: string | null;
-	declare type: TransactionType;
+	public declare from: string;
 
-	declare readonly createdAt: CreationOptional<Date>;
-	declare readonly updatedAt: CreationOptional<Date>;
+	public declare to: string;
 
-	static initialise(sequelize: Sequelize) {
+	public declare amount: number;
+
+	public declare auctionId: string | null;
+
+	public declare notes: string | null;
+
+	public declare type: TransactionType;
+
+	public declare readonly createdAt: CreationOptional<Date>;
+
+	public declare readonly updatedAt: CreationOptional<Date>;
+
+	public static initialise(sequelize: Sequelize) {
 		return this.init(
 			{
 				from: {

@@ -1,16 +1,18 @@
+import { type RestEvents, type RESTEvents } from 'discord.js';
 import ms from 'ms';
 import { logger } from '#logger';
-import { RESTEvent } from '#structures/events/RESTEvent';
-import type { RESTEvents, RestEvents } from 'discord.js';
+import { RESTEvent } from '#structures/events/RESTEvent.js';
 
 export default class RateLimitedEvent extends RESTEvent {
 	/**
 	 * event listener callback
+	 *
 	 * @param rateLimitInfo
 	 */
-	override run(rateLimitInfo: RestEvents[RESTEvents.RateLimited][0]) {
+	public override run(rateLimitInfo: RestEvents[RESTEvents.RateLimited][0]) {
 		if (rateLimitInfo.global) {
-			return logger.error({ timeoutReadable: ms(rateLimitInfo.timeToReset), ...rateLimitInfo }, '[GLOBAL RATE LIMIT]');
+			logger.error({ timeoutReadable: ms(rateLimitInfo.timeToReset), ...rateLimitInfo }, '[GLOBAL RATE LIMIT]');
+			return;
 		}
 
 		// adding and removing single reactions are 1/250ms, so get rate limited each time

@@ -1,17 +1,26 @@
-import { ChannelType, PermissionFlagsBits, PermissionsBitField } from 'discord.js';
 import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
+import {
+	ChannelType,
+	PermissionFlagsBits,
+	PermissionsBitField,
+	type Channel,
+	type Message,
+	type MessageOptions,
+	type Snowflake,
+	type TextBasedChannel,
+	type TextChannel,
+} from 'discord.js';
 import ms from 'ms';
-import { logger } from '#logger';
+import { EmbedUtil } from './EmbedUtil.js';
 import { commaListAnd } from '#functions';
-import { EmbedUtil } from './EmbedUtil';
-import type { Channel, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';
+import { logger } from '#logger';
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
 }
 
 export class ChannelUtil extends null {
-	static DM_PERMISSIONS = new PermissionsBitField()
+	private static readonly DM_PERMISSIONS = new PermissionsBitField()
 		.add(
 			PermissionFlagsBits.AddReactions,
 			PermissionFlagsBits.ViewChannel,
@@ -25,12 +34,12 @@ export class ChannelUtil extends null {
 		)
 		.freeze();
 
-	static DEFAULT_SEND_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
+	private static readonly DEFAULT_SEND_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
 
 	/**
 	 * @param channel
 	 */
-	static logInfo(channel: Channel | null) {
+	public static logInfo(channel: Channel | null) {
 		if (!channel) return null;
 
 		switch (channel.type) {
@@ -45,10 +54,10 @@ export class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 */
-	static botPermissions(channel: Channel): Readonly<PermissionsBitField>;
-	static botPermissions(channel: null): null;
-	static botPermissions(channel: Channel | null): Readonly<PermissionsBitField> | null;
-	static botPermissions(channel: Channel | null) {
+	public static botPermissions(channel: Channel): Readonly<PermissionsBitField>;
+	public static botPermissions(channel: null): null;
+	public static botPermissions(channel: Channel | null): Readonly<PermissionsBitField> | null;
+	public static botPermissions(channel: Channel | null) {
 		if (!channel) return null;
 
 		switch (channel.type) {
@@ -63,20 +72,23 @@ export class ChannelUtil extends null {
 
 	/**
 	 * deletes all provided messages from the channel with as few API calls as possible
+	 *
 	 * @param channel
 	 * @param IdOrIds
 	 */
-	static async deleteMessages(channel: TextBasedChannel | null, IdOrIds: Snowflake | Snowflake[]) {
+	public static async deleteMessages(channel: TextBasedChannel | null, IdOrIds: Snowflake | Snowflake[]) {
 		if (!channel?.isTextBased()) {
-			return logger.warn({ channel, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]: not a text based channel');
+			logger.warn({ channel, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]: not a text based channel');
+			return null;
 		}
 
 		try {
 			switch (channel.type) {
 				case ChannelType.DM:
-					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map((id) => channel.messages.delete(id)));
+					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map(async (id) => channel.messages.delete(id)));
 
-					return await channel.messages.delete(IdOrIds);
+					await channel.messages.delete(IdOrIds);
+					return null;
 
 				default: {
 					if (Array.isArray(IdOrIds)) {
@@ -85,25 +97,28 @@ export class ChannelUtil extends null {
 						}
 
 						return await Promise.all(
-							IdOrIds.map((id) => {
+							IdOrIds.map(async (id) => {
 								const message = channel.messages.cache.get(id);
 
 								if (!message?.deletable) return null;
 
-								return channel.messages.delete(id);
+								await channel.messages.delete(id);
+								return null;
 							}),
 						);
 					}
 
 					const message = channel.messages.cache.get(IdOrIds);
 
-					if (!message?.deletable) return;
+					if (!message?.deletable) return null;
 
-					return await channel.messages.delete(IdOrIds);
+					await channel.messages.delete(IdOrIds);
+					return null;
 				}
 			}
 		} catch (error) {
-			return logger.error({ channel, err: error, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]');
+			logger.error({ channel, err: error, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]');
+			return null;
 		}
 	}
 
@@ -112,19 +127,19 @@ export class ChannelUtil extends null {
 	 * @param options
 	 * @param permissions
 	 */
-	static async send(
+	public static async send(
 		channel: TextBasedChannel,
 		options: SendOptions & { rejectOnError: true },
 		permissions?: Readonly<PermissionsBitField>,
 	): Promise<Message>;
-	static async send(
+	public static async send(
 		channel: TextBasedChannel,
-		options: string | SendOptions,
+		options: SendOptions | string,
 		permissions?: Readonly<PermissionsBitField>,
 	): Promise<Message | null>;
-	static async send(
+	public static async send(
 		channel: TextBasedChannel,
-		options: string | SendOptions,
+		options: SendOptions | string,
 		permissions = this.botPermissions(channel),
 	): Promise<Message | null> {
 		const _options = typeof options === 'string' ? { content: options } : options;
@@ -190,7 +205,6 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
 			const MESSAGE = `bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
 				(channel as TextChannel).guild.members.me!.communicationDisabledUntilTimestamp! - Date.now(),

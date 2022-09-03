@@ -1,22 +1,24 @@
-import { Collection } from 'discord.js';
 import { CronJob } from 'cron';
+import { Collection } from 'discord.js';
 import { logger } from '#logger';
-import type { LunarClient } from './LunarClient';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export class CronJobManager {
-	declare client: LunarClient;
-	cache = new Collection<string, CronJob>();
+	public declare readonly client: LunarClient;
 
-	constructor(client: LunarClient) {
+	public readonly cache = new Collection<string, CronJob>();
+
+	public constructor(client: LunarClient) {
 		Object.defineProperty(this, 'client', { value: client });
 	}
 
 	/**
 	 * starts and caches a cronJob
+	 *
 	 * @param name
 	 * @param cronJob
 	 */
-	schedule(name: string, cronJob: CronJob) {
+	public schedule(name: string, cronJob: CronJob) {
 		// prevent multiple cron jobs with the same name
 		if (this.cache.has(name)) {
 			this.cache.get(name)!.stop();
@@ -30,10 +32,11 @@ export class CronJobManager {
 
 	/**
 	 * Resolves a data entry to a data Object.
-	 * @param keyOrInstance The id or instance of something in this Manager
+	 *
+	 * @param keyOrInstance - The id or instance of something in this Manager
 	 * @returns An instance from this Manager
 	 */
-	resolve(keyOrInstance: string | CronJob) {
+	public resolve(keyOrInstance: CronJob | string) {
 		if (keyOrInstance instanceof CronJob) return keyOrInstance;
 		if (typeof keyOrInstance === 'string') return this.cache.get(keyOrInstance) ?? null;
 		return null;
@@ -41,9 +44,10 @@ export class CronJobManager {
 
 	/**
 	 * stops and removes a cronJob
+	 *
 	 * @param idOrInstance
 	 */
-	remove(idOrInstance: string | CronJob) {
+	public remove(idOrInstance: CronJob | string) {
 		const cronJob = this.resolve(idOrInstance);
 
 		if (!cronJob) throw new Error(`[CRONJOB REMOVE]: invalid input: '${idOrInstance}'`);

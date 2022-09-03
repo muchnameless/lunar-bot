@@ -1,4 +1,5 @@
 import { URL } from 'node:url';
+import { AsyncQueue } from '@sapphire/async-queue';
 import {
 	bold,
 	DiscordAPIError,
@@ -7,11 +8,23 @@ import {
 	PermissionFlagsBits,
 	time,
 	TimestampStyles,
+	type CommandInteractionOption,
+	type Message,
+	type MessageCollectorOptions,
+	type MessageOptions,
+	type Snowflake,
+	type TextChannel,
+	type User,
+	type Webhook,
+	type WebhookMessageOptions,
 } from 'discord.js';
-import { AsyncQueue } from '@sapphire/async-queue';
 import { fetch } from 'undici';
-import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
-import { logger } from '#logger';
+import { type ChatBridge, type MessageForwardOptions } from '../ChatBridge.js';
+import { type HypixelMessage } from '../HypixelMessage.js';
+import { PREFIX_BY_TYPE } from '../constants/index.js';
+import { ChatManager } from './ChatManager.js';
+import { imgur } from '#api';
+import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache.js';
 import {
 	ALLOWED_EXTENSIONS,
 	ALLOWED_MIMES,
@@ -19,38 +32,29 @@ import {
 	MAX_WEBHOOKS_PER_CHANNEL,
 	UnicodeEmoji,
 } from '#constants';
-import { WebhookError } from '#structures/errors/WebhookError';
-import { imgur } from '#api';
 import { asyncReplace, minutes, seconds } from '#functions';
-import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache';
-import { PREFIX_BY_TYPE } from '../constants';
-import { ChatManager } from './ChatManager';
-import type {
-	CommandInteractionOption,
-	Message,
-	MessageCollectorOptions,
-	MessageOptions,
-	Snowflake,
-	TextChannel,
-	User,
-	Webhook,
-	WebhookMessageOptions,
-} from 'discord.js';
-import type { DualCommand } from '#structures/commands/DualCommand';
-import type { ChatBridgeChannel } from '#structures/database/models/HypixelGuild';
-import type { InteractionUtilReplyOptions, SendDMOptions } from '#utils';
-import type { ChatBridge, MessageForwardOptions } from '../ChatBridge';
-import type { HypixelMessage } from '../HypixelMessage';
+import { logger } from '#logger';
+import { type DualCommand } from '#structures/commands/DualCommand.js';
+import { type ChatBridgeChannel } from '#structures/database/models/HypixelGuild.js';
+import { WebhookError } from '#structures/errors/WebhookError.js';
+import {
+	ChannelUtil,
+	InteractionUtil,
+	MessageUtil,
+	UserUtil,
+	type InteractionUtilReplyOptions,
+	type SendDMOptions,
+} from '#utils';
 
 interface SendViaBotOptions extends MessageOptions {
 	content: string;
-	hypixelMessage?: HypixelMessage | null;
 	fromMinecraft?: boolean;
+	hypixelMessage?: HypixelMessage | null;
 }
 
 interface SendViaWebhookOptions extends WebhookMessageOptions {
-	queuePromise?: Promise<void>;
 	abortController?: AbortController;
+	queuePromise?: Promise<void>;
 }
 
 export class DiscordChatManager extends ChatManager {
@@ -58,40 +62,47 @@ export class DiscordChatManager extends ChatManager {
 	 * webhook fetching/creating & caching
 	 */
 	private _fetchOrCreateWebhookPromise: Promise<this> | null = null;
+
 	/**
 	 * chat queue
 	 */
-	override queue = new AsyncQueue();
+	public override readonly queue = new AsyncQueue();
+
 	/**
 	 * hypixel message type
 	 */
-	type: keyof typeof PREFIX_BY_TYPE;
+	public readonly type: keyof typeof PREFIX_BY_TYPE;
+
 	/**
 	 * discord channel id
 	 */
-	channelId: Snowflake;
+	public readonly channelId: Snowflake;
+
 	/**
 	 * hypixel chat prefix
 	 */
-	prefix: string;
+	public readonly prefix: typeof PREFIX_BY_TYPE[keyof typeof PREFIX_BY_TYPE];
+
 	/**
 	 * channel webhook
 	 */
-	webhook: Webhook | null = null;
+	public webhook: Webhook | null = null;
+
 	/**
 	 * chat bridge status
 	 */
-	ready = false;
+	public ready = false;
+
 	/**
 	 * interaction user cache
 	 */
-	interactionUserCache = new InteractionUserCache();
+	public readonly interactionUserCache = new InteractionUserCache();
 
 	/**
 	 * @param chatBridge
 	 * @param channel
 	 */
-	constructor(chatBridge: ChatBridge, { type, channelId }: ChatBridgeChannel) {
+	public constructor(chatBridge: ChatBridge, { type, channelId }: ChatBridgeChannel) {
 		super(chatBridge);
 
 		this.type = type;
@@ -101,9 +112,10 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * player ign or member displayName or author username, *blocked* if BLOCKED_WORDS_REGEXP check doesn't pass
+	 *
 	 * @param message
 	 */
-	static getPlayerName(message: Message) {
+	public static getPlayerName(message: Message) {
 		return this._formatAtMention(
 			MessageUtil.isNormalWebhookMessage(message)
 				? UserUtil.getPlayer(
@@ -115,6 +127,7 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * returns @name if the name passes the BLOCKED_WORDS_REGEXP
+	 *
 	 * @param name
 	 */
 	private static _formatAtMention(name: string) {
@@ -123,6 +136,7 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * returns the name with dots replaced by spaces or a generic placeholder if no name is passed
+	 *
 	 * @param name
 	 */
 	private static _getAttachmentName(name: string | null) {
@@ -131,6 +145,7 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * tries to upload all image attachments to imgur, replacing all successfully uploaded URLs with the imgur URLs
+	 *
 	 * @param attachments
 	 */
 	private async _uploadAttachments(attachments: Message['attachments']) {
@@ -160,36 +175,37 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * chat bridge channel
 	 */
-	get channel() {
+	public get channel() {
 		return this.client.channels.cache.get(this.channelId) as TextChannel | undefined;
 	}
 
 	/**
 	 * MinecraftChatManager
 	 */
-	get minecraft() {
+	public get minecraft() {
 		return this.chatBridge.minecraft;
 	}
 
 	/**
 	 * returns the promise from queueing the promise
+	 *
 	 * @param signal
 	 */
-	queuePromise(signal: AbortSignal = AbortSignal.timeout(minutes(1))) {
+	public async queuePromise(signal: AbortSignal = AbortSignal.timeout(minutes(1))) {
 		return this.queue.wait({ signal });
 	}
 
 	/**
 	 * asserts that the webhook is present
 	 */
-	isReady(): this is this & { webhook: Webhook } {
+	public isReady(): this is this & { webhook: Webhook } {
 		return this.ready;
 	}
 
 	/**
 	 * initialise the discord chat manager
 	 */
-	init() {
+	public async init() {
 		return this._fetchOrCreateWebhook();
 	}
 
@@ -210,8 +226,10 @@ export class DiscordChatManager extends ChatManager {
 			this._fetchOrCreateWebhookPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within _fetchOrCreateWebhook
+	 *
 	 * @internal
 	 */
 	async #fetchOrCreateWebhook() {
@@ -286,8 +304,10 @@ export class DiscordChatManager extends ChatManager {
 
 			this.ready = true;
 		} else {
-			this.chatBridge.manager.webhookIds.delete(this.webhook?.id!);
-			this.webhook = null;
+			if (this.webhook) {
+				this.chatBridge.manager.webhookIds.delete(this.webhook.id);
+				this.webhook = null;
+			}
 
 			this.ready = false;
 		}
@@ -297,10 +317,11 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * tries to send an ephemeral message via a cached interaction or DMs the message author
+	 *
 	 * @param user
 	 * @param options
 	 */
-	async sendDM(user: User, options: SendDMOptions & InteractionUtilReplyOptions) {
+	public async sendDM(user: User, options: InteractionUtilReplyOptions & SendDMOptions) {
 		// try ephemeral interaction followUp
 		const interaction = this.interactionUserCache.get(user.id);
 
@@ -323,9 +344,10 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * sends a message via the chatBridge webhook
+	 *
 	 * @param options
 	 */
-	async sendViaWebhook({ queuePromise, abortController, ...options }: SendViaWebhookOptions) {
+	public async sendViaWebhook({ queuePromise, abortController, ...options }: SendViaWebhookOptions) {
 		// chat bridge disabled
 		if (!this.chatBridge.isEnabled()) {
 			abortController?.abort();
@@ -347,8 +369,10 @@ export class DiscordChatManager extends ChatManager {
 			this.queue.shift();
 		}
 	}
+
 	/**
 	 * should only ever be called from within sendViaWebhook
+	 *
 	 * @param options
 	 * @internal
 	 */
@@ -382,9 +406,10 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * sends a message via the bot in the chatBridge channel
+	 *
 	 * @param options
 	 */
-	async sendViaBot({ hypixelMessage, content, fromMinecraft, ...options }: SendViaBotOptions) {
+	public async sendViaBot({ hypixelMessage, content, fromMinecraft, ...options }: SendViaBotOptions) {
 		if (!this.chatBridge.isEnabled()) return null;
 
 		const queuePromise = this.queuePromise();
@@ -414,6 +439,7 @@ export class DiscordChatManager extends ChatManager {
 		await queuePromise;
 
 		try {
+			// eslint-disable-next-line @typescript-eslint/return-await
 			return await ChannelUtil.send(this.channel!, _options);
 		} finally {
 			this.queue.shift();
@@ -422,10 +448,11 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * forwards a discord message to in-game guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
+	 *
 	 * @param message
 	 * @param options
 	 */
-	async forwardToMinecraft(
+	public async forwardToMinecraft(
 		message: Message,
 		{ player: playerInput, isEdit = false, signal }: MessageForwardOptions & { signal: AbortSignal },
 	) {
@@ -451,7 +478,9 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if the player is auto muted
-		if (player?.infractions! >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+		if (
+			(player?.infractions ?? Number.NEGATIVE_INFINITY) >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')
+		) {
 			void this.sendDM(message.author, {
 				content: 'you are currently muted due to continues infractions',
 				redisKey: `dm:${message.author.id}:chatbridge:muted`,
@@ -497,7 +526,7 @@ export class DiscordChatManager extends ChatManager {
 			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
 				messageContent = await asyncReplace(
 					messageContent,
-					/(?:https?:\/\/(?:www\.|(?!www))[a-z\d][a-z\d-]+[a-z\d]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[a-z\d]+\.\S{2,})/gi,
+					/https?:\/\/(?:www\.|(?!www))[\da-z][\da-z-]+[\da-z]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[\da-z]+\.\S{2,}/gi,
 					async (match) => {
 						try {
 							const url = new URL(match[0]);
@@ -583,7 +612,7 @@ export class DiscordChatManager extends ChatManager {
 						interaction.options.getSubcommand(false),
 					];
 
-					// @ts-expect-error
+					// @ts-expect-error private
 					for (const { name, value } of interaction.options._hoistedOptions as CommandInteractionOption[]) {
 						if (name === 'visibility') continue;
 
@@ -620,7 +649,7 @@ export class DiscordChatManager extends ChatManager {
 		return this.minecraft.chat({
 			content: contentParts.join(' '),
 			prefix: `${this.prefix} ${
-				message.author.id !== message.client.user!.id ? `${DiscordChatManager.getPlayerName(message)}: ` : ''
+				message.author.id === message.client.user!.id ? '' : `${DiscordChatManager.getPlayerName(message)}: `
 			}`,
 			discordMessage: message,
 			signal,
@@ -629,9 +658,10 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * collects chat messages from the bot
+	 *
 	 * @param options
 	 */
-	override createMessageCollector(options?: MessageCollectorOptions) {
+	public override createMessageCollector(options?: MessageCollectorOptions) {
 		return new MessageCollector(this.channel!, options);
 	}
 }

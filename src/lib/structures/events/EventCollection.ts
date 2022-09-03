@@ -1,29 +1,34 @@
+import { type EventEmitter } from 'node:events';
 import { basename } from 'node:path';
+import { type URL } from 'node:url';
 import { Collection } from 'discord.js';
-import { logger } from '#logger';
+import { type BaseEvent } from './BaseEvent.js';
 import { readJSFiles } from '#functions';
-import type { EventEmitter } from 'node:events';
-import type { URL } from 'node:url';
-import type { BaseEvent } from './BaseEvent';
+import { logger } from '#logger';
 
 interface EventLoadOptions {
-	/** whether to reload the imported file */
-	reload?: boolean;
-	/** whether to load disabled events */
+	/**
+	 * whether to load disabled events
+	 */
 	force?: boolean;
+	/**
+	 * whether to reload the imported file
+	 */
+	reload?: boolean;
 }
 
 export class EventCollection extends Collection<string, BaseEvent> {
 	/**
 	 * NodeJS EventEmitter
 	 */
-	emitter: EventEmitter;
+	private readonly emitter: EventEmitter;
+
 	/**
 	 * path to the event files
 	 */
-	dirURL: URL;
+	public readonly dirURL: URL;
 
-	constructor(emitter: EventEmitter, dirURL: URL, entries?: readonly [string, BaseEvent][]) {
+	public constructor(emitter: EventEmitter, dirURL: URL, entries?: readonly [string, BaseEvent][]) {
 		super(entries);
 
 		this.emitter = emitter;
@@ -34,16 +39,19 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	 * built-in methods will use this as the constructor
 	 * that way EventCollection#filter returns a standard Collection
 	 */
-	static override get [Symbol.species]() {
+	public static override get [Symbol.species]() {
 		return Collection;
 	}
 
 	/**
 	 * loads a single command into the collection
-	 * @param file command file to load
+	 *
+	 * @param file - command file to load
 	 * @param options
+	 * @param options.force - whether to load disabled commands
+	 * @param options.reload - whether to reload the imported file
 	 */
-	async loadFromFile(file: string, { reload = false, force = false }: EventLoadOptions = {}) {
+	public async loadFromFile(file: string, { reload = false, force = false }: EventLoadOptions = {}) {
 		const name = basename(file, '.js');
 		const filePath = reload ? `${file}?update=${Date.now()}` : file;
 
@@ -62,9 +70,10 @@ export class EventCollection extends Collection<string, BaseEvent> {
 
 	/**
 	 * loads all commands into the collection
+	 *
 	 * @param options
 	 */
-	async loadAll(options?: EventLoadOptions) {
+	public async loadAll(options?: EventLoadOptions) {
 		let eventCount = 0;
 
 		for await (const path of readJSFiles(this.dirURL)) {
@@ -73,7 +82,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 			++eventCount;
 		}
 
-		logger.info(`[EVENTS]: ${eventCount} event${eventCount !== 1 ? 's' : ''} loaded`);
+		logger.info(`[EVENTS]: ${eventCount} event${eventCount === 1 ? '' : 's'} loaded`);
 
 		return this;
 	}
@@ -81,7 +90,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	/**
 	 * unload all commands
 	 */
-	unloadAll() {
+	public unloadAll() {
 		return this.each((event) => event.unload());
 	}
 }

@@ -1,61 +1,74 @@
-import { Collection } from 'discord.js';
-import type { HypixelGuild } from '../database/models/HypixelGuild';
-import type { Snowflake } from 'discord.js';
-import type { LunarClient } from '../LunarClient';
-import type { BaseCommandCollection, CommandType } from './BaseCommandCollection';
+import { Collection, type Snowflake } from 'discord.js';
+import { type BaseCommandCollection, type CommandType } from './BaseCommandCollection.js';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
 
 export interface CommandContext {
+	category: string | null;
 	client: LunarClient;
 	collection: BaseCommandCollection;
 	fileName: string;
-	category: string | null;
 }
 
 export interface CommandData {
-	/** command name, defaults to the file name */
-	name?: string;
-	/** command cooldown in milliseconds */
+	/**
+	 * command cooldown in milliseconds
+	 */
 	cooldown?: number | null;
-	/** function returning a Snowflake array */
+	/**
+	 * command name, defaults to the file name
+	 */
+	name?: string;
+	/**
+	 * function returning a Snowflake array
+	 */
 	requiredRoles?: RequiredRoles;
 }
 
 type RequiredRoles = (hypixelGuild: HypixelGuild) => Snowflake[];
 
 export class BaseCommand {
-	declare client: LunarClient;
-	collection: BaseCommandCollection;
+	public declare readonly client: LunarClient;
+
+	public readonly collection: BaseCommandCollection;
+
 	/**
 	 * command name (lower case)
 	 */
-	name: string;
+	public readonly name: string;
+
 	/**
 	 * command category, derived from the folder name
 	 */
-	category: string | null;
+	public readonly category: string | null;
+
 	/**
 	 * null for a default, 0 for none
 	 */
-	cooldown: number | null;
+	public readonly cooldown: number | null;
+
 	/**
 	 * function to dynamically create a required roles array
 	 */
-	protected _requiredRoles: RequiredRoles | null;
+	protected readonly _requiredRoles: RequiredRoles | null;
+
 	/**
 	 * user id -> last used timestamp, for cooldowns
 	 */
-	timestamps: Collection<Snowflake, number> | null;
+	public timestamps: Collection<Snowflake, number> | null;
+
 	/**
 	 * command name aliases (lower case)
 	 */
-	aliases: string[] | null = null;
+	public aliases: string[] | null = null;
 
 	/**
 	 * create a new command
+	 *
 	 * @param context
 	 * @param data
 	 */
-	constructor(
+	public constructor(
 		{ client, collection, fileName, category }: CommandContext,
 		{ name, cooldown, requiredRoles }: CommandData = {},
 	) {
@@ -67,21 +80,22 @@ export class BaseCommand {
 
 		this.cooldown = cooldown ?? null;
 		this._requiredRoles = requiredRoles ?? null;
-		this.timestamps = this.cooldown !== 0 ? new Collection() : null;
+		this.timestamps = this.cooldown === 0 ? null : new Collection();
 	}
 
 	/**
 	 * client config
 	 */
-	get config() {
+	public get config() {
 		return this.client.config;
 	}
 
 	/**
 	 * roles required to run this command
+	 *
 	 * @param hypixelGuild
 	 */
-	requiredRoles(hypixelGuild?: HypixelGuild | null): Snowflake[] | null {
+	public requiredRoles(hypixelGuild?: HypixelGuild | null): Snowflake[] | null {
 		if (!this._requiredRoles) return null;
 		if (!hypixelGuild) throw 'unable to find a hypixel guild for role permissions';
 		return this._requiredRoles(hypixelGuild);
@@ -90,7 +104,7 @@ export class BaseCommand {
 	/**
 	 * clears the cooldown timestamps collection
 	 */
-	clearCooldowns() {
+	public clearCooldowns() {
 		this.timestamps &&= new Collection();
 		return this;
 	}
@@ -98,7 +112,7 @@ export class BaseCommand {
 	/**
 	 * loads the command and possible aliases into their collections
 	 */
-	load() {
+	public load() {
 		this.collection.set(this.name, this as unknown as CommandType);
 		if (this.aliases) for (const alias of this.aliases) this.collection.set(alias, this as unknown as CommandType);
 		return this;
@@ -107,7 +121,7 @@ export class BaseCommand {
 	/**
 	 * removes all aliases and the command from the commandsCollection
 	 */
-	unload() {
+	public unload() {
 		this.collection.delete(this.name);
 		if (this.aliases) for (const alias of this.aliases) this.collection.delete(alias);
 		return this;

@@ -1,4 +1,6 @@
 import { env, memoryUsage, version as processVersion } from 'node:process';
+import { EmbedLimits } from '@sapphire/discord-utilities';
+import { stripIndents } from 'common-tags';
 import {
 	ActionRowBuilder,
 	ChannelType,
@@ -8,27 +10,23 @@ import {
 	time,
 	TimestampStyles,
 	version as djsVersion,
+	type ChatInputCommandInteraction,
+	type Collection,
+	type DMChannel,
+	type MessageActionRowComponentBuilder,
+	type Snowflake,
+	type TextBasedChannel,
+	type ThreadChannel,
 } from 'discord.js';
-import { stripIndents } from 'common-tags';
-import { EmbedLimits } from '@sapphire/discord-utilities';
 import ms from 'ms';
-import { InteractionUtil } from '#utils';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { hypixel, imgur } from '#api';
 import { buildDeleteButton, escapeIgn, formatNumber, seconds, trim } from '#functions';
-import type {
-	ChatInputCommandInteraction,
-	Collection,
-	DMChannel,
-	MessageActionRowComponentBuilder,
-	Snowflake,
-	TextBasedChannel,
-	ThreadChannel,
-} from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { InteractionUtil } from '#utils';
 
 export default class DebugCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder().setDescription('shows general information about the bot'),
 			cooldown: 0,
@@ -37,9 +35,10 @@ export default class DebugCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { guilds, channels, players } = this.client;
 		const me = interaction.guild?.members.me ?? null;
 
@@ -62,84 +61,83 @@ export default class DebugCommand extends ApplicationCommand {
 							value: stripIndents`
 								Guilds: ${formatNumber(guilds.cache.size)}
 								Channels: ${formatNumber(channels.cache.size)} (${formatNumber(
-								channels.cache.filter((c) => c.isThread() || c.type === ChannelType.DM).size,
+								channels.cache.filter((channel) => channel.isThread() || channel.type === ChannelType.DM).size,
 							)} temporary)
-								${(channels.cache.filter((c) => c.type === ChannelType.DM) as Collection<Snowflake, DMChannel>)
+								${(channels.cache.filter((channel) => channel.type === ChannelType.DM) as Collection<Snowflake, DMChannel>)
 									.map(
-										(c) =>
-											[c.recipient?.tag ?? c.recipientId, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
+										(channel) =>
+											[
+												channel.recipient?.tag ?? channel.recipientId,
+												SnowflakeUtil.timestampFrom(channel.lastMessageId ?? ''),
+											] as const,
 									)
 									.sort(([, a], [, b]) => b - a)
 									.map(([name, timestamp]) =>
 										quote(`${name}: ${time(seconds.fromMilliseconds(timestamp), TimestampStyles.LongDateTime)}`),
 									)
 									.join('\n')}
-								${(channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
-									.map((c) => [c, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const)
+								${(channels.cache.filter((channel) => channel.isThread()) as Collection<Snowflake, ThreadChannel>)
+									.map((channel) => [channel, SnowflakeUtil.timestampFrom(channel.lastMessageId ?? '')] as const)
 									.sort(([, a], [, b]) => b - a)
-									.map(([c, timestamp]) =>
-										quote(`${c}: ${time(seconds.fromMilliseconds(timestamp), TimestampStyles.LongDateTime)}`),
+									.map(([channel, timestamp]) =>
+										quote(`${channel}: ${time(seconds.fromMilliseconds(timestamp), TimestampStyles.LongDateTime)}`),
 									)
 									.join('\n')}
 								Members: ${formatNumber(guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
 								Users: ${formatNumber(this.client.users.cache.size)}
 								Messages: ${formatNumber(
 									channels.cache.reduce(
-										// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 										(acc, channel) => acc + ((channel as TextBasedChannel).messages?.cache.size ?? 0),
 										0,
 									),
 								)}
-								${
-									/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-									(
-										channels.cache.filter((c) => Boolean((c as TextBasedChannel).messages?.cache.size)) as Collection<
-											Snowflake,
-											TextBasedChannel
-										>
+								${(
+									channels.cache.filter((channel) =>
+										Boolean((channel as TextBasedChannel).messages?.cache.size),
+									) as Collection<Snowflake, TextBasedChannel>
+								)
+									.sort(
+										(
+											{
+												messages: {
+													cache: { size: a },
+												},
+											},
+											{
+												messages: {
+													cache: { size: b },
+												},
+											},
+										) => b - a,
 									)
-										/* eslint-enable @typescript-eslint/no-unnecessary-condition */
-										.sort(
-											(
-												{
-													messages: {
-														cache: { size: a },
-													},
-												},
-												{
-													messages: {
-														cache: { size: b },
-													},
-												},
-											) => b - a,
-										)
-										.map((c) =>
-											quote(
-												`${c.type !== ChannelType.DM ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
-													c.messages.cache.size,
-												)}`,
-											),
-										)
-										.join('\n')
-								}
+									.map((channel) =>
+										quote(
+											`${
+												channel.type === ChannelType.DM ? channel.recipient?.tag ?? 'unknown channel' : `${channel}`
+											}: ${formatNumber(channel.messages.cache.size)}`,
+										),
+									)
+									.join('\n')}
 								DiscordGuilds: ${formatNumber(this.client.discordGuilds.cache.size)}
 								HypixelGuilds: ${formatNumber(this.client.hypixelGuilds.cache.size)}
 								Players: ${formatNumber(players.cache.size)}
-								${quote(`not inGuild: ${formatNumber(players.cache.filter((p) => !p.inGuild()).size)}`)}
+								${quote(`not inGuild: ${formatNumber(players.cache.filter((player) => !player.inGuild()).size)}`)}
 								${quote(
 									`cached DiscordMember: ${formatNumber(
 										// @ts-expect-error _discordMember is private
-										players.cache.filter((p) => p._discordMember).size,
+										players.cache.filter((player) => player._discordMember).size,
 									)}`,
 								)}
 								${quote(
 									`incorrectly cached: ${formatNumber(
 										players.cache.filter(
-											(p) =>
-												// @ts-expect-error
-												p._discordMember &&
-												// @ts-expect-error
-												p._discordMember !== p.hypixelGuild?.discordGuild?.members.cache.get(p._discordMember.id),
+											(player) =>
+												// @ts-expect-error private
+												player._discordMember &&
+												// @ts-expect-error private
+												player._discordMember !==
+													// @ts-expect-error private
+													player.hypixelGuild?.discordGuild?.members.cache.get(player._discordMember.id),
 										).size,
 									)}`,
 								)}
@@ -209,7 +207,7 @@ export default class DebugCommand extends ApplicationCommand {
 													Server: ${await cb.minecraft.server}
 													Queues:
 													${quote(`Minecraft: ${cb.minecraft.queue.remaining}`)}
-													${cb.discord.channelsByType.map((c) => quote(`${c.channel}: ${c.queue.remaining}`)).join('\n')}
+													${cb.discord.channelsByType.map((manager) => quote(`${manager.channel}: ${manager.queue.remaining}`)).join('\n')}
 												`,
 											),
 										)

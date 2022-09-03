@@ -1,8 +1,10 @@
-import { setTimeout as sleep } from 'node:timers/promises';
-sleep;
-import util from 'node:util';
 import fs from 'node:fs/promises';
+import { setTimeout as sleep } from 'node:timers/promises';
+import util from 'node:util';
 import v8 from 'node:v8';
+import { Stopwatch } from '@sapphire/stopwatch';
+import { Type } from '@sapphire/type';
+import commonTags from 'common-tags';
 import Discord, {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -15,17 +17,29 @@ import Discord, {
 	TextInputBuilder,
 	TextInputStyle,
 	userMention,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type Message,
+	type MessageActionRowComponentBuilder,
+	type MessageContextMenuCommandInteraction,
+	type ModalActionRowComponentBuilder,
+	type ModalSubmitInteraction,
 } from 'discord.js';
-Routes; // unused imports are 'used' so that tsc doesn't remove them
-import { Stopwatch } from '@sapphire/stopwatch';
-import { Type } from '@sapphire/type';
-import { fetch } from 'undici';
-fetch;
-import { format } from 'prettier';
 import ms from 'ms';
-ms;
-import commonTags from 'common-tags';
-commonTags;
+import { format } from 'prettier';
+import { fetch } from 'undici';
+import BaseOwnerCommand from './~base.js';
+import { redis, hypixel, imgur, mojang } from '#api';
+import * as constants from '#constants';
+import { sequelize, sql } from '#db';
+import * as functions from '#functions';
+import { logger } from '#logger';
+import * as nwFunctions from '#networth/functions/index.js';
+import { calculateItemPrice } from '#networth/networth.js';
+import { accessories, itemUpgrades, populateCaches, prices } from '#networth/prices.js';
+import { jobs } from '#root/jobs/index.js';
+import { IGNORED_ERRORS } from '#root/process.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
 import {
 	ChannelUtil,
 	EmbedUtil,
@@ -35,54 +49,45 @@ import {
 	LeaderboardUtil,
 	MessageUtil,
 	UserUtil,
+	type InteractionUtilReplyOptions,
+	type RepliableInteraction,
 } from '#utils';
+
+// unused imports are 'used' so that tsc doesn't remove them
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+sleep;
+Routes;
+fetch;
+ms;
+commonTags;
 ChannelUtil;
 EmbedUtil;
 GuildMemberUtil;
 GuildUtil;
 LeaderboardUtil;
 MessageUtil;
-import { calculateItemPrice } from '#networth/networth';
 calculateItemPrice;
-import { accessories, itemUpgrades, populateCaches, prices } from '#networth/prices';
 accessories;
 itemUpgrades;
 populateCaches;
 prices;
-import { sequelize, sql } from '#db';
 sequelize;
 sql;
-import { logger } from '#logger';
-import * as constants from '#constants';
 constants;
-import { redis, hypixel, imgur, mojang } from '#api';
 redis;
 hypixel;
 imgur;
 mojang;
-import * as functions from '#functions';
 functions;
-import * as nwFunctions from '#networth/functions/index';
 nwFunctions;
-import { IGNORED_ERRORS } from '#root/process';
 IGNORED_ERRORS;
-import { jobs } from '#root/jobs/index';
 jobs;
-import BaseOwnerCommand from './~base';
-import type {
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	Message,
-	MessageActionRowComponentBuilder,
-	MessageContextMenuCommandInteraction,
-	ModalActionRowComponentBuilder,
-	ModalSubmitInteraction,
-} from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { InteractionUtilReplyOptions, RepliableInteraction } from '#utils';
+/* eslint-enable @typescript-eslint/no-unused-expressions */
+
+const type = (x: unknown) => new Type(x).toString();
 
 export default class EvalCommand extends BaseOwnerCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('executes js code')
@@ -134,7 +139,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 	 * @param stopwatch
 	 * @param inspectDepth
 	 */
-	// @ts-expect-error
+	// @ts-expect-error override
 	protected override _respondWithError(
 		interaction: RepliableInteraction<'cachedOrDM'>,
 		error: unknown,
@@ -167,8 +172,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 		const stopwatch = new Stopwatch();
 
-		/* eslint-disable @typescript-eslint/no-unused-vars */
-		const reply = (options: string | InteractionUtilReplyOptions) =>
+		const reply = (options: InteractionUtilReplyOptions | string) =>
 			InteractionUtil.reply(
 				interaction,
 				typeof options === 'string'
@@ -182,12 +186,13 @@ export default class EvalCommand extends BaseOwnerCommand {
 					  }
 					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
-		const type = (x: unknown) => new Type(x).toString();
 		const inspect = (x: unknown) => util.inspect(x, { depth: inspectDepth, getters: true, showHidden: true });
-		const saveHeapdump = () => {
+		const saveHeapdump = async () => {
 			void InteractionUtil.defer(interaction);
 			return fs.writeFile(`${Date.now()}.heapsnapshot`, v8.getHeapSnapshot());
 		};
+
+		/* eslint-disable id-length */
 		const i = interaction;
 		const { client, config } = this;
 		const { guild, guild: g, user, user: author, member, member: m } = interaction;
@@ -196,13 +201,12 @@ export default class EvalCommand extends BaseOwnerCommand {
 		const player = UserUtil.getPlayer(user);
 		const p = player;
 		const bridges = client.chatBridges.cache;
-		/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 		const mention = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getMentionable('mention');
 		const channel =
 			(interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getChannel('channel') ?? interaction.channel;
 		const ch = channel;
 		const attachment = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getAttachment('attachment');
-		/* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-unnecessary-condition */
+		/* eslint-enable id-length */
 
 		const responseEmbed = this.client.defaultEmbed //
 			.setFooter({
@@ -255,6 +259,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 			stopwatch.restart();
 
 			// eval args
+			// eslint-disable-next-line no-eval
 			let evaled = eval(toEvaluate);
 
 			stopwatch.stop();
@@ -287,10 +292,11 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param message
 	 */
-	override messageContextMenuRun(
+	public override async messageContextMenuRun(
 		interaction: MessageContextMenuCommandInteraction<'cachedOrDM'>,
 		{ content, author }: Message,
 	) {
@@ -307,10 +313,11 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
+	public override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [subcommand, inspectDepth] = args as [string, string];
 
 		switch (subcommand) {
@@ -348,10 +355,11 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]) {
+	public override async modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]) {
 		const [subcommand, inspectDepth] = args as [string, string];
 
 		switch (subcommand) {
@@ -375,9 +383,10 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		return this._sharedRun(interaction, interaction.options.getString('input', true), {
 			isAsync: interaction.options.getBoolean('async') ?? undefined,
 			inspectDepth: interaction.options.getInteger('inspect') ?? undefined,

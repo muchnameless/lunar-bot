@@ -1,17 +1,16 @@
-import { SlashCommandBuilder, userMention } from 'discord.js';
+import { type Components } from '@zikeji/hypixel';
+import { SlashCommandBuilder, userMention, type ChatInputCommandInteraction } from 'discord.js';
 import { Op } from 'sequelize';
-import { InteractionUtil, UserUtil } from '#utils';
-import { logger } from '#logger';
-import { requiredIgnOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
 import { hypixel, mojang } from '#api';
 import { formatError } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { Components } from '@zikeji/hypixel';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { requiredIgnOption } from '#structures/commands/commonOptions.js';
+import { InteractionUtil, UserUtil } from '#utils';
 
 export default class VerifyCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('link your discord account to your minecraft account')
@@ -22,9 +21,10 @@ export default class VerifyCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const IGN = interaction.options.getString('ign', true);
 		const playerLinkedToId =
 			UserUtil.getPlayer(interaction.user) ??
@@ -61,7 +61,6 @@ export default class VerifyCommand extends ApplicationCommand {
 			return InteractionUtil.reply(interaction, formatError(error));
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag

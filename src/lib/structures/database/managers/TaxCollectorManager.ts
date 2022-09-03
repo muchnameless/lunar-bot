@@ -1,10 +1,9 @@
-import { bold } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import { bold } from 'discord.js';
+import { type Player } from '../models/Player.js';
+import { type TaxCollector } from '../models/TaxCollector.js';
+import { ModelManager, type ModelResovable } from './ModelManager.js';
 import { escapeIgn, formatNumber } from '#functions';
-import { ModelManager } from './ModelManager';
-import type { TaxCollector } from '../models/TaxCollector';
-import type { ModelResovable } from './ModelManager';
-import type { Player } from '../models/Player';
 
 export type TaxCollectorResovable = ModelResovable<TaxCollector>;
 
@@ -12,16 +11,17 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	/**
 	 * returns a collection of all currently active collectors
 	 */
-	get activeCollectors() {
+	public get activeCollectors() {
 		return this.cache.filter(({ isCollecting }) => isCollecting);
 	}
 
 	/**
 	 * add a player as a taxcollector
+	 *
 	 * @param uuidOrPlayer
 	 */
-	// @ts-expect-error
-	override async add(uuidOrPlayer: ModelResovable<Player>) {
+	// @ts-expect-error incompatible override
+	public override async add(uuidOrPlayer: ModelResovable<Player>) {
 		const player = this.client.players.resolve(uuidOrPlayer);
 		if (!player) throw new Error(`[TAX COLLECTOR ADD]: invalid input: ${uuidOrPlayer}`);
 
@@ -46,9 +46,10 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 
 	/**
 	 * changes the tax collectors isCollecting to false or deletes the entry if the collector didn't collect anything
+	 *
 	 * @param taxCollector
 	 */
-	async setInactive(taxCollector: TaxCollectorResovable) {
+	public async setInactive(taxCollector: TaxCollectorResovable) {
 		const _taxCollector = this.resolve(taxCollector);
 		if (!_taxCollector) return this;
 
@@ -68,24 +69,28 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 
 	/**
 	 * get a taxCollector by their discord ID
+	 *
 	 * @param id
 	 */
-	getById(id: string) {
+	public getById(id: string) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		return this.cache.get(this.client.players.getById(id)?.minecraftUuid!) ?? null;
 	}
 
 	/**
 	 * get a taxCollector by their IGN, case insensitive and with auto-correction
+	 *
 	 * @param ign
 	 */
-	getByIgn(ign: string) {
+	public getByIgn(ign: string) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		return this.cache.get(this.client.players.getByIgn(ign)?.minecraftUuid!) ?? null;
 	}
 
 	/**
 	 * returns a tax collected embed
 	 */
-	createTaxCollectedEmbed() {
+	public createTaxCollectedEmbed() {
 		const embed = this.client.defaultEmbed //
 			.setTitle('Collected Guild Tax') //
 			.setDescription(stripIndents`
@@ -100,7 +105,6 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 
 		for (const taxCollector of this.cache.values()) {
 			embed.addFields({
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				name: `${escapeIgn(`${taxCollector}`)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
 				value: stripIndents`
 					tax: ${formatNumber(taxCollector.collectedTax)}

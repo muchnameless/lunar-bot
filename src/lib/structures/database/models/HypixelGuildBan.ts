@@ -1,28 +1,31 @@
-import { Model, DataTypes } from 'sequelize';
-import type {
-	CreationOptional,
-	InferAttributes,
-	InferCreationAttributes,
-	ModelStatic,
-	NonAttribute,
-	Sequelize,
+import {
+	Model,
+	DataTypes,
+	type CreationOptional,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type ModelStatic,
+	type NonAttribute,
+	type Sequelize,
 } from 'sequelize';
-import type { LunarClient } from '../../LunarClient';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export class HypixelGuildBan extends Model<InferAttributes<HypixelGuildBan>, InferCreationAttributes<HypixelGuildBan>> {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare minecraftUuid: string;
-	declare _reason: string | null;
+	public declare minecraftUuid: string;
 
-	declare readonly createdAt: CreationOptional<Date>;
-	declare readonly updatedAt: CreationOptional<Date>;
+	public declare _reason: string | null;
 
-	get reason(): NonAttribute<string> {
+	public declare readonly createdAt: CreationOptional<Date>;
+
+	public declare readonly updatedAt: CreationOptional<Date>;
+
+	public get reason(): NonAttribute<string> {
 		return this._reason ?? 'no reason specified';
 	}
 
-	static initialise(sequelize: Sequelize) {
+	public static initialise(sequelize: Sequelize) {
 		return this.init(
 			{
 				minecraftUuid: {

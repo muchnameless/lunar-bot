@@ -1,15 +1,14 @@
-import { codeBlock, SlashCommandBuilder } from 'discord.js';
 import { EmbedLimits } from '@sapphire/discord-utilities';
-import { InteractionUtil } from '#utils';
-import { hypixelGuildOption, requiredIgnOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { codeBlock, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { hypixel, mojang } from '#api';
 import { escapeIgn, seconds, trim } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption, requiredIgnOption } from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 export default class FriendCheckCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('checks which friends of the player are in the guild')
@@ -21,9 +20,10 @@ export default class FriendCheckCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 		const friends = new Set(
 			(await hypixel.friends.uuid(uuid)).records.map((x) => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender)),

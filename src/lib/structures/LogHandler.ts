@@ -1,44 +1,53 @@
+import { type Dir } from 'node:fs';
 import { mkdir, opendir, readFile, rm, writeFile } from 'node:fs/promises';
 import { URL } from 'node:url';
-import { PermissionFlagsBits, SnowflakeUtil, embedLength, isJSONEncodable } from 'discord.js';
 import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
+import {
+	PermissionFlagsBits,
+	SnowflakeUtil,
+	embedLength,
+	isJSONEncodable,
+	type APIEmbed,
+	type GuildChannel,
+	type JSONEncodable,
+	type Message,
+	type TextChannel,
+} from 'discord.js';
 import ms from 'ms';
-import { ChannelUtil } from '#utils';
-import { logger } from '#logger';
 import { commaListAnd } from '#functions';
-import type { Dir } from 'node:fs';
-import type { APIEmbed, GuildChannel, JSONEncodable, Message, TextChannel } from 'discord.js';
-import type { LunarClient } from './LunarClient';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { ChannelUtil } from '#utils';
 
-type LogInput = JSONEncodable<APIEmbed> | APIEmbed | string | number | null | undefined;
+type LogInput = APIEmbed | JSONEncodable<APIEmbed> | number | string | null | undefined;
 
 export class LogHandler {
-	declare client: LunarClient;
-	logURL: URL;
+	public declare readonly client: LunarClient;
+
+	private readonly logURL: URL;
 
 	/**
 	 * @param client
 	 * @param logURL
 	 */
-	constructor(client: LunarClient, logURL: URL) {
+	public constructor(client: LunarClient, logURL: URL) {
 		Object.defineProperty(this, 'client', { value: client });
 
 		this.logURL = logURL;
 	}
 
-	static REQUIRED_CHANNEL_PERMISSIONS =
+	public static REQUIRED_CHANNEL_PERMISSIONS =
 		PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks;
 
 	/**
 	 * logging channel
 	 */
-	get channel() {
+	public get channel() {
 		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID'));
 
 		if (!channel?.isTextBased()) {
 			logger.error(
 				`[LOG HANDLER]: ${
-					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 					channel ? `#${(channel as GuildChannel).name ?? channel.id}` : this.client.config.get('LOGGING_CHANNEL_ID')
 				} is not a cached text based channel (id)`,
 			);
@@ -57,7 +66,6 @@ export class LogHandler {
 			return null;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
 			const {
 				members: { me },
@@ -77,14 +85,14 @@ export class LogHandler {
 	/**
 	 * whether the log handler has a valid channel with all neccessary permissions
 	 */
-	get ready() {
+	public get ready() {
 		return Boolean(this.channel);
 	}
 
 	/**
 	 * posts all remaining file logs from the log_buffer
 	 */
-	async init() {
+	public async init() {
 		if (!this.channel) return this;
 
 		try {
@@ -98,14 +106,15 @@ export class LogHandler {
 
 	/**
 	 * logs embeds to console and to the logging channel
-	 * @param input embeds to log
+	 *
+	 * @param input - embeds to log
 	 */
-	log(input: LogInput): Promise<Message | null>;
-	log(...input: LogInput[]): Promise<Message | null | (Message | null)[]>;
-	log(...input: LogInput[]): Promise<Message | null | (Message | null)[]> {
+	public log(input: LogInput): Promise<Message | null>;
+	public log(...input: LogInput[]): Promise<(Message | null)[] | Message | null>;
+	public async log(...input: LogInput[]): Promise<(Message | null)[] | Message | null> {
 		const embeds = this._transformInput(input);
 
-		if (!embeds.length) return Promise.resolve(null); // nothing to log
+		if (!embeds.length) return null; // nothing to log
 
 		// send 1 message
 		if (
@@ -143,23 +152,24 @@ export class LogHandler {
 
 	/**
 	 * make sure all elements are instances of MessageEmbed
+	 *
 	 * @param input
 	 */
 	private _transformInput(input: LogInput[]) {
 		const embeds: APIEmbed[] = [];
 
-		for (const i of input) {
-			if (i == null) continue; // filter out null & undefined
+		for (const maybeEmbed of input) {
+			if (maybeEmbed === null || maybeEmbed === undefined) continue; // filter out null & undefined
 
-			if (isJSONEncodable(i)) {
-				embeds.push(i.toJSON());
-			} else if (typeof i === 'object') {
-				embeds.push(this.client.options.jsonTransformer!(i) as APIEmbed);
-			} else if (['string', 'number'].includes(typeof i)) {
-				embeds.push(this.client.defaultEmbed.setDescription(`${i}`).toJSON());
+			if (isJSONEncodable(maybeEmbed)) {
+				embeds.push(maybeEmbed.toJSON());
+			} else if (typeof maybeEmbed === 'object') {
+				embeds.push(this.client.options.jsonTransformer!(maybeEmbed) as APIEmbed);
+			} else if (['string', 'number'].includes(typeof maybeEmbed)) {
+				embeds.push(this.client.defaultEmbed.setDescription(`${maybeEmbed}`).toJSON());
 			} else {
 				throw new TypeError(
-					`[TRANSFORM INPUT]: provided argument '${i}' is a '${typeof i}' instead of an Object or String`,
+					`[TRANSFORM INPUT]: provided argument '${maybeEmbed}' is a '${typeof maybeEmbed}' instead of an Object or String`,
 				);
 			}
 		}
@@ -169,6 +179,7 @@ export class LogHandler {
 
 	/**
 	 * log to console and send in the logging channel
+	 *
 	 * @param embeds
 	 */
 	private async _log(embeds: APIEmbed[]) {
@@ -184,6 +195,7 @@ export class LogHandler {
 
 		// API call
 		try {
+			// eslint-disable-next-line @typescript-eslint/return-await
 			return await channel.send({ embeds });
 		} catch (error) {
 			logger.error(error, '[CLIENT LOG]');
@@ -208,9 +220,10 @@ export class LogHandler {
 
 	/**
 	 * write data in 'cwd/log_buffer'
-	 * @param embeds file content
+	 *
+	 * @param embeds - file content
 	 */
-	private async _logToFile(embeds: (JSONEncodable<APIEmbed> | APIEmbed)[]) {
+	private async _logToFile(embeds: (APIEmbed | JSONEncodable<APIEmbed>)[]) {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(

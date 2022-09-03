@@ -1,5 +1,5 @@
 import { setTimeout } from 'node:timers';
-import ms from 'ms';
+import { ApplicationCommandOptionLimits } from '@sapphire/discord-utilities';
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -8,11 +8,23 @@ import {
 	InteractionType,
 	PermissionFlagsBits,
 	userMention,
+	type APIActionRowComponent,
+	type APIMessageActionRowComponent,
+	type ApplicationCommandOptionChoiceData,
+	type AutocompleteInteraction,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type ClientEvents,
+	type Events,
+	type JSONEncodable,
+	type MessageActionRowComponentBuilder,
+	type MessageContextMenuCommandInteraction,
+	type ModalSubmitInteraction,
+	type SelectMenuInteraction,
+	type Snowflake,
+	type UserContextMenuCommandInteraction,
 } from 'discord.js';
-import { ApplicationCommandOptionLimits } from '@sapphire/discord-utilities';
-import { GuildMemberUtil, InteractionUtil, MessageUtil } from '#utils';
-import { logger } from '#logger';
-import { Event } from '#structures/events/Event';
+import ms from 'ms';
 import { CustomIdKey, GUILD_ID_ALL } from '#constants';
 import {
 	assertNever,
@@ -20,25 +32,10 @@ import {
 	handleLeaderboardSelectMenuInteraction,
 	sortCache,
 } from '#functions';
-import type { RepliableInteraction } from '#utils';
-import type {
-	APIActionRowComponent,
-	APIMessageActionRowComponent,
-	ApplicationCommandOptionChoiceData,
-	AutocompleteInteraction,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	ClientEvents,
-	Events,
-	JSONEncodable,
-	MessageActionRowComponentBuilder,
-	MessageContextMenuCommandInteraction,
-	ModalSubmitInteraction,
-	SelectMenuInteraction,
-	Snowflake,
-	UserContextMenuCommandInteraction,
-} from 'discord.js';
+import { logger } from '#logger';
 import type LeaderboardCommand from '#root/commands/guild/leaderboard';
+import { Event } from '#structures/events/Event.js';
+import { GuildMemberUtil, InteractionUtil, MessageUtil, type RepliableInteraction } from '#utils';
 
 export default class InteractionCreateEvent extends Event {
 	private _visibilityButtonMessages = new Set<Snowflake>();
@@ -86,7 +83,7 @@ export default class InteractionCreateEvent extends Event {
 		switch (TYPE) {
 			// InteractionUtil.awaitConfirmation, handled by a collector
 			case CustomIdKey.Confirm:
-				return;
+				return undefined;
 
 			// leaderboards edit
 			case CustomIdKey.Leaderboard:
@@ -127,7 +124,7 @@ export default class InteractionCreateEvent extends Event {
 				void InteractionUtil.deferUpdate(interaction);
 
 				// no-op additional clicks on the same button
-				if (this._visibilityButtonMessages.has(interaction.message.id)) return;
+				if (this._visibilityButtonMessages.has(interaction.message.id)) return undefined;
 
 				try {
 					this._visibilityButtonMessages.add(interaction.message.id);
@@ -149,7 +146,7 @@ export default class InteractionCreateEvent extends Event {
 						// copy row and remove visibility button
 						components.push(
 							new ActionRowBuilder<MessageActionRowComponentBuilder>({
-								components: row.components.slice(0, -1).map((c) => c.toJSON()),
+								components: row.components.slice(0, -1).map((row) => row.toJSON()),
 							}),
 						);
 					}
@@ -166,6 +163,7 @@ export default class InteractionCreateEvent extends Event {
 					});
 
 					// remove the button from the ephemeral message
+					// eslint-disable-next-line @typescript-eslint/return-await
 					return await InteractionUtil.editReply(interaction, { components });
 				} finally {
 					this._visibilityButtonMessages.delete(interaction.message.id);
@@ -189,6 +187,9 @@ export default class InteractionCreateEvent extends Event {
 
 				return command.buttonRun(interaction, args);
 			}
+
+			default:
+				return undefined;
 		}
 	}
 
@@ -214,7 +215,7 @@ export default class InteractionCreateEvent extends Event {
 						throw `the \`${commandName}\` command is currently disabled`;
 					}
 
-					return;
+					return undefined;
 				}
 
 				// role permissions
@@ -222,11 +223,15 @@ export default class InteractionCreateEvent extends Event {
 
 				return command.selectMenuRun(interaction, args);
 			}
+
+			default:
+				return undefined;
 		}
 	}
 
 	/**
 	 * respond to autocomplete interactions
+	 *
 	 * @param interaction
 	 */
 	private async _handleAutocompleteInteraction(interaction: AutocompleteInteraction<'cachedOrDM'>) {
@@ -396,6 +401,9 @@ export default class InteractionCreateEvent extends Event {
 
 				return command.modalSubmitRun(interaction, args);
 			}
+
+			default:
+				return undefined;
 		}
 	}
 
@@ -410,9 +418,10 @@ export default class InteractionCreateEvent extends Event {
 
 	/**
 	 * event listener callback
+	 *
 	 * @param interaction
 	 */
-	override async run(interaction: ClientEvents[Events.InteractionCreate][0]) {
+	public override async run(interaction: ClientEvents[Events.InteractionCreate][0]) {
 		if (!InteractionUtil.inCachedGuildOrDM(interaction)) return;
 
 		try {
@@ -422,42 +431,51 @@ export default class InteractionCreateEvent extends Event {
 
 					switch (interaction.commandType) {
 						case ApplicationCommandType.ChatInput:
-							return void (await this._handleChatInputCommandInteraction(interaction));
+							await this._handleChatInputCommandInteraction(interaction);
+							return;
 
 						case ApplicationCommandType.Message:
-							return void (await this._handleMessageContextMenuInteraction(interaction));
+							await this._handleMessageContextMenuInteraction(interaction);
+							return;
 
 						case ApplicationCommandType.User:
-							return void (await this._handleUserContextMenuInteraction(interaction));
+							await this._handleUserContextMenuInteraction(interaction);
+							return;
 
 						default:
+							// eslint-disable-next-line consistent-return
 							return assertNever(interaction);
 					}
 
 				case InteractionType.ApplicationCommandAutocomplete:
-					return void (await this._handleAutocompleteInteraction(interaction));
+					await this._handleAutocompleteInteraction(interaction);
+					return;
 
 				case InteractionType.MessageComponent:
 					this._handleRepliableInteraction(interaction);
 
 					switch (interaction.componentType) {
 						case ComponentType.Button:
-							return void (await this._handleButtonInteraction(interaction));
+							await this._handleButtonInteraction(interaction);
+							return;
 
 						case ComponentType.SelectMenu:
-							return void (await this._handleSelectMenuInteraction(interaction));
+							await this._handleSelectMenuInteraction(interaction);
+							return;
 
 						default:
+							// eslint-disable-next-line consistent-return
 							return assertNever(interaction);
 					}
 
 				case InteractionType.ModalSubmit:
 					this._handleRepliableInteraction(interaction);
 
-					return void (await this._handleModalSubmitInteraction(interaction));
+					await this._handleModalSubmitInteraction(interaction);
+					return;
 
 				default:
-					return assertNever(interaction);
+					assertNever(interaction);
 			}
 		} catch (error) {
 			logger.error({ err: error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
@@ -467,11 +485,12 @@ export default class InteractionCreateEvent extends Event {
 			// respond to interaction
 			if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
 				// reply with error
-				return void InteractionUtil.reply(interaction, {
+				void InteractionUtil.reply(interaction, {
 					content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
 					ephemeral: true,
 					allowedMentions: { parse: [], repliedUser: true },
 				});
+				return;
 			}
 
 			// autocomplete -> send empty choices

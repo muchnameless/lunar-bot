@@ -1,9 +1,9 @@
 import { argv, exit } from 'node:process';
-import '#structures/database/pgEnum-fix'; // to allow `sync --alter` with pg enums set
-import { logger } from '#logger';
+import '#structures/database/pgEnum-fix.js'; // to allow `sync --alter` with pg enums set
 import { sequelize } from '#db';
+import { logger } from '#logger';
 
-// @ts-expect-error
+// @ts-expect-error Property 'options' does not exist on type 'Sequelize'
 sequelize.options.logging = (...x) => logger.debug(...x);
 
 const force = argv.includes('--force') || argv.includes('-f');

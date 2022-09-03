@@ -11,6 +11,7 @@ export const NEVER_MATCHING_REGEXP = '.^';
 /**
  * normal lowercase letters <> small latin capital letters
  */
+/* eslint-disable id-length */
 export const SMALL_LATIN_CAPITAL_LETTERS = {
 	a: '\u1D00',
 	b: '\u0299',
@@ -39,3 +40,4 @@ export const SMALL_LATIN_CAPITAL_LETTERS = {
 	y: '\u028F',
 	z: '\u1D22',
 } as const;
+/* eslint-enable id-length */

@@ -18,10 +18,10 @@ export enum MessagePosition {
 }
 
 export const enum HypixelMessageType {
-	Whisper = 'WHISPER',
 	Guild = 'GUILD',
 	Officer = 'OFFICER',
 	Party = 'PARTY',
+	Whisper = 'WHISPER',
 }
 
 export const enum MinecraftChatManagerState {
@@ -88,7 +88,6 @@ export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2800}\u{180E}\u{200B}]/u;
 /**
  * spam messages
  */
-// eslint-disable-next-line regexp/no-obscure-range
 export const MEME_REGEXP = /[⠁-⣿]|\be+z+\b/;
 
 export const NON_WHITESPACE_REGEXP = new RegExp(

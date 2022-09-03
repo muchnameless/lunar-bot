@@ -1,22 +1,36 @@
-import { codeBlock, InteractionType, SlashCommandBuilder, SnowflakeUtil, time } from 'discord.js';
-import { Op } from 'sequelize';
 import { AutoCompleteLimits, EmbedLimits } from '@sapphire/discord-utilities';
-import ms from 'ms';
-import { GuildMemberUtil, InteractionUtil, UserUtil } from '#utils';
-import { logger } from '#logger';
-import { HypixelMessage } from '#chatBridge/HypixelMessage';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { UNKNOWN_IGN } from '#constants';
 import {
-	forceOption,
-	hypixelGuildOption,
-	optionalPlayerOption,
-	pageOption,
-	requiredIgnOption,
-	requiredPlayerOption,
-	targetOption,
-} from '#structures/commands/commonOptions';
+	codeBlock,
+	InteractionType,
+	SlashCommandBuilder,
+	SnowflakeUtil,
+	time,
+	type AutocompleteInteraction,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type Interaction,
+	type SlashCommandStringOption,
+	type Snowflake,
+} from 'discord.js';
+import ms from 'ms';
+import { Op, type Attributes, type WhereOptions } from 'sequelize';
 import { mojang } from '#api';
+import { HypixelMessage, type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import {
+	demote,
+	historyErrors,
+	invite,
+	kick,
+	mute,
+	logErrors,
+	promote,
+	setRank,
+	topErrors,
+	unmute,
+	unknownIgn,
+} from '#chatBridge/constants/index.js';
+import { type CommandOptions } from '#chatBridge/managers/MinecraftChatManager.js';
+import { UNKNOWN_IGN } from '#constants';
 import {
 	autocorrect,
 	buildPaginationActionRow,
@@ -30,38 +44,26 @@ import {
 	stringToMS,
 	trim,
 } from '#functions';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
 import {
-	demote,
-	historyErrors,
-	invite,
-	kick,
-	mute,
-	logErrors,
-	promote,
-	setRank,
-	topErrors,
-	unmute,
-	unknownIgn,
-} from '#chatBridge/constants';
-import type {
-	AutocompleteInteraction,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	Interaction,
-	SlashCommandStringOption,
-	Snowflake,
-} from 'discord.js';
-import type { Attributes, WhereOptions } from 'sequelize';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { Player } from '#structures/database/models/Player';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
-import type { CommandOptions } from '#chatBridge/managers/MinecraftChatManager';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
+	forceOption,
+	hypixelGuildOption,
+	optionalPlayerOption,
+	pageOption,
+	requiredIgnOption,
+	requiredPlayerOption,
+	targetOption,
+} from '#structures/commands/commonOptions.js';
+import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import { type Player } from '#structures/database/models/Player.js';
+import { GuildMemberUtil, InteractionUtil, UserUtil } from '#utils';
 
 interface RunModerationOptions {
-	target: Player | string;
 	executor: Player | null;
 	hypixelGuild: HypixelGuild;
+	target: Player | string;
 }
 
 interface RunMuteOptions extends RunModerationOptions {
@@ -74,9 +76,9 @@ interface RunKickOptions extends RunModerationOptions {
 }
 
 export default class GuildCommand extends ApplicationCommand {
-	GUILD_IDENTIFIER = new Set(['guild', 'everyone'] as const);
+	private readonly GUILD_IDENTIFIER = new Set(['guild', 'everyone'] as const);
 
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('hypixel')
 			.addSubcommand((subcommand) =>
@@ -234,11 +236,16 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * throws on unknown subcommand, rejects on missing permissions
+	 *
 	 * @param interaction
 	 * @param hypixelGuild
 	 * @param subcommand
 	 */
-	private _assertRequiredRoles(interaction: Interaction<'cachedOrDM'>, hypixelGuild: HypixelGuild, subcommand: string) {
+	private async _assertRequiredRoles(
+		interaction: Interaction<'cachedOrDM'>,
+		hypixelGuild: HypixelGuild,
+		subcommand: string,
+	) {
 		const roleIds: Snowflake[] = [];
 
 		switch (subcommand) {
@@ -274,6 +281,7 @@ export default class GuildCommand extends ApplicationCommand {
 				throw new Error(`unknown subcommand '${subcommand}'`);
 		}
 
+		// eslint-disable-next-line consistent-return
 		return this.assertPermissions(interaction, { roleIds, hypixelGuild });
 	}
 
@@ -281,7 +289,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param targetInput
 	 * @param interaction
 	 */
-	async getMuteTarget(targetInput: string, interaction?: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public async getMuteTarget(targetInput: string, interaction?: ChatInputCommandInteraction<'cachedOrDM'>) {
 		if (this.GUILD_IDENTIFIER.has(targetInput as any)) {
 			return 'everyone';
 		}
@@ -331,9 +339,10 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * /g mute
+	 *
 	 * @param options
 	 */
-	async runMute({ target, executor, duration, hypixelGuild }: RunMuteOptions) {
+	public async runMute({ target, executor, duration, hypixelGuild }: RunMuteOptions) {
 		if (this.client.players.isModel(target)) {
 			const IN_GUILD = target.inGuild();
 
@@ -350,11 +359,9 @@ export default class GuildCommand extends ApplicationCommand {
 				hypixelGuild.syncMute(target, Date.now() + duration),
 				(async () => {
 					const discordMember = await target.fetchDiscordMember();
-					if (!discordMember) return;
-					return GuildMemberUtil.timeout(
-						discordMember,
-						duration,
-						`${executor}: \`/guild mute ${target} ${ms(duration)}\``,
+					return (
+						discordMember &&
+						GuildMemberUtil.timeout(discordMember, duration, `${executor}: \`/guild mute ${target} ${ms(duration)}\``)
 					);
 				})(),
 			]);
@@ -371,6 +378,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 		try {
 			const { chatBridge } = hypixelGuild;
+			// eslint-disable-next-line @typescript-eslint/return-await
 			return await chatBridge.minecraft.command({
 				command: `guild mute ${target} ${ms(duration)}`,
 				responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, chatBridge.bot.username),
@@ -385,7 +393,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param duration
 	 */
-	async runMuteInteraction(
+	public async runMuteInteraction(
 		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		duration: number,
@@ -416,10 +424,10 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * asserts the executor has an in-game staff rank in the hypixelGuild
+	 *
 	 * @param hypixelGuild
 	 * @param executor
 	 */
-	// eslint-disable-next-line class-methods-use-this
 	private _assertExecutorIsStaff(hypixelGuild: HypixelGuild, executor: Player | null): asserts executor is Player {
 		if (!executor) {
 			throw 'unable to find a linked player for your discord account';
@@ -439,7 +447,7 @@ export default class GuildCommand extends ApplicationCommand {
 	/**
 	 * @param options
 	 */
-	async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
+	public async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
 		this._assertExecutorIsStaff(hypixelGuild, executor);
 
 		if (typeof target === 'string') {
@@ -483,6 +491,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param commandOptions
 	 * @param hypixelGuild
@@ -504,6 +513,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param commandOptions
 	 */
@@ -531,7 +541,7 @@ export default class GuildCommand extends ApplicationCommand {
 													msg.formattedContent
 														.replaceAll('§r§c ●', ' 🔴') // prettify emojis
 														.replaceAll('§r§a ●', ' 🟢')
-														.replace(/\[.+?\] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
+														.replace(/\[.+?] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
 														.trim(),
 											  )
 											: msg.content,
@@ -548,10 +558,14 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * @param interaction
-	 * @param value input value
-	 * @param name option name
+	 * @param value - input value
+	 * @param name - option name
 	 */
-	override autocompleteRun(interaction: AutocompleteInteraction<'cachedOrDM'>, value: string, name: string) {
+	public override async autocompleteRun(
+		interaction: AutocompleteInteraction<'cachedOrDM'>,
+		value: string,
+		name: string,
+	) {
 		switch (name) {
 			case 'rank':
 				if (!value) {
@@ -580,7 +594,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param page
 	 */
 	private async _paginatedRun(
-		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ButtonInteraction<'cachedOrDM'>,
+		interaction: ButtonInteraction<'cachedOrDM'> | ChatInputCommandInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		subcommand: string,
 		commandOptions: CommandOptions,
@@ -643,7 +657,7 @@ export default class GuildCommand extends ApplicationCommand {
 					`${this.baseCustomId}:${subcommand}:${hypixelGuild.guildId}:${interaction.user.id}`,
 					currentPage,
 					totalPages,
-					{ firstPage: pageMatched !== null ? 1 : 0 },
+					{ firstPage: pageMatched === null ? 0 : 1 },
 				),
 			],
 		});
@@ -651,10 +665,11 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
-	 * @param args parsed customId, split by ':'
+	 * @param args - parsed customId, split by ':'
 	 */
-	override async buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
+	public override async buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT] = args as [string, string, string, string];
 		const [SUBCOMMAND] = SUBCOMMAND_WITH_ARGS.split(' ', 1) as [string];
 		const hypixelGuild = this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID);
@@ -715,9 +730,10 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const SUBCOMMAND = interaction.options.getSubcommand();
 
@@ -765,7 +781,8 @@ export default class GuildCommand extends ApplicationCommand {
 									`add \`${target}\` to the ban list for \`${reason}\`?`,
 								);
 							} catch (error) {
-								return logger.error(error);
+								logger.error(error);
+								return;
 							}
 
 						// fallthrough
@@ -988,8 +1005,10 @@ export default class GuildCommand extends ApplicationCommand {
 						hypixelGuild.syncMute(target, null),
 						(async () => {
 							const discordMember = await target.fetchDiscordMember();
-							if (!discordMember) return;
-							return GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``);
+							return (
+								discordMember &&
+								GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``)
+							);
 						})(),
 					]);
 

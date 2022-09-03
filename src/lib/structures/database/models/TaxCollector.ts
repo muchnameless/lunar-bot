@@ -1,32 +1,37 @@
-import { Model, DataTypes } from 'sequelize';
-import { assertNever } from '#functions';
-import { TransactionType } from './Transaction';
-import type {
-	Attributes,
-	CreationOptional,
-	InferAttributes,
-	InferCreationAttributes,
-	InstanceDestroyOptions,
-	InstanceUpdateOptions,
-	ModelStatic,
-	NonAttribute,
-	Sequelize,
+import {
+	DataTypes,
+	Model,
+	type Attributes,
+	type CreationOptional,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type InstanceDestroyOptions,
+	type InstanceUpdateOptions,
+	type ModelStatic,
+	type NonAttribute,
+	type Sequelize,
 } from 'sequelize';
-import type { LunarClient } from '../../LunarClient';
-import type { Player } from './Player';
+import { type Player } from './Player.js';
+import { TransactionType } from './Transaction.js';
+import { assertNever } from '#functions';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCreationAttributes<TaxCollector>> {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare minecraftUuid: string;
-	declare isCollecting: CreationOptional<boolean>;
-	declare collectedTax: CreationOptional<number>;
-	declare collectedDonations: CreationOptional<number>;
+	public declare minecraftUuid: string;
 
-	declare readonly createdAt: CreationOptional<Date>;
-	declare readonly updatedAt: CreationOptional<Date>;
+	public declare isCollecting: CreationOptional<boolean>;
 
-	static initialise(sequelize: Sequelize) {
+	public declare collectedTax: CreationOptional<number>;
+
+	public declare collectedDonations: CreationOptional<number>;
+
+	public declare readonly createdAt: CreationOptional<Date>;
+
+	public declare readonly updatedAt: CreationOptional<Date>;
+
+	public static initialise(sequelize: Sequelize) {
 		return this.init(
 			{
 				minecraftUuid: {
@@ -57,22 +62,26 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 		) as ModelStatic<TaxCollector>;
 	}
 
-	get player(): NonAttribute<Player | null> {
+	public get player(): NonAttribute<Player | null> {
 		return this.client.players.cache.get(this.minecraftUuid) ?? null;
 	}
 
-	get ign(): NonAttribute<string | null> {
+	public get ign(): NonAttribute<string | null> {
 		return this.player?.ign ?? null;
 	}
 
 	/**
 	 * adds the amount to the taxCollector's collected amount
+	 *
 	 * @param amount
 	 * @param type
 	 * @param options
 	 */
-	// eslint-disable-next-line default-param-last
-	addAmount(amount: number, type = TransactionType.Tax, options?: InstanceUpdateOptions<Attributes<TaxCollector>>) {
+	public addAmount(
+		amount: number,
+		type = TransactionType.Tax,
+		options?: InstanceUpdateOptions<Attributes<TaxCollector>>,
+	) {
 		let data;
 
 		switch (type) {
@@ -93,9 +102,10 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 
 	/**
 	 * resets the specified amount back to 0
+	 *
 	 * @param type
 	 */
-	resetAmount(type = TransactionType.Tax) {
+	public resetAmount(type = TransactionType.Tax) {
 		switch (type) {
 			case TransactionType.Tax:
 				return this.update({ collectedTax: 0 });
@@ -111,7 +121,7 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 	/**
 	 * destroys the db entry and removes it from cache
 	 */
-	override destroy(options?: InstanceDestroyOptions) {
+	public override async destroy(options?: InstanceDestroyOptions) {
 		this.client.taxCollectors.cache.delete(this.minecraftUuid);
 		return super.destroy(options);
 	}
@@ -119,7 +129,7 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 	/**
 	 * player IGN or UUID
 	 */
-	override toString() {
+	public override toString() {
 		return this.ign ?? this.minecraftUuid;
 	}
 }

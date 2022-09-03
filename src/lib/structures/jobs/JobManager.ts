@@ -1,15 +1,15 @@
 import { Collection } from 'discord.js';
-import type { Job } from './Job';
+import { type Job } from './Job.js';
 
 export class JobManager {
-	jobs = new Collection<string, Job>();
+	public readonly jobs = new Collection<string, Job>();
 
-	add(job: Job) {
+	public add(job: Job) {
 		this.jobs.set(job.name, job);
 		job.start();
 	}
 
-	stop(shouldRestart?: boolean) {
-		return Promise.all(this.jobs.map((job) => job.stop(shouldRestart)));
+	public async stop(shouldRestart?: boolean) {
+		return Promise.all(this.jobs.map(async (job) => job.stop(shouldRestart)));
 	}
 }

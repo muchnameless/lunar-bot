@@ -1,5 +1,6 @@
 import { env } from 'node:process';
 import { URL } from 'node:url';
+import { lazy } from '@sapphire/utilities';
 import {
 	ActivityType,
 	ChannelType,
@@ -10,12 +11,11 @@ import {
 	PresenceUpdateStatus,
 	RequestMethod,
 	Routes,
+	type Snowflake,
 } from 'discord.js';
-import { lazy } from '@sapphire/utilities';
-import { LunarClient } from '#structures/LunarClient';
+import { startJobs } from './jobs/index.js';
 import { hours, minutes, seconds } from '#functions';
-import { startJobs } from './jobs';
-import type { Snowflake } from 'discord.js';
+import { LunarClient } from '#structures/LunarClient.js';
 
 if (env.NODE_ENV !== 'development') disableValidators();
 
@@ -36,7 +36,7 @@ const client = new LunarClient({
 		ReactionUserManager: {
 			// cache only the bot user
 			maxSize: 1,
-			keepOverLimit: (e) => e.id === e.client.user!.id,
+			keepOverLimit: (user) => user.id === user.client.user!.id,
 		},
 		StageInstanceManager: 0,
 		VoiceStateManager: 0,
@@ -64,6 +64,7 @@ const client = new LunarClient({
 					for (const channel of client.channels.cache.values()) {
 						if (channel.type === ChannelType.DM) recipients.add(channel.recipientId);
 					}
+
 					return recipients;
 				});
 

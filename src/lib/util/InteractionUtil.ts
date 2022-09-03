@@ -1,4 +1,6 @@
 import { setTimeout, clearTimeout } from 'node:timers';
+import { InteractionLimits, MessageLimits } from '@sapphire/discord-utilities';
+import { stripIndent } from 'common-tags';
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -15,10 +17,26 @@ import {
 	Message,
 	RESTJSONErrorCodes,
 	SnowflakeUtil,
+	type APIActionRowComponent,
+	type APIMessageActionRowComponent,
+	type AutocompleteInteraction,
+	type BaseGuildTextChannel,
+	type ButtonInteraction,
+	type CacheType,
+	type ChatInputCommandInteraction,
+	type EmojiIdentifierResolvable,
+	type Interaction,
+	type InteractionDeferReplyOptions,
+	type InteractionDeferUpdateOptions,
+	type InteractionReplyOptions,
+	type InteractionUpdateOptions,
+	type MessageActionRowComponentBuilder,
+	type MessageResolvable,
+	type ModalBuilder,
+	type TextBasedChannel,
+	type WebhookEditMessageOptions,
 } from 'discord.js';
-import { InteractionLimits, MessageLimits } from '@sapphire/discord-utilities';
-import { stripIndent } from 'common-tags';
-import { logger } from '#logger';
+import { MessageUtil, ChannelUtil, UserUtil, type SendDMOptions } from './index.js';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '#constants';
 import {
 	assertNever,
@@ -28,38 +46,17 @@ import {
 	seconds,
 	validateDiscordId,
 	validateMinecraftUuid,
+	type SplitOptions,
 } from '#functions';
-import { MessageUtil, ChannelUtil, UserUtil } from '.';
-import type {
-	APIActionRowComponent,
-	APIMessageActionRowComponent,
-	AutocompleteInteraction,
-	BaseGuildTextChannel,
-	ButtonInteraction,
-	CacheType,
-	ChatInputCommandInteraction,
-	EmojiIdentifierResolvable,
-	Interaction,
-	InteractionDeferReplyOptions,
-	InteractionDeferUpdateOptions,
-	InteractionReplyOptions,
-	InteractionUpdateOptions,
-	MessageActionRowComponentBuilder,
-	MessageResolvable,
-	ModalBuilder,
-	TextBasedChannel,
-	WebhookEditMessageOptions,
-} from 'discord.js';
-import type { SplitOptions } from '#functions';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild';
-import type { Player } from '#structures/database/models/Player';
-import type { SendDMOptions } from '.';
+import { logger } from '#logger';
+import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import { type Player } from '#structures/database/models/Player.js';
 
 interface InteractionData {
+	autoDeferTimeout: NodeJS.Timeout | null;
 	deferReplyPromise: Promise<InteractionResponse | Message> | null;
 	deferUpdatePromise: Promise<InteractionResponse> | null;
 	useEphemeral: boolean;
-	autoDeferTimeout: NodeJS.Timeout | null;
 }
 
 export type RepliableInteraction<Cached extends CacheType = 'cachedOrDM'> = Extract<
@@ -82,9 +79,9 @@ interface DeferReplyOptions extends InteractionDeferReplyOptions {
 }
 
 export interface InteractionUtilReplyOptions extends InteractionReplyOptions {
-	split?: SplitOptions | boolean;
-	code?: string | boolean;
+	code?: boolean | string;
 	rejectOnError?: boolean;
+	split?: SplitOptions | boolean;
 }
 
 interface EditReplyOptions extends WebhookEditMessageOptions {
@@ -100,45 +97,61 @@ interface UpdateOptions extends InteractionUpdateOptions {
 }
 
 interface GetPlayerOptions {
-	/** whether to use the current user in case that no player / target option is provided */
+	/**
+	 * whether to use the current user in case that no player / target option is provided
+	 */
 	fallbackToCurrentUser?: boolean;
-	/** whether to throw an error if no linked player is found */
+	/**
+	 * whether to throw an error if no linked player is found
+	 */
 	throwIfNotFound?: boolean;
 }
 
 interface GetHypixelGuildOptions {
-	/** whether to use the current user in case that no player / target option is provided */
+	/**
+	 * whether to use the current user in case that no player / target option is provided
+	 */
 	fallbackIfNoInput?: boolean;
-	/** whether the return value may also be a string with GUILD_ID_ALL */
+	/**
+	 * whether the return value may also be a string with GUILD_ID_ALL
+	 */
 	includeAll?: boolean;
 }
 
 interface AwaitReplyOptions extends InteractionReplyOptions {
 	question?: string;
-	/** time in milliseconds to wait for a response */
+	/**
+	 * time in milliseconds to wait for a response
+	 */
 	time?: number;
 }
 
 interface AwaitConfirmationOptions extends Omit<InteractionReplyOptions, 'fetchReply' | 'rejectOnError'> {
-	question?: string;
-	/** time in milliseconds to wait for a response */
-	time?: number;
 	errorMessage?: string;
+	question?: string;
+	/**
+	 * time in milliseconds to wait for a response
+	 */
+	time?: number;
 }
 
 export class InteractionUtil extends null {
 	/**
 	 * cache
 	 */
-	static CACHE = new WeakMap<Exclude<Interaction<'cachedOrDM'>, AutocompleteInteraction>, InteractionData>();
+	private static readonly CACHE = new WeakMap<
+		Exclude<Interaction<'cachedOrDM'>, AutocompleteInteraction>,
+		InteractionData
+	>();
 
-	static AUTO_DEFER_TIMEOUT = seconds(1);
+	private static readonly AUTO_DEFER_TIMEOUT = seconds(1);
 
 	/**
 	 * adds the interaction to the WeakMap which holds InteractionData and schedules deferring
+	 *
 	 * @param interaction
 	 */
-	static add(interaction: RepliableInteraction<'cachedOrDM'>) {
+	public static add(interaction: RepliableInteraction<'cachedOrDM'>) {
 		const { channel } = interaction;
 		const interactionData: InteractionData = {
 			deferReplyPromise: null,
@@ -171,9 +184,10 @@ export class InteractionUtil extends null {
 
 	/**
 	 * checks the command options for the ephemeral option
+	 *
 	 * @param interaction
 	 */
-	static checkEphemeralOption(interaction: Interaction<'cachedOrDM'>) {
+	public static checkEphemeralOption(interaction: Interaction<'cachedOrDM'>) {
 		if (!interaction.isChatInputCommand()) return null;
 
 		switch (interaction.options.getString('visibility')) {
@@ -190,9 +204,10 @@ export class InteractionUtil extends null {
 
 	/**
 	 * whether the error is due to an interaction reply
+	 *
 	 * @param error
 	 */
-	static isInteractionError(error: unknown): error is DiscordAPIError {
+	public static isInteractionError(error: unknown): error is DiscordAPIError {
 		if (!(error instanceof DiscordAPIError)) return false;
 
 		switch (error.code) {
@@ -210,7 +225,7 @@ export class InteractionUtil extends null {
 	/**
 	 * @param interaction
 	 */
-	static logInfo(interaction: Interaction<'cachedOrDM'>) {
+	public static logInfo(interaction: Interaction<'cachedOrDM'>) {
 		switch (interaction.type) {
 			case InteractionType.ApplicationCommand:
 				switch (interaction.commandType) {
@@ -330,9 +345,10 @@ export class InteractionUtil extends null {
 
 	/**
 	 * appends the first option name if the command is a subcommand or subcommand group
+	 *
 	 * @param interaction
 	 */
-	static fullCommandName(interaction: Interaction) {
+	public static fullCommandName(interaction: Interaction) {
 		switch (interaction.type) {
 			case InteractionType.MessageComponent:
 				return `${ComponentType[interaction.componentType]} '${interaction.customId}'`;
@@ -371,35 +387,43 @@ export class InteractionUtil extends null {
 
 	/**
 	 * whether the force option was set to true
+	 *
 	 * @param interaction
 	 */
-	static checkForce(interaction: ChatInputCommandInteraction<'cachedOrDM'> | AutocompleteInteraction<'cachedOrDM'>) {
+	public static checkForce(
+		interaction: AutocompleteInteraction<'cachedOrDM'> | ChatInputCommandInteraction<'cachedOrDM'>,
+	) {
 		return interaction.options.getBoolean('force') ?? false;
 	}
 
 	/**
 	 * whether the interaction is from a cached guild or DM	channel
+	 *
 	 * @param interaction
 	 */
-	static inCachedGuildOrDM(interaction: Interaction): interaction is Interaction<'cachedOrDM'> {
+	public static inCachedGuildOrDM(interaction: Interaction): interaction is Interaction<'cachedOrDM'> {
 		// guilds are sent with all their channels -> cached channel implies cached guild
 		return interaction.client.channels.cache.has(interaction.channelId!);
 	}
 
 	/**
 	 * whether the interaction has a message attached
+	 *
 	 * @param interaction
 	 */
-	static isFromMessage<T extends Interaction<'cachedOrDM'>>(interaction: T): interaction is T & FromMessageInteraction {
+	public static isFromMessage<T extends Interaction<'cachedOrDM'>>(
+		interaction: T,
+	): interaction is FromMessageInteraction & T {
 		return Boolean((interaction as any).message);
 	}
 
 	/**
 	 * deferUpdate for components, else deferReply
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	static defer<T extends RepliableInteraction>(
+	public static async defer<T extends RepliableInteraction>(
 		interaction: T,
 		options?: T extends FromMessageInteraction ? DeferUpdateOptions : DeferReplyOptions,
 	) {
@@ -412,10 +436,11 @@ export class InteractionUtil extends null {
 
 	/**
 	 * update for components, else reply
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	static replyOrUpdate<T extends RepliableInteraction>(
+	public static async replyOrUpdate<T extends RepliableInteraction>(
 		interaction: T,
 		options: string | (T extends FromMessageInteraction ? UpdateOptions : InteractionUtilReplyOptions),
 	) {
@@ -428,12 +453,15 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async deferReply(
+	public static async deferReply(
 		interaction: RepliableInteraction,
 		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
 	): Promise<Message>;
-	static async deferReply(interaction: RepliableInteraction, options?: DeferReplyOptions): Promise<void | Message>;
-	static async deferReply(interaction: RepliableInteraction, options?: DeferReplyOptions) {
+	public static async deferReply(
+		interaction: RepliableInteraction,
+		options?: DeferReplyOptions,
+	): Promise<InteractionResponse | Message | null>;
+	public static async deferReply(interaction: RepliableInteraction, options?: DeferReplyOptions) {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferReplyPromise) return cached.deferReplyPromise;
 
@@ -441,6 +469,7 @@ export class InteractionUtil extends null {
 			if (options?.rejectOnError) {
 				throw new Error(`${Object.entries(this.logInfo(interaction))}: already replied`);
 			}
+
 			return logger.warn({ ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER REPLY]: already replied');
 		}
 
@@ -451,11 +480,13 @@ export class InteractionUtil extends null {
 		} catch (error) {
 			if (options?.rejectOnError) throw error;
 			logger.error({ err: error, ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER REPLY]');
+			return null;
 		}
 	}
 
 	/**
 	 * adds a "change visibility button" to the option's components
+	 *
 	 * @param options
 	 */
 	private static _addVisibilityButton(options: Pick<InteractionReplyOptions, 'components' | 'ephemeral'>) {
@@ -477,8 +508,9 @@ export class InteractionUtil extends null {
 				options.components = components;
 
 				const LAST_NON_FULL_ROW = components.findLastIndex(
-					({ components: c }) =>
-						c[0]?.type !== ComponentType.SelectMenu && c.length < InteractionLimits.MaximumButtonsPerActionRow,
+					({ components }) =>
+						components[0]?.type !== ComponentType.SelectMenu &&
+						components.length < InteractionLimits.MaximumButtonsPerActionRow,
 				);
 
 				// non empty row found
@@ -502,22 +534,22 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async reply(
+	public static async reply(
 		interaction: RepliableInteraction,
-		options: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true },
+		options: InteractionUtilReplyOptions & { fetchReply: true; rejectOnError: true },
 	): Promise<Message>;
-	static async reply(
+	public static async reply(
 		interaction: RepliableInteraction,
 		options: InteractionUtilReplyOptions & { rejectOnError: true },
 	): Promise<InteractionResponse | Message>;
-	static async reply(
+	public static async reply(
 		interaction: RepliableInteraction,
-		options: string | InteractionUtilReplyOptions,
-	): Promise<null | InteractionResponse | Message>;
-	static async reply(
+		options: InteractionUtilReplyOptions | string,
+	): Promise<InteractionResponse | Message | null>;
+	public static async reply(
 		interaction: RepliableInteraction,
-		options: string | InteractionUtilReplyOptions,
-	): Promise<null | InteractionResponse | Message> {
+		options: InteractionUtilReplyOptions | string,
+	): Promise<InteractionResponse | Message | null> {
 		const cached = this.CACHE.get(interaction)!;
 		const _options =
 			typeof options === 'string'
@@ -535,6 +567,7 @@ export class InteractionUtil extends null {
 				for (const content of parts) {
 					await this.reply(interaction, { ..._options, content, split: false, code: false });
 				}
+
 				return await this.reply(interaction, { ..._options, content: lastPart, split: false, code: false });
 			}
 
@@ -581,7 +614,7 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async followUp(interaction: RepliableInteraction, options: InteractionUtilReplyOptions) {
+	public static async followUp(interaction: RepliableInteraction, options: InteractionUtilReplyOptions) {
 		try {
 			return await interaction.followUp(options);
 		} catch (error) {
@@ -596,22 +629,22 @@ export class InteractionUtil extends null {
 	 * @param options
 	 * @param message optional followUp Message to edit
 	 */
-	static async editReply(
+	public static async editReply(
 		interaction: RepliableInteraction,
 		options: EditReplyOptions,
 		message: MessageResolvable,
 	): Promise<Message>;
-	static async editReply(
+	public static async editReply(
 		interaction: RepliableInteraction,
 		options: EditReplyOptions & { rejectOnError: true },
 	): Promise<Message>;
-	static async editReply(
+	public static async editReply(
 		interaction: RepliableInteraction,
-		options: string | EditReplyOptions,
-	): Promise<null | Message>;
-	static async editReply(
+		options: EditReplyOptions | string,
+	): Promise<Message | null>;
+	public static async editReply(
 		interaction: RepliableInteraction,
-		options: string | EditReplyOptions,
+		options: EditReplyOptions | string,
 		message?: MessageResolvable,
 	) {
 		const _options = typeof options === 'string' ? { content: options } : { ...options };
@@ -650,15 +683,15 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async deferUpdate(
+	public static async deferUpdate(
 		interaction: FromMessageInteraction,
 		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
 	): Promise<Message>;
-	static async deferUpdate(
+	public static async deferUpdate(
 		interaction: FromMessageInteraction,
 		options?: DeferReplyOptions,
 	): Promise<InteractionResponse | Message>;
-	static async deferUpdate(
+	public static async deferUpdate(
 		interaction: FromMessageInteraction,
 		options?: DeferUpdateOptions,
 	): Promise<InteractionResponse | Message> {
@@ -685,17 +718,17 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async update(
+	public static async update(
 		interaction: FromMessageInteraction,
 		options: UpdateOptions & { rejectOnError: true },
 	): Promise<Message>;
-	static async update(
+	public static async update(
 		interaction: FromMessageInteraction,
-		options: string | UpdateOptions,
+		options: UpdateOptions | string,
 	): Promise<InteractionResponse | Message>;
-	static async update(
+	public static async update(
 		interaction: FromMessageInteraction,
-		options: string | UpdateOptions,
+		options: UpdateOptions | string,
 	): Promise<InteractionResponse | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		const _options =
@@ -739,16 +772,17 @@ export class InteractionUtil extends null {
 
 	/**
 	 * deletes the message which the component is attached to
+	 *
 	 * @param interaction
 	 */
-	static async deleteMessage(interaction: FromMessageInteraction) {
+	public static async deleteMessage(interaction: FromMessageInteraction) {
 		const cached = this.CACHE.get(interaction)!;
 
 		try {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
 
 			// replied
-			if (interaction.replied) return MessageUtil.delete(interaction.message);
+			if (interaction.replied) return await MessageUtil.delete(interaction.message);
 
 			await this.deferUpdate(interaction, { rejectOnError: true });
 
@@ -775,7 +809,7 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param modal
 	 */
-	static showModal(interaction: ModalRepliableInteraction, modal: ModalBuilder) {
+	public static async showModal(interaction: ModalRepliableInteraction, modal: ModalBuilder) {
 		const cached = this.CACHE.get(interaction)!;
 
 		// showModal is an initial reply
@@ -790,10 +824,11 @@ export class InteractionUtil extends null {
 
 	/**
 	 * posts question in same channel and returns content of first reply or null if timeout
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	static async awaitReply(interaction: RepliableInteraction, options: string | AwaitReplyOptions = {}) {
+	public static async awaitReply(interaction: RepliableInteraction, options: AwaitReplyOptions | string = {}) {
 		const {
 			question = 'confirm this action?',
 			time = minutes(1),
@@ -803,9 +838,9 @@ export class InteractionUtil extends null {
 		try {
 			const channel =
 				interaction.channel ??
-				(interaction.channelId !== null
-					? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel)
-					: null);
+				(interaction.channelId === null
+					? null
+					: ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel));
 
 			if (!channel) throw `no channel with the id '${interaction.channelId}'`;
 
@@ -830,10 +865,14 @@ export class InteractionUtil extends null {
 
 	/**
 	 * confirms the action via a button collector
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	static async awaitConfirmation(interaction: RepliableInteraction, options: string | AwaitConfirmationOptions = {}) {
+	public static async awaitConfirmation(
+		interaction: RepliableInteraction,
+		options: AwaitConfirmationOptions | string = {},
+	) {
 		const {
 			question = 'confirm this action?',
 			time = minutes(1),
@@ -870,12 +909,12 @@ export class InteractionUtil extends null {
 
 		const collector = res.createMessageComponentCollector({
 			componentType: ComponentType.Button,
-			filter: (i) => {
+			filter: (buttonInteraction) => {
 				// wrong button
-				if (![SUCCESS_ID, CANCEL_ID].includes(i.customId)) return false;
+				if (![SUCCESS_ID, CANCEL_ID].includes(buttonInteraction.customId)) return false;
 
 				// wrong user
-				if (i.user.id !== interaction.user.id) {
+				if (buttonInteraction.user.id !== interaction.user.id) {
 					void this.reply(interaction, {
 						content: 'that is not up to you to decide',
 						ephemeral: true,
@@ -913,7 +952,11 @@ export class InteractionUtil extends null {
 							components: [row],
 						});
 
-						if (success) return resolve();
+						if (success) {
+							resolve();
+							return;
+						}
+
 						break;
 					}
 
@@ -944,6 +987,7 @@ export class InteractionUtil extends null {
 							);
 							void this.reply(interaction, editOptions);
 						}
+
 						break;
 					}
 				}
@@ -955,14 +999,18 @@ export class InteractionUtil extends null {
 
 	/**
 	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
+	 *
 	 * @param interaction
 	 * @param emojis
 	 */
-	static async react(interaction: ChatInputCommandInteraction<'cachedOrDM'>, ...emojis: EmojiIdentifierResolvable[]) {
+	public static async react(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
+		...emojis: EmojiIdentifierResolvable[]
+	) {
 		if (interaction.ephemeral) return null;
 
 		try {
-			return MessageUtil.react(await interaction.fetchReply(), ...emojis);
+			return await MessageUtil.react(await interaction.fetchReply(), ...emojis);
 		} catch (error) {
 			return logger.error({ err: error, ...this.logInfo(interaction), data: emojis }, '[INTERACTION REACT]');
 		}
@@ -970,21 +1018,25 @@ export class InteractionUtil extends null {
 
 	/**
 	 * returns the player object, optional fallback to the interaction.user's player
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	static getPlayer(
+	public static getPlayer(
 		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		options: GetPlayerOptions & { throwIfNotFound: true },
 	): Player;
-	static getPlayer(interaction: ChatInputCommandInteraction<'cachedOrDM'>, options?: GetPlayerOptions): Player | null;
-	static getPlayer(
+	public static getPlayer(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
+		options?: GetPlayerOptions,
+	): Player | null;
+	public static getPlayer(
 		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		{ fallbackToCurrentUser = false, throwIfNotFound = false } = {},
 	) {
 		if (
 			!(
-				// @ts-expect-error
+				// @ts-expect-error private property access
 				interaction.options._hoistedOptions.length
 			)
 		) {
@@ -993,6 +1045,7 @@ export class InteractionUtil extends null {
 				if (throwIfNotFound && !player) throw `no player linked to \`${interaction.user.tag}\` found`;
 				return player;
 			}
+
 			return null;
 		}
 
@@ -1006,6 +1059,7 @@ export class InteractionUtil extends null {
 				if (throwIfNotFound && !player) throw `no player linked to \`${interaction.user.tag}\` found`;
 				return player;
 			}
+
 			return null;
 		}
 
@@ -1031,15 +1085,19 @@ export class InteractionUtil extends null {
 
 	/**
 	 * returns the player object's IGN, optional fallback to interaction.user's player
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	static getIgn(
+	public static getIgn(
 		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		options: GetPlayerOptions & { throwIfNotFound: true },
 	): string;
-	static getIgn(interaction: ChatInputCommandInteraction<'cachedOrDM'>, options?: GetPlayerOptions): string | null;
-	static getIgn(interaction: ChatInputCommandInteraction<'cachedOrDM'>, options?: GetPlayerOptions) {
+	public static getIgn(
+		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
+		options?: GetPlayerOptions,
+	): string | null;
+	public static getIgn(interaction: ChatInputCommandInteraction<'cachedOrDM'>, options?: GetPlayerOptions) {
 		if (this.checkForce(interaction)) {
 			const IGN =
 				(interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase() ??
@@ -1047,35 +1105,36 @@ export class InteractionUtil extends null {
 			if (options?.throwIfNotFound && !IGN) throw 'no IGN specified';
 			return IGN;
 		}
+
 		return this.getPlayer(interaction, options)?.ign ?? null;
 	}
 
 	/**
 	 * returns a HypixelGuild instance
+	 *
 	 * @param interaction
 	 * @param options
 	 */
-	static getHypixelGuild(
+	public static getHypixelGuild(
 		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput?: true; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL;
-	static getHypixelGuild(
+	public static getHypixelGuild(
 		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll: true },
 	): HypixelGuild | typeof GUILD_ID_ALL | null;
-	static getHypixelGuild(
+	public static getHypixelGuild(
 		interaction: Interaction<'cachedOrDM'>,
 		options?: { fallbackIfNoInput?: true; includeAll?: false },
 	): HypixelGuild;
-	static getHypixelGuild(
+	public static getHypixelGuild(
 		interaction: Interaction<'cachedOrDM'>,
 		options: { fallbackIfNoInput: false; includeAll?: false },
 	): HypixelGuild | null;
-	static getHypixelGuild(
+	public static getHypixelGuild(
 		interaction: Interaction<'cachedOrDM'>,
 		{ fallbackIfNoInput = true, includeAll = false }: GetHypixelGuildOptions = {},
 	) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		const INPUT = (interaction as ChatInputCommandInteraction<'cachedOrDM'>).options?.getString('guild');
 
 		if (INPUT) {

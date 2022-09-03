@@ -10,27 +10,31 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-type Action = (...lexeme: string[]) => string | number | null;
+type Action = (...lexeme: string[]) => number | string | null;
 
 interface Rule {
-	pattern: RegExp;
 	action: Action;
+	pattern: RegExp;
 }
 
 interface Match {
-	result: RegExpExecArray;
 	action: Action;
 	length: number;
+	result: RegExpExecArray;
 }
 
 export class Lexer {
-	private rules: Rule[] = [];
-	private remove = 0;
-	private index = 0;
-	private input = '';
-	private reject: boolean | undefined;
+	private readonly rules: Rule[] = [];
 
-	addRule(pattern: RegExp, action: Action = (x) => x) {
+	private remove = 0;
+
+	private index = 0;
+
+	private input = '';
+
+	private reject = true;
+
+	public addRule(pattern: RegExp, action: Action = (x) => x) {
 		this.rules.push({
 			pattern: new RegExp(pattern.source, `${pattern.flags}gy`),
 			action,
@@ -39,7 +43,7 @@ export class Lexer {
 		return this;
 	}
 
-	setInput(input: string) {
+	public setInput(input: string) {
 		this.input = input;
 		this.remove = 0;
 		this.index = 0;
@@ -47,11 +51,11 @@ export class Lexer {
 		return this;
 	}
 
-	lex() {
+	public lex() {
 		this.reject = true;
 
 		while (this.index <= this.input.length) {
-			const matches = this.scan().splice(this.remove);
+			const matches = this._scan().splice(this.remove);
 			const index = this.index;
 
 			while (matches.length) {
@@ -90,7 +94,7 @@ export class Lexer {
 		return null;
 	}
 
-	private scan() {
+	private _scan() {
 		const matches: Match[] = [];
 		const lastIndex = this.index;
 

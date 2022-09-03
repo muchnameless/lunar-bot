@@ -1,50 +1,49 @@
-import { URL } from 'node:url';
 import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { URL } from 'node:url';
 import { AsyncQueue } from '@sapphire/async-queue';
-import { fetch } from 'undici';
 import ms from 'ms';
-import { logger } from '#logger';
+import { fetch, type Response, type RequestInit } from 'undici';
+import { FetchError } from './errors/FetchError.js';
 import { consumeBody, isAbortError, seconds } from '#functions';
+import { logger } from '#logger';
 import { keys } from '#types';
-import { FetchError } from './errors/FetchError';
-import type { Response, RequestInit } from 'undici';
 
 export interface ImageData {
-	id: string;
-	title: string | null;
-	description: string | null;
-	datetime: number;
-	type: string;
-	animated: boolean;
-	width: number;
-	height: number;
-	size: number;
-	views: number;
-	bandwidth: number;
-	vote: unknown | null;
-	favorite: boolean;
-	nsfw: boolean | null;
-	section: unknown | null;
-	account_url: unknown | null;
 	account_id: number;
-	is_ad: boolean;
-	in_most_viral: boolean;
-	has_sound: boolean;
-	tags: string[];
+	account_url: unknown | null;
 	ad_type: number;
 	ad_url: string;
-	edited?: number;
-	in_gallery: boolean;
+	animated: boolean;
+	bandwidth: number;
+	datetime: number;
 	deletehash: string;
-	name: string;
+	description: string | null;
+	edited?: number;
+	favorite: boolean;
+	has_sound: boolean;
+	height: number;
+	id: string;
+	in_gallery: boolean;
+	in_most_viral: boolean;
+	is_ad: boolean;
 	link: string;
+	name: string;
+	nsfw: boolean | null;
+	section: unknown | null;
+	size: number;
+	tags: string[];
+	title: string | null;
+	type: string;
+	views: number;
+	vote: unknown | null;
+	width: number;
 }
 
 export interface UploadResponse {
 	data: ImageData;
-	success: boolean;
 	status: number;
+	success: boolean;
 }
 
 interface Cache {
@@ -53,38 +52,46 @@ interface Cache {
 }
 
 interface RateLimitData {
-	userlimit: null | number;
-	userremaining: null | number;
-	userreset: null | number;
-	clientlimit: null | number;
-	clientremaining: null | number;
-	clientreset: null | number;
+	clientlimit: number | null;
+	clientremaining: number | null;
+	clientreset: number | null;
+	userlimit: number | null;
+	userremaining: number | null;
+	userreset: number | null;
 }
 
 interface PostRateLimitData {
-	limit: null | number;
-	remaining: null | number;
-	reset: null | number;
+	limit: number | null;
+	remaining: number | null;
+	reset: number | null;
 }
 
 interface ImgurClientOptions {
 	cache?: Cache;
-	timeout?: number;
-	retries?: number;
 	rateLimitOffset?: number;
 	rateLimitedWaitTime?: number;
+	retries?: number;
+	timeout?: number;
 }
 
 export class ImgurClient {
 	#authorisation!: string;
-	baseURL = 'https://api.imgur.com/3/';
-	queue = new AsyncQueue();
-	cache?: Cache;
-	timeout: number;
-	rateLimitOffset: number;
-	rateLimitedWaitTime: number;
-	retries: number;
-	rateLimit: RateLimitData = {
+
+	private readonly baseURL = 'https://api.imgur.com/3/';
+
+	public readonly queue = new AsyncQueue();
+
+	private readonly cache?: Cache;
+
+	private readonly timeout: number;
+
+	private readonly rateLimitOffset: number;
+
+	private readonly rateLimitedWaitTime: number;
+
+	private readonly retries: number;
+
+	public rateLimit: RateLimitData = {
 		userlimit: null,
 		userremaining: null,
 		userreset: null,
@@ -92,7 +99,8 @@ export class ImgurClient {
 		clientremaining: null,
 		clientreset: null,
 	};
-	postRateLimit: PostRateLimitData = {
+
+	public postRateLimit: PostRateLimitData = {
 		limit: null,
 		remaining: null,
 		reset: null,
@@ -102,7 +110,7 @@ export class ImgurClient {
 	 * @param clientId
 	 * @param options
 	 */
-	constructor(
+	public constructor(
 		clientId: string,
 		{ cache, timeout, retries, rateLimitOffset, rateLimitedWaitTime }: ImgurClientOptions = {},
 	) {
@@ -117,7 +125,7 @@ export class ImgurClient {
 		void (async () => {
 			try {
 				const data = (await cache?.get('ratelimits')) as
-					| { rateLimit: RateLimitData; postRateLimit: PostRateLimitData }
+					| { postRateLimit: PostRateLimitData; rateLimit: RateLimitData }
 					| undefined;
 
 				// no cached data or rateLimit data is already present
@@ -131,19 +139,19 @@ export class ImgurClient {
 		})();
 	}
 
-	get authorisation() {
+	public get authorisation() {
 		return this.#authorisation;
 	}
 
-	set authorisation(clientId) {
+	public set authorisation(clientId) {
 		this.#authorisation = `Client-ID ${clientId}`;
 	}
 
 	/**
 	 * caches the current ratelimit data
 	 */
-	cacheRateLimits() {
-		if (!this.cache || this.rateLimit.userlimit === null) return Promise.resolve();
+	public async cacheRateLimits() {
+		if (!this.cache || this.rateLimit.userlimit === null) return null;
 
 		return this.cache.set('ratelimits', {
 			rateLimit: this.rateLimit,
@@ -153,10 +161,14 @@ export class ImgurClient {
 
 	/**
 	 * uploads an image
+	 *
 	 * @param imageURL
 	 * @param type
 	 */
-	upload(imageURL: string, { type = 'url', signal }: { type?: 'url' | 'file'; signal?: AbortSignal } = {}) {
+	public async upload(
+		imageURL: string,
+		{ type = 'url', signal }: { signal?: AbortSignal; type?: 'file' | 'url' } = {},
+	) {
 		const url = new URL('image', this.baseURL);
 
 		url.searchParams.append('type', type);
@@ -180,10 +192,10 @@ export class ImgurClient {
 	 * @param requestInit
 	 * @param options
 	 */
-	async request(
+	public async request(
 		url: URL,
 		requestInit: RequestInit,
-		{ checkRateLimit = true, cacheKey }: { checkRateLimit?: boolean; cacheKey: string },
+		{ checkRateLimit = true, cacheKey }: { cacheKey: string; checkRateLimit?: boolean },
 	) {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
@@ -199,6 +211,7 @@ export class ImgurClient {
 					if (RESET_TIME > this.rateLimitedWaitTime) {
 						throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					}
+
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
@@ -210,6 +223,7 @@ export class ImgurClient {
 					if (RESET_TIME > this.rateLimitedWaitTime) {
 						throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					}
+
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
@@ -219,6 +233,7 @@ export class ImgurClient {
 					if (RESET_TIME > this.rateLimitedWaitTime) {
 						throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					}
+
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 			}
@@ -264,6 +279,7 @@ export class ImgurClient {
 
 	/**
 	 * make request
+	 *
 	 * @param url
 	 * @param requestInit
 	 * @param retries current retry
@@ -291,6 +307,7 @@ export class ImgurClient {
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (isAbortError(error) && retries !== this.retries) {
+				// eslint-disable-next-line @typescript-eslint/return-await
 				return this._request(url, { headers, signal, ...options }, retries + 1);
 			}
 

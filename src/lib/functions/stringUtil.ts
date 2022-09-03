@@ -1,39 +1,41 @@
+import { EmbedLimits } from '@sapphire/discord-utilities';
 import { jaroWinkler } from '@skyra/jaro-winkler';
 import { cleanCodeBlockContent, codeBlock, escapeCodeBlock } from 'discord.js';
-import { EmbedLimits } from '@sapphire/discord-utilities';
-import ms from 'ms';
-import { SMALL_LATIN_CAPITAL_LETTERS, AnsiFormat } from '#constants';
-import type { StringValue } from 'ms';
-import type { AnsiBackground, AnsiColour } from '#constants';
-import type { Merge } from '#types';
+import ms, { type StringValue } from 'ms';
+import { AnsiFormat, SMALL_LATIN_CAPITAL_LETTERS, type AnsiBackground, type AnsiColour } from '#constants';
+import { type Merge } from '#types';
 
 type AnsiOptions =
-	| [AnsiFormat, AnsiBackground?, AnsiColour?]
-	| [AnsiFormat, AnsiColour?]
 	| [AnsiBackground, AnsiColour?]
 	| [AnsiBackground]
-	| [AnsiColour];
+	| [AnsiColour]
+	| [AnsiFormat, AnsiBackground?, AnsiColour?]
+	| [AnsiFormat, AnsiColour?];
 
 /**
  * ansi code block formatting and colouring tag
+ *
  * @param options format | background | colour
  */
 // "? ||" to use the fallback for an empty options array
+// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 export const ansiTag = (options?: AnsiOptions) => `\u001B[${options?.join(';') || AnsiFormat.Normal}m` as const;
 
 /**
  * wraps the content in ansi tags
+ *
  * @link https://gist.github.com/kkrypt0nn/a02506f3712ff2d1c8ca7c9e0aed7c06
  * @param content
  * @param options format | background | colour
  */
-export const ansi = <T extends string | number>(content: T, ...options: AnsiOptions) =>
+export const ansi = <T extends number | string>(content: T, ...options: AnsiOptions) =>
 	`${ansiTag(options)}${content}${ansiTag()}` as const;
 
 const orListFormatter = new Intl.ListFormat('en-GB', { style: 'short', type: 'disjunction' });
 
 /**
  * ['a', 'b', 'c'] -> 'a, b or c'
+ *
  * @param list
  */
 export const commaListOr = (list: string[]) => orListFormatter.format(list);
@@ -42,36 +44,42 @@ const andListFormatter = new Intl.ListFormat('en-GB', { style: 'short', type: 'c
 
 /**
  * ['a', 'b', 'c'] -> 'a, b and c'
+ *
  * @param list
  */
 export const commaListAnd = (list: string[]) => andListFormatter.format(list);
 
 /**
  * escapes discord markdown in igns
+ *
  * @param string to escape
  */
 export const escapeIgn = (string: string | null) => string?.replaceAll('_', '\\_') ?? '';
 
 /**
  * extracts user IDs from @mentions
+ *
  * @param string to analyze
  */
 export const getIdFromString = (string: string) => /(?<=^(?:<@!?)?)\d{17,20}(?=>?$)/.exec(string)?.[0] ?? null;
 
 /**
  * aBc -> Abc
+ *
  * @param string to convert
  */
 export const upperCaseFirstChar = (string: string) => `${string[0]!.toUpperCase()}${string.slice(1).toLowerCase()}`;
 
 /**
  * removes ',', '.' and '_' from the input string
+ *
  * @param string input
  */
 export const removeNumberFormatting = (string: string | null) => string?.replace(/[,._]/g, '');
 
 /**
  * trims a string to a certain length
+ *
  * @param string to trim
  * @param max maximum length
  */
@@ -79,19 +87,22 @@ export const trim = (string: string, max: number) => (string.length > max ? `${s
 
 /**
  * replaces toLocaleString('fr-FR') separator with a normal space
+ *
  * @param string
  */
 export const cleanFormattedNumber = (string: string) => string.replaceAll('\u{202F}', ' ');
 
 /**
  * replaces all small latin capital letters with normal lowercase letters
+ *
  * @param string
  */
 export const replaceSmallLatinCapitalLetters = (string: string) =>
-	Object.entries(SMALL_LATIN_CAPITAL_LETTERS).reduce((s, [normal, small]) => s.replaceAll(small, normal), string);
+	Object.entries(SMALL_LATIN_CAPITAL_LETTERS).reduce((acc, [normal, small]) => acc.replaceAll(small, normal), string);
 
 /**
  * '30d1193h71585m4295001s' -> ['30d', '1193h', '71585m', '4295001s'] -> 15_476_901_000
+ *
  * @param string
  */
 export const stringToMS = (string: string) =>
@@ -99,12 +110,14 @@ export const stringToMS = (string: string) =>
 
 /**
  * removes minecraft formatting codes
+ *
  * @param string
  */
 export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-or]/g, '');
 
 /**
  * escapes '*' and '_' if those are neither within a URL nor a code block or inline code
+ *
  * @param string
  * @param escapeEverything whether to also escape '\' before '*' and '_'
  */
@@ -147,6 +160,7 @@ const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
 
 /**
  * compares to strings alphabetically, case insensitive
+ *
  * @param a
  * @param b
  */
@@ -179,14 +193,15 @@ function concatMessageChunks(
 }
 
 export interface SplitOptions {
-	maxLength?: number;
-	char?: string | string[];
-	prepend?: string;
 	append?: string;
+	char?: string[] | string;
+	maxLength?: number;
+	prepend?: string;
 }
 
 /**
  * Splits a string into multiple chunks at a designated character that do not exceed a specific length.
+ *
  * @param text Content to split
  * @param options Options controlling the behavior of the split
  */
@@ -222,12 +237,13 @@ export function splitMessage(
 }
 
 export interface MakeContentOptions {
+	code?: boolean | string;
 	split?: SplitOptions | boolean;
-	code?: string | boolean;
 }
 
 /**
  * TEMPORARY replacement until discordjs/builders includes a message builder
+ *
  * @param text
  * @param options
  */
@@ -258,6 +274,7 @@ export function makeContent(text = '', options: MakeContentOptions = {}) {
 
 /**
  * generates an array of code blocks
+ *
  * @param input
  * @param code
  * @param char
@@ -284,6 +301,7 @@ export function splitForEmbedFields(
 
 /**
  * calculate how many lines the single-line string takes up inside the embed field
+ *
  * @param string
  * @param lineLength
  */
@@ -299,10 +317,13 @@ function getDisplayedLines(string: string, lineLength: number) {
 			currentLine = word;
 		}
 	}
+
 	return totalLines;
 }
+
 /**
  * calculates how many lines the multi-line string takes up inside the embed field
+ *
  * @param string
  * @param lineLength
  */
@@ -311,6 +332,7 @@ export const getInlineFieldLineCount = (string: string, lineLength: number) =>
 
 /**
  * jaro winkler similarity, 0 (no match) to 1 (exact match)
+ *
  * @param string1
  * @param string2
  * @returns

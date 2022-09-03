@@ -1,31 +1,36 @@
-import { SlashCommandBuilder, time, TimestampStyles } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import {
+	SlashCommandBuilder,
+	time,
+	TimestampStyles,
+	type ChatInputCommandInteraction,
+	type CommandInteractionOption,
+} from 'discord.js';
 import ms from 'ms';
-import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
-import { INVISIBLE_CHARACTERS, HypixelMessageType } from '#chatBridge/constants';
-import { hypixelGuildOption } from '#structures/commands/commonOptions';
-import { DualCommand } from '#structures/commands/DualCommand';
+import { type ChatBridge } from '#chatBridge/ChatBridge.js';
+import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { INVISIBLE_CHARACTERS, HypixelMessageType } from '#chatBridge/constants/index.js';
 import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '#functions';
-import type { ChatInputCommandInteraction, CommandInteractionOption } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { ChatBridge } from '#chatBridge/ChatBridge';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { DualCommand } from '#structures/commands/DualCommand.js';
+import { hypixelGuildOption } from '#structures/commands/commonOptions.js';
+import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
 
 interface RunOptions {
 	chatBridge: ChatBridge;
-	question: string;
-	pollOptionNames: string[];
 	duration?: string | null;
 	ign: string;
+	pollOptionNames: string[];
+	question: string;
 }
 
 export default class PollCommand extends DualCommand {
 	/**
 	 * currently running polls
 	 */
-	polls = new Map<ChatBridge, number>();
+	private readonly polls = new Map<ChatBridge, number>();
 
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('create a poll for both in-game and discord guild chat')
 			.addStringOption((option) =>
@@ -36,12 +41,12 @@ export default class PollCommand extends DualCommand {
 			);
 
 		// add choices
-		for (let i = 1; i <= 10; ++i) {
+		for (let index = 1; index <= 10; ++index) {
 			slash.addStringOption((option) =>
 				option
-					.setName(`choice_${i}`)
-					.setDescription(`choice ${i}`)
-					.setRequired(i <= 1),
+					.setName(`choice_${index}`)
+					.setDescription(`choice ${index}`)
+					.setRequired(index <= 1),
 			);
 		}
 
@@ -69,6 +74,7 @@ export default class PollCommand extends DualCommand {
 
 	/**
 	 * create a poll for both in-game chat and the chatBridge channel
+	 *
 	 * @param options
 	 */
 	private async _sharedRun({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
@@ -165,13 +171,16 @@ export default class PollCommand extends DualCommand {
 		} finally {
 			this.polls.delete(chatBridge); // unlock poll command
 		}
+
+		return null;
 	}
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		void InteractionUtil.deferReply(interaction, {
 			ephemeral: true,
 		});
@@ -179,7 +188,7 @@ export default class PollCommand extends DualCommand {
 		const result = await this._sharedRun({
 			chatBridge: InteractionUtil.getHypixelGuild(interaction).chatBridge,
 			question: interaction.options.getString('question', true),
-			// @ts-expect-error
+			// @ts-expect-error private
 			pollOptionNames: (interaction.options._hoistedOptions as CommandInteractionOption[])
 				.filter(({ name }) => name.startsWith('choice_'))
 				.map(({ value }) => value as string),
@@ -195,9 +204,10 @@ export default class PollCommand extends DualCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override async minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		// TODO: use parseArgs
 		const inputMatched = /(?<=[\u0022\u201C\u201D]).+?(?=[\u0022\u201C\u201D])/u
 			.exec(hypixelMessage.content)
@@ -215,5 +225,6 @@ export default class PollCommand extends DualCommand {
 		});
 
 		if (result) return hypixelMessage.author.send(result);
+		return null;
 	}
 }

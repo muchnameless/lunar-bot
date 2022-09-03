@@ -1,3 +1,6 @@
+import { type ArrayElementType } from '@sapphire/utilities';
+import { type Components } from '@zikeji/hypixel';
+import { getSkillLevel } from './index.js';
 import {
 	DUNGEON_CLASSES,
 	DUNGEON_EXPONENTS,
@@ -11,11 +14,8 @@ import {
 	SLAYER_DIVIDER,
 	SLAYER_MODIFIER,
 	SLAYERS,
+	type DungeonTypes,
 } from '#constants';
-import { getSkillLevel } from '.';
-import type { ArrayElementType } from '@sapphire/utilities';
-import type { Components } from '@zikeji/hypixel';
-import type { DungeonTypes } from '#constants';
 
 export type WeightData = ReturnType<typeof getSenitherWeight>;
 
@@ -44,7 +44,6 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const slayer of SLAYERS) {
 		const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(
 			slayer,
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0,
 		);
 
@@ -58,7 +57,6 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const type of DUNGEON_TYPES) {
 		const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(
 			type,
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			skyblockMember.dungeons?.dungeon_types?.[type]?.experience ?? 0,
 		);
 
@@ -70,7 +68,6 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const dungeonClass of DUNGEON_CLASSES) {
 		const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(
 			dungeonClass,
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			skyblockMember.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0,
 		);
 
@@ -121,10 +118,10 @@ export function getSenitherSlayerWeight(slayerType: ArrayElementType<typeof SLAY
 	let slayerWeight = 1_000_000 / DIVIDER;
 
 	// calculate overflow
-	let remaining = xp - 1_000_000;
-	let modifier: number;
+	const BASE_MODIFIER = SLAYER_MODIFIER[slayerType] ?? 0;
 
-	const BASE_MODIFIER = (modifier = SLAYER_MODIFIER[slayerType] ?? 0);
+	let modifier = BASE_MODIFIER;
+	let remaining = xp - 1_000_000;
 
 	while (remaining > 0) {
 		const LEFT = Math.min(remaining, 1_000_000);

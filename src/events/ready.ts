@@ -1,9 +1,9 @@
 import { minutes, retry, safePromiseAll } from '#functions';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event';
+import { Event } from '#structures/events/Event.js';
 
 export default class ReadyEvent extends Event {
-	override once = true;
+	public override readonly once = true;
 
 	private async _connectChatBridges() {
 		if (!this.config.get('CHATBRIDGE_ENABLED')) return;
@@ -23,7 +23,7 @@ export default class ReadyEvent extends Event {
 	/**
 	 * event listener callback
 	 */
-	override async run() {
+	public override async run() {
 		logger.info(`[READY]: logged in as ${this.client.user!.tag}`);
 
 		this.client.db.schedule();

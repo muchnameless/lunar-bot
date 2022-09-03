@@ -1,10 +1,16 @@
-import { bold, escapeMarkdown, SlashCommandBuilder, userMention } from 'discord.js';
-import { GuildMemberUtil, GuildUtil, InteractionUtil } from '#utils';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { hypixelGuildOption } from '#structures/commands/commonOptions';
+import {
+	bold,
+	escapeMarkdown,
+	SlashCommandBuilder,
+	userMention,
+	type ChatInputCommandInteraction,
+	type GuildMember,
+} from 'discord.js';
 import { escapeIgn, splitMessage } from '#functions';
-import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { hypixelGuildOption } from '#structures/commands/commonOptions.js';
+import { GuildMemberUtil, GuildUtil, InteractionUtil } from '#utils';
 
 interface IssueInfo {
 	amount: number;
@@ -12,7 +18,7 @@ interface IssueInfo {
 }
 
 export default class LinkIssuesCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('list player db and discord role discrepancies')
@@ -23,13 +29,15 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		// discord members with wrong roles
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const guild = hypixelGuild.discordGuild;
 		const discordGuild = this.client.discordGuilds.cache.get(hypixelGuild.discordId!);
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		const mandatoryRole = guild?.roles.cache.get(discordGuild?.MANDATORY_ROLE_ID!);
 		const missingMandatoryRole: GuildMember[] = [];
 		const guildRoleAndNotInGuild: GuildMember[] = [];
@@ -40,9 +48,11 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				if (mandatoryRole && !member.roles.cache.has(mandatoryRole.id)) {
 					missingMandatoryRole.push(member);
 				}
+
 				continue;
 			}
 
+			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 			if (member.roles.cache.hasAny(discordGuild?.GUILD_ROLE_ID!, hypixelGuild.GUILD_ROLE_ID!)) {
 				guildRoleAndNotInGuild.push(member);
 			}

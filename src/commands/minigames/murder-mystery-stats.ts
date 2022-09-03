@@ -1,25 +1,24 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { oneLine } from 'common-tags';
-import { optionalIgnOption } from '#structures/commands/commonOptions';
+import { SlashCommandBuilder } from 'discord.js';
+import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
 import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '#functions';
-import BaseStatsCommand from './~base-stats-command';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { FetchedData } from './~base-stats-command';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 
 interface MurderMysteryStats {
-	games: number;
-	wins: number;
-	kills: number;
-	deaths: number;
-	murderer_wins: number;
-	detective_wins: number;
 	coins: number;
-	quickest_murderer_win_time_seconds: number | string;
+	deaths: number;
+	detective_wins: number;
+	games: number;
+	kills: number;
+	murderer_wins: number;
 	quickest_detective_win_time_seconds: number | string;
+	quickest_murderer_win_time_seconds: number | string;
+	wins: number;
 }
 
 export default class MurderMysteryStatsCommand extends BaseStatsCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(
 			context,
 			{
@@ -37,9 +36,10 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 
 	/**
 	 * data -> reply
+	 *
 	 * @param data
 	 */
-	override _generateReply({ ign, playerData }: FetchedData) {
+	protected override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.MurderMystery) return `\`${ign}\` has no MurderMystery stats`;
 
 		try {
@@ -71,18 +71,14 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 				detective wins: ${formatNumber(detective_wins)},
 				coins: ${formatNumber(coins)},
 				fastest murderer win: ${
-					// eslint-disable-next-line camelcase
 					typeof quickest_murderer_win_time_seconds === 'number'
 						? formatNumber(quickest_murderer_win_time_seconds)
-						: // eslint-disable-next-line camelcase
-						  quickest_murderer_win_time_seconds
+						: quickest_murderer_win_time_seconds
 				} s,
 				fastest detective win: ${
-					// eslint-disable-next-line camelcase
 					typeof quickest_detective_win_time_seconds === 'number'
 						? formatNumber(quickest_detective_win_time_seconds)
-						: // eslint-disable-next-line camelcase
-						  quickest_detective_win_time_seconds
+						: quickest_detective_win_time_seconds
 				} s
 			`;
 		} catch {

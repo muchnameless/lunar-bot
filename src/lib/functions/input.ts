@@ -1,15 +1,15 @@
-import { UserUtil } from '#utils';
-import { HypixelMessage } from '#chatBridge/HypixelMessage';
+import { type Interaction } from 'discord.js';
 import { mojang } from '#api';
-import type { HypixelUserMessage } from '#chatBridge/HypixelMessage';
-import type { Interaction } from 'discord.js';
+import { HypixelMessage, type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { UserUtil } from '#utils';
 
 /**
  * message, args -> ign, uuid
+ *
  * @param ctx
  * @param ignOrUuid
  */
-export async function getUuidAndIgn(ctx: Interaction<'cachedOrDM'> | HypixelUserMessage, ignOrUuid?: string | null) {
+export async function getUuidAndIgn(ctx: HypixelUserMessage | Interaction<'cachedOrDM'>, ignOrUuid?: string | null) {
 	// remove non-alphanumeric characters
 	const IGN_OR_UUID = ignOrUuid?.replace(/\W/g, '');
 

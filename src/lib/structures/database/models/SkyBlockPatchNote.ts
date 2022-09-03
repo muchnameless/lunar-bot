@@ -1,29 +1,34 @@
-import { Model, DataTypes } from 'sequelize';
-import type {
-	CreationOptional,
-	InferAttributes,
-	InferCreationAttributes,
-	ModelStatic,
-	NonAttribute,
-	Sequelize,
+import {
+	Model,
+	DataTypes,
+	type CreationOptional,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type ModelStatic,
+	type NonAttribute,
+	type Sequelize,
 } from 'sequelize';
-import type { LunarClient } from '../../LunarClient';
+import { type LunarClient } from '#structures/LunarClient.js';
 
 export class SkyBlockPatchNote extends Model<
 	InferAttributes<SkyBlockPatchNote>,
 	InferCreationAttributes<SkyBlockPatchNote>
 > {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare guid: number;
-	declare title: string;
-	declare creator: string;
-	declare link: string;
+	public declare guid: number;
 
-	declare readonly createdAt: CreationOptional<Date>;
-	declare readonly updatedAt: CreationOptional<Date>;
+	public declare title: string;
 
-	static initialise(sequelize: Sequelize) {
+	public declare creator: string;
+
+	public declare link: string;
+
+	public declare readonly createdAt: CreationOptional<Date>;
+
+	public declare readonly updatedAt: CreationOptional<Date>;
+
+	public static initialise(sequelize: Sequelize) {
 		return this.init(
 			{
 				guid: {

@@ -1,17 +1,25 @@
-import { bold, EmbedBuilder, hyperlink, InteractionType, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { InteractionUtil } from '#utils';
-import { logger } from '#logger';
-import { pageOption, requiredIgnOption } from '#structures/commands/commonOptions';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
-import { STATS_URL_BASE } from '#constants';
+import {
+	bold,
+	EmbedBuilder,
+	hyperlink,
+	InteractionType,
+	SlashCommandBuilder,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type Snowflake,
+} from 'discord.js';
 import { mojang } from '#api';
+import { STATS_URL_BASE } from '#constants';
 import { buildPaginationActionRow, escapeIgn } from '#functions';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { ButtonInteraction, ChatInputCommandInteraction, Snowflake } from 'discord.js';
+import { logger } from '#logger';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { pageOption, requiredIgnOption } from '#structures/commands/commonOptions.js';
+import { InteractionUtil } from '#utils';
 
 export default class BanListCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			aliases: [],
 			slash: new SlashCommandBuilder()
@@ -51,12 +59,13 @@ export default class BanListCommand extends ApplicationCommand {
 
 	/**
 	 * /friend list [page]
+	 *
 	 * @param interaction
 	 * @param userId
 	 * @param page
 	 */
 	private async _runView(
-		interaction: ChatInputCommandInteraction<'cachedOrDM'> | ButtonInteraction<'cachedOrDM'>,
+		interaction: ButtonInteraction<'cachedOrDM'> | ChatInputCommandInteraction<'cachedOrDM'>,
 		userId: Snowflake,
 		page: number,
 	) {
@@ -116,10 +125,11 @@ export default class BanListCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
+	public override async buttonRun(interaction: ButtonInteraction<'cachedOrDM'>, args: string[]) {
 		const [SUBCOMMAND, USER_ID, PAGE] = args as [string, Snowflake, `${bigint}`];
 
 		switch (SUBCOMMAND) {
@@ -133,9 +143,10 @@ export default class BanListCommand extends ApplicationCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommand()) {
 			case 'add': {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));

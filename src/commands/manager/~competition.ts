@@ -1,10 +1,9 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { InteractionUtil } from '#utils';
-import { ApplicationCommand } from '#structures/commands/ApplicationCommand';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { DUNGEON_TYPES, SKILLS } from '#constants';
 import { autocorrect, commaListOr, seconds } from '#functions';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandContext } from '#structures/commands/BaseCommand';
+import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { InteractionUtil } from '#utils';
 
 /**
  * Roadmap: (project discontinued)
@@ -13,7 +12,7 @@ import type { CommandContext } from '#structures/commands/BaseCommand';
  */
 
 export class CompetitionCommand extends ApplicationCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder().setDescription('WIP'),
 			cooldown: seconds(1),
@@ -23,13 +22,14 @@ export class CompetitionCommand extends ApplicationCommand {
 	/**
 	 * possible types for a competition
 	 */
-	static COMPETITION_TYPES = [...SKILLS, 'slayer', ...DUNGEON_TYPES];
+	public static COMPETITION_TYPES = [...SKILLS, 'slayer', ...DUNGEON_TYPES];
 
 	/**
 	 * execute the command
+	 *
 	 * @param interaction
 	 */
-	override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		const collector = interaction.channel!.createMessageCollector({
 			filter: (msg) => msg.author.id === interaction.user.id,
 			idle: seconds(30),
@@ -49,6 +49,7 @@ export class CompetitionCommand extends ApplicationCommand {
 			void InteractionUtil.reply(interaction, `competition type? ${commaListOr(CompetitionCommand.COMPETITION_TYPES)}`);
 
 			do {
+				// eslint-disable-next-line n/callback-return
 				const collected = await next();
 				const result = autocorrect(collected, CompetitionCommand.COMPETITION_TYPES);
 
@@ -65,37 +66,39 @@ export class CompetitionCommand extends ApplicationCommand {
 			void InteractionUtil.reply(interaction, 'starting time?');
 
 			do {
+				// eslint-disable-next-line n/callback-return
 				const collected = await next();
 				const result = new Date(collected);
 
-				if (!Number.isNaN(result.getTime())) {
-					startingTime = result;
-					retries = 0;
-				} else {
+				if (Number.isNaN(result.getTime())) {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
 					void InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
+				} else {
+					startingTime = result;
+					retries = 0;
 				}
 			} while (!startingTime);
 
 			void InteractionUtil.reply(interaction, 'ending time?');
 
 			do {
+				// eslint-disable-next-line n/callback-return
 				const collected = await next();
 
 				const result = new Date(collected);
 
-				if (!Number.isNaN(result.getTime())) {
-					endingTime = result;
-					retries = 0;
-				} else {
+				if (Number.isNaN(result.getTime())) {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
 					void InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
+				} else {
+					endingTime = result;
+					retries = 0;
 				}
 			} while (!endingTime);
 
-			void InteractionUtil.reply(
+			return InteractionUtil.reply(
 				interaction,
 				`type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
 			);

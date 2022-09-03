@@ -1,11 +1,11 @@
+import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
 import { logger } from '#logger';
-import { ChatBridgeEvent } from '../ChatBridgeEvent';
 
 export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
 	/**
 	 * event listener callback
 	 */
-	override async run() {
+	public override async run() {
 		// link chatBridge to the bot account's guild
 		void this.chatBridge.link();
 

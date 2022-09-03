@@ -1,13 +1,13 @@
+import { type Collection } from 'discord.js';
 import ms from 'ms';
-import { BridgeCommand } from '#structures/commands/BridgeCommand';
+import { type HypixelUserMessage } from '../../HypixelMessage.js';
 import { commaListOr, seconds } from '#functions';
-import type { CommandContext } from '#structures/commands/BaseCommand';
-import type { Collection } from 'discord.js';
-import type { DualCommand } from '#structures/commands/DualCommand';
-import type { HypixelUserMessage } from '../../HypixelMessage';
+import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import { BridgeCommand } from '#structures/commands/BridgeCommand.js';
+import { type DualCommand } from '#structures/commands/DualCommand.js';
 
 export default class HelpBridgeCommand extends BridgeCommand {
-	constructor(context: CommandContext) {
+	public constructor(context: CommandContext) {
 		super(context, {
 			aliases: ['h'],
 			description: 'list of all commands or info about a specific command',
@@ -18,9 +18,10 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 	/**
 	 * removes duplicates and lists the commands by name | aliases
+	 *
 	 * @param commands
 	 */
-	static listCommands(commands: Collection<string, BridgeCommand | DualCommand>) {
+	public static listCommands(commands: Collection<string, BridgeCommand | DualCommand>) {
 		return [...new Set(commands.values())]
 			.map((command) =>
 				[command.name, ...((command as DualCommand).aliasesInGame ?? command.aliases ?? [])].join(' | '),
@@ -30,9 +31,10 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
+	 *
 	 * @param hypixelMessage
 	 */
-	override minecraftRun(hypixelMessage: HypixelUserMessage) {
+	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		// default help
 		if (!hypixelMessage.commandData.args.length) {
 			const reply = [

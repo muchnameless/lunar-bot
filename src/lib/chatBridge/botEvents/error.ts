@@ -1,10 +1,9 @@
-import { ChatBridgeEvent } from '../ChatBridge';
-import type { ChatBridge } from '../ChatBridge';
+import { ChatBridgeEvent, type ChatBridge } from '../ChatBridge.js';
 
 /**
  * @param chatBridge
  * @param error
  */
-export default function (chatBridge: ChatBridge, error: Error) {
+export default function run(chatBridge: ChatBridge, error: Error) {
 	chatBridge.emit(ChatBridgeEvent.Error, error);
 }

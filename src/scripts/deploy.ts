@@ -2,7 +2,7 @@ import { argv, env, exit } from 'node:process';
 import { URL } from 'node:url';
 import { Routes } from 'discord.js';
 import { logger } from '#logger';
-import { LunarClient } from '#structures/LunarClient';
+import { LunarClient } from '#structures/LunarClient.js';
 
 const GUILD_ID = argv[2];
 const client = new LunarClient({

@@ -1,14 +1,35 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import { Model, DataTypes } from 'sequelize';
-import { bold, codeBlock, EmbedBuilder, embedLength } from 'discord.js';
-import { RateLimitError } from '@zikeji/hypixel';
 import { EmbedLimits } from '@sapphire/discord-utilities';
+import { RateLimitError } from '@zikeji/hypixel';
+import {
+	bold,
+	codeBlock,
+	EmbedBuilder,
+	embedLength,
+	type APIEmbed,
+	type Collection,
+	type Guild,
+	type GuildMember,
+	type JSONEncodable,
+	type Snowflake,
+} from 'discord.js';
 import ms from 'ms';
-import { GuildUtil } from '#utils';
-import { logger } from '#logger';
-import { mute, setRank, unmute } from '#chatBridge/constants';
-import { Offset, SKYBLOCK_XP_TYPES, UNKNOWN_IGN, XP_OFFSETS_TIME } from '#constants';
+import {
+	Model,
+	DataTypes,
+	type CreationOptional,
+	type InferAttributes,
+	type InferCreationAttributes,
+	type InstanceDestroyOptions,
+	type ModelStatic,
+	type NonAttribute,
+	type Sequelize,
+} from 'sequelize';
+import { type Player } from './Player.js';
 import { hypixel, mojang } from '#api';
+import { type ChatBridge } from '#chatBridge/ChatBridge.js';
+import { mute, setRank, unmute, type PREFIX_BY_TYPE } from '#chatBridge/constants/index.js';
+import { Offset, SKYBLOCK_XP_TYPES, UNKNOWN_IGN, XP_OFFSETS_TIME } from '#constants';
 import {
 	cleanFormattedNumber,
 	compareAlphabetically,
@@ -22,55 +43,44 @@ import {
 	seconds,
 	splitMessage,
 } from '#functions';
-import type { APIEmbed, Collection, Guild, GuildMember, JSONEncodable, Snowflake } from 'discord.js';
-import type {
-	CreationOptional,
-	InferAttributes,
-	InferCreationAttributes,
-	InstanceDestroyOptions,
-	ModelStatic,
-	NonAttribute,
-	Sequelize,
-} from 'sequelize';
-import type { Player } from './Player';
-import type { ChatBridge } from '#chatBridge/ChatBridge';
-import type { LunarClient } from '#structures/LunarClient';
-import type { PREFIX_BY_TYPE } from '#chatBridge/constants';
+import { logger } from '#logger';
+import { type LunarClient } from '#structures/LunarClient.js';
+import { GuildUtil } from '#utils';
 
 export type GuildRank =
+	| AutomatedGuildRank
 	| {
-			name: string;
-			roleId: null;
-			priority: number;
-			positionReq: null;
 			currentWeightReq: null;
-	  }
-	| AutomatedGuildRank;
+			name: string;
+			positionReq: null;
+			priority: number;
+			roleId: null;
+	  };
 
 interface AutomatedGuildRank {
-	name: string;
-	roleId: string;
-	priority: number;
-	positionReq: number;
 	currentWeightReq: number;
+	name: string;
+	positionReq: number;
+	priority: number;
+	roleId: string;
 }
 
 export interface ChatBridgeChannel {
-	type: keyof typeof PREFIX_BY_TYPE;
 	channelId: Snowflake;
+	type: keyof typeof PREFIX_BY_TYPE;
 }
 
 interface StatsHistory {
+	catacombsAverage: number;
 	playerCount: number;
-	weightAverage: number;
 	skillAverage: number;
 	slayerAverage: number;
-	catacombsAverage: number;
+	weightAverage: number;
 }
 
 export interface UpdateOptions {
-	syncRanks?: boolean;
 	rejectOnAPIError?: boolean;
+	syncRanks?: boolean;
 }
 
 interface PlayerWithWeight {
@@ -83,76 +93,114 @@ interface MutedGuildMember {
 	mutedTill: number;
 }
 
-type HypixelGuildStats = Record<'weight' | 'skills' | 'slayer' | 'catacombs', string>;
+type HypixelGuildStats = Record<'catacombs' | 'skills' | 'slayer' | 'weight', string>;
+
+const formatInteger = (number: number) => cleanFormattedNumber(formatNumber(Math.round(number)));
+const formatDecimal = (number: number) => cleanFormattedNumber(formatDecimalNumber(number));
 
 export class HypixelGuild extends Model<
 	InferAttributes<HypixelGuild, { omit: 'players' }>,
 	InferCreationAttributes<HypixelGuild, { omit: 'players' }>
 > {
-	declare client: NonAttribute<LunarClient>;
+	public declare readonly client: NonAttribute<LunarClient>;
 
-	declare guildId: string;
-	declare discordId: Snowflake | null;
-	/** Lunar */
-	declare GUILD_ROLE_ID: Snowflake | null;
-	declare EX_GUILD_ROLE_ID: Snowflake | null;
-	declare BRIDGER_ROLE_ID: Snowflake | null;
-	declare staffRoleIds: CreationOptional<Snowflake[]>;
-	declare adminRoleIds: CreationOptional<Snowflake[]>;
-	declare name: CreationOptional<string>;
-	declare weightReq: number | null;
-	declare chatBridgeEnabled: CreationOptional<boolean>;
-	declare mutedTill: CreationOptional<number>;
-	declare _mutedPlayers: CreationOptional<MutedGuildMember[]>;
-	declare chatBridgeChannels: CreationOptional<ChatBridgeChannel[]>;
-	declare ranks: CreationOptional<GuildRank[]>;
-	declare syncRanksEnabled: CreationOptional<boolean>;
-	/** amount of non GM ranks with staff perms */
-	declare staffRanksAmount: CreationOptional<number>;
-	declare statsHistory: CreationOptional<StatsHistory[]>;
-	declare statDiscordChannels: HypixelGuildStats | null;
-	declare updateStatDiscordChannelsEnabled: CreationOptional<boolean>;
-	declare acceptJoinRequests: CreationOptional<boolean>;
-	declare taxChannelId: Snowflake | null;
-	declare taxMessageId: Snowflake | null;
-	declare announcementsChannelId: Snowflake | null;
-	declare loggingChannelId: Snowflake | null;
-	declare syncIgnThreshold: CreationOptional<number>;
-	declare kickCooldown: CreationOptional<number>;
-	declare lastKickAt: CreationOptional<Date>;
+	public declare guildId: string;
+
+	public declare discordId: Snowflake | null;
+
+	/**
+	 * Lunar
+	 */
+	public declare GUILD_ROLE_ID: Snowflake | null;
+
+	public declare EX_GUILD_ROLE_ID: Snowflake | null;
+
+	public declare BRIDGER_ROLE_ID: Snowflake | null;
+
+	public declare staffRoleIds: CreationOptional<Snowflake[]>;
+
+	public declare adminRoleIds: CreationOptional<Snowflake[]>;
+
+	public declare name: CreationOptional<string>;
+
+	public declare weightReq: number | null;
+
+	public declare chatBridgeEnabled: CreationOptional<boolean>;
+
+	public declare mutedTill: CreationOptional<number>;
+
+	public declare _mutedPlayers: CreationOptional<MutedGuildMember[]>;
+
+	public declare chatBridgeChannels: CreationOptional<ChatBridgeChannel[]>;
+
+	public declare ranks: CreationOptional<GuildRank[]>;
+
+	public declare syncRanksEnabled: CreationOptional<boolean>;
+
+	/**
+	 * amount of non GM ranks with staff perms
+	 */
+	public declare staffRanksAmount: CreationOptional<number>;
+
+	public declare statsHistory: CreationOptional<StatsHistory[]>;
+
+	public declare statDiscordChannels: HypixelGuildStats | null;
+
+	public declare updateStatDiscordChannelsEnabled: CreationOptional<boolean>;
+
+	public declare acceptJoinRequests: CreationOptional<boolean>;
+
+	public declare taxChannelId: Snowflake | null;
+
+	public declare taxMessageId: Snowflake | null;
+
+	public declare announcementsChannelId: Snowflake | null;
+
+	public declare loggingChannelId: Snowflake | null;
+
+	public declare syncIgnThreshold: CreationOptional<number>;
+
+	public declare kickCooldown: CreationOptional<number>;
+
+	public declare lastKickAt: CreationOptional<Date>;
 
 	/**
 	 * guild ranks sync
 	 */
 	private _syncRanksPromise: NonAttribute<Promise<this> | null> = null;
+
 	/**
 	 * guild data update
 	 */
 	private _updateDataPromise: NonAttribute<Promise<this> | null> = null;
+
 	/**
 	 * guild players
 	 */
 	private _players: NonAttribute<Collection<string, Player> | null> = null;
+
 	/**
 	 * linked chat bridge
 	 */
 	private _chatBridge: NonAttribute<ChatBridge<true> | null> = null;
+
 	/**
-	 * players who are muted in guild chat, <minecraftUuid, mutedTill>
+	 * players who are muted in guild chat, \<minecraftUuid, mutedTill\>
 	 */
-	mutedPlayers: NonAttribute<Map<string, number>>;
+	public mutedPlayers: NonAttribute<Map<string, number>>;
+
 	/**
 	 * scheduled unmutes
 	 */
 	private _unmuteTimeouts: NonAttribute<Map<string, NodeJS.Timeout>> = new Map();
 
-	constructor(...args: any[]) {
+	public constructor(...args: any[]) {
 		super(...args);
 
 		this.mutedPlayers = new Map(this._mutedPlayers.map(({ minecraftUuid, mutedTill }) => [minecraftUuid, mutedTill]));
 	}
 
-	static initialise(sequelize: Sequelize) {
+	public static initialise(sequelize: Sequelize) {
 		return this.init(
 			{
 				guildId: {
@@ -314,9 +362,10 @@ export class HypixelGuild extends Model<
 
 	/**
 	 * transformes a log array
+	 *
 	 * @param logArray
 	 */
-	static transformLogArray(logArray: string[]) {
+	public static transformLogArray(logArray: string[]) {
 		if (!logArray.length) return logArray;
 
 		return splitMessage(logArray.sort(compareAlphabetically).join('\n'), {
@@ -325,44 +374,46 @@ export class HypixelGuild extends Model<
 		});
 	}
 
-	set players(value: Collection<string, Player> | null) {
-		this._players = value;
-	}
-
 	/**
 	 * returns the filtered <LunarClient>.players containing all players from this guild
 	 */
-	get players(): Collection<string, Player> {
+	public get players(): Collection<string, Player> {
 		return (this._players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId));
 	}
 
-	set chatBridge(value: ChatBridge | null) {
-		this._chatBridge = value;
+	public set players(value: Collection<string, Player> | null) {
+		this._players = value;
 	}
 
 	/**
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
-	get chatBridge(): NonAttribute<ChatBridge<true>> {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	public get chatBridge(): NonAttribute<ChatBridge<true>> {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
 		if (!this._chatBridge?.minecraft.isReady()) {
 			throw `${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`;
 		}
+
 		return this._chatBridge;
+	}
+
+	public set chatBridge(value: ChatBridge | null) {
+		this._chatBridge = value;
 	}
 
 	/**
 	 * returns the amount of players in the guild
 	 */
-	get playerCount(): NonAttribute<number> {
+	public get playerCount(): NonAttribute<number> {
 		return this.players.size;
 	}
 
 	/**
 	 * returns various average stats
 	 */
-	get stats(): NonAttribute<Record<'weightAverage' | 'skillAverage' | 'slayerAverage' | 'catacombsAverage', number>> {
+	public get stats(): NonAttribute<
+		Record<'catacombsAverage' | 'skillAverage' | 'slayerAverage' | 'weightAverage', number>
+	> {
 		const { players } = this;
 		const PLAYER_COUNT = players.size;
 
@@ -378,9 +429,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * returns various average stats, formatted as strings
 	 */
-	get formattedStats(): NonAttribute<HypixelGuildStats> {
-		const formatInteger = (number: number) => cleanFormattedNumber(formatNumber(Math.round(number)));
-		const formatDecimal = (number: number) => cleanFormattedNumber(formatDecimalNumber(number));
+	public get formattedStats(): NonAttribute<HypixelGuildStats> {
 		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
 
 		return {
@@ -394,8 +443,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * whether the player is muted and that mute is not expired
 	 */
-	get muted(): NonAttribute<boolean> {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	public get muted(): NonAttribute<boolean> {
 		if (this.mutedTill) {
 			// mute hasn't expired
 			if (Date.now() < this.mutedTill) return true;
@@ -410,7 +458,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * linked discord guild (if available)
 	 */
-	get discordGuild(): NonAttribute<Guild | null> {
+	public get discordGuild(): NonAttribute<Guild | null> {
 		const discordGuild = this.client.guilds.cache.get(this.discordId!);
 
 		if (discordGuild?.available) return discordGuild;
@@ -421,32 +469,38 @@ export class HypixelGuild extends Model<
 
 	/**
 	 * /guild mute ${target} ms(duration)
+	 *
 	 * @param target
 	 * @param duration
 	 */
-	async mute(target: Player | 'everyone', duration: number) {
+	public async mute(target: Player | 'everyone', duration: number) {
 		// prevent circular calls when syncing
-		if (Math.abs(this.mutedPlayers.get((target as Player).minecraftUuid)! - Date.now() - duration) < seconds(1)) return;
+		if (Math.abs(this.mutedPlayers.get((target as Player).minecraftUuid)! - Date.now() - duration) < seconds(1)) {
+			return null;
+		}
 
 		try {
 			const { chatBridge } = this;
+			// eslint-disable-next-line @typescript-eslint/return-await
 			return await chatBridge.minecraft.command({
 				command: `guild mute ${target} ${ms(duration)}`,
 				responseRegExp: mute(`${target}`, chatBridge.bot.username),
 			});
 		} catch (error) {
 			logger.error({ err: error, data: { target: `${target}`, duration } }, `[MUTE]: ${this.name}`);
+			return null;
 		}
 	}
 
 	/**
 	 * /guild unmute ${target}
+	 *
 	 * @param target
 	 * @param timeout
 	 */
-	unmute(target: Player, timeout: number) {
+	public async unmute(target: Player, timeout: number) {
 		// prevent circular calls when syncing
-		if (!this.checkMute(target)) return;
+		if (!this.checkMute(target)) return this;
 
 		// overwrite existing scheduled unmute
 		const existing = this._unmuteTimeouts.get(target.minecraftUuid);
@@ -459,7 +513,7 @@ export class HypixelGuild extends Model<
 		if (!timeout) return this.#unmute(target);
 
 		// schedule unmute
-		return new Promise((resolve) => {
+		return new Promise<this>((resolve) => {
 			this._unmuteTimeouts.set(
 				target.minecraftUuid,
 				setTimeout(() => {
@@ -468,13 +522,14 @@ export class HypixelGuild extends Model<
 			);
 		});
 	}
+
 	/**
 	 * @param target
 	 * @internal
 	 */
 	async #unmute(target: Player) {
 		// prevent circular calls when syncing
-		if (!this.checkMute(target)) return;
+		if (!this.checkMute(target)) return this;
 
 		try {
 			const { chatBridge } = this;
@@ -487,14 +542,17 @@ export class HypixelGuild extends Model<
 			logger.error({ err: error, data: { target: `${target}` } }, `[UNMUTE]: ${this.name}`);
 			void this.unmute(target, minutes(1));
 		}
+
+		return this;
 	}
 
 	/**
 	 * sync in-game guild mutes for the player
+	 *
 	 * @param player
 	 * @param mutedTill
 	 */
-	async syncMute(player: Player, mutedTill: number | null) {
+	public async syncMute(player: Player, mutedTill: number | null) {
 		if (mutedTill === null) {
 			// delete returns false if the element has not been deleted, true if it has been deleted
 			if (!this.mutedPlayers.delete(player.minecraftUuid)) return this;
@@ -541,9 +599,11 @@ export class HypixelGuild extends Model<
 
 	/**
 	 * whether the player is muted in-game in this hypixel guild
+	 *
 	 * @param player
 	 */
-	checkMute(player: Player | null) {
+	public checkMute(player: Player | null) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		if (this.mutedPlayers.has(player?.minecraftUuid!)) {
 			// mute hasn't expired
 			if (Date.now() < this.mutedPlayers.get(player!.minecraftUuid)!) return true;
@@ -558,7 +618,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * removes mutes from players that have expired. useful since the map can still hold mutes of players who left the guild
 	 */
-	async removeExpiredMutes() {
+	public async removeExpiredMutes() {
 		let changed = false;
 
 		for (const [minecraftUuid, mutedTill] of this.mutedPlayers) {
@@ -586,16 +646,17 @@ export class HypixelGuild extends Model<
 
 	/**
 	 * whether the player has an in-game staff rank in this hypixel guild
+	 *
 	 * @param player
 	 */
-	checkStaff(player: Player) {
+	public checkStaff(player: Player) {
 		return player.guildId === this.guildId && player.guildRankPriority > this.ranks.length - this.staffRanksAmount;
 	}
 
 	/**
 	 * shifts the daily stats history
 	 */
-	async saveDailyStats() {
+	public async saveDailyStats() {
 		// append current xp to the beginning of the statsHistory-Array and pop of the last value
 		const { statsHistory } = this;
 		statsHistory.shift();
@@ -612,9 +673,10 @@ export class HypixelGuild extends Model<
 
 	/**
 	 * updates the player database
+	 *
 	 * @param options
 	 */
-	async updateData(options?: UpdateOptions) {
+	public async updateData(options?: UpdateOptions) {
 		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
@@ -623,8 +685,10 @@ export class HypixelGuild extends Model<
 			this._updateDataPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within updateData
+	 *
 	 * @internal
 	 */
 	async #updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
@@ -778,11 +842,7 @@ export class HypixelGuild extends Model<
 						if (!discordMember) {
 							const discordTag = await player.fetchDiscordTag();
 
-							if (!discordTag) {
-								player.inDiscord = false;
-								joinedLog.push(`-\u00A0${player}: no linked discord`);
-								hasError = true;
-							} else {
+							if (discordTag) {
 								discordMember = await GuildUtil.fetchMemberByTag(this.discordGuild, discordTag);
 
 								if (!discordMember) {
@@ -799,6 +859,10 @@ export class HypixelGuild extends Model<
 
 									hasError = true;
 								}
+							} else {
+								player.inDiscord = false;
+								joinedLog.push(`-\u00A0${player}: no linked discord`);
+								hasError = true;
 							}
 						}
 
@@ -910,7 +974,7 @@ export class HypixelGuild extends Model<
 			const createEmbed = () => {
 				const embed = new EmbedBuilder()
 					.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
-					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
+					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES === 1 ? '' : 's'}`)
 					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
 					.setTimestamp();
 
@@ -931,8 +995,8 @@ export class HypixelGuild extends Model<
 				const MAX_VALUE_LINES = Math.max(IGNS_JOINED_LOG_LINE_COUNT, PLAYERS_LEFT_LOG_LINE_COUNT);
 
 				// // empty line padding
-				for (let i = 1 + MAX_VALUE_LINES - IGNS_JOINED_LOG_LINE_COUNT; --i; ) joinedLogElement += '\n\u200B';
-				for (let i = 1 + MAX_VALUE_LINES - PLAYERS_LEFT_LOG_LINE_COUNT; --i; ) leftLogElement += '\n\u200B';
+				for (let index = 1 + MAX_VALUE_LINES - IGNS_JOINED_LOG_LINE_COUNT; --index; ) joinedLogElement += '\n\u200B';
+				for (let index = 1 + MAX_VALUE_LINES - PLAYERS_LEFT_LOG_LINE_COUNT; --index; ) leftLogElement += '\n\u200B';
 
 				const newFields = [
 					{
@@ -987,8 +1051,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * syncs guild ranks with the weight leaderboard
 	 */
-	async syncRanks() {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	public async syncRanks() {
 		if (!this.client.config.get('AUTO_GUILD_RANKS') || !this.syncRanksEnabled) return this;
 
 		if (this._syncRanksPromise) return this._syncRanksPromise;
@@ -999,8 +1062,10 @@ export class HypixelGuild extends Model<
 			this._syncRanksPromise = null;
 		}
 	}
+
 	/**
 	 * should only ever be called from within syncRanks
+	 *
 	 * @internal
 	 */
 	async #syncRanks() {
@@ -1029,7 +1094,9 @@ export class HypixelGuild extends Model<
 				return this;
 			}
 
-			/** ranks with an absolute instead of a relative positionReq, sorted descendingly by it */
+			/**
+			 * ranks with an absolute instead of a relative positionReq, sorted descendingly by it
+			 */
 			const automatedRanks: AutomatedGuildRank[] = [];
 
 			for (const rank of this.ranks) {
@@ -1059,7 +1126,6 @@ export class HypixelGuild extends Model<
 			this.save().catch((error) => logger.error(error));
 
 			// update player ranks
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (!this.chatBridgeEnabled) return this;
 
 			const { chatBridge } = this;
@@ -1111,8 +1177,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * update discord stat channel names
 	 */
-	async updateStatDiscordChannels() {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	public async updateStatDiscordChannels() {
 		if (!this.updateStatDiscordChannelsEnabled || !this.statDiscordChannels) return;
 
 		for (const [type, value] of Object.entries(this.formattedStats)) {
@@ -1143,9 +1208,9 @@ export class HypixelGuild extends Model<
 	/**
 	 * destroys the db entry and removes it from cache
 	 */
-	override async destroy(options?: InstanceDestroyOptions) {
+	public override async destroy(options?: InstanceDestroyOptions) {
 		// clean up players
-		await Promise.all(this.players.map((player) => player.removeFromGuild()));
+		await Promise.all(this.players.map(async (player) => player.removeFromGuild()));
 
 		this.client.hypixelGuilds.cache.delete(this.guildId);
 		return super.destroy(options);
@@ -1154,7 +1219,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * the name of the guild
 	 */
-	override toString() {
+	public override toString() {
 		return this.name;
 	}
 }

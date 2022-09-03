@@ -3,11 +3,12 @@ import { promisify } from 'node:util';
 
 /**
  * 99_137 -> 99K, 1_453_329 -> 1.5M
+ *
  * @param number
  * @param digits
  */
 export function shortenNumber(number: number, digits?: number) {
-	let str: string | number;
+	let str: number | string;
 	let suffix: string;
 
 	if (number < 1e3) {
@@ -25,6 +26,7 @@ export function shortenNumber(number: number, digits?: number) {
 	} else if (number < 1e15) {
 		str = (number / 1e12).toFixed(digits ?? 2);
 		suffix = 'T';
+		// eslint-disable-next-line sonarjs/no-duplicated-branches
 	} else {
 		// numbers bigger than 1T shouldn't occur
 		str = number.toFixed(digits ?? 0);
@@ -85,7 +87,8 @@ export async function randomNumber(minimum: number, maximum: number) {
 		 *
 		 *   (Source: Scott Arciszewski)
 		 */
-		const randomValue = (await asyncRandomBytes(bytesNeeded)).reduce((acc, cur, i) => acc | (cur << (8 * i))) & mask;
+		const randomValue =
+			(await asyncRandomBytes(bytesNeeded)).reduce((acc, cur, index) => acc | (cur << (8 * index))) & mask;
 
 		if (randomValue <= range) {
 			/**
@@ -103,14 +106,19 @@ export async function randomNumber(minimum: number, maximum: number) {
 }
 
 interface DecimalNumberFormattingOptions {
-	/** amount to space-pad at the start */
-	padding?: number;
-	/** amount of decimals to round to */
+	/**
+	 * amount of decimals to round to
+	 */
 	decimals?: number;
+	/**
+	 * amount to space-pad at the start
+	 */
+	padding?: number;
 }
 
 /**
  * space-padding at the beginning and '0'-padding at the end
+ *
  * @param number number to format
  * @param options
  */
@@ -126,12 +134,15 @@ export function formatDecimalNumber(
 }
 
 interface NumberFormattingOptions {
-	/** amount to space-pad at the start */
+	/**
+	 * amount to space-pad at the start
+	 */
 	padding?: number;
 }
 
 /**
  * space-padding at the beginning, converterFunction and locale string formatting
+ *
  * @param number number to format
  * @param options
  */
@@ -140,6 +151,7 @@ export const formatNumber = (number: number, { padding = 0 }: NumberFormattingOp
 
 /**
  * formats a number as percentage
+ *
  * @param number
  */
 export function formatPercent(number: number) {

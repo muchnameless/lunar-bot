@@ -1,4 +1,5 @@
-import { minutes, seconds, weeks } from '#functions';
+import { type Mutable, type ArrayElementType } from '@sapphire/utilities';
+import { type Snowflake } from 'discord.js';
 import {
 	COSMETIC_SKILLS,
 	DUNGEON_TYPES,
@@ -7,9 +8,8 @@ import {
 	SKILLS,
 	SKYBLOCK_YEAR_0,
 	SLAYERS,
-} from '.';
-import type { Snowflake } from 'discord.js';
-import type { ArrayElementType, Mutable } from '@sapphire/utilities';
+} from './index.js';
+import { minutes, seconds, weeks } from '#functions';
 
 // generate default config
 export const DEFAULT_CONFIG = {
@@ -29,6 +29,7 @@ export const DEFAULT_CONFIG = {
 	CURRENT_COMPETITION: 'lily-weight',
 	DATABASE_UPDATE_INTERVAL: 5,
 	DEFAULT_MAX_PARTS: 5,
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	DEFAULT_XP_OFFSET: Offset.Week,
 	ELEMENTS_PER_PAGE: 10,
 	EMBED_BLUE: 0x34_98_db,
@@ -91,11 +92,11 @@ export type ConfigValues = Loosen<Mutable<typeof DEFAULT_CONFIG>>;
 export const enum Offset {
 	CompetitionEnd = 'CompetitionEnd',
 	CompetitionStart = 'CompetitionStart',
-	Mayor = 'OffsetMayor',
-	Week = 'OffsetWeek',
-	Month = 'OffsetMonth',
 	Current = 'current',
 	Day = 'day',
+	Mayor = 'OffsetMayor',
+	Month = 'OffsetMonth',
+	Week = 'OffsetWeek',
 }
 
 export const XP_OFFSETS = [
