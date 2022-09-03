@@ -1203,13 +1203,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zikeji/hypixel@github:muchnameless/node-hypixel#a9c5722ae4261ac23886ce187401de2639b64e53":
+"@zikeji/hypixel@github:muchnameless/node-hypixel#b4fe0a111701abc15bd15f6c1552b404031d5116":
   version: 3.1.1
-  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=a9c5722ae4261ac23886ce187401de2639b64e53"
+  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=b4fe0a111701abc15bd15f6c1552b404031d5116"
   dependencies:
     "@sapphire/async-queue": ^1.5.0
     undici: ^5.10.0
-  checksum: df844cb5fda489f1b6b2624c1890e7ab45b0bddc346925b3f9cd800ed61bb2ae91efa4d99c16f8d0442bdc61ad594c23d29544c484df21ed1efac9339fe5c4e1
+  checksum: 20b4e3f62ca54e6a77d3bb869d6b7049f6e02e3fa46d78ca6e5a7823d2cf87df2a6e00dc133e1219d3c6d05350bd171bbc71c9ed96b09f1185db5e70048d055c
   languageName: node
   linkType: hard
 
@@ -2741,8 +2741,8 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-react@npm:^7.31.1":
-  version: 7.31.2
-  resolution: "eslint-plugin-react@npm:7.31.2"
+  version: 7.31.4
+  resolution: "eslint-plugin-react@npm:7.31.4"
   dependencies:
     array-includes: ^3.1.5
     array.prototype.flatmap: ^1.3.0
@@ -2760,7 +2760,7 @@ __metadata:
     string.prototype.matchall: ^4.0.7
   peerDependencies:
     eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
-  checksum: f2115c77c0f7e307b613c93c947eff341651c8483698bcad27b9d265b113ab993ea37c0ba5f5ef476320139546936d35212a9879987f34c5efec20761727bbf1
+  checksum: 5fa5293f922c9fc24c300a60b9d3f33a2406116b88df46a134cbcdb514b91b526251ce604716ab1cde94c7c95f25963a56c1509faf867601b3b0f94d9f68d61b
   languageName: node
   linkType: hard
 
@@ -4511,7 +4511,7 @@ __metadata:
     "@types/node": ^18.7.14
     "@types/pg": ^8.6.5
     "@types/prettier": ^2.7.0
-    "@zikeji/hypixel": "github:muchnameless/node-hypixel#a9c5722ae4261ac23886ce187401de2639b64e53"
+    "@zikeji/hypixel": "github:muchnameless/node-hypixel#b4fe0a111701abc15bd15f6c1552b404031d5116"
     bufferutil: ^4.0.6
     chart.js: ^3.9.1
     chartjs-node-canvas: ^4.1.6
