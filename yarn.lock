@@ -2250,9 +2250,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@npm:14.3.1-dev.1662163776-f79ccb4.0":
-  version: 14.3.1-dev.1662163776-f79ccb4.0
-  resolution: "discord.js@npm:14.3.1-dev.1662163776-f79ccb4.0"
+"discord.js@npm:14.4.0-dev.1662206823-d08a57c.0":
+  version: 14.4.0-dev.1662206823-d08a57c.0
+  resolution: "discord.js@npm:14.4.0-dev.1662206823-d08a57c.0"
   dependencies:
     "@discordjs/builders": ^1.2.0
     "@discordjs/collection": ^1.1.0
@@ -2265,13 +2265,13 @@ __metadata:
     tslib: ^2.4.0
     undici: ^5.10.0
     ws: ^8.8.1
-  checksum: d5985b68ee56c3ce09e0c729ec9e79590e6b73580e85cf694c471f5725313d7925826d808535bea2599eb51d2c3d9e1b3fa0a4116ec8c4dee51ec1027ef9ebe8
+  checksum: 7001258d2cda591da1e2ce67a49d9a4741a6360364ae5a27d527ee53b459a12ac6f69a7b91765e7e009e4807766e3a1e5c67368f8a66fc9acfcfcee65777db9b
   languageName: node
   linkType: hard
 
-"discord.js@patch:discord.js@14.3.1-dev.1662163776-f79ccb4.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661774646-682e0e1.0-c4cc9c232f.patch::locator=lunar-bot%40workspace%3A.":
-  version: 14.3.1-dev.1662163776-f79ccb4.0
-  resolution: "discord.js@patch:discord.js@npm%3A14.3.1-dev.1662163776-f79ccb4.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661774646-682e0e1.0-c4cc9c232f.patch::version=14.3.1-dev.1662163776-f79ccb4.0&hash=266bd3&locator=lunar-bot%40workspace%3A."
+"discord.js@patch:discord.js@14.4.0-dev.1662206823-d08a57c.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661774646-682e0e1.0-c4cc9c232f.patch::locator=lunar-bot%40workspace%3A.":
+  version: 14.4.0-dev.1662206823-d08a57c.0
+  resolution: "discord.js@patch:discord.js@npm%3A14.4.0-dev.1662206823-d08a57c.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1661774646-682e0e1.0-c4cc9c232f.patch::version=14.4.0-dev.1662206823-d08a57c.0&hash=266bd3&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@discordjs/builders": ^1.2.0
     "@discordjs/collection": ^1.1.0
@@ -2284,7 +2284,7 @@ __metadata:
     tslib: ^2.4.0
     undici: ^5.10.0
     ws: ^8.8.1
-  checksum: f80f4e68ad35bf73b9f530ed1814609cbc144bc114e1b5b5a1f25a23e52236c6ee0095edd14e8268d95021cfe4fcdc6e2f581c366d0afb4b1b9b22f4a4a97b5c
+  checksum: 2b911441d445beab19568f7598363d27fe566d740517957b4958f1645152c73034c2917e7a6af7cb15ae4a0f0cc0476c69027ead6af9416f47069f9889954749
   languageName: node
   linkType: hard
 
@@ -4517,7 +4517,7 @@ __metadata:
     chartjs-node-canvas: ^4.1.6
     common-tags: ^1.8.2
     cron: ^2.1.0
-    discord.js: 14.3.1-dev.1662163776-f79ccb4.0
+    discord.js: 14.4.0-dev.1662206823-d08a57c.0
     env-cmd: ^10.1.0
     eslint: ^8.23.0
     eslint-config-neon: ^0.1.32
