@@ -71,7 +71,7 @@ export class ChatBridgeManager {
 
 		this.commands = new BridgeCommandCollection(client, commandsURL);
 
-		for (let index = 0; index < ChatBridgeManager._accounts.length; ++index) {
+		for (let index = 0; index < this._accounts.length; ++index) {
 			this.cache.push(new ChatBridge(client, this, index));
 		}
 	}
@@ -79,7 +79,7 @@ export class ChatBridgeManager {
 	/**
 	 * mc accounts
 	 */
-	private static get _accounts() {
+	private get _accounts() {
 		return env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/).filter(Boolean);
 	}
 
@@ -108,7 +108,7 @@ export class ChatBridgeManager {
 		await this.commands.loadAll();
 
 		// single
-		if (typeof index === 'number' && index >= 0 && index < ChatBridgeManager._accounts.length) {
+		if (typeof index === 'number' && index >= 0 && index < this._accounts.length) {
 			const chatBridge = this.cache[index]!;
 
 			await chatBridge.connect();

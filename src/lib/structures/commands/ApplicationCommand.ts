@@ -289,7 +289,7 @@ export class ApplicationCommand extends BaseCommand {
 		}
 
 		/**
-		 * wether the interaction is from the hypixel guild's linked discord guild
+		 * whether the interaction is from the hypixel guild's linked discord guild
 		 */
 		const IS_IN_LINKED_GUILD = interaction.guildId !== null && interaction.guildId === hypixelGuild.discordId;
 

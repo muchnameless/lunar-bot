@@ -27,7 +27,7 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 	 * @param duelStats
 	 * @param stat
 	 */
-	private static _calculateStats(duelStats: Components.Schemas.PlayerStatsGameMode, stat: string) {
+	private _calculateStats(duelStats: Components.Schemas.PlayerStatsGameMode, stat: string) {
 		return ['duel', 'doubles', 'four'].reduce(
 			(acc, cur) => acc + ((duelStats[`bridge_${cur}_${stat}`] as number | undefined) ?? 0),
 			0,
@@ -47,9 +47,9 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 
 			if (typeof deaths !== 'number' || typeof kills !== 'number') return `\`${ign}\` has no Bridge stats`;
 
-			const wins = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'wins');
-			const losses = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'losses');
-			const gamesPlayed = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'rounds_played');
+			const wins = this._calculateStats(playerData.stats.Duels, 'wins');
+			const losses = this._calculateStats(playerData.stats.Duels, 'losses');
+			const gamesPlayed = this._calculateStats(playerData.stats.Duels, 'rounds_played');
 
 			return oneLine`
 				${escapeIgn(ign)}:
@@ -62,7 +62,7 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 				kills: ${formatNumber(kills as number)},
 				deaths: ${formatNumber(deaths as number)},
 				kd ratio: ${this.calculateKD(kills as number, deaths as number) ?? '-/-'},
-				goals: ${formatNumber(BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'goals'))}
+				goals: ${formatNumber(this._calculateStats(playerData.stats.Duels, 'goals'))}
 			`;
 		} catch {
 			return `\`${ign}\` has no Bridge stats`;

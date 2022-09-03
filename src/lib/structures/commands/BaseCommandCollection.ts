@@ -24,6 +24,11 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	public readonly dirURL: URL;
 
 	/**
+	 * categories that are excluded from the help command and autocorrection
+	 */
+	public static readonly INVISIBLE_CATEGORIES = new Set(['hidden', 'owner']);
+
+	/**
 	 * @param client
 	 * @param dirURL
 	 * @param entries
@@ -43,11 +48,6 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	public static override get [Symbol.species]() {
 		return Collection;
 	}
-
-	/**
-	 * categories that are excluded from the help command and autocorrection
-	 */
-	public static readonly INVISIBLE_CATEGORIES = new Set(['hidden', 'owner']);
 
 	/**
 	 * clears the cooldown timestamps collection for all commands

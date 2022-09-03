@@ -10,6 +10,7 @@
 		"@typescript-eslint/consistent-type-definitions": 0,
 		"@typescript-eslint/no-base-to-string": 0,
 		"@typescript-eslint/no-throw-literal": 0,
+		// "@typescript-eslint/no-unused-vars": 2,
 		"@typescript-eslint/restrict-plus-operands": 0,
 		"curly": [2, "multi-line", "consistent"],
 		"jsdoc/check-param-names": 0,

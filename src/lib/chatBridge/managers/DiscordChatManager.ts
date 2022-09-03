@@ -1,5 +1,4 @@
 import { URL } from 'node:url';
-import { AsyncQueue } from '@sapphire/async-queue';
 import {
 	bold,
 	DiscordAPIError,
@@ -57,16 +56,15 @@ interface SendViaWebhookOptions extends WebhookMessageOptions {
 	queuePromise?: Promise<void>;
 }
 
+export interface ReadyDiscordChatManager extends DiscordChatManager {
+	webhook: Webhook;
+}
+
 export class DiscordChatManager extends ChatManager {
 	/**
 	 * webhook fetching/creating & caching
 	 */
 	private _fetchOrCreateWebhookPromise: Promise<this> | null = null;
-
-	/**
-	 * chat queue
-	 */
-	public override readonly queue = new AsyncQueue();
 
 	/**
 	 * hypixel message type
@@ -198,7 +196,7 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * asserts that the webhook is present
 	 */
-	public isReady(): this is this & { webhook: Webhook } {
+	public isReady(): this is ReadyDiscordChatManager {
 		return this.ready;
 	}
 

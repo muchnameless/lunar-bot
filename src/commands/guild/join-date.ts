@@ -43,9 +43,9 @@ export default class JoinDateCommand extends DualCommand {
 		);
 	}
 
-	public static readonly running = new Set();
+	private readonly running = new Set();
 
-	public static readonly JOINED_REGEXP = new RegExp(
+	private readonly JOINED_REGEXP = new RegExp(
 		`(?<time>.+): ${IGN_DEFAULT} (?:joined|created the guild)(?:\\n.+: ${IGN_DEFAULT} invited ${IGN_DEFAULT})*$`,
 	);
 
@@ -53,20 +53,20 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param chatBridge
 	 * @param ign
 	 */
-	public static async getJoinDate(chatBridge: ChatBridge, ign: string) {
+	private async _getJoinDate(chatBridge: ChatBridge, ign: string) {
 		// get first page
-		let logEntry = await this.getLogEntry(chatBridge, ign, 1);
+		let logEntry = await this._getLogEntry(chatBridge, ign, 1);
 		let lastPage = Number(/\(Page 1 of (\d+)\)/.exec(logEntry)?.[1]);
 
 		// log has more than 1 page -> get latest page
-		if (lastPage !== 1) logEntry = await this.getLogEntry(chatBridge, ign, lastPage);
+		if (lastPage !== 1) logEntry = await this._getLogEntry(chatBridge, ign, lastPage);
 
-		let matched = JoinDateCommand.JOINED_REGEXP.exec(logEntry);
+		let matched = this.JOINED_REGEXP.exec(logEntry);
 
 		// last page didn't contain join, get next-to-last page
 		let invitedRegExp: RegExp;
 		while (!matched && lastPage >= 1) {
-			matched = JoinDateCommand.JOINED_REGEXP.exec(await this.getLogEntry(chatBridge, ign, --lastPage));
+			matched = this.JOINED_REGEXP.exec(await this._getLogEntry(chatBridge, ign, --lastPage));
 
 			// entry does not end with invited message -> no joined / created message at all
 			if (!(invitedRegExp ??= new RegExp(`\\n.+: ${IGN_DEFAULT} invited ${ign}$`)).test(logEntry)) break;
@@ -86,7 +86,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param ign
 	 * @param page
 	 */
-	public static getLogEntry(chatBridge: ChatBridge, ign: string, page: number) {
+	private _getLogEntry(chatBridge: ChatBridge, ign: string, page: number) {
 		return chatBridge.minecraft.command({
 			command: `g log ${ign} ${page}`,
 			abortRegExp: logErrors(ign),
@@ -102,7 +102,7 @@ export default class JoinDateCommand extends DualCommand {
 	 */
 	private async _generateReply(chatBridge: ChatBridge, ignInput: string) {
 		try {
-			const { ign, timestampSeconds } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
+			const { ign, timestampSeconds } = await this._getJoinDate(chatBridge, ignInput);
 			return `${escapeIgn(ign)}: joined ${chatBridge.hypixelGuild} at ${
 				Number.isNaN(timestampSeconds) ? 'an unknown date' : time(timestampSeconds)
 			}`;
@@ -126,7 +126,7 @@ export default class JoinDateCommand extends DualCommand {
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(hypixelGuild.guildId)) {
+			if (this.running.has(hypixelGuild.guildId)) {
 				throw 'the command is already running';
 			}
 
@@ -134,7 +134,7 @@ export default class JoinDateCommand extends DualCommand {
 			const joinInfos: JoinInfo[] = [];
 
 			try {
-				JoinDateCommand.running.add(hypixelGuild.guildId);
+				this.running.add(hypixelGuild.guildId);
 
 				await InteractionUtil.awaitConfirmation(
 					interaction,
@@ -144,10 +144,10 @@ export default class JoinDateCommand extends DualCommand {
 				);
 
 				for (const { ign } of hypixelGuild.players.values()) {
-					joinInfos.push(await JoinDateCommand.getJoinDate(chatBridge, ign));
+					joinInfos.push(await this._getJoinDate(chatBridge, ign));
 				}
 			} finally {
-				JoinDateCommand.running.delete(hypixelGuild.guildId);
+				this.running.delete(hypixelGuild.guildId);
 			}
 
 			return InteractionUtil.reply(interaction, {

@@ -27,7 +27,7 @@ export default class MathsCommand extends DualCommand {
 	 * >= 10 -> sin(90°) = 0
 	 * >= 18 -> cos(90°) = 1
 	 */
-	private static readonly precision = 18;
+	private readonly precision = 18;
 
 	public constructor(context: CommandContext) {
 		super(
@@ -50,52 +50,52 @@ export default class MathsCommand extends DualCommand {
 		);
 	}
 
-	private static readonly percent = {
+	private readonly percent = {
 		precedence: 8,
 		associativity: OperatorAssociativity.Right,
 	} as const;
 
-	private static readonly multiplier = {
+	private readonly multiplier = {
 		precedence: 7,
 		associativity: OperatorAssociativity.Right,
 	} as const;
 
-	private static readonly degree = {
+	private readonly degree = {
 		precedence: 6,
 		associativity: OperatorAssociativity.Right,
 	} as const;
 
-	private static readonly factorialPost = {
+	private readonly factorialPost = {
 		precedence: 5,
 		associativity: OperatorAssociativity.Right,
 	} as const;
 
-	private static readonly factorialPre = {
+	private readonly factorialPre = {
 		precedence: 5,
 		associativity: OperatorAssociativity.Left,
 	} as const;
 
-	private static readonly func = {
+	private readonly func = {
 		precedence: 4,
 		associativity: OperatorAssociativity.Left,
 	} as const;
 
-	private static readonly power = {
+	private readonly power = {
 		precedence: 3,
 		associativity: OperatorAssociativity.Left,
 	} as const;
 
-	private static readonly factor = {
+	private readonly factor = {
 		precedence: 2,
 		associativity: OperatorAssociativity.Left,
 	} as const;
 
-	private static readonly term = {
+	private readonly term = {
 		precedence: 1,
 		associativity: OperatorAssociativity.Left,
 	} as const;
 
-	private static readonly unaryOperators = {
+	private readonly unaryOperators = {
 		m: (x = 1) => {
 			return BigDecimal.multiply(x, 1_000_000);
 		},
@@ -150,7 +150,7 @@ export default class MathsCommand extends DualCommand {
 		},
 	} as const;
 
-	private static readonly binaryOperators = {
+	private readonly binaryOperators = {
 		'^': (a?: number, b?: number) => {
 			if (typeof a === 'undefined') throw new Error('`^` is not a unary operator');
 			if (a === 0 && b === 0) return Number.NaN;
@@ -177,7 +177,7 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * @param start
 	 */
-	private static _factorial(start: number) {
+	private _factorial(start: number) {
 		let temp = 1;
 		let iterations = start;
 		while (iterations > 0) {
@@ -193,7 +193,7 @@ export default class MathsCommand extends DualCommand {
 	 *
 	 * @param x
 	 */
-	private static _isMultipleOfPi(x: number) {
+	private _isMultipleOfPi(x: number) {
 		return (
 			Number(BigDecimal.divide(x, Math.PI, this.precision)) ===
 			Number(BigDecimal.floor(BigDecimal.divide(x, Math.PI, this.precision)))
@@ -205,7 +205,7 @@ export default class MathsCommand extends DualCommand {
 	 *
 	 * @param x
 	 */
-	private static _isMultipleOfPiHalf(x: number) {
+	private _isMultipleOfPiHalf(x: number) {
 		return (
 			Number(
 				BigDecimal.divide(BigDecimal.add(x, BigDecimal.divide(Math.PI, 2, this.precision)), Math.PI, this.precision),
@@ -221,7 +221,7 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * lexer for mathematical expressions
 	 */
-	private static lexer = new Lexer()
+	private lexer = new Lexer()
 		.addRule(/,/, () => null) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-])-)?(?:\d+(?:\.\d+)?|\.\d+)/) // numbers
 		.addRule(/(?<![+-])[)*/^]/) // operators which should not follow after unary prefix operators
@@ -245,7 +245,7 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * parser for reverse polish notation
 	 */
-	private static parser = new Parser({
+	private parser = new Parser({
 		m: this.multiplier,
 		k: this.multiplier,
 		'°': this.degree,
@@ -266,14 +266,14 @@ export default class MathsCommand extends DualCommand {
 		percent: this.percent,
 	});
 
-	private static _parse(input: string) {
+	private _parse(input: string) {
 		const tokens: (number | string)[] = [];
 
 		let token: number | string | null;
 
-		MathsCommand.lexer.setInput(input);
+		this.lexer.setInput(input);
 
-		while ((token = MathsCommand.lexer.lex())) tokens.push(token);
+		while ((token = this.lexer.lex())) tokens.push(token);
 
 		// logger.debug({ tokens });
 
@@ -287,7 +287,7 @@ export default class MathsCommand extends DualCommand {
 	 *
 	 * @param value
 	 */
-	private static _validateNumber(value?: number | string) {
+	private _validateNumber(value?: number | string) {
 		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) {
 			throw `(intermediate) result larger than ${formatNumber(Number.MAX_SAFE_INTEGER)}`;
 		}
@@ -301,7 +301,7 @@ export default class MathsCommand extends DualCommand {
 	 *
 	 * @param input
 	 */
-	private static _formatNumberString(input: string) {
+	private _formatNumberString(input: string) {
 		return input.replace(/(?<!\..*)\B(?=(?:\d{3})+(?!\d))/gs, '\u{202F}');
 	}
 
@@ -326,7 +326,7 @@ export default class MathsCommand extends DualCommand {
 
 		// parse
 		try {
-			parsed = MathsCommand._parse(INPUT);
+			parsed = this._parse(INPUT);
 		} catch (error) {
 			throw `${error instanceof Error ? error.message : error}, input: \`${INPUT}\``;
 		}
@@ -339,21 +339,21 @@ export default class MathsCommand extends DualCommand {
 
 		// calculate
 		try {
-			const pop = () => MathsCommand._validateNumber(stack.pop());
+			const pop = () => this._validateNumber(stack.pop());
 
 			for (const token of parsed) {
-				if (Reflect.has(MathsCommand.binaryOperators, token)) {
+				if (Reflect.has(this.binaryOperators, token)) {
 					const b = pop();
 					const a = pop();
 
-					stack.push(MathsCommand.binaryOperators[token as keyof typeof MathsCommand['binaryOperators']](a, b));
+					stack.push(this.binaryOperators[token as keyof MathsCommand['binaryOperators']](a, b));
 					continue;
 				}
 
-				if (Reflect.has(MathsCommand.unaryOperators, token)) {
+				if (Reflect.has(this.unaryOperators, token)) {
 					const a = pop();
 
-					stack.push(MathsCommand.unaryOperators[token as keyof typeof MathsCommand['unaryOperators']](a));
+					stack.push(this.unaryOperators[token as keyof MathsCommand['unaryOperators']](a));
 					continue;
 				}
 
@@ -370,12 +370,12 @@ export default class MathsCommand extends DualCommand {
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
 		return {
-			input: MathsCommand._formatNumberString(INPUT)
+			input: this._formatNumberString(INPUT)
 				.replace(/(?<=.)[*+/-]/g, ' $& ') // add spaces around operators
 				.replaceAll(',', '$& ') // add space after commas
 				.replace(/pi/gi, '\u{03C0}'), // prettify 'pi'
 			output: Number(output),
-			formattedOutput: MathsCommand._formatNumberString(output?.toString() ?? ''),
+			formattedOutput: this._formatNumberString(output?.toString() ?? ''),
 		};
 	}
 

@@ -76,14 +76,14 @@ export default class ConfigCommand extends ApplicationCommand {
 	 *
 	 * @param key
 	 */
-	private static _transformKey(key: string) {
+	private _transformKey(key: string) {
 		return key.toUpperCase().replace(/ +/g, '');
 	}
 
 	/**
 	 * @param entries
 	 */
-	private static _listEntries(entries: Collection<string, Config>) {
+	private _listEntries(entries: Collection<string, Config>) {
 		return (
 			entries
 				.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
@@ -117,7 +117,7 @@ export default class ConfigCommand extends ApplicationCommand {
 					{ name: value, value }, // current input
 					...sortCache(
 						this.config.cache,
-						ConfigCommand._transformKey(value),
+						this._transformKey(value),
 						'key',
 						'key',
 						AutoCompleteLimits.MaximumAmountOfOptions - 1,
@@ -125,7 +125,7 @@ export default class ConfigCommand extends ApplicationCommand {
 				]);
 
 			case 'delete':
-				return interaction.respond(sortCache(this.config.cache, ConfigCommand._transformKey(value), 'key', 'key'));
+				return interaction.respond(sortCache(this.config.cache, this._transformKey(value), 'key', 'key'));
 
 			default:
 				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
@@ -140,7 +140,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
 		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
-				const KEY = ConfigCommand._transformKey(interaction.options.getString('key', true));
+				const KEY = this._transformKey(interaction.options.getString('key', true));
 				const OLD_VALUE = this.config.get(KEY);
 
 				let newValue: string[] | boolean | number | string = interaction.options.getString('value', true);
@@ -175,7 +175,7 @@ export default class ConfigCommand extends ApplicationCommand {
 			}
 
 			case 'delete': {
-				const KEY = ConfigCommand._transformKey(interaction.options.getString('key', true));
+				const KEY = this._transformKey(interaction.options.getString('key', true));
 
 				if (!this.config.cache.has(KEY)) return InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
 
@@ -190,7 +190,7 @@ export default class ConfigCommand extends ApplicationCommand {
 
 				if (!query) {
 					return InteractionUtil.reply(interaction, {
-						content: ConfigCommand._listEntries(this.config.cache),
+						content: this._listEntries(this.config.cache),
 						code: 'apache',
 						split: { char: '\n' },
 					});
@@ -199,7 +199,7 @@ export default class ConfigCommand extends ApplicationCommand {
 				const queryRegex = new RE2(query, 'i');
 
 				return InteractionUtil.reply(interaction, {
-					content: ConfigCommand._listEntries(
+					content: this._listEntries(
 						this.config.cache.filter(
 							({ key, value }) => queryRegex.test(key) || (value !== null && queryRegex.test(value)),
 						),

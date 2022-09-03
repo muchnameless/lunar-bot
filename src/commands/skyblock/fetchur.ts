@@ -19,7 +19,7 @@ export default class FetchurCommand extends DualCommand {
 		);
 	}
 
-	private static readonly FETCHUR_ITEMS = [
+	private readonly FETCHUR_ITEMS = [
 		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
 		'1 compass (4 iron + 1 redstone)',
 		'20 mithril',
@@ -58,9 +58,10 @@ export default class FetchurCommand extends DualCommand {
 			nextResetDate = tomorrow;
 		}
 
-		return `item: ${
-			FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]
-		}, changes ${time(nextResetDate, TimestampStyles.RelativeTime)}`;
+		return `item: ${this.FETCHUR_ITEMS[(date.getUTCDate() - 1) % this.FETCHUR_ITEMS.length]}, changes ${time(
+			nextResetDate,
+			TimestampStyles.RelativeTime,
+		)}`;
 	}
 
 	/**

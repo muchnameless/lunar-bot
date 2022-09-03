@@ -18,12 +18,12 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 		});
 	}
 
-	private static readonly running = new Set<Snowflake>();
+	private readonly running = new Set<Snowflake>();
 
 	/**
 	 * time to wait between role API requests
 	 */
-	private static readonly TIMEOUT = seconds(30);
+	private readonly TIMEOUT = seconds(30);
 
 	/**
 	 * execute the command
@@ -37,12 +37,12 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 			throw 'unable to determine the guild';
 		}
 
-		if (PurgeRolesCommand.running.has(guild.id)) {
+		if (this.running.has(guild.id)) {
 			throw 'the command is already running';
 		}
 
 		try {
-			PurgeRolesCommand.running.add(guild.id);
+			this.running.add(guild.id);
 
 			const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(guild.id)?.GUILD_ROLE_ID;
 			const toPurge: { rolesToPurge: Snowflake[]; userId: Snowflake }[] = [];
@@ -67,7 +67,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 			await InteractionUtil.awaitConfirmation(
 				interaction,
 				`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT === 1 ? '' : 's'}, expected duration: ${ms(
-					(PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT,
+					(PURGE_AMOUNT - 1) * this.TIMEOUT,
 					{ long: true },
 				)}?`,
 			);
@@ -75,7 +75,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 			let success = 0;
 
 			for (const { userId, rolesToPurge } of toPurge) {
-				await sleep(PurgeRolesCommand.TIMEOUT);
+				await sleep(this.TIMEOUT);
 
 				const member = guild.members.cache.get(userId);
 				if (!member) continue;
@@ -94,7 +94,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 				`done, purged roles from ${success}/${PURGE_AMOUNT} member${PURGE_AMOUNT === 1 ? '' : 's'}`,
 			);
 		} finally {
-			PurgeRolesCommand.running.delete(guild.id);
+			this.running.delete(guild.id);
 		}
 	}
 }

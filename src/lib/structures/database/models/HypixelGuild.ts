@@ -27,7 +27,7 @@ import {
 } from 'sequelize';
 import { type Player } from './Player.js';
 import { hypixel, mojang } from '#api';
-import { type ChatBridge } from '#chatBridge/ChatBridge.js';
+import { type ChatBridge, type MinecraftReadyChatBridge } from '#chatBridge/ChatBridge.js';
 import { mute, setRank, unmute, type PREFIX_BY_TYPE } from '#chatBridge/constants/index.js';
 import { Offset, SKYBLOCK_XP_TYPES, UNKNOWN_IGN, XP_OFFSETS_TIME } from '#constants';
 import {
@@ -182,7 +182,7 @@ export class HypixelGuild extends Model<
 	/**
 	 * linked chat bridge
 	 */
-	private _chatBridge: NonAttribute<ChatBridge<true> | null> = null;
+	private _chatBridge: NonAttribute<ChatBridge | null> = null;
 
 	/**
 	 * players who are muted in guild chat, \<minecraftUuid, mutedTill\>
@@ -388,9 +388,9 @@ export class HypixelGuild extends Model<
 	/**
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
-	public get chatBridge(): NonAttribute<ChatBridge<true>> {
+	public get chatBridge(): NonAttribute<MinecraftReadyChatBridge> {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
-		if (!this._chatBridge?.minecraft.isReady()) {
+		if (!this._chatBridge?.isMinecraftReady()) {
 			throw `${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`;
 		}
 

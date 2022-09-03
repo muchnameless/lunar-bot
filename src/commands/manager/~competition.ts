@@ -12,17 +12,17 @@ import { InteractionUtil } from '#utils';
  */
 
 export class CompetitionCommand extends ApplicationCommand {
+	/**
+	 * possible types for a competition
+	 */
+	private readonly COMPETITION_TYPES = [...SKILLS, 'slayer', ...DUNGEON_TYPES];
+
 	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder().setDescription('WIP'),
 			cooldown: seconds(1),
 		});
 	}
-
-	/**
-	 * possible types for a competition
-	 */
-	public static COMPETITION_TYPES = [...SKILLS, 'slayer', ...DUNGEON_TYPES];
 
 	/**
 	 * execute the command
@@ -46,12 +46,12 @@ export class CompetitionCommand extends ApplicationCommand {
 		let retries = 0;
 
 		try {
-			void InteractionUtil.reply(interaction, `competition type? ${commaListOr(CompetitionCommand.COMPETITION_TYPES)}`);
+			void InteractionUtil.reply(interaction, `competition type? ${commaListOr(this.COMPETITION_TYPES)}`);
 
 			do {
 				// eslint-disable-next-line n/callback-return
 				const collected = await next();
-				const result = autocorrect(collected, CompetitionCommand.COMPETITION_TYPES);
+				const result = autocorrect(collected, this.COMPETITION_TYPES);
 
 				if (result.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')) {
 					type = result.value;

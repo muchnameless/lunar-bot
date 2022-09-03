@@ -2,11 +2,20 @@ import { EventEmitter, once } from 'node:events';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
 import { type Awaitable, type Message as DiscordMessage, type MessageOptions } from 'discord.js';
+import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
 import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
-import { DiscordManager, type DiscordChatManagerResolvable } from './managers/DiscordManager.js';
-import { MinecraftChatManager, type MinecraftChatOptions } from './managers/MinecraftChatManager.js';
+import {
+	DiscordManager,
+	type DiscordChatManagerResolvable,
+	type ReadyDiscordManager,
+} from './managers/DiscordManager.js';
+import {
+	MinecraftChatManager,
+	type MinecraftChatOptions,
+	type ReadyMinecraftChatManager,
+} from './managers/MinecraftChatManager.js';
 import { UnicodeEmoji } from '#constants';
 import { minutes, seconds } from '#functions';
 import { logger } from '#logger';
@@ -53,7 +62,19 @@ export interface ChatBridge {
 	on(event: ChatBridgeEvent.Message, listener: (hypixelMessage: HypixelMessage) => Awaitable<void>): this;
 }
 
-export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter {
+export interface MinecraftReadyChatBridge extends ChatBridge {
+	get bot(): MinecraftBot;
+	minecraft: ReadyMinecraftChatManager;
+	get player(): Player;
+}
+
+export interface DiscordReadyChatBridge extends ChatBridge {
+	discord: ReadyDiscordManager;
+}
+
+export type ReadyChatBridge = DiscordReadyChatBridge & MinecraftReadyChatBridge;
+
+export class ChatBridge extends EventEmitter {
 	/**
 	 * increases each link cycle
 	 */
@@ -87,7 +108,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	/**
 	 * minecraft related functions
 	 */
-	public readonly minecraft: MinecraftChatManager<loggedIn> = new MinecraftChatManager(this);
+	public readonly minecraft: MinecraftChatManager = new MinecraftChatManager(this);
 
 	/**
 	 * discord related functions
@@ -131,10 +152,24 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	}
 
 	/**
-	 * whether the minecraft bot and all discord channel managers (webhooks) are ready
+	 * whether the minecraft bot is ready and logged in
 	 */
-	public isReady(): this is ChatBridge<true> {
-		return this.minecraft.isReady() && this.discord.ready;
+	public isMinecraftReady(): this is MinecraftReadyChatBridge {
+		return this.minecraft.isReady();
+	}
+
+	/**
+	 * whether all discord channels are ready
+	 */
+	public isDiscordReady(): this is DiscordReadyChatBridge {
+		return this.discord.isReady();
+	}
+
+	/**
+	 * whether the minecraft bot and all discord channels are ready
+	 */
+	public isReady(): this is ReadyChatBridge {
+		return this.isMinecraftReady() && this.isDiscordReady();
 	}
 
 	/**
@@ -175,7 +210,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param guildName
 	 */
 	public async link(guildName: string | null = null): Promise<this> {
-		if (!this.minecraft.isReady()) {
+		if (!this.isMinecraftReady()) {
 			await once(this, ChatBridgeEvent.Ready);
 		}
 
@@ -308,7 +343,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 		}
 
 		// mc bot not ready yet
-		if (!this.minecraft.isReady()) {
+		if (!this.isMinecraftReady()) {
 			try {
 				await once(this, ChatBridgeEvent.Ready, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {

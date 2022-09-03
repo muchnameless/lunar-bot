@@ -26,6 +26,9 @@ export class LogHandler {
 
 	private readonly logURL: URL;
 
+	private readonly REQUIRED_CHANNEL_PERMISSIONS =
+		PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks;
+
 	/**
 	 * @param client
 	 * @param logURL
@@ -35,9 +38,6 @@ export class LogHandler {
 
 		this.logURL = logURL;
 	}
-
-	public static REQUIRED_CHANNEL_PERMISSIONS =
-		PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks;
 
 	/**
 	 * logging channel
@@ -54,11 +54,11 @@ export class LogHandler {
 			return null;
 		}
 
-		if (!ChannelUtil.botPermissions(channel).has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS, false)) {
+		if (!ChannelUtil.botPermissions(channel).has(this.REQUIRED_CHANNEL_PERMISSIONS, false)) {
 			logger.error(
 				`[LOG HANDLER]: missing ${commaListAnd(
 					ChannelUtil.botPermissions(channel)
-						.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS, false)
+						.missing(this.REQUIRED_CHANNEL_PERMISSIONS, false)
 						.map((permission) => `'${permission}'`),
 				)}
 				`,

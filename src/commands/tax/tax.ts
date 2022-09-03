@@ -8,7 +8,6 @@ import {
 	type Collection,
 	type JSONEncodable,
 	type Message,
-	type Snowflake,
 	type TextChannel,
 } from 'discord.js';
 import { Op } from 'sequelize';

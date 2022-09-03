@@ -51,7 +51,6 @@ import {
 } from '#functions';
 import { logger } from '#logger';
 import { type Player } from '#structures/database/models/Player.js';
-import { type If } from '#types';
 import { MessageUtil, UserUtil } from '#utils';
 
 export interface MinecraftChatOptions {
@@ -215,7 +214,12 @@ class LastMessages {
 	}
 }
 
-export class MinecraftChatManager<loggedIn extends boolean = boolean> extends ChatManager {
+export interface ReadyMinecraftChatManager extends MinecraftChatManager {
+	bot: MinecraftBot;
+	botUuid: string;
+}
+
+export class MinecraftChatManager extends ChatManager {
 	/**
 	 * resolves this._promise
 	 */
@@ -272,12 +276,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * minecraft bot client
 	 */
-	public bot: If<loggedIn, MinecraftBot> = null as If<loggedIn, MinecraftBot>;
+	public bot: MinecraftBot | null = null;
 
 	/**
 	 * minecraft uuid of the bot user
 	 */
-	public botUuid: If<loggedIn, string> = null as If<loggedIn, string>;
+	public botUuid: string | null = null;
 
 	/**
 	 * increases each login, reset to 0 on successfull spawn
@@ -292,7 +296,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * whether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
-	public isReady(): this is MinecraftChatManager<true> {
+	public isReady(): this is ReadyMinecraftChatManager {
 		return this.state === MinecraftChatManagerState.Ready && !(this.bot?.ended ?? true);
 	}
 
@@ -543,7 +547,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		++this.loginAttempts;
 
-		(this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
+		this.bot = await createBot(this.chatBridge, {
 			host: 'mc.hypixel.net',
 			port: 25_565,
 			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
@@ -587,7 +591,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			logger.error(error, '[CHATBRIDGE DISCONNECT]');
 		}
 
-		(this as MinecraftChatManager<false>).bot = null;
+		this.bot = null;
 
 		return this;
 	}

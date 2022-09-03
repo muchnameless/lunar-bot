@@ -13,11 +13,17 @@ import ms, { type StringValue } from 'ms';
 import { Op } from 'sequelize';
 import { type ChatBridge } from '../ChatBridge.js';
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP, type HypixelMessageType } from '../constants/index.js';
-import { DiscordChatManager } from './DiscordChatManager.js';
+import { DiscordChatManager, type ReadyDiscordChatManager } from './DiscordChatManager.js';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
 import { logger } from '#logger';
 
 export type DiscordChatManagerResolvable = DiscordChatManager | HypixelMessageType | Snowflake;
+
+export interface ReadyDiscordManager extends DiscordManager {
+	get channels(): Collection<Snowflake, ReadyDiscordChatManager>;
+	readonly channelsByIds: Collection<string, ReadyDiscordChatManager>;
+	readonly channelsByType: Collection<string, ReadyDiscordChatManager>;
+}
 
 export class DiscordManager {
 	public readonly chatBridge: ChatBridge;
@@ -46,6 +52,13 @@ export class DiscordManager {
 		for (const channel of this.channels.values()) {
 			channel.ready = value;
 		}
+	}
+
+	/**
+	 * whether all channels are ready
+	 */
+	public isReady() {
+		return this.ready;
 	}
 
 	/**
