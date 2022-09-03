@@ -754,6 +754,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sapphire/ratelimits@npm:2.4.5-next.7392d04.0":
+  version: 2.4.5-next.7392d04.0
+  resolution: "@sapphire/ratelimits@npm:2.4.5-next.7392d04.0"
+  dependencies:
+    "@sapphire/time-utilities": ^1.7.6
+  checksum: 25b177536f1f7064a8348c80509388a2b154e43d7108579975c557f024b4cad47107529e5643b157d498a56df9afa4aa0ffb3a5ac2319591318bc316af7733fe
+  languageName: node
+  linkType: hard
+
 "@sapphire/shapeshift@npm:3.6.1-next.10b4fbb.0":
   version: 3.6.1-next.10b4fbb.0
   resolution: "@sapphire/shapeshift@npm:3.6.1-next.10b4fbb.0"
@@ -780,6 +789,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sapphire/time-utilities@npm:^1.7.6":
+  version: 1.7.6
+  resolution: "@sapphire/time-utilities@npm:1.7.6"
+  dependencies:
+    "@sapphire/utilities": ^3.9.2
+  checksum: eadcdf2cbadcc15fa36d7d3b4719acb05f30ed0611f3f8bcfd47d8037221239168f190e79b2c05942cc66a66cbbf3c7d313eda15e9a2a3cff81cf25cec42f3ce
+  languageName: node
+  linkType: hard
+
 "@sapphire/type@npm:2.2.5-next.cf34f61.0":
   version: 2.2.5-next.cf34f61.0
   resolution: "@sapphire/type@npm:2.2.5-next.cf34f61.0"
@@ -795,6 +813,13 @@ __metadata:
   version: 3.9.4-next.7392d04.0
   resolution: "@sapphire/utilities@npm:3.9.4-next.7392d04.0"
   checksum: db49763952a77c9c6b2c9e77fbf0738e4b37e1dca9a11efe0a5ac725e051f175df0e45ccee85e398c679c00ebff033ceda1cfacefc2f05cccbe104c91854aa2b
+  languageName: node
+  linkType: hard
+
+"@sapphire/utilities@npm:^3.9.2":
+  version: 3.9.3
+  resolution: "@sapphire/utilities@npm:3.9.3"
+  checksum: 9f3f977fd5c0677d5f79136e9cb68ade3317cfba3e87bb58689f4af68233a807af34eb6092ad262c946d5eaf5c4a76cd534b0b395ebbaf0f0912dd80e174f912
   languageName: node
   linkType: hard
 
@@ -1203,13 +1228,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zikeji/hypixel@github:muchnameless/node-hypixel#b4fe0a111701abc15bd15f6c1552b404031d5116":
+"@zikeji/hypixel@github:muchnameless/node-hypixel#38880e95836b3cbfc2b012bb4960c1a19b32acb7":
   version: 3.1.1
-  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=b4fe0a111701abc15bd15f6c1552b404031d5116"
+  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=38880e95836b3cbfc2b012bb4960c1a19b32acb7"
   dependencies:
     "@sapphire/async-queue": ^1.5.0
+    "@sapphire/ratelimits": ^2.4.4
     undici: ^5.10.0
-  checksum: 20b4e3f62ca54e6a77d3bb869d6b7049f6e02e3fa46d78ca6e5a7823d2cf87df2a6e00dc133e1219d3c6d05350bd171bbc71c9ed96b09f1185db5e70048d055c
+  checksum: 7120d3493d82c10cacd62fcbd4833fe76f5cdd190b5d67f716ee35dc86eec01719d6b56bfd62afad6f33feee0a74f08a088f8f516cd7dce981012ef1455b4dd7
   languageName: node
   linkType: hard
 
@@ -4501,6 +4527,7 @@ __metadata:
     "@discordjs/rest": 1.2.0-dev.1662293018-8b3d006.0
     "@sapphire/async-queue": 1.5.1-next.7392d04.0
     "@sapphire/discord-utilities": 2.11.7-next.7392d04.0
+    "@sapphire/ratelimits": 2.4.5-next.7392d04.0
     "@sapphire/shapeshift": 3.6.1-next.10b4fbb.0
     "@sapphire/stopwatch": 1.4.2-next.7392d04.0
     "@sapphire/type": 2.2.5-next.cf34f61.0
@@ -4511,7 +4538,7 @@ __metadata:
     "@types/node": ^18.7.14
     "@types/pg": ^8.6.5
     "@types/prettier": ^2.7.0
-    "@zikeji/hypixel": "github:muchnameless/node-hypixel#b4fe0a111701abc15bd15f6c1552b404031d5116"
+    "@zikeji/hypixel": "github:muchnameless/node-hypixel#38880e95836b3cbfc2b012bb4960c1a19b32acb7"
     bufferutil: ^4.0.6
     chart.js: ^3.9.1
     chartjs-node-canvas: ^4.1.6

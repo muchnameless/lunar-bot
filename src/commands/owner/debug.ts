@@ -19,7 +19,7 @@ import {
 	type ThreadChannel,
 } from 'discord.js';
 import ms from 'ms';
-import { hypixel, imgur } from '#api';
+import { hypixel, imgur, mojang } from '#api';
 import { buildDeleteButton, escapeIgn, formatNumber, seconds, trim } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import { type CommandContext } from '#structures/commands/BaseCommand.js';
@@ -31,6 +31,36 @@ export default class DebugCommand extends ApplicationCommand {
 			slash: new SlashCommandBuilder().setDescription('shows general information about the bot'),
 			cooldown: 0,
 		});
+	}
+
+	/**
+	 * @param api
+	 */
+	private _getRateLimitInfo(api: typeof hypixel | typeof mojang) {
+		const rateLimit = api.rateLimitManager.acquire('global');
+
+		return stripIndents`
+			Rate Limit
+			${quote(`remaining: ${rateLimit.remaining}`)}
+			${quote(`reset: ${time(seconds.fromMilliseconds(rateLimit.expires), TimestampStyles.LongDateTime)}`)}
+			${quote(`limit: ${api.rateLimitManager.limit}`)}
+			Queue: ${api.queue.remaining}
+		`;
+	}
+
+	/**
+	 * @param managerName
+	 */
+	private _getImgurRateLimitInfo(managerName: 'client' | 'post' | 'user') {
+		const { manager } = imgur.rateLimitManagers[managerName === 'user' ? 0 : managerName === 'client' ? 1 : 2];
+		const rateLimit = manager.acquire('global');
+
+		return [
+			quote(managerName),
+			quote(`remaining: ${rateLimit.remaining}`),
+			quote(`reset: ${time(seconds.fromMilliseconds(rateLimit.expires), TimestampStyles.LongDateTime)}`),
+			quote(`limit: ${manager.limit}`),
+		].join('\n');
 	}
 
 	/**
@@ -150,47 +180,20 @@ export default class DebugCommand extends ApplicationCommand {
 								.join('\n'),
 						},
 						{
+							name: 'Mojang',
+							value: this._getRateLimitInfo(mojang),
+						},
+						{
 							name: 'Hypixel',
-							value: stripIndents`
-								Rate Limits
-								${Object.entries(hypixel.rateLimit)
-									.map(([key, value]: [string, number]) =>
-										quote(
-											`${key}: ${
-												key === 'reset' ? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime) : value
-											}`,
-										),
-									)
-									.join('\n')}
-								Queue: ${hypixel.queue.remaining}
-							`,
+							value: this._getRateLimitInfo(hypixel),
 						},
 						{
 							name: 'Imgur',
 							value: stripIndents`
 								Rate Limits
-								${Object.entries(imgur.rateLimit)
-									.map(([key, value]: [string, number | null]) =>
-										quote(
-											`${key}: ${
-												key.endsWith('reset') && value !== null
-													? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime)
-													: value
-											}`,
-										),
-									)
-									.join('\n')}
-								${Object.entries(imgur.postRateLimit)
-									.map(([key, value]: [string, number | null]) =>
-										quote(
-											`post${key}: ${
-												key.endsWith('reset') && value !== null
-													? time(seconds.fromMilliseconds(value), TimestampStyles.LongDateTime)
-													: value
-											}`,
-										),
-									)
-									.join('\n')}
+								${this._getImgurRateLimitInfo('user')}
+								${this._getImgurRateLimitInfo('client')}
+								${this._getImgurRateLimitInfo('post')}
 								Queue: ${imgur.queue.remaining}
 							`,
 						},
