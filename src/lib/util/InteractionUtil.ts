@@ -30,7 +30,6 @@ import {
 	type InteractionDeferUpdateOptions,
 	type InteractionReplyOptions,
 	type InteractionUpdateOptions,
-	type MessageActionRowComponentBuilder,
 	type MessageResolvable,
 	type ModalBuilder,
 	type TextBasedChannel,
@@ -495,9 +494,7 @@ export class InteractionUtil extends null {
 		switch (options.components?.length) {
 			case undefined:
 			case 0:
-				options.components = [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()),
-				];
+				options.components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buildVisibilityButton())];
 				break;
 
 			default: {
@@ -523,9 +520,7 @@ export class InteractionUtil extends null {
 				if (components.length === MessageLimits.MaximumActionRows) return;
 
 				// add a new row
-				components.push(
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildVisibilityButton()).toJSON(),
-				);
+				components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(buildVisibilityButton()).toJSON());
 			}
 		}
 	}
@@ -881,7 +876,7 @@ export class InteractionUtil extends null {
 		} = typeof options === 'string' ? { question: options } : options;
 		const SUCCESS_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
 		const CANCEL_ID = `${CustomIdKey.Confirm}:${SnowflakeUtil.generate()}`;
-		const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder() //
 				.setCustomId(SUCCESS_ID)
 				.setStyle(ButtonStyle.Success)

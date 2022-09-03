@@ -10,10 +10,10 @@ import {
 	time,
 	TimestampStyles,
 	version as djsVersion,
+	type ButtonBuilder,
 	type ChatInputCommandInteraction,
 	type Collection,
 	type DMChannel,
-	type MessageActionRowComponentBuilder,
 	type Snowflake,
 	type TextBasedChannel,
 	type ThreadChannel,
@@ -221,9 +221,7 @@ export default class DebugCommand extends ApplicationCommand {
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
-			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildDeleteButton(interaction.user.id)),
-			],
+			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user.id))],
 		});
 	}
 }

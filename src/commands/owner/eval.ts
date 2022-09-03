@@ -22,7 +22,6 @@ import Discord, {
 	type Message,
 	type MessageActionRowComponentBuilder,
 	type MessageContextMenuCommandInteraction,
-	type ModalActionRowComponentBuilder,
 	type ModalSubmitInteraction,
 } from 'discord.js';
 import ms from 'ms';
@@ -329,7 +328,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 						.setCustomId(interaction.customId)
 						.addComponents(
 							EvalCommand._buildInputTextInput(interaction),
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+							new ActionRowBuilder<TextInputBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('inspectDepth')
 									.setStyle(TextInputStyle.Short)

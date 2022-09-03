@@ -10,7 +10,6 @@ import {
 	type APISelectMenuOption,
 	type ChatInputCommandInteraction,
 	type EmbedBuilder,
-	type MessageActionRowComponentBuilder,
 	type SelectMenuInteraction,
 	type Snowflake,
 } from 'discord.js';
@@ -90,7 +89,7 @@ export default class AhCommand extends ApplicationCommand {
 				return {
 					embeds: [embed.setDescription('no unclaimed auctions')],
 					components: [
-						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+						new ActionRowBuilder<SelectMenuBuilder>().addComponents(
 							new SelectMenuBuilder()
 								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
@@ -153,7 +152,7 @@ export default class AhCommand extends ApplicationCommand {
 					`),
 				],
 				components: [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+					new ActionRowBuilder<SelectMenuBuilder>().addComponents(
 						new SelectMenuBuilder()
 							.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
@@ -209,7 +208,7 @@ export default class AhCommand extends ApplicationCommand {
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+				new ActionRowBuilder<SelectMenuBuilder>().addComponents(
 					new SelectMenuBuilder()
 						.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 						.setDisabled(true)
@@ -276,7 +275,7 @@ export default class AhCommand extends ApplicationCommand {
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [
-							new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+							new ActionRowBuilder<SelectMenuBuilder>().addComponents(
 								new SelectMenuBuilder()
 									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)

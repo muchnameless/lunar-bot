@@ -9,7 +9,6 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 	type ChatInputCommandInteraction,
-	type ModalActionRowComponentBuilder,
 	type ModalSubmitInteraction,
 } from 'discord.js';
 import BigDecimal from 'js-big-decimal';
@@ -405,7 +404,7 @@ export default class MathsCommand extends DualCommand {
 						.setTitle('Maths')
 						.setCustomId(this.baseCustomId)
 						.addComponents(
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+							new ActionRowBuilder<TextInputBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Short)
@@ -414,7 +413,7 @@ export default class MathsCommand extends DualCommand {
 									.setPlaceholder(trim(rawInput, TextInputLimits.MaximumPlaceholderCharacters))
 									.setRequired(true),
 							),
-							new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+							new ActionRowBuilder<TextInputBuilder>().addComponents(
 								new TextInputBuilder()
 									.setCustomId('error')
 									.setStyle(TextInputStyle.Paragraph)

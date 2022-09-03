@@ -15,9 +15,7 @@ import {
 	type ButtonInteraction,
 	type EmbedBuilder,
 	type JSONEncodable,
-	type MessageActionRowComponentBuilder,
 	type MessageComponentInteraction,
-	type ModalActionRowComponentBuilder,
 } from 'discord.js';
 import { UnicodeEmoji } from '#constants';
 import { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } from '#functions';
@@ -107,7 +105,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 		const OLD_INPUT =
 			interaction.message.embeds[0]?.fields?.[0]!.value.replace(/^```[a-z]*\n|```$/g, '').trim() ?? 'code';
 
-		return new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+		return new ActionRowBuilder<TextInputBuilder>().addComponents(
 			new TextInputBuilder()
 				.setCustomId('input')
 				.setStyle(TextInputStyle.Paragraph)
@@ -251,7 +249,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 		return InteractionUtil.replyOrUpdate(interaction, {
 			embeds: [responseEmbed],
 			components: [
-				new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:edit${customId}`)
 						.setEmoji({ name: UnicodeEmoji.EditMessage })
