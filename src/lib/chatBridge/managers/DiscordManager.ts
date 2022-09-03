@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandOptionType,
+	chatInputApplicationCommandMention,
 	Collection,
 	escapeMarkdown as djsEscapeMarkdown,
 	time,
@@ -218,18 +219,27 @@ export class DiscordManager {
 
 									switch (group?.type) {
 										case undefined:
-											replaced.push(`</${commandName}:${command.id}>`, groupOrSubcommand, subcommand);
+											replaced.push(
+												chatInputApplicationCommandMention(commandName, command.id),
+												groupOrSubcommand,
+												subcommand,
+											);
 											break;
 
 										case ApplicationCommandOptionType.Subcommand:
 											if (group.options?.some(({ name }) => name === subcommand)) {
-												replaced.push(`</${commandName} ${groupOrSubcommand} ${subcommand}:${command.id}>`);
+												replaced.push(
+													chatInputApplicationCommandMention(commandName, groupOrSubcommand!, subcommand!, command.id),
+												);
 												break;
 											}
 										// fallthrough
 
 										default:
-											replaced.push(`</${commandName} ${groupOrSubcommand}:${command.id}>`, subcommand);
+											replaced.push(
+												chatInputApplicationCommandMention(commandName, groupOrSubcommand!, command.id),
+												subcommand,
+											);
 											break;
 									}
 
@@ -238,13 +248,20 @@ export class DiscordManager {
 
 								case ApplicationCommandOptionType.Subcommand:
 									if (command.options.some(({ name }) => name === groupOrSubcommand)) {
-										replaced.push(`</${commandName} ${groupOrSubcommand}:${command.id}>`, subcommand);
+										replaced.push(
+											chatInputApplicationCommandMention(commandName, groupOrSubcommand!, command.id),
+											subcommand,
+										);
 										break;
 									}
 								// fallthrough
 
 								default:
-									replaced.push(`</${commandName}:${command.id}>`, groupOrSubcommand, subcommand);
+									replaced.push(
+										chatInputApplicationCommandMention(commandName, command.id),
+										groupOrSubcommand,
+										subcommand,
+									);
 									break;
 							}
 
