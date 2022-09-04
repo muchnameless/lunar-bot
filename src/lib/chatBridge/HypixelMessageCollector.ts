@@ -235,10 +235,14 @@ export interface HypixelMessageCollectorOptions {
 export const enum HypixelMessageCollectorEvent {
 	Collect = 'collect',
 	End = 'end',
+	Ignore = 'ignore',
 }
 
 export interface HypixelMessageCollector {
-	on(event: HypixelMessageCollectorEvent.Collect, listener: (item: HypixelMessage) => Awaitable<void>): this;
+	on(
+		event: HypixelMessageCollectorEvent.Collect | HypixelMessageCollectorEvent.Ignore,
+		listener: (item: HypixelMessage) => Awaitable<void>,
+	): this;
 	on(
 		event: HypixelMessageCollectorEvent.End,
 		listener: (collected: HypixelMessageCollector['collected'], reason: string) => Awaitable<void>,
@@ -384,6 +388,11 @@ export class HypixelMessageCollector extends EventEmitter {
 				clearTimeout(this._idletimeout);
 				this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
 			}
+		} else {
+			/**
+			 * Emitted whenever an element is not collected by the collector.
+			 */
+			this.emit(HypixelMessageCollectorEvent.Ignore, hypixelMessage);
 		}
 
 		this.checkEnd();
