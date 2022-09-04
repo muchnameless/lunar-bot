@@ -294,14 +294,14 @@ export default class TaxCommand extends ApplicationCommand {
 						});
 
 						// optional ghost ping (delete ping message(s))
-						if (!SHOULD_GHOST_PING) return null;
+						if (!SHOULD_GHOST_PING) return;
 
 						const replyMessage = await interaction.fetchReply();
 						// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 						const fetched: Collection<string, Message> | void = await interaction.channel?.messages
 							.fetch({ after: replyMessage.id })
 							.catch((error) => logger.error(error, '[TAX REMINDER]: ghost ping'));
-						if (!fetched) return null;
+						if (!fetched) return;
 
 						return ChannelUtil.deleteMessages(interaction.channel, [
 							replyMessage.id,

@@ -51,7 +51,7 @@ export default class GuildMemberUpdateEvent extends Event {
 			if (oldMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
 				// member lost mandatory role -> log incident
 				if (!newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
-					void this.client.log(
+					return void this.client.log(
 						new EmbedBuilder()
 							.setColor(this.config.get('EMBED_RED'))
 							.setAuthor({
@@ -72,9 +72,9 @@ export default class GuildMemberUpdateEvent extends Event {
 
 				// member was given mandatory role -> update roles
 			} else if (newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
-				await player.updateDiscordMember({
+				return void (await player.updateDiscordMember({
 					reason: `received ${newMember.guild.roles.cache.get(discordGuild.MANDATORY_ROLE_ID)!.name} role`,
-				});
+				}));
 			}
 		}
 	}

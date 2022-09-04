@@ -171,8 +171,6 @@ export default class PollCommand extends DualCommand {
 		} finally {
 			this.polls.delete(chatBridge); // unlock poll command
 		}
-
-		return null;
 	}
 
 	/**
@@ -225,6 +223,5 @@ export default class PollCommand extends DualCommand {
 		});
 
 		if (result) return hypixelMessage.author.send(result);
-		return null;
 	}
 }

@@ -11,8 +11,7 @@ export default class RateLimitedEvent extends RESTEvent {
 	 */
 	public override run(rateLimitInfo: RestEvents[RESTEvents.RateLimited][0]) {
 		if (rateLimitInfo.global) {
-			logger.error({ timeoutReadable: ms(rateLimitInfo.timeToReset), ...rateLimitInfo }, '[GLOBAL RATE LIMIT]');
-			return;
+			return logger.error({ timeoutReadable: ms(rateLimitInfo.timeToReset), ...rateLimitInfo }, '[GLOBAL RATE LIMIT]');
 		}
 
 		// adding and removing single reactions are 1/250ms, so get rate limited each time

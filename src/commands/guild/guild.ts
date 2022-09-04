@@ -781,8 +781,7 @@ export default class GuildCommand extends ApplicationCommand {
 									`add \`${target}\` to the ban list for \`${reason}\`?`,
 								);
 							} catch (error) {
-								logger.error(error);
-								return;
+								return logger.error(error);
 							}
 
 						// fallthrough
@@ -1005,10 +1004,8 @@ export default class GuildCommand extends ApplicationCommand {
 						hypixelGuild.syncMute(target, null),
 						(async () => {
 							const discordMember = await target.fetchDiscordMember();
-							return (
-								discordMember &&
-								GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``)
-							);
+							if (!discordMember) return;
+							return GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``);
 						})(),
 					]);
 

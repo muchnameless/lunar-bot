@@ -154,8 +154,7 @@ export class ChatBridgeManager {
 	 */
 	public async handleAnnouncementMessage(message: Message) {
 		if (!message.content) {
-			MessageUtil.react(message, UnicodeEmoji.Stop);
-			return;
+			return void MessageUtil.react(message, UnicodeEmoji.Stop);
 		}
 
 		const res: boolean[] = [];

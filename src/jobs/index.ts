@@ -37,12 +37,10 @@ export function startJobs(client: LunarClient) {
 			message(message: WorkerMessage) {
 				switch (message.op) {
 					case JobType.HypixelForumLastGUIDUpdate:
-						void client.config.set('HYPIXEL_FORUM_LAST_GUID', message.d);
-						break;
+						return void client.config.set('HYPIXEL_FORUM_LAST_GUID', message.d);
 
 					case JobType.LogMessage:
-						logger[message.d.lvl](...message.d.args);
-						break;
+						return logger[message.d.lvl](...message.d.args);
 
 					case JobType.SkyBlockItemUpdate:
 						if (!message.d.length) return;
@@ -58,11 +56,10 @@ export function startJobs(client: LunarClient) {
 						break;
 
 					case JobType.SkyBlockPriceUpdate:
-						prices.set(message.d.itemId, message.d.price);
-						break;
+						return prices.set(message.d.itemId, message.d.price);
 
 					default:
-						assertNever(message);
+						return assertNever(message);
 				}
 			},
 		}),

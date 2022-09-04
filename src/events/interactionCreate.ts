@@ -83,7 +83,7 @@ export default class InteractionCreateEvent extends Event {
 		switch (TYPE) {
 			// InteractionUtil.awaitConfirmation, handled by a collector
 			case CustomIdKey.Confirm:
-				return undefined;
+				return;
 
 			// leaderboards edit
 			case CustomIdKey.Leaderboard:
@@ -124,7 +124,7 @@ export default class InteractionCreateEvent extends Event {
 				void InteractionUtil.deferUpdate(interaction);
 
 				// no-op additional clicks on the same button
-				if (this._visibilityButtonMessages.has(interaction.message.id)) return undefined;
+				if (this._visibilityButtonMessages.has(interaction.message.id)) return;
 
 				try {
 					this._visibilityButtonMessages.add(interaction.message.id);
@@ -189,7 +189,6 @@ export default class InteractionCreateEvent extends Event {
 			}
 
 			default:
-				return undefined;
 		}
 	}
 
@@ -215,7 +214,7 @@ export default class InteractionCreateEvent extends Event {
 						throw `the \`${commandName}\` command is currently disabled`;
 					}
 
-					return undefined;
+					return;
 				}
 
 				// role permissions
@@ -225,7 +224,6 @@ export default class InteractionCreateEvent extends Event {
 			}
 
 			default:
-				return undefined;
 		}
 	}
 
@@ -403,7 +401,6 @@ export default class InteractionCreateEvent extends Event {
 			}
 
 			default:
-				return undefined;
 		}
 	}
 
@@ -475,7 +472,7 @@ export default class InteractionCreateEvent extends Event {
 					return;
 
 				default:
-					assertNever(interaction);
+					return assertNever(interaction);
 			}
 		} catch (error) {
 			logger.error({ err: error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
@@ -485,12 +482,11 @@ export default class InteractionCreateEvent extends Event {
 			// respond to interaction
 			if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
 				// reply with error
-				void InteractionUtil.reply(interaction, {
+				return void InteractionUtil.reply(interaction, {
 					content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
 					ephemeral: true,
 					allowedMentions: { parse: [], repliedUser: true },
 				});
-				return;
 			}
 
 			// autocomplete -> send empty choices

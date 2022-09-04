@@ -28,8 +28,7 @@ export default class MessageReactionAddEvent extends Event {
 			if (reaction.partial) await reaction.fetch();
 			if (reaction.message.partial) await reaction.message.fetch();
 		} catch (error) {
-			logger.error(error, '[MESSAGE REACTION ADD]: error while fetching partial');
-			return;
+			return logger.error(error, '[MESSAGE REACTION ADD]: error while fetching partial');
 		}
 
 		if (userId === reaction.message.author?.id) {

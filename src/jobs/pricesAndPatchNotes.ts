@@ -356,8 +356,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 				break;
 
 			case undefined: // no itemId
-				logger.warn({ auction, item }, '[UPDATE PRICES]: malformed item data');
-				return;
+				return logger.warn({ auction, item }, '[UPDATE PRICES]: malformed item data');
 		}
 
 		binAuctions.ensure(itemId, () => []).push(price / item.Count);
@@ -492,8 +491,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 	const { success, items } = await hypixel.resources.skyblock.items({ signal: ac.signal });
 
 	if (!success) {
-		logger.error({ success }, '[UPDATE SKYBLOCK ITEMS]');
-		return;
+		return logger.error({ success }, '[UPDATE SKYBLOCK ITEMS]');
 	}
 
 	const parsedItems: ParsedSkyBlockItem[] = items.map((item) => ({

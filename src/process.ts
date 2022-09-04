@@ -18,8 +18,7 @@ process
 	.once('uncaughtException', (error, origin) => {
 		// eslint-disable-next-line sonarjs/no-empty-collection
 		if (IGNORED_ERRORS.includes(error?.message ?? error)) {
-			logger.error({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
-			return;
+			return logger.error({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
 		}
 
 		logger.fatal({ err: error, origin }, '[UNCAUGHT EXCEPTION]');
