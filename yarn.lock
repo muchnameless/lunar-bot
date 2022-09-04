@@ -2491,9 +2491,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-neon@npm:^0.1.32":
-  version: 0.1.32
-  resolution: "eslint-config-neon@npm:0.1.32"
+"eslint-config-neon@npm:^0.1.33":
+  version: 0.1.33
+  resolution: "eslint-config-neon@npm:0.1.33"
   dependencies:
     "@angular-eslint/eslint-plugin": ^14.0.3
     "@angular-eslint/eslint-plugin-template": ^14.0.3
@@ -2523,7 +2523,7 @@ __metadata:
     eslint-plugin-unicorn: ^43.0.2
     eslint-plugin-vue: ^9.4.0
     vue-eslint-parser: ^9.0.3
-  checksum: d60f62664751397e7cd6f12bd95ad59935f127af4a83816f852413c5782a1c7af747333778a78ebf0deb7ffed9c32b6f5c172ed2708d29425e661bd510c96805
+  checksum: 304a6fcf7dbb052cb5bc8e461f948baf05a1a67075fc7c52d85fb8830ec267b2d8391de0755b157306ba7dd8bbd111ef8b64e77a3aa2638655a1b0d88ecb5cea
   languageName: node
   linkType: hard
 
@@ -4520,7 +4520,7 @@ __metadata:
     discord.js: 14.4.0-dev.1662293040-8b3d006.0
     env-cmd: ^10.1.0
     eslint: ^8.23.0
-    eslint-config-neon: ^0.1.32
+    eslint-config-neon: ^0.1.33
     fast-xml-parser: ^4.0.9
     husky: ^8.0.1
     ioredis: ^5.2.3
