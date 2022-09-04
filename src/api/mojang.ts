@@ -1,11 +1,9 @@
 import { redis } from './index.js';
 import { RedisKey } from '#constants';
-import { days, hours, minutes, seconds } from '#functions';
+import { days, hours, minutes } from '#functions';
 import { MojangClient, type MojangResult } from '#structures/MojangClient.js';
 
 export const mojang = new MojangClient({
-	timeout: seconds(30),
-	retries: 1,
 	cache: {
 		async get(key): Promise<MojangResult | null> {
 			return JSON.parse((await redis.get(`${RedisKey.Mojang}:${key}`))!);

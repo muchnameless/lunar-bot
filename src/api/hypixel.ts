@@ -8,9 +8,6 @@ import { logger } from '#logger';
 export const SKYBLOCK_PROFILE_TTL = seconds(30);
 
 export const hypixel = new Client(env.HYPIXEL_KEY!, {
-	timeout: seconds(15),
-	rateLimitResetOffset: seconds(1),
-	retries: 1,
 	cache: {
 		async get<T>(key: string): Promise<(DefaultMeta & T) | null> {
 			return JSON.parse((await redis.get(`${RedisKey.Hypixel}:${key}`))!);
@@ -41,6 +38,9 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 			return redis.psetex(`${RedisKey.Hypixel}:${key}`, ttl, JSON.stringify(value));
 		},
 	},
+	rateLimitResetOffset: seconds(1),
+	retries: 3,
+	timeout: seconds(20),
 });
 
 hypixel

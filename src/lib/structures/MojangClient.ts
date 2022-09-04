@@ -1,9 +1,14 @@
+import { clearTimeout, setTimeout } from 'node:timers';
+import { setTimeout as sleep } from 'node:timers/promises';
+import { AsyncQueue } from '@sapphire/async-queue';
+import { RateLimitManager } from '@sapphire/ratelimits';
 import { fetch, type Response } from 'undici';
 import { MojangAPIError } from './errors/MojangAPIError.js';
 import {
 	// days,
 	consumeBody,
 	isAbortError,
+	minutes,
 	seconds,
 	validateMinecraftIgn,
 	validateMinecraftUuid,
@@ -14,9 +19,16 @@ export interface MojangResult {
 	uuid: string;
 }
 
-interface MojangFetchOptions {
+export interface MojangFetchOptions {
 	cache?: boolean;
 	force?: boolean;
+	signal?: AbortSignal;
+}
+
+interface InternalMojangFetchOptions extends MojangFetchOptions {
+	path: string;
+	query: string;
+	queryType?: string | null;
 }
 
 interface Cache {
@@ -30,12 +42,23 @@ interface Cache {
 
 interface MojangClientOptions {
 	cache?: Cache;
+	rateLimitResetOffset?: number;
 	retries?: number;
 	timeout?: number;
 }
 
 export class MojangClient {
+	/**
+	 * https://wiki.vg/Mojang_API
+	 * https://c4k3.github.io/wiki.vg/Mojang_API.html#Notes
+	 */
+	public readonly rateLimitManager = new RateLimitManager(minutes(10), 600);
+
+	public readonly queue = new AsyncQueue();
+
 	private readonly cache?: Cache;
+
+	private readonly rateLimitResetOffset: number;
 
 	private readonly timeout: number;
 
@@ -44,10 +67,11 @@ export class MojangClient {
 	/**
 	 * @param options
 	 */
-	public constructor({ cache, timeout, retries }: MojangClientOptions = {}) {
+	public constructor({ cache, rateLimitResetOffset, timeout, retries }: MojangClientOptions = {}) {
 		this.cache = cache;
-		this.timeout = timeout ?? seconds(10);
-		this.retries = retries ?? 1;
+		this.rateLimitResetOffset = rateLimitResetOffset ?? seconds(1);
+		this.retries = retries ?? 3;
+		this.timeout = timeout ?? seconds(20);
 	}
 
 	/**
@@ -57,7 +81,9 @@ export class MojangClient {
 	 * @param options
 	 */
 	public async igns(usernames: string[], options?: MojangFetchOptions): Promise<MojangResult[]> {
-		if (!usernames.length || usernames.length > 10) throw new MojangAPIError({ statusText: 'wrong input' });
+		if (!usernames.length || usernames.length > 10) {
+			throw new MojangAPIError({ statusText: `received ${usernames.length} usernames, must be between 1 and 10` });
+		}
 
 		const res = await fetch('https://api.mojang.com/profiles/minecraft', {
 			method: 'POST',
@@ -160,7 +186,8 @@ export class MojangClient {
 		queryType = null,
 		cache = true,
 		force = false,
-	}: MojangFetchOptions & { path: string; query: string; queryType?: string | null }): Promise<MojangResult> {
+		signal,
+	}: InternalMojangFetchOptions): Promise<MojangResult> {
 		const CACHE_KEY = `${queryType}:${query}`;
 
 		if (!force) {
@@ -182,7 +209,7 @@ export class MojangClient {
 			}
 		}
 
-		const res = await this._request(`${path}${query}`);
+		const res = await this._request(`${path}${query}`, signal);
 
 		switch (res.status) {
 			// success
@@ -211,7 +238,7 @@ export class MojangClient {
 
 			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
 			// 		while ((timestamp -= days(30)) >= Date.parse('2015-02-04T00:00:00.000Z')) {
-			// 			const pastRes = await this._request(`${path}${query}?at=${timestamp}`);
+			// 			const pastRes = await this._request(`${path}${query}?at=${timestamp}`, signal);
 
 			// 			if (pastRes.status === 200) {
 			// 				const { id: uuid, name: ign } = (await res.json()) as { id: string; name: string };
@@ -246,18 +273,49 @@ export class MojangClient {
 	 * @param url
 	 * @param retries
 	 */
-	private async _request(url: string, retries = 0): Promise<Response> {
+	private async _request(url: string, signal: AbortSignal | undefined, retries = 0): Promise<Response> {
+		const ratelimit = this.rateLimitManager.acquire('global');
+
+		if (ratelimit.limited) {
+			await this.queue.wait({ signal });
+
+			if (ratelimit.limited) {
+				try {
+					await sleep(ratelimit.remainingTime + this.rateLimitResetOffset, null, { signal });
+				} catch (error) {
+					this.queue.shift();
+					throw error;
+				}
+			}
+
+			ratelimit.consume();
+			this.queue.shift();
+		} else {
+			signal?.throwIfAborted();
+			ratelimit.consume();
+		}
+
+		// internal AbortSignal (to have a timeout without having to abort the external signal)
+		const controller = new AbortController();
+		const listener = () => controller.abort();
+		const timeout = setTimeout(listener, this.timeout);
+
+		// external AbortSignal
+		signal?.addEventListener('abort', listener);
+
 		try {
-			return await fetch(url, {
-				signal: AbortSignal.timeout(this.timeout),
-			});
+			return await fetch(url, { signal: controller.signal });
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (isAbortError(error) && retries !== this.retries) {
-				return this._request(url, retries + 1);
+				return await this._request(url, signal, retries + 1);
 			}
 
 			throw error;
+		} finally {
+			clearTimeout(timeout);
+
+			signal?.removeEventListener('abort', listener);
 		}
 	}
 }

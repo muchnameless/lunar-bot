@@ -1,6 +1,6 @@
 import process, { exit } from 'node:process';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { imgur, redis } from '#api';
+import { redis } from '#api';
 import { sequelize, sql } from '#db';
 import { seconds } from '#functions';
 import { logger } from '#logger';
@@ -35,13 +35,6 @@ process
 
 async function cleanup() {
 	let hasError = false;
-
-	try {
-		await imgur.cacheRateLimits();
-	} catch (error) {
-		logger.fatal(error);
-		hasError = true;
-	}
 
 	for (const output of await Promise.allSettled([
 		sequelize.close(),

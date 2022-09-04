@@ -2,12 +2,10 @@ import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
 import { AsyncQueue } from '@sapphire/async-queue';
-import ms from 'ms';
-import { fetch, type Response, type RequestInit } from 'undici';
+import { RateLimitManager } from '@sapphire/ratelimits';
+import { fetch, type Headers, type RequestInit, type Response } from 'undici';
 import { FetchError } from './errors/FetchError.js';
-import { consumeBody, isAbortError, seconds } from '#functions';
-import { logger } from '#logger';
-import { keys } from '#types';
+import { consumeBody, days, hours, isAbortError, seconds } from '#functions';
 
 export interface ImageData {
 	account_id: number;
@@ -51,25 +49,9 @@ interface Cache {
 	set(key: string, value: unknown): Promise<unknown>;
 }
 
-interface RateLimitData {
-	clientlimit: number | null;
-	clientremaining: number | null;
-	clientreset: number | null;
-	userlimit: number | null;
-	userremaining: number | null;
-	userreset: number | null;
-}
-
-interface PostRateLimitData {
-	limit: number | null;
-	remaining: number | null;
-	reset: number | null;
-}
-
 interface ImgurClientOptions {
 	cache?: Cache;
-	rateLimitOffset?: number;
-	rateLimitedWaitTime?: number;
+	rateLimitResetOffset?: number;
 	retries?: number;
 	timeout?: number;
 }
@@ -79,64 +61,54 @@ export class ImgurClient {
 
 	private readonly baseURL = 'https://api.imgur.com/3/';
 
+	/**
+	 * https://api.imgur.com/
+	 * https://apidocs.imgur.com/
+	 */
+	public readonly rateLimitManagers = [
+		// user
+		{
+			manager: new RateLimitManager(hours(1), 500),
+			remainingKey: 'x-ratelimit-userremaining',
+			resetKey: 'x-ratelimit-userreset',
+			limitKey: 'x-ratelimit-userlimit',
+		},
+		// client
+		{
+			manager: new RateLimitManager(days(1), 12_500),
+			remainingKey: 'x-ratelimit-clientremaining',
+			resetKey: 'x-ratelimit-clientreset',
+			limitKey: 'x-ratelimit-clientlimit',
+		},
+		// post
+		{
+			manager: new RateLimitManager(hours(1), 1_250),
+			remainingKey: 'x-post-rate-limit-remaining',
+			resetKey: 'x-post-rate-limit-reset',
+			limitKey: 'x-post-rate-limit-limit',
+		},
+	] as const;
+
 	public readonly queue = new AsyncQueue();
 
 	private readonly cache?: Cache;
 
-	private readonly timeout: number;
-
-	private readonly rateLimitOffset: number;
-
-	private readonly rateLimitedWaitTime: number;
+	private readonly rateLimitResetOffset: number;
 
 	private readonly retries: number;
 
-	public rateLimit: RateLimitData = {
-		userlimit: null,
-		userremaining: null,
-		userreset: null,
-		clientlimit: null,
-		clientremaining: null,
-		clientreset: null,
-	};
-
-	public postRateLimit: PostRateLimitData = {
-		limit: null,
-		remaining: null,
-		reset: null,
-	};
+	private readonly timeout: number;
 
 	/**
 	 * @param clientId
 	 * @param options
 	 */
-	public constructor(
-		clientId: string,
-		{ cache, timeout, retries, rateLimitOffset, rateLimitedWaitTime }: ImgurClientOptions = {},
-	) {
+	public constructor(clientId: string, { cache, rateLimitResetOffset, retries, timeout }: ImgurClientOptions = {}) {
 		this.authorisation = clientId;
 		this.cache = cache;
-		this.timeout = timeout ?? seconds(10);
-		this.retries = retries ?? 1;
-		this.rateLimitOffset = rateLimitOffset ?? seconds(1);
-		this.rateLimitedWaitTime = rateLimitedWaitTime ?? seconds(10);
-
-		// restore cached rateLimit data
-		void (async () => {
-			try {
-				const data = (await cache?.get('ratelimits')) as
-					| { postRateLimit: PostRateLimitData; rateLimit: RateLimitData }
-					| undefined;
-
-				// no cached data or rateLimit data is already present
-				if (!data || this.rateLimit.userlimit !== null) return;
-
-				this.rateLimit = data.rateLimit;
-				this.postRateLimit = data.postRateLimit;
-			} catch (error) {
-				logger.error(error);
-			}
-		})();
+		this.rateLimitResetOffset = rateLimitResetOffset ?? seconds(1);
+		this.retries = retries ?? 3;
+		this.timeout = timeout ?? seconds(20);
 	}
 
 	public get authorisation() {
@@ -145,18 +117,6 @@ export class ImgurClient {
 
 	public set authorisation(clientId) {
 		this.#authorisation = `Client-ID ${clientId}`;
-	}
-
-	/**
-	 * caches the current ratelimit data
-	 */
-	public async cacheRateLimits() {
-		if (!this.cache || this.rateLimit.userlimit === null) return null;
-
-		return this.cache.set('ratelimits', {
-			rateLimit: this.rateLimit,
-			postRateLimit: this.postRateLimit,
-		});
 	}
 
 	/**
@@ -181,7 +141,6 @@ export class ImgurClient {
 				signal,
 			},
 			{
-				checkRateLimit: true,
 				cacheKey: imageURL,
 			},
 		) as Promise<UploadResponse>;
@@ -192,89 +151,24 @@ export class ImgurClient {
 	 * @param requestInit
 	 * @param options
 	 */
-	public async request(
-		url: URL,
-		requestInit: RequestInit,
-		{ checkRateLimit = true, cacheKey }: { cacheKey: string; checkRateLimit?: boolean },
-	) {
+	public async request(url: URL, requestInit: RequestInit, { cacheKey }: { cacheKey: string }) {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
-		await this.queue.wait({ signal: requestInit.signal });
+		const res = await this._request(url, requestInit);
 
-		try {
-			// check rate limit
-			if (checkRateLimit) {
-				if (this.rateLimit.userremaining === 0) {
-					const RESET_TIME = this.rateLimit.userreset! - Date.now();
+		this.getRateLimitHeaders(res.headers);
 
-					if (RESET_TIME > this.rateLimitedWaitTime) {
-						throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
-					}
-
-					if (RESET_TIME > 0) await sleep(RESET_TIME);
-				}
-
-				if (this.rateLimit.clientremaining === 0) {
-					if (this.rateLimit.clientreset === null) throw new Error('imgur client rate limit, unknown clientreset');
-
-					const RESET_TIME = this.rateLimit.clientreset - Date.now();
-
-					if (RESET_TIME > this.rateLimitedWaitTime) {
-						throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
-					}
-
-					if (RESET_TIME > 0) await sleep(RESET_TIME);
-				}
-
-				if ((requestInit.method === 'POST' || !requestInit.method) && this.postRateLimit.remaining === 0) {
-					const RESET_TIME = this.postRateLimit.reset! - Date.now();
-
-					if (RESET_TIME > this.rateLimitedWaitTime) {
-						throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
-					}
-
-					if (RESET_TIME > 0) await sleep(RESET_TIME);
-				}
-			}
-
-			const res = await this._request(url, requestInit);
-
-			// get server time
-			const NOW = Date.parse(res.headers.get('date')!) || Date.now();
-
-			// get ratelimit headers
-			for (const type of keys(this.rateLimit)) {
-				const data = Number.parseInt(res.headers.get(`x-ratelimit-${type}`)!, 10);
-				if (Number.isNaN(data)) continue;
-
-				this.rateLimit[type] = type.endsWith('reset')
-					? (data < 1e9 ? NOW : 0) + seconds(data) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
-					: data;
-			}
-
-			for (const type of keys(this.postRateLimit)) {
-				const data = Number.parseInt(res.headers.get(`x-post-rate-limit-${type}`)!, 10);
-				if (Number.isNaN(data)) continue;
-
-				this.postRateLimit[type] = type.endsWith('reset')
-					? (data < 1e9 ? NOW : 0) + seconds(data) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
-					: data;
-			}
-
-			// check response
-			if (res.status !== 200) {
-				void consumeBody(res);
-				throw new FetchError('ImgurAPIError', res);
-			}
-
-			const parsedRes = await res.json();
-			await this.cache?.set(cacheKey, parsedRes); // cache
-
-			return parsedRes;
-		} finally {
-			this.queue.shift();
+		// check response
+		if (res.status !== 200) {
+			void consumeBody(res);
+			throw new FetchError('ImgurAPIError', res);
 		}
+
+		const parsedRes = await res.json();
+		await this.cache?.set(cacheKey, parsedRes); // cache
+
+		return parsedRes;
 	}
 
 	/**
@@ -285,6 +179,28 @@ export class ImgurClient {
 	 * @param retries current retry
 	 */
 	private async _request(url: URL, { headers, signal, ...options }: RequestInit, retries = 0): Promise<Response> {
+		for (const { manager } of this.rateLimitManagers) {
+			const ratelimit = manager.acquire('global');
+
+			if (ratelimit.limited) {
+				await this.queue.wait({ signal });
+
+				if (ratelimit.limited) {
+					try {
+						await sleep(ratelimit.remainingTime, null, { signal });
+					} catch (error) {
+						this.queue.shift();
+						throw error;
+					}
+				}
+
+				ratelimit.consume();
+				this.queue.shift();
+			} else {
+				ratelimit.consume();
+			}
+		}
+
 		signal?.throwIfAborted();
 
 		// internal AbortSignal (to have a timeout without having to abort the external signal)
@@ -316,6 +232,42 @@ export class ImgurClient {
 			clearTimeout(timeout);
 
 			signal?.removeEventListener('abort', listener);
+		}
+	}
+
+	/**
+	 * updates ratelimits from headers
+	 *
+	 * @param headers
+	 */
+	private getRateLimitHeaders(headers: Headers) {
+		// get server time
+		const serverTime = Date.parse(headers.get('date')!);
+		const now = Date.now();
+
+		for (const { manager, remainingKey, resetKey, limitKey } of this.rateLimitManagers) {
+			const rateLimit = manager.acquire('global');
+
+			const remaining = Number.parseInt(headers.get(remainingKey)!, 10);
+			if (remaining < rateLimit.remaining) {
+				rateLimit.remaining = remaining;
+			}
+
+			const reset =
+				resetKey === 'x-post-rate-limit-reset'
+					? // time left in seconds
+					  seconds(Number.parseInt(headers.get(resetKey)!, 10)) + (serverTime || now)
+					: // timestamp in seconds
+					  seconds(Number.parseInt(headers.get(resetKey)!, 10));
+			if (reset > now) {
+				rateLimit.expires = reset + this.rateLimitResetOffset;
+			}
+
+			const limit = Number.parseInt(headers.get(limitKey)!, 10);
+			if (limit) {
+				// @ts-expect-error readonly
+				manager.limit = limit;
+			}
 		}
 	}
 }
