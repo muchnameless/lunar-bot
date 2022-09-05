@@ -75,6 +75,13 @@ export class MojangClient {
 	}
 
 	/**
+	 * rateLimit bucket
+	 */
+	public get rateLimit() {
+		return this.rateLimitManager.acquire('global');
+	}
+
+	/**
 	 * bulk convertion (1 <= amount  <= 10) for ign -> uuid
 	 *
 	 * @param usernames
@@ -274,25 +281,25 @@ export class MojangClient {
 	 * @param retries
 	 */
 	private async _request(url: string, signal: AbortSignal | undefined, retries = 0): Promise<Response> {
-		const ratelimit = this.rateLimitManager.acquire('global');
+		const { rateLimit } = this;
 
-		if (ratelimit.limited) {
+		if (rateLimit.limited) {
 			await this.queue.wait({ signal });
 
-			if (ratelimit.limited) {
+			if (rateLimit.limited) {
 				try {
-					await sleep(ratelimit.remainingTime + this.rateLimitResetOffset, null, { signal });
+					await sleep(rateLimit.remainingTime + this.rateLimitResetOffset, null, { signal });
 				} catch (error) {
 					this.queue.shift();
 					throw error;
 				}
 			}
 
-			ratelimit.consume();
+			rateLimit.consume();
 			this.queue.shift();
 		} else {
 			signal?.throwIfAborted();
-			ratelimit.consume();
+			rateLimit.consume();
 		}
 
 		// internal AbortSignal (to have a timeout without having to abort the external signal)

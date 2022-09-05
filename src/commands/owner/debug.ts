@@ -34,17 +34,17 @@ export default class DebugCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * @param api
+	 * @param apiClient
 	 */
-	private _getRateLimitInfo(api: typeof hypixel | typeof mojang) {
-		const rateLimit = api.rateLimitManager.acquire('global');
+	private _getRateLimitInfo(apiClient: typeof hypixel | typeof mojang) {
+		const { rateLimit } = apiClient;
 
 		return stripIndents`
 			Rate Limit
 			${quote(`remaining: ${rateLimit.remaining}`)}
 			${quote(`reset: ${time(seconds.fromMilliseconds(rateLimit.expires), TimestampStyles.LongDateTime)}`)}
-			${quote(`limit: ${api.rateLimitManager.limit}`)}
-			Queue: ${api.queue.remaining}
+			${quote(`limit: ${apiClient.rateLimitManager.limit}`)}
+			Queue: ${apiClient.queue.remaining}
 		`;
 	}
 
@@ -52,8 +52,8 @@ export default class DebugCommand extends ApplicationCommand {
 	 * @param managerName
 	 */
 	private _getImgurRateLimitInfo(managerName: 'client' | 'post' | 'user') {
-		const { manager } = imgur.rateLimitManagers[managerName === 'user' ? 0 : managerName === 'client' ? 1 : 2];
-		const rateLimit = manager.acquire('global');
+		const { manager, rateLimit } =
+			imgur.rateLimitManagers[managerName === 'user' ? 0 : managerName === 'client' ? 1 : 2];
 
 		return [
 			quote(managerName),

@@ -69,6 +69,9 @@ export class ImgurClient {
 		// user
 		{
 			manager: new RateLimitManager(hours(1), 500),
+			get rateLimit() {
+				return this.manager.acquire('global');
+			},
 			remainingKey: 'x-ratelimit-userremaining',
 			resetKey: 'x-ratelimit-userreset',
 			limitKey: 'x-ratelimit-userlimit',
@@ -76,6 +79,9 @@ export class ImgurClient {
 		// client
 		{
 			manager: new RateLimitManager(days(1), 12_500),
+			get rateLimit() {
+				return this.manager.acquire('global');
+			},
 			remainingKey: 'x-ratelimit-clientremaining',
 			resetKey: 'x-ratelimit-clientreset',
 			limitKey: 'x-ratelimit-clientlimit',
@@ -83,6 +89,9 @@ export class ImgurClient {
 		// post
 		{
 			manager: new RateLimitManager(hours(1), 1_250),
+			get rateLimit() {
+				return this.manager.acquire('global');
+			},
 			remainingKey: 'x-post-rate-limit-remaining',
 			resetKey: 'x-post-rate-limit-reset',
 			limitKey: 'x-post-rate-limit-limit',
@@ -179,25 +188,23 @@ export class ImgurClient {
 	 * @param retries current retry
 	 */
 	private async _request(url: URL, { headers, signal, ...options }: RequestInit, retries = 0): Promise<Response> {
-		for (const { manager } of this.rateLimitManagers) {
-			const ratelimit = manager.acquire('global');
-
-			if (ratelimit.limited) {
+		for (const { rateLimit } of this.rateLimitManagers) {
+			if (rateLimit.limited) {
 				await this.queue.wait({ signal });
 
-				if (ratelimit.limited) {
+				if (rateLimit.limited) {
 					try {
-						await sleep(ratelimit.remainingTime, null, { signal });
+						await sleep(rateLimit.remainingTime, null, { signal });
 					} catch (error) {
 						this.queue.shift();
 						throw error;
 					}
 				}
 
-				ratelimit.consume();
+				rateLimit.consume();
 				this.queue.shift();
 			} else {
-				ratelimit.consume();
+				rateLimit.consume();
 			}
 		}
 
@@ -245,9 +252,7 @@ export class ImgurClient {
 		const serverTime = Date.parse(headers.get('date')!);
 		const now = Date.now();
 
-		for (const { manager, remainingKey, resetKey, limitKey } of this.rateLimitManagers) {
-			const rateLimit = manager.acquire('global');
-
+		for (const { manager, rateLimit, remainingKey, resetKey, limitKey } of this.rateLimitManagers) {
 			const remaining = Number.parseInt(headers.get(remainingKey)!, 10);
 			if (remaining < rateLimit.remaining) {
 				rateLimit.remaining = remaining;
