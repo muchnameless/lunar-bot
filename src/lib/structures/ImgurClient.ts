@@ -194,7 +194,7 @@ export class ImgurClient {
 
 				if (rateLimit.limited) {
 					try {
-						await sleep(rateLimit.remainingTime, null, { signal });
+						await sleep(rateLimit.remainingTime + this.rateLimitResetOffset, null, { signal });
 					} catch (error) {
 						this.queue.shift();
 						throw error;
@@ -265,7 +265,7 @@ export class ImgurClient {
 					: // timestamp in seconds
 					  seconds(Number.parseInt(headers.get(resetKey)!, 10));
 			if (reset > now) {
-				rateLimit.expires = reset + this.rateLimitResetOffset;
+				rateLimit.expires = reset;
 			}
 
 			const limit = Number.parseInt(headers.get(limitKey)!, 10);
