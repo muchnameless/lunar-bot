@@ -241,7 +241,6 @@ export class DatabaseManager {
 
 				if (taxAuctions.length) {
 					dbPromises.push(
-						// eslint-disable-next-line consistent-return
 						(async () => {
 							const paidLog: string[] = [];
 

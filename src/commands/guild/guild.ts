@@ -281,7 +281,6 @@ export default class GuildCommand extends ApplicationCommand {
 				throw new Error(`unknown subcommand '${subcommand}'`);
 		}
 
-		// eslint-disable-next-line consistent-return
 		return this.assertPermissions(interaction, { roleIds, hypixelGuild });
 	}
 

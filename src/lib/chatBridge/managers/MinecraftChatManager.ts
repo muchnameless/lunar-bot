@@ -1112,7 +1112,6 @@ export class MinecraftChatManager extends ChatManager {
 				}
 
 				await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				// eslint-disable-next-line consistent-return
 				return this.#sendToChat(content, prefix, discordMessage, lastMessages); // retry sending
 			}
 
@@ -1141,11 +1140,8 @@ export class MinecraftChatManager extends ChatManager {
 	 *
 	 * @param options
 	 */
-	public async command(options: string | (CommandOptions & { raw?: false })): Promise<string>;
 	public async command(options: CommandOptions & { raw: true }): Promise<HypixelMessage[]>;
-	// TODO
-	// eslint-disable-next-line @typescript-eslint/unified-signatures
-	public async command(options: CommandOptions): Promise<string>;
+	public async command(options: CommandOptions | string): Promise<string>;
 	public async command(options: CommandOptions | string) {
 		const {
 			command,
@@ -1228,7 +1224,6 @@ export class MinecraftChatManager extends ChatManager {
 								return;
 							}
 
-							// eslint-disable-next-line prefer-promise-reject-errors
 							reject(`no in-game response after ${ms(timeout, { long: true })}`);
 							return;
 						}

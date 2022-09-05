@@ -440,7 +440,6 @@ export default class InteractionCreateEvent extends Event {
 							return;
 
 						default:
-							// eslint-disable-next-line consistent-return
 							return assertNever(interaction);
 					}
 
@@ -461,7 +460,6 @@ export default class InteractionCreateEvent extends Event {
 							return;
 
 						default:
-							// eslint-disable-next-line consistent-return
 							return assertNever(interaction);
 					}
 
