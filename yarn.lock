@@ -4560,7 +4560,7 @@ __metadata:
     ms: 3.0.0-canary.1
     pg: ^8.8.0
     pg-hstore: ^2.3.4
-    pino: ^8.4.2
+    pino: ^8.5.0
     pino-pretty: ^9.1.0
     postgres: 3.2.4
     prettier: ^2.7.1
@@ -5580,9 +5580,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:^8.4.2":
-  version: 8.4.2
-  resolution: "pino@npm:8.4.2"
+"pino@npm:^8.5.0":
+  version: 8.5.0
+  resolution: "pino@npm:8.5.0"
   dependencies:
     atomic-sleep: ^1.0.0
     fast-redact: ^3.1.1
@@ -5597,7 +5597,7 @@ __metadata:
     thread-stream: ^2.0.0
   bin:
     pino: bin.js
-  checksum: 870ee673d54a8e0b03766f39800e9805023f7f5efbbd33f61142febcdc556e24463d1d2af182c9b504e44ffa82bf692d67e4c284a64ea2cf96e166a13d77a0bc
+  checksum: 94aad4cafa4f79a9564478508239aeefb6c5fd2b58b80f2f82f4f1f36532fd2d801e7dfb22764a85e5e897ec23fae9506438a64ae852b8e0f7114b961ad5f859
   languageName: node
   linkType: hard
 
