@@ -1771,14 +1771,14 @@ __metadata:
   linkType: hard
 
 "canvas@npm:^2.8.0":
-  version: 2.9.3
-  resolution: "canvas@npm:2.9.3"
+  version: 2.10.0
+  resolution: "canvas@npm:2.10.0"
   dependencies:
     "@mapbox/node-pre-gyp": ^1.0.0
     nan: ^2.15.0
     node-gyp: latest
     simple-get: ^3.0.3
-  checksum: 368112ba4b16f54ce6dfac1ccbc45ddd1eb0b76dc09509c2601c2a26459bb4449d259a7aa8664fd94153aad13b48557535f3b9eb7fad9a97929b9eb962e50f09
+  checksum: bed0f61d51a6f5d721742776e2dd1203ad6ca2475e1177cfb7a6f9ed1d313372ab8b4aa5a6780c85d35e533e2400cb5f291be1a1d35a84fc71d6372cd4cdbc61
   languageName: node
   linkType: hard
 
@@ -2767,8 +2767,8 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-react@npm:^7.31.1":
-  version: 7.31.4
-  resolution: "eslint-plugin-react@npm:7.31.4"
+  version: 7.31.6
+  resolution: "eslint-plugin-react@npm:7.31.6"
   dependencies:
     array-includes: ^3.1.5
     array.prototype.flatmap: ^1.3.0
@@ -2786,7 +2786,7 @@ __metadata:
     string.prototype.matchall: ^4.0.7
   peerDependencies:
     eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
-  checksum: 5fa5293f922c9fc24c300a60b9d3f33a2406116b88df46a134cbcdb514b91b526251ce604716ab1cde94c7c95f25963a56c1509faf867601b3b0f94d9f68d61b
+  checksum: fdcee460db2e01398b31dd75bb0597d6dfa2f29beda9c5ef641e6e3c72c8c2191cbaa952f7469a5e091bc2be959a1abc09761bdca70f12aa4a73090f48a98f6b
   languageName: node
   linkType: hard
 
