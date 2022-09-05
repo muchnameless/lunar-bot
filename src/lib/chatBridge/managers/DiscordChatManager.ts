@@ -25,8 +25,8 @@ import { ChatManager } from './ChatManager.js';
 import { imgur } from '#api';
 import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache.js';
 import {
-	ALLOWED_EXTENSIONS,
-	ALLOWED_MIMES,
+	ALLOWED_EXTENSIONS_REGEX,
+	ALLOWED_MIMES_REGEX,
 	MAX_IMAGE_UPLOAD_SIZE,
 	MAX_WEBHOOKS_PER_CHANNEL,
 	UnicodeEmoji,
@@ -154,7 +154,7 @@ export class DiscordChatManager extends ChatManager {
 		const urls: string[] = [];
 
 		for (const { contentType, url, size, name } of attachments.values()) {
-			if (!ALLOWED_MIMES.has(contentType as any) || size > MAX_IMAGE_UPLOAD_SIZE) {
+			if (!ALLOWED_MIMES_REGEX.test(contentType!) || size > MAX_IMAGE_UPLOAD_SIZE) {
 				urls.push(DiscordChatManager._getAttachmentName(name));
 				continue;
 			}
@@ -533,7 +533,7 @@ export class DiscordChatManager extends ChatManager {
 								// don't upload imgur links to imgur
 								url.hostname.endsWith('imgur.com') ||
 								// upload only pictures
-								!ALLOWED_EXTENSIONS.some((ext) => url.pathname.endsWith(ext))
+								!ALLOWED_EXTENSIONS_REGEX.test(url.pathname)
 							) {
 								return match[0];
 							}
@@ -549,7 +549,7 @@ export class DiscordChatManager extends ChatManager {
 								const contentLength = res.headers.get('content-length');
 
 								if (
-									!ALLOWED_MIMES.has(contentType as any) ||
+									!ALLOWED_MIMES_REGEX.test(contentType!) ||
 									!contentLength ||
 									Number(contentLength) > MAX_IMAGE_UPLOAD_SIZE
 								) {
