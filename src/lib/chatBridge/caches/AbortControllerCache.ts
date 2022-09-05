@@ -7,7 +7,7 @@ export class AbortControllerCache extends BaseCache<AbortController> {
 	protected static override readonly _maxAge = minutes(5);
 
 	// eslint-disable-next-line unicorn/consistent-function-scoping
-	protected readonly _sweepInterval = setInterval(() => this.sweep(), minutes(10));
+	protected readonly _sweepInterval = setInterval(() => this.sweep(), minutes(5));
 
 	/**
 	 * returns either the cached or a new AbortController

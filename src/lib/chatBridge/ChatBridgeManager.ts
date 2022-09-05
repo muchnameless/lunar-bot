@@ -64,7 +64,7 @@ export class ChatBridgeManager {
 				interactionUserCache.sweep();
 			}
 		}
-	}, minutes(15));
+	}, minutes(10));
 
 	public constructor(client: LunarClient, commandsURL: URL) {
 		Object.defineProperty(this, 'client', { value: client });
