@@ -1,5 +1,5 @@
 import { type EventEmitter } from 'node:events';
-import { type Awaitable } from '@sapphire/utilities';
+import { type Awaitable } from 'discord.js';
 
 export interface BaseEventContext {
 	emitter: EventEmitter;

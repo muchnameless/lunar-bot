@@ -200,7 +200,7 @@
 
 import { EventEmitter } from 'node:events';
 import { setTimeout, clearTimeout } from 'node:timers';
-import { type Awaitable } from '@sapphire/utilities';
+import { type Awaitable } from 'discord.js';
 import { ChatBridgeEvent, type ChatBridge } from './ChatBridge.js';
 import { type HypixelMessage } from './HypixelMessage.js';
 

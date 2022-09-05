@@ -1,10 +1,10 @@
-import { type Awaitable } from '@sapphire/utilities';
 import {
 	ApplicationCommandType,
 	PermissionFlagsBits,
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
 	type AutocompleteInteraction,
+	type Awaitable,
 	type ButtonInteraction,
 	type ChatInputCommandInteraction,
 	type CommandInteraction,

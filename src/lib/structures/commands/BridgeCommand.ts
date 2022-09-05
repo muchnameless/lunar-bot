@@ -1,5 +1,5 @@
 import { type ParseArgsConfig } from 'node:util';
-import { type Awaitable } from '@sapphire/utilities';
+import { type Awaitable } from 'discord.js';
 import { BaseCommand, type CommandContext, type CommandData } from './BaseCommand.js';
 import { BaseCommandCollection } from './BaseCommandCollection.js';
 import { type BridgeCommandCollection } from './BridgeCommandCollection.js';

@@ -1,16 +1,16 @@
 import { type Components } from '@zikeji/hypixel';
-import { type SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { type Awaitable, type ChatInputCommandInteraction, type SlashCommandBuilder } from 'discord.js';
 import { getSkyBlockProfiles } from '#api';
 import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, PROFILE_NAMES } from '#constants';
 import {
 	autocorrect,
-	formatError,
+	commaListOr,
 	findSkyblockProfile,
+	formatError,
 	getUuidAndIgn,
 	seconds,
 	upperCaseFirstChar,
-	commaListOr,
 } from '#functions';
 import { logger } from '#logger';
 import { type ApplicationCommandData, type SlashCommandOption } from '#structures/commands/ApplicationCommand.js';
@@ -133,7 +133,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 *
 	 * @param data
 	 */
-	protected _generateReply(data: FetchedData): Promise<string> | string {
+	protected _generateReply(data: FetchedData): Awaitable<string> {
 		throw new Error('not implemented');
 	}
 
