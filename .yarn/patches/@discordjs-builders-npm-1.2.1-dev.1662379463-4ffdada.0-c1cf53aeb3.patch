@@ -1,0 +1,13 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 99738e13f1178eb94693fb03de7b8935eee0d51e..23007ac17c2be8b6c2cafefc26b2e9856646038e 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -904,7 +904,7 @@ declare class TextInputBuilder extends ComponentBuilder<APITextInputComponent> i
+ declare type MessageComponentBuilder = ActionRowBuilder<MessageActionRowComponentBuilder> | MessageActionRowComponentBuilder;
+ declare type ModalComponentBuilder = ActionRowBuilder<ModalActionRowComponentBuilder> | ModalActionRowComponentBuilder;
+ declare type MessageActionRowComponentBuilder = ButtonBuilder | SelectMenuBuilder;
+-declare type ModalActionRowComponentBuilder = TextInputBuilder;
++declare type ModalActionRowComponentBuilder = SelectMenuBuilder | TextInputBuilder;
+ declare type AnyComponentBuilder = MessageActionRowComponentBuilder | ModalActionRowComponentBuilder;
+ /**
+  * Represents an action row component
