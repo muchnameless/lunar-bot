@@ -160,7 +160,7 @@ export class DiscordChatManager extends ChatManager {
 			}
 
 			try {
-				urls.push((await imgur.upload(url)).data.link);
+				urls.push((await imgur.uploadURL(url)).data.link);
 			} catch (error) {
 				logger.error(error, '[UPLOAD ATTACHMENTS]');
 				urls.push(DiscordChatManager._getAttachmentName(name));
@@ -558,7 +558,7 @@ export class DiscordChatManager extends ChatManager {
 							}
 
 							// try to upload URL
-							return (await imgur.upload(url.toString(), { signal })).data.link;
+							return (await imgur.uploadURL(url.toString(), { signal })).data.link;
 						} catch (error) {
 							logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}`);
 							return match[0];
