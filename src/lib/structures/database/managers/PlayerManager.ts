@@ -265,7 +265,7 @@ export class PlayerManager extends ModelManager<Player> {
 			}
 
 			for (const player of this.cache.values()) {
-				const rateLimit = hypixel.rateLimitManager.acquire('global');
+				const { rateLimit } = hypixel;
 				if (rateLimit.remaining < hypixel.rateLimitManager.limit * 0.25) {
 					await sleep(rateLimit.expires - Date.now() + seconds(1));
 				}
@@ -439,7 +439,7 @@ export class PlayerManager extends ModelManager<Player> {
 			if (!player.inGuild()) continue;
 
 			try {
-				const rateLimit = hypixel.rateLimitManager.acquire('global');
+				const { rateLimit } = hypixel;
 				if (rateLimit.remaining < hypixel.rateLimitManager.limit * 0.25) {
 					await sleep(rateLimit.expires - Date.now() + seconds(1));
 				}
