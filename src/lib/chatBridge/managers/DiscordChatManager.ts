@@ -133,12 +133,25 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * returns the name with dots replaced by spaces or a generic placeholder if no name is passed
+	 * returns an identifier for the attachment, either the name (if not "unknown") or the first part of the content type (if it exists),
+	 * replaces dots with spaces since hypixel does not allow sending "URLs" in chat
 	 *
 	 * @param name
+	 * @param contentType
 	 */
-	private static _getAttachmentName(name: string | null) {
-		return `[${name?.replaceAll('.', ' ') ?? 'attachment'}]`;
+	private static _getAttachmentName(name: string | null, contentType: string | null) {
+		// no name -> use contentType if available
+		if (name === null) {
+			return `[${contentType?.slice(0, contentType.indexOf('/')) ?? 'unknown'} attachment]`;
+		}
+
+		// discord's name placeholder -> use contentType if available
+		if (name.startsWith('unknown.') && contentType !== null) {
+			return `[${contentType.slice(0, contentType.indexOf('/'))} attachment]`;
+		}
+
+		// name includes the extension
+		return `[${name.replaceAll('.', ' ')}]`;
 	}
 
 	/**
@@ -148,14 +161,14 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	private async _uploadAttachments(attachments: Message['attachments']) {
 		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
-			return attachments.map(({ name }) => DiscordChatManager._getAttachmentName(name));
+			return attachments.map(({ name, contentType }) => DiscordChatManager._getAttachmentName(name, contentType));
 		}
 
 		const urls: string[] = [];
 
 		for (const { contentType, url, size, name } of attachments.values()) {
 			if (size > MAX_IMAGE_UPLOAD_SIZE || !ALLOWED_MIMES_REGEX.test(contentType!)) {
-				urls.push(DiscordChatManager._getAttachmentName(name));
+				urls.push(DiscordChatManager._getAttachmentName(name, contentType));
 				continue;
 			}
 
@@ -163,7 +176,7 @@ export class DiscordChatManager extends ChatManager {
 				urls.push((await imgur.uploadURL(url)).data.link);
 			} catch (error) {
 				logger.error(error, '[UPLOAD ATTACHMENTS]');
-				urls.push(DiscordChatManager._getAttachmentName(name));
+				urls.push(DiscordChatManager._getAttachmentName(name, contentType));
 			}
 		}
 
