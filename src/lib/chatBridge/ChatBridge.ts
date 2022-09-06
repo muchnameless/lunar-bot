@@ -6,6 +6,7 @@ import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
 import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
+import { type ForwardToMinecraftOptions } from './managers/DiscordChatManager.js';
 import {
 	DiscordManager,
 	type DiscordChatManagerResolvable,
@@ -31,19 +32,6 @@ export interface BroadcastOptions {
 	hypixelMessage?: HypixelMessage | null;
 	minecraft?: Omit<MinecraftChatOptions, 'content'>;
 	type?: DiscordChatManagerResolvable;
-}
-
-export interface MessageForwardOptions {
-	/**
-	 * whether the message is an edit instead of a new message
-	 */
-	isEdit?: boolean;
-	link?: DiscordChatManagerResolvable;
-	/**
-	 * player for muted and isStaff check
-	 */
-	player?: Player;
-	signal?: AbortSignal;
 }
 
 export const enum ChatBridgeEvent {
@@ -328,7 +316,7 @@ export class ChatBridge extends EventEmitter {
 	 * @param options
 	 * @returns true if the ChatBridge handled the message, false otherwise
 	 */
-	public async handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions & { signal: AbortSignal }) {
+	public async handleDiscordMessage(message: DiscordMessage, options: ForwardToMinecraftOptions) {
 		if (!this.hypixelGuild?.chatBridgeEnabled) {
 			// linked but not enabled
 			if (this.hypixelGuild) return this.handleError(message);

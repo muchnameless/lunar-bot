@@ -1,8 +1,11 @@
 /**
- * hypixel chat filter
+ * chat filter
  */
-export const BLOCKED_WORDS_REGEXP = new RegExp(
+export const BLOCKED_EXPRESSIONS_REGEXP = new RegExp(
 	[
+		/**
+		 * hypixel
+		 */
 		/\b(?:e|cyber)?s[3e]x+\b/,
 		/seks/,
 		/\bsemen\b/,
@@ -85,6 +88,12 @@ export const BLOCKED_WORDS_REGEXP = new RegExp(
 		/kanker/,
 		/\bswastika/,
 		/n[4a]z[1i]/,
+
+		/**
+		 * custom
+		 */
+		/[⠁-⣿]/, // braille code (used in some spam messages)
+		/\be+z+\b/, // hypixel replaces messages containing "ez" with a set of other "funny" messages
 	]
 		.map((regex) => regex.source)
 		.join('|'),

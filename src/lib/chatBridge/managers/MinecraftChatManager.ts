@@ -30,7 +30,6 @@ import {
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
-	MEME_REGEXP,
 	MinecraftChatManagerState,
 	NON_WHITESPACE_REGEXP,
 	randomPadding,
@@ -928,18 +927,9 @@ export class MinecraftChatManager extends ChatManager {
 
 		const parsedContent = await this.parseContent(content, discordMessage);
 
-		// blocked by the content filter
-		if (MinecraftChatManager.BLOCKED_WORDS_REGEXP.test(parsedContent) || MEME_REGEXP.test(parsedContent)) {
-			logger.warn({ prefix, content, parsedContent }, '[CHATBRIDGE CHAT]: blocked word');
-			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
-			return false;
-		}
-
-		// blocked by the advertisement filter
-		for (const [maybeURL] of parsedContent.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
-			if (MinecraftChatManager.ALLOWED_URLS_REGEXP.test(maybeURL)) continue;
-
-			logger.warn({ prefix, content, parsedContent, maybeURL }, '[CHATBRIDGE CHAT]: blocked URL');
+		// filter check
+		if (MinecraftChatManager.shouldBlock(parsedContent)) {
+			logger.warn({ prefix, content, parsedContent }, '[CHATBRIDGE CHAT]: blocked word or URL');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
 		}

@@ -26,7 +26,7 @@ export abstract class ChatManager {
 	/**
 	 * regexp to check for words that are blocked on hypixel
 	 */
-	public static BLOCKED_WORDS_REGEXP: RegExp;
+	public static BLOCKED_EXPRESSIONS_REGEXP: RegExp;
 
 	public static ALLOWED_URLS_REGEXP: RegExp;
 
@@ -42,6 +42,27 @@ export abstract class ChatManager {
 		if (!newFilter) throw new Error(`${fileName} has no export named ${propertyName}`);
 
 		ChatManager[propertyName] = newFilter;
+	}
+
+	/**
+	 * whether the content is blocked by one of the filters (blocked words or URLs)
+	 *
+	 * @param string
+	 */
+	public static shouldBlock(string: string) {
+		// blocked by the content filter
+		if (this.BLOCKED_EXPRESSIONS_REGEXP.test(string)) {
+			return true;
+		}
+
+		// blocked by the advertisement filter
+		for (const [maybeURL] of string.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
+			if (this.ALLOWED_URLS_REGEXP.test(maybeURL)) continue;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public get mcAccount() {
@@ -84,5 +105,5 @@ export abstract class ChatManager {
 	}
 }
 
-await ChatManager.reloadFilter('blockedWords.js', 'BLOCKED_WORDS_REGEXP');
+await ChatManager.reloadFilter('blockedExpressions.js', 'BLOCKED_EXPRESSIONS_REGEXP');
 await ChatManager.reloadFilter('allowedURLs.js', 'ALLOWED_URLS_REGEXP');

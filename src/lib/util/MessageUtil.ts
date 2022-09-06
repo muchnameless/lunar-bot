@@ -68,7 +68,7 @@ export class MessageUtil extends null {
 	}
 
 	/**
-	 * whether the message is a reply but not to an application command
+	 * whether the message is a reply but not a followUp to an application command
 	 *
 	 * @param message
 	 */

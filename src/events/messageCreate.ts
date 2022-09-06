@@ -8,7 +8,7 @@ export default class MessageCreateEvent extends Event {
 	 * @param message
 	 * @param isEdit
 	 */
-	protected _handleDiscordMessage(message: Message, isEdit = false) {
+	protected _handleDiscordMessage(message: Message, isEdit: boolean) {
 		// chat bridge
 		this.client.chatBridges.handleDiscordMessage(message, { isEdit });
 

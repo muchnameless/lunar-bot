@@ -1,5 +1,7 @@
-// export * from './allowedURLs.js'; // imported dynamically
-// export * from './blockedWords.js';
+// imported dynamically
+// export * from './allowedURLs.js';
+// export * from './blockedExpressions.js';
+
 export * from './botSettings.js';
 export * from './chatBridge.js';
 export * from './commandResponses.js';

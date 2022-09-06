@@ -113,8 +113,8 @@ export default class ReloadCommand extends ApplicationCommand {
 
 				switch (subcommand) {
 					case 'blocked-words':
-						fileName = 'blockedWords.js' as const;
-						propertyName = 'BLOCKED_WORDS_REGEXP' as const;
+						fileName = 'blockedExpressions.js' as const;
+						propertyName = 'BLOCKED_EXPRESSIONS_REGEXP' as const;
 						break;
 
 					case 'allowed-urls':

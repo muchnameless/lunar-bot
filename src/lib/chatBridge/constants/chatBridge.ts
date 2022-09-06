@@ -85,11 +85,6 @@ export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PAD
  */
 export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2800}\u{180E}\u{200B}]/u;
 
-/**
- * spam messages
- */
-export const MEME_REGEXP = /[⠁-⣿]|\be+z+\b/;
-
 export const NON_WHITESPACE_REGEXP = new RegExp(
 	`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${INVISIBLE_CHARACTERS.join('')}]`,
 	'u',

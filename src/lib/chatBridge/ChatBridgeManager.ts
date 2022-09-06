@@ -4,11 +4,11 @@ import { setInterval } from 'node:timers';
 import { type URL } from 'node:url';
 import { stripIndents } from 'common-tags';
 import { MessageFlags, type Message, type Snowflake } from 'discord.js';
-import { ChatBridge, ChatBridgeEvent, type MessageForwardOptions } from './ChatBridge.js';
+import { ChatBridge, ChatBridgeEvent } from './ChatBridge.js';
 import { AbortControllerCache } from './caches/AbortControllerCache.js';
 import { InteractionCache } from './caches/InteractionCache.js';
 import { DELETED_MESSAGE_REASON } from './constants/index.js';
-import { DiscordChatManager } from './managers/DiscordChatManager.js';
+import { DiscordChatManager, type ForwardToMinecraftOptions } from './managers/DiscordChatManager.js';
 import { UnicodeEmoji } from '#constants';
 import { minutes } from '#functions';
 import { logger } from '#logger';
@@ -167,7 +167,7 @@ export class ChatBridgeManager {
 				const [minecraftResult, discordResult] = await hypixelGuild.chatBridge.broadcast({
 					content: stripIndents`
 						${message.content}
-						~ ${DiscordChatManager.getPlayerName(message)}
+						~ ${await DiscordChatManager.getPlayerName(message)}
 					`,
 					discord: {
 						allowedMentions: { parse: [] },
@@ -218,7 +218,7 @@ export class ChatBridgeManager {
 	 * @param message
 	 * @param options
 	 */
-	public async handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
+	public async handleDiscordMessage(message: Message, options: Omit<ForwardToMinecraftOptions, 'signal'>) {
 		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot

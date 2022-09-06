@@ -18,7 +18,7 @@ import {
 	type WebhookMessageOptions,
 } from 'discord.js';
 import { fetch } from 'undici';
-import { type ChatBridge, type MessageForwardOptions } from '../ChatBridge.js';
+import { type ChatBridge } from '../ChatBridge.js';
 import { type HypixelMessage } from '../HypixelMessage.js';
 import { PREFIX_BY_TYPE } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
@@ -54,6 +54,17 @@ interface SendViaBotOptions extends MessageOptions {
 interface SendViaWebhookOptions extends WebhookMessageOptions {
 	abortController?: AbortController;
 	queuePromise?: Promise<void>;
+}
+
+export interface ForwardToMinecraftOptions {
+	/**
+	 * whether the message is an edit instead of a new message
+	 */
+	isEdit: boolean;
+	/**
+	 * AbortSignal to cancel forwarding the message
+	 */
+	signal: AbortSignal;
 }
 
 export interface ReadyDiscordChatManager extends DiscordChatManager {
@@ -109,27 +120,29 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * player ign or member displayName or author username, *blocked* if BLOCKED_WORDS_REGEXP check doesn't pass
+	 * player ign or member displayName or author username, *blocked* if filter check doesn't pass
 	 *
 	 * @param message
 	 */
-	public static getPlayerName(message: Message) {
-		return this._formatAtMention(
-			MessageUtil.isNormalWebhookMessage(message)
-				? UserUtil.getPlayer(
-						message.guild?.members.cache.find(({ displayName }) => displayName === message.author.username)?.user,
-				  )?.ign ?? message.author.username
-				: UserUtil.getPlayer(message.author)?.ign ?? message.member?.displayName ?? message.author.username,
+	public static async getPlayerName(message: Message) {
+		const user = MessageUtil.isNormalWebhookMessage(message)
+			? message.guild?.members.cache.find(({ displayName }) => displayName === message.author.username)?.user
+			: message.author;
+
+		return DiscordChatManager._replaceBlockedName(
+			(user && (UserUtil.getPlayer(user) ?? (await message.client.players.fetch({ discordId: user.id })))?.ign) ??
+				message.member?.displayName ??
+				message.author.username,
 		);
 	}
 
 	/**
-	 * returns @name if the name passes the BLOCKED_WORDS_REGEXP
+	 * returns a placeholder instead of the name if it does not pass the filter
 	 *
 	 * @param name
 	 */
-	private static _formatAtMention(name: string) {
-		return this.BLOCKED_WORDS_REGEXP.test(name) ? '*blocked name*' : name;
+	private static _replaceBlockedName(name: string) {
+		return this.shouldBlock(name) ? '*blocked name*' : name;
 	}
 
 	/**
@@ -463,16 +476,12 @@ export class DiscordChatManager extends ChatManager {
 	 * @param message
 	 * @param options
 	 */
-	public async forwardToMinecraft(
-		message: Message,
-		{ player: playerInput, isEdit = false, signal }: MessageForwardOptions & { signal: AbortSignal },
-	) {
+	public async forwardToMinecraft(message: Message, { isEdit, signal }: ForwardToMinecraftOptions) {
 		const messageInteraction =
 			message.interaction ??
 			// followUp to an interaction
 			(message.reference && message.channel.messages.cache.get(message.reference.messageId!)?.interaction);
 		const player =
-			playerInput ??
 			UserUtil.getPlayer(messageInteraction?.user ?? message.author) ?? // cached player
 			(await this.client.players.fetch({ discordId: messageInteraction?.user.id ?? message.author.id })); // uncached player
 
@@ -528,7 +537,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// actual content
 		let messageContent =
-			isEdit && !message.interaction && message.content && !message.content.endsWith('*')
+			isEdit && !messageInteraction && message.content && !message.content.endsWith('*')
 				? `${message.content}*` // add a trailing '*' to indicate an edit if not already present
 				: message.content;
 
@@ -599,7 +608,7 @@ export class DiscordChatManager extends ChatManager {
 
 				// author found and author is not already pinged
 				if (!new RegExp(`<@!?${referencedMessage.author.id}>`).test(message.content)) {
-					contentParts.unshift(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
+					contentParts.unshift(`@${await DiscordChatManager.getPlayerName(referencedMessage)}`);
 				}
 			} catch (error) {
 				logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}: error fetching reference`);
@@ -649,7 +658,7 @@ export class DiscordChatManager extends ChatManager {
 			if (content) {
 				void this.minecraft.chat({
 					content: `${this.client.config.get('PREFIXES')[0]}${content}`,
-					prefix: `${this.prefix} ${DiscordChatManager._formatAtMention(
+					prefix: `${this.prefix} ${DiscordChatManager._replaceBlockedName(
 						player?.ign ?? messageInteraction.user.username,
 					)}: `,
 				});
@@ -660,7 +669,11 @@ export class DiscordChatManager extends ChatManager {
 		return this.minecraft.chat({
 			content: contentParts.join(' '),
 			prefix: `${this.prefix} ${
-				message.author.id === message.client.user!.id ? '' : `${DiscordChatManager.getPlayerName(message)}: `
+				message.author.id === message.client.user!.id
+					? ''
+					: `${DiscordChatManager._replaceBlockedName(
+							player?.ign ?? message.member?.displayName ?? message.author.username,
+					  )}: `
 			}`,
 			discordMessage: message,
 			signal,
