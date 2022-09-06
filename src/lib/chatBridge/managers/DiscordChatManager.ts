@@ -154,7 +154,7 @@ export class DiscordChatManager extends ChatManager {
 		const urls: string[] = [];
 
 		for (const { contentType, url, size, name } of attachments.values()) {
-			if (!ALLOWED_MIMES_REGEX.test(contentType!) || size > MAX_IMAGE_UPLOAD_SIZE) {
+			if (size > MAX_IMAGE_UPLOAD_SIZE || !ALLOWED_MIMES_REGEX.test(contentType!)) {
 				urls.push(DiscordChatManager._getAttachmentName(name));
 				continue;
 			}
@@ -546,12 +546,12 @@ export class DiscordChatManager extends ChatManager {
 								// TODO: cache this via redis?
 								const res = await fetch(url, { method: 'HEAD', signal });
 								const contentType = res.headers.get('content-type');
-								const contentLength = res.headers.get('content-length');
+								const contentLength = Number.parseInt(res.headers.get('content-length')!, 10);
 
 								if (
-									!ALLOWED_MIMES_REGEX.test(contentType!) ||
-									!contentLength ||
-									Number(contentLength) > MAX_IMAGE_UPLOAD_SIZE
+									Number.isNaN(contentLength) ||
+									contentLength > MAX_IMAGE_UPLOAD_SIZE ||
+									!ALLOWED_MIMES_REGEX.test(contentType!)
 								) {
 									return match[0];
 								}
