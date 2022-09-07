@@ -39,7 +39,7 @@ export class UserUtil extends null {
 	/**
 	 * @param user
 	 */
-	public static getPlayer(user?: User) {
+	public static getPlayer(user?: User | null) {
 		const player = this.PLAYER_CACHE.get(user!) ?? null;
 		if (player || !user) return player;
 
