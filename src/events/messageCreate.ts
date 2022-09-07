@@ -21,6 +21,6 @@ export default class MessageCreateEvent extends Event {
 		}
 
 		// player activity
-		void UserUtil.getPlayer(message.author)?.update({ lastActivityAt: new Date() });
+		if (!message.author.bot) void UserUtil.getPlayer(message.author)?.update({ lastActivityAt: new Date() });
 	}
 }
