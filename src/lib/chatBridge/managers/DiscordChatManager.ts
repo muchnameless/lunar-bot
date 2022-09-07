@@ -480,7 +480,9 @@ export class DiscordChatManager extends ChatManager {
 		const messageInteraction =
 			message.interaction ??
 			// followUp to an interaction
-			(message.reference && message.channel.messages.cache.get(message.reference.messageId!)?.interaction);
+			(MessageUtil.isFollowUp(message)
+				? message.channel.messages.cache.get(message.reference.messageId!)?.interaction
+				: null);
 		const player =
 			UserUtil.getPlayer(messageInteraction?.user ?? message.author) ?? // cached player
 			(await this.client.players.fetch({ discordId: messageInteraction?.user.id ?? message.author.id })); // uncached player
@@ -656,10 +658,22 @@ export class DiscordChatManager extends ChatManager {
 			}
 
 			if (content) {
+				// message is a bot message (since it has an interaction property) -> use messageInteraction.user instead of message.author
 				void this.minecraft.chat({
 					content: `${this.client.config.get('PREFIXES')[0]}${content}`,
 					prefix: `${this.prefix} ${DiscordChatManager._replaceBlockedName(
-						player?.ign ?? messageInteraction.user.username,
+						player?.ign ??
+							(
+								await message.guild?.members
+									.fetch(messageInteraction.user.id)
+									.catch((error) =>
+										logger.error(
+											error,
+											`[FORWARD DC TO MC]: ${this.logInfo}: error fetching messageInteraction member`,
+										),
+									)
+							)?.displayName ??
+							messageInteraction.user.username,
 					)}: `,
 				});
 			}

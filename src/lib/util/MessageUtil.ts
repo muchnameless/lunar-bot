@@ -19,6 +19,14 @@ import { ChannelUtil, EmbedUtil, type SendOptions } from './index.js';
 import { commaListAnd, minutes } from '#functions';
 import { logger } from '#logger';
 
+interface ReplyMessage extends Message {
+	reference: NonNullable<Message['reference']>;
+}
+
+interface FollowUpMessage extends ReplyMessage {
+	webhookId: NonNullable<Message['webhookId']>;
+}
+
 interface AwaitReplyOptions extends MessageOptions {
 	question?: string;
 	/**
@@ -72,8 +80,19 @@ export class MessageUtil extends null {
 	 *
 	 * @param message
 	 */
-	public static isNormalReplyMessage(message: Message) {
-		return message.type === MessageType.Reply && !message.webhookId;
+	public static isNormalReplyMessage(message: Message): message is ReplyMessage {
+		return message.type === MessageType.Reply && message.webhookId === null;
+	}
+
+	/**
+	 * whether the message is a followUp to an interaction
+	 *
+	 * @param message
+	 */
+	public static isFollowUp(message: Message): message is FollowUpMessage {
+		return (
+			message.type === MessageType.Reply && message.webhookId !== null && message.webhookId === message.applicationId
+		);
 	}
 
 	/**
