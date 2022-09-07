@@ -477,12 +477,14 @@ export class DiscordChatManager extends ChatManager {
 	 * @param options
 	 */
 	public async forwardToMinecraft(message: Message, { isEdit, signal }: ForwardToMinecraftOptions) {
-		const messageInteraction =
-			message.interaction ??
-			// followUp to an interaction
-			(MessageUtil.isFollowUp(message)
-				? message.channel.messages.cache.get(message.reference.messageId)?.interaction
-				: null);
+		const messageInteraction = message.author.bot
+			? // reply to an interaction
+			  message.interaction ??
+			  // followUp to an interaction
+			  (MessageUtil.isFollowUp(message)
+					? message.channel.messages.cache.get(message.reference.messageId)?.interaction ?? null
+					: null)
+			: null;
 		const player =
 			UserUtil.getPlayer(messageInteraction?.user ?? message.author) ?? // cached player
 			(await this.client.players.fetch({ discordId: messageInteraction?.user.id ?? message.author.id })); // uncached player
