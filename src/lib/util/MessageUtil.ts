@@ -20,7 +20,9 @@ import { commaListAnd, minutes } from '#functions';
 import { logger } from '#logger';
 
 interface ReplyMessage extends Message {
-	reference: NonNullable<Message['reference']>;
+	reference: NonNullable<Message['reference']> & {
+		messageId: NonNullable<NonNullable<Message['reference']>['messageId']>;
+	};
 }
 
 interface FollowUpMessage extends ReplyMessage {

@@ -481,7 +481,7 @@ export class DiscordChatManager extends ChatManager {
 			message.interaction ??
 			// followUp to an interaction
 			(MessageUtil.isFollowUp(message)
-				? message.channel.messages.cache.get(message.reference.messageId!)?.interaction
+				? message.channel.messages.cache.get(message.reference.messageId)?.interaction
 				: null);
 		const player =
 			UserUtil.getPlayer(messageInteraction?.user ?? message.author) ?? // cached player
