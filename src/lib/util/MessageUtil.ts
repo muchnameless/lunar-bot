@@ -119,7 +119,7 @@ export class MessageUtil extends null {
 		const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
 
 		return reaction?.me
-			? Promise.resolve(reaction) // reaction from bot already exists
+			? reaction // reaction from bot already exists
 			: message.react(emojiIndetifier); // new reaction
 	}
 

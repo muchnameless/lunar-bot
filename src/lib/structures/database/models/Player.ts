@@ -13,7 +13,6 @@ import {
 	type Snowflake,
 	type GuildResolvable,
 	type Guild,
-	type User,
 } from 'discord.js';
 import type LilyWeight from 'lilyweight';
 import {
@@ -21,14 +20,16 @@ import {
 	fn,
 	Model,
 	UniqueConstraintError,
+	type Attributes,
 	type CreationOptional,
+	type FindOptions,
 	type InferAttributes,
 	type InferCreationAttributes,
 	type InstanceDestroyOptions,
+	type ModelAttributeColumnOptions,
 	type ModelStatic,
 	type NonAttribute,
 	type Sequelize,
-	type ModelAttributeColumnOptions,
 } from 'sequelize';
 import { type ModelResovable } from '../managers/ModelManager.js';
 import { type GuildRank, type HypixelGuild } from './HypixelGuild.js';
@@ -90,6 +91,8 @@ import { logger } from '#logger';
 import { type LunarClient } from '#structures/LunarClient.js';
 import { toUpperCase } from '#types';
 import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil, type RoleResolvables } from '#utils';
+
+type PlayerFindOptions = FindOptions<Attributes<Player>>;
 
 interface ParsedTransaction extends InferAttributes<Transaction> {
 	fromIGN: string | null;
@@ -910,8 +913,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * fetches the discord user if the discord id is valid
 	 */
-	public get discordUser(): NonAttribute<Promise<User | null>> {
-		return validateNumber(this.discordId) ? this.client.users.fetch(this.discordId) : Promise.resolve(null);
+	public async fetchDiscordUser() {
+		return validateNumber(this.discordId) ? this.client.users.fetch(this.discordId) : null;
 	}
 
 	/**
@@ -970,47 +973,51 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * amount of the last tax transaction from that player
 	 */
-	public get taxAmount(): NonAttribute<Promise<number | null>> {
-		return (async () => {
-			const result = await this.client.db.models.Transaction.findAll({
-				limit: 1,
-				where: {
-					from: this.minecraftUuid,
-					type: TransactionType.Tax,
-				},
-				order: [['createdAt', 'DESC']],
-				attributes: ['amount'],
-				raw: true,
-			});
+	public async fetchLastTaxAmount() {
+		const result = await this.client.db.models.Transaction.findAll({
+			limit: 1,
+			where: {
+				from: this.minecraftUuid,
+				type: TransactionType.Tax,
+			},
+			order: [['createdAt', 'DESC']],
+			attributes: ['amount'],
+			raw: true,
+		});
 
-			return result[0]?.amount ?? null;
-		})();
+		return result[0]?.amount ?? null;
 	}
 
 	/**
 	 * all transactions from that player
 	 */
-	public get transactions(): NonAttribute<Promise<ParsedTransaction[]>> {
-		return (async () =>
-			Promise.all(
-				(
-					await this.client.db.models.Transaction.findAll({
-						where: {
-							from: this.minecraftUuid,
-						},
-						order: [['createdAt', 'DESC']],
-						raw: true,
-					})
-				).map(async (transaction) => ({
-					...transaction,
-					fromIGN: this.ign,
-					toIGN:
-						(
-							this.client.players.cache.get(transaction.to) ??
-							(await mojang.uuid(transaction.to).catch((error) => logger.error(error)))
-						)?.ign ?? transaction.to,
-				})),
-			))();
+	public async fetchTransactions(
+		options: PlayerFindOptions & { parse: false },
+	): Promise<InferAttributes<Transaction>[]>;
+	public async fetchTransactions(options?: PlayerFindOptions & { parse?: boolean }): Promise<ParsedTransaction[]>;
+	public async fetchTransactions({ parse = true, ...options }: PlayerFindOptions & { parse?: boolean } = {}) {
+		const data = await this.client.db.models.Transaction.findAll({
+			where: {
+				from: this.minecraftUuid,
+			},
+			order: [['createdAt', 'DESC']],
+			raw: true,
+			...options,
+		});
+
+		if (!parse) return data;
+
+		return Promise.all(
+			data.map(async (transaction) => ({
+				...transaction,
+				fromIGN: this.ign,
+				toIGN:
+					(
+						this.client.players.cache.get(transaction.to) ??
+						(await mojang.uuid(transaction.to).catch((error) => logger.error(error)))
+					)?.ign ?? transaction.to,
+			})),
+		) as Promise<ParsedTransaction[]>;
 	}
 
 	/**

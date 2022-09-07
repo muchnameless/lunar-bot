@@ -122,7 +122,7 @@ export default class LinkCommand extends ApplicationCommand {
 			let linkedUser: User | null = null;
 
 			try {
-				linkedUser = await playerLinkedToId.discordUser;
+				linkedUser = await playerLinkedToId.fetchDiscordUser();
 			} catch (error) {
 				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownUser) {
 					linkedUserIsDeleted = true;
@@ -155,7 +155,7 @@ export default class LinkCommand extends ApplicationCommand {
 			let linkedUser: User | null = null;
 
 			try {
-				linkedUser = await player.discordUser;
+				linkedUser = await player.fetchDiscordUser();
 
 				await InteractionUtil.awaitConfirmation(interaction, {
 					question: stripIndents`

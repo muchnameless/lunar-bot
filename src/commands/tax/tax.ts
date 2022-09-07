@@ -217,7 +217,7 @@ export default class TaxCommand extends ApplicationCommand {
 							await InteractionUtil.awaitConfirmation(
 								interaction,
 								`\`${player}\` is already set to paid with an amount of \`${formatNumber(
-									(await player.taxAmount) ?? Number.NaN,
+									(await player.fetchLastTaxAmount()) ?? Number.NaN,
 								)}\`. Overwrite this?`,
 							);
 
@@ -335,7 +335,7 @@ export default class TaxCommand extends ApplicationCommand {
 
 							if (!player.paid) return InteractionUtil.reply(interaction, `\`${player}\` is not set to paid`);
 
-							const OLD_AMOUNT = await player.taxAmount;
+							const OLD_AMOUNT = await player.fetchLastTaxAmount();
 
 							await InteractionUtil.awaitConfirmation(
 								interaction,

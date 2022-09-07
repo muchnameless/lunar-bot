@@ -332,29 +332,6 @@ export class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * whether the minecraft bot can send chat messages
-	 */
-	public get chatReady() {
-		if (!this.bot) return Promise.resolve(false);
-
-		return (async () => {
-			try {
-				await this.command({
-					command: `w ${this.bot!.username} o/`,
-					responseRegExp: /^You cannot message this player\.$/,
-					timeout: seconds(1),
-					rejectOnTimeout: true,
-					max: 1,
-				});
-
-				return true;
-			} catch {
-				return false;
-			}
-		})();
-	}
-
-	/**
 	 * maximum attempts to resend to in-game chat
 	 */
 	public static readonly MAX_RETRIES = 3 as const;
@@ -405,6 +382,28 @@ export class MinecraftChatManager extends ChatManager {
 	 */
 	public get delay() {
 		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
+	}
+
+	/**
+	 * whether the minecraft bot can send chat messages
+	 */
+	public async isChatReady() {
+		if (!this.bot || this.bot.ended) return false;
+
+		try {
+			// try to whisper to the bot itself since the bot is both online and the response from the server is always the same
+			await this.command({
+				command: `w ${this.bot.username} o/`,
+				responseRegExp: /^You cannot message this player\.$/,
+				timeout: seconds(1),
+				rejectOnTimeout: true,
+				max: 1,
+			});
+
+			return true;
+		} catch {
+			return false;
+		}
 	}
 
 	/**
