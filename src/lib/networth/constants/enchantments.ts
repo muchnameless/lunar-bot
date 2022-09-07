@@ -76,6 +76,7 @@ export const enum Enchantment {
 	ManaVampire = 'mana_vampire',
 	Overload = 'overload',
 	Piercing = 'piercing',
+	Piscary = 'piscary',
 	Power = 'power',
 	Pristine = 'pristine',
 	ProjectileProtection = 'projectile_protection',
@@ -118,6 +119,7 @@ export const enum Enchantment {
 	TurboWarts = 'turbo_warts',
 	TurboWheat = 'turbo_wheat',
 	UltimateBank = 'ultimate_bank',
+	UltimateBobbinTime = 'ultimate_bobbin_time',
 	UltimateChimera = 'ultimate_chimera',
 	UltimateCombo = 'ultimate_combo',
 	UltimateDuplex = 'ultimate_reiterate', // API still uses old name

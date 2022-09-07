@@ -100,6 +100,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Magnet:
 		case Enchantment.Overload:
 		case Enchantment.Power:
+		case Enchantment.Piscary:
 		case Enchantment.Pristine:
 		case Enchantment.ProjectileProtection:
 		case Enchantment.Prosecute:
@@ -168,6 +169,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.TurboWarts:
 		case Enchantment.TurboWheat:
 		case Enchantment.UltimateBank: // ultimate
+		case Enchantment.UltimateBobbinTime:
 		case Enchantment.UltimateChimera:
 		case Enchantment.UltimateCombo:
 		case Enchantment.UltimateDuplex:
