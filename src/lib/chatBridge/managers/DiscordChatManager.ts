@@ -56,17 +56,6 @@ interface SendViaWebhookOptions extends WebhookMessageOptions {
 	queuePromise?: Promise<void>;
 }
 
-export interface ForwardToMinecraftOptions {
-	/**
-	 * whether the message is an edit instead of a new message
-	 */
-	isEdit: boolean;
-	/**
-	 * AbortSignal to cancel forwarding the message
-	 */
-	signal: AbortSignal;
-}
-
 export interface ReadyDiscordChatManager extends DiscordChatManager {
 	webhook: Webhook;
 }
@@ -165,35 +154,6 @@ export class DiscordChatManager extends ChatManager {
 
 		// name includes the extension
 		return `[${name.replaceAll('.', ' ')}]`;
-	}
-
-	/**
-	 * tries to upload all image attachments to imgur, replacing all successfully uploaded URLs with the imgur URLs
-	 *
-	 * @param attachments
-	 */
-	private async _uploadAttachments(attachments: Message['attachments']) {
-		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
-			return attachments.map(({ name, contentType }) => DiscordChatManager._getAttachmentName(name, contentType));
-		}
-
-		const urls: string[] = [];
-
-		for (const { contentType, url, size, name } of attachments.values()) {
-			if (size > MAX_IMAGE_UPLOAD_SIZE || !ALLOWED_MIMES_REGEX.test(contentType!)) {
-				urls.push(DiscordChatManager._getAttachmentName(name, contentType));
-				continue;
-			}
-
-			try {
-				urls.push((await imgur.uploadURL(url)).data.link);
-			} catch (error) {
-				logger.error(error, '[UPLOAD ATTACHMENTS]');
-				urls.push(DiscordChatManager._getAttachmentName(name, contentType));
-			}
-		}
-
-		return urls;
 	}
 
 	/**
@@ -474,9 +434,9 @@ export class DiscordChatManager extends ChatManager {
 	 * forwards a discord message to in-game guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
 	 *
 	 * @param message
-	 * @param options
+	 * @param signal
 	 */
-	public async forwardToMinecraft(message: Message, { isEdit, signal }: ForwardToMinecraftOptions) {
+	public async forwardToMinecraft(message: Message, signal: AbortSignal) {
 		const messageInteraction = message.author.bot
 			? // reply to an interaction
 			  message.interaction ??
@@ -541,7 +501,8 @@ export class DiscordChatManager extends ChatManager {
 
 		// actual content
 		let messageContent =
-			isEdit && !messageInteraction && message.content && !message.content.endsWith('*')
+			// rely on editedTimestamp since first editReply after a deferReply does not modify it
+			message.editedTimestamp !== null && message.content && !message.content.endsWith('*')
 				? `${message.content}*` // add a trailing '*' to indicate an edit if not already present
 				: message.content;
 
@@ -584,7 +545,7 @@ export class DiscordChatManager extends ChatManager {
 							}
 
 							// try to upload URL
-							return (await imgur.uploadURL(url.toString(), { signal })).data.link;
+							return (await imgur.uploadURL(url.toString(), signal)).data.link;
 						} catch (error) {
 							logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}`);
 							return match[0];
@@ -597,10 +558,34 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// stickers
-		if (message.stickers.size) contentParts.push(...message.stickers.map(({ name }) => `:${name}:`));
+		if (message.stickers.size) {
+			for (const { name } of message.stickers.values()) {
+				contentParts.push(`:${name}:`);
+			}
+		}
 
-		// links of attachments
-		if (message.attachments.size) contentParts.push(...(await this._uploadAttachments(message.attachments)));
+		// attachments
+		if (message.attachments.size) {
+			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
+				for (const { contentType, url, size, name } of message.attachments.values()) {
+					if (size > MAX_IMAGE_UPLOAD_SIZE || !ALLOWED_MIMES_REGEX.test(contentType!)) {
+						contentParts.push(DiscordChatManager._getAttachmentName(name, contentType));
+						continue;
+					}
+
+					try {
+						contentParts.push((await imgur.uploadURL(url, signal)).data.link);
+					} catch (error) {
+						logger.error(error, '[UPLOAD ATTACHMENTS]');
+						contentParts.push(DiscordChatManager._getAttachmentName(name, contentType));
+					}
+				}
+			} else {
+				for (const { name, contentType } of message.attachments.values()) {
+					contentParts.push(DiscordChatManager._getAttachmentName(name, contentType));
+				}
+			}
+		}
 
 		// empty message (e.g. only embeds)
 		if (!contentParts.length) return void MessageUtil.react(message, UnicodeEmoji.Stop);

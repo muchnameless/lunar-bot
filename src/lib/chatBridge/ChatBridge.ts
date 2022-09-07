@@ -6,7 +6,6 @@ import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
 import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
-import { type ForwardToMinecraftOptions } from './managers/DiscordChatManager.js';
 import {
 	DiscordManager,
 	type DiscordChatManagerResolvable,
@@ -313,10 +312,10 @@ export class ChatBridge extends EventEmitter {
 	 * forwards the discord message to minecraft chat if the ChatBridge has a DiscordChatManager for the message's channel, returning true if so, false otherwise
 	 *
 	 * @param message
-	 * @param options
+	 * @param signal
 	 * @returns true if the ChatBridge handled the message, false otherwise
 	 */
-	public async handleDiscordMessage(message: DiscordMessage, options: ForwardToMinecraftOptions) {
+	public async handleDiscordMessage(message: DiscordMessage, signal: AbortSignal) {
 		if (!this.hypixelGuild?.chatBridgeEnabled) {
 			// linked but not enabled
 			if (this.hypixelGuild) return this.handleError(message);
@@ -343,7 +342,7 @@ export class ChatBridge extends EventEmitter {
 		const discordChatManager = this.discord.channelsByIds.get(message.channelId);
 		if (!discordChatManager) return false;
 
-		void discordChatManager.forwardToMinecraft(message, options);
+		void discordChatManager.forwardToMinecraft(message, signal);
 		return true;
 	}
 

@@ -1,25 +1,23 @@
-import { PermissionFlagsBits, type ClientEvents, type Events, type Message } from 'discord.js';
-import MessageCreateEvent from './messageCreate.js';
+import { type ClientEvents, type Events, type Message } from 'discord.js';
 import { minutes } from '#functions';
 import { logger } from '#logger';
-import { ChannelUtil } from '#utils';
+import { Event } from '#structures/events/Event.js';
 
-export default class MessageUpdateEvent extends MessageCreateEvent {
+export default class MessageUpdateEvent extends Event {
 	/**
 	 * event listener callback
 	 *
 	 * @param oldMessage
 	 * @param newMessage
 	 */
-	// @ts-expect-error override
 	public override async run(
 		oldMessage: ClientEvents[Events.MessageUpdate][0],
 		newMessage: ClientEvents[Events.MessageUpdate][1],
 	) {
+		// original message is older than 10 min
 		if (
-			Date.now() - newMessage.createdTimestamp >= minutes(10) || // original message is older than 10 min
-			(oldMessage.content === newMessage.content && newMessage.content) || // pinned or embed added
-			!ChannelUtil.botPermissions(newMessage.channel).has(PermissionFlagsBits.ViewChannel, false) // slash cmd response edits
+			newMessage.editedTimestamp !== null &&
+			newMessage.editedTimestamp - newMessage.createdTimestamp >= minutes(10)
 		) {
 			return;
 		}
@@ -28,10 +26,16 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 			try {
 				await newMessage.fetch();
 			} catch (error) {
-				return logger.error(error, '[CMD HANDLER]: error while fetching partial message');
+				return logger.error(error, '[MESSAGE UPDATE]: error while fetching partial message');
 			}
 		}
 
-		this._handleDiscordMessage(newMessage as Message, true);
+		// pinned or embed added, newMessage.content check so the ChatBridge can react with "blocked" to embed only messages
+		if (oldMessage.content === newMessage.content && newMessage.content) {
+			return;
+		}
+
+		// chat bridge
+		this.client.chatBridges.handleDiscordMessage(newMessage as Message);
 	}
 }

@@ -8,7 +8,7 @@ import { ChatBridge, ChatBridgeEvent } from './ChatBridge.js';
 import { AbortControllerCache } from './caches/AbortControllerCache.js';
 import { InteractionCache } from './caches/InteractionCache.js';
 import { DELETED_MESSAGE_REASON } from './constants/index.js';
-import { DiscordChatManager, type ForwardToMinecraftOptions } from './managers/DiscordChatManager.js';
+import { DiscordChatManager } from './managers/DiscordChatManager.js';
 import { UnicodeEmoji } from '#constants';
 import { minutes } from '#functions';
 import { logger } from '#logger';
@@ -216,22 +216,18 @@ export class ChatBridgeManager {
 	 * forwards the discord message if a chat bridge for that channel is found
 	 *
 	 * @param message
-	 * @param options
 	 */
-	public async handleDiscordMessage(message: Message, options: Omit<ForwardToMinecraftOptions, 'signal'>) {
+	public async handleDiscordMessage(message: Message) {
 		if (this.shouldIgnoreMessage(message)) return; // not a chat bridge message or bridge disabled
 		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
-		const _options = {
-			signal: this.abortControllers.get(message.id).signal,
-			...options,
-		};
+		const signal = this.abortControllers.get(message.id).signal;
 
-		if (_options.signal.aborted) return; // ignore deleted messages
+		if (signal.aborted) return; // ignore deleted messages
 
 		const res = await Promise.all(
-			this.cache.map(async (chatBridge) => chatBridge.handleDiscordMessage(message, _options)),
+			this.cache.map(async (chatBridge) => chatBridge.handleDiscordMessage(message, signal)),
 		);
 
 		if (res.includes(true)) return;

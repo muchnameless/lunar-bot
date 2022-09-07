@@ -56,10 +56,6 @@ interface ImgurClientOptions {
 	timeout?: number;
 }
 
-export interface ImgurUploadOptions {
-	signal?: AbortSignal;
-}
-
 export class ImgurClient {
 	#authorisation!: string;
 
@@ -139,9 +135,9 @@ export class ImgurClient {
 	 * uploads an image
 	 *
 	 * @param imageURL - url to upload
-	 * @param options
+	 * @param signal
 	 */
-	public async uploadURL(imageURL: string, { signal }: ImgurUploadOptions = {}) {
+	public async uploadURL(imageURL: string, signal?: AbortSignal) {
 		const url = new URL('image', this.baseURL);
 
 		url.searchParams.append('type', 'url');
@@ -151,9 +147,9 @@ export class ImgurClient {
 			url,
 			{
 				method: 'POST',
-				signal,
 			},
 			imageURL,
+			signal,
 		) as Promise<UploadResponse>;
 	}
 
@@ -162,14 +158,18 @@ export class ImgurClient {
 	 * @param requestInit
 	 * @param cacheKey
 	 */
-	public async request(url: URL, requestInit: RequestInit, cacheKey: string) {
+	public async request(url: URL, requestInit: RequestInit, cacheKey: string, signal?: AbortSignal) {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
-		const res = await this.#request(url, {
-			...requestInit,
-			headers: { Authorization: this.#authorisation, ...requestInit.headers },
-		});
+		const res = await this.#request(
+			url,
+			{
+				...requestInit,
+				headers: { Authorization: this.#authorisation, ...requestInit.headers },
+			},
+			signal,
+		);
 
 		this.getRateLimitHeaders(res.headers);
 
@@ -190,9 +190,10 @@ export class ImgurClient {
 	 *
 	 * @param url
 	 * @param requestInit
-	 * @param retries current retry
+	 * @param signal
+	 * @param retries - current retry
 	 */
-	async #request(url: URL, { signal, ...options }: RequestInit, retries = 0): Promise<Response> {
+	async #request(url: URL, requestInit: RequestInit, signal?: AbortSignal, retries = 0): Promise<Response> {
 		for (const { rateLimit } of this.rateLimitManagers) {
 			if (rateLimit.limited) {
 				await this.queue.wait({ signal });
@@ -226,13 +227,13 @@ export class ImgurClient {
 		try {
 			return await fetch(url, {
 				signal: controller.signal,
-				...options,
+				...requestInit,
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (isAbortError(error) && retries !== this.retries) {
 				// eslint-disable-next-line @typescript-eslint/return-await
-				return this.#request(url, { signal, ...options }, retries + 1);
+				return this.#request(url, requestInit, signal, retries + 1);
 			}
 
 			throw error;
