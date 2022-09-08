@@ -99,7 +99,7 @@ export class DiscordManager {
 	 */
 	private _findEmojiByName(fullMatch: string, inColon: string) {
 		const emoji =
-			EMOJI_NAME_TO_UNICODE[fullMatch.replaceAll('_', '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
+			EMOJI_NAME_TO_UNICODE[fullMatch.replace(/(?<!:)[_-]+/g, '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
 
 		if (emoji) return emoji;
 
