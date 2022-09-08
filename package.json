@@ -81,7 +81,7 @@
 		"@commitlint/config-angular": "^17.1.0",
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^2.0.0",
-		"@types/node": "^18.7.15",
+		"@types/node": "^18.7.16",
 		"@types/pg": "^8.6.5",
 		"@types/prettier": "^2.7.0",
 		"env-cmd": "^10.1.0",
@@ -107,7 +107,7 @@
 		"@sapphire/ratelimits": "2.4.5-next.4cca2e0.0",
 		"@sapphire/shapeshift": "3.6.1-next.e9a029a.0",
 		"@sapphire/snowflake": "3.2.3-next.4cca2e0.0",
-		"@types/node": "patch:@types/node@npm:^18.7.15#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch",
+		"@types/node": "patch:@types/node@npm:^18.7.16#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch",
 		"discord-api-types": "0.37.7-next.b08f2e3.1662406356",
 		"discord.js": "patch:discord.js@14.3.1-dev.1662552265-d8e7741.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1662379451-4ffdada.0-6e4e4ea690.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
