@@ -222,7 +222,7 @@ export class ChatBridgeManager {
 		if (message.flags.any(MessageFlags.Ephemeral | MessageFlags.Loading)) return; // ignore ephemeral and loading (deferred, embeds missing, etc) messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
-		const signal = this.abortControllers.get(message.id).signal;
+		const { signal } = this.abortControllers.get(message.id);
 
 		if (signal.aborted) return; // ignore deleted messages
 
