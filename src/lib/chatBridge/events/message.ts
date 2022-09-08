@@ -480,7 +480,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		// permissions
 		if (player?.discordId !== this.client.ownerId) {
-			const commandId = command.commandId;
+			const { commandId } = command;
 
 			// user is not the owner at this point
 			if (

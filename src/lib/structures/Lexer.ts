@@ -56,7 +56,7 @@ export class Lexer {
 
 		while (this.index <= this.input.length) {
 			const matches = this._scan().splice(this.remove);
-			const index = this.index;
+			const { index } = this;
 
 			while (matches.length) {
 				if (!this.reject) break;
@@ -75,7 +75,7 @@ export class Lexer {
 				}
 			}
 
-			const input = this.input;
+			const { input } = this;
 
 			if (index < input.length) {
 				if (this.reject) {
