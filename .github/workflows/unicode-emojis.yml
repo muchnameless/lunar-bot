@@ -3,7 +3,7 @@ name: Automatic Unicode Emoji Update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: '0 0 * * *'
 
 jobs:
   unicode-emojis:
@@ -31,7 +31,7 @@ jobs:
         run: yarn build
 
       - name: Run script
-        run: node dist/scripts/generateEmojiParser.mjs
+        run: node dist/scripts/generateEmojiParser.js
 
       - name: Format
         run: yarn format
