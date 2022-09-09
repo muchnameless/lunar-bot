@@ -1,0 +1,57 @@
+name: Automatic Unicode Emoji Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  unicode-emojis:
+    name: Update unicode emojis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+
+      - name: Install Node.js v18
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
+        with:
+          node-version: 18
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
+          yarn --immutable
+
+      - name: Build
+        run: yarn build
+
+      - name: Run script
+        run: node dist/scripts/generateEmojiParser.mjs
+
+      - name: Format
+        run: yarn format
+
+      - name: Commit and create pull request
+        env:
+          GITHUB_USER: github-actions[bot]
+          GITHUB_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git add .;
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit, exiting with code 0"
+            exit 0;
+          else
+            git remote set-url origin "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${GITHUB_REPOSITORY}.git";
+            git config --local user.email "${GITHUB_EMAIL}";
+            git config --local user.name "${GITHUB_USER}";
+            git checkout -b update-unicode-emojis/$(date +%F-%H-%M);
+            git commit -sam "feat: update unicode emojis";
+            git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)
+            gh pr create -t "feat: update unicode emojis" -B main;
+          fi
