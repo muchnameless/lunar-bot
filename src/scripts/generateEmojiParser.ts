@@ -256,10 +256,10 @@ for (const [name, surrogates] of unique.sort((_0, _1, a, b) => compareAlphabetic
 	lines.push(`\t'${name}': '${surrogates}',`);
 }
 
-// UNICODE_TO_EMOJI_NAME
 lines.push('} as const;');
 lines.push('');
 
+// UNICODE_TO_EMOJI_NAME
 lines.push('/**');
 lines.push(' * unicode emojis to discord emoji names');
 lines.push(' */');
