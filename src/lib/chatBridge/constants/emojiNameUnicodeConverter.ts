@@ -1,3 +1,5 @@
+/* eslint-disable id-length */
+
 /**
  * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/
  * @link https://gitlab.emzi0767.dev/Emzi0767/discord-emoji
@@ -6,8 +8,6 @@
  * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.min.json
  * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.min.json
  */
-
-/* eslint-disable id-length */
 
 /**
  * discord emoji names to unicode emojis
