@@ -94,17 +94,16 @@ export class DiscordManager {
 	/**
 	 * custom or basic emoji search by name
 	 *
-	 * @param fullMatch
-	 * @param inColon
+	 * @param name
 	 */
-	private _findEmojiByName(fullMatch: string, inColon: string) {
+	private _findEmojiByName(name: string) {
 		const emoji =
-			EMOJI_NAME_TO_UNICODE[fullMatch.replace(/(?<!:)[_-]+/g, '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
+			EMOJI_NAME_TO_UNICODE[name.replace(/(?<!^)[_-]+|:+/g, '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
 
 		if (emoji) return emoji;
 
 		const { value, similarity } = autocorrect(
-			inColon,
+			name,
 			// https://discord.com/developers/docs/resources/emoji#emoji-object name - ?string (can be null only in reaction emoji objects)
 			this.client.emojis.cache as Collection<string, GuildEmoji & { name: string }>,
 			'name',
@@ -175,9 +174,9 @@ export class DiscordManager {
 						// emojis (custom and default)
 						/(?<!<[at]?):(\S+):(?!\d{17,20}>)/g,
 						(match, p1: string) =>
-							this._findEmojiByName(match, p1) ??
+							this._findEmojiByName(p1) ??
 							match.replace(/:(\S+?):/g, (_match, _p1: string) =>
-								p1.length === _p1.length ? _match : this._findEmojiByName(_match, _p1) ?? _match,
+								p1.length === _p1.length ? _match : this._findEmojiByName(_p1) ?? _match,
 							),
 					)
 					.replace(

@@ -246,14 +246,15 @@ for (const { namesWithColons, surrogates } of data) {
 		if (!name.startsWith(':') || !name.endsWith(':')) continue;
 
 		// "_" and "-" are removed because the parser removes them too
-		unique.set(sanitizeName(name).replace(/(?<!:)[_-]+/g, ''), surrogates);
+		unique.set(
+			sanitizeName(name).replace(/(?<!:)[_-]+|:+/g, ''), // remove :, can't use names since have to check if :: is present to filter out certain names
+			surrogates,
+		);
 	}
 }
 
-for (const [namesWithColons, surrogates] of unique
-	.sort((_0, _1, a, b) => compareAlphabetically(a.slice(':'.length), b.slice(':'.length)))
-	.entries()) {
-	lines.push(`\t'${namesWithColons}': '${surrogates}',`);
+for (const [name, surrogates] of unique.sort((_0, _1, a, b) => compareAlphabetically(a, b)).entries()) {
+	lines.push(`\t'${name}': '${surrogates}',`);
 }
 
 // UNICODE_TO_EMOJI_NAME
