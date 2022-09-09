@@ -122,9 +122,9 @@ export class ChatBridge extends EventEmitter {
 	 */
 	public get logInfo() {
 		return {
-			bot: this.bot?.username ?? 'no bot',
+			bot: this.bot?.username ?? null,
 			botUuid: this.minecraft.botUuid,
-			guild: this.hypixelGuild?.name ?? 'no guild',
+			hypixelGuild: this.hypixelGuild?.logInfo ?? null,
 			mcAccount: this.mcAccount,
 		};
 	}
