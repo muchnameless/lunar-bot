@@ -222,6 +222,8 @@ const data = ((await (await fetch(url)).json()) as EmojiResponse).emojiDefinitio
 const lines: string[] = [];
 
 // header
+lines.push('/* eslint-disable id-length */'); // some keys are single chars
+lines.push('');
 lines.push('/**');
 lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/');
 lines.push(' * @link https://gitlab.emzi0767.dev/Emzi0767/discord-emoji');
@@ -233,8 +235,6 @@ lines.push(' */');
 lines.push('');
 
 // EMOJI_NAME_TO_UNICODE
-lines.push('/* eslint-disable id-length */'); // some keys are single chars
-lines.push('');
 lines.push('/**');
 lines.push(' * discord emoji names to unicode emojis');
 lines.push(' */');
