@@ -1,3 +1,5 @@
+- name: automerge
+  color: 0E8A16
 - name: blocked
   color: 'fc1423'
 - name: bug

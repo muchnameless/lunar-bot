@@ -1,10 +1,8 @@
 version = 1
 
 [merge]
-blocking_labels = ['blocked']
 delete_branch_on_merge = true
 method = 'squash'
-require_automerge_label = false
 
 [merge.message]
 include_coauthors = true
