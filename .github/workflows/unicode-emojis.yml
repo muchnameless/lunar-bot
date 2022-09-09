@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/scripts/generateEmojiParser.js'
 
 jobs:
   unicode-emojis:
