@@ -245,11 +245,8 @@ for (const { namesWithColons, surrogates } of data) {
 		// namesWithColons includes stuff like :-) too which should not be parsed
 		if (!name.startsWith(':') || !name.endsWith(':')) continue;
 
-		// "_" and "-" are removed because the parser removes them too
-		unique.set(
-			sanitizeName(name).replace(/(?<!:)[_-]+|:+/g, ''), // remove :, can't use names since have to check if :: is present to filter out certain names
-			surrogates,
-		);
+		// "_", "-" and ":" are removed because the parser removes them too. can't use names since have to check if :: is present to filter out certain names above
+		unique.set(sanitizeName(name).replace(/(?<!:)[_-]+|:+/g, ''), surrogates);
 	}
 }
 
