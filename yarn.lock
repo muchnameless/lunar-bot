@@ -4568,7 +4568,7 @@ __metadata:
     prismarine-chat: ^1.6.1
     prismarine-nbt: ^2.2.1
     re2: ^1.17.7
-    sequelize: ^6.21.5
+    sequelize: ^6.21.6
     timezonecomplete: ^5.12.4
     tslib: ^2.4.0
     typescript: ^4.9.0-dev.20220908
@@ -6292,9 +6292,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize@npm:^6.21.5":
-  version: 6.21.5
-  resolution: "sequelize@npm:6.21.5"
+"sequelize@npm:^6.21.6":
+  version: 6.21.6
+  resolution: "sequelize@npm:6.21.6"
   dependencies:
     "@types/debug": ^4.1.7
     "@types/validator": ^13.7.1
@@ -6329,7 +6329,7 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: 470c1ffe1288ad268c41880ee04e802426b4be515287caa82e6ff0cb894f66658a4047ff9c0dc1f2bad6444f46ad20ffb0e14cde8fd7738effece9cc5ecf654f
+  checksum: 0e2c9e1141200464cf4a959396ea554668f1c4444afdfa16b81b253c6dd61da7dba635b1547d6833b4575ecda9395ea50b58e052fd6e05e5afff5f6d682355e4
   languageName: node
   linkType: hard
 
