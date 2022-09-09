@@ -13,7 +13,6 @@
  * discord emoji names to unicode emojis
  */
 export const EMOJI_NAME_TO_UNICODE = {
-	_1tone1: '👎🏻',
 	_1tone2: '👎🏼',
 	_1tone3: '👎🏽',
 	_1tone4: '👎🏾',
