@@ -53,5 +53,5 @@ jobs:
             git checkout -b update-unicode-emojis/$(date +%F-%H-%M);
             git commit -sam "feat: update unicode emojis";
             git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)
-            gh pr create -t "feat: update unicode emojis" -B main;
+            gh pr create -t "feat: update unicode emojis" -b "new unicode emojis found" -B main;
           fi
