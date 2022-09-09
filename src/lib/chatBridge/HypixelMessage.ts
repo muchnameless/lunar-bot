@@ -95,15 +95,15 @@ export class HypixelMessage {
 	/**
 	 * message type
 	 */
-	public declare readonly type: HypixelMessageType | null;
+	public readonly type: HypixelMessageType | null;
 
-	public declare readonly author: HypixelMessageAuthor | null;
+	public readonly author: HypixelMessageAuthor | null;
 
 	public readonly content: string;
 
 	public readonly spam: boolean;
 
-	public declare readonly commandData: CommandData | null;
+	public readonly commandData: CommandData | null;
 
 	/**
 	 * @param chatBridge
@@ -210,10 +210,6 @@ export class HypixelMessage {
 			this.spam = spamMessages.test(this.content);
 			this.commandData = null;
 		}
-	}
-
-	public get logInfo() {
-		return this.author?.ign ?? 'unknown author';
 	}
 
 	public get prefixReplacedContent() {
@@ -364,7 +360,7 @@ export class HypixelMessage {
 
 			return discordMessage;
 		} catch (error) {
-			logger.error(error, '[FORWARD TO DC]');
+			logger.error(error, '[FORWARD TO DISCORD]');
 			return null;
 		}
 	}
@@ -386,7 +382,7 @@ export class HypixelMessage {
 				player?.imageURL ??
 				(await mojang.ign(this.author!.ign).then(
 					({ uuid }) => uuidToBustURL(uuid),
-					(error) => logger.error(error, '[FORWARD TO DC]'),
+					(error) => logger.error(error, '[FORWARD TO DISCORD]'),
 				)) ??
 				(member?.guild.members.me ?? this.client.user)?.displayAvatarURL(),
 			allowedMentions: {

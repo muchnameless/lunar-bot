@@ -16,7 +16,14 @@ export default class GuildMemberAddEvent extends Event {
 
 		if (!player) return;
 
-		player.link(member, 'linked player joined discord server').catch((error) => logger.error(error));
+		player
+			.link(member, 'linked player joined discord server')
+			.catch((error) =>
+				logger.error(
+					{ err: error, player: player.logInfo, member: GuildMemberUtil.logInfo(member) },
+					'[GUILD MEMBER ADD]',
+				),
+			);
 
 		// member is not from the hypixel guild's discord guild
 		if (player.hypixelGuild?.discordId !== member.guild.id) return;

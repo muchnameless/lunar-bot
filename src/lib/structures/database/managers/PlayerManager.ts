@@ -28,6 +28,11 @@ import { logger } from '#logger';
 
 export class PlayerManager extends ModelManager<Player> {
 	/**
+	 * number of max concurrent requests to the Mojang API
+	 */
+	private readonly _updateIgnBatchSize = 10;
+
+	/**
 	 * player db xp update
 	 */
 	private _updateXpPromise: Promise<this> | null = null;
@@ -320,8 +325,10 @@ export class PlayerManager extends ModelManager<Player> {
 		>();
 
 		// API calls
-		await Promise.all(
-			this.cache.map(async (player) => {
+		const promises: Promise<unknown>[] = [];
+
+		try {
+			const updateSingle = async (player: Player) => {
 				const result = await player.updateIgn();
 				if (!result) return;
 
@@ -336,8 +343,22 @@ export class PlayerManager extends ModelManager<Player> {
 						};
 					})
 					.ignChanges.push(`${result.oldIgn} -> ${result.newIgn}`);
-			}),
-		);
+			};
+
+			// batch requests
+			for (const player of this.cache.values()) {
+				if (promises.length === this._updateIgnBatchSize) {
+					await Promise.all(promises);
+					promises.length = 0;
+				}
+
+				promises.push(updateSingle(player));
+			}
+
+			if (promises.length) await Promise.all(promises);
+		} catch (error) {
+			logger.error(error, '[UPDATE IGNS]');
+		}
 
 		// no changes
 		if (!log.size) return this;

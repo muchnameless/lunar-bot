@@ -1,6 +1,7 @@
 import { minutes, retry, safePromiseAll } from '#functions';
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event.js';
+import { UserUtil } from '#utils';
 
 export default class ReadyEvent extends Event {
 	public override readonly once = true;
@@ -24,7 +25,7 @@ export default class ReadyEvent extends Event {
 	 * event listener callback
 	 */
 	public override async run() {
-		logger.info(`[READY]: logged in as ${this.client.user!.tag}`);
+		logger.info(UserUtil.logInfo(this.client.user!), '[READY]: logged in');
 
 		this.client.db.schedule();
 

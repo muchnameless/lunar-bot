@@ -35,7 +35,7 @@ import {
 	type TextBasedChannel,
 	type WebhookEditMessageOptions,
 } from 'discord.js';
-import { MessageUtil, ChannelUtil, UserUtil, type SendDMOptions } from './index.js';
+import { ChannelUtil, MessageUtil, UserUtil, type SendDMOptions } from './index.js';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '#constants';
 import {
 	assertNever,
@@ -466,7 +466,7 @@ export class InteractionUtil extends null {
 
 		if (interaction.replied) {
 			if (options?.rejectOnError) {
-				throw new Error(`${Object.entries(this.logInfo(interaction))}: already replied`);
+				throw new Error('already replied');
 			}
 
 			return logger.warn({ ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER REPLY]: already replied');
@@ -782,12 +782,7 @@ export class InteractionUtil extends null {
 			await this.deferUpdate(interaction, { rejectOnError: true });
 
 			if (MessageUtil.isEphemeral(interaction.message)) {
-				logger.warn(
-					this.logInfo(interaction),
-					`[INTERACTION DELETE MESSAGE]: unable to delete ephemeral message in ${MessageUtil.channelLogInfo(
-						interaction.message,
-					)}`,
-				);
+				logger.warn(this.logInfo(interaction), '[INTERACTION DELETE MESSAGE]: ephemeral message');
 				return null;
 			}
 

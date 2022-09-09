@@ -45,7 +45,6 @@ import {
 	GuildMemberUtil,
 	GuildUtil,
 	InteractionUtil,
-	LeaderboardUtil,
 	MessageUtil,
 	UserUtil,
 	type InteractionUtilReplyOptions,
@@ -63,7 +62,6 @@ ChannelUtil;
 EmbedUtil;
 GuildMemberUtil;
 GuildUtil;
-LeaderboardUtil;
 MessageUtil;
 calculateItemPrice;
 accessories;
@@ -283,7 +281,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 		} catch (error) {
 			stopwatch.stop();
 
-			logger.debug(error, '[EVAL]');
+			logger.debug(error, '[EVAL CMD]');
 
 			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
 		}

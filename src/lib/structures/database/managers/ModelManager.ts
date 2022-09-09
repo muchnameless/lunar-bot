@@ -85,7 +85,7 @@ export class ModelManager<M extends Model> {
 
 			return entry;
 		} catch (error) {
-			logger.error(error, `[${this.constructor.name} FETCH]`);
+			logger.error({ err: error, options: { cache, where } }, `[${this.constructor.name} FETCH]`);
 			return null;
 		}
 	}

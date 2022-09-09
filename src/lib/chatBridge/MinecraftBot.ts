@@ -45,7 +45,7 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 		bot[SPAWN_EVENTS.has(name as any) ? 'once' : 'on'](name, callback.bind(null, chatBridge));
 	}
 
-	logger.debug(`[CREATE BOT]: ${events.length} event${events.length === 1 ? '' : 's'} loaded`);
+	logger.debug({ events: events.length }, '[CREATE BOT]: events loaded');
 
 	return bot;
 }

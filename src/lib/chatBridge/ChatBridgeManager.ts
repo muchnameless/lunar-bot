@@ -180,19 +180,20 @@ export class ChatBridgeManager {
 
 				res.push(minecraftResult && Boolean(discordResult));
 			} catch (error) {
-				logger.error(error, `[HANDLE ANNOUNCEMENT MSG]: ${hypixelGuild}`);
+				logger.error({ err: error, hypixelGuild: hypixelGuild.logInfo }, '[HANDLE ANNOUNCEMENT MESSAGE]');
 				res.push(false);
 			}
 		}
 
 		// handle results
 		if (res.length && !res.includes(false)) {
-			// remove :x: reaction from bot if existant
-			if (message.reactions.cache.get(UnicodeEmoji.X)?.me) {
-				message.reactions.cache
-					.get(UnicodeEmoji.X)!
-					.users.remove(this.client.user!)
-					.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
+			// remove :x: reaction from bot if existent
+			const errorReaction = message.reactions.cache.get(UnicodeEmoji.X);
+
+			if (errorReaction?.me) {
+				errorReaction.users
+					.remove(this.client.user!)
+					.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MESSAGE]'));
 			}
 		} else {
 			void MessageUtil.react(message, UnicodeEmoji.X);

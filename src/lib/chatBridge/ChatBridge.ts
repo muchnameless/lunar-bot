@@ -121,7 +121,12 @@ export class ChatBridge extends EventEmitter {
 	 * bot ign | guild name
 	 */
 	public get logInfo() {
-		return `${this.bot?.username ?? 'no bot'} | ${this.hypixelGuild ?? 'no guild'}`;
+		return {
+			bot: this.bot?.username ?? 'no bot',
+			botUuid: this.minecraft.botUuid,
+			guild: this.hypixelGuild?.name ?? 'no guild',
+			mcAccount: this.mcAccount,
+		};
 	}
 
 	/**
@@ -226,13 +231,13 @@ export class ChatBridge extends EventEmitter {
 			if (!hypixelGuild) {
 				this.unlink();
 
-				logger.error(`[CHATBRIDGE]: ${this.bot!.username}: no matching guild found`);
+				logger.error(this.logInfo, '[CHATBRIDGE]: no matching guild found');
 				return this;
 			}
 
 			// already linked to this guild
 			if (hypixelGuild.guildId === this.hypixelGuild?.guildId) {
-				logger.debug(`[CHATBRIDGE]: ${this.logInfo}: already linked`);
+				logger.debug(this.logInfo, '[CHATBRIDGE]: already linked');
 				return this;
 			}
 
@@ -241,7 +246,7 @@ export class ChatBridge extends EventEmitter {
 
 			this.emit(ChatBridgeEvent.Linked);
 
-			logger.info(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot!.username}`);
+			logger.info(this.logInfo, '[CHATBRIDGE]: linked');
 
 			// instantiate DiscordChannelManagers
 			await this.discord.init();
@@ -250,10 +255,10 @@ export class ChatBridge extends EventEmitter {
 
 			return this;
 		} catch (error) {
-			logger.error(error, `[CHATBRIDGE LINK]: #${this.mcAccount}`);
+			logger.error({ err: error, ...this.logInfo }, '[CHATBRIDGE LINK]');
 
 			if (!this.shouldRetryLinking) {
-				logger.error(`[CHATBRIDGE LINK]: #${this.mcAccount}: aborting retry due to a critical error`);
+				logger.error(this.logInfo, '[CHATBRIDGE LINK]: aborting retry due to a critical error');
 				return this;
 			}
 
@@ -324,7 +329,7 @@ export class ChatBridge extends EventEmitter {
 			try {
 				await once(this, ChatBridgeEvent.Linked, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {
-				logger.error(error, `[HANDLE DISCORD MESSAGE]: ${this.logInfo}: not linked`);
+				logger.error({ err: error, ...this.logInfo }, '[HANDLE DISCORD MESSAGE]: not linked');
 				return this.handleError(message);
 			}
 		}
@@ -334,7 +339,7 @@ export class ChatBridge extends EventEmitter {
 			try {
 				await once(this, ChatBridgeEvent.Ready, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {
-				logger.error(error, `[HANDLE DISCORD MESSAGE]: ${this.logInfo}: minecraft not ready`);
+				logger.error({ err: error, ...this.logInfo }, '[HANDLE DISCORD MESSAGE]: minecraft not ready');
 				return this.handleError(message);
 			}
 		}

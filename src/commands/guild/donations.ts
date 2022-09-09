@@ -49,7 +49,7 @@ export default class DonationsCommand extends ApplicationCommand {
 				.map(async ([minecraftUuid, amount], index) => {
 					const IGN =
 						this.client.players.cache.get(minecraftUuid)?.ign ??
-						(await mojang.uuid(minecraftUuid).catch((error) => logger.error(error)))?.ign ??
+						(await mojang.uuid(minecraftUuid).catch((error) => logger.error(error, '[DONATIONS CMD]')))?.ign ??
 						minecraftUuid;
 					const notes = reducedNotes[minecraftUuid]!.join('\n');
 

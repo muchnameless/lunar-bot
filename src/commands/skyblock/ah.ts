@@ -161,7 +161,7 @@ export default class AhCommand extends ApplicationCommand {
 				],
 			};
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, '[AH CMD]');
 
 			return {
 				embeds: [
@@ -307,7 +307,7 @@ export default class AhCommand extends ApplicationCommand {
 				}),
 			);
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, '[AH CMD]');
 			return InteractionUtil.reply(interaction, formatError(error));
 		}
 	}

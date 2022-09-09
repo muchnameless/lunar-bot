@@ -1,9 +1,11 @@
 import { type Config } from '../models/Config.js';
 import { ModelManager } from './ModelManager.js';
 import { type ConfigValues } from '#constants';
-import { logger } from '#logger';
+import { Warnings } from '#structures/Warnings.js';
 
 export class ConfigManager extends ModelManager<Config> {
+	public readonly invalidKeyWarnings = new Warnings<string | null | undefined>();
+
 	/**
 	 * upserts a config entry
 	 *
@@ -37,7 +39,7 @@ export class ConfigManager extends ModelManager<Config> {
 		return (
 			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 			this.cache.get(key?.toUpperCase()!)?.parsedValue ??
-			(logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`), null)
+			(this.invalidKeyWarnings.emit(key, { key }, '[CONFIG GET]: invalid key'), null)
 		);
 	}
 }

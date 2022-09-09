@@ -261,7 +261,7 @@ export class DatabaseManager {
 
 										paidLog.push(`${player}: ${formatNumber(amount)}`);
 									} catch (error) {
-										logger.error(error);
+										logger.error({ err: error, player: player.logInfo, taxCollector: taxCollector.logInfo });
 										paidLog.push(`${player}: ${error}`);
 									}
 								}),
@@ -278,7 +278,7 @@ export class DatabaseManager {
 					);
 				}
 			} catch (error) {
-				logger.error(error, `[UPDATE TAX DB]: ${taxCollector}`);
+				logger.error({ err: error, taxCollector: taxCollector.logInfo }, '[UPDATE TAX DB]');
 				apiError = true;
 				availableAuctionsLog.push({
 					ign: taxCollector.ign,
@@ -460,12 +460,15 @@ export class DatabaseManager {
 				!taxChannel?.isTextBased() ||
 				((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)
 			) {
-				logger.warn('[TAX MESSAGE] tax channel error');
+				logger.warn({ taxChannel: ChannelUtil.logInfo(taxChannel) }, '[TAX MESSAGE] tax channel error');
 				return this;
 			}
 
 			if (!ChannelUtil.botPermissions(taxChannel).has(PermissionFlagsBits.ViewChannel, false)) {
-				logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+				logger.warn(
+					{ taxChannel: ChannelUtil.logInfo(taxChannel) },
+					'[TAX MESSAGE]: missing permission to edit taxMessage',
+				);
 				return this;
 			}
 
@@ -477,7 +480,10 @@ export class DatabaseManager {
 				try {
 					taxMessage = await taxChannel.messages.fetch(TAX_MESSAGE_ID);
 				} catch (error) {
-					logger.error(error, '[TAX MESSAGE]: fetch');
+					logger.error(
+						{ err: error, taxChannel: ChannelUtil.logInfo(taxChannel), taxMessageId: TAX_MESSAGE_ID },
+						'[TAX MESSAGE]: fetch',
+					);
 
 					// abort updating if the error is not 'unknown message (-> message was deleted)'
 					if (!(error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage)) {
@@ -494,7 +500,10 @@ export class DatabaseManager {
 				});
 
 				void config.set('TAX_MESSAGE_ID', id);
-				logger.info('[TAX MESSAGE]: created new taxMessage');
+				logger.info(
+					{ taxChannel: ChannelUtil.logInfo(taxChannel), taxMessageId: id },
+					'[TAX MESSAGE]: created new taxMessage',
+				);
 				return this;
 			}
 

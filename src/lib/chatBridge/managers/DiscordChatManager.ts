@@ -218,7 +218,7 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	async #fetchOrCreateWebhook() {
 		if (!this.hypixelGuild) {
-			logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
+			logger.warn(this.logInfo, '[CHATBRIDGE]: no guild to fetch webhook');
 			return this;
 		}
 
@@ -259,7 +259,10 @@ export class DiscordChatManager extends ChatManager {
 
 			this._setWebhook(webhook);
 
-			logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild}: #${channel.name} webhook fetched and cached`);
+			logger.debug(
+				{ ...this.logInfo, channel: ChannelUtil.logInfo(channel) },
+				'[CHATBRIDGE]: webhook fetched and cached',
+			);
 			return this;
 		} catch (error) {
 			if (error instanceof WebhookError) {
@@ -314,7 +317,7 @@ export class DiscordChatManager extends ChatManager {
 				await InteractionUtil.followUp(interaction, { ...options, ephemeral: true, rejectOnError: true });
 				return; // successfull
 			} catch (error) {
-				logger.error(error, `[SEND PRIVATE MESSAGE]: ${this.logInfo}`);
+				logger.error({ err: error, ...this.logInfo }, '[SEND DM]');
 
 				if (InteractionUtil.isInteractionError(error)) {
 					this.interactionUserCache.delete(user.id);
@@ -335,13 +338,13 @@ export class DiscordChatManager extends ChatManager {
 		// chat bridge disabled
 		if (!this.chatBridge.isEnabled()) {
 			abortController?.abort();
-			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: not enabled`);
+			throw new Error('[SEND VIA WEBHOOK]: ChatBridge not enabled');
 		}
 
 		// no content
 		if (!options.content) {
 			abortController?.abort();
-			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: no content`);
+			throw new Error('[SEND VIA WEBHOOK]: no message content');
 		}
 
 		// async queue
@@ -366,7 +369,7 @@ export class DiscordChatManager extends ChatManager {
 			if (!this.isReady()) {
 				await this._fetchOrCreateWebhook();
 
-				if (!this.isReady()) throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: not ready`);
+				if (!this.isReady()) throw new Error('[SEND VIA WEBHOOK]: ChatBridge not ready');
 			}
 
 			// API request
@@ -374,7 +377,7 @@ export class DiscordChatManager extends ChatManager {
 		} catch (error) {
 			// webhook deleted
 			if (error instanceof DiscordAPIError && error.status === 404) {
-				logger.error(error, `[SEND VIA WEBHOOK]: ${this.logInfo}: webhook deleted -> recreating & resending`);
+				logger.error({ err: error, ...this.logInfo }, '[SEND VIA WEBHOOK]: webhook deleted -> recreating & resending');
 
 				// try to obtain another webhook
 				this._setWebhook(null);
@@ -402,7 +405,7 @@ export class DiscordChatManager extends ChatManager {
 		try {
 			discordMessage = await hypixelMessage?.discordMessage;
 		} catch (error) {
-			logger.error(error, `[SEND VIA BOT]: ${this.logInfo}`);
+			logger.error({ err: error, ...this.logInfo }, '[SEND VIA BOT]');
 		}
 
 		const _options: SendViaBotOptions = {
@@ -547,7 +550,7 @@ export class DiscordChatManager extends ChatManager {
 							// try to upload URL
 							return (await imgur.uploadURL(url.toString(), signal)).data.link;
 						} catch (error) {
-							logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}`);
+							logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]');
 							return match[0];
 						}
 					},
@@ -576,7 +579,7 @@ export class DiscordChatManager extends ChatManager {
 					try {
 						contentParts.push((await imgur.uploadURL(url, signal)).data.link);
 					} catch (error) {
-						logger.error(error, '[UPLOAD ATTACHMENTS]');
+						logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]');
 						contentParts.push(DiscordChatManager._getAttachmentName(name, contentType));
 					}
 				}
@@ -600,7 +603,7 @@ export class DiscordChatManager extends ChatManager {
 					contentParts.unshift(`@${await DiscordChatManager.getPlayerName(referencedMessage)}`);
 				}
 			} catch (error) {
-				logger.error(error, `[FORWARD DC TO MC]: ${this.logInfo}: error fetching reference`);
+				logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]: error fetching reference');
 			}
 		}
 
@@ -655,8 +658,8 @@ export class DiscordChatManager extends ChatManager {
 									.fetch(messageInteraction.user.id)
 									.catch((error) =>
 										logger.error(
-											error,
-											`[FORWARD DC TO MC]: ${this.logInfo}: error fetching messageInteraction member`,
+											{ err: error, ...this.logInfo },
+											'[FORWARD TO MINECRAFT]: error fetching messageInteraction member',
 										),
 									)
 							)?.displayName ??

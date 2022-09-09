@@ -48,7 +48,7 @@ export default class LinkCommand extends ApplicationCommand {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
 			guildId = (await hypixel.guild.player(uuid)).guild?._id ?? null;
 		} catch (error) {
-			logger.error(error, '[LINK]');
+			logger.error(error, '[LINK CMD]');
 		}
 
 		let player: Player | null = null;
@@ -128,10 +128,10 @@ export default class LinkCommand extends ApplicationCommand {
 					linkedUserIsDeleted = true;
 					logger.error(
 						{ err: error, ...player.logInfo, discordId: playerLinkedToId.discordId },
-						'[LINK]: deleted discord user',
+						'[LINK CMD]: deleted discord user',
 					);
 				} else {
-					logger.error({ err: error, ...player.logInfo }, '[LINK]: error fetching already linked user');
+					logger.error({ err: error, ...player.logInfo }, '[LINK CMD]: error fetching already linked user');
 				}
 			}
 
@@ -187,7 +187,7 @@ export default class LinkCommand extends ApplicationCommand {
 			interaction.options.getMember('user') ??
 			(await guild?.members
 				.fetch(user)
-				.catch((error) => logger.error(error, '[LINK]: error fetching member to link'))) ??
+				.catch((error) => logger.error(error, '[LINK CMD]: error fetching member to link'))) ??
 			null;
 
 		// no discord member for the user to link found

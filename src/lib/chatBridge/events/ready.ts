@@ -16,6 +16,6 @@ export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 		// set bot to ready
 		this.chatBridge.minecraft.state = MinecraftChatManagerState.Ready;
 
-		logger.debug(`[CHATBRIDGE READY]: ${this.chatBridge.logInfo}: spawned and ready`);
+		logger.debug(this.chatBridge.logInfo, '[CHATBRIDGE READY]: spawned and ready');
 	}
 }

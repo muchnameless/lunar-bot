@@ -133,7 +133,7 @@ export default class ReloadCommand extends ApplicationCommand {
 				} catch (error) {
 					logger.error(
 						{ err: error, subcommand, fileName, propertyName },
-						'an error occurred while reloading the filter',
+						'[RELOAD CMD]: an error occurred while reloading the filter',
 					);
 
 					throw stripIndents`
@@ -194,11 +194,11 @@ export default class ReloadCommand extends ApplicationCommand {
 
 							await this.collection.loadFromFile(commandFile, { reload });
 
-							logger.info(`command ${commandName} was reloaded successfully`);
+							logger.info({ commandName }, '[RELOAD CMD]: command was reloaded successfully');
 
 							return InteractionUtil.reply(interaction, `command \`${commandName}\` was reloaded successfully`);
 						} catch (error) {
-							logger.error(error, 'an error occurred while reloading');
+							logger.error({ err: error, commandName }, '[RELOAD CMD]: an error occurred while reloading');
 
 							throw stripIndents`
 								an error occurred while reloading \`${commandName}\`:
@@ -216,7 +216,7 @@ export default class ReloadCommand extends ApplicationCommand {
 								`${this.collection.size} command${this.collection.size === 1 ? '' : 's'} were reloaded successfully`,
 							);
 						} catch (error) {
-							logger.error(error, 'an error occurred while reloading all commands');
+							logger.error(error, '[RELOAD CMD]: an error occurred while reloading all commands');
 
 							throw stripIndents`
 								an error occurred while reloading all commands:
@@ -249,11 +249,11 @@ export default class ReloadCommand extends ApplicationCommand {
 
 							({ name: eventName } = await this.client.events.loadFromFile(eventFile, { force, reload }));
 
-							logger.info(`event ${eventName} was reloaded successfully`);
+							logger.info({ eventName }, 'event was reloaded successfully');
 
 							return InteractionUtil.reply(interaction, `event \`${eventName}\` was reloaded successfully`);
 						} catch (error) {
-							logger.error(error, 'an error occurred while reloading');
+							logger.error({ err: error, eventName }, '[RELOAD CMD]: an error occurred while reloading');
 
 							throw stripIndents`
 								an error occurred while reloading \`${eventName}\`:
@@ -273,7 +273,7 @@ export default class ReloadCommand extends ApplicationCommand {
 								} were reloaded successfully`,
 							);
 						} catch (error) {
-							logger.error(error, 'an error occurred while reloading all events');
+							logger.error(error, '[RELOAD CMD]: an error occurred while reloading all events');
 
 							throw stripIndents`
 								an error occurred while reloading all events:

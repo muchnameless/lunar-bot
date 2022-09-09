@@ -85,7 +85,8 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 				++success;
 
 				logger.info(
-					`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`,
+					{ rolesToPurge: rolesToPurge.length, member: GuildMemberUtil.logInfo(member) },
+					'[PURGE ROLES CMD]: removed roles',
 				);
 			}
 

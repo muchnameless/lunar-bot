@@ -57,7 +57,7 @@ export default class VerifyCommand extends ApplicationCommand {
 
 			({ player: hypixelPlayer } = await hypixel.player.uuid(uuid));
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, '[VERIFY CMD]');
 			return InteractionUtil.reply(interaction, formatError(error));
 		}
 
@@ -97,7 +97,7 @@ export default class VerifyCommand extends ApplicationCommand {
 					},
 				});
 			} catch (error) {
-				logger.error(error, '[VERIFY]: database');
+				logger.error(error, '[VERIFY CMD]: database');
 				return InteractionUtil.reply(
 					interaction,
 					`an error occurred while updating the guild player database. Contact ${userMention(this.client.ownerId)}`,
@@ -110,7 +110,7 @@ export default class VerifyCommand extends ApplicationCommand {
 			interaction.member ??
 			(await InteractionUtil.getHypixelGuild(interaction)
 				.discordGuild?.members.fetch(interaction.user)
-				.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??
+				.catch((error) => logger.error(error, '[VERIFY CMD]: guild member fetch'))) ??
 			null;
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');

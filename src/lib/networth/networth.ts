@@ -21,7 +21,9 @@ import {
 } from './functions/index.js';
 import { accessories, getPrice, itemUpgrades, prices, unknownItemIdWarnings, type ItemUpgrade } from './prices.js';
 import { hypixel } from '#api';
-import { logger } from '#logger';
+import { Warnings } from '#structures/Warnings.js';
+
+const unknownStarredItemWarnings = new Warnings<string>();
 
 /**
  * parse base64 item_data strings and calculate item prices
@@ -266,7 +268,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 			price += essencePrice * PriceModifier.Essence;
 		} else {
-			logger.warn(`[NETWORTH]: unknown starred item '${itemId}', originTag: '${extraAttributes.originTag}'`);
+			unknownStarredItemWarnings.emit(
+				itemId,
+				{ itemId, originTag: extraAttributes.originTag },
+				'[NETWORTH]: unknown starred item',
+			);
 		}
 	}
 

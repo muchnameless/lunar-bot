@@ -12,7 +12,7 @@ export default class GuildUnavailableEvent extends Event {
 	 * @param guild
 	 */
 	public override run(guild: ClientEvents[Events.GuildUnavailable][0]) {
-		logger.info(`[GUILD UNAVAILABLE]: ${guild.name}`);
+		logger.info(GuildUtil.logInfo(guild), '[GUILD UNAVAILABLE]');
 
 		// sweep linked discord members cache
 		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
@@ -30,7 +30,7 @@ export default class GuildUnavailableEvent extends Event {
 				await GuildUtil.fetchAllMembers(guild);
 				clearInterval(interval);
 			} catch (error) {
-				logger.error(error, `[GUILD UNAVAILABLE]: ${guild.name}`);
+				logger.error({ err: error, ...GuildUtil.logInfo(guild) }, '[GUILD UNAVAILABLE]');
 			}
 		}, minutes(5));
 	}

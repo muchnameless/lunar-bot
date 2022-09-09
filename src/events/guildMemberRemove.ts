@@ -26,7 +26,14 @@ export default class GuildMemberRemoveEvent extends Event {
 		if (player?.hypixelGuild?.discordId !== member.guild.id) return;
 
 		// uncaches the member as well
-		player.update({ inDiscord: false }).catch((error) => logger.error(error));
+		player
+			.update({ inDiscord: false })
+			.catch((error) =>
+				logger.error(
+					{ err: error, player: player.logInfo, member: GuildMemberUtil.logInfo(member) },
+					'[GUILD MEMBER REMOVE]',
+				),
+			);
 
 		void this.client.log(
 			EmbedUtil.padFields(

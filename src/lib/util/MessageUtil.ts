@@ -15,7 +15,7 @@ import {
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
-import { ChannelUtil, EmbedUtil, type SendOptions } from './index.js';
+import { ChannelUtil, EmbedUtil, UserUtil, type SendOptions } from './index.js';
 import { commaListAnd, minutes } from '#functions';
 import { logger } from '#logger';
 
@@ -48,8 +48,14 @@ export class MessageUtil extends null {
 	/**
 	 * @param message
 	 */
-	public static channelLogInfo(message: Message) {
-		return ChannelUtil.logInfo(message.channel) ?? message.channelId;
+	public static logInfo(message: Message) {
+		return {
+			messageId: message.id,
+			content: message.content,
+			type: MessageType[message.type],
+			author: UserUtil.logInfo(message.author),
+			channel: ChannelUtil.logInfo(message.channel),
+		};
 	}
 
 	/**
@@ -141,10 +147,7 @@ export class MessageUtil extends null {
 				false,
 			)
 		) {
-			logger.warn(
-				{ message, data: emojis },
-				`[MESSAGE REACT]: missing permissions to react in ${this.channelLogInfo(message)}`,
-			);
+			logger.warn({ ...this.logInfo(message), data: emojis }, '[MESSAGE REACT]: missing permissions');
 			return null;
 		}
 
@@ -160,10 +163,7 @@ export class MessageUtil extends null {
 		}
 
 		if (this.isEphemeral(message)) {
-			logger.warn(
-				{ message, data: emojis },
-				`[MESSAGE REACT]: unable to react to ephemeral message in ${this.channelLogInfo(message)}`,
-			);
+			logger.warn({ ...this.logInfo(message), data: emojis }, '[MESSAGE REACT]: ephemeral message');
 			return null;
 		}
 
@@ -172,7 +172,7 @@ export class MessageUtil extends null {
 			try {
 				return await this._reactSingle(message, emojis[0]!);
 			} catch (error) {
-				logger.error({ message, err: error, data: emojis }, `[MESSAGE REACT]: in ${this.channelLogInfo(message)}`);
+				logger.error({ err: error, ...this.logInfo(message), data: emojis }, '[MESSAGE REACT]');
 				return null;
 			}
 		}
@@ -185,7 +185,7 @@ export class MessageUtil extends null {
 				res.push(await this._reactSingle(message, emojiIndetifier));
 			}
 		} catch (error) {
-			logger.error({ message, err: error, data: emojis }, `[MESSAGE REACT]: in ${this.channelLogInfo(message)}`);
+			logger.error({ err: error, ...this.logInfo(message), data: emojis }, '[MESSAGE REACT]');
 		}
 
 		return res;
@@ -199,17 +199,14 @@ export class MessageUtil extends null {
 	public static async delete(message: Message): Promise<Message> {
 		// permission check
 		if (!message.deletable) {
-			logger.warn(
-				message,
-				`[MESSAGE DELETE]: missing permissions to delete message in ${this.channelLogInfo(message)}`,
-			);
+			logger.warn(this.logInfo(message), '[MESSAGE DELETE]: missing permissions to delete message');
 			return message;
 		}
 
 		try {
 			return await message.delete();
 		} catch (error) {
-			logger.error({ message, err: error }, `[MESSAGE DELETE]: in ${this.channelLogInfo(message)}`);
+			logger.error({ err: error, ...this.logInfo(message) }, '[MESSAGE DELETE]');
 			return message;
 		}
 	}
@@ -242,7 +239,7 @@ export class MessageUtil extends null {
 
 			return collected.first()?.content ?? null;
 		} catch (error) {
-			logger.error(error);
+			logger.error({ err: error, options }, '[MESSAGE AWAIT REPLY]');
 			return null;
 		}
 	}
@@ -274,7 +271,7 @@ export class MessageUtil extends null {
 				error.code === RESTJSONErrorCodes.InvalidFormBodyOrContentType &&
 				((error.rawError as DiscordErrorData).errors as Record<string, unknown> | undefined)?.message_reference
 			) {
-				logger.error({ err: error, data: _options }, `[MESSAGE REPLY]: in ${this.channelLogInfo(message)}`);
+				logger.error({ err: error, ...this.logInfo(message), data: _options }, '[MESSAGE REPLY]');
 
 				// don't change pinging behaviour and don't modify allowedMentions.users ref
 				const allowedMentions = _options.allowedMentions ?? message.client.options.allowedMentions ?? {};
@@ -303,7 +300,7 @@ export class MessageUtil extends null {
 			}
 
 			if (_options.rejectOnError) throw error;
-			logger.error({ err: error, data: _options }, `[MESSAGE REPLY]: in ${this.channelLogInfo(message)}`);
+			logger.error({ err: error, ...this.logInfo(message), data: _options }, '[MESSAGE REPLY]');
 			return null;
 		}
 	}
@@ -331,7 +328,7 @@ export class MessageUtil extends null {
 				const MESSAGE = 'missing permissions to edit message';
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+				logger.warn({ ...this.logInfo(message), data: _options }, `[MESSAGE EDIT]: ${MESSAGE}`);
 				return message;
 			}
 
@@ -342,7 +339,7 @@ export class MessageUtil extends null {
 			const MESSAGE = `content length ${_options.content!.length} > ${MessageLimits.MaximumLength}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			logger.warn({ ...this.logInfo(message), data: _options }, `[MESSAGE EDIT]: ${MESSAGE}`);
 			return message;
 		}
 
@@ -351,7 +348,7 @@ export class MessageUtil extends null {
 				const MESSAGE = `embeds length ${_options.embeds.length} > ${MessageLimits.MaximumEmbeds}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+				logger.warn({ ...this.logInfo(message), data: _options }, `[MESSAGE EDIT]: ${MESSAGE}`);
 				return message;
 			}
 
@@ -361,7 +358,7 @@ export class MessageUtil extends null {
 				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EmbedLimits.MaximumTotalCharacters}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ message, data: _options }, `[MESSAGE EDIT]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+				logger.warn({ ...this.logInfo(message), data: _options }, `[MESSAGE EDIT]: ${MESSAGE}`);
 				return message;
 			}
 
@@ -379,7 +376,7 @@ export class MessageUtil extends null {
 			}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(`[MESSAGE EDIT]: ${MESSAGE} in ${ChannelUtil.logInfo(message.channel)}`);
+			logger.warn(this.logInfo(message), `[MESSAGE EDIT]: ${MESSAGE}`);
 			return message;
 		}
 
@@ -387,7 +384,7 @@ export class MessageUtil extends null {
 			return await message.edit(_options);
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
-			logger.error({ message, err: error }, `[MESSAGE EDIT]: in ${this.channelLogInfo(message)}`);
+			logger.error({ err: error, ...this.logInfo(message) }, '[MESSAGE EDIT]');
 			return message;
 		}
 	}
@@ -403,7 +400,7 @@ export class MessageUtil extends null {
 			const MESSAGE = 'message is already pinned';
 
 			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			logger.warn(this.logInfo(message), `[MESSAGE PIN]: ${MESSAGE}`);
 			return message;
 		}
 
@@ -411,7 +408,7 @@ export class MessageUtil extends null {
 			const MESSAGE = 'missing permissions to pin message';
 
 			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE PIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			logger.warn(this.logInfo(message), `[MESSAGE PIN]: ${MESSAGE}`);
 			return message;
 		}
 
@@ -419,7 +416,7 @@ export class MessageUtil extends null {
 			return await message.pin();
 		} catch (error) {
 			if (rejectOnError) throw error;
-			logger.error({ message, err: error }, `[MESSAGE PIN]: in ${this.channelLogInfo(message)}`);
+			logger.error({ err: error, ...this.logInfo(message) }, '[MESSAGE PIN]');
 			return message;
 		}
 	}
@@ -435,7 +432,7 @@ export class MessageUtil extends null {
 			const MESSAGE = 'message is not pinned';
 
 			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			logger.warn(this.logInfo(message), `[MESSAGE UNPIN]: ${MESSAGE}`);
 			return message;
 		}
 
@@ -443,7 +440,7 @@ export class MessageUtil extends null {
 			const MESSAGE = 'missing permissions to unpin message';
 
 			if (rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ message }, `[MESSAGE UNPIN]: ${MESSAGE} in ${this.channelLogInfo(message)}`);
+			logger.warn(this.logInfo(message), `[MESSAGE UNPIN]: ${MESSAGE}`);
 			return message;
 		}
 
@@ -451,7 +448,7 @@ export class MessageUtil extends null {
 			return await message.unpin();
 		} catch (error) {
 			if (rejectOnError) throw error;
-			logger.error({ message, err: error }, `[MESSAGE UNPIN]: in ${this.channelLogInfo(message)}`);
+			logger.error({ err: error, ...this.logInfo(message) }, '[MESSAGE UNPIN]');
 			return message;
 		}
 	}

@@ -300,7 +300,7 @@ export default class TaxCommand extends ApplicationCommand {
 						// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 						const fetched: Collection<string, Message> | void = await interaction.channel?.messages
 							.fetch({ after: replyMessage.id })
-							.catch((error) => logger.error(error, '[TAX REMINDER]: ghost ping'));
+							.catch((error) => logger.error(error, '[TAX CMD]: ghost ping'));
 						if (!fetched) return;
 
 						return ChannelUtil.deleteMessages(interaction.channel, [
@@ -362,10 +362,13 @@ export default class TaxCommand extends ApplicationCommand {
 								try {
 									currentTaxEmbed = (await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID'))).embeds[0];
 								} catch (error) {
-									logger.error(error, '[TAX RESET] TAX_MESSAGE fetch error');
+									logger.error(
+										{ err: error, taxMessageId: this.config.get('TAX_MESSAGE_ID') },
+										'[TAX CMD]: TAX_MESSAGE fetch error',
+									);
 								}
 							} else {
-								logger.warn('[TAX RESET] tax channel error');
+								logger.warn('[TAX CMD]: tax channel error');
 							}
 
 							if (!currentTaxEmbed) {
@@ -438,11 +441,11 @@ export default class TaxCommand extends ApplicationCommand {
 
 								if (pinnedMessages.size >= 50) await pinnedMessages.last()!.unpin();
 
-								logger.info('[TAX RESET]: unpinned old tax embed');
+								logger.info('[TAX CMD]: unpinned old tax embed');
 
 								await logMessage.pin();
 							} catch (error) {
-								logger.error(error, '[TAX RESET]: logging');
+								logger.error(error, '[TAX CMD]: logging');
 							}
 						})();
 

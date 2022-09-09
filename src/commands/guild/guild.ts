@@ -330,7 +330,7 @@ export default class GuildCommand extends ApplicationCommand {
 								})
 							)[0];
 						} catch (error) {
-							return logger.error(error);
+							return logger.error(error, '[GUILD CMD]');
 						}
 				  })())
 		);
@@ -480,7 +480,7 @@ export default class GuildCommand extends ApplicationCommand {
 				rejectOnTimeout: true,
 			});
 
-			hypixelGuild.update({ lastKickAt: new Date() }).catch((error) => logger.error(error));
+			hypixelGuild.update({ lastKickAt: new Date() }).catch((error) => logger.error(error, '[GUILD CMD]'));
 
 			return result;
 		} catch (error) {
@@ -780,7 +780,7 @@ export default class GuildCommand extends ApplicationCommand {
 									`add \`${target}\` to the ban list for \`${reason}\`?`,
 								);
 							} catch (error) {
-								return logger.error(error);
+								return logger.error(error, '[GUILD CMD]');
 							}
 
 						// fallthrough
@@ -795,7 +795,7 @@ export default class GuildCommand extends ApplicationCommand {
 									content: `\`${target}\` was added to the ban list for \`${reason}\``,
 								});
 							} catch (error) {
-								logger.error(error);
+								logger.error(error, '[GUILD CMD]');
 
 								void InteractionUtil.reply(interaction, {
 									content: `error adding \`${target}\` to the ban list: ${error}`,

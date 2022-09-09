@@ -43,11 +43,11 @@ export class Job {
 	}
 
 	public onError(error: Error) {
-		logger.error(error, `[JOB] ${this.name}: error`);
+		logger.error({ err: error, job: this.name }, '[JOB]: error');
 	}
 
 	public onExit(code: number) {
-		logger.error(`[JOB] ${this.name}: exited with code ${code}`);
+		logger.error({ code, job: this.name }, '[JOB]: exited');
 
 		this._worker = null;
 
@@ -55,19 +55,15 @@ export class Job {
 	}
 
 	public onMessage(message: unknown) {
-		if (typeof message === 'string') {
-			logger.info(message);
-		} else {
-			logger.info(message, `[JOB] ${this.name}: message`);
-		}
+		logger.info({ job: this.name, message }, '[JOB]: message');
 	}
 
 	public onMessageerror(error: Error) {
-		logger.error(error, `[JOB] ${this.name}: messageerror`);
+		logger.error({ err: error, job: this.name }, '[JOB]: messageerror');
 	}
 
 	public onOnline() {
-		logger.info(`[JOB] ${this.name}: worker online`);
+		logger.info({ job: this.name }, '[JOB]: worker online');
 	}
 
 	public start() {

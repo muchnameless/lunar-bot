@@ -38,7 +38,7 @@ export class HypixelMessageAuthor {
 		this.guildRank = guildRank ?? null;
 		this.player = uuid
 			? this.client.players.cache.get(uuid) ??
-			  logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ??
+			  logger.error({ ign, uuid }, '[HYPIXEL AUTHOR CTOR]: unknown uuid') ??
 			  this.client.players.findByIgn(ign)
 			: this.client.players.findByIgn(ign);
 	}
@@ -57,13 +57,13 @@ export class HypixelMessageAuthor {
 				const { uuid } = await mojang.ign(this.ign);
 				this.player =
 					this.client.players.cache.get(uuid) ??
-					logger.error(`[HYPIXEL AUTHOR INIT]: unknown uuid '${uuid}'`) ??
+					logger.error({ ign: this.ign, uuid }, '[HYPIXEL AUTHOR INIT]: unknown uuid') ??
 					(await this.client.players.fetch({ minecraftUuid: uuid }));
 			}
 
 			this.member = (await this.player?.fetchDiscordMember()) ?? null;
 		} catch (error) {
-			logger.error(error, '[AUTHOR PLAYER]');
+			logger.error({ err: error, ign: this.ign }, '[AUTHOR PLAYER]');
 		}
 	}
 

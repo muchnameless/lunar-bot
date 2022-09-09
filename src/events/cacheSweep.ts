@@ -12,6 +12,6 @@ export default class CacheSweepEvent extends Event {
 	 * @param message
 	 */
 	public override run(message: ClientEvents[Events.CacheSweep][0]) {
-		logger.debug(`[SWEEPERS]: ${message}`);
+		logger.debug(`[CACHE SWEEP]: ${message}`);
 	}
 }

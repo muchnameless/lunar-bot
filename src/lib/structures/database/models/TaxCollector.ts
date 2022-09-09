@@ -70,6 +70,10 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 		return this.player?.ign ?? null;
 	}
 
+	public get logInfo(): NonAttribute<Record<string, unknown>> {
+		return this.player?.logInfo ?? { minecraftUuid: this.minecraftUuid };
+	}
+
 	/**
 	 * adds the amount to the taxCollector's collected amount
 	 *

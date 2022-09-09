@@ -82,7 +82,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 				),
 			);
 		} catch (error) {
-			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
+			logger.error(error, '[NETWORTH CMD]');
 			return InteractionUtil.reply(interaction, formatError(error));
 		}
 	}
@@ -113,7 +113,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 						time: seconds(30),
 					});
 				} catch (error) {
-					return logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
+					return logger.error(error, '[NETWORTH CMD]');
 				}
 			}
 		}
@@ -126,7 +126,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 				),
 			);
 		} catch (error) {
-			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
+			logger.error(error, '[NETWORTH CMD]');
 			return hypixelMessage.reply(formatError(error));
 		}
 	}

@@ -23,10 +23,10 @@ export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
 					max: 1,
 				});
 
-				logger.debug(`[CHATBRIDGE CONNECT]: ${this.chatBridge.logInfo}: sent to limbo`);
+				logger.debug(this.chatBridge.logInfo, '[CHATBRIDGE CONNECT]: sent to limbo');
 				break;
 			} catch (error) {
-				logger.error(error, `[CHATBRIDGE CONNECT]: ${this.chatBridge.logInfo}: error while sending to limbo`);
+				logger.error({ err: error, ...this.chatBridge.logInfo }, '[CHATBRIDGE CONNECT]: error while sending to limbo');
 			}
 		} while (--counter);
 	}

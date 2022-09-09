@@ -42,7 +42,7 @@ export default class PingMuteCommand extends DualCommand {
 
 			return `\`${player}\` can no longer ping members via the chat bridge`;
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, '[PING MUTE CMD]');
 
 			return `an error occurred while trying to remove \`${player}\`'s ping permissions`;
 		}

@@ -154,8 +154,8 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	public override fetchAllMembers() {
 		return safePromiseAll(
 			this.guilds.cache.map(async (guild) => {
-				const { size } = await GuildUtil.fetchAllMembers(guild);
-				logger.info(`[FETCH ALL MEMBERS]: ${guild.name}: fetched ${size} members`);
+				await GuildUtil.fetchAllMembers(guild);
+				logger.info(GuildUtil.logInfo(guild), '[FETCH ALL MEMBERS]');
 			}),
 		);
 	}

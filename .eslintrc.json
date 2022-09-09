@@ -19,6 +19,7 @@
 		"prefer-promise-reject-errors": 0,
 		"promise/prefer-await-to-callbacks": 0,
 		"promise/prefer-await-to-then": 0,
+		"quotes": [2, "single", { "avoidEscape": true }],
 		"require-atomic-updates": 0,
 		"sonarjs/no-nested-switch": 0,
 		"tsdoc/syntax": 0,

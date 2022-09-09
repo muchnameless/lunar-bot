@@ -44,9 +44,7 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 });
 
 hypixel
-	.on('limited', (limit, reset) =>
-		logger.warn(`[HYPIXEL API]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`),
-	)
+	.on('limited', (limit, reset) => logger.warn({ limit, reset }, '[HYPIXEL API]: ratelimit hit'))
 	.on('reset', () => logger.info('[HYPIXEL API]: ratelimit reset'));
 
 export const getSkyBlockProfiles = async (uuid: string) =>

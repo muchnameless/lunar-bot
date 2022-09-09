@@ -9,7 +9,7 @@ export default class ShardReconnectingEvent extends Event {
 	 * @param shardId
 	 */
 	public override run(shardId: ClientEvents[Events.ShardReconnecting][0]) {
-		logger.info(`[SHARD #${shardId} RECONNECTING]`);
+		logger.info({ shardId }, '[SHARD RECONNECTING]');
 
 		this.client.players.uncacheDiscordMembers();
 	}

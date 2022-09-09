@@ -11,7 +11,7 @@ import {
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
-import { EmbedUtil } from './EmbedUtil.js';
+import { GuildUtil, UserUtil, EmbedUtil } from './index.js';
 import { commaListAnd } from '#functions';
 import { logger } from '#logger';
 
@@ -39,7 +39,30 @@ export class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 */
-	public static logInfo(channel: Channel | null) {
+	public static logInfo(channel: Channel | null | undefined) {
+		if (!channel) return null;
+
+		switch (channel.type) {
+			case ChannelType.DM: {
+				const { recipient } = channel;
+				return {
+					channelId: channel.id,
+					recipient: recipient ? UserUtil.logInfo(recipient) : { userId: channel.recipientId },
+				};
+			}
+
+			case ChannelType.GroupDM:
+				return { channelId: channel.id, channelName: channel.name };
+
+			default:
+				return { channelId: channel.id, channelName: channel.name, guild: GuildUtil.logInfo(channel.guild) };
+		}
+	}
+
+	/**
+	 * @param channel
+	 */
+	public static channelName(channel: Channel | null | undefined) {
 		if (!channel) return null;
 
 		switch (channel.type) {
@@ -198,7 +221,7 @@ export class ChannelUtil extends null {
 				.map((permission) => `'${permission}'`);
 			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${
 				missingChannelPermissions.length === 1 ? '' : 's'
-			} in ${this.logInfo(channel)}`;
+			} in ${this.channelName(channel)}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);

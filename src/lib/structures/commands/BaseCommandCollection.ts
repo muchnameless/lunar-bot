@@ -110,7 +110,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 			++commandCount;
 		}
 
-		logger.info(`[COMMANDS]: ${commandCount} command${commandCount === 1 ? '' : 's'} loaded`);
+		logger.info({ commands: commandCount }, '[COMMANDS]: commands loaded');
 
 		return this;
 	}

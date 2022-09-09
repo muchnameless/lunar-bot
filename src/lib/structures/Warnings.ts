@@ -1,7 +1,13 @@
 import { logger } from '#logger';
 
 export class Warnings<K> {
+	public static readonly instances: Warnings<unknown>[] = [];
+
 	private readonly _emitted = new Set<K>();
+
+	public constructor() {
+		Warnings.instances.push(this);
+	}
 
 	/**
 	 * emit the warning once per key

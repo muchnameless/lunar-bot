@@ -28,9 +28,8 @@ export class GuildMemberUtil extends null {
 	/**
 	 * @param member
 	 */
-	public static logInfo(member: GuildMember) {
-		if (member.nickname) return `${member.nickname} | ${member.user.tag}`;
-		return member.user.tag;
+	public static logInfo(member: GuildMember | PartialGuildMember) {
+		return { user: UserUtil.logInfo(member.user), guild: GuildUtil.logInfo(member.guild), nickname: member.nickname };
 	}
 
 	/**

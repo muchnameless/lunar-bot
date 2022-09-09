@@ -30,7 +30,7 @@ try {
 	const SHOULD_DELETE = argv.includes('delete') || argv.includes('d');
 	const commands = SHOULD_DELETE ? [] : client.commands.apiData;
 
-	logger.info(`[DEPLOY]: started refreshing slash commands for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}`);
+	logger.info({ guildId: GUILD_ID }, '[DEPLOY]: started refreshing application commands');
 
 	await client.rest.put(
 		GUILD_ID

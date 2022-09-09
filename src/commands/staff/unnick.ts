@@ -84,7 +84,7 @@ export default class UnnickCommand extends ApplicationCommand {
 				allowedMentions: { parse: [] },
 			});
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, '[UNNICK CMD]');
 
 			return InteractionUtil.reply(interaction, {
 				content: `error resetting ${member}'s nickname: ${error}`,

@@ -32,7 +32,6 @@ export class UserUtil extends null {
 			userId: user.id,
 			tag: user.tag,
 			bot: user.bot,
-			flags: user.flags?.toArray(),
 		};
 	}
 

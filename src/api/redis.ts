@@ -4,4 +4,4 @@ import { logger } from '#logger';
 
 export const redis = new Redis(env.REDIS_URI!);
 
-redis.on('error', (error) => logger.error(error));
+redis.on('error', (error) => logger.error(error, '[REDIS]'));

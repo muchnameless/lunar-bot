@@ -307,7 +307,10 @@ export class ApplicationCommand extends BaseCommand {
 			try {
 				member = await discordGuild.members.fetch(interaction.user);
 			} catch (error) {
-				logger.error(error, '[ASSERT PERMISSIONS]: error while fetching member');
+				logger.error(
+					{ err: error, ...InteractionUtil.logInfo(interaction) },
+					'[ASSERT PERMISSIONS]: error while fetching member',
+				);
 				throw missingPermissionsError('unknown discord member', interaction, discordGuild, roleIds);
 			}
 		}

@@ -77,7 +77,6 @@ import {
 	getSkillLevel,
 	getSlayerLevel,
 	hours,
-	isAbortError,
 	minutes,
 	safePromiseAll,
 	seconds,
@@ -802,7 +801,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		// last infraction expired -> remove all infractions
 		if (this._infractions.at(-1)! + this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION') <= Date.now()) {
-			this.update({ _infractions: null }).catch((error) => logger.error(error));
+			this.update({ _infractions: null }).catch((error) =>
+				logger.error({ err: error, ...this.logInfo }, '[GET INFRACTIONS]'),
+			);
 			return 0;
 		}
 
@@ -815,9 +816,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	public get hypixelGuild(): NonAttribute<HypixelGuild | null> {
 		return (
 			this.client.hypixelGuilds.cache.get(this.guildId!) ??
-			(this.guildId
-				? (logger.warn(`[GET HYPIXEL GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`), null)
-				: null)
+			(this.guildId ? (logger.warn(this.logInfo, '[GET HYPIXEL GUILD]: no cached guild found'), null) : null)
 		);
 	}
 
@@ -882,7 +881,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				try {
 					await this.update({ inDiscord: false });
 				} catch (error) {
-					logger.error(error);
+					logger.error({ err: error, ...this.logInfo });
 				}
 			}
 
@@ -903,7 +902,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			try {
 				await this.update({ inDiscord: true });
 			} catch (error) {
-				logger.error(error);
+				logger.error({ err: error, ...this.logInfo });
 			}
 		}
 
@@ -942,7 +941,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * returns an object with the ign and guild name
 	 */
 	public get logInfo(): NonAttribute<Record<string, unknown>> {
-		return { ign: this.ign, guild: this.guildName };
+		return {
+			ign: this.ign,
+			minecraftUuid: this.minecraftUuid,
+			hypixelGuild: this.guildName,
+			hypixelGuildId: this.guildId,
+		};
 	}
 
 	/**
@@ -1014,7 +1018,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				toIGN:
 					(
 						this.client.players.cache.get(transaction.to) ??
-						(await mojang.uuid(transaction.to).catch((error) => logger.error(error)))
+						(await mojang
+							.uuid(transaction.to)
+							.catch((error) => logger.error({ err: error, ...this.logInfo }, '[FETCH TRANSACTIONS]')))
 					)?.ign ?? transaction.to,
 			})),
 		) as Promise<ParsedTransaction[]>;
@@ -1065,7 +1071,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			const playerData = (await hypixel.skyblock.profile(this.mainProfileId!)).profile?.members?.[this.minecraftUuid];
 
 			if (!playerData) {
-				this.update({ mainProfileId: null }).catch((error) => logger.error(error));
+				this.update({ mainProfileId: null }).catch((error) =>
+					logger.error({ err: error, ...this.logInfo }, '[UPDATE XP]'),
+				);
 				throw `unable to find main profile named '${this.mainProfileName}' -> resetting name`;
 			}
 
@@ -1636,7 +1644,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		// permission check
 		if (!member.guild.members.me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
-			logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`);
+			logger.warn(
+				{ ...this.logInfo, discordGuild: GuildUtil.logInfo(member.guild) },
+				"[MAKE ROLE API CALL]: missing 'ManageRoles' permissions",
+			);
 			return false;
 		}
 
@@ -1688,7 +1699,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			return true;
 		} catch (error) {
 			// was not successful
-			logger.error(error, '[ROLE API CALL]');
+			logger.error({ err: error, ...this.logInfo }, '[MAKE ROLE API CALL]');
 
 			void this.setDiscordMember(null, error instanceof DiscordAPIError);
 
@@ -1733,7 +1744,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * removes the discord server in-game guild role & all roles handled automatically by the bot
 	 */
 	public async removeFromGuild() {
-		void this.client.taxCollectors.setInactive(this.minecraftUuid).catch((error) => logger.error(error));
+		void this.client.taxCollectors
+			.setInactive(this.minecraftUuid)
+			.catch((error) => logger.error({ err: error, ...this.logInfo }, '[REMOVE FROM GUILD]'));
 
 		const member = await this.fetchDiscordMember();
 
@@ -1753,7 +1766,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				// error updating roles
 				logger.warn(this.logInfo, '[REMOVE FROM GUILD]: unable to update roles');
 				this.update({ guildId: GUILD_ID_ERROR }).catch((error) =>
-					logger.error({ err: error, ...this.logInfo }, 'REMOVE FROM GUILD'),
+					logger.error({ err: error, ...this.logInfo }, '[REMOVE FROM GUILD]'),
 				);
 				return false;
 			}
@@ -1847,7 +1860,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		if (!me!.permissions.has(PermissionFlagsBits.ManageNicknames)) {
 			logger.warn(
 				{ guildId: member.guild.id, guildName: member.guild.name, ...this.logInfo },
-				"[SYNC IGN DISPLAYNAME]: missing 'ManageNicknames'",
+				"[MAKE NICK API CALL]: missing 'ManageNicknames'",
 			);
 			return false;
 		}
@@ -1921,15 +1934,15 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						break;
 
 					default:
-						logger.error(`[SYNC IGN DISPLAYNAME]: unknown reason: ${reason}`);
+						logger.error({ ...this.logInfo, reason }, '[MAKE NICK API CALL]: unknown reason');
 				}
 
-				logger.info(this.logInfo, '[SYNC IGN DISPLAYNAME]: sent nickname info DM');
+				logger.info(this.logInfo, '[MAKE NICK API CALL]: sent nickname info DM');
 			}
 
 			return true;
 		} catch (error) {
-			logger.error({ err: error, ...this.logInfo }, '[SYNC IGN DISPLAYNAME]');
+			logger.error({ err: error, ...this.logInfo }, '[MAKE NICK API CALL]');
 			void this.setDiscordMember(null, error instanceof DiscordAPIError);
 			return false;
 		}
@@ -2012,7 +2025,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				await this.update({ ign: CURRENT_IGN });
 			} catch (error) {
 				this.ign = OLD_IGN;
-				return logger.error({ err: error, ...this.logInfo }, '[UPDATE IGN]');
+				logger.error({ err: error, ...this.logInfo }, '[UPDATE IGN]');
+				return null;
 			}
 
 			void this.syncIgnWithDisplayName(false);
@@ -2022,18 +2036,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				newIgn: CURRENT_IGN,
 			};
 		} catch (error) {
-			if (error instanceof Error && error.name.startsWith('Sequelize')) {
-				return logger.error({ err: error, ...this.logInfo }, '[UPDATE IGN]');
-			}
-
 			// prevent further auto updates
 			void this.client.config.set('MOJANG_API_ERROR', true);
 
-			if (isAbortError(error)) {
-				return logger.error(this.logInfo, '[UPDATE IGN]: request timeout');
-			}
-
-			return logger.error({ err: error, ...this.logInfo }, '[UPDATE IGN]');
+			throw error;
 		}
 	}
 
@@ -2513,7 +2519,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		try {
 			return await this.save();
 		} catch (error) {
-			logger.error(error);
+			logger.error({ err: error, ...this.logInfo }, '[ADD INFRACTION]');
 			return this;
 		}
 	}

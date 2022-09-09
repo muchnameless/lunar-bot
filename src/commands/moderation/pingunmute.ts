@@ -28,7 +28,7 @@ export default class PingUnmuteCommand extends PingMute {
 
 			return `\`${player}\` can now ping members via the chat bridge`;
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, '[PING UNMUTE CMD]');
 
 			return `an error occurred while trying to give \`${player}\` ping permissions`;
 		}

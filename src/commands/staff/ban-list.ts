@@ -87,7 +87,7 @@ export default class BanListCommand extends ApplicationCommand {
 						${reason}
 					`;
 				} catch (error) {
-					logger.error(error);
+					logger.error(error, '[BAN LIST CMD]');
 
 					return stripIndents`
 						${bold(hyperlink(minecraftUuid, `${STATS_URL_BASE}${minecraftUuid}`))}

@@ -9,7 +9,7 @@ export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 	 * @param error
 	 */
 	public override run(error: unknown) {
-		logger.error(error, '[CHATBRIDGE ERROR]');
+		logger.error({ err: error, ...this.chatBridge.logInfo }, '[CHATBRIDGE ERROR]');
 
 		if (error instanceof Error) {
 			// handle login errors
@@ -19,7 +19,7 @@ export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 				this.chatBridge.minecraft.state = MinecraftChatManagerState.Errored;
 				this.chatBridge.minecraft.disconnect();
 
-				logger.error('[CHATBRIDGE ERROR]: invalid credentials detected');
+				logger.error(this.chatBridge.logInfo, '[CHATBRIDGE ERROR]: invalid credentials detected');
 			}
 		}
 	}

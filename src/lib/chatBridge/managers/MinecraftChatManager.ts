@@ -325,7 +325,7 @@ export class MinecraftChatManager extends ChatManager {
 
 				return (JSON.parse(result).server as string | undefined) ?? null;
 			} catch (error) {
-				logger.error(error, '[GET SERVER]');
+				logger.error({ err: error, ...this.logInfo }, '[GET SERVER]');
 				return null;
 			}
 		})();
@@ -517,15 +517,17 @@ export class MinecraftChatManager extends ChatManager {
 	/**
 	 * reconnect the bot if it hasn't successfully spawned in 60 seconds
 	 *
-	 * @param time
+	 * @param timeout
 	 */
-	public scheduleAbortLoginTimeout(time = minutes(1)) {
+	public scheduleAbortLoginTimeout(timeout = minutes(1)) {
 		clearTimeout(this._abortLoginTimeout!);
 
 		this._abortLoginTimeout = setTimeout(() => {
-			logger.warn(`[CHATBRIDGE ABORT LOGIN]: triggered after ${ms(time, { long: true })} -> reconnecting`);
-			this.reconnect(0).catch((error) => logger.error(error, '[CHATBRIDGE ABORT LOGIN]'));
-		}, time);
+			logger.warn({ ...this.logInfo, timeout }, '[CHATBRIDGE ABORT LOGIN]: triggered -> reconnecting');
+			this.reconnect(0).catch((error) =>
+				logger.error({ err: error, ...this.logInfo, timeout }, '[CHATBRIDGE ABORT LOGIN]'),
+			);
+		}, timeout);
 	}
 
 	/**
@@ -537,7 +539,7 @@ export class MinecraftChatManager extends ChatManager {
 		}
 
 		if (this.isReady()) {
-			logger.info(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
+			logger.info(this.logInfo, '[CHATBRIDGE]: already connected');
 			return this;
 		}
 
@@ -565,7 +567,7 @@ export class MinecraftChatManager extends ChatManager {
 	public async reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
 		this.disconnect();
 
-		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
+		logger.warn({ ...this.logInfo, loginDelay }, '[CHATBRIDGE RECONNECT]: attempting reconnect after loginDelay');
 
 		await sleep(loginDelay);
 		await this.connect();
@@ -586,7 +588,7 @@ export class MinecraftChatManager extends ChatManager {
 		try {
 			this.bot?.end('disconnect.quitting');
 		} catch (error) {
-			logger.error(error, '[CHATBRIDGE DISCONNECT]');
+			logger.error({ err: error, ...this.logInfo }, '[CHATBRIDGE DISCONNECT]');
 		}
 
 		this.bot = null;
@@ -995,14 +997,14 @@ export class MinecraftChatManager extends ChatManager {
 			try {
 				await this.queue.wait({ signal });
 			} catch (error) {
-				logger.error(error, '[CHATBRIDGE CHAT]');
+				logger.error({ err: error, ...this.logInfo }, '[CHATBRIDGE CHAT]');
 				return signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
 			}
 
 			try {
 				await this.#sendToChat(`${contentPrefix}${part}`, commandPrefix, discordMessage, lastMessages);
 			} catch (error) {
-				logger.error(error, '[CHATBRIDGE CHAT]');
+				logger.error({ err: error, ...this.logInfo }, '[CHATBRIDGE CHAT]');
 				success = false;
 			} finally {
 				this._retries = 0;
@@ -1062,7 +1064,7 @@ export class MinecraftChatManager extends ChatManager {
 				signature: this.bot.signMessage(message, timestamp),
 			});
 		} catch (error) {
-			logger.error(error, '[_SEND TO CHAT]: bot.write error');
+			logger.error({ err: error, ...this.logInfo }, '[_SEND TO CHAT]: bot.write error');
 			void MessageUtil.react(discordMessage, UnicodeEmoji.X);
 
 			this._resetFilter();
@@ -1261,7 +1263,7 @@ export class MinecraftChatManager extends ChatManager {
 			try {
 				await this.#sendToChat(command, prefix);
 			} catch (error) {
-				logger.error(error, '[CHATBRIDGE MC COMMAND]');
+				logger.error({ err: error, ...this.logInfo }, '[CHATBRIDGE COMMAND]');
 				reject(error);
 				collector.stop('error');
 			} finally {

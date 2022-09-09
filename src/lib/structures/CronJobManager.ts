@@ -22,7 +22,7 @@ export class CronJobManager {
 		// prevent multiple cron jobs with the same name
 		if (this.cache.has(name)) {
 			this.cache.get(name)!.stop();
-			logger.warn(`[CRONJOB SCHEDULE]: CronJob '${name}' already existed`);
+			logger.warn({ cronJob: name }, '[CRONJOB SCHEDULE]: CronJob already existed');
 		}
 
 		cronJob.start();

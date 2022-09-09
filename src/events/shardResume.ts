@@ -13,7 +13,7 @@ export default class ShardResumeEvent extends Event {
 		shardId: ClientEvents[Events.ShardResume][0],
 		replayedEvents: ClientEvents[Events.ShardResume][1],
 	) {
-		logger.info(`[SHARD #${shardId} RESUME]: ${replayedEvents} replayed Events`);
+		logger.info({ replayedEvents, shardId }, '[SHARD RESUME]');
 
 		void this.client.fetchAllMembers();
 	}

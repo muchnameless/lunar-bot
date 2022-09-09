@@ -77,7 +77,7 @@ export default class ExecCommand extends BaseOwnerCommand {
 		} catch (error) {
 			stopwatch.stop();
 
-			logger.error(error, '[EXEC]');
+			logger.error(error, '[EXEC CMD]');
 
 			return this._respondWithError(
 				interaction,

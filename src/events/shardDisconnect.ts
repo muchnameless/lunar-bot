@@ -14,7 +14,7 @@ export default class ShardDisconnectEvent extends Event {
 		closeEvent: ClientEvents[Events.ShardDisconnect][0],
 		shardId: ClientEvents[Events.ShardDisconnect][1],
 	) {
-		logger.error(closeEvent, `[SHARD #${shardId} DISCONNECT]`);
+		logger.error({ closeEvent, shardId }, '[SHARD DISCONNECT]');
 
 		void exitProcess(-1);
 	}

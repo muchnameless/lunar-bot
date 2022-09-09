@@ -274,7 +274,7 @@ export default class MathsCommand extends DualCommand {
 
 		while ((token = this.lexer.lex())) tokens.push(token);
 
-		// logger.debug({ tokens });
+		// logger.debug({ tokens }, '[MATHS CMD]');
 
 		if (!tokens.length) throw 'LexerError: token list empty';
 
@@ -330,7 +330,7 @@ export default class MathsCommand extends DualCommand {
 			throw `${error instanceof Error ? error.message : error}, input: \`${INPUT}\``;
 		}
 
-		// logger.debug({ rawInput, INPUT, parsed });
+		// logger.debug({ rawInput, INPUT, parsed }, '[MATHS CMD]');
 
 		const stack: (number | string)[] = [];
 
@@ -366,7 +366,7 @@ export default class MathsCommand extends DualCommand {
 
 		if (stack.length) throw `CalculationError: unprocessed parts, input: \`${INPUT}\``;
 
-		// logger.debug({ input: PRETTIFIED_INPUT, output })
+		// logger.debug({ input: PRETTIFIED_INPUT, output }, '[MATHS CMD]')
 
 		return {
 			input: this._formatNumberString(INPUT)
@@ -426,7 +426,7 @@ export default class MathsCommand extends DualCommand {
 						),
 				);
 			} catch (_error) {
-				logger.error(_error, '[MATHS]: modal');
+				logger.error(_error, '[MATHS CMD]: modal');
 				return InteractionUtil.reply(interaction, escapeMarkdown(`${error}`, { inlineCode: false }));
 			}
 		}

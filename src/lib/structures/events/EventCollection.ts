@@ -82,7 +82,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 			++eventCount;
 		}
 
-		logger.info(`[EVENTS]: ${eventCount} event${eventCount === 1 ? '' : 's'} loaded`);
+		logger.info({ events: eventCount }, '[EVENTS]: events loaded');
 
 		return this;
 	}

@@ -42,7 +42,7 @@ export default class GuildOfCommand extends DualCommand {
 				guild.members.length
 			}/125 members`;
 		} catch (error) {
-			logger.error(error, '[GUILDOF CMD]');
+			logger.error(error, '[GUILD OF CMD]');
 
 			return formatError(error);
 		}
