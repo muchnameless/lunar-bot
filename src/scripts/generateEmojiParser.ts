@@ -265,9 +265,15 @@ lines.push(' */');
 lines.push('export const UNICODE_TO_EMOJI_NAME = {');
 
 for (const { primaryName, primaryNameWithColons, surrogates } of data) {
-	if (skippedEmojis.has(primaryName)) continue;
+	const name = skippedEmojis.has(primaryName)
+		? primaryName.startsWith('regional_indicator_')
+			? // regional_indicator_a -> A
+			  primaryName.at(-1)!.toUpperCase()
+			: // replace with first unicode character
+			  [...surrogates][0]!
+		: primaryNameWithColons;
 
-	lines.push(`\t'${surrogates}': '${sanitizeName(primaryNameWithColons)}',`);
+	lines.push(`\t'${surrogates}': '${sanitizeName(name)}',`);
 }
 
 lines.push('} as const;');
