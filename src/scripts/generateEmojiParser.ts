@@ -64,6 +64,7 @@ lines.push(' */');
 lines.push('export const EMOJI_NAME_TO_UNICODE = {');
 
 const unique = new Map<string, string>();
+
 for (const { namesWithColons, surrogates } of data) {
 	for (const name of namesWithColons) {
 		// namesWithColons includes stuff like :-) too which should not be parsed

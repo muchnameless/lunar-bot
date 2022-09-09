@@ -34,18 +34,18 @@ edit the `.env`-file
 ## Credit
 
 - MessageCollector.ts adapted from [`discord.js`]
-- Emoji name <-> unicode converter ported from [`DSharpPlus`]
+- emoji name <-> unicode converter using [`discord emoji map project`]
 - randomNumber ported from [`random-number-csprng`]
 - networth calculations from [`MaroAPI`], [`SkyHelperAPI`] and [`SkyCrypt`]
 
 <!----------------- LINKS --------------->
 
-[`postgresql`]: https://www.postgresql.org/download/
-[`redis`]: https://redis.io
 [`canvas`]: https://www.npmjs.com/package/canvas
+[`discord emoji map project`]: https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/
 [`discord.js`]: https://discord.js.org/
-[`dsharpplus`]: https://github.com/DSharpPlus/DSharpPlus
-[`random-number-csprng`]: https://github.com/joepie91/node-random-number-csprng
 [`maroapi`]: https://github.com/zt3h/MaroAPI
-[`skyhelperapi`]: https://github.com/Altpapier/SkyHelperAPI
+[`postgresql`]: https://www.postgresql.org/download/
+[`random-number-csprng`]: https://github.com/joepie91/node-random-number-csprng
+[`redis`]: https://redis.io
 [`skycrypt`]: https://github.com/SkyCryptWebsite/SkyCrypt
+[`skyhelperapi`]: https://github.com/Altpapier/SkyHelperAPI
