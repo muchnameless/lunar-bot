@@ -233,6 +233,8 @@ lines.push(' */');
 lines.push('');
 
 // EMOJI_NAME_TO_UNICODE
+lines.push('/* eslint-disable id-length */'); // some keys are single chars
+lines.push('');
 lines.push('/**');
 lines.push(' * discord emoji names to unicode emojis');
 lines.push(' */');
