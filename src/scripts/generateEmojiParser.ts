@@ -215,7 +215,7 @@ const compareAlphabetically = (a?: string | null, b?: string | null) => collator
 const sanitizeName = (name: string) => name.replace(/(?=['\\])/g, '\\');
 
 const data = ((await (await fetch(url)).json()) as EmojiResponse).emojiDefinitions.sort(
-	({ primaryNameWithColons: a }, { primaryNameWithColons: b }) => compareAlphabetically(a, b),
+	({ primaryName: a }, { primaryName: b }) => compareAlphabetically(a, b),
 );
 
 const lines: string[] = [];
