@@ -1,4 +1,5 @@
 import { writeFile } from 'node:fs/promises';
+import { Collection } from 'discord.js';
 import { fetch } from 'undici';
 
 /**
@@ -239,7 +240,7 @@ lines.push(' * discord emoji names to unicode emojis');
 lines.push(' */');
 lines.push('export const EMOJI_NAME_TO_UNICODE = {');
 
-const unique = new Map<string, string>();
+const unique = new Collection<string, string>();
 
 for (const { namesWithColons, surrogates } of data) {
 	for (const name of namesWithColons) {
@@ -251,7 +252,9 @@ for (const { namesWithColons, surrogates } of data) {
 	}
 }
 
-for (const [namesWithColons, surrogates] of unique.entries()) {
+for (const [namesWithColons, surrogates] of unique
+	.sort((_, __, a, b) => compareAlphabetically(a.slice(':'.length), b.slice(':'.length)))
+	.entries()) {
 	lines.push(`\t'${namesWithColons}': '${surrogates}',`);
 }
 
