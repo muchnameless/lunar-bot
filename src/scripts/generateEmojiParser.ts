@@ -229,8 +229,6 @@ lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discor
 lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.json');
 lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.min.json');
 lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.min.json');
-lines.push(' *');
-lines.push(' * commented emojis are rendered in mc chat -> no need to transform');
 lines.push(' */');
 lines.push('');
 
