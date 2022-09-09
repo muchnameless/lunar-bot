@@ -28,7 +28,7 @@ import { ModelManager } from './ModelManager.js';
 import { PlayerManager } from './PlayerManager.js';
 import { TaxCollectorManager } from './TaxCollectorManager.js';
 import { hypixel } from '#api';
-import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, UnicodeEmoji } from '#constants';
+import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, UnicodeEmoji } from '#constants';
 import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber } from '#functions';
 import { logger } from '#logger';
 import { type LunarClient } from '#structures/LunarClient.js';
@@ -112,7 +112,7 @@ export class DatabaseManager {
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:updatePlayerDatabase`,
 			new CronJobConstructor({
-				cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
+				cronTime: `0 0/${HYPIXEL_UPDATE_INTERVAL} * * * *`,
 				onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
 			}),
 		);
@@ -432,7 +432,7 @@ export class DatabaseManager {
 			// the hypxiel api encountered an error before
 			if (config.get('HYPIXEL_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() <= config.get('DATABASE_UPDATE_INTERVAL')) {
+				if (new Date().getMinutes() <= HYPIXEL_UPDATE_INTERVAL) {
 					for (const hypixelGuild of hypixelGuilds.cache.values()) {
 						void hypixelGuild.syncRanks();
 					}

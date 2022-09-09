@@ -41,10 +41,11 @@ import {
 	COSMETIC_SKILLS,
 	DELIMITER_ROLES,
 	DUNGEON_CLASSES,
-	DUNGEON_TYPES,
 	DUNGEON_TYPES_AND_CLASSES,
+	DUNGEON_TYPES,
 	FindProfileStrategy,
 	GUILD_ID_ERROR,
+	HYPIXEL_UPDATE_INTERVAL,
 	isXPType,
 	LILY_SKILL_NAMES,
 	Offset,
@@ -56,11 +57,11 @@ import {
 	SLAYER_ROLES,
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
+	STATS_URL_BASE,
 	UNKNOWN_IGN,
 	XP_AND_DATA_TYPES,
 	XP_OFFSETS,
 	XP_TYPES,
-	STATS_URL_BASE,
 	type DungeonTypes,
 	type SkillTypes,
 	type SlayerTypes,
@@ -1097,7 +1098,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				}
 			} else {
 				// log once every hour (during the first update)
-				if (!new Date().getHours() && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+				if (!new Date().getHours() && new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL) {
 					logger.warn(this.logInfo, '[UPDATE XP]: skill API disabled');
 				}
 
@@ -1136,7 +1137,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			if (
 				!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') &&
 				!new Date().getHours() &&
-				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
+				new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL
 			) {
 				logger.warn(this.logInfo, '[UPDATE XP]: no slayer data found');
 			}
@@ -1175,7 +1176,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			if (
 				!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') &&
 				!new Date().getHours() &&
-				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
+				new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL
 			) {
 				logger.warn(this.logInfo, '[UPDATE XP]: no dungeons data found');
 			}
@@ -1186,7 +1187,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			if (
 				!Reflect.has(playerData, 'collection') &&
 				!new Date().getHours() &&
-				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
+				new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL
 			) {
 				logger.warn(this.logInfo, '[UPDATE XP]: collections API disabled');
 			}
@@ -1235,7 +1236,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		// timeout expires before the next update
 		const TIMEOUT_LEFT = (member.communicationDisabledUntilTimestamp ?? 0) - Date.now();
 
-		if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= 2 * this.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1)) {
+		if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= minutes(2 * HYPIXEL_UPDATE_INTERVAL)) {
 			void this.hypixelGuild?.unmute(this, member.communicationDisabledUntilTimestamp! - Date.now() + seconds(1));
 		}
 
@@ -1915,10 +1916,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						void GuildMemberUtil.sendDM(member, {
 							content: stripIndents`
 								include your ign \`${this.ign}\` somewhere in your nickname.
-								If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${
-								this.client.user
-							} will automatically change your discord nickname
-						`,
+								If you just changed your ign, wait up to ${HYPIXEL_UPDATE_INTERVAL} minutes and ${this.client.user} will automatically change your discord nickname
+							`,
 							redisKey: `dm:${member.id}:nickname:ign`,
 						});
 						break;

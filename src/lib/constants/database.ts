@@ -11,6 +11,16 @@ import {
 } from './index.js';
 import { minutes, seconds, weeks } from '#functions';
 
+/**
+ * CronJob interval in minutes for Hypixel API updates
+ */
+export const HYPIXEL_UPDATE_INTERVAL = 5;
+
+/**
+ * CronJob interval in minutes for Mojang API updates
+ */
+export const MOJANG_UPDATE_INTERVAL = 10;
+
 // generate default config
 export const DEFAULT_CONFIG = {
 	AUTO_GUILD_RANKS: true,
@@ -27,7 +37,6 @@ export const DEFAULT_CONFIG = {
 	COMPETITION_SCHEDULED: false,
 	COMPETITION_START_TIME: Number.POSITIVE_INFINITY,
 	CURRENT_COMPETITION: 'lily-weight',
-	DATABASE_UPDATE_INTERVAL: 5,
 	DEFAULT_MAX_PARTS: 5,
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	DEFAULT_XP_OFFSET: Offset.Week,
@@ -40,7 +49,6 @@ export const DEFAULT_CONFIG = {
 	HYPIXEL_FORUM_LAST_GUID: 0,
 	HYPIXEL_SKYBLOCK_API_ERROR: false,
 	IGN_UPDATE_ENABLED: true,
-	IGN_UPDATE_INTERVAL: 20,
 	IMGUR_UPLOADER_ENABLED: true,
 	INACTIVE_ROLE_TIME: weeks(1),
 	INGAME_RESPONSE_TIMEOUT: seconds(5),

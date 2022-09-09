@@ -32,6 +32,7 @@ import {
 import { redis } from '#api';
 import {
 	GUILD_ID_ALL,
+	HYPIXEL_UPDATE_INTERVAL,
 	LEADERBOARD_XP_TYPES,
 	Offset,
 	RedisKey,
@@ -491,7 +492,7 @@ async function getLeaderboardMessageOptions(
 		);
 	}
 
-	void redis.psetex(CACHE_KEY, client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1), JSON.stringify(embeds));
+	void redis.psetex(CACHE_KEY, minutes(HYPIXEL_UPDATE_INTERVAL), JSON.stringify(embeds));
 
 	if (leaderboardArgs.page < 1) {
 		leaderboardArgs.page = 1;

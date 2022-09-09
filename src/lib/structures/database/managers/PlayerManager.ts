@@ -14,7 +14,13 @@ import {
 import { sql } from '../sql.js';
 import { ModelManager, type ModelResovable } from './ModelManager.js';
 import { hypixel } from '#api';
-import { MAYOR_CHANGE_INTERVAL, Offset, XP_OFFSETS_TIME } from '#constants';
+import {
+	HYPIXEL_UPDATE_INTERVAL,
+	MAYOR_CHANGE_INTERVAL,
+	MOJANG_UPDATE_INTERVAL,
+	Offset,
+	XP_OFFSETS_TIME,
+} from '#constants';
 import {
 	autocorrect,
 	compareAlphabetically,
@@ -261,7 +267,7 @@ export class PlayerManager extends ModelManager<Player> {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() <= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+				if (new Date().getMinutes() <= HYPIXEL_UPDATE_INTERVAL) {
 					logger.warn('[PLAYERS UPDATE XP]: auto updates disabled');
 					return this;
 				}
@@ -307,7 +313,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('MOJANG_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() <= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (new Date().getMinutes() <= MOJANG_UPDATE_INTERVAL) {
 				logger.warn('[PLAYERS UPDATE IGNS]: auto updates disabled');
 				return this;
 			}
@@ -446,7 +452,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() <= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (new Date().getMinutes() <= HYPIXEL_UPDATE_INTERVAL) {
 				logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
 				return this;
 			}
@@ -593,7 +599,7 @@ export class PlayerManager extends ModelManager<Player> {
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:updateIGNs`,
 			new CronJob({
-				cronTime: `0 0/${config.get('IGN_UPDATE_INTERVAL')} * * * *`,
+				cronTime: `0 0/${MOJANG_UPDATE_INTERVAL} * * * *`,
 				onTick: () => config.get('IGN_UPDATE_ENABLED') && this.updateIgns(),
 			}),
 		);
