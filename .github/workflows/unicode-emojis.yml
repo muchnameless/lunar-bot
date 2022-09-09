@@ -1,4 +1,4 @@
-name: Automatic Unicode Emoji Update
+name: Unicode Emoji Update
 
 on:
   workflow_dispatch:
