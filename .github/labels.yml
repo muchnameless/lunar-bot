@@ -1,0 +1,30 @@
+- name: blocked
+  color: 'fc1423'
+- name: bug
+  color: 'd73a4a'
+- name: chore
+  color: 'ffffff'
+- name: ci
+  color: '0075ca'
+- name: dependencies
+  color: '276bd1'
+- name: documentation
+  color: '0075ca'
+- name: duplicate
+  color: 'cfd3d7'
+- name: good first issue
+  color: '7057ff'
+- name: help wanted
+  color: '008672'
+- name: invalid
+  color: 'e4e669'
+- name: need repro
+  color: 'c66037'
+- name: refactor
+  color: '1d637f'
+- name: tests
+  color: 'f06dff'
+- name: typings
+  color: '80c042'
+- name: wontfix
+  color: 'ffffff'

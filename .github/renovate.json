@@ -10,7 +10,7 @@
 	],
 	"ignorePresets": ["workarounds:typesNodeVersioning"],
 	"postUpdateOptions": ["yarnDedupeHighest"],
-	"labels": ["Meta: Dependencies"],
+	"labels": ["dependencies"],
 	"npm": {
 		"rangeStrategy": "bump",
 		"packageRules": [
