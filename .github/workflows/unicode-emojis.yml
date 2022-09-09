@@ -52,6 +52,8 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           commit-message: 'feat: update unicode emojis'
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: update-unicode-emojis
           title: 'feat: update unicode emojis'
           body: 'new unicode emojis found'
-          branch: update-unicode-emojis
