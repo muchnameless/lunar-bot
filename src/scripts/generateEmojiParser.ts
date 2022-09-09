@@ -251,7 +251,7 @@ for (const { namesWithColons, surrogates } of data) {
 }
 
 for (const [namesWithColons, surrogates] of unique
-	.sort((_, __, a, b) => compareAlphabetically(a.slice(':'.length), b.slice(':'.length)))
+	.sort((_0, _1, a, b) => compareAlphabetically(a.slice(':'.length), b.slice(':'.length)))
 	.entries()) {
 	lines.push(`\t'${namesWithColons}': '${surrogates}',`);
 }

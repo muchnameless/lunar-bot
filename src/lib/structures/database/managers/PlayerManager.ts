@@ -497,7 +497,7 @@ export class PlayerManager extends ModelManager<Player> {
 			return embed;
 		};
 
-		for (const [guild, mainProfileUpdate] of log.sort((_, __, { name: a }, { name: b }) =>
+		for (const [guild, mainProfileUpdate] of log.sort((_0, _1, { name: a }, { name: b }) =>
 			compareAlphabetically(a, b),
 		)) {
 			const logParts = splitMessage(codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')), {
