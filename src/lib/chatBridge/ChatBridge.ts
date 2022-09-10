@@ -95,12 +95,12 @@ export class ChatBridge extends EventEmitter {
 	/**
 	 * minecraft related functions
 	 */
-	public readonly minecraft: MinecraftChatManager = new MinecraftChatManager(this);
+	public readonly minecraft = new MinecraftChatManager(this);
 
 	/**
 	 * discord related functions
 	 */
-	public readonly discord: DiscordManager = new DiscordManager(this);
+	public readonly discord = new DiscordManager(this);
 
 	/**
 	 * ChatBridge events
@@ -122,7 +122,7 @@ export class ChatBridge extends EventEmitter {
 	 */
 	public get logInfo() {
 		return {
-			bot: this.bot?.username ?? null,
+			bot: this.minecraft.botUsername,
 			botUuid: this.minecraft.botUuid,
 			hypixelGuild: this.hypixelGuild?.logInfo ?? null,
 			mcAccount: this.mcAccount,

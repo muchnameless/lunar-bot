@@ -12,7 +12,7 @@ import {
 import ms, { type StringValue } from 'ms';
 import { Op } from 'sequelize';
 import { type ChatBridge } from '../ChatBridge.js';
-import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP, type HypixelMessageType } from '../constants/index.js';
+import { EMOJI_NAME_TO_UNICODE, type HypixelMessageType } from '../constants/index.js';
 import { DiscordChatManager, type ReadyDiscordChatManager } from './DiscordChatManager.js';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
 import { logger } from '#logger';
@@ -168,7 +168,6 @@ export class DiscordManager {
 						}
 					})
 				)
-					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible mc characters
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 					.replace(
 						// emojis (custom and default)

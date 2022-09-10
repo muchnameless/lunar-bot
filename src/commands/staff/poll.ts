@@ -100,7 +100,7 @@ export default class PollCommand extends DualCommand {
 			}));
 			const optionsCount = pollOptions.length;
 			const hypixelMessages = chatBridge.minecraft.awaitMessages({
-				filter: (hypixelMessage) => hypixelMessage.isUserMessage() && hypixelMessage.type === HypixelMessageType.Guild,
+				filter: (hypixelMessage) => hypixelMessage.type === HypixelMessageType.Guild && !hypixelMessage.me,
 				time: DURATION,
 			}) as Promise<HypixelUserMessage[]>;
 			const discordChannel = chatBridge.discord.channelsByType.get(HypixelMessageType.Guild)!.channel;

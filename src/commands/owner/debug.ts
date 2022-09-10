@@ -204,13 +204,15 @@ export default class DebugCommand extends ApplicationCommand {
 									(
 										await Promise.all(
 											this.client.chatBridges.cache.map(
-												async (cb) => stripIndents`
-													Bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
-													HypixelGuild: ${cb.hypixelGuild?.name ?? 'not linked'}
-													Server: ${await cb.minecraft.server}
+												async (chatBridge) => stripIndents`
+													Bot: ${escapeIgn(chatBridge.minecraft.botUsername ?? 'offline')}
+													HypixelGuild: ${chatBridge.hypixelGuild?.name ?? 'not linked'}
+													Server: ${await chatBridge.minecraft.server}
 													Queues:
-													${quote(`Minecraft: ${cb.minecraft.queue.remaining}`)}
-													${cb.discord.channelsByType.map((manager) => quote(`${manager.channel}: ${manager.queue.remaining}`)).join('\n')}
+													${quote(`Minecraft: ${chatBridge.minecraft.queue.remaining}`)}
+													${chatBridge.discord.channelsByType
+														.map((manager) => quote(`${manager.channel}: ${manager.queue.remaining}`))
+														.join('\n')}
 												`,
 											),
 										)

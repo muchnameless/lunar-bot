@@ -17,6 +17,7 @@ export default async function run(chatBridge: ChatBridge) {
 
 	// remove '-' from uuid
 	chatBridge.minecraft.botUuid = chatBridge.bot.uuid.replaceAll('-', '');
+	chatBridge.minecraft.botUsername = chatBridge.bot.username;
 
 	// send settings to server
 	chatBridge.bot.write('settings', DEFAULT_SETTINGS);

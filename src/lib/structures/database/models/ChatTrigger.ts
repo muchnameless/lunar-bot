@@ -82,7 +82,7 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 		return new RegExp(
 			this.regExpString.replaceAll(
 				'{BOT_IGN}',
-				hypixelMessage.chatBridge.bot?.username.replaceAll('_', '[_ ]?') ?? NEVER_MATCHING_REGEXP,
+				hypixelMessage.chatBridge.minecraft.botUsername?.replaceAll('_', '[_ ]?') ?? NEVER_MATCHING_REGEXP,
 			),
 			'i',
 		);

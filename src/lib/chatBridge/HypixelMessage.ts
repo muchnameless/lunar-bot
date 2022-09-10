@@ -6,12 +6,7 @@ import { type BroadcastOptions, type ChatBridge } from './ChatBridge.js';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
 import { PrismarineMessage } from './PrismarineMessage.js';
 import { type ChatPacket } from './botEvents/player_chat.js';
-import {
-	HypixelMessageType,
-	INVISIBLE_CHARACTER_REGEXP,
-	spamMessages,
-	type MessagePosition,
-} from './constants/index.js';
+import { HypixelMessageType, spamMessages, type MessagePosition } from './constants/index.js';
 import { type DiscordChatManager } from './managers/DiscordChatManager.js';
 import { type MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 import { mojang } from '#api';
@@ -57,6 +52,7 @@ interface ForwardToDiscordOptions {
 export interface HypixelUserMessage extends HypixelMessage {
 	author: NonNullable<HypixelMessage['author']>;
 	commandData: CommandData;
+	me: false;
 	spam: false;
 	type: NonNullable<HypixelMessage['type']>;
 }
@@ -88,14 +84,14 @@ export class HypixelMessage {
 	public readonly rawContent: string;
 
 	/**
-	 * content with invis chars removed
-	 */
-	public readonly cleanedContent: string;
-
-	/**
 	 * message type
 	 */
 	public readonly type: HypixelMessageType | null;
+
+	/**
+	 * whether the message was sent by the bot
+	 */
+	public readonly me: boolean = false;
 
 	public readonly author: HypixelMessageAuthor | null;
 
@@ -113,8 +109,7 @@ export class HypixelMessage {
 		this.chatBridge = chatBridge;
 		this.prismarineMessage = PrismarineMessage.fromNotch(content);
 		this.position = type;
-		this.rawContent = this.prismarineMessage.toString();
-		this.cleanedContent = this.rawContent.replace(INVISIBLE_CHARACTER_REGEXP, '').trim();
+		this.rawContent = this.prismarineMessage.toString().trim();
 
 		/**
 		 * Guild > [HypixelRank] ign [GuildRank]: message
@@ -124,7 +119,7 @@ export class HypixelMessage {
 		 */
 		const matched =
 			/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)])?: /.exec(
-				this.cleanedContent,
+				this.rawContent,
 			);
 
 		if (matched) {
@@ -135,7 +130,7 @@ export class HypixelMessage {
 				this.chatBridge,
 				matched.groups!.whisper === 'To'
 					? {
-							ign: this.chatBridge.bot?.username ?? UNKNOWN_IGN,
+							ign: this.chatBridge.minecraft.botUsername ?? UNKNOWN_IGN,
 							guildRank: null,
 							uuid: this.chatBridge.minecraft.botUuid,
 					  }
@@ -151,11 +146,12 @@ export class HypixelMessage {
 								: null,
 					  },
 			);
-			this.content = this.cleanedContent.slice(matched[0]!.length).trimStart();
+			this.content = this.rawContent.slice(matched[0]!.length).trimStart();
 			this.spam = false;
 
 			// message was sent from the bot -> don't parse input
-			if (this.me) {
+			if (this.author.ign === this.chatBridge.minecraft.botUsername) {
+				this.me = true;
 				this.commandData = null;
 				return;
 			}
@@ -164,7 +160,7 @@ export class HypixelMessage {
 				new RegExp(
 					`^(?:${[
 						...this.client.config.get('PREFIXES').map((x) => regExpEsc(x)), // prefixes
-						`@${this.chatBridge.bot?.username ?? NEVER_MATCHING_REGEXP}`, // @Bot-IGN
+						`@${this.chatBridge.minecraft.botUsername ?? NEVER_MATCHING_REGEXP}`, // @Bot-IGN
 					].join('|')})`,
 					'i',
 				).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
@@ -206,7 +202,7 @@ export class HypixelMessage {
 		} else {
 			this.type = null;
 			this.author = null;
-			this.content = this.cleanedContent;
+			this.content = this.rawContent;
 			this.spam = spamMessages.test(this.content);
 			this.commandData = null;
 		}
@@ -225,14 +221,6 @@ export class HypixelMessage {
 	 */
 	public get client() {
 		return this.chatBridge.client;
-	}
-
-	/**
-	 * whether the message was sent by the bot
-	 */
-	public get me() {
-		if (!this.author) return false;
-		return this.author.ign === this.chatBridge.bot?.username;
 	}
 
 	/**
@@ -261,13 +249,6 @@ export class HypixelMessage {
 	 */
 	public get member() {
 		return this.author?.member ?? null;
-	}
-
-	/**
-	 * whether the message was sent by a non-bot user
-	 */
-	public isUserMessage(): this is HypixelUserMessage {
-		return this.type !== null && !this.me;
 	}
 
 	/**

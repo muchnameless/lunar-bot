@@ -46,29 +46,29 @@ export const CHAT_FUNCTION_BY_TYPE = {
  * characters that don't render in mc chat
  */
 export const INVISIBLE_CHARACTERS = [
-	'\u{800}', // 'ࠀ'
-	'\u{2B4D}', // '⭍'
-	'\u{58F}', // '֏'
-	'\u{A8F0}', // '꣰'
-	'\u{26D3}', // '⛓'
-	'\u{26EC}', // '⛬'
-	'\u{26EB}', // '⛫'
-	'\u{26ED}', // '⛭'
-	'\u{26EE}', // '⛮'
-	'\u{26F6}', // '⛶'
-	'\u{26D8}', // '⛘'
-	'\u{26D0}', // '⛐'
-	'\u{26E9}', // '⛩'
-	'\u{26E0}', // '⛠'
-	'\u{26CB}', // '⛋'
-	'\u{26DF}', // '⛟'
-	'\u{26C9}', // '⛉'
-	'\u{26CD}', // '⛍'
-	'\u{26D7}', // '⛗'
-	'\u{26DC}', // '⛜'
-	'\u{26E1}', // '⛡'
-	'\u{26CC}', // '⛌'
-	'\u{26CF}', // '⛏'
+	'ࠀ',
+	'⭍',
+	'֏',
+	'꣰',
+	'⛓',
+	'⛬',
+	'⛫',
+	'⛭',
+	'⛮',
+	'⛶',
+	'⛘',
+	'⛐',
+	'⛩',
+	'⛠',
+	'⛋',
+	'⛟',
+	'⛉',
+	'⛍',
+	'⛗',
+	'⛜',
+	'⛡',
+	'⛌',
+	'⛏',
 ] as const;
 
 export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('|'), 'gu');
@@ -76,7 +76,7 @@ export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('
 /**
  * chunks of text which can be used to pad a message to bypass hypixel's spam filter
  */
-const PADDING_CHUNKS = ['-', '_', '/'].map((chunk) => ` ${chunk.repeat(4)}` as const);
+export const PADDING_CHUNKS = ['-', '_', '/'].map((chunk) => ` ${chunk.repeat(4)}` as const);
 
 export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PADDING_CHUNKS.length)]!;
 
@@ -85,9 +85,6 @@ export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PAD
  */
 export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2800}\u{180E}\u{200B}]/u;
 
-export const NON_WHITESPACE_REGEXP = new RegExp(
-	`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${INVISIBLE_CHARACTERS.join('')}]`,
-	'u',
-);
+export const WHITESPACE_ONLY_REGEXP = /^[\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]*$/u;
 
 export const DELETED_MESSAGE_REASON = Symbol('ChatBridge:deletedMessage');

@@ -31,7 +31,7 @@ import {
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
 	MinecraftChatManagerState,
-	NON_WHITESPACE_REGEXP,
+	WHITESPACE_ONLY_REGEXP,
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
 } from '../constants/index.js';
@@ -283,6 +283,11 @@ export class MinecraftChatManager extends ChatManager {
 	public botUuid: string | null = null;
 
 	/**
+	 * minecraft IGN of the bot user
+	 */
+	public botUsername: string | null = null;
+
+	/**
 	 * increases each login, reset to 0 on successfull spawn
 	 */
 	public loginAttempts = 0;
@@ -391,6 +396,7 @@ export class MinecraftChatManager extends ChatManager {
 		if (!this.bot || this.bot.ended) return false;
 
 		try {
+			// TODO: this appears to be broken, you can now msg yourself...
 			// try to whisper to the bot itself since the bot is both online and the response from the server is always the same
 			await this.command({
 				command: `w ${this.bot.username} o/`,
@@ -704,6 +710,7 @@ export class MinecraftChatManager extends ChatManager {
 				}),
 			)
 				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
+				.replace(INVISIBLE_CHARACTER_REGEXP, '') // hypixel removes them -> remove them here so the filter works reliably
 				.replace(/<a?:(\w{2,32}):\d{17,20}>/g, ':$1:') // custom emojis
 				.replace(TwemojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
 				// replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
@@ -945,7 +952,7 @@ export class MinecraftChatManager extends ChatManager {
 				maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length,
 			})) {
 				// filter out whitespace only parts
-				if (!NON_WHITESPACE_REGEXP.test(part)) {
+				if (WHITESPACE_ONLY_REGEXP.test(part)) {
 					if (part) {
 						logger.trace({ prefix, content, parsedContent, part }, '[CHATBRIDGE CHAT]: ignored whitespace part');
 					}

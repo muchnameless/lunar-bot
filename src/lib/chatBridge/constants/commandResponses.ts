@@ -70,6 +70,10 @@ const _unmute = {
 	success: (target = `${IGN_DEFAULT}|the guild chat`, executor = IGN_DEFAULT) =>
 		`^${HYPIXEL_RANK}(?<executor>${executor}) has unmuted ${HYPIXEL_RANK}(?<target>${target})`,
 };
+const _slowMode = {
+	success: (executor = IGN_DEFAULT) =>
+		`^Guild > ${HYPIXEL_RANK}(?<executor>${executor}) (?:(?<enabled>enabled) the chat throttle! You can only send messages every 10 seconds|(?<disabled>disabled) the chat throttle)[.!]?$`,
+};
 
 const genericErrorResponses = Object.values(_genericErrors);
 const demoteResponses = [
@@ -157,6 +161,12 @@ const unmuteResponses = [
 	_genericErrors.unknownIgn,
 	_genericErrors.playerNotInGuild,
 ];
+const slowModeResponses = [
+	...Object.values(_slowMode),
+	_genericErrors.MUST_BE_GM,
+	_genericErrors.MISSING_PERMS,
+	_genericErrors.RANK_MISSING_PERMS,
+];
 const paginationErrorResponses = Object.values(_paginationErrors);
 
 // dynamic RegExp constructors
@@ -219,6 +229,9 @@ export const topErrors = (ign = IGN_DEFAULT) =>
 export const unmute = (target = IGN_DEFAULT, executor = IGN_DEFAULT) =>
 	new RegExp(unmuteResponses.map((x) => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i');
 
+export const slowMode = (executor = IGN_DEFAULT) =>
+	new RegExp(slowModeResponses.map((x) => (typeof x === 'function' ? x(executor) : x)).join('|'), 'i');
+
 // static RegExp
 export const spamMessages = new RegExp(
 	[
@@ -238,3 +251,4 @@ export const kickSuccess = new RegExp(_kick.success(), 'i');
 export const muteSuccess = new RegExp(_mute.success(), 'i');
 export const promoteSuccess = new RegExp(_promote.success(), 'i');
 export const unmuteSuccess = new RegExp(_unmute.success(), 'i');
+export const slowModeChange = new RegExp(_slowMode.success(), 'i');
