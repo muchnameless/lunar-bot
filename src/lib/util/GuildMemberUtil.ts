@@ -29,7 +29,13 @@ export class GuildMemberUtil extends null {
 	 * @param member
 	 */
 	public static logInfo(member: GuildMember | PartialGuildMember) {
-		return { user: UserUtil.logInfo(member.user), guild: GuildUtil.logInfo(member.guild), nickname: member.nickname };
+		return {
+			user: UserUtil.logInfo(member.user),
+			guild: GuildUtil.logInfo(member.guild),
+			nickname: member.nickname,
+			// @ts-expect-error private
+			roles: member._roles,
+		};
 	}
 
 	/**
@@ -153,13 +159,16 @@ export class GuildMemberUtil extends null {
 				: roles
 		).difference(member.roles.cache);
 		if (!difference.size) {
-			logger.warn({ member, data: roles }, '[GUILDMEMBER SET ROLES]: nothing to change');
+			logger.warn({ member: this.logInfo(member), data: roles }, '[GUILDMEMBER SET ROLES]: nothing to change');
 			return member;
 		}
 
 		const me = member.guild.members.me!;
 		if (!me.permissions.has(PermissionFlagsBits.ManageRoles)) {
-			logger.warn({ member, data: roles }, "[GUILDMEMBER SET ROLES]: missing 'MANAGE_ROLES' permission");
+			logger.warn(
+				{ member: this.logInfo(member), data: roles },
+				"[GUILDMEMBER SET ROLES]: missing 'MANAGE_ROLES' permission",
+			);
 			return member;
 		}
 
@@ -167,7 +176,7 @@ export class GuildMemberUtil extends null {
 		if (difference.some((role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0)) {
 			logger.warn(
 				{
-					member,
+					member: this.logInfo(member),
 					data: roles,
 					filtered: difference.filter(
 						(role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0,
@@ -181,7 +190,7 @@ export class GuildMemberUtil extends null {
 		try {
 			return await member.roles.set(Array.isArray(roles) ? (roles.filter(Boolean) as (Role | Snowflake)[]) : roles);
 		} catch (error) {
-			logger.error({ member, err: error, data: roles }, '[GUILDMEMBER SET ROLES]');
+			logger.error({ member: this.logInfo(member), err: error, data: roles }, '[GUILDMEMBER SET ROLES]');
 			return member;
 		}
 	}
@@ -209,7 +218,7 @@ export class GuildMemberUtil extends null {
 		try {
 			return await member.roles.set(rolesToAdd);
 		} catch (error) {
-			logger.error({ member, err: error, data: { add, remove } }, '[GUILDMEMBER EDIT ROLES]');
+			logger.error({ member: this.logInfo(member), err: error, data: { add, remove } }, '[GUILDMEMBER EDIT ROLES]');
 			return member;
 		}
 	}
@@ -231,21 +240,27 @@ export class GuildMemberUtil extends null {
 	 */
 	public static async timeout(member: GuildMember, duration: number | null, reason?: string) {
 		if (!member.moderatable) {
-			logger.warn({ member, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]: missing permissions');
+			logger.warn(
+				{ member: this.logInfo(member), data: { duration, reason } },
+				'[GUILDMEMBER TIMEOUT]: missing permissions',
+			);
 			return member;
 		}
 
 		const DURATION = duration === null ? null : Math.min(duration, ModerationLimits.MaximumTimeoutDuration);
 
 		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - DURATION!) < seconds(1)) {
-			logger.debug({ member, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]: is already in (similar) timeout');
+			logger.debug(
+				{ member: this.logInfo(member), data: { duration, reason } },
+				'[GUILDMEMBER TIMEOUT]: is already in (similar) timeout',
+			);
 			return member;
 		}
 
 		try {
 			return await member.timeout(DURATION, reason);
 		} catch (error) {
-			logger.error({ member, err: error, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]');
+			logger.error({ member: this.logInfo(member), err: error, data: { duration, reason } }, '[GUILDMEMBER TIMEOUT]');
 			return member;
 		}
 	}
