@@ -7,7 +7,7 @@ import { logger } from '#logger';
 
 export const SKYBLOCK_PROFILE_TTL = seconds(30);
 
-export const hypixel = new Client(env.HYPIXEL_KEY!, {
+export const hypixel = new Client(env.HYPIXEL_KEY, {
 	cache: {
 		async get<T>(key: string): Promise<(DefaultMeta & T) | null> {
 			return JSON.parse((await redis.get(`${RedisKey.Hypixel}:${key}`))!);

@@ -4,7 +4,7 @@ import { RedisKey } from '#constants';
 import { days } from '#functions';
 import { ImgurClient } from '#structures/ImgurClient.js';
 
-export const imgur = new ImgurClient(env.IMGUR_CLIENT_ID!, {
+export const imgur = new ImgurClient(env.IMGUR_CLIENT_ID, {
 	cache: {
 		async get(key) {
 			return JSON.parse((await redis.get(`${RedisKey.Imgur}:${key}`))!) as unknown;

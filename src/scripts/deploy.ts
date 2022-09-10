@@ -16,7 +16,7 @@ const client = new LunarClient({
 	intents: 0,
 });
 
-client.rest.setToken(env.DISCORD_TOKEN!);
+client.rest.setToken(env.DISCORD_TOKEN);
 
 try {
 	logger.info('[DEPLOY]: initialising database');
@@ -34,8 +34,8 @@ try {
 
 	await client.rest.put(
 		GUILD_ID
-			? Routes.applicationGuildCommands(env.DISCORD_CLIENT_ID!, GUILD_ID)
-			: Routes.applicationCommands(env.DISCORD_CLIENT_ID!),
+			? Routes.applicationGuildCommands(env.DISCORD_CLIENT_ID, GUILD_ID)
+			: Routes.applicationCommands(env.DISCORD_CLIENT_ID),
 		{
 			body: commands,
 		},

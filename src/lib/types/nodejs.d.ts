@@ -1,3 +1,23 @@
+namespace NodeJS {
+	interface ProcessEnv {
+		DISCORD_CLIENT_ID: string;
+		DISCORD_TOKEN: string;
+		HYPIXEL_KEY: string;
+		IMGUR_CLIENT_ID: string;
+		MINECRAFT_ACCOUNT_TYPE: string;
+		MINECRAFT_PASSWORD: string;
+		MINECRAFT_USERNAME: string;
+		NODE_ENV: string;
+		NODE_OPTIONS: string;
+		OWNER: string;
+		PGDATABASE: string;
+		PGHOST: string;
+		PGPASSWORD: string;
+		PGUSERNAME: string;
+		REDIS_URI: string;
+	}
+}
+
 interface Array<T> {
 	/**
 	 * Returns the value of the last element in the array where predicate is true, and undefined

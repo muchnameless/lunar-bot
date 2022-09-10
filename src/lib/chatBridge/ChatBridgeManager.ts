@@ -80,7 +80,7 @@ export class ChatBridgeManager {
 	 * mc accounts
 	 */
 	private get _accounts() {
-		return env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/).filter(Boolean);
+		return env.MINECRAFT_ACCOUNT_TYPE.split(/\s+/).filter(Boolean);
 	}
 
 	/**

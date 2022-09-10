@@ -550,10 +550,10 @@ export class MinecraftChatManager extends ChatManager {
 		this.bot = await createBot(this.chatBridge, {
 			host: 'mc.hypixel.net',
 			port: 25_565,
-			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
-			password: env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
+			username: env.MINECRAFT_USERNAME.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
+			password: env.MINECRAFT_PASSWORD.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
 			version: MC_CLIENT_VERSION,
-			auth: env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as 'microsoft' | 'mojang',
+			auth: env.MINECRAFT_ACCOUNT_TYPE.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as 'microsoft' | 'mojang',
 		});
 
 		return this;
