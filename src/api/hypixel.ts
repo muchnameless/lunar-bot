@@ -5,18 +5,16 @@ import { RedisKey } from '#constants';
 import { days, minutes, seconds } from '#functions';
 import { logger } from '#logger';
 
-export const SKYBLOCK_PROFILE_TTL = seconds(30);
-
 export const hypixel = new Client(env.HYPIXEL_KEY, {
 	cache: {
 		async get<T>(key: string): Promise<(DefaultMeta & T) | null> {
 			return JSON.parse((await redis.get(`${RedisKey.Hypixel}:${key}`))!);
 		},
 		async set(key, value) {
-			let ttl = minutes(5); // default 5 minute ttl
+			let ttl: number;
 
 			if (key.startsWith('skyblock:profiles')) {
-				ttl = SKYBLOCK_PROFILE_TTL;
+				ttl = seconds(30);
 			} else if (
 				key.startsWith('guild') ||
 				key.startsWith('player') ||
@@ -33,6 +31,8 @@ export const hypixel = new Client(env.HYPIXEL_KEY, {
 				ttl = seconds(10); // this endpoint is cached by cloudflare and updates every 10 seconds
 			} else if (key.startsWith('skyblock:auctions:')) {
 				ttl = minutes(1); // this endpoint is cached by cloudflare and updates every 60 seconds
+			} else {
+				ttl = minutes(5);
 			}
 
 			return redis.psetex(`${RedisKey.Hypixel}:${key}`, ttl, JSON.stringify(value));

@@ -188,7 +188,7 @@ const skippedEmojis = new Set([
 	'zero',
 ]);
 
-export interface EmojiResponse {
+interface EmojiResponse {
 	assetHash: string;
 	bundleType: string;
 	discordClient: string;

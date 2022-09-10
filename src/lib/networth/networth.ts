@@ -62,7 +62,7 @@ async function parseItems(base64: string) {
 	return networth;
 }
 
-export type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
+type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 	Partial<{
 		ability_scroll: string[];
 		art_of_war_count: number;

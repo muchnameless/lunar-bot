@@ -13,22 +13,9 @@ export const toLowerCase = <T extends string>(string: T) => string.toLowerCase()
  */
 export type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
 
-/**
- * Type helper for making certain fields of an object optional. This is helpful
- * for creating the `CreationAttributes` from your `Attributes` for a Model.
- */
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-/**
- * true -> A, false -> B, boolean -> A | B
- */
-export type If<T extends boolean, A, B = null> = T extends true ? A : T extends false ? B : A | B;
-
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export type Merge<M, N> = N & Omit<M, Extract<keyof M, keyof N>>;
-
-export type OverrideProps<M, N> = { [P in keyof M]: P extends keyof N ? N[P] : M[P] };
 
 export type ModifyDeep<A extends AnyObject, B extends DeepPartialAny<A>> = A extends AnyObject
 	? Omit<B, keyof A>

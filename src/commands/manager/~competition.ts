@@ -11,7 +11,7 @@ import { InteractionUtil } from '#utils';
  *  - use guild scheduled events to register event for players to participate
  */
 
-export class CompetitionCommand extends ApplicationCommand {
+export default class CompetitionCommand extends ApplicationCommand {
 	/**
 	 * possible types for a competition
 	 */
