@@ -4,30 +4,8 @@ import { URL } from 'node:url';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import { type PickByValue } from '@sapphire/utilities';
 import { type Awaitable, type Collection } from 'discord.js';
-import { jaroWinklerSimilarity, weeks } from './index.js';
+import { jaroWinklerSimilarity } from './index.js';
 import { logger } from '#logger';
-
-/**
- * returns the ISO week number of the given date
- *
- * @param date date to analyze
- */
-export function getWeekOfYear(date: Date) {
-	const target = new Date(date.getTime());
-	const dayNumber = (date.getUTCDay() + 6) % 7;
-
-	target.setUTCDate(target.getUTCDate() - dayNumber + 3);
-
-	const firstThursday = target.getTime();
-
-	target.setUTCMonth(0, 1);
-
-	if (target.getUTCDay() !== 4) {
-		target.setUTCMonth(0, 1 + ((4 - target.getUTCDay() + 7) % 7));
-	}
-
-	return Math.ceil((firstThursday - target.getTime()) / weeks(1)) + 1;
-}
 
 interface AutocorrectResult<T> {
 	/**
@@ -250,13 +228,6 @@ export function sortCache<T>(
 			value: element[valueKey] as unknown as string,
 		}));
 }
-
-/**
- * stringifies the error and removes html code from it
- *
- * @param error
- */
-export const formatError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/s, '');
 
 /**
  * retries if func rejects

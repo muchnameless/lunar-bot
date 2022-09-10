@@ -1,5 +1,3 @@
-import { roundNumber } from '@sapphire/utilities';
-
 /* eslint-disable @typescript-eslint/prefer-literal-enum-member */
 const enum Time {
 	Millisecond = 1,
@@ -25,7 +23,7 @@ export const seconds = (seconds: number) => seconds * Time.Second;
  *
  * @param milliseconds
  */
-seconds.fromMilliseconds = (milliseconds: number) => roundNumber(milliseconds / Time.Second);
+seconds.fromMilliseconds = (milliseconds: number) => Math.trunc(milliseconds / Time.Second);
 
 /**
  * converts a number of minutes to milliseconds
@@ -68,3 +66,32 @@ export const months = (months: number) => months * Time.Month;
  * @param years
  */
 export const years = (years: number) => years * Time.Year;
+
+/**
+ * whether the current time is within the (provided) first minutes of the current hour
+ *
+ * @param minutes
+ */
+export const isFirstMinutesOfHour = (minutes: number) => new Date().getMinutes() < minutes;
+
+/**
+ * returns the ISO week number of the given date
+ *
+ * @param date date to analyze
+ */
+export function getWeekOfYear(date: Date) {
+	const target = new Date(date.getTime());
+	const dayNumber = (date.getUTCDay() + 6) % 7;
+
+	target.setUTCDate(target.getUTCDate() - dayNumber + 3);
+
+	const firstThursday = target.getTime();
+
+	target.setUTCMonth(0, 1);
+
+	if (target.getUTCDay() !== 4) {
+		target.setUTCMonth(0, 1 + ((4 - target.getUTCDay() + 7) % 7));
+	}
+
+	return Math.ceil((firstThursday - target.getTime()) / weeks(1)) + 1;
+}
