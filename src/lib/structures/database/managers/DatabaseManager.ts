@@ -29,7 +29,7 @@ import { PlayerManager } from './PlayerManager.js';
 import { TaxCollectorManager } from './TaxCollectorManager.js';
 import { hypixel } from '#api';
 import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, UnicodeEmoji } from '#constants';
-import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber } from '#functions';
+import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber, isFirstMinutesOfHour } from '#functions';
 import { logger } from '#logger';
 import { type LunarClient } from '#structures/LunarClient.js';
 import { entries } from '#types';
@@ -432,7 +432,9 @@ export class DatabaseManager {
 			// the hypxiel api encountered an error before
 			if (config.get('HYPIXEL_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() <= HYPIXEL_UPDATE_INTERVAL) {
+				if (isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)) {
+					void config.set('HYPIXEL_API_ERROR', false);
+				} else {
 					for (const hypixelGuild of hypixelGuilds.cache.values()) {
 						void hypixelGuild.syncRanks();
 					}
@@ -440,8 +442,6 @@ export class DatabaseManager {
 					logger.warn('[DB UPDATE]: auto updates disabled');
 					return this;
 				}
-
-				void config.set('HYPIXEL_API_ERROR', false);
 			}
 
 			// update player db

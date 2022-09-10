@@ -78,6 +78,7 @@ import {
 	getSkillLevel,
 	getSlayerLevel,
 	hours,
+	isFirstMinutesOfHour,
 	minutes,
 	safePromiseAll,
 	seconds,
@@ -1098,7 +1099,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				}
 			} else {
 				// log once every hour (during the first update)
-				if (!new Date().getHours() && new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL) {
+				if (new Date().getHours() === 0 && isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)) {
 					logger.warn(this.logInfo, '[UPDATE XP]: skill API disabled');
 				}
 
@@ -1136,8 +1137,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// no slayer data found logging
 			if (
 				!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') &&
-				!new Date().getHours() &&
-				new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL
+				new Date().getHours() === 0 &&
+				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
 				logger.warn(this.logInfo, '[UPDATE XP]: no slayer data found');
 			}
@@ -1175,8 +1176,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// no dungeons data found logging
 			if (
 				!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') &&
-				!new Date().getHours() &&
-				new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL
+				new Date().getHours() === 0 &&
+				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
 				logger.warn(this.logInfo, '[UPDATE XP]: no dungeons data found');
 			}
@@ -1186,8 +1187,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			 */
 			if (
 				!Reflect.has(playerData, 'collection') &&
-				!new Date().getHours() &&
-				new Date().getMinutes() < HYPIXEL_UPDATE_INTERVAL
+				new Date().getHours() === 0 &&
+				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
 				logger.warn(this.logInfo, '[UPDATE XP]: collections API disabled');
 			}

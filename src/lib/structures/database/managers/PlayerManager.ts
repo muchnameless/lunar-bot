@@ -25,6 +25,7 @@ import {
 	autocorrect,
 	compareAlphabetically,
 	getWeekOfYear,
+	isFirstMinutesOfHour,
 	safePromiseAll,
 	seconds,
 	splitMessage,
@@ -267,12 +268,12 @@ export class PlayerManager extends ModelManager<Player> {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() <= HYPIXEL_UPDATE_INTERVAL) {
+				if (isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)) {
+					void this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+				} else {
 					logger.warn('[PLAYERS UPDATE XP]: auto updates disabled');
 					return this;
 				}
-
-				void this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
 			}
 
 			for (const player of this.cache.values()) {
@@ -313,12 +314,12 @@ export class PlayerManager extends ModelManager<Player> {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('MOJANG_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() <= MOJANG_UPDATE_INTERVAL) {
+			if (isFirstMinutesOfHour(MOJANG_UPDATE_INTERVAL)) {
+				void this.client.config.set('MOJANG_API_ERROR', false);
+			} else {
 				logger.warn('[PLAYERS UPDATE IGNS]: auto updates disabled');
 				return this;
 			}
-
-			void this.client.config.set('MOJANG_API_ERROR', false);
 		}
 
 		const log = new Collection<
@@ -452,12 +453,12 @@ export class PlayerManager extends ModelManager<Player> {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() <= HYPIXEL_UPDATE_INTERVAL) {
+			if (isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)) {
+				void this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+			} else {
 				logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
 				return this;
 			}
-
-			void this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
 		}
 
 		const log = new Collection<HypixelGuild, string[]>();
