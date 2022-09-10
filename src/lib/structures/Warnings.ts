@@ -7,7 +7,7 @@ export class Warnings<K> {
 
 	static {
 		setInterval(() => {
-			for (const instance of Warnings.instances) {
+			for (const instance of this.instances) {
 				instance._emitted.clear();
 			}
 		}, hours(12));
