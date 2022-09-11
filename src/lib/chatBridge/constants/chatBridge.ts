@@ -59,6 +59,6 @@ export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PAD
  */
 export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2800}\u{180E}\u{200B}]/u;
 
-export const WHITESPACE_ONLY_REGEXP = /^[\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]*$/u;
+export const WHITESPACE_ONLY_REGEXP = /^[\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]*$/u;
 
 export const DELETED_MESSAGE_REASON = Symbol('ChatBridge:deletedMessage');
