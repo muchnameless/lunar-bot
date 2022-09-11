@@ -45,33 +45,7 @@ export const CHAT_FUNCTION_BY_TYPE = {
 /**
  * characters that don't render in mc chat
  */
-export const INVISIBLE_CHARACTERS = [
-	'ࠀ',
-	'⭍',
-	'֏',
-	'꣰',
-	'⛓',
-	'⛬',
-	'⛫',
-	'⛭',
-	'⛮',
-	'⛶',
-	'⛘',
-	'⛐',
-	'⛩',
-	'⛠',
-	'⛋',
-	'⛟',
-	'⛉',
-	'⛍',
-	'⛗',
-	'⛜',
-	'⛡',
-	'⛌',
-	'⛏',
-] as const;
-
-export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('|'), 'gu');
+export const INVISIBLE_CHARACTER_REGEXP = /ࠀ|⭍|֏|'꣰|⛬|⛫|⛭|⛮|⛶|⛘|⛐|⛠|⛋|⛟|⛉|⛍|⛗|⛜|⛡|⛌/gu;
 
 /**
  * chunks of text which can be used to pad a message to bypass hypixel's spam filter

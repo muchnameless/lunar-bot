@@ -9,7 +9,7 @@ import {
 import ms from 'ms';
 import { type ChatBridge } from '#chatBridge/ChatBridge.js';
 import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { INVISIBLE_CHARACTERS, HypixelMessageType } from '#chatBridge/constants/index.js';
+import { HypixelMessageType } from '#chatBridge/constants/index.js';
 import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '#functions';
 import { type CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
@@ -113,7 +113,7 @@ export default class PollCommand extends DualCommand {
 			await chatBridge.broadcast(stripIndents`
 				poll by ${escapeIgn(ign)}: type a number to vote (${ms(DURATION, { long: true })})
 				${question}
-				${pollOptions.map(({ number, option }) => `${INVISIBLE_CHARACTERS[0]}${number}: ${option}`).join('\n')}
+				${pollOptions.map(({ number, option }) => `${number}: ${option}`).join('\n')}
 			`);
 
 			// aquire in-game votes

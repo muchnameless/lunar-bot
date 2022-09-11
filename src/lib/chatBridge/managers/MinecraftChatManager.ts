@@ -29,7 +29,6 @@ import {
 	DELETED_MESSAGE_REASON,
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
-	INVISIBLE_CHARACTERS,
 	MinecraftChatManagerState,
 	WHITESPACE_ONLY_REGEXP,
 	randomPadding,
@@ -862,7 +861,7 @@ export class MinecraftChatManager extends ChatManager {
 			return false;
 		}
 
-		return this.chat({ prefix: `/gc ${prefix}${prefix ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
+		return this.chat({ prefix: `/gc ${prefix}${prefix && ' '}`, ..._options });
 	}
 
 	/**
@@ -886,7 +885,7 @@ export class MinecraftChatManager extends ChatManager {
 			return false;
 		}
 
-		return this.chat({ prefix: `/oc ${prefix}${prefix ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
+		return this.chat({ prefix: `/oc ${prefix}${prefix && ' '}`, ..._options });
 	}
 
 	/**
@@ -897,7 +896,7 @@ export class MinecraftChatManager extends ChatManager {
 	public async pchat(options: MinecraftChatOptions | string) {
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
 
-		return this.chat({ prefix: `/pc ${prefix}${prefix ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
+		return this.chat({ prefix: `/pc ${prefix}${prefix && ' '}`, ..._options });
 	}
 
 	/**

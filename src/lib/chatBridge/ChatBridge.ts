@@ -5,7 +5,7 @@ import { type Awaitable, type Message as DiscordMessage, type MessageOptions } f
 import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
-import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
+import { CHAT_FUNCTION_BY_TYPE, HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
 import {
 	DiscordManager,
 	type DiscordChatManagerResolvable,
@@ -375,8 +375,8 @@ export class ChatBridge extends EventEmitter {
 					content,
 					prefix: `${
 						discordChatManager?.prefix ??
-						PREFIX_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]
-					} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`,
+						PREFIX_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof PREFIX_BY_TYPE)]
+					} ${minecraftPrefix}${minecraftPrefix && ' '}`,
 					maxParts,
 					..._options,
 				}),
