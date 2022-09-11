@@ -276,10 +276,10 @@ export class HypixelMessage {
 			case HypixelMessageType.Guild:
 			case HypixelMessageType.Officer: {
 				const result = await this.chatBridge.broadcast({
-					hypixelMessage: this,
 					discord: {
 						allowedMentions: { parse: [] },
 					},
+					hypixelMessage: this,
 					..._options,
 				});
 

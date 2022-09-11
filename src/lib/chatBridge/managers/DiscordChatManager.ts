@@ -20,7 +20,7 @@ import {
 import { fetch } from 'undici';
 import { type ChatBridge } from '../ChatBridge.js';
 import { type HypixelMessage } from '../HypixelMessage.js';
-import { PREFIX_BY_TYPE } from '../constants/index.js';
+import { PREFIX_BY_TYPE, type HypixelMessageType } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
 import { imgur } from '#api';
 import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache.js';
@@ -69,7 +69,7 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * hypixel message type
 	 */
-	public readonly type: keyof typeof PREFIX_BY_TYPE;
+	public readonly type: HypixelMessageType;
 
 	/**
 	 * discord channel id
@@ -79,7 +79,7 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * hypixel chat prefix
 	 */
-	public readonly prefix: typeof PREFIX_BY_TYPE[keyof typeof PREFIX_BY_TYPE];
+	public readonly prefix: typeof PREFIX_BY_TYPE[HypixelMessageType];
 
 	/**
 	 * channel webhook
@@ -651,7 +651,7 @@ export class DiscordChatManager extends ChatManager {
 				// message is a bot message (since it has an interaction property) -> use messageInteraction.user instead of message.author
 				void this.minecraft.chat({
 					content: `${this.client.config.get('PREFIXES')[0]}${content}`,
-					prefix: `${this.prefix} ${DiscordChatManager._replaceBlockedName(
+					prefix: `${this.prefix}${DiscordChatManager._replaceBlockedName(
 						player?.ign ??
 							(
 								await message.guild?.members
@@ -672,13 +672,12 @@ export class DiscordChatManager extends ChatManager {
 		// send content
 		return this.minecraft.chat({
 			content: contentParts.join(' '),
-			prefix: `${this.prefix} ${
+			prefix:
 				message.author.id === message.client.user!.id
-					? ''
-					: `${DiscordChatManager._replaceBlockedName(
+					? this.prefix
+					: `${this.prefix}${DiscordChatManager._replaceBlockedName(
 							player?.ign ?? message.member?.displayName ?? message.author.username,
-					  )}: `
-			}`,
+					  )}: `,
 			discordMessage: message,
 			signal,
 		});

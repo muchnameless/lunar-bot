@@ -26,13 +26,13 @@ import {
 } from '../HypixelMessageCollector.js';
 import { createBot } from '../MinecraftBot.js';
 import {
+	ChatPrefix,
 	DELETED_MESSAGE_REASON,
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
-	MinecraftChatManagerState,
-	WHITESPACE_ONLY_REGEXP,
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
+	WHITESPACE_ONLY_REGEXP,
 } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
 import { MC_CLIENT_VERSION, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
@@ -215,6 +215,12 @@ class LastMessages {
 export interface ReadyMinecraftChatManager extends MinecraftChatManager {
 	bot: MinecraftBot;
 	botUuid: string;
+}
+
+export const enum MinecraftChatManagerState {
+	Ready,
+	Connecting,
+	Errored,
 }
 
 export class MinecraftChatManager extends ChatManager {
@@ -846,7 +852,7 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param options
 	 */
 	public gchat(options: MinecraftChatOptions | string) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
+		const { prefix, ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
 			logger.trace(
@@ -861,7 +867,7 @@ export class MinecraftChatManager extends ChatManager {
 			return false;
 		}
 
-		return this.chat({ prefix: `/gc ${prefix}${prefix && ' '}`, ..._options });
+		return this.chat({ prefix: prefix ? `${ChatPrefix.Guild}${prefix} ` : ChatPrefix.Guild, ..._options });
 	}
 
 	/**
@@ -870,7 +876,7 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param options
 	 */
 	public ochat(options: MinecraftChatOptions | string) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
+		const { prefix, ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
 			logger.trace(
@@ -885,7 +891,7 @@ export class MinecraftChatManager extends ChatManager {
 			return false;
 		}
 
-		return this.chat({ prefix: `/oc ${prefix}${prefix && ' '}`, ..._options });
+		return this.chat({ prefix: prefix ? `${ChatPrefix.Officer}${prefix} ` : ChatPrefix.Officer, ..._options });
 	}
 
 	/**
@@ -894,9 +900,9 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param options
 	 */
 	public async pchat(options: MinecraftChatOptions | string) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
+		const { prefix, ..._options } = MinecraftChatManager.resolveChatInput(options);
 
-		return this.chat({ prefix: `/pc ${prefix}${prefix && ' '}`, ..._options });
+		return this.chat({ prefix: prefix ? `${ChatPrefix.Party}${prefix} ` : ChatPrefix.Party, ..._options });
 	}
 
 	/**
@@ -906,10 +912,10 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param options
 	 */
 	public async whisper(ign: string, options: MinecraftChatOptions | string) {
-		const { prefix = '', ..._options } = MinecraftChatManager.resolveChatInput(options);
+		const { prefix, ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		return this.chat({
-			prefix: `/w ${ign} ${prefix}${prefix && ' '}`,
+			prefix: prefix ? `${ChatPrefix.Whisper}${ign} ${prefix} ` : `${ChatPrefix.Whisper}${ign} `,
 			maxParts: Number.POSITIVE_INFINITY,
 			..._options,
 		});
@@ -974,17 +980,17 @@ export class MinecraftChatManager extends ChatManager {
 		let commandPrefix: string;
 		let contentPrefix: string;
 
-		if (prefix.startsWith('/gc ') || prefix.startsWith('/oc ')) {
+		if (prefix.startsWith(ChatPrefix.Guild) || prefix.startsWith(ChatPrefix.Officer)) {
 			// guild and officer chat
 			lastMessages = this._lastMessages[LastMessagesType.Guild]!;
 
-			commandPrefix = prefix.slice(0, '/gc '.length);
-			contentPrefix = prefix.slice('/gc '.length);
-		} else if (prefix.startsWith('/w ')) {
+			commandPrefix = prefix.slice(0, ChatPrefix.Guild.length);
+			contentPrefix = prefix.slice(ChatPrefix.Guild.length);
+		} else if (prefix.startsWith(ChatPrefix.Whisper)) {
 			// whispers
 			lastMessages = this._lastMessages[LastMessagesType.Whisper]!;
 
-			const index = prefix.indexOf(' ', '/w '.length) + 1;
+			const index = prefix.indexOf(' ', ChatPrefix.Whisper.length) + 1;
 			commandPrefix = prefix.slice(0, index);
 			contentPrefix = prefix.slice(index);
 		} else {
@@ -1032,7 +1038,7 @@ export class MinecraftChatManager extends ChatManager {
 	 */
 	async #sendToChat(
 		content: string,
-		prefix = '',
+		prefix: string,
 		discordMessage: Message | null = null,
 		lastMessages: LastMessages | null = null,
 	): Promise<void> {

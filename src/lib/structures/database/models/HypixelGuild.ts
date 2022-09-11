@@ -28,7 +28,7 @@ import {
 import { type Player } from './Player.js';
 import { hypixel, mojang } from '#api';
 import { type ChatBridge, type MinecraftReadyChatBridge } from '#chatBridge/ChatBridge.js';
-import { mute, setRank, unmute, type PREFIX_BY_TYPE } from '#chatBridge/constants/index.js';
+import { mute, setRank, unmute, type HypixelMessageType } from '#chatBridge/constants/index.js';
 import { Offset, SKYBLOCK_XP_TYPES, UNKNOWN_IGN, XP_OFFSETS_TIME } from '#constants';
 import {
 	cleanFormattedNumber,
@@ -67,7 +67,7 @@ interface AutomatedGuildRank {
 
 export interface ChatBridgeChannel {
 	channelId: Snowflake;
-	type: keyof typeof PREFIX_BY_TYPE;
+	type: HypixelMessageType;
 }
 
 interface StatsHistory {

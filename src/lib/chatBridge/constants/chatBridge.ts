@@ -24,22 +24,18 @@ export const enum HypixelMessageType {
 	Whisper = 'WHISPER',
 }
 
-export const enum MinecraftChatManagerState {
-	Ready,
-	Connecting,
-	Errored,
+export const enum ChatPrefix {
+	Guild = '/gc ',
+	Officer = '/oc ',
+	Party = '/pc ',
+	Whisper = '/w ',
 }
 
 export const PREFIX_BY_TYPE = {
-	GUILD: '/gc',
-	OFFICER: '/oc',
-	PARTY: '/pc',
-} as const;
-
-export const CHAT_FUNCTION_BY_TYPE = {
-	GUILD: 'gchat',
-	OFFICER: 'ochat',
-	PARTY: 'pchat',
+	[HypixelMessageType.Guild]: ChatPrefix.Guild,
+	[HypixelMessageType.Officer]: ChatPrefix.Officer,
+	[HypixelMessageType.Party]: ChatPrefix.Party,
+	[HypixelMessageType.Whisper]: ChatPrefix.Whisper,
 } as const;
 
 /**

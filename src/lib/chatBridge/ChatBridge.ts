@@ -5,12 +5,8 @@ import { type Awaitable, type Message as DiscordMessage, type MessageOptions } f
 import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
-import { CHAT_FUNCTION_BY_TYPE, HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
-import {
-	DiscordManager,
-	type DiscordChatManagerResolvable,
-	type ReadyDiscordManager,
-} from './managers/DiscordManager.js';
+import { HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
+import { DiscordManager, type ReadyDiscordManager } from './managers/DiscordManager.js';
 import {
 	MinecraftChatManager,
 	type MinecraftChatOptions,
@@ -30,7 +26,6 @@ export interface BroadcastOptions {
 	discord?: Omit<MessageOptions, 'content'>;
 	hypixelMessage?: HypixelMessage | null;
 	minecraft?: Omit<MinecraftChatOptions, 'content'>;
-	type?: DiscordChatManagerResolvable;
 }
 
 export const enum ChatBridgeEvent {
@@ -359,30 +354,23 @@ export class ChatBridge extends EventEmitter {
 	public async broadcast(options: BroadcastOptions | string) {
 		const {
 			content,
-			hypixelMessage,
-			type = hypixelMessage?.type ?? HypixelMessageType.Guild,
 			discord,
-			minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ..._options } = {},
+			hypixelMessage,
+			minecraft: { prefix: minecraftPrefix, maxParts = Number.POSITIVE_INFINITY, ...minecraft } = {},
 		} = typeof options === 'string' ? ({ content: options } as BroadcastOptions) : options;
-		const discordChatManager = this.discord.resolve(type);
+		const type = hypixelMessage?.type ?? HypixelMessageType.Guild;
 
 		return Promise.all([
 			// minecraft
-			this.minecraft[CHAT_FUNCTION_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]]?.(
-				{ content, prefix: minecraftPrefix, maxParts, ..._options },
-			) ??
-				this.minecraft.chat({
-					content,
-					prefix: `${
-						discordChatManager?.prefix ??
-						PREFIX_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof PREFIX_BY_TYPE)]
-					} ${minecraftPrefix}${minecraftPrefix && ' '}`,
-					maxParts,
-					..._options,
-				}),
+			this.minecraft.chat({
+				content,
+				prefix: minecraftPrefix ? `${PREFIX_BY_TYPE[type]}${minecraftPrefix} ` : PREFIX_BY_TYPE[type],
+				maxParts,
+				...minecraft,
+			}),
 
 			// discord
-			discordChatManager?.sendViaBot({
+			this.discord.resolve(type)?.sendViaBot({
 				content,
 				hypixelMessage,
 				...discord,

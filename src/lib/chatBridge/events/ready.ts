@@ -1,5 +1,5 @@
 import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
-import { MinecraftChatManagerState } from '../constants/index.js';
+import { MinecraftChatManagerState } from '../managers/MinecraftChatManager.js';
 import { logger } from '#logger';
 
 export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
