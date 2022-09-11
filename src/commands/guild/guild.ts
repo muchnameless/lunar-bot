@@ -153,7 +153,7 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('mute')
-					.setDescription('mute')
+					.setDescription('mute a guild member or the whole guild')
 					.addStringOption(targetOption)
 					.addStringOption((option) =>
 						option //
@@ -210,7 +210,7 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('unmute')
-					.setDescription('unmute a guild member')
+					.setDescription('unmute a guild member or the whole guild')
 					.addStringOption(targetOption),
 			);
 
