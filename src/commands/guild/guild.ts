@@ -21,13 +21,14 @@ import {
 	historyErrors,
 	invite,
 	kick,
-	mute,
 	logErrors,
+	mute,
 	promote,
 	setRank,
+	slowMode,
 	topErrors,
-	unmute,
 	unknownIgn,
+	unmute,
 } from '#chatBridge/constants/index.js';
 import { type CommandOptions } from '#chatBridge/managers/MinecraftChatManager.js';
 import { UNKNOWN_IGN } from '#constants';
@@ -84,13 +85,30 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('demote')
-					.setDescription('demote')
+					.setDescription('demote a guild member')
 					.addStringOption(requiredPlayerOption),
+			)
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('history')
+					.setDescription('view the last 24h of guild events')
+					.addIntegerOption(pageOption),
+			)
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('info')
+					.setDescription('show information about the guild'),
+			)
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('invite')
+					.setDescription('invite a player')
+					.addStringOption(requiredIgnOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('kick')
-					.setDescription('kick')
+					.setDescription('kick a guild member')
 					.addStringOption(requiredPlayerOption)
 					.addStringOption((option) =>
 						option //
@@ -106,48 +124,31 @@ export default class GuildCommand extends ApplicationCommand {
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
-					.setName('history')
-					.setDescription('history')
-					.addIntegerOption(pageOption),
-			)
-			.addSubcommand((subcommand) =>
-				subcommand //
-					.setName('info')
-					.setDescription('info'),
-			)
-			.addSubcommand((subcommand) =>
-				subcommand //
-					.setName('invite')
-					.setDescription('invite')
-					.addStringOption(requiredIgnOption),
-			)
-			.addSubcommand((subcommand) =>
-				subcommand //
 					.setName('list')
-					.setDescription('list'),
+					.setDescription('list guild members'),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('log')
-					.setDescription('log')
+					.setDescription('view the audit log')
 					.addStringOption(optionalPlayerOption)
 					.addIntegerOption(pageOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('member')
-					.setDescription('member')
+					.setDescription('show information about a guild member')
 					.addStringOption(optionalPlayerOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('members')
-					.setDescription('members'),
+					.setDescription('list guild members'),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('motd')
-					.setDescription('motd'),
+					.setDescription('show the "message of the day" preview'),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand
@@ -164,23 +165,23 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('online')
-					.setDescription('online'),
+					.setDescription('list online guild members'),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('promote')
-					.setDescription('promote')
+					.setDescription('promote a guild member')
 					.addStringOption(requiredPlayerOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('quest')
-					.setDescription('quest'),
+					.setDescription('show the current guild quest'),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('setrank')
-					.setDescription('setrank')
+					.setDescription('set the rank of a guild member')
 					.addStringOption(requiredPlayerOption)
 					.addStringOption((option) =>
 						option //
@@ -191,9 +192,14 @@ export default class GuildCommand extends ApplicationCommand {
 					),
 			)
 			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('slow')
+					.setDescription('toggle slow chat (10s delay between messages)'),
+			)
+			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('top')
-					.setDescription('top')
+					.setDescription('list members with the most guild xp earned')
 					.addIntegerOption((option) =>
 						option //
 							.setName('days-ago')
@@ -204,7 +210,7 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('unmute')
-					.setDescription('unmute')
+					.setDescription('unmute a guild member')
 					.addStringOption(targetOption),
 			);
 
@@ -273,6 +279,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'mute':
 			case 'promote':
 			case 'setrank':
+			case 'slow':
 			case 'unmute':
 				roleIds.push(...hypixelGuild.staffRoleIds);
 				break;
@@ -756,6 +763,39 @@ export default class GuildCommand extends ApplicationCommand {
 				});
 			}
 
+			case 'history':
+				return this._paginatedRun(
+					interaction,
+					hypixelGuild,
+					SUBCOMMAND,
+					{
+						command: 'guild history',
+						abortRegExp: historyErrors(),
+					},
+					interaction.user.id,
+					interaction.options.getInteger('page'),
+				);
+
+			case 'info':
+			case 'quest':
+				return this._sharedRun(interaction, hypixelGuild, {
+					command: `guild ${SUBCOMMAND}`,
+				});
+
+			case 'invite': {
+				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
+				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
+
+				if (existingBan) {
+					throw `\`${ign}\` is on the ban list for \`${existingBan.reason}\``;
+				}
+
+				return this._sharedRun(interaction, hypixelGuild, {
+					command: `guild invite ${ign}`,
+					responseRegExp: invite(ign),
+				});
+			}
+
 			case 'kick': {
 				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
@@ -814,57 +854,6 @@ export default class GuildCommand extends ApplicationCommand {
 				});
 			}
 
-			case 'history':
-				return this._paginatedRun(
-					interaction,
-					hypixelGuild,
-					SUBCOMMAND,
-					{
-						command: 'guild history',
-						abortRegExp: historyErrors(),
-					},
-					interaction.user.id,
-					interaction.options.getInteger('page'),
-				);
-
-			case 'info':
-			case 'quest':
-				return this._sharedRun(interaction, hypixelGuild, {
-					command: `guild ${SUBCOMMAND}`,
-				});
-
-			case 'motd':
-				return this._sharedRun(interaction, hypixelGuild, {
-					command: 'guild motd preview',
-				});
-
-			case 'top':
-				return this._paginatedRun(
-					interaction,
-					hypixelGuild,
-					SUBCOMMAND,
-					{
-						command: 'guild top',
-						abortRegExp: topErrors(),
-					},
-					interaction.user.id,
-					interaction.options.getInteger('days-ago'),
-				);
-
-			case 'invite': {
-				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
-				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
-
-				if (existingBan) {
-					throw `\`${ign}\` is on the ban list for \`${existingBan.reason}\``;
-				}
-
-				return this._sharedRun(interaction, hypixelGuild, {
-					command: `guild invite ${ign}`,
-					responseRegExp: invite(ign),
-				});
-			}
-
 			case 'list':
 			case 'members':
 			case 'online':
@@ -896,6 +885,11 @@ export default class GuildCommand extends ApplicationCommand {
 					abortRegExp: unknownIgn(target.ign),
 				});
 			}
+
+			case 'motd':
+				return this._sharedRun(interaction, hypixelGuild, {
+					command: 'guild motd preview',
+				});
 
 			case 'mute': {
 				const DURATION_INPUT = interaction.options.getString('duration', true);
@@ -947,6 +941,26 @@ export default class GuildCommand extends ApplicationCommand {
 					responseRegExp: setRank(target.ign, undefined, rank.name),
 				});
 			}
+
+			case 'slow':
+				return this._sharedRun(interaction, hypixelGuild, {
+					command: 'guild slow',
+					responseRegExp: slowMode(hypixelGuild.chatBridge.bot.username),
+					max: 1,
+				});
+
+			case 'top':
+				return this._paginatedRun(
+					interaction,
+					hypixelGuild,
+					SUBCOMMAND,
+					{
+						command: 'guild top',
+						abortRegExp: topErrors(),
+					},
+					interaction.user.id,
+					interaction.options.getInteger('days-ago'),
+				);
 
 			case 'unmute': {
 				const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
