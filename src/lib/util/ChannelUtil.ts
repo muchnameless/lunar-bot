@@ -23,18 +23,20 @@ export class ChannelUtil extends null {
 	private static readonly DM_PERMISSIONS = new PermissionsBitField()
 		.add(
 			PermissionFlagsBits.AddReactions,
-			PermissionFlagsBits.ViewChannel,
+			PermissionFlagsBits.AttachFiles,
+			PermissionFlagsBits.EmbedLinks,
+			PermissionFlagsBits.MentionEveryone,
+			PermissionFlagsBits.ReadMessageHistory,
 			PermissionFlagsBits.SendMessages,
 			PermissionFlagsBits.SendTTSMessages,
-			PermissionFlagsBits.EmbedLinks,
-			PermissionFlagsBits.AttachFiles,
-			PermissionFlagsBits.ReadMessageHistory,
-			PermissionFlagsBits.MentionEveryone,
 			PermissionFlagsBits.UseExternalEmojis,
+			PermissionFlagsBits.ViewChannel,
 		)
 		.freeze();
 
-	private static readonly DEFAULT_SEND_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
+	private static readonly BASE_SEND_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
+
+	private static readonly SLOWMODE_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.ManageMessages;
 
 	/**
 	 * @param channel
@@ -48,14 +50,20 @@ export class ChannelUtil extends null {
 				return {
 					channelId: channel.id,
 					recipient: recipient ? UserUtil.logInfo(recipient) : { userId: channel.recipientId },
+					channelType: ChannelType[channel.type],
 				};
 			}
 
 			case ChannelType.GroupDM:
-				return { channelId: channel.id, channelName: channel.name };
+				return { channelId: channel.id, channelName: channel.name, channelType: ChannelType[channel.type] };
 
 			default:
-				return { channelId: channel.id, channelName: channel.name, guild: GuildUtil.logInfo(channel.guild) };
+				return {
+					channelId: channel.id,
+					channelName: channel.name,
+					channelType: ChannelType[channel.type],
+					guild: GuildUtil.logInfo(channel.guild),
+				};
 		}
 	}
 
@@ -101,7 +109,10 @@ export class ChannelUtil extends null {
 	 */
 	public static async deleteMessages(channel: TextBasedChannel | null, IdOrIds: Snowflake | Snowflake[]) {
 		if (!channel?.isTextBased()) {
-			logger.warn({ channel, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]: not a text based channel');
+			logger.warn(
+				{ channel: this.logInfo(channel), data: IdOrIds },
+				'[CHANNEL DELETE MESSAGES]: not a text based channel',
+			);
 			return null;
 		}
 
@@ -140,7 +151,7 @@ export class ChannelUtil extends null {
 				}
 			}
 		} catch (error) {
-			logger.error({ channel, err: error, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]');
+			logger.error({ channel: this.logInfo(channel), err: error, data: IdOrIds }, '[CHANNEL DELETE MESSAGES]');
 			return null;
 		}
 	}
@@ -168,13 +179,13 @@ export class ChannelUtil extends null {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		// guild -> requires permission
-		let requiredChannelPermissions = this.DEFAULT_SEND_PERMISSIONS;
+		let requiredChannelPermissions = this.BASE_SEND_PERMISSIONS;
 
 		if ((_options.content?.length ?? 0) > MessageLimits.MaximumLength) {
 			const MESSAGE = `content length ${_options.content!.length} > ${MessageLimits.MaximumLength}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+			logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -183,7 +194,7 @@ export class ChannelUtil extends null {
 				const MESSAGE = 'cannot reply to a system message';
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+				logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 				return null;
 			}
 
@@ -195,7 +206,7 @@ export class ChannelUtil extends null {
 				const MESSAGE = `embeds length ${_options.embeds.length} > ${MessageLimits.MaximumEmbeds}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+				logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 				return null;
 			}
 
@@ -205,7 +216,7 @@ export class ChannelUtil extends null {
 				const MESSAGE = `embeds total char length ${TOTAL_LENGTH} > ${EmbedLimits.MaximumTotalCharacters}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
-				logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+				logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 				return null;
 			}
 
@@ -224,7 +235,7 @@ export class ChannelUtil extends null {
 			} in ${this.channelName(channel)}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+			logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -235,7 +246,7 @@ export class ChannelUtil extends null {
 			)}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn({ channel, data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+			logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
 			return null;
 		}
 
@@ -243,8 +254,43 @@ export class ChannelUtil extends null {
 			return await channel.send(_options);
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
-			logger.error({ channel, err: error, data: _options }, '[CHANNEL SEND]');
+			logger.error({ channel: this.logInfo(channel), err: error, data: _options }, '[CHANNEL SEND]');
 			return null;
+		}
+	}
+
+	/**
+	 *
+	 * @param channel
+	 * @param rateLimitPerUser
+	 * @param reason
+	 */
+	public static async setRateLimitPerUser(channel: TextChannel, rateLimitPerUser: number, reason?: string) {
+		const permissions = this.botPermissions(channel);
+
+		if (!permissions.has(this.SLOWMODE_PERMISSIONS, false)) {
+			const missingChannelPermissions = permissions
+				.missing(this.SLOWMODE_PERMISSIONS, false)
+				.map((permission) => `'${permission}'`);
+			const MESSAGE = `missing ${commaListAnd(missingChannelPermissions)} permission${
+				missingChannelPermissions.length === 1 ? '' : 's'
+			} in ${this.channelName(channel)}`;
+
+			logger.warn(
+				{ channel: this.logInfo(channel), data: { rateLimitPerUser, reason } },
+				`[CHANNEL SET RATE LIMIT PER USER]: ${MESSAGE}`,
+			);
+			return null;
+		}
+
+		try {
+			return await channel.setRateLimitPerUser(rateLimitPerUser, reason);
+		} catch (error) {
+			logger.error(
+				{ channel: this.logInfo(channel), err: error, data: { rateLimitPerUser, reason } },
+				'[CHANNEL SET RATE LIMIT PER USER]',
+			);
+			return channel;
 		}
 	}
 }

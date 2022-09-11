@@ -52,7 +52,7 @@ export class MessageUtil extends null {
 		return {
 			messageId: message.id,
 			content: message.content,
-			type: MessageType[message.type],
+			messageType: MessageType[message.type],
 			author: UserUtil.logInfo(message.author),
 			channel: ChannelUtil.logInfo(message.channel),
 		};
