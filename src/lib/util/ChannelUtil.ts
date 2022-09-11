@@ -260,12 +260,21 @@ export class ChannelUtil extends null {
 	}
 
 	/**
-	 *
 	 * @param channel
 	 * @param rateLimitPerUser
 	 * @param reason
 	 */
 	public static async setRateLimitPerUser(channel: TextChannel, rateLimitPerUser: number, reason?: string) {
+		// nothing to do
+		if (channel.rateLimitPerUser === rateLimitPerUser) {
+			logger.warn(
+				{ channel: this.logInfo(channel), data: { rateLimitPerUser, reason } },
+				'[CHANNEL SET RATE LIMIT PER USER]: rateLimitPerUser is already set',
+			);
+			return channel;
+		}
+
+		// permission checks
 		const permissions = this.botPermissions(channel);
 
 		if (!permissions.has(this.SLOWMODE_PERMISSIONS, false)) {
@@ -283,6 +292,7 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
+		// api call
 		try {
 			return await channel.setRateLimitPerUser(rateLimitPerUser, reason);
 		} catch (error) {

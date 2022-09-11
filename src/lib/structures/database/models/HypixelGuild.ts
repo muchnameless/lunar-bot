@@ -133,6 +133,8 @@ export class HypixelGuild extends Model<
 
 	public declare chatBridgeChannels: CreationOptional<ChatBridgeChannel[]>;
 
+	public declare slowChatEnabled: CreationOptional<boolean>;
+
 	public declare ranks: CreationOptional<GuildRank[]>;
 
 	public declare syncRanksEnabled: CreationOptional<boolean>;
@@ -274,6 +276,11 @@ export class HypixelGuild extends Model<
 				chatBridgeChannels: {
 					type: DataTypes.ARRAY(DataTypes.JSONB),
 					defaultValue: [],
+					allowNull: false,
+				},
+				slowChatEnabled: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
 					allowNull: false,
 				},
 				ranks: {

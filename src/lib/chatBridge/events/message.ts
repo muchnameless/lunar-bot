@@ -27,7 +27,7 @@ import {
 } from '#functions';
 import { logger } from '#logger';
 import type MathsCommand from '#root/commands/general/maths';
-import { GuildMemberUtil, MessageUtil } from '#utils';
+import { ChannelUtil, GuildMemberUtil, MessageUtil } from '#utils';
 
 const blockedRegExp = new RegExp(
 	`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+)(?:${PADDING_CHUNKS.join(
@@ -466,7 +466,29 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (slowModeChangeMatched) {
 			void hypixelMessage.forwardToDiscord();
 
-			const { executor } = slowModeChangeMatched.groups as { executor: string };
+			const { enabled, executor } = slowModeChangeMatched.groups as {
+				disabled: string | undefined;
+				enabled: string | undefined;
+				executor: string;
+			};
+
+			// sync with discord channel
+			void hypixelMessage.hypixelGuild?.update({ slowChatEnabled: Boolean(enabled) });
+
+			const discordGuildChannel = this.chatBridge.discord.channelsByType.get(HypixelMessageType.Guild)?.channel;
+
+			if (discordGuildChannel) {
+				if (enabled) {
+					void ChannelUtil.setRateLimitPerUser(discordGuildChannel, 10, `slow mode enabled by ${executor}`);
+				} else {
+					void ChannelUtil.setRateLimitPerUser(discordGuildChannel, 0, `slow mode disabled by ${executor}`);
+				}
+			} else {
+				logger.error(
+					{ ...this.chatBridge.logInfo, content: hypixelMessage.content, executor },
+					'[CHATBRIDGE]: slowMode no discord channel',
+				);
+			}
 
 			return logger.info(
 				{ ...this.chatBridge.logInfo, content: hypixelMessage.content, executor },
