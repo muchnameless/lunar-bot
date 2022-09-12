@@ -2,7 +2,7 @@ import { parseArgs, type ParseArgsConfig } from 'node:util';
 import { regExpEsc } from '@sapphire/utilities';
 import { type GuildMember, type Message as DiscordMessage } from 'discord.js';
 import { type ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
-import { type BroadcastOptions, type ChatBridge } from './ChatBridge.js';
+import { type BroadcastOptions, type BroadcastResult, type ChatBridge } from './ChatBridge.js';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
 import { PrismarineMessage } from './PrismarineMessage.js';
 import { type ChatPacket } from './botEvents/player_chat.js';
@@ -275,11 +275,11 @@ export class HypixelMessage {
 		switch (this.type) {
 			case HypixelMessageType.Guild:
 			case HypixelMessageType.Officer: {
-				const result = await this.chatBridge.broadcast({
+				const result: BroadcastResult = await this.chatBridge.broadcast({
 					discord: {
 						allowedMentions: { parse: [] },
 					},
-					hypixelMessage: this,
+					hypixelMessage: this as HypixelMessage & { type: HypixelMessageType.Guild | HypixelMessageType.Officer },
 					..._options,
 				});
 

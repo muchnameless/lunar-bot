@@ -5,7 +5,7 @@ import { type Awaitable, type Message as DiscordMessage, type MessageOptions } f
 import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
-import { HypixelMessageType, PREFIX_BY_TYPE } from './constants/index.js';
+import { CHAT_METHOD_BY_TYPE, HypixelMessageType } from './constants/index.js';
 import { DiscordManager, type ReadyDiscordManager } from './managers/DiscordManager.js';
 import {
 	MinecraftChatManager,
@@ -24,9 +24,11 @@ import { MessageUtil } from '#utils';
 export interface BroadcastOptions {
 	content: string;
 	discord?: Omit<MessageOptions, 'content'>;
-	hypixelMessage?: HypixelMessage | null;
+	hypixelMessage?: (HypixelMessage & { type: Exclude<HypixelMessageType, HypixelMessageType.Whisper> }) | null;
 	minecraft?: Omit<MinecraftChatOptions, 'content'>;
 }
+
+export type BroadcastResult = [boolean, DiscordMessage | null];
 
 export const enum ChatBridgeEvent {
 	Connect = 'connect',
@@ -351,20 +353,19 @@ export class ChatBridge extends EventEmitter {
 	 *
 	 * @param options
 	 */
-	public async broadcast(options: BroadcastOptions | string) {
+	public async broadcast(options: BroadcastOptions | string): Promise<BroadcastResult> {
 		const {
 			content,
 			discord,
 			hypixelMessage,
-			minecraft: { prefix, maxParts = Number.POSITIVE_INFINITY, ...minecraft } = {},
+			minecraft: { maxParts = Number.POSITIVE_INFINITY, ...minecraft } = {},
 		} = typeof options === 'string' ? ({ content: options } as BroadcastOptions) : options;
 		const type = hypixelMessage?.type ?? HypixelMessageType.Guild;
 
 		return Promise.all([
-			// minecraft
-			this.minecraft.chat({
+			// minecraft (use chat method so mutedCheck is performed before sending)
+			this.minecraft[CHAT_METHOD_BY_TYPE[type]]({
 				content,
-				prefix: prefix ? `${PREFIX_BY_TYPE[type]}${prefix} ` : PREFIX_BY_TYPE[type],
 				maxParts,
 				...minecraft,
 			}),

@@ -112,6 +112,7 @@ const enum ChatResponse {
 	Timeout,
 	Spam,
 	Blocked,
+	Muted,
 }
 
 const enum ForwardRejectionReason {
@@ -650,6 +651,13 @@ export class MinecraftChatManager extends ChatManager {
 			hypixelMessage.content.startsWith('This message is not allowed')
 		) {
 			this._resolveAndReset(ChatResponse.Blocked);
+			return;
+		}
+
+		// muted
+		if (hypixelMessage.content.startsWith("You're currently guild muted for")) {
+			this._resolveAndReset(ChatResponse.Muted);
+			// return;
 		}
 	}
 
@@ -1123,6 +1131,13 @@ export class MinecraftChatManager extends ChatManager {
 				void this._handleForwardRejection(discordMessage, ForwardRejectionReason.HypixelBlocked);
 				await sleep(this.delay);
 				throw `unable to send '${message}', hypixel's filter blocked it`;
+			}
+
+			// bot muted
+			case ChatResponse.Muted: {
+				void MessageUtil.react(discordMessage, UnicodeEmoji.Muted);
+				await sleep(this.delay);
+				throw `unable to send '${message}', bot is muted`;
 			}
 
 			// message sent successfully

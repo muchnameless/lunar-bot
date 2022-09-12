@@ -38,6 +38,13 @@ export const PREFIX_BY_TYPE = {
 	[HypixelMessageType.Whisper]: ChatPrefix.Whisper,
 } as const;
 
+export const CHAT_METHOD_BY_TYPE = {
+	[HypixelMessageType.Guild]: 'gchat',
+	[HypixelMessageType.Officer]: 'ochat',
+	[HypixelMessageType.Party]: 'pchat',
+	[HypixelMessageType.Whisper]: 'whisper',
+} as const;
+
 /**
  * characters that don't render in mc chat
  */
