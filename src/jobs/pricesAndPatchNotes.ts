@@ -335,7 +335,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 			case ItemId.Rune: {
 				const [RUNE, LEVEL] = Object.entries(item.tag!.ExtraAttributes!.runes!)[0]!;
 
-				itemId = `RUNE_${RUNE}_${LEVEL}`;
+				itemId = `${ItemId.Rune}_${RUNE}_${LEVEL}`;
 				break;
 			}
 

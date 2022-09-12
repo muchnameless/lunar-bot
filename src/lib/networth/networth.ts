@@ -10,6 +10,7 @@ import {
 	NON_REDUCED_PETS,
 	PriceModifier,
 	SKYBLOCK_INVENTORIES,
+	THUNDER_CHARGES,
 } from './constants/index.js';
 import {
 	calculatePetSkillLevel,
@@ -81,6 +82,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		skin: string;
 		stats_book: number;
 		talisman_enrichment: string;
+		thunder_charge: number;
 		tuned_transmission: number;
 		upgrade_level: number;
 		winning_bid: number;
@@ -120,16 +122,16 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 			case ItemId.MidasStaff:
 				// price paid over 100M does not further affect item
-				price = Math.min(extraAttributes.winning_bid, 100e6);
+				price = Math.min(extraAttributes.winning_bid, 100e6) * PriceModifier.WinningBid;
 				break;
 
 			case ItemId.MidasSword:
 				// price paid over 50M does not further affect item
-				price = Math.min(extraAttributes.winning_bid, 50e6);
+				price = Math.min(extraAttributes.winning_bid, 50e6) * PriceModifier.WinningBid;
 				break;
 
 			default:
-				price = extraAttributes.winning_bid;
+				price = extraAttributes.winning_bid * PriceModifier.WinningBid;
 		}
 	}
 
@@ -209,7 +211,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// upgradable armor (e.g. crimson)
 	if (itemUpgrade?.prestige) {
 		let currentItemUpgrade: ItemUpgrade | undefined = itemUpgrade;
-		let essencePrice = 0;
 
 		// follow prestige chain
 		do {
@@ -217,23 +218,21 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			if (itemUpgrade.stars) {
 				for (const star of itemUpgrade.stars) {
 					for (const [material, amount] of Object.entries(star)) {
-						essencePrice += amount * getPrice(material);
+						price += amount * getPrice(material) * PriceModifier.Essence;
 					}
 				}
 			}
 
 			// prestige
 			for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
-				essencePrice += amount * getPrice(material);
+				price += amount * getPrice(material) * PriceModifier.Essence;
 			}
 
 			// try to add "base item"
-			price += getPrice(currentItemUpgrade.prestige!.item);
+			price += getPrice(currentItemUpgrade.prestige!.item) * PriceModifier.PrestigeItem;
 
 			currentItemUpgrade = itemUpgrades.get(currentItemUpgrade.prestige!.item);
 		} while (currentItemUpgrade?.prestige);
-
-		price += essencePrice * PriceModifier.Essence;
 	}
 
 	// stars
@@ -286,6 +285,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		price +=
 			getPrice(`TALISMAN_ENRICHMENT_${extraAttributes.talisman_enrichment.toUpperCase()}`) *
 			PriceModifier.TalismanEnrichment;
+	}
+
+	// pulse ring
+	if (extraAttributes.thunder_charge && itemId === ItemId.PulseRing) {
+		price +=
+			((THUNDER_CHARGES.findLast((charge) => charge <= extraAttributes.thunder_charge!) ?? 0) / 50_000) *
+			getPrice(ItemId.ThunderInABottle) *
+			PriceModifier.ThunderInABottle;
 	}
 
 	// recombed
@@ -361,11 +368,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		price += getPrice(extraAttributes.drill_part_engine.toUpperCase()) * PriceModifier.DrillUpgrade;
 	}
 
-	// ethermerge (Aspect of the Void)
+	// etherwarp (Aspect of the Void)
 	if (extraAttributes.ethermerge) {
-		price +=
-			getPrice(ItemId.EtherwarpConduit) * PriceModifier.EtherwarpConduit +
-			getPrice(ItemId.EtherwarpMerger) * PriceModifier.EtherwarpMerger;
+		price += (getPrice(ItemId.EtherwarpConduit) + getPrice(ItemId.EtherwarpMerger)) * PriceModifier.Etherwarp;
 	}
 
 	// mana disintegrator
@@ -431,7 +436,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 	// candy + skins
 	if (pet.candyUsed) {
 		if (!NON_REDUCED_PETS.has(pet.type as ItemId)) {
-			price *= PriceModifier.PetWithCandy;
+			price = Math.max(price * PriceModifier.PetWithCandy, price - (level >= 100 ? 5_000_000 : 2_500_000));
 		}
 
 		if (pet.skin) {
