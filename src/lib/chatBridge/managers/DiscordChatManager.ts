@@ -767,7 +767,7 @@ export class DiscordChatManager extends ChatManager {
 						.slice('/'.length)
 						.replace(/ visibility:[a-z]+/, '');
 				}
-			} else if (message.author.id !== message.client.user!.id) {
+			} else if (message.author.id !== message.client.user.id) {
 				// interaction from another bot
 				content = messageInteraction.commandName;
 			}
@@ -797,12 +797,18 @@ export class DiscordChatManager extends ChatManager {
 		// send content
 		return this.minecraft.chat({
 			content: contentParts.join(' '),
-			prefix:
-				message.author.id === message.client.user.id
-					? this.prefix
-					: `${this.prefix}${DiscordChatManager._replaceBlockedName(
-							player?.ign ?? message.member?.displayName ?? message.author.username,
-					  )}: `,
+			prefix: message.author.bot
+				? message.author.id === message.client.user.id
+					? // this bot
+					  this.prefix
+					: // other bot
+					  `${this.prefix}${DiscordChatManager._replaceBlockedName(
+							message.member?.displayName ?? message.author.username,
+					  )}: `
+				: // user
+				  `${this.prefix}${DiscordChatManager._replaceBlockedName(
+						player?.ign ?? message.member?.displayName ?? message.author.username,
+				  )}: `,
 			discordMessage: message,
 			signal,
 		});
