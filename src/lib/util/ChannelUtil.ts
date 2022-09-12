@@ -5,7 +5,7 @@ import {
 	PermissionsBitField,
 	type Channel,
 	type Message,
-	type MessageOptions,
+	type MessageCreateOptions,
 	type Snowflake,
 	type TextBasedChannel,
 	type TextChannel,
@@ -15,7 +15,7 @@ import { GuildUtil, UserUtil, EmbedUtil } from './index.js';
 import { commaListAnd } from '#functions';
 import { logger } from '#logger';
 
-export interface SendOptions extends MessageOptions {
+export interface SendOptions extends MessageCreateOptions {
 	rejectOnError?: boolean;
 }
 

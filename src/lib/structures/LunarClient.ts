@@ -7,7 +7,7 @@ import {
 	PresenceUpdateStatus,
 	type ActivitiesOptions,
 	type ClientOptions,
-	type MessageOptions,
+	type MessageCreateOptions,
 	type Snowflake,
 } from 'discord.js';
 import { ChatBridgeManager } from '#chatBridge/ChatBridgeManager.js';
@@ -139,7 +139,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	 *
 	 * @param options
 	 */
-	public override async dmOwner(options: MessageOptions | string) {
+	public override async dmOwner(options: MessageCreateOptions | string) {
 		try {
 			return UserUtil.sendDM(await this.users.fetch(this.ownerId), options);
 		} catch (error) {

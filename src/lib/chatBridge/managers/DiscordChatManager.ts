@@ -12,11 +12,11 @@ import {
 	type CommandInteractionOption,
 	type Message,
 	type MessageCollectorOptions,
-	type MessageOptions,
+	type MessageCreateOptions,
 	type Snowflake,
 	type TextChannel,
 	type Webhook,
-	type WebhookMessageOptions,
+	type WebhookCreateMessageOptions,
 } from 'discord.js';
 import ms from 'ms';
 import { fetch } from 'undici';
@@ -42,13 +42,13 @@ import { type Player } from '#structures/database/models/Player.js';
 import { WebhookError } from '#structures/errors/WebhookError.js';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
 
-interface SendViaBotOptions extends MessageOptions {
+interface SendViaBotOptions extends MessageCreateOptions {
 	content: string;
 	fromMinecraft?: boolean;
 	hypixelMessage?: HypixelMessage | null;
 }
 
-interface SendViaWebhookOptions extends WebhookMessageOptions {
+interface SendViaWebhookOptions extends WebhookCreateMessageOptions {
 	abortController?: AbortController;
 	queuePromise?: Promise<void>;
 }
@@ -511,7 +511,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param options
 	 * @internal
 	 */
-	async #sendViaWebhook(options: WebhookMessageOptions): Promise<Message> {
+	async #sendViaWebhook(options: WebhookCreateMessageOptions): Promise<Message> {
 		try {
 			// fetch / create webhook if non existent
 			if (!this.isReady()) {
