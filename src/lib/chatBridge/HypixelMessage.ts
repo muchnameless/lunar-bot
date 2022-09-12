@@ -261,8 +261,10 @@ export class HypixelMessage {
 
 	/**
 	 * content with discord ansi markdown instead of minecraft formatting codes (not all are supported)
+	 *
+	 * @param reset - whether to replace reset tags
 	 */
-	public get ansiContent() {
+	public ansiContent(reset = true) {
 		let message = this.formattedContent;
 
 		for (const [key, value] of [
@@ -287,7 +289,7 @@ export class HypixelMessage {
 			// ['§m', ansiTag()], // '\u001B[9m', // strikethrough
 			['§n', ansiTag([AnsiFormat.Underline])], // underline
 			// ['§o', ansiTag()], // '\u001B[3m', // italic
-			['§r', ansiTag()], // reset
+			['§r', reset ? ansiTag() : ''], // reset
 		] as const) {
 			message = message.replaceAll(key, value);
 		}
