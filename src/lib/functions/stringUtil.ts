@@ -17,8 +17,7 @@ type AnsiOptions =
  *
  * @param options format | background | colour
  */
-// "? ||" to use the fallback for an empty options array
-// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- "? ||" to use the fallback for an empty options array
 export const ansiTag = (options?: AnsiOptions) => `\u001B[${options?.join(';') || AnsiFormat.Normal}m` as const;
 
 /**

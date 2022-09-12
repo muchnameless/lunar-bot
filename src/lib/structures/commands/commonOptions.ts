@@ -113,3 +113,8 @@ export const hypixelGuildOption = new SlashCommandStringOption()
 	.setRequired(false)
 	.setAutocomplete(true);
 // TODO: add guild name length limit
+
+export const ansiOutputOption = new SlashCommandBooleanOption()
+	.setName('ansi')
+	.setDescription('use ansi codeblocks (default: false)')
+	.setRequired(false);

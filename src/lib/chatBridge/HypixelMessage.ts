@@ -10,8 +10,8 @@ import { HypixelMessageType, spamMessages, type MessagePosition } from './consta
 import { type DiscordChatManager } from './managers/DiscordChatManager.js';
 import { type MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 import { mojang } from '#api';
-import { NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
-import { minutes, uuidToBustURL } from '#functions';
+import { AnsiColour, AnsiFormat, NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
+import { ansiTag, minutes, uuidToBustURL } from '#functions';
 import { logger } from '#logger';
 import { type BridgeCommand } from '#structures/commands/BridgeCommand.js';
 import { type DualCommand } from '#structures/commands/DualCommand.js';
@@ -257,6 +257,42 @@ export class HypixelMessage {
 	 */
 	public get formattedContent() {
 		return this.prismarineMessage.toMotd().trim();
+	}
+
+	/**
+	 * content with discord ansi markdown instead of minecraft formatting codes (not all are supported)
+	 */
+	public get ansiContent() {
+		let message = this.formattedContent;
+
+		for (const [key, value] of [
+			['§0', ansiTag([AnsiColour.Gray])], // black
+			['§1', ansiTag([AnsiColour.Blue])], // dark blue
+			['§2', ansiTag([AnsiColour.Green])], // dark green
+			['§3', ansiTag([AnsiColour.Cyan])], // dark aqua
+			['§4', ansiTag([AnsiColour.Red])], // dark red
+			['§5', ansiTag([AnsiColour.Pink])], // dark purple
+			['§6', ansiTag([AnsiColour.Yellow])], // gold
+			['§7', ansiTag([AnsiColour.Gray])], // '\u001B[37m', // gray
+			['§8', ansiTag([AnsiColour.Gray])], // '\u001B[90m', // dark gray
+			['§9', ansiTag([AnsiColour.Blue])], // '\u001B[94m', // blue
+			['§a', ansiTag([AnsiColour.Green])], // '\u001B[92m', // green
+			['§b', ansiTag([AnsiColour.Cyan])], // '\u001B[96m', // aqua
+			['§c', ansiTag([AnsiColour.Red])], // '\u001B[91m', // red
+			['§d', ansiTag([AnsiColour.Pink])], // '\u001B[95m', // light purple
+			['§e', ansiTag([AnsiColour.Yellow])], // '\u001B[93m', // yellow
+			['§f', ansiTag([AnsiColour.White])], // '\u001B[97m', // white
+			// ['§k', ansiTag()], // '\u001B[6m', // obfuscated
+			['§l', ansiTag([AnsiFormat.Bold])], // bold
+			// ['§m', ansiTag()], // '\u001B[9m', // strikethrough
+			['§n', ansiTag([AnsiFormat.Underline])], // underline
+			// ['§o', ansiTag()], // '\u001B[3m', // italic
+			['§r', ansiTag()], // reset
+		] as const) {
+			message = message.replaceAll(key, value);
+		}
+
+		return `${message}${ansiTag()}`;
 	}
 
 	/**

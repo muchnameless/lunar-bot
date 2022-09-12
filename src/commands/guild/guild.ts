@@ -49,6 +49,7 @@ import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import { type CommandContext } from '#structures/commands/BaseCommand.js';
 import {
+	ansiOutputOption,
 	forceOption,
 	hypixelGuildOption,
 	optionalPlayerOption,
@@ -125,7 +126,8 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('list')
-					.setDescription('list guild members'),
+					.setDescription('list guild members')
+					.addBooleanOption(ansiOutputOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand
@@ -143,7 +145,8 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('members')
-					.setDescription('list guild members'),
+					.setDescription('list guild members')
+					.addBooleanOption(ansiOutputOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
@@ -165,7 +168,8 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand //
 					.setName('online')
-					.setDescription('list online guild members'),
+					.setDescription('list online guild members')
+					.addBooleanOption(ansiOutputOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand //
@@ -527,13 +531,28 @@ export default class GuildCommand extends ApplicationCommand {
 		interaction: ChatInputCommandInteraction<'cachedOrDM'>,
 		hypixelGuild: HypixelGuild,
 		commandOptions: CommandOptions,
+		ansi: boolean,
 	) {
+		const formatMessage = ansi
+			? (msg: HypixelMessage) => msg.ansiContent
+			: (msg: HypixelMessage) =>
+					msg.content.includes('●')
+						? removeMcFormatting(
+								msg.formattedContent
+									.replaceAll('§r§c ●', ' 🔴') // prettify emojis
+									.replaceAll('§r§a ●', ' 🟢')
+									.replace(/\[.+?] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
+									.trim(),
+						  )
+						: msg.content;
+
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
 					.setDescription(
 						codeBlock(
+							'ansi',
 							trim(
 								(
 									await hypixelGuild.chatBridge.minecraft.command({
@@ -541,17 +560,7 @@ export default class GuildCommand extends ApplicationCommand {
 										raw: true,
 									})
 								)
-									.map((msg) =>
-										msg.content.includes('●')
-											? removeMcFormatting(
-													msg.formattedContent
-														.replaceAll('§r§c ●', ' 🔴') // prettify emojis
-														.replaceAll('§r§a ●', ' 🟢')
-														.replace(/\[.+?] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
-														.trim(),
-											  )
-											: msg.content,
-									)
+									.map(formatMessage)
 									.join('\n'),
 								EmbedLimits.MaximumDescriptionLength - 8, // 2 * (3 [```] + 1 [\n])
 							),
@@ -857,9 +866,14 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'list':
 			case 'members':
 			case 'online':
-				return this._runList(interaction, hypixelGuild, {
-					command: `guild ${SUBCOMMAND}`,
-				});
+				return this._runList(
+					interaction,
+					hypixelGuild,
+					{
+						command: `guild ${SUBCOMMAND}`,
+					},
+					interaction.options.getBoolean('ansi') ?? false,
+				);
 
 			case 'log': {
 				const COMMAND = `log ${InteractionUtil.getIgn(interaction) ?? ''}`.trimEnd();
