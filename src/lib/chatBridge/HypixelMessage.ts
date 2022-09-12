@@ -294,7 +294,7 @@ export class HypixelMessage {
 			message = message.replaceAll(key, value);
 		}
 
-		return `${message}${ansiTag()}`;
+		return reset ? `${message}${ansiTag()}` : message;
 	}
 
 	/**
