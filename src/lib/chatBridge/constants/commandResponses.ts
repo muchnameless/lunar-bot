@@ -240,6 +240,7 @@ export const spamMessages = new RegExp(
 		'Blocked excessive spam.',
 		'You are sending commands too fast! Please slow down.',
 		'Please wait before doing that again!',
+		'You are chatting too fast! You must wait 10 seconds in between messages.',
 	]
 		.map((x) => `^${x.replace(/[!.]/g, '[.!]?')}$`)
 		.join('|'),

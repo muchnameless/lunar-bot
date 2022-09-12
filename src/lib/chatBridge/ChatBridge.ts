@@ -356,7 +356,7 @@ export class ChatBridge extends EventEmitter {
 			content,
 			discord,
 			hypixelMessage,
-			minecraft: { prefix: minecraftPrefix, maxParts = Number.POSITIVE_INFINITY, ...minecraft } = {},
+			minecraft: { prefix, maxParts = Number.POSITIVE_INFINITY, ...minecraft } = {},
 		} = typeof options === 'string' ? ({ content: options } as BroadcastOptions) : options;
 		const type = hypixelMessage?.type ?? HypixelMessageType.Guild;
 
@@ -364,7 +364,7 @@ export class ChatBridge extends EventEmitter {
 			// minecraft
 			this.minecraft.chat({
 				content,
-				prefix: minecraftPrefix ? `${PREFIX_BY_TYPE[type]}${minecraftPrefix} ` : PREFIX_BY_TYPE[type],
+				prefix: prefix ? `${PREFIX_BY_TYPE[type]}${prefix} ` : PREFIX_BY_TYPE[type],
 				maxParts,
 				...minecraft,
 			}),

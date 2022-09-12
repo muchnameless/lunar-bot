@@ -29,7 +29,7 @@ export default class ChannelUpdateEvent extends Event {
 
 			// skip bridges which are not linked
 			const { hypixelGuild } = chatBridge;
-			if (!hypixelGuild) continue;
+			if (!hypixelGuild?.chatBridgeEnabled) continue;
 
 			// skip channels which are already in sync
 			if (hypixelGuild.slowChatEnabled ? newChannel.rateLimitPerUser !== 0 : newChannel.rateLimitPerUser === 0) {

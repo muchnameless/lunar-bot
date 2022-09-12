@@ -858,7 +858,7 @@ export class MinecraftChatManager extends ChatManager {
 			logger.trace(
 				{
 					prefix,
-					cotent: _options.content,
+					content: _options.content,
 					mutedFor: this.hypixelGuild.mutedPlayers.get(this.botUuid!)! - Date.now(),
 				},
 				'[GCHAT]: bot muted',
@@ -882,7 +882,7 @@ export class MinecraftChatManager extends ChatManager {
 			logger.trace(
 				{
 					prefix,
-					cotent: _options.content,
+					content: _options.content,
 					mutedFor: this.hypixelGuild.mutedPlayers.get(this.botUuid!)! - Date.now(),
 				},
 				'[OCHAT]: bot muted',
