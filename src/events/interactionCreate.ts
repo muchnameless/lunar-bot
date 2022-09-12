@@ -154,7 +154,7 @@ export default class InteractionCreateEvent extends Event {
 					// send new non-ephemeral message
 					await InteractionUtil.reply(interaction, {
 						rejectOnError: true,
-						content: interaction.message.content || null,
+						content: interaction.message.content,
 						embeds: interaction.message.embeds,
 						files: interaction.message.attachments.map(({ url }) => url),
 						components,

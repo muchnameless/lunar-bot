@@ -9,8 +9,8 @@ import {
 	type DiscordErrorData,
 	type EmojiIdentifierResolvable,
 	type Message,
+	type MessageCreateOptions,
 	type MessageEditOptions,
-	type MessageOptions,
 	type MessageReaction,
 	type TextChannel,
 } from 'discord.js';
@@ -29,7 +29,7 @@ interface FollowUpMessage extends ReplyMessage {
 	webhookId: NonNullable<Message['webhookId']>;
 }
 
-interface AwaitReplyOptions extends MessageOptions {
+interface AwaitReplyOptions extends MessageCreateOptions {
 	question?: string;
 	/**
 	 * time in milliseconds to wait for a response

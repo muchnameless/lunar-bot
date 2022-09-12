@@ -1,7 +1,7 @@
 import { EventEmitter, once } from 'node:events';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
-import { type Awaitable, type Message as DiscordMessage, type MessageOptions } from 'discord.js';
+import { type Awaitable, type Message as DiscordMessage, type MessageCreateOptions } from 'discord.js';
 import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
@@ -24,7 +24,7 @@ import { MessageUtil } from '#utils';
 
 export interface BroadcastOptions {
 	content: string;
-	discord?: Omit<MessageOptions, 'content'>;
+	discord?: Omit<MessageCreateOptions, 'content'>;
 	hypixelMessage?: (HypixelMessage & { type: Exclude<HypixelMessageType, HypixelMessageType.Whisper> }) | null;
 	minecraft?: Omit<MinecraftChatOptions, 'content'>;
 }
