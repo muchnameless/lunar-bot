@@ -260,39 +260,74 @@ export class HypixelMessage {
 	}
 
 	/**
-	 * content with discord ansi markdown instead of minecraft formatting codes (not all are supported)
+	 * content with discord ansi markdown instead of minecraft formatting codes
+	 * correct colours (not all are supported by discord and therefore omitted / replaced with something similar)
+	 *
+	 * §0 - black         - \u001b[30m
+	 * §1 - dark blue     - \u001b[34m
+	 * §2 - dark green    - \u001b[32m
+	 * §3 - dark aqua     - \u001b[36m
+	 * §4 - dark red      - \u001b[31m
+	 * §5 - dark purple   - \u001b[35m
+	 * §6 - gold          - \u001b[33m
+	 * §7 - gray          - \u001b[37m
+	 * §8 - dark gray     - \u001b[90m
+	 * §9 - blue          - \u001b[94m
+	 * §a - green         - \u001b[92m
+	 * §b - aqua          - \u001b[96m
+	 * §c - red           - \u001b[91m
+	 * §d - light purple  - \u001b[95m
+	 * §e - yellow        - \u001b[93m
+	 * §f - white         - \u001b[97m
+	 * §k - obfuscated    - \u001b[6m
+	 * §l - bold          - \u001b[1m
+	 * §m - strikethrough - \u001b[9m
+	 * §n - underline     - \u001b[4m
+	 * §o - italic        - \u001b[3m
+	 * §r - reset         - \u001b[0m
 	 *
 	 * @param reset - whether to replace reset tags
 	 */
 	public ansiContent(reset = true) {
 		let message = this.formattedContent;
 
-		for (const [key, value] of [
-			['§0', ansiTag([AnsiColour.Gray])], // black
-			['§1', ansiTag([AnsiColour.Blue])], // dark blue
-			['§2', ansiTag([AnsiColour.Green])], // dark green
-			['§3', ansiTag([AnsiColour.Cyan])], // dark aqua
-			['§4', ansiTag([AnsiColour.Red])], // dark red
-			['§5', ansiTag([AnsiColour.Pink])], // dark purple
-			['§6', ansiTag([AnsiColour.Yellow])], // gold
-			['§7', ansiTag([AnsiColour.Gray])], // '\u001B[37m', // gray
-			['§8', ansiTag([AnsiColour.Gray])], // '\u001B[90m', // dark gray
-			['§9', ansiTag([AnsiColour.Blue])], // '\u001B[94m', // blue
-			['§a', ansiTag([AnsiColour.Green])], // '\u001B[92m', // green
-			['§b', ansiTag([AnsiColour.Cyan])], // '\u001B[96m', // aqua
-			['§c', ansiTag([AnsiColour.Red])], // '\u001B[91m', // red
-			['§d', ansiTag([AnsiColour.Pink])], // '\u001B[95m', // light purple
-			['§e', ansiTag([AnsiColour.Yellow])], // '\u001B[93m', // yellow
-			['§f', ansiTag([AnsiColour.White])], // '\u001B[97m', // white
-			// ['§k', ansiTag()], // '\u001B[6m', // obfuscated
-			['§l', ansiTag([AnsiFormat.Bold])], // bold
-			// ['§m', ansiTag()], // '\u001B[9m', // strikethrough
-			['§n', ansiTag([AnsiFormat.Underline])], // underline
-			// ['§o', ansiTag()], // '\u001B[3m', // italic
-			['§r', reset ? ansiTag() : ''], // reset
-		] as const) {
-			message = message.replaceAll(key, value);
-		}
+		message = message.replace(/§([\da-fk-or])/g, (_, code: string) => {
+			switch (code) {
+				case '0':
+				case '7':
+				case '8':
+					return ansiTag([AnsiColour.Gray]);
+				case '1':
+				case '9':
+					return ansiTag([AnsiColour.Blue]);
+				case '2':
+				case 'a':
+					return ansiTag([AnsiColour.Green]);
+				case '3':
+				case 'b':
+					return ansiTag([AnsiColour.Cyan]);
+				case '4':
+				case 'c':
+					return ansiTag([AnsiColour.Red]);
+				case '5':
+				case 'd':
+					return ansiTag([AnsiColour.Pink]);
+				case '6':
+				case 'e':
+					return ansiTag([AnsiColour.Yellow]);
+				case 'f':
+					return reset ? ansiTag([AnsiColour.White]) : '';
+				case 'l':
+					return ansiTag([AnsiFormat.Bold]);
+				case 'n':
+					return ansiTag([AnsiFormat.Underline]);
+				case 'r':
+					return reset ? ansiTag() : '';
+
+				default:
+					return '';
+			}
+		});
 
 		return reset ? `${message}${ansiTag()}` : message;
 	}

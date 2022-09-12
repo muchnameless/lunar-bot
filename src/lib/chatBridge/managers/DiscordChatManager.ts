@@ -775,7 +775,9 @@ export class DiscordChatManager extends ChatManager {
 			if (content) {
 				// message is a bot message (since it has an interaction property) -> use messageInteraction.user instead of message.author
 				void this.minecraft.chat({
-					content: `${this.client.config.get('PREFIXES')[0]}${content}`,
+					content: `${
+						message.author.id === message.client.user.id ? this.client.config.get('PREFIXES')[0] : '/'
+					}${content}`,
 					prefix: `${this.prefix}${DiscordChatManager._replaceBlockedName(
 						player?.ign ??
 							(
