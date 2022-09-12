@@ -851,7 +851,7 @@ export class MinecraftChatManager extends ChatManager {
 	 *
 	 * @param options
 	 */
-	public gchat(options: MinecraftChatOptions | string) {
+	public async gchat(options: MinecraftChatOptions | string) {
 		const { prefix, ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
@@ -875,7 +875,7 @@ export class MinecraftChatManager extends ChatManager {
 	 *
 	 * @param options
 	 */
-	public ochat(options: MinecraftChatOptions | string) {
+	public async ochat(options: MinecraftChatOptions | string) {
 		const { prefix, ..._options } = MinecraftChatManager.resolveChatInput(options);
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
