@@ -1,10 +1,12 @@
 import { URL } from 'node:url';
+import { stripIndents } from 'common-tags';
 import {
 	bold,
 	DiscordAPIError,
 	EmbedBuilder,
 	MessageCollector,
 	PermissionFlagsBits,
+	SnowflakeUtil,
 	time,
 	TimestampStyles,
 	type CommandInteractionOption,
@@ -13,16 +15,16 @@ import {
 	type MessageOptions,
 	type Snowflake,
 	type TextChannel,
-	type User,
 	type Webhook,
 	type WebhookMessageOptions,
 } from 'discord.js';
+import ms from 'ms';
 import { fetch } from 'undici';
 import { type ChatBridge } from '../ChatBridge.js';
 import { type HypixelMessage } from '../HypixelMessage.js';
 import { PREFIX_BY_TYPE, type HypixelMessageType } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
-import { imgur } from '#api';
+import { imgur, redis } from '#api';
 import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache.js';
 import {
 	ALLOWED_EXTENSIONS_REGEX,
@@ -30,20 +32,15 @@ import {
 	MAX_IMAGE_UPLOAD_SIZE,
 	MAX_WEBHOOKS_PER_CHANNEL,
 	UnicodeEmoji,
+	UNKNOWN_IGN,
 } from '#constants';
-import { asyncReplace, minutes, seconds } from '#functions';
+import { assertNever, asyncReplace, days, hours, minutes, seconds } from '#functions';
 import { logger } from '#logger';
 import { type DualCommand } from '#structures/commands/DualCommand.js';
 import { type ChatBridgeChannel } from '#structures/database/models/HypixelGuild.js';
+import { type Player } from '#structures/database/models/Player.js';
 import { WebhookError } from '#structures/errors/WebhookError.js';
-import {
-	ChannelUtil,
-	InteractionUtil,
-	MessageUtil,
-	UserUtil,
-	type InteractionUtilReplyOptions,
-	type SendDMOptions,
-} from '#utils';
+import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
 
 interface SendViaBotOptions extends MessageOptions {
 	content: string;
@@ -58,6 +55,20 @@ interface SendViaWebhookOptions extends WebhookMessageOptions {
 
 export interface ReadyDiscordChatManager extends DiscordChatManager {
 	webhook: Webhook;
+}
+
+export const enum ForwardRejectionType {
+	PlayerHypixelMuted,
+	PlayerAutoMuted,
+	BotMuted,
+	GuildMuted,
+	HypixelBlocked,
+	LocalBlocked,
+	MessageSize,
+	NoContent,
+	Error,
+	Spam,
+	Timeout,
 }
 
 export class DiscordChatManager extends ChatManager {
@@ -303,30 +314,167 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * tries to send an ephemeral message via a cached interaction or DMs the message author
-	 *
-	 * @param user
-	 * @param options
+	 * @param message
+	 * @param type
+	 * @param player
 	 */
-	public async sendDM(user: User, options: InteractionUtilReplyOptions & SendDMOptions) {
+	public async handleForwardRejection(message: Message, type: ForwardRejectionType, player?: Player | null) {
+		let emoji: UnicodeEmoji;
+		let content: string | undefined;
+		let redisKey: string | undefined;
+		let cooldown: number | undefined;
+
+		switch (type) {
+			case ForwardRejectionType.PlayerHypixelMuted:
+				emoji = UnicodeEmoji.Muted;
+				content = `your mute expires ${time(
+					seconds.fromMilliseconds(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
+					TimestampStyles.RelativeTime,
+				)}`;
+				redisKey = `dm:${message.author.id}:chatbridge:muted`;
+				break;
+
+			case ForwardRejectionType.PlayerAutoMuted:
+				emoji = UnicodeEmoji.Muted;
+				content = 'you are currently muted due to continues infractions';
+				redisKey = `dm:${message.author.id}:chatbridge:muted`;
+				break;
+
+			case ForwardRejectionType.GuildMuted:
+				emoji = UnicodeEmoji.Muted;
+				content = `${this.hypixelGuild!.name}'s guild chat mute expires ${time(
+					seconds.fromMilliseconds(this.hypixelGuild!.mutedTill),
+					TimestampStyles.RelativeTime,
+				)}`;
+				redisKey = `dm:${message.author.id}:chatbridge:muted`;
+				break;
+
+			case ForwardRejectionType.BotMuted:
+				emoji = UnicodeEmoji.Muted;
+				content = `the bot's mute expires ${time(
+					seconds.fromMilliseconds(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid!)!),
+					TimestampStyles.RelativeTime,
+				)}`;
+				redisKey = `dm:${message.author.id}:chatbridge:muted`;
+				break;
+
+			case ForwardRejectionType.HypixelBlocked: {
+				emoji = UnicodeEmoji.Stop;
+
+				const _player =
+					player ??
+					UserUtil.getPlayer(message.author) ??
+					(
+						await this.client.players.model.findCreateFind({
+							where: { discordId: message.author.id },
+							defaults: {
+								minecraftUuid: SnowflakeUtil.generate().toString(),
+								ign: UNKNOWN_IGN,
+								inDiscord: true,
+							},
+						})
+					)[0];
+
+				void _player.addInfraction();
+
+				const { infractions } = _player;
+
+				if (infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+					const MUTE_DURATION = ms(this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION'), { long: true });
+
+					void this.client.log(
+						new EmbedBuilder()
+							.setColor(this.client.config.get('EMBED_RED'))
+							.setAuthor({
+								name: message.author.tag,
+								iconURL: (message.member ?? message.author).displayAvatarURL(),
+								url: _player.url,
+							})
+							.setThumbnail(_player.imageURL)
+							.setDescription(
+								stripIndents`
+									${bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions
+									${_player.info}
+								`,
+							)
+							.setTimestamp(),
+					);
+
+					content = `you were automatically muted for ${MUTE_DURATION} due to continues infractions`;
+				} else {
+					content = 'continuing to do so will result in an automatic temporary mute';
+				}
+
+				content = stripIndents`
+					your message was blocked because you used a blocked word or character
+					(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
+
+					${content}
+				`;
+				break;
+			}
+
+			case ForwardRejectionType.LocalBlocked:
+				emoji = UnicodeEmoji.Stop;
+				content = stripIndents`
+					your message was blocked because you used a blocked word or character
+					(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
+				`;
+				redisKey = `dm:${message.author.id}:chatbridge:blocked`;
+				cooldown = days(1);
+				break;
+
+			case ForwardRejectionType.MessageSize:
+				emoji = UnicodeEmoji.Stop;
+				content = stripIndents`
+					your message was blocked because you are only allowed to send up to ${this.client.config.get(
+						'CHATBRIDGE_DEFAULT_MAX_PARTS',
+					)} messages at once
+					(in-game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+				`;
+				redisKey = `dm:${message.author.id}:chatbridge:blocked`;
+				cooldown = days(1);
+				break;
+
+			case ForwardRejectionType.NoContent:
+				emoji = UnicodeEmoji.Stop;
+				break;
+
+			case ForwardRejectionType.Error:
+			case ForwardRejectionType.Spam:
+			case ForwardRejectionType.Timeout:
+				emoji = UnicodeEmoji.X;
+				break;
+
+			default:
+				assertNever(type);
+		}
+
+		void MessageUtil.react(message, emoji);
+
+		if (!content) return;
+
+		cooldown ??= hours(1);
+
 		// try ephemeral interaction followUp
-		const interaction = this.interactionUserCache.get(user.id);
+		const interaction = this.interactionUserCache.get(message.author.id);
 
 		if (interaction) {
 			try {
-				await InteractionUtil.followUp(interaction, { ...options, ephemeral: true, rejectOnError: true });
+				await InteractionUtil.followUp(interaction, { content, ephemeral: true, rejectOnError: true });
+				if (redisKey) void redis.psetex(redisKey, cooldown, 1); // prevent additional DMs
 				return; // successfull
 			} catch (error) {
 				logger.error({ err: error, ...this.logInfo }, '[SEND DM]');
 
 				if (InteractionUtil.isInteractionError(error)) {
-					this.interactionUserCache.delete(user.id);
+					this.interactionUserCache.delete(message.author.id);
 				}
 			}
 		}
 
 		// fallback to regular DM
-		void UserUtil.sendDM(user, options);
+		void UserUtil.sendDM(message.author, { content, redisKey, cooldown });
 	}
 
 	/**
@@ -454,49 +602,24 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (this.hypixelGuild!.checkMute(player)) {
-			void this.sendDM(message.author, {
-				content: `your mute expires ${time(
-					seconds.fromMilliseconds(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
-					TimestampStyles.RelativeTime,
-				)}`,
-				redisKey: `dm:${message.author.id}:chatbridge:muted`,
-			});
-			return void MessageUtil.react(message, UnicodeEmoji.Muted);
+			return this.handleForwardRejection(message, ForwardRejectionType.PlayerHypixelMuted, player);
 		}
 
 		// check if the player is auto muted
 		if (
 			(player?.infractions ?? Number.NEGATIVE_INFINITY) >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')
 		) {
-			void this.sendDM(message.author, {
-				content: 'you are currently muted due to continues infractions',
-				redisKey: `dm:${message.author.id}:chatbridge:muted`,
-			});
-			return void MessageUtil.react(message, UnicodeEmoji.Muted);
+			return this.handleForwardRejection(message, ForwardRejectionType.PlayerAutoMuted);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild!.muted && (!player || !this.hypixelGuild!.checkStaff(player))) {
-			void this.sendDM(message.author, {
-				content: `${this.hypixelGuild!.name}'s guild chat mute expires ${time(
-					seconds.fromMilliseconds(this.hypixelGuild!.mutedTill),
-					TimestampStyles.RelativeTime,
-				)}`,
-				redisKey: `dm:${message.author.id}:chatbridge:muted`,
-			});
-			return void MessageUtil.react(message, UnicodeEmoji.Muted);
+			return this.handleForwardRejection(message, ForwardRejectionType.GuildMuted);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.hypixelGuild!.checkMute(this.minecraft.botPlayer)) {
-			void this.sendDM(message.author, {
-				content: `the bot's mute expires ${time(
-					seconds.fromMilliseconds(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid!)!),
-					TimestampStyles.RelativeTime,
-				)}`,
-				redisKey: `dm:${message.author.id}:chatbridge:muted`,
-			});
-			return void MessageUtil.react(message, UnicodeEmoji.Muted);
+			return this.handleForwardRejection(message, ForwardRejectionType.BotMuted);
 		}
 
 		// build content
@@ -591,7 +714,9 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// empty message (e.g. only embeds)
-		if (!contentParts.length) return void MessageUtil.react(message, UnicodeEmoji.Stop);
+		if (!contentParts.length) {
+			return this.handleForwardRejection(message, ForwardRejectionType.NoContent);
+		}
 
 		// @referencedMessageAuthor if normal reply
 		if (MessageUtil.isNormalReplyMessage(message)) {

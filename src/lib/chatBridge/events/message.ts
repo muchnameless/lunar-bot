@@ -75,20 +75,19 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				const cache = this.chatBridge.discord.channelsByType.get(hypixelMessage.type!)?.channel?.messages.cache;
 
 				if (cache) {
-					void MessageUtil.react(
-						(
-							await asyncCollectionFilter(
-								cache,
-								senderDiscordId
-									? async (message) =>
-											message.author.id === senderDiscordId &&
-											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent)
-									: async (message) =>
-											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent),
-							)
-						).sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a)[0] ?? null,
-						UnicodeEmoji.Stop,
-					);
+					const [discordMessage] = (
+						await asyncCollectionFilter(
+							cache,
+							senderDiscordId
+								? async (message) =>
+										message.author.id === senderDiscordId &&
+										(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent)
+								: async (message) =>
+										(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent),
+						)
+					).sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a);
+
+					if (discordMessage) void MessageUtil.react(discordMessage, UnicodeEmoji.Stop);
 				}
 			}
 

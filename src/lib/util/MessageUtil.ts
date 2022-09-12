@@ -135,8 +135,8 @@ export class MessageUtil extends null {
 	 * @param message
 	 * @param emojis
 	 */
-	public static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
-		if (!message || this.isEphemeral(message)) return null;
+	public static async react(message: Message, ...emojis: EmojiIdentifierResolvable[]) {
+		if (this.isEphemeral(message)) return null;
 
 		// permission checks
 		const { channel } = message;

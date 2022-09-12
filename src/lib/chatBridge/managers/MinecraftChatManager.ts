@@ -5,16 +5,7 @@ import { URL } from 'node:url';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { TwemojiRegex } from '@sapphire/discord-utilities';
 import { jaroWinkler } from '@skyra/jaro-winkler';
-import { stripIndents } from 'common-tags';
-import {
-	bold,
-	EmbedBuilder,
-	SnowflakeUtil,
-	TimestampStyles,
-	type GuildChannel,
-	type Message,
-	type Snowflake,
-} from 'discord.js';
+import { TimestampStyles, type GuildChannel, type Message, type Snowflake } from 'discord.js';
 import minecraftData from 'minecraft-data';
 import { type Client as MinecraftBot } from 'minecraft-protocol';
 import ms from 'ms';
@@ -35,12 +26,11 @@ import {
 	WHITESPACE_ONLY_REGEXP,
 } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
-import { MC_CLIENT_VERSION, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
+import { ForwardRejectionType } from './DiscordChatManager.js';
+import { MC_CLIENT_VERSION, UnicodeEmoji } from '#constants';
 import {
-	assertNever,
 	asyncReplace,
 	cleanFormattedNumber,
-	days,
 	minutes,
 	replaceSmallLatinCapitalLetters,
 	seconds,
@@ -49,7 +39,7 @@ import {
 } from '#functions';
 import { logger } from '#logger';
 import { type Player } from '#structures/database/models/Player.js';
-import { MessageUtil, UserUtil } from '#utils';
+import { UserUtil } from '#utils';
 
 export interface MinecraftChatOptions {
 	content: string;
@@ -113,12 +103,6 @@ const enum ChatResponse {
 	Spam,
 	Blocked,
 	Muted,
-}
-
-const enum ForwardRejectionReason {
-	HypixelBlocked,
-	LocalBlocked,
-	MessageCount,
 }
 
 const enum LastMessagesType {
@@ -416,105 +400,6 @@ export class MinecraftChatManager extends ChatManager {
 		} catch {
 			return false;
 		}
-	}
-
-	/**
-	 * reacts to the message and DMs the author
-	 *
-	 * @param discordMessage
-	 * @param reason
-	 * @param data
-	 */
-	private async _handleForwardRejection(
-		discordMessage: Message | null,
-		reason: ForwardRejectionReason,
-		data?: Record<string, unknown>,
-	) {
-		if (!discordMessage) return;
-
-		void MessageUtil.react(discordMessage, UnicodeEmoji.Stop);
-
-		let content: string | undefined;
-
-		switch (reason) {
-			case ForwardRejectionReason.HypixelBlocked: {
-				const player =
-					UserUtil.getPlayer(discordMessage.author) ??
-					(
-						await this.client.players.model.findCreateFind({
-							where: { discordId: discordMessage.author.id },
-							defaults: {
-								minecraftUuid: SnowflakeUtil.generate().toString(),
-								ign: UNKNOWN_IGN,
-								inDiscord: true,
-							},
-						})
-					)[0];
-
-				void player.addInfraction();
-
-				const { infractions } = player;
-
-				if (infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
-					const MUTE_DURATION = ms(this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION'), { long: true });
-
-					void this.client.log(
-						new EmbedBuilder()
-							.setColor(this.client.config.get('EMBED_RED'))
-							.setAuthor({
-								name: discordMessage.author.tag,
-								iconURL: (discordMessage.member ?? discordMessage.author).displayAvatarURL(),
-								url: player.url,
-							})
-							.setThumbnail(player.imageURL)
-							.setDescription(
-								stripIndents`
-									${bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions
-									${player.info}
-								`,
-							)
-							.setTimestamp(),
-					);
-
-					content = `you were automatically muted for ${MUTE_DURATION} due to continues infractions`;
-				}
-
-				content ??= 'continuing to do so will result in an automatic temporary mute';
-			}
-			// fallthrough
-
-			case ForwardRejectionReason.LocalBlocked:
-				content = stripIndents`
-					your message was blocked because you used a blocked word or character
-					(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
-
-					${content ?? ''}
-				`;
-				break;
-
-			case ForwardRejectionReason.MessageCount:
-				content = stripIndents`
-					your message was blocked because you are only allowed to send up to ${
-						data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')
-					} messages at once
-					(in-game chat messages can only be up to 256 characters long and new lines are treated as new messages)
-				`;
-				break;
-
-			default:
-				assertNever(reason);
-		}
-
-		void (this.chatBridge.discord.channelsByIds.get(discordMessage.channelId) ?? UserUtil).sendDM(
-			discordMessage.author,
-			reason === ForwardRejectionReason.HypixelBlocked
-				? { content }
-				: {
-						content,
-						redisKey: `dm:${discordMessage.author.id}:chatbridge:blocked`,
-						cooldown: days(1),
-				  },
-		);
 	}
 
 	/**
@@ -855,6 +740,15 @@ export class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
+	 * @param message
+	 * @param type
+	 */
+	private async _handleForwardRejection(message: Message | null | undefined, type: ForwardRejectionType) {
+		if (!message) return;
+		return this.chatBridge.discord.channelsByIds.get(message.channelId)?.handleForwardRejection(message, type);
+	}
+
+	/**
 	 * send a message to in-game guild chat
 	 *
 	 * @param options
@@ -871,6 +765,8 @@ export class MinecraftChatManager extends ChatManager {
 				},
 				'[GCHAT]: bot muted',
 			);
+
+			void this._handleForwardRejection(_options.discordMessage, ForwardRejectionType.BotMuted);
 
 			return false;
 		}
@@ -895,6 +791,8 @@ export class MinecraftChatManager extends ChatManager {
 				},
 				'[OCHAT]: bot muted',
 			);
+
+			void this._handleForwardRejection(_options.discordMessage, ForwardRejectionType.BotMuted);
 
 			return false;
 		}
@@ -951,7 +849,7 @@ export class MinecraftChatManager extends ChatManager {
 		// filter check
 		if (MinecraftChatManager.shouldBlock(parsedContent)) {
 			logger.warn({ prefix, content, parsedContent }, '[CHATBRIDGE CHAT]: blocked word or URL');
-			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
+			void this._handleForwardRejection(discordMessage, ForwardRejectionType.LocalBlocked);
 			return false;
 		}
 
@@ -980,7 +878,7 @@ export class MinecraftChatManager extends ChatManager {
 		if (!contentParts.size) return false;
 
 		if (contentParts.size > maxParts) {
-			void this._handleForwardRejection(discordMessage, ForwardRejectionReason.MessageCount, { maxParts });
+			void this._handleForwardRejection(discordMessage, ForwardRejectionType.MessageSize);
 			return false;
 		}
 
@@ -1051,7 +949,7 @@ export class MinecraftChatManager extends ChatManager {
 		lastMessages: LastMessages | null = null,
 	): Promise<void> {
 		if (!this.bot || this.bot.ended) {
-			void MessageUtil.react(discordMessage, UnicodeEmoji.X);
+			void this._handleForwardRejection(discordMessage, ForwardRejectionType.Error);
 			return;
 		}
 
@@ -1085,7 +983,7 @@ export class MinecraftChatManager extends ChatManager {
 			});
 		} catch (error) {
 			logger.error({ err: error, ...this.logInfo }, '[_SEND TO CHAT]: bot.write error');
-			void MessageUtil.react(discordMessage, UnicodeEmoji.X);
+			void this._handleForwardRejection(discordMessage, ForwardRejectionType.Error);
 
 			this._resetFilter();
 
@@ -1103,7 +1001,7 @@ export class MinecraftChatManager extends ChatManager {
 
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.isReady()) {
-					void MessageUtil.react(discordMessage, UnicodeEmoji.X);
+					void this._handleForwardRejection(discordMessage, ForwardRejectionType.Timeout);
 					throw `timeout while sending '${message}'`;
 				}
 
@@ -1117,7 +1015,7 @@ export class MinecraftChatManager extends ChatManager {
 
 				// max retries reached
 				if (++this._retries === MinecraftChatManager.MAX_RETRIES) {
-					void MessageUtil.react(discordMessage, UnicodeEmoji.X);
+					void this._handleForwardRejection(discordMessage, ForwardRejectionType.Spam);
 					await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					throw `unable to send '${message}', anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}
@@ -1128,14 +1026,14 @@ export class MinecraftChatManager extends ChatManager {
 
 			// hypixel filter blocked message
 			case ChatResponse.Blocked: {
-				void this._handleForwardRejection(discordMessage, ForwardRejectionReason.HypixelBlocked);
+				void this._handleForwardRejection(discordMessage, ForwardRejectionType.HypixelBlocked);
 				await sleep(this.delay);
 				throw `unable to send '${message}', hypixel's filter blocked it`;
 			}
 
 			// bot muted
 			case ChatResponse.Muted: {
-				void MessageUtil.react(discordMessage, UnicodeEmoji.Muted);
+				void this._handleForwardRejection(discordMessage, ForwardRejectionType.BotMuted);
 				await sleep(this.delay);
 				throw `unable to send '${message}', bot is muted`;
 			}

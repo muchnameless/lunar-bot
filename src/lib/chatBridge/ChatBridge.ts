@@ -6,6 +6,7 @@ import { type Client as MinecraftBot } from 'minecraft-protocol';
 import { type ChatBridgeManager } from './ChatBridgeManager.js';
 import { type HypixelMessage } from './HypixelMessage.js';
 import { CHAT_METHOD_BY_TYPE, HypixelMessageType } from './constants/index.js';
+import { ForwardRejectionType } from './managers/DiscordChatManager.js';
 import { DiscordManager, type ReadyDiscordManager } from './managers/DiscordManager.js';
 import {
 	MinecraftChatManager,
@@ -304,9 +305,12 @@ export class ChatBridge extends EventEmitter {
 	 * @param message
 	 */
 	public handleError(message: DiscordMessage) {
-		if (!this.discord.channelsByIds.has(message.channelId)) return false;
+		const discordChatManager = this.discord.channelsByIds.get(message.channelId);
 
-		void MessageUtil.react(message, UnicodeEmoji.X);
+		if (!discordChatManager) return false;
+
+		void discordChatManager.handleForwardRejection(message, ForwardRejectionType.Error);
+
 		return true;
 	}
 
