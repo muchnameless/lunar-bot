@@ -78,7 +78,7 @@ export class ChatBridge extends EventEmitter {
 	/**
 	 * position in the mcAccount array
 	 */
-	public mcAccount: number;
+	public readonly mcAccount: number;
 
 	/**
 	 * linked hypixel guild

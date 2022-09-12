@@ -97,7 +97,7 @@ export class ChannelUtil extends null {
 				return this.DM_PERMISSIONS;
 
 			default:
-				return channel.permissionsFor(channel.client.user!);
+				return channel.permissionsFor(channel.client.user);
 		}
 	}
 

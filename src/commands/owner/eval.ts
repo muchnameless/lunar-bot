@@ -207,8 +207,8 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 		const responseEmbed = this.client.defaultEmbed //
 			.setFooter({
-				text: me?.displayName ?? this.client.user!.username,
-				iconURL: (me ?? this.client.user!).displayAvatarURL(),
+				text: me?.displayName ?? this.client.user.username,
+				iconURL: (me ?? this.client.user).displayAvatarURL(),
 			});
 
 		// format input

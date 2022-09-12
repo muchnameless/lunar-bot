@@ -798,7 +798,7 @@ export class DiscordChatManager extends ChatManager {
 		return this.minecraft.chat({
 			content: contentParts.join(' '),
 			prefix:
-				message.author.id === message.client.user!.id
+				message.author.id === message.client.user.id
 					? this.prefix
 					: `${this.prefix}${DiscordChatManager._replaceBlockedName(
 							player?.ign ?? message.member?.displayName ?? message.author.username,

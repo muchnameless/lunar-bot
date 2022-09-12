@@ -110,7 +110,7 @@ export class MessageUtil extends null {
 	 */
 	public static isNormalBotMessage(message: Message) {
 		return (
-			message.author.id === message.client.user!.id &&
+			message.author.id === message.client.user.id &&
 			(message.type === MessageType.Default || this.isNormalReplyMessage(message))
 		);
 	}

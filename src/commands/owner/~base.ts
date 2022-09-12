@@ -17,7 +17,7 @@ import {
 	type JSONEncodable,
 	type MessageComponentInteraction,
 } from 'discord.js';
-import { UnicodeEmoji } from '#constants';
+import { NEVER_MATCHING_REGEXP, UnicodeEmoji } from '#constants';
 import { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import { InteractionUtil, type RepliableInteraction } from '#utils';
@@ -39,7 +39,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 				// escape codeblock markdown
 				.replaceAll('`', '`\u200B')
 				// replace the client token
-				.replace(new RegExp(this.client.token!, 'gi'), '***')
+				.replace(new RegExp(this.client.token ?? NEVER_MATCHING_REGEXP, 'gi'), '***')
 				// replace other .env values
 				.replace(
 					new RegExp(

@@ -79,7 +79,7 @@ export class HypixelMessage {
 	public discordMessage: Promise<DiscordMessage | null> = Promise.resolve(null);
 
 	/**
-	 * raw content string
+	 * trimmed raw content string
 	 */
 	public readonly rawContent: string;
 
@@ -93,12 +93,24 @@ export class HypixelMessage {
 	 */
 	public readonly me: boolean = false;
 
+	/**
+	 * message author, including db and discord data
+	 */
 	public readonly author: HypixelMessageAuthor | null;
 
+	/**
+	 * content without "Guild > [RANK] IGN: "
+	 */
 	public readonly content: string;
 
+	/**
+	 * whether the message is an anti spam reply from hypixel
+	 */
 	public readonly spam: boolean;
 
+	/**
+	 * command data, including args, used prefix
+	 */
 	public readonly commandData: CommandData | null;
 
 	/**
@@ -208,7 +220,10 @@ export class HypixelMessage {
 		}
 	}
 
-	public get prefixReplacedContent() {
+	/**
+	 * !w -> /weight
+	 */
+	private get prefixReplacedContent() {
 		return this.commandData?.command
 			? this.content
 					.replace(this.commandData.prefix!, '/')

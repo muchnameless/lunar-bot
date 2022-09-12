@@ -305,9 +305,7 @@ export default class TaxCommand extends ApplicationCommand {
 
 						return ChannelUtil.deleteMessages(interaction.channel, [
 							replyMessage.id,
-							...fetched
-								.filter(({ author: { id } }) => [this.client.user!.id, interaction.user.id].includes(id))
-								.keys(),
+							...fetched.filter(({ author: { id } }) => [this.client.user.id, interaction.user.id].includes(id)).keys(),
 						]);
 					}
 

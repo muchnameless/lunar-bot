@@ -23,7 +23,7 @@ type GuildId = Snowflake;
 type CommandId = Snowflake;
 
 export class PermissionsManager {
-	public declare readonly client: LunarClient;
+	public declare readonly client: LunarClient<true>;
 
 	public readonly cache = new Collection<GuildId, Collection<CommandId, CommandPermissions>>();
 
@@ -137,7 +137,7 @@ export class PermissionsManager {
 			case false:
 				// explicit deny
 				throw `you are explicitly denied access to the \`${
-					this.client.application!.commands.cache.get(commandId)?.name ?? commandId
+					this.client.application.commands.cache.get(commandId)?.name ?? commandId
 				}\` command`;
 
 			case undefined:
@@ -164,7 +164,7 @@ export class PermissionsManager {
 					throw `the ${this.client.guilds.cache.get(guildId)?.roles.cache.get(roleId)?.name ?? roleId} role in \`${
 						this.client.guilds.cache.get(guildId)?.name ?? guildId
 					}\` is denied access to the \`${
-						this.client.application!.commands.cache.get(commandId)?.name ?? commandId
+						this.client.application.commands.cache.get(commandId)?.name ?? commandId
 					}\` command`;
 				}
 			}

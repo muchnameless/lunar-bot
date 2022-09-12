@@ -25,14 +25,14 @@ export default class ReadyEvent extends Event {
 	 * event listener callback
 	 */
 	public override async run() {
-		logger.info(UserUtil.logInfo(this.client.user!), '[READY]: logged in');
+		logger.info(UserUtil.logInfo(this.client.user), '[READY]: logged in');
 
 		this.client.db.schedule();
 
 		await safePromiseAll([
 			this.client.logHandler.init(),
 			this._connectChatBridges(),
-			retry(() => this.client.application!.commands.fetch(), minutes(1), minutes(30)),
+			retry(() => this.client.application.commands.fetch(), minutes(1), minutes(30)),
 			retry(() => this.client.permissions.init(), minutes(1), minutes(30)),
 		]);
 
@@ -42,7 +42,7 @@ export default class ReadyEvent extends Event {
 				cronJobs: this.client.cronJobs.cache.size,
 				logChannel: this.client.logHandler.ready,
 				chatBridges: this.client.chatBridges.cache.length,
-				applicationCommands: this.client.application!.commands.cache.size,
+				applicationCommands: this.client.application.commands.cache.size,
 				permissions: Object.fromEntries(
 					this.client.permissions.cache.map((permissions, guildId) => [guildId, permissions.size]),
 				),

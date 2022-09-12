@@ -36,7 +36,7 @@ const client = new LunarClient({
 		ReactionUserManager: {
 			// cache only the bot user
 			maxSize: 1,
-			keepOverLimit: (user) => user.id === user.client.user!.id,
+			keepOverLimit: (user) => user.id === user.client.user.id,
 		},
 		StageInstanceManager: 0,
 		VoiceStateManager: 0,

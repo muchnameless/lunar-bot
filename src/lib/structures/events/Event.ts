@@ -6,7 +6,7 @@ export interface EventContext extends BaseEventContext {
 }
 
 export class Event extends BaseEvent {
-	public declare readonly client: LunarClient;
+	public declare readonly client: LunarClient<true>;
 
 	public constructor(context: EventContext) {
 		super(context);

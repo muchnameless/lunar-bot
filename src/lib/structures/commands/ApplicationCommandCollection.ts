@@ -29,7 +29,7 @@ export class ApplicationCommandCollection<
 	 * @param commandManager
 	 */
 	public async init(
-		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands,
+		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application.commands,
 	) {
 		return commandManager.set(this.apiData);
 	}
@@ -42,7 +42,7 @@ export class ApplicationCommandCollection<
 	 */
 	public async create(
 		commandName: string,
-		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands,
+		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application.commands,
 	) {
 		const command = this.get(commandName) ?? (await this.loadByName(commandName));
 
@@ -62,7 +62,7 @@ export class ApplicationCommandCollection<
 	 */
 	public async deleteCommand(
 		commandName: string,
-		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands,
+		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application.commands,
 	) {
 		const commands = await (commandManager as ApplicationCommandManager).fetch();
 		const command = commands.find((cmd) => cmd.name === commandName.toLowerCase());

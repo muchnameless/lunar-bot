@@ -222,8 +222,8 @@ export default class DebugCommand extends ApplicationCommand {
 						},
 					)
 					.setFooter({
-						text: me?.displayName ?? this.client.user!.username,
-						iconURL: (me ?? this.client.user!).displayAvatarURL(),
+						text: me?.displayName ?? this.client.user.username,
+						iconURL: (me ?? this.client.user).displayAvatarURL(),
 					}),
 			],
 			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user.id))],

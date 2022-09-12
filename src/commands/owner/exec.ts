@@ -44,8 +44,8 @@ export default class ExecCommand extends BaseOwnerCommand {
 		const me = interaction.guild?.members.me ?? null;
 		const responseEmbed = this.client.defaultEmbed //
 			.setFooter({
-				text: me?.displayName ?? this.client.user!.username,
-				iconURL: (me ?? this.client.user!).displayAvatarURL(),
+				text: me?.displayName ?? this.client.user.username,
+				iconURL: (me ?? this.client.user).displayAvatarURL(),
 			});
 
 		ExecCommand._addInputToResponseEmbed(responseEmbed, input, 'bash');

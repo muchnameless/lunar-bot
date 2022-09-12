@@ -16,7 +16,7 @@ interface CommandLoadOptions {
 export type CommandType = ApplicationCommand | BridgeCommand | DualCommand;
 
 export class BaseCommandCollection<C extends CommandType = CommandType> extends Collection<string, C> {
-	public declare readonly client: LunarClient;
+	public declare readonly client: LunarClient<true>;
 
 	/**
 	 * path to the command files
