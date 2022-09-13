@@ -105,6 +105,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	if (isVanillaItem(item)) return 0;
 
 	const itemId = extraAttributes.id;
+	const itemUpgrade = itemUpgrades.get(itemId);
 
 	let price =
 		item.Count *
@@ -210,9 +211,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		price +=
 			extraAttributes.farming_for_dummies_count * getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies;
 	}
-
-	// upgrades
-	const itemUpgrade = itemUpgrades.get(itemId);
 
 	// upgradable armor (e.g. crimson)
 	if (itemUpgrade?.prestige) {
