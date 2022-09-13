@@ -50,7 +50,10 @@ export function startJobs(client: LunarClient) {
 
 						for (const { id, category, ...data } of message.d) {
 							if (category === 'ACCESSORY') accessories.add(id);
-							if (data.stars) itemUpgrades.set(id, data);
+
+							if (data.dungeon_conversion || data.stars || data.prestige || data.gemstone_slots) {
+								itemUpgrades.set(id, data);
+							}
 						}
 
 						break;
