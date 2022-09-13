@@ -1,5 +1,6 @@
 import { ChannelType, type ClientEvents, type Events } from 'discord.js';
 import { HypixelMessageType, slowMode } from '#chatBridge/constants/index.js';
+import { logger } from '#logger';
 import { Event } from '#structures/events/Event.js';
 
 export default class ChannelUpdateEvent extends Event {
@@ -9,7 +10,7 @@ export default class ChannelUpdateEvent extends Event {
 	 * @param oldChannel
 	 * @param newChannel
 	 */
-	public override async run(
+	public override run(
 		oldChannel: ClientEvents[Events.ChannelUpdate][0],
 		newChannel: ClientEvents[Events.ChannelUpdate][1],
 	) {
@@ -37,11 +38,13 @@ export default class ChannelUpdateEvent extends Event {
 			}
 
 			// toggle slow chat
-			await chatBridge.minecraft.command({
-				command: 'guild slow',
-				responseRegExp: slowMode(chatBridge.minecraft.botUsername ?? undefined),
-				max: 1,
-			});
+			chatBridge.minecraft
+				.command({
+					command: 'guild slow',
+					responseRegExp: slowMode(chatBridge.minecraft.botUsername ?? undefined),
+					max: 1,
+				})
+				.catch((error) => logger.error(error, '[CHANNEL UPDATE]'));
 		}
 	}
 }
