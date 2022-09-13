@@ -66,6 +66,7 @@ async function parseItems(base64: string) {
 type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 	Partial<{
 		ability_scroll: string[];
+		art_of_peace_count: number;
 		art_of_war_count: number;
 		drill_part_engine: string;
 		drill_part_fuel_tank: string;
@@ -197,6 +198,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// art of war
 	if (extraAttributes.art_of_war_count) {
 		price += extraAttributes.art_of_war_count * getPrice(ItemId.ArtOfWar) * PriceModifier.ArtOfWar;
+	}
+
+	// art of peace
+	if (extraAttributes.art_of_peace_count) {
+		price += extraAttributes.art_of_peace_count * getPrice(ItemId.ArtOfPeace) * PriceModifier.ArtOfPeace;
 	}
 
 	// farming for dummies

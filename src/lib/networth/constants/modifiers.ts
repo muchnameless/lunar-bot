@@ -9,6 +9,7 @@ export const enum PriceModifier {
 	AppliedEnchantment20 = 0.2,
 	AppliedEnchantment35 = 0.35,
 	AppliedEnchantmentDefault = 0.85,
+	ArtOfPeace = 0.8,
 	ArtOfWar = 0.6,
 	BookOfStats = 0.6,
 	DrillUpgrade = 1,

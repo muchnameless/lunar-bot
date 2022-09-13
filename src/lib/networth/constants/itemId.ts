@@ -7,6 +7,7 @@ export const enum ItemId {
 	AmberMaterial = 'AMBER_MATERIAL',
 	ArmorshredArrow = 'ARMORSHRED_ARROW',
 	ArrowBundleMagma = 'ARROW_BUNDLE_MAGMA',
+	ArtOfPeace = 'THE_ART_OF_PEACE',
 	ArtOfWar = 'THE_ART_OF_WAR',
 	AspectOfTheEnd = 'ASPECT_OF_THE_END',
 	AspectOfTheVoid = 'ASPECT_OF_THE_VOID',
