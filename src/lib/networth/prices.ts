@@ -6,7 +6,7 @@ import { logger } from '#logger';
 import { type ParsedSkyBlockItem } from '#root/jobs/pricesAndPatchNotes.js';
 import { Warnings } from '#structures/Warnings.js';
 
-export type ItemUpgrade = Pick<ParsedSkyBlockItem, 'dungeon_conversion' | 'prestige' | 'stars'>;
+export type ItemUpgrade = Pick<ParsedSkyBlockItem, 'dungeon_conversion' | 'gemstone_slots' | 'prestige' | 'stars'>;
 
 export const prices = new Map<string, number>();
 export const itemUpgrades = new Map<string, ItemUpgrade>();
@@ -24,7 +24,11 @@ export async function populateCaches() {
 	try {
 		// prices
 		const pricesRows = await sql<[{ id: string; median: number }]>`
-			SELECT id, median(history) from prices
+			SELECT
+				id,
+				median(history)
+			FROM
+				prices
 		`;
 
 		prices.clear();
@@ -37,7 +41,19 @@ export async function populateCaches() {
 
 		// item upgrades
 		const itemUpgradesRows = await sql<[ItemUpgrade & Pick<ParsedSkyBlockItem, 'id'>]>`
-			SELECT id, dungeon_conversion, stars, prestige from skyblock_items WHERE dungeon_conversion IS NOT NULL OR stars IS NOT NULL OR prestige IS NOT NULL
+			SELECT
+				id,
+				dungeon_conversion,
+				stars,
+				prestige,
+				gemstone_slots
+			FROM
+				skyblock_items
+			WHERE
+				dungeon_conversion IS NOT NULL OR
+				stars IS NOT NULL OR
+				prestige IS NOT NULL OR
+				gemstone_slots IS NOT NULL
 		`;
 
 		itemUpgrades.clear();
@@ -48,7 +64,12 @@ export async function populateCaches() {
 
 		// accessories
 		const accessoriesRows = await sql<[{ id: string }]>`
-			SELECT id from skyblock_items WHERE category = 'ACCESSORY'
+			SELECT
+				id
+			FROM
+				skyblock_items
+			WHERE
+				category = 'ACCESSORY'
 		`;
 
 		accessories.clear();

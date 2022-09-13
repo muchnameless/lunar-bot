@@ -471,16 +471,53 @@ interface Prestige {
 export type ParsedSkyBlockItem = {
 	category: string | null;
 	dungeon_conversion: Record<string, number> | null;
+	gemstone_slots:
+		| {
+				costs: Record<string, number> | null;
+				slot_type: string;
+		  }[]
+		| null;
 	id: string;
 	prestige: Prestige | null;
 	stars: Record<string, number>[] | null;
 };
 
-const reduceCostsArray = (costs: ArrayElementType<NonNullable<Components.Schemas.SkyBlockItem['upgrade_costs']>>) =>
-	costs.reduce<Record<string, number>>((acc, cur) => {
+/**
+ * @param upgradeCosts
+ */
+const parseUpgradeCosts = (
+	upgradeCosts: ArrayElementType<NonNullable<Components.Schemas.SkyBlockItem['upgrade_costs']>>,
+) =>
+	upgradeCosts.reduce<Record<string, number>>((acc, cur) => {
 		acc['essence_type' in cur ? `ESSENCE_${cur.essence_type}` : cur.item_id] = cur.amount;
 		return acc;
 	}, {});
+
+/**
+ * @param gemstoneSlot
+ */
+const parseGemstoneSlots = (
+	gemstoneSlot: ArrayElementType<NonNullable<Components.Schemas.SkyBlockItem['gemstone_slots']>>,
+) => ({
+	slot_type: gemstoneSlot.slot_type,
+	costs:
+		gemstoneSlot.costs?.reduce<Record<string, number>>((acc, cur) => {
+			switch (cur.type) {
+				case 'COINS':
+					acc[ItemId.Coins] = cur.coins;
+					break;
+
+				case 'ITEM':
+					acc[cur.item_id] = cur.amount;
+					break;
+
+				default:
+					logger.warn({ data: cur }, '[PARSE GEMSTONE SLOTS]: unknown type');
+			}
+
+			return acc;
+		}, {}) ?? null,
+});
 
 /**
  * update skyblock items
@@ -499,9 +536,10 @@ async function updateSkyBlockItems(ac: AbortController) {
 		dungeon_conversion: item.dungeon_item_conversion_cost
 			? { [`ESSENCE_${item.dungeon_item_conversion_cost.essence_type}`]: item.dungeon_item_conversion_cost.amount }
 			: null,
-		stars: item.upgrade_costs?.map((entry) => reduceCostsArray(entry)) ?? null,
+		stars: item.upgrade_costs?.map(parseUpgradeCosts) ?? null,
 		category: item.category ?? null,
 		prestige: null,
+		gemstone_slots: item.gemstone_slots?.map(parseGemstoneSlots) ?? null,
 	}));
 
 	for (const { id, prestige } of items) {
@@ -510,7 +548,7 @@ async function updateSkyBlockItems(ac: AbortController) {
 		const item = parsedItems.find(({ id: _id }) => _id === prestige.item_id);
 		if (!item) continue;
 
-		item.prestige = { item: id, costs: reduceCostsArray(prestige.costs) };
+		item.prestige = { item: id, costs: parseUpgradeCosts(prestige.costs) };
 	}
 
 	await sql`
@@ -521,7 +559,8 @@ async function updateSkyBlockItems(ac: AbortController) {
 			dungeon_conversion = excluded.dungeon_conversion,
 			stars = excluded.stars,
 			category = excluded.category,
-			prestige = excluded.prestige
+			prestige = excluded.prestige,
+			gemstone_slots = excluded.gemstone_slots
 	`;
 
 	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });

@@ -74,7 +74,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		dye_item: string;
 		ethermerge: number;
 		farming_for_dummies_count: number;
-		gems: Record<string, string>;
+		gems: Record<string, string | { quality: string; uuid: string }> & { unlocked_slots?: string[] };
 		gemstone_slots: number;
 		jalapeno_count: number;
 		mana_disintegrator_count: number;
@@ -310,26 +310,43 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		price += getPrice(ItemId.Recombobulator) * PriceModifier.Recomb;
 	}
 
-	// gemstones
-	if (extraAttributes.gems) {
-		// TODO: https://github.com/HypixelDev/PublicAPI/discussions/549
+	// gemstones -- https://github.com/HypixelDev/PublicAPI/discussions/549
+	if (extraAttributes.gems && itemUpgrade?.gemstone_slots) {
 		/**
 		 * API example:
 		 *
 		 * gems: {
-		 *   AMBER_0: 'FINE',                // FINE_AMBER (slice '_')
-		 *   AMBER_1: 'FLAWLESS',            // FLAWLESS_AMBER (slice '_')
-		 *   COMBAT_0: 'FINE',               // COMBAT_0_gem (gems[`${key}_gem`])
-		 *   COMBAT_0_gem: 'JASPER',         // endsWith('_gem') continue
-		 *   unlocked_slots: [ 'COMBAT_0' ], // isArray continue
+		 *   AMBER_0: 'FINE',
+		 *   AMBER_1: 'FLAWLESS',
+		 *   COMBAT_0: 'FINE',
+		 *   COMBAT_0_gem: 'JASPER',
+		 *   unlocked_slots: [ 'COMBAT_0' ],
 		 * }
 		 */
-		for (const [key, value] of Object.entries(extraAttributes.gems)) {
-			if (Array.isArray(value) || key.endsWith('_gem')) continue;
+		const appliedGemstones = Object.entries(extraAttributes.gems);
 
-			price +=
-				getPrice(`${value}_${extraAttributes.gems[`${key}_gem`] ?? key.slice(0, key.indexOf('_'))}_GEM`) *
-				PriceModifier.Gemstone;
+		// iterate over all possible gemstone slots
+		for (const { costs, slot_type } of itemUpgrade.gemstone_slots) {
+			// check whether gemstone is applied
+			const keyIndex = appliedGemstones.findIndex(([key]) => key.startsWith(slot_type) && !key.endsWith('_gem'));
+			if (keyIndex === -1) continue;
+
+			// remove applied gemstone to not count the same one twice
+			const [[key, value]] = appliedGemstones.splice(keyIndex, 1) as [
+				[string, string | { quality: string; uuid: string }],
+			];
+			const type = ['COMBAT', 'OFFENSIVE', 'DEFENSIVE', 'MINING', 'UNIVERSAL'].includes(slot_type)
+				? extraAttributes.gems[`${key}_gem`]!
+				: slot_type;
+
+			price += getPrice(`${typeof value === 'string' ? value : value.quality}_${type}_GEM`) * PriceModifier.Gemstone;
+
+			// additional unlocking costs for the slot
+			if (costs && (extraAttributes.gems.unlocked_slots?.includes(key) ?? true)) {
+				for (const [material, amount] of Object.entries(costs)) {
+					price += amount * getPrice(material) * PriceModifier.Essence;
+				}
+			}
 		}
 	}
 
