@@ -21,6 +21,7 @@ export const enum PriceModifier {
 	FumingPotatoBook = 0.6,
 	Gemstone = 1,
 	GemstoneChamber = 0.9,
+	GemstoneSlots = 0.75,
 	HotPotatoBook = 1,
 	ItemSkin = 0.9,
 	JalapenoBook = 0.7,

@@ -247,12 +247,10 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	if (typeof stars === 'number') {
 		if (itemUpgrade) {
-			let essencePrice = 0;
-
 			// initial dungeon conversion cost
 			if (itemUpgrade.dungeon_conversion) {
 				for (const [material, amount] of Object.entries(itemUpgrade.dungeon_conversion)) {
-					essencePrice += amount * getPrice(material);
+					price += amount * getPrice(material) * PriceModifier.Essence;
 				}
 			}
 
@@ -262,7 +260,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 					// item api has required materials
 					if (itemUpgrade.stars[star]) {
 						for (const [material, amount] of Object.entries(itemUpgrade.stars[star]!)) {
-							essencePrice += amount * getPrice(material);
+							price += amount * getPrice(material) * PriceModifier.Essence;
 						}
 					} else {
 						// dungeon items require master stars for stars 6 - 10
@@ -270,8 +268,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 					}
 				}
 			}
-
-			price += essencePrice * PriceModifier.Essence;
 		} else {
 			unknownStarredItemWarnings.emit(
 				itemId,
@@ -344,7 +340,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			// additional unlocking costs for the slot
 			if (costs && (extraAttributes.gems.unlocked_slots?.includes(key) ?? true)) {
 				for (const [material, amount] of Object.entries(costs)) {
-					price += amount * getPrice(material) * PriceModifier.Essence;
+					price += amount * getPrice(material) * PriceModifier.GemstoneSlots;
 				}
 			}
 		}
