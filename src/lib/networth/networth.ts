@@ -329,13 +329,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 			// remove applied gemstone to not count the same one twice
 			const [[key, value]] = appliedGemstones.splice(keyIndex, 1) as [
+				// quality string has been changed to an object with the uuid but not all items are updated (yet?)
 				[string, string | { quality: string; uuid: string }],
 			];
-			const type = ['COMBAT', 'OFFENSIVE', 'DEFENSIVE', 'MINING', 'UNIVERSAL'].includes(slot_type)
-				? extraAttributes.gems[`${key}_gem`]!
-				: slot_type;
 
-			price += getPrice(`${typeof value === 'string' ? value : value.quality}_${type}_GEM`) * PriceModifier.Gemstone;
+			price +=
+				getPrice(
+					`${typeof value === 'string' ? value : value.quality}_${extraAttributes.gems[`${key}_gem`] ?? slot_type}_GEM`,
+				) * PriceModifier.Gemstone;
 
 			// additional unlocking costs for the slot
 			if (costs && (extraAttributes.gems.unlocked_slots?.includes(key) ?? true)) {
