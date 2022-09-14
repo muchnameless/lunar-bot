@@ -678,12 +678,12 @@ export class DiscordChatManager extends ChatManager {
 						try {
 							url = new URL(match[0]);
 
-							// don't upload imgur links to imgur
-							if (url.hostname.endsWith('imgur.com')) {
+							// link does not need to be parsed
+							if (DiscordChatManager.ALLOWED_URLS_REGEXP.test(url.hostname) || !url.pathname.includes('.')) {
 								return match[0];
 							}
 
-							// upload only pictures
+							// not an image
 							if (!ALLOWED_EXTENSIONS_REGEX.test(url.pathname)) {
 								return DiscordChatManager._getAttachmentNameFromUrl(url);
 							}
@@ -707,8 +707,8 @@ export class DiscordChatManager extends ChatManager {
 						} catch (error) {
 							logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]');
 
-							if (url) return DiscordChatManager._getAttachmentNameFromUrl(url);
-							return match[0];
+							if (url?.pathname.includes('.')) return DiscordChatManager._getAttachmentNameFromUrl(url);
+							return match[0]; // not a file URL
 						}
 					},
 				);
