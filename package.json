@@ -110,7 +110,7 @@
 		"@sapphire/shapeshift": "3.6.1-next.ca67dd9.0",
 		"@sapphire/snowflake": "3.2.3-next.f224a82.0",
 		"@types/node": "patch:@types/node@npm:^18.7.18#.yarn/patches/@types-node-npm-18.7.2-8575dab8c2.patch",
-		"discord-api-types": "0.37.9-next.afd3b55.1662748619",
+		"discord-api-types": "0.37.10-next.d452f63.1663194634",
 		"discord.js": "patch:discord.js@14.3.1-dev.1663157077-d14d47b.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1662941460-a9f003a.0-2fd95734b0.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
