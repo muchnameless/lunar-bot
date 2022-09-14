@@ -152,19 +152,29 @@ export class DiscordChatManager extends ChatManager {
 	 * @param name
 	 * @param contentType
 	 */
-	private static _getAttachmentName(name: string | null, contentType: string | null) {
+	private static _getAttachmentName(name: string | null, contentType: string | null | undefined) {
 		// no name -> use contentType if available
 		if (name === null) {
 			return `[${contentType?.slice(0, contentType.indexOf('/')) ?? 'unknown'} attachment]`;
 		}
 
 		// discord's name placeholder -> use contentType if available
-		if (name.startsWith('unknown.') && contentType !== null) {
+		if (name.startsWith('unknown.') && contentType) {
 			return `[${contentType.slice(0, contentType.indexOf('/'))} attachment]`;
 		}
 
 		// name includes the extension
 		return `[${name.replaceAll('.', ' ')}]`;
+	}
+
+	/**
+	 * parses the file name from the URL
+	 *
+	 * @param url
+	 * @param contentType
+	 */
+	private static _getAttachmentNameFromUrl(url: URL, contentType?: string | null) {
+		return this._getAttachmentName(url.pathname.slice(url.pathname.lastIndexOf('/') + 1), contentType);
 	}
 
 	/**
@@ -639,16 +649,19 @@ export class DiscordChatManager extends ChatManager {
 					messageContent,
 					/https?:\/\/(?:www\.|(?!www))[\da-z][\da-z-]+[\da-z]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[\da-z]+\.\S{2,}/gi,
 					async (match) => {
-						try {
-							const url = new URL(match[0]);
+						let url: URL | undefined;
 
-							if (
-								// don't upload imgur links to imgur
-								url.hostname.endsWith('imgur.com') ||
-								// upload only pictures
-								!ALLOWED_EXTENSIONS_REGEX.test(url.pathname)
-							) {
+						try {
+							url = new URL(match[0]);
+
+							// don't upload imgur links to imgur
+							if (url.hostname.endsWith('imgur.com')) {
 								return match[0];
+							}
+
+							// upload only pictures
+							if (!ALLOWED_EXTENSIONS_REGEX.test(url.pathname)) {
+								return DiscordChatManager._getAttachmentNameFromUrl(url);
 							}
 
 							// remove query parameters
@@ -666,7 +679,7 @@ export class DiscordChatManager extends ChatManager {
 									contentLength > MAX_IMAGE_UPLOAD_SIZE ||
 									!ALLOWED_MIMES_REGEX.test(contentType!)
 								) {
-									return match[0];
+									return DiscordChatManager._getAttachmentNameFromUrl(url, contentType);
 								}
 							}
 
@@ -674,6 +687,8 @@ export class DiscordChatManager extends ChatManager {
 							return (await imgur.uploadURL(url.toString(), signal)).data.link;
 						} catch (error) {
 							logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]');
+
+							if (url) return DiscordChatManager._getAttachmentNameFromUrl(url);
 							return match[0];
 						}
 					},
