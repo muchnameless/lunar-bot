@@ -31,7 +31,6 @@ import {
 	ALLOWED_MIMES_REGEX,
 	MAX_IMAGE_UPLOAD_SIZE,
 	MAX_WEBHOOKS_PER_CHANNEL,
-	RedisKey,
 	UnicodeEmoji,
 	UNKNOWN_IGN,
 } from '#constants';
