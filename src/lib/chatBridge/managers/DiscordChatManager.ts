@@ -31,6 +31,7 @@ import {
 	ALLOWED_MIMES_REGEX,
 	MAX_IMAGE_UPLOAD_SIZE,
 	MAX_WEBHOOKS_PER_CHANNEL,
+	RedisKey,
 	UnicodeEmoji,
 	UNKNOWN_IGN,
 } from '#constants';
@@ -165,6 +166,30 @@ export class DiscordChatManager extends ChatManager {
 
 		// name includes the extension
 		return `[${name.replaceAll('.', ' ')}]`;
+	}
+
+	/**
+	 * fetches and parses the content-type and content-length headers from the url
+	 *
+	 * @param url
+	 * @param signal
+	 */
+	private static async _fetchContentHeaders(url: URL, signal?: AbortSignal) {
+		const cacheKey = `headers:${url.href}`;
+		const cached = await redis.get(cacheKey);
+		if (cached) return JSON.parse(cached) as typeof result;
+
+		const { headers } = await fetch(url, { method: 'HEAD', signal });
+
+		const contentLength = Number.parseInt(headers.get('content-length')!, 10);
+		const result = {
+			contentType: headers.get('content-type'),
+			// JSON.stringify converts NaN to null
+			contentLength: Number.isNaN(contentLength) ? null : contentLength,
+		};
+
+		void redis.psetex(cacheKey, days(1), JSON.stringify(result));
+		return result;
 	}
 
 	/**
@@ -667,20 +692,15 @@ export class DiscordChatManager extends ChatManager {
 							// remove query parameters
 							url.search = '';
 
-							// check headers for URLs other than discord's CDN
-							if (!/discordapp\.(?:net|com)$/.test(url.hostname)) {
-								// TODO: cache this via redis?
-								const res = await fetch(url, { method: 'HEAD', signal });
-								const contentType = res.headers.get('content-type');
-								const contentLength = Number.parseInt(res.headers.get('content-length')!, 10);
+							// check headers
+							const { contentType, contentLength } = await DiscordChatManager._fetchContentHeaders(url, signal);
 
-								if (
-									Number.isNaN(contentLength) ||
-									contentLength > MAX_IMAGE_UPLOAD_SIZE ||
-									!ALLOWED_MIMES_REGEX.test(contentType!)
-								) {
-									return DiscordChatManager._getAttachmentNameFromUrl(url, contentType);
-								}
+							if (
+								contentLength === null ||
+								contentLength > MAX_IMAGE_UPLOAD_SIZE ||
+								!ALLOWED_MIMES_REGEX.test(contentType!)
+							) {
+								return DiscordChatManager._getAttachmentNameFromUrl(url, contentType);
 							}
 
 							// try to upload URL
