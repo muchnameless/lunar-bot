@@ -678,8 +678,8 @@ export class DiscordChatManager extends ChatManager {
 						try {
 							url = new URL(match[0]);
 
-							// link does not need to be parsed
-							if (DiscordChatManager.ALLOWED_URLS_REGEXP.test(url.hostname) || !url.pathname.includes('.')) {
+							// no file URL or URL is not blocked on hypixel
+							if (!url.pathname.includes('.') || DiscordChatManager.ALLOWED_URLS_REGEXP.test(url.hostname)) {
 								return match[0];
 							}
 
