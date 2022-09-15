@@ -13,8 +13,8 @@ import {
 	Routes,
 	type Snowflake,
 } from 'discord.js';
-import { startJobs } from './jobs/index.js';
 import { hours, minutes, seconds } from '#functions';
+import { startJobs } from '#root/jobs/index.js';
 import { LunarClient } from '#structures/LunarClient.js';
 
 if (env.NODE_ENV !== 'development') disableValidators();

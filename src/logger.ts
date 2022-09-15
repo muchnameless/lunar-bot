@@ -1,6 +1,6 @@
 import { isMainThread, parentPort } from 'node:worker_threads';
 import { pino, stdSerializers } from 'pino';
-import { JobType } from './jobs/index.js';
+import { JobType } from '#root/jobs/index.js';
 
 type LogArguments = Parameters<pino.LogFn>;
 

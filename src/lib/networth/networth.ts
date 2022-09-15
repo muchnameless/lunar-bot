@@ -39,18 +39,16 @@ async function parseItems(base64: string) {
 
 		// backpacks / new year cake bag -> iterate over contained items
 		if (item.tag.ExtraAttributes.id.endsWith('BACKPACK') || item.tag.ExtraAttributes.id.endsWith('_BAG')) {
-			const _items = item.tag.ExtraAttributes[
+			const items = item.tag.ExtraAttributes[
 				Object.keys(item.tag.ExtraAttributes).find((key) => key.endsWith('_data'))!
 			] as number[];
 
-			if (!Array.isArray(_items)) continue;
+			if (!Array.isArray(items)) continue;
 
-			for (const _item of simplify(
-				(await parse(Buffer.from(_items), 'big')).parsed.value.i as never,
+			for (const item of simplify(
+				(await parse(Buffer.from(items), 'big')).parsed.value.i as never,
 			) as NBTInventoryItem[]) {
-				if (!_item.tag?.ExtraAttributes?.id) continue;
-
-				networth += calculateItemPrice(_item);
+				if (item.tag?.ExtraAttributes?.id) networth += calculateItemPrice(item);
 			}
 
 			continue;
