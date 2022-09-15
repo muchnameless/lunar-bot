@@ -149,22 +149,37 @@ export class DiscordChatManager extends ChatManager {
 	 * returns an identifier for the attachment, either the name (if not "unknown") or the first part of the content type (if it exists),
 	 * replaces dots with spaces since hypixel does not allow sending "URLs" in chat
 	 *
-	 * @param name
-	 * @param contentType
+	 * @param name - file name
+	 * @param contentType - content type of the file (if available)
+	 * @param attachmentType - used as a fallback description if the name is "unknown" or not present
 	 */
-	private static _getAttachmentName(name: string | null, contentType: string | null | undefined) {
+	private static _getAttachmentName(
+		name: string | null,
+		contentType: string | null | undefined,
+		attachmentType = 'attachment',
+	) {
 		// no name -> use contentType if available
 		if (name === null) {
-			return `[${contentType?.slice(0, contentType.indexOf('/')) ?? 'unknown'} attachment]`;
+			return `[${contentType?.slice(0, contentType.indexOf('/')) ?? 'unknown'} ${attachmentType}]`;
 		}
 
 		// discord's name placeholder -> use contentType if available
 		if (name.startsWith('unknown.') && contentType) {
-			return `[${contentType.slice(0, contentType.indexOf('/'))} attachment]`;
+			return `[${contentType.slice(0, contentType.indexOf('/'))} ${attachmentType}]`;
 		}
 
 		// name includes the extension
 		return `[${name.replaceAll('.', ' ')}]`;
+	}
+
+	/**
+	 * parses the file name from the URL
+	 *
+	 * @param url
+	 * @param contentType
+	 */
+	private static _getAttachmentNameFromUrl(url: URL, contentType?: string | null) {
+		return this._getAttachmentName(url.pathname.slice(url.pathname.lastIndexOf('/') + 1), contentType, 'link');
 	}
 
 	/**
@@ -189,16 +204,6 @@ export class DiscordChatManager extends ChatManager {
 
 		void redis.psetex(cacheKey, days(1), JSON.stringify(result));
 		return result;
-	}
-
-	/**
-	 * parses the file name from the URL
-	 *
-	 * @param url
-	 * @param contentType
-	 */
-	private static _getAttachmentNameFromUrl(url: URL, contentType?: string | null) {
-		return this._getAttachmentName(url.pathname.slice(url.pathname.lastIndexOf('/') + 1), contentType);
 	}
 
 	/**
@@ -694,10 +699,12 @@ export class DiscordChatManager extends ChatManager {
 							// check headers
 							const { contentType, contentLength } = await DiscordChatManager._fetchContentHeaders(url, signal);
 
+							// only images up to a certain size can be uploaded
 							if (
 								contentLength === null ||
 								contentLength > MAX_IMAGE_UPLOAD_SIZE ||
-								!ALLOWED_MIMES_REGEX.test(contentType!)
+								contentType === null ||
+								!ALLOWED_MIMES_REGEX.test(contentType)
 							) {
 								return DiscordChatManager._getAttachmentNameFromUrl(url, contentType);
 							}
