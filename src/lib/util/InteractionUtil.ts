@@ -156,10 +156,9 @@ export class InteractionUtil extends null {
 			deferReplyPromise: null,
 			deferUpdatePromise: null,
 			useEphemeral:
-				this.checkEphemeralOption(interaction) ??
-				(channel !== null && channel.type !== ChannelType.DM
-					? !channel.name.includes('command') && !channel.name.includes('ᴄᴏᴍᴍᴀɴᴅ') // guild channel
-					: false), // DM channel
+				this.getEphemeralOption(interaction) ??
+				(channel === null || // uncached channel
+					(channel.type !== ChannelType.DM && !channel.name.includes('command') && !channel.name.includes('ᴄᴏᴍᴍᴀɴᴅ'))), // guild channel
 			autoDeferTimeout: setTimeout(
 				// interactions must be acked within 3 seconds
 				() => {
@@ -182,11 +181,11 @@ export class InteractionUtil extends null {
 	}
 
 	/**
-	 * checks the command options for the ephemeral option
+	 * gets the value of the ephemeral option as a nullable boolean
 	 *
 	 * @param interaction
 	 */
-	public static checkEphemeralOption(interaction: Interaction<'cachedOrDM'>) {
+	public static getEphemeralOption(interaction: Interaction<'cachedOrDM'>) {
 		if (!interaction.isChatInputCommand()) return null;
 
 		switch (interaction.options.getString('visibility')) {
@@ -401,8 +400,7 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 */
 	public static inCachedGuildOrDM(interaction: Interaction): interaction is Interaction<'cachedOrDM'> {
-		// guilds are sent with all their channels -> cached channel implies cached guild
-		return interaction.client.channels.cache.has(interaction.channelId!);
+		return interaction.guildId === null || interaction.client.guilds.cache.has(interaction.guildId);
 	}
 
 	/**
@@ -596,7 +594,8 @@ export class InteractionUtil extends null {
 			if (this.isInteractionError(error)) {
 				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION REPLY]');
 				if (_options.ephemeral) return UserUtil.sendDM(interaction.user, _options as SendDMOptions);
-				return ChannelUtil.send(interaction.channel!, _options as SendDMOptions);
+				const { channel } = interaction;
+				if (channel) return ChannelUtil.send(channel, _options as SendDMOptions);
 			}
 
 			if (_options.rejectOnError) throw error;

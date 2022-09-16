@@ -16,15 +16,7 @@ import { getSkyBlockProfiles, mojang } from '#api';
 import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
 import { type HypixelMessage, type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { ErrorCode, UnicodeEmoji } from '#constants';
-import {
-	assertNever,
-	asyncCollectionFilter,
-	commaListOr,
-	formatError,
-	getLilyWeight,
-	stringToMS,
-	type WeightData,
-} from '#functions';
+import { assertNever, commaListOr, formatError, getLilyWeight, stringToMS, type WeightData } from '#functions';
 import { logger } from '#logger';
 import type MathsCommand from '#root/commands/general/maths';
 import { ChannelUtil, GuildMemberUtil, MessageUtil } from '#utils';
@@ -75,19 +67,14 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				const cache = this.chatBridge.discord.channelsByType.get(hypixelMessage.type!)?.channel?.messages.cache;
 
 				if (cache) {
-					const [discordMessage] = (
-						await asyncCollectionFilter(
-							cache,
-							senderDiscordId
-								? async (message) =>
-										message.author.id === senderDiscordId &&
-										(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent)
-								: async (message) =>
-										(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent),
-						)
-					).sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a);
+					for (const message of [...cache.values()].reverse()) {
+						if (message.author.id !== senderDiscordId) continue;
 
-					if (discordMessage) void MessageUtil.react(discordMessage, UnicodeEmoji.Stop);
+						if ((await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent)) {
+							void MessageUtil.react(message, UnicodeEmoji.Stop);
+							break;
+						}
+					}
 				}
 			}
 

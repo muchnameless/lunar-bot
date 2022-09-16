@@ -27,7 +27,7 @@ import {
 } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
 import { ForwardRejectionType } from './DiscordChatManager.js';
-import { MC_CLIENT_VERSION, UnicodeEmoji } from '#constants';
+import { MC_CLIENT_VERSION } from '#constants';
 import {
 	asyncReplace,
 	cleanFormattedNumber,
@@ -607,7 +607,6 @@ export class MinecraftChatManager extends ChatManager {
 					return match[0]!;
 				}),
 			)
-				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 				.replace(INVISIBLE_CHARACTER_REGEXP, '') // hypixel removes them -> remove them here so the filter works reliably
 				.replace(/<a?:(\w{2,32}):\d{17,20}>/g, ':$1:') // custom emojis
 				.replace(TwemojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis

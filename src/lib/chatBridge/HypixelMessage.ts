@@ -364,9 +364,6 @@ export class HypixelMessage {
 			case HypixelMessageType.Guild:
 			case HypixelMessageType.Officer: {
 				const result: BroadcastResult = await this.chatBridge.broadcast({
-					discord: {
-						allowedMentions: { parse: [] },
-					},
 					hypixelMessage: this as HypixelMessage & { type: HypixelMessageType.Guild | HypixelMessageType.Officer },
 					..._options,
 				});
@@ -404,7 +401,6 @@ export class HypixelMessage {
 		if (!this.author) {
 			return (this.discordMessage = discordChatManager.sendViaBot({
 				content: this.content,
-				allowedMentions: { parse: [] },
 				fromMinecraft: true,
 			}));
 		}

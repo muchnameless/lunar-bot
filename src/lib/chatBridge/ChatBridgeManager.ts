@@ -169,9 +169,6 @@ export class ChatBridgeManager {
 						${message.content}
 						~ ${await DiscordChatManager.getPlayerName(message)}
 					`,
-					discord: {
-						allowedMentions: { parse: [] },
-					},
 					minecraft: {
 						prefix: 'Guild_Announcement:',
 						maxParts: Number.POSITIVE_INFINITY,

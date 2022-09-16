@@ -46,9 +46,9 @@ export const CHAT_METHOD_BY_TYPE = {
 } as const;
 
 /**
- * characters that don't render in mc chat
+ * characters that don't render in mc chat and ZWS
  */
-export const INVISIBLE_CHARACTER_REGEXP = /ࠀ|⭍|֏|'꣰|⛬|⛫|⛭|⛮|⛶|⛘|⛐|⛠|⛋|⛟|⛉|⛍|⛗|⛜|⛡|⛌/gu;
+export const INVISIBLE_CHARACTER_REGEXP = /ࠀ|⭍|֏|'꣰|⛬|⛫|⛭|⛮|⛶|⛘|⛐|⛠|⛋|⛟|⛉|⛍|⛗|⛜|⛡|⛌|\u{180E}|\u{200B}/gu;
 
 /**
  * chunks of text which can be used to pad a message to bypass hypixel's spam filter
@@ -57,11 +57,6 @@ export const PADDING_CHUNKS = ['-', '_', '/'].map((chunk) => ` ${chunk.repeat(4)
 
 export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PADDING_CHUNKS.length)]!;
 
-/**
- * any non-'-' and non-whitespace
- */
-export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2800}\u{180E}\u{200B}]/u;
-
-export const WHITESPACE_ONLY_REGEXP = /^[\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]*$/u;
+export const WHITESPACE_ONLY_REGEXP = /^[\s\u{2800}]*$/u;
 
 export const DELETED_MESSAGE_REASON = Symbol('ChatBridge:deletedMessage');

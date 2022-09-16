@@ -77,9 +77,9 @@ export class HypixelMessageAuthor {
 	}
 
 	/**
-	 * player IGN
+	 * returns @IGN
 	 */
 	public toString() {
-		return this.ign;
+		return `@${this.ign}`;
 	}
 }

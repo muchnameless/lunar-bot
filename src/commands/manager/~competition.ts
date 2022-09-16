@@ -30,10 +30,13 @@ export default class CompetitionCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		const collector = interaction.channel!.createMessageCollector({
+		const collector = interaction.channel?.createMessageCollector({
 			filter: (msg) => msg.author.id === interaction.user.id,
 			idle: seconds(30),
 		});
+
+		if (!collector) return void InteractionUtil.reply(interaction, { content: 'unknown channel', ephemeral: true });
+
 		const next = async () => {
 			const { content } = await collector.next;
 			if (/^(?:abort|cancel|end|stop)$/i.test(content)) throw 'command cancelled';

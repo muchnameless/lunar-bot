@@ -597,9 +597,7 @@ export class DiscordChatManager extends ChatManager {
 
 		const _options: SendViaBotOptions = {
 			content: await this.chatBridge.discord.parseContent(
-				`${
-					discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
-				}${content}`,
+				discordMessage || !hypixelMessage ? content : `${hypixelMessage.member ?? hypixelMessage.author}, ${content}`,
 				fromMinecraft,
 			),
 			reply: discordMessage
@@ -607,6 +605,7 @@ export class DiscordChatManager extends ChatManager {
 						messageReference: discordMessage,
 				  }
 				: undefined,
+			allowedMentions: { parse: [] },
 			...options,
 		};
 
