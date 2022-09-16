@@ -45,6 +45,10 @@ export class InteractionUserCache extends BaseCache<RepliableInteraction> {
 	 * sweeps the interaction cache and deletes all that were created before the max age
 	 */
 	public sweep() {
-		return this._cache.sweep(({ createdTimestamp }) => Date.now() - createdTimestamp > InteractionUserCache._maxAge);
+		if (!this._cache.size) return 0;
+
+		const now = Date.now();
+
+		return this._cache.sweep(({ createdTimestamp }) => now - createdTimestamp > InteractionUserCache._maxAge);
 	}
 }

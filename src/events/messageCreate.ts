@@ -1,4 +1,4 @@
-import { type ClientEvents, type Events } from 'discord.js';
+import { type ClientEvents, type Events, type Message } from 'discord.js';
 import { UnicodeEmoji } from '#constants';
 import { Event } from '#structures/events/Event.js';
 import { MessageUtil, UserUtil } from '#utils';
@@ -10,6 +10,12 @@ export default class MessageCreateEvent extends Event {
 	 * @param message
 	 */
 	public override run(message: ClientEvents[Events.MessageCreate][0]) {
+		if (message.interaction !== null && message.author.id !== this.client.user.id) {
+			this.client.chatBridges.handleInteractionRepliesFromOtherBots(
+				message as Message & { interaction: NonNullable<Message['interaction']> },
+			);
+		}
+
 		// chat bridge
 		this.client.chatBridges.handleDiscordMessage(message);
 

@@ -1,8 +1,8 @@
-import { type ChatInputCommandInteraction, type Snowflake } from 'discord.js';
+import { type CommandInteraction, type Snowflake } from 'discord.js';
 import { BaseCache } from './BaseCache.js';
 import { minutes } from '#functions';
 
-export class InteractionCache extends BaseCache<ChatInputCommandInteraction<'cachedOrDM'>> {
+export class OwnInteractionCache extends BaseCache<CommandInteraction<'cachedOrDM'>> {
 	protected static override readonly _maxAge = minutes(15);
 
 	/**
@@ -10,7 +10,7 @@ export class InteractionCache extends BaseCache<ChatInputCommandInteraction<'cac
 	 *
 	 * @param interaction
 	 */
-	public add(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
+	public add(interaction: CommandInteraction<'cachedOrDM'>) {
 		this._cache.set(interaction.id, interaction);
 	}
 
@@ -31,6 +31,10 @@ export class InteractionCache extends BaseCache<ChatInputCommandInteraction<'cac
 	 * sweeps the interaction cache and deletes all that were created before the max age
 	 */
 	public sweep() {
-		return this._cache.sweep(({ createdTimestamp }) => Date.now() - createdTimestamp > InteractionCache._maxAge);
+		if (!this._cache.size) return 0;
+
+		const now = Date.now();
+
+		return this._cache.sweep(({ createdTimestamp }) => now - createdTimestamp > OwnInteractionCache._maxAge);
 	}
 }

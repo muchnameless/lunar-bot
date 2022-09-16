@@ -3,10 +3,9 @@ import { env } from 'node:process';
 import { setInterval } from 'node:timers';
 import { type URL } from 'node:url';
 import { stripIndents } from 'common-tags';
-import { MessageFlags, type Message, type Snowflake } from 'discord.js';
+import { InteractionType, MessageFlags, type Message, type Snowflake } from 'discord.js';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge.js';
-import { AbortControllerCache } from './caches/AbortControllerCache.js';
-import { InteractionCache } from './caches/InteractionCache.js';
+import { AbortControllerCache, OtherBotInteractionCache, OwnInteractionCache } from './caches/index.js';
 import { DELETED_MESSAGE_REASON } from './constants/index.js';
 import { DiscordChatManager } from './managers/DiscordChatManager.js';
 import { UnicodeEmoji } from '#constants';
@@ -48,16 +47,22 @@ export class ChatBridgeManager {
 	public readonly abortControllers = new AbortControllerCache();
 
 	/**
-	 * interaction cache
+	 * CommandInteraction cache for this bot's interactions
 	 */
-	public readonly interactionCache = new InteractionCache();
+	public readonly ownInteractionCache = new OwnInteractionCache();
+
+	/**
+	 * MessageInteraction cache for interactions from other bots
+	 */
+	public readonly otherBotInteractionCache = new OtherBotInteractionCache();
 
 	/**
 	 * interval to sweep this manager's and it's cached bridges' interaction caches
 	 */
 	// eslint-disable-next-line unicorn/consistent-function-scoping
 	public readonly interactionCacheSweeperInterval = setInterval(() => {
-		this.interactionCache.sweep();
+		this.ownInteractionCache.sweep();
+		this.otherBotInteractionCache.sweep();
 
 		for (const { discord } of this.cache) {
 			for (const { interactionUserCache } of discord.channels.values()) {
@@ -253,10 +258,25 @@ export class ChatBridgeManager {
 	public handleInteractionCreate(interaction: RepliableInteraction) {
 		if (!this.channelIds.has(interaction.channelId!)) return;
 
-		if (interaction.isChatInputCommand()) this.interactionCache.add(interaction);
+		if (interaction.isCommand()) this.ownInteractionCache.add(interaction);
 
 		for (const chatBridge of this.cache) {
 			chatBridge.discord.channelsByIds.get(interaction.channelId!)?.interactionUserCache.add(interaction);
+		}
+	}
+
+	/**
+	 * caches interactions in chat bridge channels
+	 *
+	 * @param message
+	 */
+	public handleInteractionRepliesFromOtherBots(
+		message: Message & { interaction: NonNullable<Message['interaction']> },
+	) {
+		if (!this.channelIds.has(message.channelId)) return;
+
+		if (message.interaction.type === InteractionType.ApplicationCommand) {
+			this.otherBotInteractionCache.add(message.interaction);
 		}
 	}
 }

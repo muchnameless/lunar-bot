@@ -49,8 +49,12 @@ export class AbortControllerCache extends BaseCache<AbortController> {
 	 * sweeps the AbortController cache and deletes all that were created before the max age
 	 */
 	public sweep() {
+		if (!this._cache.size) return 0;
+
+		const now = Date.now();
+
 		return this._cache.sweep(
-			(_, messageId) => Date.now() - SnowflakeUtil.timestampFrom(messageId) > AbortControllerCache._maxAge,
+			(_, messageId) => now - SnowflakeUtil.timestampFrom(messageId) > AbortControllerCache._maxAge,
 		);
 	}
 }

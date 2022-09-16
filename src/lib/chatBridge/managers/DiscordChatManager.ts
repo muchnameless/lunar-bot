@@ -22,10 +22,10 @@ import ms from 'ms';
 import { fetch } from 'undici';
 import { type ChatBridge } from '../ChatBridge.js';
 import { type HypixelMessage } from '../HypixelMessage.js';
+import { InteractionUserCache } from '../caches/index.js';
 import { PREFIX_BY_TYPE, type HypixelMessageType } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
 import { imgur, redis } from '#api';
-import { InteractionUserCache } from '#chatBridge/caches/InteractionUserCache.js';
 import {
 	ALLOWED_EXTENSIONS_REGEX,
 	ALLOWED_MIMES_REGEX,
@@ -772,52 +772,43 @@ export class DiscordChatManager extends ChatManager {
 			}
 		}
 
-		// send interaction "command" for initial application command reply
+		// send interaction "command" for initial application command reply (if the interaction is still cached)
 		if (messageInteraction) {
-			const interaction = this.chatBridge.manager.interactionCache.get(messageInteraction.id);
-
 			let content: string | undefined;
 
-			// cached interaction from the bot
-			if (interaction) {
-				const command = this.client.commands.get(interaction.commandName) as DualCommand | undefined;
+			if (message.author.id === message.client.user.id) {
+				// cached interaction from the bot
+				const interaction = this.chatBridge.manager.ownInteractionCache.get(messageInteraction.id);
 
-				if (command?.parseArgsOptions) {
-					const commandParts: (string | null)[] = [
-						interaction.commandName,
-						interaction.options.getSubcommandGroup(),
-						interaction.options.getSubcommand(false),
-					];
+				if (interaction) {
+					const parseArgsOptions = (this.client.commands.get(interaction.commandName) as DualCommand | undefined)
+						?.parseArgsOptions;
+					const commandParts: (string | null)[] = [interaction.commandName];
+
+					if (interaction.isChatInputCommand()) {
+						commandParts.push(interaction.options.getSubcommandGroup(), interaction.options.getSubcommand(false));
+					}
 
 					// @ts-expect-error private
 					for (const { name, value } of interaction.options._hoistedOptions as CommandInteractionOption[]) {
 						if (name === 'visibility') continue;
 
-						if (Reflect.has(command.parseArgsOptions, name)) {
-							commandParts.push(`--${name}`);
-						}
-
-						commandParts.push(`${value}`);
+						commandParts.push(
+							parseArgsOptions ? (name in parseArgsOptions ? `--${name} ${value}` : `${value}`) : `${name}:${value}`,
+						);
 					}
 
-					content = commandParts.filter(Boolean).join(' ');
-				} else {
-					content = interaction
-						.toString()
-						.slice('/'.length)
-						.replace(/ visibility:[a-z]+/, '');
+					content = `${this.client.config.get('PREFIXES')[0]}${commandParts.filter(Boolean).join(' ')}`;
 				}
-			} else if (message.author.id !== message.client.user.id) {
-				// interaction from another bot
-				content = messageInteraction.commandName;
+			} else if (this.chatBridge.manager.otherBotInteractionCache.get(messageInteraction.id)) {
+				// cached interaction from another bot
+				content = `/${messageInteraction.commandName}`;
 			}
 
 			if (content) {
 				// message is a bot message (since it has an interaction property) -> use messageInteraction.user instead of message.author
 				void this.minecraft.chat({
-					content: `${
-						message.author.id === message.client.user.id ? this.client.config.get('PREFIXES')[0] : '/'
-					}${content}`,
+					content,
 					prefix: `${this.prefix}${DiscordChatManager._replaceBlockedName(
 						player?.ign ??
 							(

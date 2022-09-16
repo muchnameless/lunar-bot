@@ -34,8 +34,12 @@ export default class MessageUpdateEvent extends Event {
 			return;
 		}
 
-		// pinned or embed added, newMessage.content check so the ChatBridge can react with "blocked" to embed only messages
-		if (oldMessage.content === newMessage.content && newMessage.content) {
+		// check if the content has changed or embeds or attachments were added
+		if (
+			oldMessage.content === newMessage.content &&
+			oldMessage.embeds.length === newMessage.embeds.length &&
+			oldMessage.attachments.size === newMessage.attachments.size
+		) {
 			return;
 		}
 
