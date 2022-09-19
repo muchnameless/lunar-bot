@@ -14,7 +14,7 @@ import { type ChatTrigger } from '#structures/database/models/ChatTrigger.js';
 import { type DiscordGuild } from '#structures/database/models/DiscordGuild.js';
 import { type EventCollection } from '#structures/events/EventCollection.js';
 
-declare public module 'discord.js' {
+declare module 'discord.js' {
 	interface Client {
 		readonly chatBridges: ChatBridgeManager;
 		readonly chatTriggers: ModelManager<ChatTrigger>;
@@ -24,7 +24,7 @@ declare public module 'discord.js' {
 		readonly db: DatabaseManager;
 		readonly defaultEmbed: EmbedBuilder;
 		readonly discordGuilds: ModelManager<DiscordGuild>;
-		dmOwner(options: MessageOptions | string): Promise<Message<boolean> | null>;
+		dmOwner(options: MessageCreateOptions | string): Promise<Message<boolean> | null>;
 
 		readonly events: EventCollection;
 		fetchAllMembers(): Promise<void>;
