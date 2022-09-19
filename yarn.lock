@@ -790,10 +790,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/timer-manager@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@sapphire/timer-manager@npm:1.0.0"
-  checksum: 2f131c2bf1882528c80e6a4aa8f0d3078ae1e2e3d1afc054878fbdb946dc987073d037dad5122e67d20b98e0ec6a37a8e4da7f9c0a91b9711819ad54bbedd6a4
+"@sapphire/timer-manager@npm:1.0.1-next.945ecc2.0":
+  version: 1.0.1-next.945ecc2.0
+  resolution: "@sapphire/timer-manager@npm:1.0.1-next.945ecc2.0"
+  checksum: 4edfb440e44bd9f9b9f0036efcdc1120f7261977238814374f1f4ca24b6133d7ef856e42cf720a21fc30177c0aac422536d324a809384399d992b20b6ba3dcd9
   languageName: node
   linkType: hard
 
