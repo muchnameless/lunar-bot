@@ -42,20 +42,12 @@ export default class FetchurCommand extends DualCommand {
 		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date, DateFunctions.GetUTC)) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
 
-		const today = new Date();
-		today.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
+		const nextResetDate = new Date();
+		nextResetDate.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
 
-		let nextResetDate: Date;
-
-		if (today.getTime() >= Date.now()) {
-			nextResetDate = today;
-		} else {
-			// reset already happened today
-			const tomorrow = new Date();
-			tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-			tomorrow.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
-
-			nextResetDate = tomorrow;
+		// reset already happened today
+		if (nextResetDate.getTime() < Date.now()) {
+			nextResetDate.setUTCDate(nextResetDate.getUTCDate() + 1);
 		}
 
 		return `item: ${this.FETCHUR_ITEMS[(date.getUTCDate() - 1) % this.FETCHUR_ITEMS.length]}, changes ${time(
