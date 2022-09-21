@@ -49,7 +49,7 @@ jobs:
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@18f90432bedd2afd6a825469ffd38aa24712a91d # tag=v4
+        uses: peter-evans/create-pull-request@171dd555b9ab6b18fa02519fdfacbb8bf671e1b4 # tag=v4
         with:
           token: ${{ steps.generate-token.outputs.token }}
           commit-message: 'feat: update unicode emojis'
