@@ -48,7 +48,7 @@
 		"@sapphire/type": "2.2.5-next.cf34f61.0",
 		"@sapphire/utilities": "3.9.4-next.945ecc2.0",
 		"@skyra/jaro-winkler": "^1.1.0",
-		"@zikeji/hypixel": "github:muchnameless/node-hypixel#1bd7ca09f831df70b43a1c4e1fccf1df10c00c7b",
+		"@zikeji/hypixel": "github:muchnameless/node-hypixel#9419ec29868b6ef6f39f255d8433ece7c1f096e3",
 		"bufferutil": "^4.0.6",
 		"chart.js": "^3.9.1",
 		"chartjs-node-canvas": "^4.1.6",
