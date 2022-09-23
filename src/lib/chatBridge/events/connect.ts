@@ -1,7 +1,8 @@
-import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { ChatBridgeEvent } from '../ChatBridge.js';
+import { ChatBridgeEvent as BaseChatBridgeEvent } from '../ChatBridgeEvent.js';
 import { logger } from '#logger';
 
-export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
+export default class ConnectChatBridgeEvent extends BaseChatBridgeEvent {
 	/**
 	 * event listener callback
 	 */
@@ -29,5 +30,8 @@ export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
 				logger.error({ err: error, ...this.chatBridge.logInfo }, '[CHATBRIDGE CONNECT]: error while sending to limbo');
 			}
 		} while (--counter);
+
+		// bot is in limbo -> won't change servers anymore -> ready to send messages
+		this.chatBridge.emit(ChatBridgeEvent.Ready);
 	}
 }

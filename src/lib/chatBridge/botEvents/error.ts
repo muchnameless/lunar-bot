@@ -1,9 +1,8 @@
 import { ChatBridgeEvent, type ChatBridge } from '../ChatBridge.js';
 
 /**
- * @param chatBridge
  * @param error
  */
-export default function run(chatBridge: ChatBridge, error: Error) {
-	chatBridge.emit(ChatBridgeEvent.Error, error);
+export default function run(this: ChatBridge, error: Error) {
+	this.emit(ChatBridgeEvent.Error, error);
 }

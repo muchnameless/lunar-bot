@@ -7,9 +7,8 @@ export type ChatPacket = {
 };
 
 /**
- * @param chatBridge
  * @param packet
  */
-export default async function run(chatBridge: ChatBridge, packet: ChatPacket) {
-	chatBridge.emit(ChatBridgeEvent.Message, await new HypixelMessage(chatBridge, packet).init());
+export default async function run(this: ChatBridge, packet: ChatPacket) {
+	this.emit(ChatBridgeEvent.Message, await new HypixelMessage(this, packet).init());
 }
