@@ -215,7 +215,7 @@ const compareAlphabetically = (a?: string | null, b?: string | null) => collator
 
 const sanitizeName = (name: string) => name.replace(/(?=['\\])/g, '\\');
 
-const writeJSONFile = async (path: string, data: string[]) => writeFile(path, `{\n\t${data.join(',\n\t')}\n}`);
+const writeJSONFile = async (path: string, data: string[]) => writeFile(path, `{\n\t${data.join(',\n\t')}\n}\n`);
 
 const data = ((await (await fetch(url)).json()) as EmojiResponse).emojiDefinitions.sort(
 	({ primaryName: a }, { primaryName: b }) => compareAlphabetically(a, b),
