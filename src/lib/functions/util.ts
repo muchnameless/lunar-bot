@@ -148,7 +148,7 @@ export async function asyncFilter<T>(
 
 	return (
 		await Promise.all(array.map(async (item, index) => ((await predicate(item, index, array)) ? item : fail)))
-	).filter((x) => x !== fail) as T[];
+	).filter((x): x is Awaited<T> => x !== fail);
 }
 
 /**

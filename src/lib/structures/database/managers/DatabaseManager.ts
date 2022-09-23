@@ -290,7 +290,7 @@ export class DatabaseManager {
 		// update database
 		if (dbPromises.length) {
 			setTimeout(async () => {
-				const taxPaidLog = (await Promise.all(dbPromises)).filter(Boolean) as APIEmbedField[];
+				const taxPaidLog = (await Promise.all(dbPromises)).filter((x): x is APIEmbedField => typeof x !== 'undefined');
 
 				// logging
 				if (taxPaidLog.length) {

@@ -58,7 +58,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * get players from all guilds (no bridgers or errors)
 	 */
 	public get inGuild(): Collection<string, PlayerInGuild> {
-		return this.cache.filter((player) => player.inGuild()) as Collection<string, PlayerInGuild>;
+		return this.cache.filter((player): player is PlayerInGuild => player.inGuild());
 	}
 
 	/**

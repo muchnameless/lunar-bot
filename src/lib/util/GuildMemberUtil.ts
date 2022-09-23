@@ -188,7 +188,9 @@ export class GuildMemberUtil extends null {
 		}
 
 		try {
-			return await member.roles.set(Array.isArray(roles) ? (roles.filter(Boolean) as (Role | Snowflake)[]) : roles);
+			return await member.roles.set(
+				Array.isArray(roles) ? roles.filter((x): x is Role | Snowflake => x !== null) : roles,
+			);
 		} catch (error) {
 			logger.error({ member: this.logInfo(member), err: error, data: roles }, '[GUILDMEMBER SET ROLES]');
 			return member;

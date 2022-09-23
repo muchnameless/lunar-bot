@@ -10,13 +10,11 @@ import {
 	time,
 	TimestampStyles,
 	version as djsVersion,
+	type AnyThreadChannel,
 	type ButtonBuilder,
 	type ChatInputCommandInteraction,
-	type Collection,
 	type DMChannel,
-	type Snowflake,
 	type TextBasedChannel,
-	type ThreadChannel,
 } from 'discord.js';
 import ms from 'ms';
 import { hypixel, imgur, mojang } from '#api';
@@ -93,7 +91,8 @@ export default class DebugCommand extends ApplicationCommand {
 								Channels: ${formatNumber(channels.cache.size)} (${formatNumber(
 								channels.cache.filter((channel) => channel.isThread() || channel.type === ChannelType.DM).size,
 							)} temporary)
-								${(channels.cache.filter((channel) => channel.type === ChannelType.DM) as Collection<Snowflake, DMChannel>)
+								${channels.cache
+									.filter((channel): channel is DMChannel => channel.type === ChannelType.DM)
 									.map(
 										(channel) =>
 											[
@@ -106,7 +105,8 @@ export default class DebugCommand extends ApplicationCommand {
 										quote(`${name}: ${time(seconds.fromMilliseconds(timestamp), TimestampStyles.LongDateTime)}`),
 									)
 									.join('\n')}
-								${(channels.cache.filter((channel) => channel.isThread()) as Collection<Snowflake, ThreadChannel>)
+								${channels.cache
+									.filter((channel): channel is AnyThreadChannel => channel.isThread())
 									.map((channel) => [channel, SnowflakeUtil.timestampFrom(channel.lastMessageId ?? '')] as const)
 									.sort(([, a], [, b]) => b - a)
 									.map(([channel, timestamp]) =>
@@ -121,11 +121,10 @@ export default class DebugCommand extends ApplicationCommand {
 										0,
 									),
 								)}
-								${(
-									channels.cache.filter((channel) =>
+								${channels.cache
+									.filter((channel): channel is TextBasedChannel =>
 										Boolean((channel as TextBasedChannel).messages?.cache.size),
-									) as Collection<Snowflake, TextBasedChannel>
-								)
+									)
 									.sort(
 										(
 											{

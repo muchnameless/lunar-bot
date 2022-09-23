@@ -48,6 +48,6 @@ hypixel
 	.on('reset', () => logger.info('[HYPIXEL API]: ratelimit reset'));
 
 export const getSkyBlockProfiles = async (uuid: string) =>
-	((await hypixel.skyblock.profiles.uuid(uuid)).profiles?.filter(Boolean) ?? null) as
-		| NonNullable<Components.Schemas.SkyBlockProfileCuteName>[]
-		| null;
+	(await hypixel.skyblock.profiles.uuid(uuid)).profiles?.filter(
+		(x): x is NonNullable<Components.Schemas.SkyBlockProfileCuteName> => x !== null,
+	) ?? null;

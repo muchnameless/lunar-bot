@@ -40,7 +40,9 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	public get uniqueDiscordGuildIds() {
 		return [
-			...new Set(this.client.hypixelGuilds.cache.map(({ discordId }) => discordId).filter(Boolean) as Snowflake[]),
+			...new Set(
+				this.client.hypixelGuilds.cache.map(({ discordId }) => discordId).filter((x): x is Snowflake => x !== null),
+			),
 		];
 	}
 
