@@ -215,69 +215,51 @@ const compareAlphabetically = (a?: string | null, b?: string | null) => collator
 
 const sanitizeName = (name: string) => name.replace(/(?=['\\])/g, '\\');
 
+const writeJSONFile = async (path: string, data: string[]) => writeFile(path, `{\n\t${data.join(',\n\t')}\n}`);
+
 const data = ((await (await fetch(url)).json()) as EmojiResponse).emojiDefinitions.sort(
 	({ primaryName: a }, { primaryName: b }) => compareAlphabetically(a, b),
 );
 
-const lines: string[] = [];
+await Promise.all([
+	// emoji name -> unicode
+	(async () => {
+		const lines: string[] = [];
+		const unique = new Collection<string, string>();
 
-// header
-lines.push('/* eslint-disable id-length */'); // some keys are single chars
-lines.push('');
-lines.push('/**');
-lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/');
-lines.push(' * @link https://gitlab.emzi0767.dev/Emzi0767/discord-emoji');
-lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.json');
-lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.json');
-lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.min.json');
-lines.push(' * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.min.json');
-lines.push(' */');
-lines.push('');
+		for (const { namesWithColons, surrogates } of data) {
+			for (const name of namesWithColons) {
+				// namesWithColons includes stuff like :-) too which should not be parsed
+				if (!name.startsWith(':') || !name.endsWith(':')) continue;
 
-// EMOJI_NAME_TO_UNICODE
-lines.push('/**');
-lines.push(' * discord emoji names to unicode emojis');
-lines.push(' */');
-lines.push('export const EMOJI_NAME_TO_UNICODE = {');
+				// "_", "-" and ":" are removed because the parser removes them too. can't use names instead of namesWithColons since have to check if :: is present to filter out certain names above
+				unique.set(sanitizeName(name).replace(/(?<!:)[_-]+|:+/g, ''), surrogates);
+			}
+		}
 
-const unique = new Collection<string, string>();
+		for (const [name, surrogates] of unique.sort((_0, _1, a, b) => compareAlphabetically(a, b)).entries()) {
+			lines.push(`"${name}": "${surrogates}"`);
+		}
 
-for (const { namesWithColons, surrogates } of data) {
-	for (const name of namesWithColons) {
-		// namesWithColons includes stuff like :-) too which should not be parsed
-		if (!name.startsWith(':') || !name.endsWith(':')) continue;
+		await writeJSONFile('src/lib/chatBridge/constants/emojiNameToUnicode.json', lines);
+	})(),
 
-		// "_", "-" and ":" are removed because the parser removes them too. can't use names since have to check if :: is present to filter out certain names above
-		unique.set(sanitizeName(name).replace(/(?<!:)[_-]+|:+/g, ''), surrogates);
-	}
-}
+	// unicode -> emoji name
+	(async () => {
+		const lines: string[] = [];
 
-for (const [name, surrogates] of unique.sort((_0, _1, a, b) => compareAlphabetically(a, b)).entries()) {
-	lines.push(`\t'${name}': '${surrogates}',`);
-}
+		for (const { primaryName, primaryNameWithColons, surrogates } of data) {
+			const name = skippedEmojis.has(primaryName)
+				? primaryName.startsWith('regional_indicator_')
+					? // regional_indicator_a -> A
+					  primaryName.at(-1)!.toUpperCase()
+					: // replace with first unicode character
+					  [...surrogates][0]!
+				: primaryNameWithColons;
 
-lines.push('} as const;');
-lines.push('');
+			lines.push(`"${surrogates}": "${sanitizeName(name)}"`);
+		}
 
-// UNICODE_TO_EMOJI_NAME
-lines.push('/**');
-lines.push(' * unicode emojis to discord emoji names');
-lines.push(' */');
-lines.push('export const UNICODE_TO_EMOJI_NAME = {');
-
-for (const { primaryName, primaryNameWithColons, surrogates } of data) {
-	const name = skippedEmojis.has(primaryName)
-		? primaryName.startsWith('regional_indicator_')
-			? // regional_indicator_a -> A
-			  primaryName.at(-1)!.toUpperCase()
-			: // replace with first unicode character
-			  [...surrogates][0]!
-		: primaryNameWithColons;
-
-	lines.push(`\t'${surrogates}': '${sanitizeName(name)}',`);
-}
-
-lines.push('} as const;');
-lines.push('');
-
-await writeFile('src/lib/chatBridge/constants/emojiNameUnicodeConverter.ts', lines.join('\n'));
+		await writeJSONFile('src/lib/chatBridge/constants/unicodeToEmojiName.json', lines);
+	})(),
+]);
