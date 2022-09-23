@@ -217,9 +217,7 @@ const sanitizeName = (name: string) => name.replace(/(?=['\\])/g, '\\');
 
 const writeJSONFile = async (path: string, data: string[]) => writeFile(path, `{\n\t${data.join(',\n\t')}\n}\n`);
 
-const data = ((await (await fetch(url)).json()) as EmojiResponse).emojiDefinitions.sort(
-	({ primaryName: a }, { primaryName: b }) => compareAlphabetically(a, b),
-);
+const { emojiDefinitions } = (await (await fetch(url)).json()) as EmojiResponse;
 
 await Promise.all([
 	// emoji name -> unicode
@@ -227,7 +225,7 @@ await Promise.all([
 		const lines: string[] = [];
 		const unique = new Collection<string, string>();
 
-		for (const { namesWithColons, surrogates } of data) {
+		for (const { namesWithColons, surrogates } of emojiDefinitions) {
 			for (const name of namesWithColons) {
 				// namesWithColons includes stuff like :-) too which should not be parsed
 				if (!name.startsWith(':') || !name.endsWith(':')) continue;
@@ -248,7 +246,9 @@ await Promise.all([
 	(async () => {
 		const lines: string[] = [];
 
-		for (const { primaryName, primaryNameWithColons, surrogates } of data) {
+		for (const { primaryName, primaryNameWithColons, surrogates } of emojiDefinitions.sort(
+			({ primaryName: a }, { primaryName: b }) => compareAlphabetically(a, b),
+		)) {
 			const name = skippedEmojis.has(primaryName)
 				? primaryName.startsWith('regional_indicator_')
 					? // regional_indicator_a -> A
