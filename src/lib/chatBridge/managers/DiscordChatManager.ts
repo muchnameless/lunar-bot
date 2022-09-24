@@ -153,35 +153,20 @@ export class DiscordChatManager extends ChatManager {
 	 *
 	 * @param name - file name
 	 * @param contentType - content type of the file (if available)
-	 * @param attachmentType - used as a fallback description if the name is "unknown" or not present
 	 */
-	private static _getAttachmentName(
-		name: string | null,
-		contentType: string | null | undefined,
-		attachmentType = 'attachment',
-	) {
+	private static _getAttachmentName(name: string | null, contentType: string | null | undefined) {
 		// no name -> use contentType if available
 		if (name === null) {
-			return `[${contentType?.slice(0, contentType.indexOf('/')) ?? 'unknown'} ${attachmentType}]`;
+			return `[${contentType?.slice(0, contentType.indexOf('/')) ?? 'unknown'} attachment]`;
 		}
 
 		// discord's name placeholder -> use contentType if available
 		if (name.startsWith('unknown.') && contentType) {
-			return `[${contentType.slice(0, contentType.indexOf('/'))} ${attachmentType}]`;
+			return `[${contentType.slice(0, contentType.indexOf('/'))} attachment]`;
 		}
 
 		// name includes the extension
 		return `[${name.replaceAll('.', ' ')}]`;
-	}
-
-	/**
-	 * parses the file name from the URL
-	 *
-	 * @param url
-	 * @param contentType
-	 */
-	private static _getAttachmentNameFromUrl(url: URL, contentType?: string | null) {
-		return this._getAttachmentName(url.pathname.slice(url.pathname.lastIndexOf('/') + 1), contentType, 'link');
 	}
 
 	/**
@@ -678,20 +663,16 @@ export class DiscordChatManager extends ChatManager {
 				messageContent = await asyncReplace(
 					messageContent,
 					/https?:\/\/(?:www\.|(?!www))[\da-z][\da-z-]+[\da-z]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[\da-z]+\.\S{2,}/gi,
-					async (match) => {
-						let url: URL | undefined;
-
+					async ([match]) => {
 						try {
-							url = new URL(match[0]);
+							const url = new URL(match);
 
-							// no file URL or URL is not blocked on hypixel
-							if (!url.pathname.includes('.') || DiscordChatManager.ALLOWED_URLS_REGEXP.test(url.hostname)) {
-								return match[0];
-							}
-
-							// not an image
-							if (!ALLOWED_EXTENSIONS_REGEX.test(url.pathname)) {
-								return DiscordChatManager._getAttachmentNameFromUrl(url);
+							// URL is not blocked on hypixel or not an image URL
+							if (
+								DiscordChatManager.ALLOWED_URLS_REGEXP.test(url.hostname) ||
+								!ALLOWED_EXTENSIONS_REGEX.test(url.pathname)
+							) {
+								return match;
 							}
 
 							// remove query parameters
@@ -707,16 +688,14 @@ export class DiscordChatManager extends ChatManager {
 								contentType === null ||
 								!ALLOWED_MIMES_REGEX.test(contentType)
 							) {
-								return DiscordChatManager._getAttachmentNameFromUrl(url, contentType);
+								return match;
 							}
 
 							// try to upload URL
 							return (await imgur.uploadURL(url.toString(), signal)).data.link;
 						} catch (error) {
 							logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]');
-
-							if (url?.pathname.includes('.')) return DiscordChatManager._getAttachmentNameFromUrl(url);
-							return match[0]; // not a file URL
+							return match;
 						}
 					},
 				);
