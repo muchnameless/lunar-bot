@@ -37,13 +37,13 @@ export default class MessageUpdateEvent extends Event {
 		// check if the content has changed or embeds or attachments were added
 		if (
 			oldMessage.content === newMessage.content &&
-			oldMessage.embeds.length === newMessage.embeds.length &&
+			(newMessage.content || oldMessage.embeds.length === newMessage.embeds.length) &&
 			oldMessage.attachments.size === newMessage.attachments.size
 		) {
 			return;
 		}
 
 		// chat bridge
-		this.client.chatBridges.handleDiscordMessage(newMessage as Message);
+		void this.client.chatBridges.handleDiscordMessage(newMessage as Message);
 	}
 }

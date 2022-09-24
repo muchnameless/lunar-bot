@@ -19,8 +19,17 @@ import { createBot } from '../MinecraftBot.js';
 import {
 	ChatPrefix,
 	DELETED_MESSAGE_REASON,
+	DISCORD_APPLICATION_COMMAND_MENTION_REGEXP,
+	DISCORD_CHANNEL_ROLE_MENTION_REGEXP,
+	DISCORD_CUSTOM_EMOJI_REGEXP,
+	DISCORD_TIMESTAMP_REGEXP,
+	DISCORD_USER_MENTION_REGEXP,
+	ESCAPING_BACKSLASH_REGEXP,
+	HIDE_LINK_EMBED_REGEXP,
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
+	MAYBE_URL_REGEXP,
+	MULTIPLE_BACKSLASH_REGEXP,
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
 	WHITESPACE_ONLY_REGEXP,
@@ -589,153 +598,153 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param discordMessage
 	 */
 	public async parseContent(string: string, discordMessage: Message | null) {
-		return (
-			cleanFormattedNumber(
-				// @mentions
-				await asyncReplace(string, /<@!?(\d{17,20})>/g, async (match) => {
-					const user = this.client.users.cache.get(match[1]!);
-					if (user) {
-						const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
-						if (player) return `@${player}`;
+		return cleanFormattedNumber(
+			// @mentions
+			await asyncReplace(string, DISCORD_USER_MENTION_REGEXP, async (match) => {
+				const user = this.client.users.cache.get(match[1]!);
+				if (user) {
+					const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
+					if (player) return `@${player}`;
+				}
+
+				const NAME =
+					(discordMessage?.guild ?? this.chatBridge.hypixelGuild?.discordGuild)?.members.cache.get(match[1]!)
+						?.displayName ?? user?.username;
+				if (NAME) return `@${NAME}`;
+
+				return match[0]!;
+			}),
+		)
+			.replace(INVISIBLE_CHARACTER_REGEXP, '') // hypixel removes them -> remove them here so the filter works reliably
+			.replace(DISCORD_CUSTOM_EMOJI_REGEXP, ':$1:') // custom emojis
+			.replace(TwemojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
+			.replace(ESCAPING_BACKSLASH_REGEXP, '') // replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
+			.replace(MULTIPLE_BACKSLASH_REGEXP, (match) => {
+				// replace \\ with \
+				let ret = '';
+				for (let index = Math.ceil(match.length / 2); index !== 0; --index) {
+					ret += '\\';
+				}
+
+				return ret;
+			})
+			.replaceAll('•', '●') // better bullet points in mc chat
+			.replaceAll('`', "'") // better single quotes
+			.replace(DISCORD_CHANNEL_ROLE_MENTION_REGEXP, (match, type: '@&' | '#', id: Snowflake) => {
+				switch (type) {
+					// channels
+					case '#': {
+						const CHANNEL_NAME = (this.client.channels.cache.get(id) as GuildChannel)?.name;
+						if (CHANNEL_NAME) return `#${replaceSmallLatinCapitalLetters(CHANNEL_NAME)}`;
+						return match;
 					}
 
-					const NAME =
-						(discordMessage?.guild ?? this.chatBridge.hypixelGuild?.discordGuild)?.members.cache.get(match[1]!)
-							?.displayName ?? user?.username;
-					if (NAME) return `@${NAME}`;
+					// roles
+					case '@&': {
+						const ROLE_NAME = discordMessage?.guild?.roles.cache.get(id)?.name;
+						if (ROLE_NAME) return `@${ROLE_NAME}`;
+						return match;
+					}
 
-					return match[0]!;
-				}),
+					default:
+						return match;
+				}
+			})
+			.replace(DISCORD_APPLICATION_COMMAND_MENTION_REGEXP, (_, name: string) => name) // application command mentions
+			.replace(DISCORD_TIMESTAMP_REGEXP, (match, p1: string, p2: string) => {
+				// dates
+				const date = new Date(seconds(Number(p1)));
+
+				if (Number.isNaN(date.getTime())) return match; // invalid date
+
+				// https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
+				switch (p2) {
+					case TimestampStyles.ShortTime:
+						return date.toLocaleString('en-GB', {
+							hour: '2-digit',
+							minute: '2-digit',
+							timeZoneName: 'short',
+							timeZone: 'UTC',
+						});
+
+					case TimestampStyles.LongTime:
+						return date.toLocaleString('en-GB', {
+							hour: '2-digit',
+							minute: '2-digit',
+							second: '2-digit',
+							timeZoneName: 'short',
+							timeZone: 'UTC',
+						});
+
+					case TimestampStyles.ShortDate:
+						return date.toLocaleString('en-GB', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+							timeZone: 'UTC',
+						});
+
+					case TimestampStyles.LongDate:
+						return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+					// case TimestampStyles.ShortDateTime:
+					// 	return date.toLocaleString('en-GB', {
+					// 		day: '2-digit',
+					// 		month: 'long',
+					// 		year: 'numeric',
+					// 		hour: '2-digit',
+					// 		minute: '2-digit',
+					// 		timeZoneName: 'short',
+					// 		timeZone: 'UTC',
+					// 	});
+
+					case TimestampStyles.LongDateTime:
+						return date.toLocaleString('en-GB', {
+							weekday: 'long',
+							day: '2-digit',
+							month: 'long',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+							timeZoneName: 'short',
+							timeZone: 'UTC',
+						});
+
+					case TimestampStyles.RelativeTime: {
+						const TIME = date.getTime() - Date.now();
+						if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
+						return `${ms(Math.abs(TIME), { long: true })} ago`;
+					}
+
+					default:
+						return date.toLocaleString('en-GB', {
+							day: '2-digit',
+							month: 'long',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+							timeZoneName: 'short',
+							timeZone: 'UTC',
+						});
+				}
+			})
+			.replace(
+				// hideLinkEmbed markdown
+				HIDE_LINK_EMBED_REGEXP,
+				(match, p1: string) => {
+					// return p1 if it is a valid URL
+					try {
+						new URL(p1);
+						return p1;
+					} catch {
+						return match;
+					}
+				},
 			)
-				.replace(INVISIBLE_CHARACTER_REGEXP, '') // hypixel removes them -> remove them here so the filter works reliably
-				.replace(/<a?:(\w{2,32}):\d{17,20}>/g, ':$1:') // custom emojis
-				.replace(TwemojiRegex, (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
-				// replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
-				.replace(/(?<![\\¯])\\(?=[^\d\n \\a-z])/gi, '')
-				.replace(/\\{2,}/g, (match) => {
-					// replace \\ with \
-					let ret = '';
-					for (let index = Math.ceil(match.length / 2); index !== 0; --index) {
-						ret += '\\';
-					}
-
-					return ret;
-				})
-				.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
-				.replaceAll('`', "'") // better single quotes
-				.replace(/<(#|@&)(\d{17,20})>/g, (match, type: '@&' | '#', id: Snowflake) => {
-					switch (type) {
-						// channels
-						case '#': {
-							const CHANNEL_NAME = (this.client.channels.cache.get(id) as GuildChannel)?.name;
-							if (CHANNEL_NAME) return `#${replaceSmallLatinCapitalLetters(CHANNEL_NAME)}`;
-							return match;
-						}
-
-						// roles
-						case '@&': {
-							const ROLE_NAME = discordMessage?.guild?.roles.cache.get(id)?.name;
-							if (ROLE_NAME) return `@${ROLE_NAME}`;
-							return match;
-						}
-
-						default:
-							return match;
-					}
-				})
-				// application command mentions
-				.replace(/<(\/[\w-]{1,32}(?: [\w-]{1,32}){0,2}):\d{17,20}>/g, (_, name: string) => name)
-				.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1: string, p2: string) => {
-					// dates
-					const date = new Date(seconds(Number(p1)));
-
-					if (Number.isNaN(date.getTime())) return match; // invalid date
-
-					// https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
-					switch (p2) {
-						case TimestampStyles.ShortTime:
-							return date.toLocaleString('en-GB', {
-								hour: '2-digit',
-								minute: '2-digit',
-								timeZoneName: 'short',
-								timeZone: 'UTC',
-							});
-
-						case TimestampStyles.LongTime:
-							return date.toLocaleString('en-GB', {
-								hour: '2-digit',
-								minute: '2-digit',
-								second: '2-digit',
-								timeZoneName: 'short',
-								timeZone: 'UTC',
-							});
-
-						case TimestampStyles.ShortDate:
-							return date.toLocaleString('en-GB', {
-								day: '2-digit',
-								month: '2-digit',
-								year: 'numeric',
-								timeZone: 'UTC',
-							});
-
-						case TimestampStyles.LongDate:
-							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
-
-						// case TimestampStyles.ShortDateTime:
-						// 	return date.toLocaleString('en-GB', {
-						// 		day: '2-digit',
-						// 		month: 'long',
-						// 		year: 'numeric',
-						// 		hour: '2-digit',
-						// 		minute: '2-digit',
-						// 		timeZoneName: 'short',
-						// 		timeZone: 'UTC',
-						// 	});
-
-						case TimestampStyles.LongDateTime:
-							return date.toLocaleString('en-GB', {
-								weekday: 'long',
-								day: '2-digit',
-								month: 'long',
-								year: 'numeric',
-								hour: '2-digit',
-								minute: '2-digit',
-								timeZoneName: 'short',
-								timeZone: 'UTC',
-							});
-
-						case TimestampStyles.RelativeTime: {
-							const TIME = date.getTime() - Date.now();
-							if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
-							return `${ms(Math.abs(TIME), { long: true })} ago`;
-						}
-
-						default:
-							return date.toLocaleString('en-GB', {
-								day: '2-digit',
-								month: 'long',
-								year: 'numeric',
-								hour: '2-digit',
-								minute: '2-digit',
-								timeZoneName: 'short',
-								timeZone: 'UTC',
-							});
-					}
-				})
-				.replace(
-					// hideLinkEmbed markdown
-					/<(https?:\/\/(?:www\.)?[\w#%+.:=@~-]{2,256}\.[a-z]{2,6}\b[\w#%&+./:=?@~-]*)>/gi,
-					(match, p1: string) => {
-						// return p1 if it is a valid URL
-						try {
-							new URL(p1);
-							return p1;
-						} catch {
-							return match;
-						}
-					},
-				)
-		);
+			.replace(MAYBE_URL_REGEXP, (match) =>
+				// replace dots for blocked "URLs"
+				MinecraftChatManager.ALLOWED_URLS_REGEXP.test(match) ? match : match.replaceAll('.', '․'),
+			);
 	}
 
 	/**
@@ -846,7 +855,7 @@ export class MinecraftChatManager extends ChatManager {
 		const parsedContent = await this.parseContent(content, discordMessage);
 
 		// filter check
-		if (MinecraftChatManager.shouldBlock(parsedContent)) {
+		if (MinecraftChatManager.BLOCKED_EXPRESSIONS_REGEXP.test(parsedContent)) {
 			logger.warn({ prefix, content, parsedContent }, '[CHATBRIDGE CHAT]: blocked word or URL');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionType.LocalBlocked);
 			return false;
