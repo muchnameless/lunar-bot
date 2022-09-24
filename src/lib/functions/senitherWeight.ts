@@ -77,7 +77,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	}
 
 	return {
-		skillAPIEnabled: Reflect.has(skyblockMember, 'experience_skill_mining'),
+		skillAPIEnabled: 'experience_skill_mining' in skyblockMember,
 		skill: totalSkillWeight,
 		slayer: totalSlayerWeight,
 		dungeons: totalDungeonWeight,

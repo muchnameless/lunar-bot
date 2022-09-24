@@ -42,7 +42,7 @@ export class Parser {
 
 				default: {
 					// token is an operator
-					if (Reflect.has(this._table, token)) {
+					if (token in this._table) {
 						let shouldWriteToStack = true;
 
 						while (stack.length) {

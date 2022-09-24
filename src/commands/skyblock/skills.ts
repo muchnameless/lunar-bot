@@ -25,7 +25,7 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 		let totalXp = 0;
 		let totalLevel = 0;
 
-		if (Reflect.has(member, 'experience_skill_mining')) {
+		if ('experience_skill_mining' in member) {
 			for (const skill of SKILLS) {
 				const XP = member[`experience_skill_${skill}`] ?? 0;
 				const { progressLevel, nonFlooredLevel } = getSkillLevel(skill, XP, 60);

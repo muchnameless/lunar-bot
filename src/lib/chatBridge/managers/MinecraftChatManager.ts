@@ -518,7 +518,7 @@ export class MinecraftChatManager extends ChatManager {
 		}
 
 		// ignore messages from players
-		if (hypixelMessage.type) return;
+		if (hypixelMessage.type !== null) return;
 
 		// anti-spam response
 		if (hypixelMessage.spam) {

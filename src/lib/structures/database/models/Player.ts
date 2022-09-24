@@ -1084,7 +1084,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			/**
 			 * SKILLS
 			 */
-			if (Reflect.has(playerData, 'experience_skill_mining')) {
+			if ('experience_skill_mining' in playerData) {
 				for (const skill of SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 				for (const skill of COSMETIC_SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 
@@ -1136,7 +1136,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			// no slayer data found logging
 			if (
-				!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') &&
+				typeof playerData.slayer_bosses?.zombie?.xp !== 'undefined' &&
 				new Date().getHours() === 0 &&
 				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
@@ -1175,7 +1175,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			// no dungeons data found logging
 			if (
-				!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') &&
+				typeof playerData.dungeons?.dungeon_types?.catacombs?.experience !== 'undefined' &&
 				new Date().getHours() === 0 &&
 				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
@@ -1186,7 +1186,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			 * collections
 			 */
 			if (
-				!Reflect.has(playerData, 'collection') &&
+				!('collection' in playerData) &&
 				new Date().getHours() === 0 &&
 				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
