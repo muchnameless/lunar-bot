@@ -213,8 +213,6 @@ const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
 
 const compareAlphabetically = (a?: string | null, b?: string | null) => collator.compare(a!, b!);
 
-const sanitizeName = (name: string) => name.replace(/(?=['\\])/g, '\\');
-
 const writeJSONFile = async (path: string, data: string[]) => writeFile(path, `{\n\t${data.join(',\n\t')}\n}\n`);
 
 const { emojiDefinitions } = (await (await fetch(url)).json()) as EmojiResponse;
@@ -231,7 +229,7 @@ await Promise.all([
 				if (!name.startsWith(':') || !name.endsWith(':')) continue;
 
 				// "_", "-" and ":" are removed because the parser removes them too. can't use names instead of namesWithColons since have to check if :: is present to filter out certain names above
-				unique.set(sanitizeName(name).replace(/(?<!:)[_-]+|:+/g, ''), surrogates);
+				unique.set(name.replace(/(?<!:)[_-]+|:+/g, ''), surrogates);
 			}
 		}
 
@@ -257,7 +255,7 @@ await Promise.all([
 					  [...surrogates][0]!
 				: primaryNameWithColons;
 
-			lines.push(`"${surrogates}": "${sanitizeName(name)}"`);
+			lines.push(`"${surrogates}": "${name}"`);
 		}
 
 		await writeJSONFile('src/lib/chatBridge/constants/unicodeToEmojiName.json', lines);

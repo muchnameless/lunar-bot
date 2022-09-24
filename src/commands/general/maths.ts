@@ -341,7 +341,7 @@ export default class MathsCommand extends DualCommand {
 			const pop = () => this._validateNumber(stack.pop());
 
 			for (const token of parsed) {
-				if (Reflect.has(this.binaryOperators, token)) {
+				if (token in this.binaryOperators) {
 					const b = pop();
 					const a = pop();
 
@@ -349,7 +349,7 @@ export default class MathsCommand extends DualCommand {
 					continue;
 				}
 
-				if (Reflect.has(this.unaryOperators, token)) {
+				if (token in this.unaryOperators) {
 					const a = pop();
 
 					stack.push(this.unaryOperators[token as keyof MathsCommand['unaryOperators']](a));
