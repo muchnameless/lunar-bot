@@ -15,6 +15,7 @@
 		"@typescript-eslint/restrict-plus-operands": 0,
 		"curly": [2, "multi-line", "consistent"],
 		"jsdoc/check-param-names": 0,
+		"logical-assignment-operators": [2, "always", { "enforceForIfStatements": true }],
 		"prefer-named-capture-group": 0,
 		"prefer-promise-reject-errors": 0,
 		"promise/prefer-await-to-callbacks": 0,
