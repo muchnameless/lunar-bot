@@ -662,7 +662,7 @@ export class DiscordChatManager extends ChatManager {
 			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
 				messageContent = await asyncReplace(
 					messageContent,
-					/https?:\/\/(?:www\.|(?!www))[\da-z][\da-z-]+[\da-z]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[\da-z]+\.\S{2,}/gi,
+					/https?:\/\/(?:www\.)?(?:[\da-z][\da-z-]+[\da-z]|[\da-z]+)\.\S{2,}/gi,
 					async ([match]) => {
 						try {
 							const url = new URL(match);
