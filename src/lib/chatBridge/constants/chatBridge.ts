@@ -66,7 +66,7 @@ export const ESCAPING_BACKSLASH_REGEXP = /(?<![\\¯])\\(?=[^\d\n \\a-z])/gi;
 
 export const HIDE_LINK_EMBED_REGEXP = /<(https?:\/\/(?:www\.)?(?:[\da-z][\da-z-]+[\da-z]|[\da-z]+)\.\S{2,})>/gi;
 
-export const MAYBE_URL_REGEXP = /(?:\w+\.)+[a-z]{2}\S*/gi;
+export const MAYBE_URL_REGEXP = /(?:[\w-]+\.)+[a-z]{2}\S*/gi;
 
 export const MINECRAFT_CHANNEL_MENTION_REGEXP = /#(\S+)/g;
 
