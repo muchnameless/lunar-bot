@@ -4,15 +4,7 @@ import { AsyncQueue } from '@sapphire/async-queue';
 import { RateLimitManager } from '@sapphire/ratelimits';
 import { fetch, type Response } from 'undici';
 import { MojangAPIError } from './errors/MojangAPIError.js';
-import {
-	// days,
-	consumeBody,
-	isAbortError,
-	minutes,
-	seconds,
-	validateMinecraftIgn,
-	validateMinecraftUuid,
-} from '#functions';
+import { consumeBody, isAbortError, minutes, seconds, validateMinecraftIgn, validateMinecraftUuid } from '#functions';
 
 export interface MojangResult {
 	ign: string;
@@ -216,7 +208,7 @@ export class MojangClient {
 			}
 		}
 
-		const res = await this._request(`${path}${query}`, signal);
+		const res = await this.#request(`${path}${query}`, signal);
 
 		switch (res.status) {
 			// success
@@ -231,39 +223,6 @@ export class MojangClient {
 
 				return response;
 			}
-
-			/**
-			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
-			 */
-			// invalid ign
-			// case 204: {
-			// 	if (queryType === 'ign') {
-			// 		void consumeBody(res);
-
-			// 		// retry a past date if name was queried
-			// 		let timestamp = Date.now();
-
-			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
-			// 		while ((timestamp -= days(30)) >= Date.parse('2015-02-04T00:00:00.000Z')) {
-			// 			const pastRes = await this._request(`${path}${query}?at=${timestamp}`, signal);
-
-			// 			if (pastRes.status === 200) {
-			// 				const { id: uuid, name: ign } = (await res.json()) as { id: string; name: string };
-			// 				const response = { uuid, ign };
-
-			// 				if (cache) {
-			// 					// only cache ign -> uuid for outdated igns
-			// 					void this.cache?.set(`ign:${ign.toLowerCase()}`, response);
-			// 				}
-
-			// 				return response;
-			// 			}
-
-			// 			void consumeBody(res);
-			// 		}
-			// 	}
-			// }
-			// falls through
 
 			default:
 				// only check cache if force === true, because otherwise cache is already checked before the request
@@ -280,7 +239,7 @@ export class MojangClient {
 	 * @param url
 	 * @param retries
 	 */
-	private async _request(url: string, signal: AbortSignal | undefined, retries = 0): Promise<Response> {
+	async #request(url: string, signal: AbortSignal | undefined, retries = 0): Promise<Response> {
 		const { rateLimit } = this;
 
 		if (rateLimit.limited) {
@@ -315,7 +274,8 @@ export class MojangClient {
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (isAbortError(error) && retries !== this.retries) {
-				return await this._request(url, signal, retries + 1);
+				// eslint-disable-next-line @typescript-eslint/return-await
+				return this.#request(url, signal, retries + 1);
 			}
 
 			throw error;
