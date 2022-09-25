@@ -108,13 +108,14 @@ export function autocorrect<T>(
 export async function asyncReplace(
 	string: string,
 	regex: RegExp,
-	callback: (match: RegExpMatchArray) => Promise<string> | string,
+	callback: (match: RegExpMatchArray) => Awaitable<string>,
 ) {
-	const promises: Promise<{ length: number; start: number; value: string }>[] = [];
+	let promises: Promise<{ length: number; start: number; value: string }>[] | undefined;
+	let match: RegExpMatchArray | null;
 
-	for (const match of string.matchAll(regex)) {
-		promises.push(
-			// eslint-disable-next-line unicorn/no-unreadable-iife
+	while ((match = regex.exec(string)) !== null) {
+		(promises ??= []).push(
+			// eslint-disable-next-line unicorn/no-unreadable-iife, @typescript-eslint/no-loop-func
 			(async () => ({
 				start: match.index!,
 				length: match[0]!.length,
@@ -123,15 +124,17 @@ export async function asyncReplace(
 		);
 	}
 
-	if (!promises.length) return string;
+	if (!promises) return string;
 
+	let replaced = string;
 	let offset = 0;
 
-	return (await Promise.all(promises)).reduce((acc, { start, length, value }) => {
-		const REPLACED = `${acc.slice(0, start - offset)}${value}${acc.slice(start - offset + length)}`;
+	for (const { start, length, value } of await Promise.all(promises)) {
+		replaced = `${replaced.slice(0, start - offset)}${value}${replaced.slice(start - offset + length)}`;
 		offset += length - value.length;
-		return REPLACED;
-	}, string);
+	}
+
+	return replaced;
 }
 
 /**

@@ -12,8 +12,19 @@ import {
 import ms, { type StringValue } from 'ms';
 import { Op } from 'sequelize';
 import { type ChatBridge } from '../ChatBridge.js';
-import { EMOJI_NAME_TO_UNICODE, type HypixelMessageType } from '../constants/index.js';
+import {
+	EMOJI_NAME_REGEXP,
+	EMOJI_NAME_TO_UNICODE,
+	MINECRAFT_CHANNEL_MENTION_REGEXP,
+	MINECRAFT_EMOJI_REGEXP,
+	MINECRAFT_MENTION_REGEXP,
+	MINECRAFT_SLASH_COMMAND_REGEXP,
+	MINECRAFT_TIMESTAMP_REGEXP,
+	QUOTE_REGEXP,
+	type HypixelMessageType,
+} from '../constants/index.js';
 import { DiscordChatManager, type ReadyDiscordChatManager } from './DiscordChatManager.js';
+import { NON_LETTER_REGEXP } from '#constants';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
 import { logger } from '#logger';
 
@@ -125,7 +136,7 @@ export class DiscordManager {
 			djsEscapeMarkdown(
 				// @mentions
 				(
-					await asyncReplace(string, /(?<!<)@(?<type>!|&)?(?<name>\w+)(?!\d{17,20}>)/g, async (match) => {
+					await asyncReplace(string, MINECRAFT_MENTION_REGEXP, async (match) => {
 						switch (match.groups!.type) {
 							// members/users
 							case '!': {
@@ -168,33 +179,35 @@ export class DiscordManager {
 						}
 					})
 				)
-					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
+					.replace(QUOTE_REGEXP, '\\') // escape '>' at the beginning
 					.replace(
 						// emojis (custom and default)
-						/(?<!<[at]?):(\S+):(?!\d{17,20}>)/g,
+						MINECRAFT_EMOJI_REGEXP,
 						(match, p1: string) =>
 							this._findEmojiByName(p1) ??
-							match.replace(/:(\S+?):/g, (_match, _p1: string) =>
+							match.replace(EMOJI_NAME_REGEXP, (_match, _p1: string) =>
 								p1.length === _p1.length ? _match : this._findEmojiByName(_p1) ?? _match,
 							),
 					)
 					.replace(
 						// channels
-						/#(\S+)/g,
+						MINECRAFT_CHANNEL_MENTION_REGEXP,
 						(match, p1: string) => {
-							const TO_SEARCH = p1.toLowerCase().replace(/[^a-z]/gi, '');
+							const TO_SEARCH = p1.toLowerCase().replace(NON_LETTER_REGEXP, '');
 							if (!TO_SEARCH) return match;
 
 							return (
 								this.chatBridge.hypixelGuild?.discordGuild?.channels.cache
-									.find(({ name }) => replaceSmallLatinCapitalLetters(name).replace(/[^a-z]/gi, '') === TO_SEARCH)
+									.find(
+										({ name }) => replaceSmallLatinCapitalLetters(name).replace(NON_LETTER_REGEXP, '') === TO_SEARCH,
+									)
 									?.toString() ?? match
 							);
 						},
 					)
 					// timestamps
 					.replace(
-						/(\bin )?(\ban?|\d+) ([a-z]+)( ago\b)?/gi,
+						MINECRAFT_TIMESTAMP_REGEXP,
 						(match, future: string, quantifier: string, timestring: string, past: string) => {
 							if (!future && !past) return match;
 
@@ -213,7 +226,7 @@ export class DiscordManager {
 					)
 					// /commands
 					.replace(
-						/\/([\w-]{1,32})(?: ([\w-]{1,32}))?(?: ([\w-]{1,32}))?/g,
+						MINECRAFT_SLASH_COMMAND_REGEXP,
 						(
 							match,
 							_commandName: string,

@@ -180,7 +180,7 @@ export class ChatBridgeManager {
 					},
 				});
 
-				res.push(minecraftResult && Boolean(discordResult));
+				res.push(minecraftResult && discordResult !== null);
 			} catch (error) {
 				logger.error({ err: error, hypixelGuild: hypixelGuild.logInfo }, '[HANDLE ANNOUNCEMENT MESSAGE]');
 				res.push(false);

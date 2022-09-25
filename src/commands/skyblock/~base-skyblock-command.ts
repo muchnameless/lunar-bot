@@ -2,7 +2,7 @@ import { type Components } from '@zikeji/hypixel';
 import { type Awaitable, type ChatInputCommandInteraction, type SlashCommandBuilder } from 'discord.js';
 import { getSkyBlockProfiles } from '#api';
 import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { FindProfileStrategy, PROFILE_NAMES } from '#constants';
+import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES } from '#constants';
 import {
 	autocorrect,
 	commaListOr,
@@ -172,7 +172,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 			positionals: [IGN, PROFILE_NAME_INPUT],
 		} = hypixelMessage.commandData.parseArgs<typeof baseParseArgsOptions>();
 
-		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(/[^a-z]/gi, '');
+		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(NON_LETTER_REGEXP, '');
 		if (profileName) {
 			let similarity: number;
 

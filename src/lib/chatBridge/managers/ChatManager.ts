@@ -6,6 +6,7 @@ import {
 	type HypixelMessageCollector,
 	type HypixelMessageCollectorOptions,
 } from '../HypixelMessageCollector.js';
+import { MAYBE_URL_REGEXP } from '../constants/index.js';
 
 type AwaitMessagesOptions = HypixelMessageCollectorOptions & {
 	errors?: string[];
@@ -56,9 +57,11 @@ export abstract class ChatManager {
 		}
 
 		// blocked by the advertisement filter
-		for (const [maybeURL] of string.matchAll(/(?:\w+\.)+[a-z]{2}\S*/gi)) {
-			if (this.ALLOWED_URLS_REGEXP.test(maybeURL)) continue;
+		let match: RegExpExecArray | null;
+		while ((match = MAYBE_URL_REGEXP.exec(string)) !== null) {
+			if (this.ALLOWED_URLS_REGEXP.test(match[0])) continue;
 
+			MAYBE_URL_REGEXP.lastIndex = 0; // reset global regex
 			return true;
 		}
 

@@ -5,7 +5,7 @@ import BaseSkyBlockCommand, {
 	type FetchedData,
 } from './~base-skyblock-command.js';
 import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { UnicodeEmoji, FindProfileStrategy, PROFILE_NAMES } from '#constants';
+import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES, UnicodeEmoji } from '#constants';
 import { autocorrect, formatError, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
 import { logger } from '#logger';
 import { getNetworth } from '#networth/networth.js';
@@ -98,7 +98,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 			positionals: [IGN, PROFILE_NAME_INPUT],
 		} = hypixelMessage.commandData.parseArgs<typeof baseParseArgsOptions & typeof parseArgsOptions>();
 
-		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(/[^a-z]/gi, '');
+		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(NON_LETTER_REGEXP, '');
 		if (profileName) {
 			let similarity: number;
 

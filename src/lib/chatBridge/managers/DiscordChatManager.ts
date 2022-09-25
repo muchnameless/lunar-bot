@@ -23,7 +23,7 @@ import { fetch } from 'undici';
 import { type ChatBridge } from '../ChatBridge.js';
 import { type HypixelMessage } from '../HypixelMessage.js';
 import { InteractionUserCache } from '../caches/index.js';
-import { PREFIX_BY_TYPE, type HypixelMessageType } from '../constants/index.js';
+import { PREFIX_BY_TYPE, URL_REGEXP, type HypixelMessageType } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
 import { imgur, redis } from '#api';
 import {
@@ -660,45 +660,38 @@ export class DiscordChatManager extends ChatManager {
 		if (messageContent) {
 			// parse discord attachment links and replace with imgur uploaded link
 			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
-				messageContent = await asyncReplace(
-					messageContent,
-					/https?:\/\/(?:www\.)?(?:[\da-z][\da-z-]+[\da-z]|[\da-z]+)\.\S{2,}/gi,
-					async ([match]) => {
-						try {
-							const url = new URL(match);
+				messageContent = await asyncReplace(messageContent, URL_REGEXP, async ([match]) => {
+					try {
+						const url = new URL(match);
 
-							// URL is not blocked on hypixel or not an image URL
-							if (
-								DiscordChatManager.ALLOWED_URLS_REGEXP.test(url.hostname) ||
-								!ALLOWED_EXTENSIONS_REGEX.test(url.pathname)
-							) {
-								return match;
-							}
-
-							// remove query parameters
-							url.search = '';
-
-							// check headers
-							const { contentType, contentLength } = await DiscordChatManager._fetchContentHeaders(url, signal);
-
-							// only images up to a certain size can be uploaded
-							if (
-								contentLength === null ||
-								contentLength > MAX_IMAGE_UPLOAD_SIZE ||
-								contentType === null ||
-								!ALLOWED_MIMES_REGEX.test(contentType)
-							) {
-								return match;
-							}
-
-							// try to upload URL
-							return (await imgur.uploadURL(url.toString(), signal)).data.link;
-						} catch (error) {
-							logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]');
+						// don't upload imgur and non-image URLs
+						if (url.hostname.endsWith('imgur.com') || !ALLOWED_EXTENSIONS_REGEX.test(url.pathname)) {
 							return match;
 						}
-					},
-				);
+
+						// remove query parameters
+						url.search = '';
+
+						// check headers
+						const { contentType, contentLength } = await DiscordChatManager._fetchContentHeaders(url, signal);
+
+						// only images up to a certain size can be uploaded
+						if (
+							contentLength === null ||
+							contentLength > MAX_IMAGE_UPLOAD_SIZE ||
+							contentType === null ||
+							!ALLOWED_MIMES_REGEX.test(contentType)
+						) {
+							return match;
+						}
+
+						// try to upload URL
+						return (await imgur.uploadURL(url.toString(), signal)).data.link;
+					} catch (error) {
+						logger.error({ err: error, ...this.logInfo }, '[FORWARD TO MINECRAFT]');
+						return match;
+					}
+				});
 			}
 
 			contentParts.push(messageContent);

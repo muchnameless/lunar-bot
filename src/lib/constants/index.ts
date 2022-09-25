@@ -6,6 +6,7 @@ export * from './interactions.js';
 export * from './minecraft.js';
 export * from './node.js';
 export * from './redis.js';
+export * from './regex.js';
 export * from './roles.js';
 export * from './skyblock.js';
 export * from './weight.js';
