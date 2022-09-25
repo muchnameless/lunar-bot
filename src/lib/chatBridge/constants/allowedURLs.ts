@@ -1,5 +1,5 @@
 /**
- * only lower case versions are not blocked by the advertisement filter
+ * URLs which are not blocked by hypixel
  */
 export const ALLOWED_URLS_REGEXP = new RegExp(
 	[
@@ -17,4 +17,5 @@ export const ALLOWED_URLS_REGEXP = new RegExp(
 	]
 		.map((x) => `\\b${x}(?:$|\\/)`)
 		.join('|'),
+	'i',
 );
