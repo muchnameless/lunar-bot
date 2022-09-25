@@ -108,10 +108,10 @@ export function autocorrect<T>(
 export async function asyncReplace(
 	string: string,
 	regex: RegExp,
-	callback: (match: RegExpMatchArray) => Awaitable<string>,
+	callback: (match: RegExpExecArray) => Awaitable<string>,
 ) {
 	let promises: Promise<{ length: number; start: number; value: string }>[] | undefined;
-	let match: RegExpMatchArray | null;
+	let match: RegExpExecArray | null;
 
 	while ((match = regex.exec(string)) !== null) {
 		(promises ??= []).push(
