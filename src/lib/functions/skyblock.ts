@@ -144,6 +144,6 @@ export const formatSkyBlockProfileName = ({
 	cute_name,
 	game_mode,
 }: NonNullable<Components.Schemas.SkyBlockProfileCuteName>) =>
-	game_mode! in GAME_MODE_EMOJIS
+	game_mode !== undefined && game_mode in GAME_MODE_EMOJIS
 		? `${cute_name} ${GAME_MODE_EMOJIS[game_mode as keyof typeof GAME_MODE_EMOJIS]}`
 		: cute_name;
