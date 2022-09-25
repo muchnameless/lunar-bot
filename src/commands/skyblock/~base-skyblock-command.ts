@@ -6,8 +6,10 @@ import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES } from '#constant
 import {
 	autocorrect,
 	commaListOr,
-	findSkyblockProfile,
+	escapeIgn,
+	findSkyBlockProfile,
 	formatError,
+	formatSkyBlockProfileName,
 	getUuidAndIgn,
 	seconds,
 	upperCaseFirstChar,
@@ -39,6 +41,12 @@ export const baseParseArgsOptions = {
 		short: 'l',
 	},
 } as const;
+
+interface ReplyData {
+	ign: string;
+	profile: NonNullable<Components.Schemas.SkyBlockProfileCuteName>;
+	reply: string;
+}
 
 export default class BaseSkyBlockCommand extends DualCommand {
 	public constructor(
@@ -91,7 +99,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 		if (profileName) {
 			profile = this._findProfileByName(profiles, profileName, ign);
 		} else {
-			profile = findSkyblockProfile(profiles, uuid, findProfileStrategy);
+			profile = findSkyBlockProfile(profiles, uuid, findProfileStrategy);
 
 			if (!profile) throw `\`${ign}\` has no SkyBlock profiles`;
 		}
@@ -115,10 +123,10 @@ export default class BaseSkyBlockCommand extends DualCommand {
 		profileName: string,
 		ign: string,
 	) {
-		const profile = profiles.find(({ cute_name: name }) => name === profileName);
+		const profile = profiles.find(({ cute_name }) => cute_name === profileName);
 
 		if (!profile) {
-			const availableProfiles = profiles.map(({ cute_name: name }) => `\`${upperCaseFirstChar(name)}\``);
+			const availableProfiles = profiles.map(({ cute_name }) => `\`${upperCaseFirstChar(cute_name)}\``);
 
 			throw `\`${ign}\` has no profile named \`${upperCaseFirstChar(profileName)}\`, available options: ${commaListOr(
 				availableProfiles,
@@ -133,8 +141,17 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 *
 	 * @param data
 	 */
-	protected _generateReply(data: FetchedData): Awaitable<string> {
+	protected _generateReply(data: FetchedData): Awaitable<ReplyData> {
 		throw new Error('not implemented');
+	}
+
+	/**
+	 * adds ign, profile and game mode indicators to the reply
+	 *
+	 * @param data
+	 */
+	protected _finalizeReply({ ign, profile, reply }: ReplyData): string {
+		return `${escapeIgn(ign)} (${formatSkyBlockProfileName(profile)}): ${reply}`;
 	}
 
 	/**
@@ -146,12 +163,14 @@ export default class BaseSkyBlockCommand extends DualCommand {
 		try {
 			return InteractionUtil.reply(
 				interaction,
-				await this._generateReply(
-					await this._fetchData(
-						interaction,
-						interaction.options.getString('ign'),
-						interaction.options.getString('profile'),
-						interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
+				this._finalizeReply(
+					await this._generateReply(
+						await this._fetchData(
+							interaction,
+							interaction.options.getString('ign'),
+							interaction.options.getString('profile'),
+							interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
+						),
 					),
 				),
 			);
@@ -194,8 +213,10 @@ export default class BaseSkyBlockCommand extends DualCommand {
 
 		try {
 			return hypixelMessage.reply(
-				await this._generateReply(
-					await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
+				this._finalizeReply(
+					await this._generateReply(
+						await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
+					),
 				),
 			);
 		} catch (error) {

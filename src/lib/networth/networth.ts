@@ -521,7 +521,7 @@ export async function getAuctionNetworth(profileId: string, uuid?: string) {
  * @param options
  */
 export async function getNetworth(
-	{ banking, members, profile_id: profileId }: NonNullable<Components.Schemas.SkyBlockProfileCuteName>,
+	{ banking, members, profile_id }: NonNullable<Components.Schemas.SkyBlockProfileCuteName>,
 	uuid: string,
 	{ addBanking = true, addAuctions = false } = {},
 ) {
@@ -542,7 +542,7 @@ export async function getNetworth(
 
 	// auctions
 	if (addAuctions) {
-		promises.push(getAuctionNetworth(profileId, uuid));
+		promises.push(getAuctionNetworth(profile_id, uuid));
 	}
 
 	// inventories

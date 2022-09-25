@@ -30,7 +30,9 @@ export default class CoopNetworthCommand extends NetworthCommand {
 		const memberUuids = Object.keys(profile.members);
 
 		// use NetworthCommand#_generateReply if no coop
-		if (memberUuids.length === 1) return super._generateReply({ ign, uuid, profile }, includeAuctions);
+		if (memberUuids.length === 1) {
+			return super._generateReply({ ign: `${ign}'s Co-op`, uuid, profile }, includeAuctions);
+		}
 
 		let bankingAPIEnabled = true;
 		let totalNetworth = profile.banking?.balance ?? ((bankingAPIEnabled = false), 0);
@@ -47,12 +49,12 @@ export default class CoopNetworthCommand extends NetworthCommand {
 			if (!inventoryAPIEnabled) ++inventoryAPIDisabled;
 		}
 
-		const reply = [`${ign}'s Co-op (${profile.cute_name}): ${shortenNumber(totalNetworth)}`];
+		const reply = [shortenNumber(totalNetworth)];
 		if (!bankingAPIEnabled) reply.push(`${UnicodeEmoji.X} Banking API disabled`);
 		if (inventoryAPIDisabled) {
 			reply.push(`${UnicodeEmoji.X} ${inventoryAPIDisabled}/${memberUuids.length} Inventory APIs disabled`);
 		}
 
-		return reply.join(' | ');
+		return { ign: `${ign}'s Co-op`, profile, reply: reply.join(' | ') };
 	}
 }

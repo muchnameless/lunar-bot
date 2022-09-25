@@ -16,8 +16,9 @@ import {
 import { getSkyBlockProfiles, hypixel } from '#api';
 import { PROFILE_EMOJIS, STATS_URL_BASE, type FindProfileStrategy } from '#constants';
 import {
+	findSkyBlockProfile,
 	formatError,
-	findSkyblockProfile,
+	formatSkyBlockProfileName,
 	getUuidAndIgn,
 	seconds,
 	shortenNumber,
@@ -77,7 +78,7 @@ export default class AhCommand extends ApplicationCommand {
 			.setAuthor({
 				name: ign,
 				iconURL: uuidToBustURL(uuid),
-				url: `${STATS_URL_BASE}${ign}/${PROFILE_NAME}`,
+				url: `${STATS_URL_BASE}${ign}/${PROFILE_NAME.split(' ', 1)[0]}`,
 			});
 
 		try {
@@ -104,23 +105,23 @@ export default class AhCommand extends ApplicationCommand {
 			let endedAuctions = 0;
 
 			for (const {
-				highest_bid_amount: highestBid,
-				starting_bid: startingBid,
+				highest_bid_amount,
+				starting_bid,
 				bids,
 				end,
-				item_name: item,
+				item_name,
 				tier,
 				bin,
-				item_lore: lore,
+				item_lore,
 				auctioneer,
 			} of auctions) {
 				embed.addFields({
-					name: `${item}${
-						item.startsWith('[Lvl ')
+					name: `${item_name}${
+						item_name.startsWith('[Lvl ')
 							? ` - ${upperCaseFirstChar(tier)}`
-							: item === 'Enchanted Book'
+							: item_name === 'Enchanted Book'
 							? (() => {
-									const matched = lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
+									const matched = item_lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
 									if (matched) return ` - ${matched}`;
 									return '';
 							  })()
@@ -128,14 +129,14 @@ export default class AhCommand extends ApplicationCommand {
 					}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
 					value: `${
 						bin
-							? `BIN: ${shortenNumber(startingBid)}`
+							? `BIN: ${shortenNumber(starting_bid)}`
 							: bids.length
-							? ((totalCoins += highestBid), `Highest Bid: ${shortenNumber(highestBid)}`)
-							: `Starting Bid: ${shortenNumber(startingBid)}`
+							? ((totalCoins += highest_bid_amount), `Highest Bid: ${shortenNumber(highest_bid_amount)}`)
+							: `Starting Bid: ${shortenNumber(starting_bid)}`
 					} • ${
 						end < Date.now()
-							? highestBid
-								? (++endedAuctions, (totalUnclaimedCoins += highestBid), 'sold')
+							? highest_bid_amount
+								? (++endedAuctions, (totalUnclaimedCoins += highest_bid_amount), 'sold')
 								: 'expired'
 							: 'ends'
 					} ${time(seconds.fromMilliseconds(end), TimestampStyles.RelativeTime)}`,
@@ -173,12 +174,17 @@ export default class AhCommand extends ApplicationCommand {
 		}
 	}
 
+	/**
+	 * builds select menu options for each profile
+	 *
+	 * @param profiles
+	 */
 	private _generateProfileOptions(profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[]) {
-		return profiles.map(({ cute_name, profile_id }) =>
+		return profiles.map((profile) =>
 			new SelectMenuOptionBuilder()
-				.setEmoji({ name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] })
-				.setLabel(cute_name)
-				.setValue(profile_id)
+				.setEmoji({ name: PROFILE_EMOJIS[profile.cute_name as keyof typeof PROFILE_EMOJIS] })
+				.setLabel(formatSkyBlockProfileName(profile))
+				.setValue(profile.profile_id)
 				.toJSON(),
 		);
 	}
@@ -261,7 +267,7 @@ export default class AhCommand extends ApplicationCommand {
 
 			if (PROFILE_NAME_INPUT) {
 				profileName = PROFILE_NAME_INPUT;
-				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
+				profileId = profiles.find(({ cute_name }) => cute_name === PROFILE_NAME_INPUT)?.profile_id;
 
 				if (!profileId) {
 					return InteractionUtil.reply(interaction, {
@@ -285,7 +291,7 @@ export default class AhCommand extends ApplicationCommand {
 					});
 				}
 			} else {
-				const mainProfile = findSkyblockProfile(
+				const mainProfile = findSkyBlockProfile(
 					profiles,
 					uuid,
 					interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,

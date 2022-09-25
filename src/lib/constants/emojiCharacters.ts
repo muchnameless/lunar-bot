@@ -26,7 +26,9 @@ export const enum UnicodeEmoji {
 }
 /* eslint-enable typescript-sort-keys/string-enum */
 
-// SkyBlock profile emojis
+/**
+ * SkyBlock profile cute_name emojis
+ */
 export const PROFILE_EMOJIS = {
 	Apple: '🍎',
 	Banana: '🍌',
@@ -49,4 +51,12 @@ export const PROFILE_EMOJIS = {
 	Tomato: '🍅',
 	Watermelon: '🍉',
 	Zucchini: '🥬',
+} as const;
+
+/**
+ * SkyBlock profile game_mode emojis
+ */
+export const GAME_MODE_EMOJIS = {
+	bingo: 'Ⓑ',
+	ironman: '♲',
 } as const;

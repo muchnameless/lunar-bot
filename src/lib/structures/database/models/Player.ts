@@ -70,7 +70,7 @@ import {
 } from '#constants';
 import {
 	escapeIgn,
-	findSkyblockProfile,
+	findSkyBlockProfile,
 	getLilyWeightRaw,
 	getSenitherDungeonWeight,
 	getSenitherSkillWeight,
@@ -1972,7 +1972,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			logger.error({ err: error, ...this.logInfo }, '[FETCH MAIN PROFILE]');
 		}
 
-		const mainProfile = findSkyblockProfile(profiles, this.minecraftUuid, FindProfileStrategy.MaxWeight);
+		const mainProfile = findSkyBlockProfile(profiles, this.minecraftUuid, FindProfileStrategy.MaxWeight);
 
 		if (!mainProfile) {
 			void safePromiseAll([
@@ -1983,15 +1983,15 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			throw 'no SkyBlock profiles';
 		}
 
-		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = mainProfile;
+		const { profile_id, cute_name } = mainProfile;
 
-		if (PROFILE_ID === this.mainProfileId) return null;
+		if (profile_id === this.mainProfileId) return null;
 
 		const { mainProfileName, mainProfileId } = this;
 
 		await this.update({
-			mainProfileId: PROFILE_ID,
-			mainProfileName: PROFILE_NAME ?? 'unknown profile name',
+			mainProfileId: profile_id,
+			mainProfileName: cute_name ?? 'unknown profile name',
 			xpUpdatesDisabled: false,
 		});
 
@@ -1999,14 +1999,14 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			{
 				...this.logInfo,
 				old: { mainProfileName, mainProfileId },
-				new: { mainProfileId: PROFILE_ID, mainProfileName: PROFILE_NAME },
+				new: { mainProfileId: profile_id, mainProfileName: cute_name },
 			},
 			'[FETCH MAIN PROFILE]',
 		);
 
 		return {
 			oldProfileName: mainProfileName,
-			newProfileName: PROFILE_NAME,
+			newProfileName: cute_name,
 		};
 	}
 

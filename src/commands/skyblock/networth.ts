@@ -55,11 +55,11 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 			addAuctions,
 		});
 
-		const reply = [`${ign} (${profile.cute_name}): ${shortenNumber(networth)}`];
+		const reply = [shortenNumber(networth)];
 		if (!bankingAPIEnabled) reply.push(`${UnicodeEmoji.X} Banking API disabled`);
 		if (!inventoryAPIEnabled) reply.push(`${UnicodeEmoji.X} Inventory API disabled`);
 
-		return reply.join(' | ');
+		return { ign, profile, reply: reply.join(' | ') };
 	}
 
 	/**
@@ -71,14 +71,16 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 		try {
 			return InteractionUtil.reply(
 				interaction,
-				await this._generateReply(
-					await this._fetchData(
-						interaction,
-						interaction.options.getString('ign'),
-						interaction.options.getString('profile'),
-						interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
+				this._finalizeReply(
+					await this._generateReply(
+						await this._fetchData(
+							interaction,
+							interaction.options.getString('ign'),
+							interaction.options.getString('profile'),
+							interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
+						),
+						interaction.options.getBoolean(includeAuctionsOptionName) ?? false,
 					),
-					interaction.options.getBoolean(includeAuctionsOptionName) ?? false,
 				),
 			);
 		} catch (error) {
@@ -120,9 +122,11 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 
 		try {
 			return hypixelMessage.reply(
-				await this._generateReply(
-					await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
-					auctions ?? false,
+				this._finalizeReply(
+					await this._generateReply(
+						await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
+						auctions ?? false,
+					),
 				),
 			);
 		} catch (error) {

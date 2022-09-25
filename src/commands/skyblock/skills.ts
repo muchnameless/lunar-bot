@@ -20,7 +20,7 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 	 */
 	protected override async _generateReply({ ign, uuid, profile }: FetchedData) {
 		const member = profile.members[uuid]!;
-		const reply = [`${ign} (${profile.cute_name}): `];
+		const reply: string[] = [];
 
 		let totalXp = 0;
 		let totalLevel = 0;
@@ -56,6 +56,6 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 
 		reply[0] += `${formatDecimalNumber(totalLevel / SKILLS.length)} Skill Average (${shortenNumber(totalXp)} Total XP)`;
 
-		return reply.join(' | ');
+		return { ign, profile, reply: reply.join(' | ') };
 	}
 }

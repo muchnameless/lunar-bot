@@ -3,6 +3,7 @@ import { assertNever, getLilyWeight } from './index.js';
 import {
 	DUNGEON_XP_TOTAL,
 	FindProfileStrategy,
+	GAME_MODE_EMOJIS,
 	LEVEL_CAP,
 	RUNECRAFTING_XP_TOTAL,
 	SKILL_XP_TOTAL,
@@ -81,9 +82,7 @@ export function getSkillLevel(type: DungeonTypes | SkillTypes, xp = 0, individua
  *
  * @param xp
  */
-export function getSlayerLevel(xp = 0) {
-	return SLAYER_XP_TOTAL.findLastIndex((requiredXp) => requiredXp <= xp);
-}
+export const getSlayerLevel = (xp = 0) => SLAYER_XP_TOTAL.findLastIndex((requiredXp) => requiredXp <= xp);
 
 /**
  * returns the main profile, determined by max senither weight
@@ -92,7 +91,7 @@ export function getSlayerLevel(xp = 0) {
  * @param uuid minecraft uuid
  * @param findProfileStrategy
  */
-export function findSkyblockProfile(
+export function findSkyBlockProfile(
 	profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[] | null,
 	uuid: string,
 	findProfileStrategy?: FindProfileStrategy | null,
@@ -135,3 +134,16 @@ export function findSkyblockProfile(
 			return null;
 	}
 }
+
+/**
+ * returns the profile name with a game_mode emoji if it exists
+ *
+ * @param profile
+ */
+export const formatSkyBlockProfileName = ({
+	cute_name,
+	game_mode,
+}: NonNullable<Components.Schemas.SkyBlockProfileCuteName>) =>
+	game_mode! in GAME_MODE_EMOJIS
+		? `${cute_name} ${GAME_MODE_EMOJIS[game_mode as keyof typeof GAME_MODE_EMOJIS]}`
+		: cute_name;

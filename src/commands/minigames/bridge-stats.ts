@@ -43,9 +43,11 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 		if (!playerData?.stats?.Duels) return `\`${ign}\` has no Bridge stats`;
 
 		try {
-			const { bridge_deaths: deaths, bridge_kills: kills } = playerData.stats.Duels;
+			const { bridge_deaths, bridge_kills } = playerData.stats.Duels;
 
-			if (typeof deaths !== 'number' || typeof kills !== 'number') return `\`${ign}\` has no Bridge stats`;
+			if (typeof bridge_deaths !== 'number' || typeof bridge_kills !== 'number') {
+				return `\`${ign}\` has no Bridge stats`;
+			}
 
 			const wins = this._calculateStats(playerData.stats.Duels, 'wins');
 			const losses = this._calculateStats(playerData.stats.Duels, 'losses');
@@ -59,9 +61,9 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 				ties: ${formatNumber(gamesPlayed - (wins + losses))},
 				win rate: ${formatDecimalNumber(wins / (wins + losses))},
 				games played: ${formatNumber(gamesPlayed)},
-				kills: ${formatNumber(kills as number)},
-				deaths: ${formatNumber(deaths as number)},
-				kd ratio: ${this.calculateKD(kills as number, deaths as number) ?? '-/-'},
+				kills: ${formatNumber(bridge_kills)},
+				deaths: ${formatNumber(bridge_deaths)},
+				kd ratio: ${this.calculateKD(bridge_kills, bridge_deaths) ?? '-/-'},
 				goals: ${formatNumber(this._calculateStats(playerData.stats.Duels, 'goals'))}
 			`;
 		} catch {

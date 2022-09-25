@@ -4,7 +4,7 @@ import BaseSkyBlockCommand from './~base-skyblock-command.js';
 import { getSkyBlockProfiles } from '#api';
 import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { UnicodeEmoji } from '#constants';
-import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn, type WeightData } from '#functions';
+import { formatDecimalNumber, formatPercent, getUuidAndIgn, type WeightData } from '#functions';
 
 export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	/**
@@ -29,6 +29,20 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	}
 
 	/**
+	 * @param profile
+	 * @param uuid
+	 */
+	private _transformProfileToWeightData(
+		profile: NonNullable<Components.Schemas.SkyBlockProfileCuteName>,
+		uuid: string,
+	) {
+		return {
+			profile,
+			...this._getWeight(profile.members[uuid]!),
+		};
+	}
+
+	/**
 	 * @param ctx
 	 * @param ignOrUuid command arguments
 	 * @param profileName
@@ -45,23 +59,14 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 
 		if (!profiles?.length) throw `\`${ign}\` has no SkyBlock profiles`;
 
-		// select profile
-		let weightData: WeightData & { name: string };
-
-		if (profileName) {
-			const profile = this._findProfileByName(profiles, profileName, ign);
-
-			weightData = {
-				name: profile.cute_name,
-				...this._getWeight(profile.members[uuid]!),
-			};
-		} else {
-			[weightData] = profiles
-				.map(({ cute_name: name, members }) => ({ name, ...this._getWeight(members[uuid]!) }))
-				.sort(({ totalWeight: a }, { totalWeight: b }) => b - a) as [WeightData & { name: string }];
-		}
-
-		return { ign, weightData };
+		return {
+			ign,
+			weightData: profileName
+				? this._transformProfileToWeightData(this._findProfileByName(profiles, profileName, ign), uuid)
+				: profiles
+						.map((profile) => this._transformProfileToWeightData(profile, uuid))
+						.sort(({ totalWeight: a }, { totalWeight: b }) => b - a)[0]!,
+		};
 	}
 
 	/**
@@ -71,17 +76,19 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 */
 	// @ts-expect-error override
 	protected override _generateReply({ ign, weightData }: Awaited<ReturnType<this['_fetchData']>>) {
-		const { name, totalWeight, overflow, skill, dungeons, slayer, skillAPIEnabled } = weightData;
+		const { profile, totalWeight, overflow, skill, dungeons, slayer, skillAPIEnabled } = weightData;
 
-		return `${escapeIgn(ign)} (${name}): ${this._formatNumber(
-			totalWeight,
-			totalWeight > 1_000 ? 2 : 1,
-		)} (${this._formatNumber(overflow, totalWeight > 1_000 ? 2 : 1)} Overflow) | Skill: ${this._formatNumber(
-			skill,
-		)} (${formatPercent(skill / totalWeight)})${
-			skillAPIEnabled ? '' : ` ${UnicodeEmoji.X} API disabled`
-		} | Dungeons: ${this._formatNumber(dungeons)} (${formatPercent(
-			dungeons / totalWeight,
-		)}) | Slayer: ${this._formatNumber(slayer)} (${formatPercent(slayer / totalWeight)}) | ${this.weightType}`;
+		return {
+			ign,
+			profile,
+			reply: `${this._formatNumber(totalWeight, totalWeight > 1_000 ? 2 : 1)} (${this._formatNumber(
+				overflow,
+				totalWeight > 1_000 ? 2 : 1,
+			)} Overflow) | Skill: ${this._formatNumber(skill)} (${formatPercent(skill / totalWeight)})${
+				skillAPIEnabled ? '' : ` ${UnicodeEmoji.X} API disabled`
+			} | Dungeons: ${this._formatNumber(dungeons)} (${formatPercent(
+				dungeons / totalWeight,
+			)}) | Slayer: ${this._formatNumber(slayer)} (${formatPercent(slayer / totalWeight)}) | ${this.weightType}`,
+		};
 	}
 }
