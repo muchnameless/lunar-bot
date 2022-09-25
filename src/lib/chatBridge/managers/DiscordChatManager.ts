@@ -665,7 +665,7 @@ export class DiscordChatManager extends ChatManager {
 						const url = new URL(match);
 
 						// don't upload imgur and non-image URLs
-						if (url.hostname.endsWith('imgur.com') || !ALLOWED_EXTENSIONS_REGEX.test(url.pathname)) {
+						if (url.hostname.toLowerCase().endsWith('imgur.com') || !ALLOWED_EXTENSIONS_REGEX.test(url.pathname)) {
 							return match;
 						}
 
