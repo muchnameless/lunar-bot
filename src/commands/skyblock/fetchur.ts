@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, time, TimestampStyles, type ChatInputCommandInteraction } from 'discord.js';
-import { zone, TimeStruct, DateFunctions } from 'timezonecomplete';
+import { DateTime } from 'luxon';
 import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { type CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
@@ -38,20 +38,10 @@ export default class FetchurCommand extends DualCommand {
 	 * execute the command
 	 */
 	private _generateReply() {
-		const date = new Date();
-		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date, DateFunctions.GetUTC)) / 60;
-		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
+		const now = DateTime.local({ zone: 'America/New_York' }); // hypixel's time zone
 
-		const nextResetDate = new Date();
-		nextResetDate.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
-
-		// reset already happened today
-		if (nextResetDate.getTime() < Date.now()) {
-			nextResetDate.setUTCDate(nextResetDate.getUTCDate() + 1);
-		}
-
-		return `item: ${this.FETCHUR_ITEMS[(date.getUTCDate() - 1) % this.FETCHUR_ITEMS.length]}, changes ${time(
-			nextResetDate,
+		return `item: ${this.FETCHUR_ITEMS[(now.day - 1) % this.FETCHUR_ITEMS.length]}, changes ${time(
+			now.startOf('day').plus({ days: 1 }).toUnixInteger(),
 			TimestampStyles.RelativeTime,
 		)}`;
 	}

@@ -223,16 +223,20 @@ export function splitMessage(
 			);
 		}
 
-		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('[SPLIT MESSAGE]: SPLIT_MAX_LEN');
+		if (splitText.some(({ length }) => length > maxLength)) {
+			throw new RangeError('[SPLIT MESSAGE]: chunk exceeded max length');
+		}
 
 		return splitText;
 	}
 
 	splitText = text.split(char);
 
-	if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('[SPLIT MESSAGE]: SPLIT_MAX_LEN');
+	if (splitText.some(({ length }) => length > maxLength)) {
+		throw new RangeError('[SPLIT MESSAGE]: chunk exceeded max length');
+	}
 
-	return concatMessageChunks(splitText, { maxLength, char: typeof char === 'string' ? char : '', append, prepend });
+	return concatMessageChunks(splitText, { maxLength, char, append, prepend });
 }
 
 export interface MakeContentOptions {
