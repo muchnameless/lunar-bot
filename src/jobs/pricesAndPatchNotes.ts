@@ -737,4 +737,4 @@ async function runJobs() {
 	ac = null;
 }
 
-new CronJob('*/1 * * * *', runJobs).start();
+new CronJob('* * * * *', runJobs).start();
