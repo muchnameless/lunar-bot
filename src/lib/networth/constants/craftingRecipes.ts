@@ -158,11 +158,11 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 			...UPGRADED_HOE_1,
 			[ItemId.Potato]: 8 * 64,
 		},
-		[ItemId.PythagoreanPotatoHoe1]: {
+		[ItemId.PythagoreanPotatoHoe2]: {
 			...UPGRADED_HOE_2,
 			[ItemId.Potato]: 8 * 64 + 4 * 64 * (5 * 32),
 		},
-		[ItemId.PythagoreanPotatoHoe1]: {
+		[ItemId.PythagoreanPotatoHoe3]: {
 			...UPGRADED_HOE_3,
 			[ItemId.Potato]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (5 * 32) * (5 * 32),
 		},
