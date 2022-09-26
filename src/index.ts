@@ -13,9 +13,12 @@ import {
 	Routes,
 	type Snowflake,
 } from 'discord.js';
+import { Agent, setGlobalDispatcher } from 'undici';
 import { hours, minutes, seconds } from '#functions';
 import { startJobs } from '#root/jobs/index.js';
 import { LunarClient } from '#structures/LunarClient.js';
+
+setGlobalDispatcher(new Agent({ connect: { timeout: 30_000 } }));
 
 if (env.NODE_ENV !== 'development') disableValidators();
 

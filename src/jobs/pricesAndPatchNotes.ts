@@ -8,7 +8,7 @@ import { Client, type Components } from '@zikeji/hypixel';
 import { CronJob } from 'cron';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
-import { fetch } from 'undici';
+import { Agent, fetch, setGlobalDispatcher } from 'undici';
 import { JobType } from './index.js';
 import { logger } from '#logger';
 import { type Enchantment } from '#networth/constants/enchantments.js';
@@ -20,6 +20,8 @@ import { calculatePetSkillLevel } from '#networth/functions/pets.js';
 import { consumeBody } from '#root/lib/functions/fetch.js';
 import { sql } from '#structures/database/sql.js';
 import { FetchError } from '#structures/errors/FetchError.js';
+
+setGlobalDispatcher(new Agent({ connect: { timeout: 30_000 } }));
 
 // because a single AbortController is used for all fetches
 EventEmitter.setMaxListeners(100);
