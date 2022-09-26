@@ -38,7 +38,7 @@ async function parseItems(base64: string) {
 		if (!item.tag?.ExtraAttributes?.id) continue;
 
 		// backpacks / new year cake bag -> iterate over contained items
-		if (item.tag.ExtraAttributes.id.endsWith('BACKPACK') || item.tag.ExtraAttributes.id.endsWith('_BAG')) {
+		if (item.tag.ExtraAttributes.id.endsWith('_BACKPACK') || item.tag.ExtraAttributes.id.endsWith('_BAG')) {
 			const items = item.tag.ExtraAttributes[
 				Object.keys(item.tag.ExtraAttributes).find((key) => key.endsWith('_data'))!
 			] as number[];
@@ -77,6 +77,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		jalapeno_count: number;
 		mana_disintegrator_count: number;
 		modifier: string;
+		new_years_cake: number;
 		petInfo: string;
 		skin: string;
 		stats_book: number;
@@ -97,6 +98,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// pet item
 	if (extraAttributes.petInfo) {
 		return getPetPrice(JSON.parse(extraAttributes.petInfo) as Components.Schemas.SkyBlockProfilePet);
+	}
+
+	// new year cake item
+	if (extraAttributes.new_years_cake) {
+		return getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
 	}
 
 	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
@@ -169,7 +175,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// runes
 	if (extraAttributes.runes) {
 		for (const [rune, level] of Object.entries(extraAttributes.runes)) {
-			price += getPrice(`RUNE_${rune}_${level}`) * PriceModifier.Rune;
+			price += getPrice(`${ItemId.Rune}_${rune}_${level}`) * PriceModifier.Rune;
 		}
 	}
 

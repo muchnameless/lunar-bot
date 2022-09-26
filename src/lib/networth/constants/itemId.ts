@@ -125,6 +125,7 @@ export const enum ItemId {
 	NewtonNetherWartsHoe1 = 'THEORETICAL_HOE_WARTS_1',
 	NewtonNetherWartsHoe2 = 'THEORETICAL_HOE_WARTS_2',
 	NewtonNetherWartsHoe3 = 'THEORETICAL_HOE_WARTS_3',
+	NewYearCake = 'NEW_YEAR_CAKE',
 	NightCrystal = 'NIGHT_CRYSTAL',
 	ObsidianTablet = 'OBSIDIAN_TABLET',
 	Onyx = 'ONYX',

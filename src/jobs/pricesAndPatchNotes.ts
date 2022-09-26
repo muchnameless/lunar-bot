@@ -342,17 +342,23 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 			case ItemId.Potion:
 				switch (item.tag!.ExtraAttributes!.potion_name) {
 					case 'Dungeon': // Dungeon potions
-						itemId = `POTION_${item.tag!.ExtraAttributes!.potion_name}_${item.tag!.ExtraAttributes!.potion_level}`;
+						itemId = `${ItemId.Potion}_${item.tag!.ExtraAttributes!.potion_name}_${
+							item.tag!.ExtraAttributes!.potion_level
+						}`;
 						break;
 
 					default:
 						// ignore other potions with multiple effects
 						if (item.tag!.ExtraAttributes!.effects?.length !== 1) return;
 
-						itemId = `POTION_${item.tag!.ExtraAttributes!.potion}_${item.tag!.ExtraAttributes!.potion_level}`;
+						itemId = `${ItemId.Potion}_${item.tag!.ExtraAttributes!.potion}_${item.tag!.ExtraAttributes!.potion_level}`;
 						break;
 				}
 
+				break;
+
+			case ItemId.NewYearCake:
+				itemId = `${ItemId.NewYearCake}_${item.tag!.ExtraAttributes!.new_years_cake}`;
 				break;
 
 			case undefined: // no itemId
