@@ -67,7 +67,7 @@
 		"prismarine-chat": "^1.6.1",
 		"prismarine-nbt": "^2.2.1",
 		"re2": "^1.17.7",
-		"sequelize": "^6.23.1",
+		"sequelize": "^6.23.2",
 		"tslib": "^2.4.0",
 		"undici": "^5.10.0",
 		"utf-8-validate": "^5.0.9",
