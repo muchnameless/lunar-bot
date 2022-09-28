@@ -116,19 +116,8 @@ export function findSkyBlockProfile(
 			return mainProfile;
 		}
 
-		case FindProfileStrategy.LastActive: {
-			let mainProfile: Components.Schemas.SkyBlockProfileCuteName = null;
-			let lastActive = -1;
-
-			for (const profile of profiles) {
-				if (lastActive > profile.members[uuid]!.last_save) continue;
-
-				mainProfile = profile;
-				lastActive = profile.members[uuid]!.last_save;
-			}
-
-			return mainProfile;
-		}
+		case FindProfileStrategy.LastActive:
+			return profiles.find(({ selected }) => selected) ?? null;
 
 		default:
 			return null;
