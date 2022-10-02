@@ -4120,10 +4120,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-big-decimal@github:muchnameless/js-big-decimal":
-  version: 1.3.5
-  resolution: "js-big-decimal@https://github.com/muchnameless/js-big-decimal.git#commit=27ed7eff814717463898eb7ac9315e0ceeecfd05"
-  checksum: c73a7810a105bd7c6483e6fd6f415ad7e923db6e3b699f91fd7a2dbf7ce90cf864bb9fc8687d6446c3adfe3ec109c7274f43a7e3a0df6dcf63ee1f40dac090ac
+"js-big-decimal@npm:^1.3.10":
+  version: 1.3.10
+  resolution: "js-big-decimal@npm:1.3.10"
+  checksum: 77863607a8cac460a8d3ba97160067e89490d15c5ef52b1be4a88d84e667c33339b0bf35ba12a2f686d05d4e8099f7a2b603ab501780055f84c3c22b354920ec
   languageName: node
   linkType: hard
 
@@ -4603,7 +4603,7 @@ __metadata:
     fast-xml-parser: ^4.0.10
     husky: ^8.0.1
     ioredis: ^5.2.3
-    js-big-decimal: "github:muchnameless/js-big-decimal"
+    js-big-decimal: ^1.3.10
     ley: ^0.7.1
     lilyweight: ^2.7.0
     lint-staged: ^13.0.3
