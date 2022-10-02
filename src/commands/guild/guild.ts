@@ -533,9 +533,9 @@ export default class GuildCommand extends ApplicationCommand {
 		commandOptions: CommandOptions,
 		ansi: boolean,
 	) {
-		const formatMessage = ansi
-			? (msg: HypixelMessage) => msg.ansiContent(false)
-			: (msg: HypixelMessage) =>
+		const formatMessage: (msg: HypixelMessage) => string = ansi
+			? (msg) => msg.ansiContent(false)
+			: (msg) =>
 					msg.content.includes('●')
 						? removeMcFormatting(
 								msg.formattedContent
