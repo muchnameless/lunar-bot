@@ -1,4 +1,5 @@
 import { GuildMemberLimits } from '@sapphire/discord-utilities';
+import { objectKeys } from '@sapphire/utilities';
 import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from 'discord.js';
 import {
 	FindProfileStrategy,
@@ -9,7 +10,6 @@ import {
 	XP_OFFSETS_SHORT,
 } from '#constants';
 import { upperCaseFirstChar } from '#functions';
-import { keys } from '#types';
 
 export const optionalIgnOption = new SlashCommandStringOption()
 	.setName('ign')
@@ -95,7 +95,7 @@ export const offsetOption = new SlashCommandStringOption()
 	.setDescription('Δ offset')
 	.setRequired(false)
 	.addChoices(
-		...keys(XP_OFFSETS_SHORT).map((x) => ({
+		...objectKeys(XP_OFFSETS_SHORT).map((x) => ({
 			name: x,
 			value: XP_OFFSETS_CONVERTER[x],
 		})),

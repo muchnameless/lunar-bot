@@ -1,4 +1,5 @@
 import { setTimeout } from 'node:timers';
+import { objectEntries } from '@sapphire/utilities';
 import { type Components } from '@zikeji/hypixel';
 import { stripIndents } from 'common-tags';
 import { CronJob as CronJobConstructor } from 'cron';
@@ -32,7 +33,6 @@ import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, Unicod
 import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber, isFirstMinutesOfHour } from '#functions';
 import { logger } from '#logger';
 import { type LunarClient } from '#structures/LunarClient.js';
-import { entries } from '#types';
 import { ChannelUtil } from '#utils';
 
 export interface Models {
@@ -130,7 +130,7 @@ export class DatabaseManager {
 
 		// set default config
 		await Promise.all(
-			entries(DEFAULT_CONFIG).map(
+			objectEntries(DEFAULT_CONFIG).map(
 				([key, value]) => this.modelManagers.config.get(key) === null && this.modelManagers.config.set(key, value),
 			),
 		);

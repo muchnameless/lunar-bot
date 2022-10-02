@@ -1,5 +1,5 @@
+import { objectKeys } from '@sapphire/utilities';
 import lilyConstants from 'lilyweight/lib/constants.json' assert { type: 'json' };
-import { keys } from '#types';
 
 /**
  * senither
@@ -60,5 +60,5 @@ export const DUNGEON_EXPONENTS = {
  * https://github.com/Antonio32A/lilyweight
  */
 
-export const LILY_SKILL_NAMES_API = keys(lilyConstants.skillNames);
-export const LILY_SKILL_NAMES = keys(lilyConstants.skillRatioWeight);
+export const LILY_SKILL_NAMES_API = objectKeys(lilyConstants.skillNames);
+export const LILY_SKILL_NAMES = objectKeys(lilyConstants.skillRatioWeight);
