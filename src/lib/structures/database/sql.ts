@@ -7,7 +7,7 @@ export const sql = postgres({
 			to: 1_184,
 			from: [1_082, 1_083, 1_114, 1_184],
 			serialize: (date: Date) => date.toISOString(),
-			parse: (isoString) => isoString,
+			parse: (isoString: string) => isoString,
 		},
 		numeric: {
 			to: 0,
