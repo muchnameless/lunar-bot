@@ -289,7 +289,7 @@ export class HypixelMessage {
 	 * @param reset - whether to replace reset tags
 	 */
 	public ansiContent(reset = true) {
-		let message = this.formattedContent;
+		let message = this.prismarineMessage.toMotd();
 
 		message = message.replace(/§([\da-fk-or])/g, (_, code: string) => {
 			switch (code) {
@@ -329,7 +329,7 @@ export class HypixelMessage {
 			}
 		});
 
-		return reset ? `${message}${ansiTag()}` : message;
+		return reset ? `${message.trim()}${ansiTag()}` : message.trim();
 	}
 
 	/**

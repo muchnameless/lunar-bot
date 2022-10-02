@@ -539,9 +539,8 @@ export default class GuildCommand extends ApplicationCommand {
 					msg.content.includes('●')
 						? removeMcFormatting(
 								msg.formattedContent
-									.replaceAll('§r§c ●', ' 🔴') // prettify emojis
-									.replaceAll('§r§a ●', ' 🟢')
-									.replace(/\[.+?] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
+									.replaceAll('§c ●', ' 🔴') // coloured emojis
+									.replaceAll('§a ●', ' 🟢')
 									.trim(),
 						  )
 						: msg.content;
