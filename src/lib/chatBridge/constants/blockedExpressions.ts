@@ -19,7 +19,7 @@ export const BLOCKED_EXPRESSIONS_REGEXP = new RegExp(
 		/\bmast[eu]rbati(?:ng|on)?\b/,
 		/suck +(?:me +off|(?:yo)?ur (?:dad|mom))/,
 		/\bb[0o]n[3e]r\b/,
-		/c *o *c *k\b/,
+		/c *o *c *k(?:\b|sucker)/,
 		/\bp *[3e] *n *[1i] *s\b/,
 		/d *(?:i+|1+) *c+ *k/,
 		/schl[0o]ng/,
@@ -95,7 +95,7 @@ export const BLOCKED_EXPRESSIONS_REGEXP = new RegExp(
 		/[⠁-⣿]/, // braille code (used in some spam messages)
 		/\be+z+\b/, // hypixel replaces messages containing "ez" with a set of other "funny" messages
 	]
-		.map((regex) => regex.source)
+		.map(({ source }) => source)
 		.join('|'),
 	'i',
 );

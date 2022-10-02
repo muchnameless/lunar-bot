@@ -311,8 +311,8 @@ export class HypixelMessageCollector extends EventEmitter {
 		this.chatBridge.once(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
 
 		this.once(HypixelMessageCollectorEvent.End, () => {
-			this.chatBridge.removeListener(ChatBridgeEvent.Message, this._handleCollect);
-			this.chatBridge.removeListener(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
+			this.chatBridge.off(ChatBridgeEvent.Message, this._handleCollect);
+			this.chatBridge.off(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
 		});
 
@@ -342,9 +342,9 @@ export class HypixelMessageCollector extends EventEmitter {
 
 			const cleanup = () => {
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
-				this.removeListener(HypixelMessageCollectorEvent.Collect, onCollect);
+				this.off(HypixelMessageCollectorEvent.Collect, onCollect);
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
-				this.removeListener(HypixelMessageCollectorEvent.End, onEnd);
+				this.off(HypixelMessageCollectorEvent.End, onEnd);
 			};
 
 			const onCollect = (item: HypixelMessage) => {
@@ -475,8 +475,8 @@ export class HypixelMessageCollector extends EventEmitter {
 				} else {
 					await new Promise((resolve) => {
 						const tick = () => {
-							this.removeListener(HypixelMessageCollectorEvent.Collect, tick);
-							this.removeListener(HypixelMessageCollectorEvent.End, tick);
+							this.off(HypixelMessageCollectorEvent.Collect, tick);
+							this.off(HypixelMessageCollectorEvent.End, tick);
 							resolve(null);
 						};
 
@@ -486,7 +486,7 @@ export class HypixelMessageCollector extends EventEmitter {
 				}
 			}
 		} finally {
-			this.removeListener(HypixelMessageCollectorEvent.Collect, onCollect);
+			this.off(HypixelMessageCollectorEvent.Collect, onCollect);
 		}
 	}
 }

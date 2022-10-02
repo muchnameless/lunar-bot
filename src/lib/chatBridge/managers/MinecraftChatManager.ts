@@ -76,7 +76,7 @@ export interface CommandOptions {
 	 */
 	max?: number;
 	/**
-	 * command prefix, defaults to '/'
+	 * command prefix, defaults to ''
 	 */
 	prefix?: string;
 	/**
@@ -159,10 +159,7 @@ class LastMessages {
 	private static _cleanContent(content: string) {
 		return content
 			.replace(/\d/g, '') // remove numbers
-			.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
-			.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invis chars
-			.trim() // remove whitespaces at the beginning and end
-			.replace(/ {2,}/g, ' '); // mc messages can only have single spaces
+			.trim(); // remove whitespaces at the beginning and end
 	}
 
 	/**
@@ -341,14 +338,22 @@ export class MinecraftChatManager extends ChatManager {
 	public static readonly MAX_RETRIES = 3 as const;
 
 	/**
-	 * normal delay to listen for error messages
-	 */
-	public static readonly delays = [null, 100, 100, 100, 120, 150, 600] as const;
-
-	/**
 	 * delay which can be used to send messages to in-game chat continously
 	 */
 	public static readonly SAFE_DELAY = 600 as const;
+
+	/**
+	 * normal delay to listen for error messages
+	 */
+	public static readonly delays = [
+		0,
+		100,
+		100,
+		100,
+		120,
+		150,
+		...Array.from({ length: 20 }, () => this.SAFE_DELAY),
+	] as const;
 
 	/**
 	 * delay which can be used after triggering anti spam
@@ -981,13 +986,12 @@ export class MinecraftChatManager extends ChatManager {
 		const listener = this._listenFor(content);
 
 		try {
-			const timestamp = BigInt(Date.now());
-
-			this.bot.write('chat_message', {
-				message,
-				timestamp,
+			this.bot.write('chat_command', {
+				command: message,
+				timestamp: Date.now(),
 				salt: 0,
-				signature: this.bot.signMessage(message, timestamp),
+				argumentSignatures: [],
+				signedPreview: false,
 			});
 		} catch (error) {
 			logger.error({ err: error, ...this.logInfo }, '[_SEND TO CHAT]: bot.write error');
@@ -1069,7 +1073,7 @@ export class MinecraftChatManager extends ChatManager {
 	public async command(options: CommandOptions | string) {
 		const {
 			command,
-			prefix = command.startsWith('/') ? '' : '/',
+			prefix = '',
 			responseRegExp,
 			abortRegExp = /^Unknown command. Type "help" for help\.$/,
 			max = -1,

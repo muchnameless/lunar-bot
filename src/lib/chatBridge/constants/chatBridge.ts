@@ -25,10 +25,10 @@ export const enum HypixelMessageType {
 }
 
 export const enum ChatPrefix {
-	Guild = '/gc ',
-	Officer = '/oc ',
-	Party = '/pc ',
-	Whisper = '/w ',
+	Guild = 'gc ',
+	Officer = 'oc ',
+	Party = 'pc ',
+	Whisper = 'w ',
 }
 
 export const PREFIX_BY_TYPE = {
