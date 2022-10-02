@@ -21,8 +21,15 @@ const CAMPFIRE_TALISMAN_GOD = {
 	[ItemId.JungleWood]: 240_000,
 } as const;
 
+const BRONZE_MEDAL = (count = 1) => ({} as const);
+const SILVER_MEDAL = (count = 1) => ({} as const);
+const GOLD_MEDAL = (count = 1) =>
+	({
+		[ItemId.Coins]: count * 800_000,
+	} as const);
+
 const THEORETICAL_HOE = {
-	[ItemId.Coins]: 1_000_000, // gold medal
+	...GOLD_MEDAL(),
 	[ItemId.JacobsTicket]: 32,
 } as const;
 const UPGRADED_HOE_1 = {
@@ -197,6 +204,36 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 				4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK) +
 				4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK) * (16 * ITEMS_PER_BLOCK),
 		},
+
+		// https://hypixel-skyblock.fandom.com/wiki/Anita
+		[ItemId.InfinidirtWand]: {
+			[ItemId.JacobsTicket]: 1,
+		},
+		[ItemId.Prismapump]: {
+			...BRONZE_MEDAL(),
+			[ItemId.JacobsTicket]: 2 / 4,
+		},
+		[ItemId.HoeOfGreatTilling]: {
+			...BRONZE_MEDAL(),
+			[ItemId.JacobsTicket]: 5,
+		},
+		[ItemId.HoeOfGreaterTilling]: {
+			...SILVER_MEDAL(),
+			[ItemId.JacobsTicket]: 10,
+		},
+		[ItemId.BasketOfSeeds]: {
+			...SILVER_MEDAL(2),
+			[ItemId.JacobsTicket]: 30,
+		},
+		[ItemId.NetherWartPouch]: {
+			...SILVER_MEDAL(2),
+			[ItemId.JacobsTicket]: 30,
+		},
+		[ItemId.CocoChopper]: THEORETICAL_HOE,
+		[ItemId.MelonDicer]: THEORETICAL_HOE,
+		[ItemId.PumpkinDicer]: THEORETICAL_HOE,
+		[ItemId.FungiCutter]: THEORETICAL_HOE,
+		[ItemId.CactusKnife]: THEORETICAL_HOE,
 
 		// https://hypixel-skyblock.fandom.com/wiki/Arrows
 		[ItemId.FlintArrow]: {

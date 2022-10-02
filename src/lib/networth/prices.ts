@@ -33,7 +33,10 @@ export async function populateCaches() {
 
 		prices.clear();
 
+		// hardcoded prices
 		prices.set(ItemId.Coins, 1);
+		prices.set(ItemId.Potion, 0);
+		prices.set(ItemId.EnchantedBook, 0);
 
 		for (const { id, median } of pricesRows) {
 			prices.set(id, median);
