@@ -5,7 +5,7 @@ import { type ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
 import { type BroadcastOptions, type BroadcastResult, type ChatBridge } from './ChatBridge.js';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
 import { PrismarineMessage } from './PrismarineMessage.js';
-import { type ChatPacket } from './botEvents/player_chat.js';
+import { type ChatPacket } from './botEvents/system_chat.js';
 import { HypixelMessageType, spamMessages, type MessagePosition } from './constants/index.js';
 import { type DiscordChatManager } from './managers/DiscordChatManager.js';
 import { type MinecraftChatOptions } from './managers/MinecraftChatManager.js';
