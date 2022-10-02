@@ -4618,7 +4618,7 @@ __metadata:
     postgres: 3.3.0
     prettier: ^2.7.1
     pretty-quick: ^3.1.3
-    prismarine-chat: ^1.6.1
+    prismarine-chat: ^1.7.2
     prismarine-nbt: ^2.2.1
     re2: ^1.17.7
     sequelize: ^6.23.2
@@ -5771,16 +5771,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-chat@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "prismarine-chat@npm:1.6.1"
+"prismarine-chat@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "prismarine-chat@npm:1.7.2"
   dependencies:
-    minecraft-data: ^3.0.0
     mojangson: ^2.0.1
     prismarine-item: ^1.10.0
     prismarine-nbt: ^2.0.0
+    prismarine-registry: ^1.4.0
     sprintf-js: ^1.1.2
-  checksum: 81c8a20202991e797890e2b758255cad65fefe85837561c110004ef3c2a5189ff44c65f77c1932947b42c5a55ce3793fc94d696a7a66df9f589628229eb0ab75
+  checksum: 51aaea67efeb8a57933b4879c366988f8b148e27f4db3e80ab919297440afd6048bb0620541b2b245accab877b666d0415defb0caf0d809f6521177000ddd0b1
   languageName: node
   linkType: hard
 
@@ -5800,6 +5800,16 @@ __metadata:
   dependencies:
     protodef: ^1.9.0
   checksum: 264ab200c65e9cf3ee47f810df266de5db1116a9a1139531a65dd3471d573ea67a11500c4053dbb590a5c11b290b63a41acdc5b41f3ba9f38972788a6161d24a
+  languageName: node
+  linkType: hard
+
+"prismarine-registry@npm:^1.4.0":
+  version: 1.5.0
+  resolution: "prismarine-registry@npm:1.5.0"
+  dependencies:
+    minecraft-data: ^3.0.0
+    prismarine-nbt: ^2.0.0
+  checksum: 9d3bb5cf8a7586daa91611dda71d218714f204c6b736b3ade565501837f19c5deb7b3c967b55a927d7f97d9c59b6b58185f3cd02c511bb6f11c91e9a7b10436b
   languageName: node
   linkType: hard
 
