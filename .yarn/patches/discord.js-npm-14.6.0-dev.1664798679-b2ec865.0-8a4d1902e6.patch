@@ -10,6 +10,15 @@ index 392fc5cc0ad71402abafb4a4f64600c1568737f2..2504d5ca4cc884ee4e2723be755fc46e
        this.connectedAt = Date.now();
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
+diff --git a/src/index.js b/src/index.js
+index a015ba4954c0120f97cd27f4b6f0b891efe842c1..f6504022a9df9a59c75ef5015064edc27fab446b 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -187,3 +187,4 @@ exports.WebSocket = require('./WebSocket');
+ __exportStar(require('discord-api-types/v10'), exports);
+ __exportStar(require('@discordjs/builders'), exports);
+ __exportStar(require('@discordjs/rest'), exports);
++__exportStar(require('@discordjs/util'), exports);
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
 index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1350d92fc 100644
 --- a/src/structures/AttachmentBuilder.js
