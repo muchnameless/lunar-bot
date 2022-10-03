@@ -561,7 +561,10 @@ async function updateSkyBlockItems(ac: AbortController) {
 
 	await sql`
 		INSERT INTO skyblock_items
-		${sql(parsedItems)}
+		${
+			// @ts-expect-error prestige
+			sql(parsedItems)
+		}
 		ON CONFLICT (id) DO
 		UPDATE SET
 			dungeon_conversion = excluded.dungeon_conversion,
