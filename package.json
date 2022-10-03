@@ -109,7 +109,7 @@
 		"@sapphire/timer-manager": "1.0.1-next.3eb5175.0",
 		"@types/node": "patch:@types/node@^18.8.0#./.yarn/patches/@types-node-npm-18.7.19-7d2784ef0e.patch",
 		"discord-api-types": "0.37.11-next.143b003.1664127793",
-		"discord.js": "patch:discord.js@14.6.0-dev.1664798679-b2ec865.0#./.yarn/patches/discord.js-npm-14.3.1-dev.1663546265-6d43e26.0-cafe9ca264.patch",
+		"discord.js": "patch:discord.js@npm%3A14.6.0-dev.1664798679-b2ec865.0#./.yarn/patches/discord.js-npm-14.6.0-dev.1664798679-b2ec865.0-8a4d1902e6.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
 }
