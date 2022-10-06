@@ -108,7 +108,7 @@
 		"@sapphire/snowflake": "3.3.0-next.3eb5175.0",
 		"@sapphire/timer-manager": "1.0.1-next.3eb5175.0",
 		"@types/node": "patch:@types/node@^18.8.2#./.yarn/patches/@types-node-npm-18.8.1-7126b1349a.patch",
-		"discord-api-types": "0.37.11-next.143b003.1664127793",
+		"discord-api-types": "0.37.12-next.f62f250.1665058733",
 		"discord.js": "patch:discord.js@npm%3A14.5.1-dev.1665015345-e745b95.0#./.yarn/patches/discord.js-npm-14.5.1-dev.1665015345-e745b95.0-1a9e46a8ca.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
