@@ -10,15 +10,6 @@ index 392fc5cc0ad71402abafb4a4f64600c1568737f2..2504d5ca4cc884ee4e2723be755fc46e
        this.connectedAt = Date.now();
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
-diff --git a/src/index.js b/src/index.js
-index a015ba4954c0120f97cd27f4b6f0b891efe842c1..f6504022a9df9a59c75ef5015064edc27fab446b 100644
---- a/src/index.js
-+++ b/src/index.js
-@@ -187,3 +187,4 @@ exports.WebSocket = require('./WebSocket');
- __exportStar(require('discord-api-types/v10'), exports);
- __exportStar(require('@discordjs/builders'), exports);
- __exportStar(require('@discordjs/rest'), exports);
-+__exportStar(require('@discordjs/util'), exports);
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
 index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1350d92fc 100644
 --- a/src/structures/AttachmentBuilder.js
@@ -182,7 +173,7 @@ index 92e4b5d7e236fca7dcc18256b90dac1656f77f22..e3222b3989ca3220cfc4d994bea92af9
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff7986770076 100644
+index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0f29640fb 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -295,10 +295,13 @@ class Message extends Base {
@@ -203,7 +194,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
      }
  
      if ('flags' in data) {
-@@ -573,11 +576,16 @@ class Message extends Base {
+@@ -576,11 +579,16 @@ class Message extends Base {
     * @readonly
     */
    get editable() {
@@ -223,7 +214,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
      }
      return precheck;
    }
-@@ -588,15 +596,19 @@ class Message extends Base {
+@@ -591,15 +599,19 @@ class Message extends Base {
     * @readonly
     */
    get deletable() {
@@ -246,7 +237,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
      if (!permissions) return false;
      // This flag allows deleting even if timed out
      if (permissions.has(PermissionFlagsBits.Administrator, false)) return true;
-@@ -617,7 +629,8 @@ class Message extends Base {
+@@ -620,7 +632,8 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
@@ -256,7 +247,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
            (channel?.viewable &&
              channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
      );
-@@ -648,7 +661,7 @@ class Message extends Base {
+@@ -651,7 +664,7 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildAnnouncement &&
@@ -265,7 +256,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
          this.type === MessageType.Default &&
          channel.viewable &&
          channel.permissionsFor(this.client.user)?.has(bitfield, false),
-@@ -666,8 +679,9 @@ class Message extends Base {
+@@ -669,8 +682,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -277,7 +268,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
    }
  
    /**
-@@ -682,8 +696,9 @@ class Message extends Base {
+@@ -685,8 +699,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -289,7 +280,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
    }
  
    /**
-@@ -697,8 +712,9 @@ class Message extends Base {
+@@ -700,8 +715,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -301,7 +292,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
      return this;
    }
  
-@@ -713,8 +729,9 @@ class Message extends Base {
+@@ -716,8 +732,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -313,7 +304,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
      return this;
    }
  
-@@ -734,13 +751,14 @@ class Message extends Base {
+@@ -737,13 +754,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -331,7 +322,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
          message: this,
          emoji: resolvePartialEmoji(emoji),
        },
-@@ -758,8 +776,9 @@ class Message extends Base {
+@@ -761,8 +779,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -343,7 +334,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
      return this;
    }
  
-@@ -783,7 +802,8 @@ class Message extends Base {
+@@ -786,7 +805,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -353,7 +344,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -796,7 +816,7 @@ class Message extends Base {
+@@ -799,7 +819,7 @@ class Message extends Base {
          },
        });
      }
@@ -362,7 +353,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
    }
  
    /**
-@@ -816,12 +836,13 @@ class Message extends Base {
+@@ -819,12 +839,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -379,7 +370,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
    }
  
    /**
-@@ -830,8 +851,9 @@ class Message extends Base {
+@@ -833,8 +854,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -392,7 +383,7 @@ index c5133feb481ed17a0d9e46e930f49aa17a9cda93..e537a293073b8942327aa1e56364ff79
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 325dea1ad929969cf14e310d801374e64400b140..b10e694eb15eb48159b2b066d14177b044bdd5b7 100644
+index 325dea1ad929969cf14e310d801374e64400b140..11885587fb60d45b4fffc78cbc61734a24f9d58c 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -4,7 +4,6 @@ const { Buffer } = require('node:buffer');
@@ -403,15 +394,6 @@ index 325dea1ad929969cf14e310d801374e64400b140..b10e694eb15eb48159b2b066d14177b0
  const { RangeError, ErrorCodes } = require('../errors');
  const DataResolver = require('../util/DataResolver');
  const MessageFlagsBitField = require('../util/MessageFlagsBitField');
-@@ -108,7 +107,7 @@ class MessagePayload {
-     if (this.options.content === null) {
-       content = '';
-     } else if (typeof this.options.content !== 'undefined') {
--      content = verifyString(this.options.content, RangeError, ErrorCodes.MessageContentType, true);
-+      content = verifyString(this.options.content, RangeError, ErrorCodes.MessageContentType);
-     }
- 
-     return content;
 @@ -134,7 +133,9 @@ class MessagePayload {
        }
      }
@@ -455,31 +437,8 @@ index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cb
  }
  
  module.exports = ModalSubmitFields;
-diff --git a/src/util/Util.js b/src/util/Util.js
-index 04d0992f5e2e007898cb9a3ca5ef165160cf2ec9..1acd21a35ce55d47e75a5488ec8ec6ae7f4915f1 100644
---- a/src/util/Util.js
-+++ b/src/util/Util.js
-@@ -345,17 +345,10 @@ function moveElementInArray(array, element, newIndex, offset = false) {
-  * @param {string} data The string resolvable to resolve
-  * @param {Function} [error] The Error constructor to instantiate. Defaults to Error
-  * @param {string} [errorMessage] The error message to throw with. Defaults to "Expected string, got <data> instead."
-- * @param {boolean} [allowEmpty=true] Whether an empty string should be allowed
-  * @returns {string}
-  */
--function verifyString(
--  data,
--  error = Error,
--  errorMessage = `Expected a string, got ${data} instead.`,
--  allowEmpty = true,
--) {
-+function verifyString(data, error = Error, errorMessage = `Expected a string, got ${data} instead.`) {
-   if (typeof data !== 'string') throw new error(errorMessage);
--  if (!allowEmpty && data.length === 0) throw new error(errorMessage);
-   return data;
- }
- 
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 93d44f01b7134cd2bdba7f5a95334ac904f404f6..d65e76045788a75571dd596f314068d757bb027a 100644
+index b6ebc3ef2289ff6a1c96a887d7c427caeac4f194..806f441124faf6633a4b528de5c41e2c249aa00b 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -259,15 +259,15 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -642,7 +601,7 @@ index 93d44f01b7134cd2bdba7f5a95334ac904f404f6..d65e76045788a75571dd596f314068d7
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5281,14 +5292,7 @@ export interface BaseMessageOptions {
+@@ -5282,14 +5293,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
