@@ -102,6 +102,7 @@
 		"@discordjs/builders": "1.2.1-dev.1665015357-e745b95.0",
 		"@discordjs/collection": "1.1.1-dev.1665015374-e745b95.0",
 		"@discordjs/rest": "1.2.1-dev.1665015345-e745b95.0",
+		"@discordjs/util": "0.1.1-dev.1665057925-b64d657.0",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@npm%3A1.5.1-next.3eb5175.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.3eb5175.0-3223b22520.patch",
 		"@sapphire/ratelimits": "2.4.6-next.3eb5175.0",
 		"@sapphire/shapeshift": "3.7.1-next.499522a.0",

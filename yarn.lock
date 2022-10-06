@@ -67,21 +67,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:^7.4.1":
-  version: 7.4.1
-  resolution: "@azure/msal-common@npm:7.4.1"
-  checksum: a4e21bf010ceaee6b580bd8e00b81386830f1b6d3e9bbd5498f0ede83765b82092958370ccbce087d4229c4e6c7b27f464d81fe8a469c0c705e8714e0eeff169
+"@azure/msal-common@npm:^7.5.0":
+  version: 7.5.0
+  resolution: "@azure/msal-common@npm:7.5.0"
+  checksum: c95c049019bf23ee499f555013fd4b0e1f4a2389bb4d7ccf4300b73b1ca9565325bee03cad10b67e2b89ef1d42d1513f9d0dd6c3de10a062205f1902280354ca
   languageName: node
   linkType: hard
 
 "@azure/msal-node@npm:^1.1.0":
-  version: 1.14.0
-  resolution: "@azure/msal-node@npm:1.14.0"
+  version: 1.14.1
+  resolution: "@azure/msal-node@npm:1.14.1"
   dependencies:
-    "@azure/msal-common": ^7.4.1
+    "@azure/msal-common": ^7.5.0
     jsonwebtoken: ^8.5.1
     uuid: ^8.3.0
-  checksum: 9ea3f5ceff99dab3f25919c7d35fab8c300493bc37d6c67033eaed7befa583eb04fd5cda7d7a40457c78721081a50b80966da73e8694142ca69a28660eaa03f6
+  checksum: 6f5cf46c03d4a3a173285e053b353855355d03fdbf8ecaf9b2c2ced137dc3ba0dd8cee041d01956d52aaaa5662be2c330f3db4e9dc23199d9b0f5ab720e3755c
   languageName: node
   linkType: hard
 
@@ -496,10 +496,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/util@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@discordjs/util@npm:0.1.0"
-  checksum: 880e15cd761437a21cf17b8a9dab50e7e5418fcc77dc34037c31a52b871fab1b958218ab6218aafd20af8b7a4e658a705d3f257268324773a285d9a06368c1b9
+"@discordjs/util@npm:0.1.1-dev.1665057925-b64d657.0":
+  version: 0.1.1-dev.1665057925-b64d657.0
+  resolution: "@discordjs/util@npm:0.1.1-dev.1665057925-b64d657.0"
+  checksum: 846fbe58efff0acb50fead5a445147ad554ce0f285f3eb86665f5b9f0b7a3b23d162ff3f9d20849e0a3f99fa5429cd93e4327f5f99864cd2995fc44c658f951a
   languageName: node
   linkType: hard
 
@@ -1267,7 +1267,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abbrev@npm:1":
+"abbrev@npm:1, abbrev@npm:^1.0.0":
   version: 1.1.1
   resolution: "abbrev@npm:1.1.1"
   checksum: a4a97ec07d7ea112c517036882b2ac22f3109b7b19077dc656316d07d308438aac28e4d9746dc4d84bf6b1e75b4a7b0a5f3cb30592419f128ca9a8cee3bcfa17
@@ -5136,14 +5136,14 @@ __metadata:
   linkType: hard
 
 "node-gyp@npm:^9.0.0, node-gyp@npm:latest":
-  version: 9.1.0
-  resolution: "node-gyp@npm:9.1.0"
+  version: 9.2.0
+  resolution: "node-gyp@npm:9.2.0"
   dependencies:
     env-paths: ^2.2.0
     glob: ^7.1.4
     graceful-fs: ^4.2.6
     make-fetch-happen: ^10.0.3
-    nopt: ^5.0.0
+    nopt: ^6.0.0
     npmlog: ^6.0.0
     rimraf: ^3.0.2
     semver: ^7.3.5
@@ -5151,7 +5151,7 @@ __metadata:
     which: ^2.0.2
   bin:
     node-gyp: bin/node-gyp.js
-  checksum: 1437fa4a879b5b9010604128e8da8609b57c66034262087539ee04a8b764b8436af2be01bab66f8fc729a3adba2dcc21b10a32b9f552696c3fa8cd657d134fc4
+  checksum: 91f0589eabbd37f0d4e3fe9918f1f9e25afc707f6e107f0133be19c5aac62e731d92abdc2b106258665a4487b18cc2878d3fcd3dc2c6cffd68da1cb2a5ccf450
   languageName: node
   linkType: hard
 
@@ -5172,6 +5172,17 @@ __metadata:
   bin:
     nopt: bin/nopt.js
   checksum: d35fdec187269503843924e0114c0c6533fb54bbf1620d0f28b4b60ba01712d6687f62565c55cc20a504eff0fbe5c63e22340c3fad549ad40469ffb611b04f2f
+  languageName: node
+  linkType: hard
+
+"nopt@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "nopt@npm:6.0.0"
+  dependencies:
+    abbrev: ^1.0.0
+  bin:
+    nopt: bin/nopt.js
+  checksum: 82149371f8be0c4b9ec2f863cc6509a7fd0fa729929c009f3a58e4eb0c9e4cae9920e8f1f8eb46e7d032fec8fb01bede7f0f41a67eb3553b7b8e14fa53de1dac
   languageName: node
   linkType: hard
 
@@ -6383,7 +6394,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.3.7, semver@npm:^7.0.0, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.6, semver@npm:^7.3.7":
+"semver@npm:7.3.7":
   version: 7.3.7
   resolution: "semver@npm:7.3.7"
   dependencies:
@@ -6400,6 +6411,17 @@ __metadata:
   bin:
     semver: ./bin/semver.js
   checksum: 1b26ecf6db9e8292dd90df4e781d91875c0dcc1b1909e70f5d12959a23c7eebb8f01ea581c00783bbee72ceeaad9505797c381756326073850dc36ed284b21b9
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.0.0, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.6, semver@npm:^7.3.7":
+  version: 7.3.8
+  resolution: "semver@npm:7.3.8"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: ba9c7cbbf2b7884696523450a61fee1a09930d888b7a8d7579025ad93d459b2d1949ee5bbfeb188b2be5f4ac163544c5e98491ad6152df34154feebc2cc337c1
   languageName: node
   linkType: hard
 
@@ -7435,9 +7457,9 @@ __metadata:
   linkType: hard
 
 "yaml@npm:^2.1.1":
-  version: 2.1.2
-  resolution: "yaml@npm:2.1.2"
-  checksum: 89f3d96215405990aa17cdacd78c17537d415e20be3eb7ff1a058a9b1d7136d4a61a84e6b47daa82558a977ae08751a6c1a80b88f99ee7cbdd51ddd78cd0d8f6
+  version: 2.1.3
+  resolution: "yaml@npm:2.1.3"
+  checksum: 91316062324a93f9cb547469092392e7d004ff8f70c40fecb420f042a4870b2181557350da56c92f07bd44b8f7a252b0be26e6ade1f548e1f4351bdd01c9d3c7
   languageName: node
   linkType: hard
 
