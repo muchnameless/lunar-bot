@@ -79,7 +79,7 @@
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^2.0.0",
 		"@types/luxon": "^3",
-		"@types/node": "^18.8.2",
+		"@types/node": "^18.8.3",
 		"@types/pg": "^8.6.5",
 		"@types/prettier": "^2.7.1",
 		"env-cmd": "^10.1.0",
@@ -108,7 +108,7 @@
 		"@sapphire/shapeshift": "3.7.1-next.499522a.0",
 		"@sapphire/snowflake": "3.3.0-next.3eb5175.0",
 		"@sapphire/timer-manager": "1.0.1-next.3eb5175.0",
-		"@types/node": "patch:@types/node@^18.8.2#./.yarn/patches/@types-node-npm-18.8.1-7126b1349a.patch",
+		"@types/node": "patch:@types/node@^18.8.3#./.yarn/patches/@types-node-npm-18.8.1-7126b1349a.patch",
 		"discord-api-types": "0.37.12-next.f62f250.1665058733",
 		"discord.js": "patch:discord.js@npm%3A14.5.1-dev.1665057886-b64d657.0#./.yarn/patches/discord.js-npm-14.5.1-dev.1665057886-b64d657.0-f6be4f648c.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
