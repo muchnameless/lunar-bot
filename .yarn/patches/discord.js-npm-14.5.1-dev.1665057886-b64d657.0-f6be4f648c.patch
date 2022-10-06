@@ -98,33 +98,33 @@ index 7d80390575b83f98a18f1f193ff3c819f0ab931c..3838c34f3e096a8f402790cdf9126ace
  
    /**
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
-index baf328ccb44b53c8725e5ea7204f6cb8c4b29945..a85daccc3cd649fd0c42313b1f1108cc52259eb4 100644
+index d2854a79499480e5702ce44ead933d95bea66e99..b20cd902e4ab0dec557ef66665a2047437c42733 100644
 --- a/src/structures/GuildEmoji.js
 +++ b/src/structures/GuildEmoji.js
 @@ -55,8 +55,9 @@ class GuildEmoji extends BaseGuildEmoji {
     * @readonly
     */
    get deletable() {
--    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
 -    return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
 +    const { me } = this.guild.members;
-+    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
++    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
 +    return !this.managed && me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
    }
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index bbb32a2c02f247216d4c30302d65dfe94e339993..f55c3e788f81d0f4d88ce9e7acb3f99803ae7c3b 100644
+index 8553889f33bb4176b365391cc21140a6784a941c..9ef42e9d34ce71c1bdc0529ccd6f38123b43bfdb 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -248,8 +248,9 @@ class GuildMember extends Base {
      if (this.user.id === this.guild.ownerId) return false;
      if (this.user.id === this.client.user.id) return false;
      if (this.client.user.id === this.guild.ownerId) return true;
--    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
 -    return this.guild.members.me.roles.highest.comparePositionTo(this.roles.highest) > 0;
 +    const { me } = this.guild.members;
-+    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
++    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
 +    return me.roles.highest.comparePositionTo(this.roles.highest) > 0;
    }
  
@@ -133,7 +133,7 @@ index bbb32a2c02f247216d4c30302d65dfe94e339993..f55c3e788f81d0f4d88ce9e7acb3f998
     * @readonly
     */
    get kickable() {
--    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers);
    }
  
@@ -141,7 +141,7 @@ index bbb32a2c02f247216d4c30302d65dfe94e339993..f55c3e788f81d0f4d88ce9e7acb3f998
     * @readonly
     */
    get bannable() {
--    if (!this.guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.BanMembers);
    }
  
@@ -155,16 +155,16 @@ index bbb32a2c02f247216d4c30302d65dfe94e339993..f55c3e788f81d0f4d88ce9e7acb3f998
    }
  
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
-index 92e4b5d7e236fca7dcc18256b90dac1656f77f22..e3222b3989ca3220cfc4d994bea92af996440d17 100644
+index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf44489054c089 100644
 --- a/src/structures/Invite.js
 +++ b/src/structures/Invite.js
 @@ -234,10 +234,11 @@ class Invite extends Base {
    get deletable() {
      const guild = this.guild;
      if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
--    if (!guild.members.me) throw new Error(ErrorCodes.GuildUncachedMe);
+-    if (!guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
 +    const { me } = guild.members;
-+    if (!me) throw new Error(ErrorCodes.GuildUncachedMe);
++    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
      return Boolean(
        this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits.ManageChannels, false) ||
 -        guild.members.me.permissions.has(PermissionFlagsBits.ManageGuild),
@@ -173,7 +173,7 @@ index 92e4b5d7e236fca7dcc18256b90dac1656f77f22..e3222b3989ca3220cfc4d994bea92af9
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0f29640fb 100644
+index 7245e004bf61cd7a005b336d3ff2346a3d9d1023..489315330ba6347ebb05abb8aa2fa8b6f37cf6ee 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -295,10 +295,13 @@ class Message extends Base {
@@ -260,10 +260,10 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     *   .catch(console.error);
     */
    edit(options) {
--    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 -    return this.channel.messages.edit(this, options);
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    return channel.messages.edit(this, options);
    }
  
@@ -272,10 +272,10 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     * }
     */
    crosspost() {
--    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 -    return this.channel.messages.crosspost(this.id);
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    return channel.messages.crosspost(this.id);
    }
  
@@ -284,10 +284,10 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     *   .catch(console.error)
     */
    async pin(reason) {
--    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.pin(this.id, reason);
 +    const { channel } = this;
-+    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 +    await channel.messages.pin(this.id, reason);
      return this;
    }
@@ -296,10 +296,10 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     *   .catch(console.error)
     */
    async unpin(reason) {
--    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.unpin(this.id, reason);
 +    const { channel } = this;
-+    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 +    await channel.messages.unpin(this.id, reason);
      return this;
    }
@@ -308,10 +308,10 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     *   .catch(console.error);
     */
    async react(emoji) {
--    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.react(this.id, emoji);
 +    const { channel } = this;
-+    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 +    await channel.messages.react(this.id, emoji);
  
      return this.client.actions.MessageReactionAdd.handle(
@@ -326,10 +326,10 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     *   .catch(console.error);
     */
    async delete() {
--    if (!this.channel) throw new Error(ErrorCodes.ChannelNotCached);
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 -    await this.channel.messages.delete(this.id);
 +    const { channel } = this;
-+    if (!channel) throw new Error(ErrorCodes.ChannelNotCached);
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 +    await channel.messages.delete(this.id);
      return this;
    }
@@ -338,9 +338,9 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     *   .catch(console.error);
     */
    reply(options) {
--    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
      let data;
  
      if (options instanceof MessagePayload) {
@@ -357,14 +357,14 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
--    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 -    if (![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(this.channel.type)) {
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    if (![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(channel.type)) {
-       return Promise.reject(new Error(ErrorCodes.MessageThreadParent));
+       return Promise.reject(new DiscordjsError(ErrorCodes.MessageThreadParent));
      }
-     if (this.hasThread) return Promise.reject(new Error(ErrorCodes.MessageExistingThread));
+     if (this.hasThread) return Promise.reject(new DiscordjsError(ErrorCodes.MessageExistingThread));
 -    return this.channel.threads.create({ ...options, startMessage: this });
 +    return channel.threads.create({ ...options, startMessage: this });
    }
@@ -374,16 +374,16 @@ index 1f7aa2d61124ad843f27ba9bc2878687dcb69ebb..66e1d66a20a850888ae8022cce506cc0
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
--    if (!this.channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 -    return this.channel.messages.fetch({ message: this.id, force });
 +    const { channel } = this;
-+    if (!channel) return Promise.reject(new Error(ErrorCodes.ChannelNotCached));
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    return channel.messages.fetch({ message: this.id, force });
    }
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 325dea1ad929969cf14e310d801374e64400b140..11885587fb60d45b4fffc78cbc61734a24f9d58c 100644
+index dacbc22222929e948b3a62b8396362ba95d690be..94909ae99d4ba8520bee6b004c88e744fe41aaa4 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -4,7 +4,6 @@ const { Buffer } = require('node:buffer');
@@ -391,7 +391,7 @@ index 325dea1ad929969cf14e310d801374e64400b140..11885587fb60d45b4fffc78cbc61734a
  const { lazy } = require('@discordjs/util');
  const { MessageFlags } = require('discord-api-types/v10');
 -const ActionRowBuilder = require('./ActionRowBuilder');
- const { RangeError, ErrorCodes } = require('../errors');
+ const { DiscordjsRangeError, ErrorCodes } = require('../errors');
  const DataResolver = require('../util/DataResolver');
  const MessageFlagsBitField = require('../util/MessageFlagsBitField');
 @@ -134,7 +133,9 @@ class MessagePayload {
@@ -418,7 +418,7 @@ index 325dea1ad929969cf14e310d801374e64400b140..11885587fb60d45b4fffc78cbc61734a
    }
  
 diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
-index 6c289d4d0cc603dbdb5b11a4829d1afd7f04334c..1eed94cab55534557b29c297dc1195cbb4db6129 100644
+index ac2a72fbcaef21a51abf13ee03eb26929b59ea0f..528f5ca4cc0e423ceefa8ac9c1f1f64d934899c7 100644
 --- a/src/structures/ModalSubmitFields.js
 +++ b/src/structures/ModalSubmitFields.js
 @@ -50,6 +50,15 @@ class ModalSubmitFields {
