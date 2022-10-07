@@ -1,6 +1,6 @@
 import { basename } from 'node:path';
 import { URL } from 'node:url';
-import { lazy } from '@sapphire/utilities';
+import { lazy } from 'discord.js';
 import { createClient, type ClientOptions } from 'minecraft-protocol';
 import { type ChatBridge } from './ChatBridge.js';
 import { SPAWN_EVENTS } from './constants/index.js';

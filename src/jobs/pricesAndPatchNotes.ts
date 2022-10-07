@@ -567,14 +567,14 @@ async function updateSkyBlockItems(ac: AbortController) {
 		}
 		ON CONFLICT (id) DO
 		UPDATE SET
-			dungeon_conversion = excluded.dungeon_conversion,
-			stars = excluded.stars,
 			category = excluded.category,
+			dungeon_conversion = excluded.dungeon_conversion,
+			gemstone_slots = excluded.gemstone_slots,
 			prestige = excluded.prestige,
-			gemstone_slots = excluded.gemstone_slots
+			stars = excluded.stars
 	`;
 
-	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: parsedItems });
+	parentPort?.postMessage({ op: JobType.SkyBlockItemUpdate, d: null });
 
 	logger.debug({ items: items.length }, '[UPDATE SKYBLOCK ITEMS]: completed');
 }

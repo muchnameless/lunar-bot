@@ -41,6 +41,7 @@ export const enum Enchantment {
 	Cultivating = 'cultivating',
 	Delicate = 'delicate',
 	DepthStrider = 'depth_strider',
+	DivineGift = 'divine_gift',
 	DragonHunter = 'dragon_hunter',
 	DragonTracer = 'aiming', // API still uses old name
 	Efficiency = 'efficiency',

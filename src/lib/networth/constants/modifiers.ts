@@ -35,6 +35,7 @@ export const enum PriceModifier {
 	Recomb = 0.8,
 	Reforge = 1,
 	Rune = 0.6,
+	ShensAuction = 0.85,
 	Silex = 0.75,
 	TalismanEnrichment = 0.75,
 	ThunderInABottle = 0.8,

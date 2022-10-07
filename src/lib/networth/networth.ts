@@ -2,9 +2,11 @@ import { Buffer } from 'node:buffer';
 import { type Components, type NBTExtraAttributes, type NBTInventoryItem } from '@zikeji/hypixel';
 import { parse, simplify } from 'prismarine-nbt';
 import {
+	ALLOWED_RECOMB_CATEGORIES,
 	CRAFTING_RECIPES,
 	Enchantment,
 	ITEM_SPECIFIC_IGNORED_ENCHANTS,
+	ItemCategory,
 	ItemId,
 	MASTER_STARS,
 	NON_REDUCED_PETS,
@@ -20,8 +22,9 @@ import {
 	isVanillaItem,
 	transformItemData,
 } from './functions/index.js';
-import { accessories, getPrice, itemUpgrades, prices, unknownItemIdWarnings, type ItemUpgrade } from './prices.js';
+import { getPrice, prices, skyblockItems, unknownItemIdWarnings, type SkyBlockItem } from './prices.js';
 import { hypixel } from '#api';
+import { logger } from '#logger';
 import { Warnings } from '#structures/Warnings.js';
 
 const unknownStarredItemWarnings = new Warnings<string>();
@@ -79,6 +82,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		modifier: string;
 		new_years_cake: number;
 		petInfo: string;
+		price: number[];
 		skin: string;
 		stats_book: number;
 		talisman_enrichment: string;
@@ -88,6 +92,28 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		winning_bid: number;
 		wood_singularity_count: number;
 	}>;
+
+/**
+ * https://hypixel-skyblock.fandom.com/wiki/Shen%27s_Auction
+ *
+ * @param extraAttributes
+ */
+const getShensAuctionPrice = (extraAttributes: SkyBlockNBTExtraAttributes) => {
+	if (!extraAttributes.price) return null;
+
+	// price is an array of [0, price] for some reason
+	const paid = extraAttributes.price[1]!;
+
+	// handle int overflows
+	const price = (paid > 0 ? paid : 2 * 2_147_483_648 + paid) * PriceModifier.ShensAuction;
+
+	if (Number.isNaN(price)) {
+		logger.error({ extraAttributes }, '[GET SHENS AUCTION PRICE]: NaN');
+		return null;
+	}
+
+	return price;
+};
 
 /**
  * @param item
@@ -109,13 +135,15 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	if (isVanillaItem(item)) return 0;
 
 	const itemId = extraAttributes.id;
-	const itemUpgrade = itemUpgrades.get(itemId);
+	const skyblockItem = skyblockItems.get(itemId);
 
 	let price =
 		item.Count *
 		(prices.get(itemId) ??
 			// non auctionable craftable items
 			CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + count * getPrice(id), 0) ??
+			// shen's auction items
+			getShensAuctionPrice(extraAttributes) ??
 			// unknown item
 			(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 
@@ -217,14 +245,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	// upgradable armor (e.g. crimson)
-	if (itemUpgrade?.prestige) {
-		let currentItemUpgrade: ItemUpgrade | undefined = itemUpgrade;
+	if (skyblockItem?.prestige) {
+		let currentItemUpgrade: SkyBlockItem | undefined = skyblockItem;
 
 		// follow prestige chain
 		do {
 			// stars
-			if (itemUpgrade.stars) {
-				for (const star of itemUpgrade.stars) {
+			if (skyblockItem.stars) {
+				for (const star of skyblockItem.stars) {
 					for (const [material, amount] of Object.entries(star)) {
 						price += amount * getPrice(material) * PriceModifier.Essence;
 					}
@@ -232,14 +260,14 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			}
 
 			// prestige
-			for (const [material, amount] of Object.entries(itemUpgrade.prestige.costs)) {
+			for (const [material, amount] of Object.entries(skyblockItem.prestige.costs)) {
 				price += amount * getPrice(material) * PriceModifier.Essence;
 			}
 
 			// try to add "base item"
 			price += getPrice(currentItemUpgrade.prestige!.item) * PriceModifier.PrestigeItem;
 
-			currentItemUpgrade = itemUpgrades.get(currentItemUpgrade.prestige!.item);
+			currentItemUpgrade = skyblockItems.get(currentItemUpgrade.prestige!.item);
 		} while (currentItemUpgrade?.prestige);
 	}
 
@@ -248,20 +276,20 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	const stars = extraAttributes.upgrade_level ?? extraAttributes.dungeon_item_level;
 
 	if (typeof stars === 'number') {
-		if (itemUpgrade) {
+		if (skyblockItem) {
 			// initial dungeon conversion cost
-			if (itemUpgrade.dungeon_conversion) {
-				for (const [material, amount] of Object.entries(itemUpgrade.dungeon_conversion)) {
+			if (skyblockItem.dungeon_conversion) {
+				for (const [material, amount] of Object.entries(skyblockItem.dungeon_conversion)) {
 					price += amount * getPrice(material) * PriceModifier.Essence;
 				}
 			}
 
 			// stars
-			if (itemUpgrade.stars) {
+			if (skyblockItem.stars) {
 				for (let star = stars - 1; star >= 0; --star) {
 					// item api has required materials
-					if (itemUpgrade.stars[star]) {
-						for (const [material, amount] of Object.entries(itemUpgrade.stars[star]!)) {
+					if (skyblockItem.stars[star]) {
+						for (const [material, amount] of Object.entries(skyblockItem.stars[star]!)) {
 							price += amount * getPrice(material) * PriceModifier.Essence;
 						}
 					} else {
@@ -303,13 +331,13 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	if (
 		extraAttributes.rarity_upgrades! > 0 &&
 		!extraAttributes.item_tier &&
-		(extraAttributes.enchantments || accessories.has(itemId))
+		(extraAttributes.enchantments || ALLOWED_RECOMB_CATEGORIES.has(skyblockItem?.category as any))
 	) {
 		price += getPrice(ItemId.Recombobulator) * PriceModifier.Recomb;
 	}
 
 	// gemstones -- https://github.com/HypixelDev/PublicAPI/discussions/549
-	if (extraAttributes.gems && itemUpgrade?.gemstone_slots) {
+	if (extraAttributes.gems && skyblockItem?.gemstone_slots) {
 		/**
 		 * API example:
 		 *
@@ -324,7 +352,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		const appliedGemstones = Object.entries(extraAttributes.gems);
 
 		// iterate over all possible gemstone slots
-		for (const { costs, slot_type } of itemUpgrade.gemstone_slots) {
+		for (const { costs, slot_type } of skyblockItem.gemstone_slots) {
 			// check whether gemstone is applied
 			const keyIndex = appliedGemstones.findIndex(([key]) => key.startsWith(slot_type) && !key.endsWith('_gem'));
 			if (keyIndex === -1) continue;
@@ -360,7 +388,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	// reforge
-	if (extraAttributes.modifier && !accessories.has(itemId)) {
+	if (extraAttributes.modifier && skyblockItem?.category !== ItemCategory.Accessory) {
 		const reforgeStone = getReforgeStone(extraAttributes.modifier, itemId);
 		if (reforgeStone) price += getPrice(reforgeStone) * PriceModifier.Reforge;
 	}

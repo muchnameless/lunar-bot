@@ -51,6 +51,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		// combinable 1->3
 		case Enchantment.Chance:
 		case Enchantment.DepthStrider:
+		case Enchantment.DivineGift:
 		case Enchantment.Experience:
 		case Enchantment.Fortune:
 		case Enchantment.Impaling:

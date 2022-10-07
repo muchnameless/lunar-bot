@@ -1,9 +1,8 @@
 import { URL } from 'node:url';
 import { type LevelWithSilent } from 'pino';
-import { type ParsedSkyBlockItem } from './pricesAndPatchNotes.js';
 import { assertNever } from '#functions';
 import { logger } from '#logger';
-import { itemUpgrades, prices, accessories } from '#networth/prices.js';
+import { populateSkyBlockItems, prices } from '#networth/prices.js';
 import { type LunarClient } from '#structures/LunarClient.js';
 import { Job } from '#structures/jobs/Job.js';
 import { JobManager } from '#structures/jobs/JobManager.js';
@@ -22,7 +21,7 @@ type WorkerMessage =
 	  }
 	| { d: { args: [string]; lvl: LevelWithSilent }; op: JobType.LogMessage }
 	| { d: { itemId: string; price: number }; op: JobType.SkyBlockPriceUpdate }
-	| { d: ParsedSkyBlockItem[]; op: JobType.SkyBlockItemUpdate };
+	| { d: null; op: JobType.SkyBlockItemUpdate };
 
 export const jobs = new JobManager();
 
@@ -43,19 +42,7 @@ export function startJobs(client: LunarClient) {
 						return logger[message.d.lvl](...message.d.args);
 
 					case JobType.SkyBlockItemUpdate:
-						if (!message.d.length) return;
-
-						accessories.clear();
-						itemUpgrades.clear();
-
-						for (const { id, category, ...data } of message.d) {
-							if (category === 'ACCESSORY') accessories.add(id);
-
-							if (data.dungeon_conversion || data.stars || data.prestige || data.gemstone_slots) {
-								itemUpgrades.set(id, data);
-							}
-						}
-
+						void populateSkyBlockItems();
 						break;
 
 					case JobType.SkyBlockPriceUpdate:

@@ -1,6 +1,7 @@
 export * from './craftingRecipes.js';
 export * from './enchantments.js';
 export * from './inventories.js';
+export * from './itemCategory.js';
 export * from './itemId.js';
 export * from './itemRarity.js';
 export * from './modifiers.js';

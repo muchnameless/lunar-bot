@@ -1,11 +1,11 @@
 import { env } from 'node:process';
 import { URL } from 'node:url';
-import { lazy } from '@sapphire/utilities';
 import {
 	ActivityType,
 	ChannelType,
 	disableValidators,
 	GatewayIntentBits,
+	lazy,
 	Options,
 	Partials,
 	PresenceUpdateStatus,

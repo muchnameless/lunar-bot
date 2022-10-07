@@ -1,16 +1,16 @@
 import { setTimeout } from 'node:timers';
-import { ItemId } from './constants/index.js';
+import { Collection } from 'discord.js';
+import { Enchantment, ItemId } from './constants/index.js';
 import { sql } from '#db';
 import { minutes } from '#functions';
 import { logger } from '#logger';
 import { type ParsedSkyBlockItem } from '#root/jobs/pricesAndPatchNotes.js';
 import { Warnings } from '#structures/Warnings.js';
 
-export type ItemUpgrade = Pick<ParsedSkyBlockItem, 'dungeon_conversion' | 'gemstone_slots' | 'prestige' | 'stars'>;
+export type SkyBlockItem = Omit<ParsedSkyBlockItem, 'id'>;
 
-export const prices = new Map<string, number>();
-export const itemUpgrades = new Map<string, ItemUpgrade>();
-export const accessories = new Set<string>();
+export const prices = new Collection<string, number>();
+export const skyblockItems = new Collection<string, SkyBlockItem>();
 
 export const unknownItemIdWarnings = new Warnings<string>();
 
@@ -37,54 +37,44 @@ export async function populateCaches() {
 		prices.set(ItemId.Coins, 1);
 		prices.set(ItemId.Potion, 0);
 		prices.set(ItemId.EnchantedBook, 0);
+		// https://hypixel-skyblock.fandom.com/wiki/Divine_Gift
+		prices.set(`ENCHANTMENT_${Enchantment.DivineGift}_1`, 25e6);
 
 		for (const { id, median } of pricesRows) {
 			prices.set(id, median);
 		}
 
-		// item upgrades
-		const itemUpgradesRows = await sql<[ItemUpgrade & Pick<ParsedSkyBlockItem, 'id'>]>`
-			SELECT
-				id,
-				dungeon_conversion,
-				stars,
-				prestige,
-				gemstone_slots
-			FROM
-				skyblock_items
-			WHERE
-				dungeon_conversion IS NOT NULL OR
-				stars IS NOT NULL OR
-				prestige IS NOT NULL OR
-				gemstone_slots IS NOT NULL
-		`;
-
-		itemUpgrades.clear();
-
-		for (const { id, ...data } of itemUpgradesRows) {
-			itemUpgrades.set(id, data);
-		}
-
-		// accessories
-		const accessoriesRows = await sql<[{ id: string }]>`
-			SELECT
-				id
-			FROM
-				skyblock_items
-			WHERE
-				category = 'ACCESSORY'
-		`;
-
-		accessories.clear();
-
-		for (const { id } of accessoriesRows) {
-			accessories.add(id);
-		}
+		await populateSkyBlockItems();
 	} catch (error) {
 		logger.error(error, '[POPULATE CACHES]');
 
 		// retry
 		setTimeout(() => void populateCaches(), minutes(1));
+	}
+}
+
+/**
+ * queries the skyblock_items database
+ */
+export async function populateSkyBlockItems() {
+	// item upgrades
+	const itemUpgradesRows = await sql<[ParsedSkyBlockItem]>`
+		SELECT
+			*
+		FROM
+			skyblock_items
+		WHERE
+			category IS NOT NULL OR
+			dungeon_conversion IS NOT NULL OR
+			gemstone_slots IS NOT NULL OR
+			prestige IS NOT NULL OR
+			stars IS NOT NULL
+	`;
+
+	skyblockItems.clear();
+
+	for (const { id, ...data } of itemUpgradesRows) {
+		skyblockItems.set(id, data);
 	}
 }
 
