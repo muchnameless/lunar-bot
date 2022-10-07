@@ -23,7 +23,8 @@
 				"matchPackagePatterns": ["^@discordjs"],
 				"matchPackageNames": ["discord.js"],
 				"followTag": "dev",
-				"groupName": "discord.js"
+				"groupName": "discord.js",
+				"automerge": true
 			},
 			{
 				"matchPackagePatterns": ["^@sapphire"],
