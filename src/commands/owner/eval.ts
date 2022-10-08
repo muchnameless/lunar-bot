@@ -227,7 +227,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 			if (isAsync) {
 				const lines = _input.trim().split(';');
 
-				// insert "return" before the last expression if not already present (since IIFE needs an explicit return, unless plain eval)
+				// insert "return" before the last expression if not already present (since IIFE needs an explicit return, unlike plain eval)
 				for (let index = lines.length - 1; index >= 0; --index) {
 					const trimmed = lines[index]!.trimStart();
 
