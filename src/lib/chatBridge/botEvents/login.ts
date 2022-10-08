@@ -10,11 +10,11 @@ export default async function run(this: ChatBridge) {
 		return;
 	}
 
-	logger.debug(this.logInfo, '[MINECRAFT BOT LOGIN]: logged in');
-
 	// remove '-' from uuid
 	this.minecraft.botUuid = this.bot.uuid.replaceAll('-', '');
 	this.minecraft.botUsername = this.bot.username;
+
+	logger.debug(this.logInfo, '[MINECRAFT BOT LOGIN]: logged in');
 
 	// send settings to server
 	this.bot.write('settings', DEFAULT_SETTINGS);

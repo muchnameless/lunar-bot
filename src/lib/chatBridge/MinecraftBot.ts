@@ -1,10 +1,11 @@
 import { basename } from 'node:path';
 import { URL } from 'node:url';
+import { findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { lazy } from 'discord.js';
 import { createClient, type ClientOptions } from 'minecraft-protocol';
 import { type ChatBridge } from './ChatBridge.js';
 import { SPAWN_EVENTS } from './constants/index.js';
-import { readJSFiles } from '#functions';
+import { JS_FILE_REGEXP } from '#constants';
 import { logger } from '#logger';
 
 type MinecraftBotEvent = {
@@ -18,7 +19,7 @@ type MinecraftBotEvent = {
 const getEvents = lazy(async () => {
 	const events: MinecraftBotEvent[] = [];
 
-	for await (const path of readJSFiles(new URL('botEvents/', import.meta.url))) {
+	for await (const path of findFilesRecursivelyRegex(new URL('botEvents', import.meta.url), JS_FILE_REGEXP)) {
 		events.push({
 			name: basename(path, '.js'),
 			callback: (await import(path)).default,

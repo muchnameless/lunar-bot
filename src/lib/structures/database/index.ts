@@ -1,13 +1,13 @@
 import { URL } from 'node:url';
+import { findFilesRecursivelyStringEndsWith } from '@sapphire/node-utilities';
 import { type Model } from 'sequelize';
 import { type Models } from './managers/DatabaseManager.js';
 import { sequelize } from './sequelize.js';
-import { readJSFiles } from '#functions';
 import { logger } from '#logger';
 
 const models = {};
 
-for await (const path of readJSFiles(new URL('models/', import.meta.url))) {
+for await (const path of findFilesRecursivelyStringEndsWith(new URL('models', import.meta.url), '.js')) {
 	const model = (await import(path)).default as typeof Model;
 
 	if (

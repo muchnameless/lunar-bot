@@ -1,5 +1,5 @@
 export const DEFAULT_SETTINGS = {
-	locale: 'en_US',
+	locale: 'en_GB',
 	viewDistance: 6, // tiny
 	chatFlags: 0, // enabled
 	chatColors: true,

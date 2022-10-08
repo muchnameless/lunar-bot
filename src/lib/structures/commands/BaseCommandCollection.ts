@@ -1,11 +1,13 @@
 import { dirname, basename } from 'node:path';
 import { type URL } from 'node:url';
+import { findFilesRecursively, findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { Collection } from 'discord.js';
 import { type ApplicationCommand } from './ApplicationCommand.js';
 import { type BaseCommand } from './BaseCommand.js';
 import { type BridgeCommand } from './BridgeCommand.js';
 import { type DualCommand } from './DualCommand.js';
-import { autocorrect, readJSFiles } from '#functions';
+import { JS_FILE_REGEXP } from '#constants';
+import { autocorrect } from '#functions';
 import { logger } from '#logger';
 import { type LunarClient } from '#structures/LunarClient.js';
 
@@ -63,13 +65,16 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	 * @param options
 	 */
 	public async loadByName(commandName: string, options?: CommandLoadOptions) {
-		for await (const path of readJSFiles(this.dirURL)) {
-			if (basename(path, '.js').toLowerCase() === commandName) {
-				return this.loadFromFile(path, options);
-			}
-		}
+		const path: string | undefined = (
+			await findFilesRecursively(
+				this.dirURL,
+				(filePath) => basename(filePath, '.js').toLowerCase() === commandName,
+			).next()
+		).value;
 
-		return null;
+		if (!path) return null;
+
+		return this.loadFromFile(path, options);
 	}
 
 	/**
@@ -104,7 +109,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	public async loadAll(options?: CommandLoadOptions) {
 		let commandCount = 0;
 
-		for await (const path of readJSFiles(this.dirURL)) {
+		for await (const path of findFilesRecursivelyRegex(this.dirURL, JS_FILE_REGEXP)) {
 			await this.loadFromFile(path, options);
 
 			++commandCount;

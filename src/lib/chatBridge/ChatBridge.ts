@@ -103,7 +103,7 @@ export class ChatBridge extends EventEmitter {
 	/**
 	 * ChatBridge events
 	 */
-	private readonly events = new EventCollection(this, new URL('events/', import.meta.url));
+	private readonly events = new EventCollection(this, new URL('events', import.meta.url));
 
 	public constructor(client: LunarClient, manager: ChatBridgeManager, mcAccount: number) {
 		super({ captureRejections: true });

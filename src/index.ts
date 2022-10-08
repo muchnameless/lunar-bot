@@ -24,10 +24,10 @@ if (env.NODE_ENV !== 'development') disableValidators();
 
 const client = new LunarClient({
 	// custom
-	applicationCommands: new URL('commands/', import.meta.url),
-	chatBridgeCommands: new URL('lib/chatBridge/commands/', import.meta.url),
-	events: new URL('events/', import.meta.url),
-	logBuffer: new URL('../log_buffer/', import.meta.url),
+	applicationCommands: new URL('commands', import.meta.url),
+	chatBridgeCommands: new URL('lib/chatBridge/commands', import.meta.url),
+	events: new URL('events', import.meta.url),
+	logBuffer: new URL('../log_buffer', import.meta.url),
 
 	// discord.js
 	makeCache: Options.cacheWithLimits({

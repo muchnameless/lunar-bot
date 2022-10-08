@@ -1,9 +1,10 @@
 import { type EventEmitter } from 'node:events';
 import { basename } from 'node:path';
 import { type URL } from 'node:url';
+import { findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { Collection } from 'discord.js';
 import { type BaseEvent } from './BaseEvent.js';
-import { readJSFiles } from '#functions';
+import { JS_FILE_REGEXP } from '#constants';
 import { logger } from '#logger';
 
 interface EventLoadOptions {
@@ -76,7 +77,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	public async loadAll(options?: EventLoadOptions) {
 		let eventCount = 0;
 
-		for await (const path of readJSFiles(this.dirURL)) {
+		for await (const path of findFilesRecursivelyRegex(this.dirURL, JS_FILE_REGEXP)) {
 			await this.loadFromFile(path, options);
 
 			++eventCount;

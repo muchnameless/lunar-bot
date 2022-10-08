@@ -1,6 +1,4 @@
-import { opendir } from 'node:fs/promises';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { URL } from 'node:url';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import { type PickByValue } from '@sapphire/utilities';
 import { type Awaitable, type Collection } from 'discord.js';
@@ -162,20 +160,6 @@ export async function asyncFilter<T>(
 export async function safePromiseAll(array: unknown[]) {
 	for (const x of await Promise.allSettled(array)) {
 		if (x.status === 'rejected') logger.error(x.reason);
-	}
-}
-
-/**
- * creates an async iterable from all .js files that don't start with a '~'
- *
- * @param root
- */
-export async function* readJSFiles(root: URL | string): AsyncGenerator<string> {
-	for await (const dir of await opendir(root)) {
-		if (dir.name.startsWith('~')) continue;
-		if (dir.isDirectory()) yield* readJSFiles(new URL(`${dir.name}/`, root));
-		if (!dir.name.endsWith('.js')) continue;
-		yield new URL(dir.name, root).href;
 	}
 }
 

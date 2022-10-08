@@ -7,10 +7,10 @@ import { LunarClient } from '#structures/LunarClient.js';
 const GUILD_ID = argv[2];
 const client = new LunarClient({
 	// custom
-	applicationCommands: new URL('../commands/', import.meta.url),
-	chatBridgeCommands: new URL('../lib/chatBridge/commands/', import.meta.url),
-	events: new URL('../events/', import.meta.url),
-	logBuffer: new URL('../../log_buffer/', import.meta.url),
+	applicationCommands: new URL('../commands', import.meta.url),
+	chatBridgeCommands: new URL('../lib/chatBridge/commands', import.meta.url),
+	events: new URL('../events', import.meta.url),
+	logBuffer: new URL('../../log_buffer', import.meta.url),
 
 	// discord.js
 	intents: 0,

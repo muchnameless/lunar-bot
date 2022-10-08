@@ -1,4 +1,5 @@
 import { basename } from 'node:path';
+import { findFilesRecursively } from '@sapphire/node-utilities';
 import { stripIndents } from 'common-tags';
 import {
 	codeBlock,
@@ -7,7 +8,6 @@ import {
 	type ChatInputCommandInteraction,
 } from 'discord.js';
 import { ChatManager } from '#chatBridge/managers/ChatManager.js';
-import { readJSFiles } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import { type CommandContext } from '#structures/commands/BaseCommand.js';
@@ -150,14 +150,12 @@ export default class ReloadCommand extends ApplicationCommand {
 
 						try {
 							// try to find file with INPUT name
-							let commandFile: string | undefined;
-
-							for await (const path of readJSFiles(this.collection.dirURL)) {
-								if (basename(path, '.js').toLowerCase() !== commandName) continue;
-
-								commandFile = path;
-								break;
-							}
+							let commandFile: string | undefined = (
+								await findFilesRecursively(
+									this.collection.dirURL,
+									(filePath) => basename(filePath, '.js').toLowerCase() === commandName,
+								).next()
+							).value;
 
 							let command: CommandType | null | undefined;
 
@@ -173,12 +171,12 @@ export default class ReloadCommand extends ApplicationCommand {
 								if (command) {
 									commandName = command.name;
 
-									for await (const path of readJSFiles(this.collection.dirURL)) {
-										if (basename(path, '.js').toLowerCase() !== commandName) continue;
-
-										commandFile = path;
-										break;
-									}
+									commandFile = (
+										await findFilesRecursively(
+											this.collection.dirURL,
+											(filePath) => basename(filePath, '.js').toLowerCase() === commandName,
+										).next()
+									).value;
 								}
 							}
 
@@ -230,14 +228,12 @@ export default class ReloadCommand extends ApplicationCommand {
 
 						try {
 							// try to find file with INPUT name
-							let eventFile: string | undefined;
-
-							for await (const path of readJSFiles(this.client.events.dirURL)) {
-								if (basename(path, '.js').toLowerCase() !== eventName) continue;
-
-								eventFile = path;
-								break;
-							}
+							const eventFile: string | undefined = (
+								await findFilesRecursively(
+									this.client.events.dirURL,
+									(filePath) => basename(filePath, '.js').toLowerCase() === eventName,
+								).next()
+							).value;
 
 							// no file found
 							if (!eventFile) {
