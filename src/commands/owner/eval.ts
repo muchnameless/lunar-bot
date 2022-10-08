@@ -83,6 +83,14 @@ jobs;
 const type = (x: unknown) => new Type(x).toString();
 
 export default class EvalCommand extends BaseOwnerCommand {
+	private static PRETTIER_OPTIONS = {
+		parser: 'babel',
+		singleQuote: true,
+		printWidth: 120,
+		trailingComma: 'all',
+		useTabs: true,
+	} as const;
+
 	public constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
@@ -212,41 +220,35 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 		// format input
 		let input: string;
+		let toEvaluate: string;
 
 		try {
-			input = format(_input.trim(), {
-				parser: 'typescript',
-				singleQuote: true,
-				printWidth: 120,
-				trailingComma: 'all',
-				useTabs: true,
-			});
+			// wrap input in async IIFE
+			if (isAsync) {
+				const lines = _input.trim().split(';');
+
+				// insert "return" before the last expression if not already present (since IIFE needs an explicit return, unlike plain eval)
+				for (let index = lines.length - 1; index >= 0; --index) {
+					const trimmed = lines[index]!.trimStart();
+
+					if (!trimmed || ['//', '/*'].some((x) => trimmed.startsWith(x))) continue;
+					if (['return ', 'const ', 'let ', 'var ', '}', ')', '.'].some((x) => trimmed.startsWith(x))) break;
+
+					// preserve whitespace (like newlines) before the last expression
+					lines[index] = lines[index]!.replace(/^\s*/, (match) => `${match}return `);
+					break;
+				}
+
+				input = format(lines.join(';'), EvalCommand.PRETTIER_OPTIONS);
+				toEvaluate = `(async () => { ${input} })()`;
+			} else {
+				input = format(_input.trim(), EvalCommand.PRETTIER_OPTIONS);
+				toEvaluate = input;
+			}
 		} catch (error) {
 			EvalCommand._addInputToResponseEmbed(responseEmbed, _input, 'ts', isAsync);
 
 			return this._respondWithError(interaction, error, responseEmbed, stopwatch, inspectDepth);
-		}
-
-		let toEvaluate: string;
-
-		// wrap input in async IIFE
-		if (isAsync) {
-			const lines = input.split('\n');
-
-			for (let index = lines.length - 1; index >= 0; --index) {
-				const trimmed = lines[index]!.trimStart();
-
-				if (!trimmed || ['//', '/*'].some((x) => trimmed.startsWith(x))) continue;
-				if (['return ', 'const ', 'let ', 'var ', '}', ')'].some((x) => trimmed.startsWith(x))) break;
-
-				lines[index] = `return ${lines[index]}`;
-				break;
-			}
-
-			input = lines.join('\n');
-			toEvaluate = `(async () => { ${input} })()`;
-		} else {
-			toEvaluate = input;
 		}
 
 		EvalCommand._addInputToResponseEmbed(responseEmbed, input, 'ts', isAsync);
