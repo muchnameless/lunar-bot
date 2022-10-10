@@ -2629,7 +2629,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-neon@npm:^0.1.35":
+"eslint-config-neon@npm:^0.1.37":
   version: 0.1.37
   resolution: "eslint-config-neon@npm:0.1.37"
   dependencies:
@@ -4707,7 +4707,7 @@ __metadata:
     discord.js: 14.5.1-dev.1665360860-3ed668e.0
     env-cmd: ^10.1.0
     eslint: ^8.25.0
-    eslint-config-neon: ^0.1.35
+    eslint-config-neon: ^0.1.37
     fast-xml-parser: ^4.0.11
     husky: ^8.0.1
     ioredis: ^5.2.3
