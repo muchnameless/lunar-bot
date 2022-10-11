@@ -87,7 +87,7 @@
 		"eslint": "^8.25.0",
 		"eslint-config-neon": "^0.1.37",
 		"husky": "^8.0.1",
-		"ley": "^0.7.1",
+		"ley": "^0.8.1",
 		"lint-staged": "^13.0.3",
 		"pino-pretty": "^9.1.1",
 		"pretty-quick": "^3.1.3",
