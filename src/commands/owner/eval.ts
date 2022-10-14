@@ -231,8 +231,8 @@ export default class EvalCommand extends BaseOwnerCommand {
 				for (let index = lines.length - 1; index >= 0; --index) {
 					const trimmed = lines[index]!.trimStart();
 
-					if (!trimmed || ['//', '/*'].some((x) => trimmed.startsWith(x))) continue;
-					if (['return ', 'const ', 'let ', 'var ', '}', ')', '.'].some((x) => trimmed.startsWith(x))) break;
+					if (!trimmed || ['//', '/*', '}', ')'].some((x) => trimmed.startsWith(x))) continue;
+					if (/^(?:return|const|let|var)\b/.test(trimmed)) break;
 
 					// preserve whitespace (like newlines) before the last expression
 					lines[index] = lines[index]!.replace(/^\s*/, (match) => `${match}return `);
