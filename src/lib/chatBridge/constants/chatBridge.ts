@@ -1,7 +1,7 @@
 /**
  * bot events that should only be listened to once
  */
-export const SPAWN_EVENTS = new Set(['login', 'keep_alive'] as const);
+export const SPAWN_EVENTS = new Set(['login'] as const);
 
 /**
  * https://wiki.vg/Protocol -> Player Chat Message -> Type

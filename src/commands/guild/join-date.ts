@@ -43,7 +43,7 @@ export default class JoinDateCommand extends DualCommand {
 		);
 	}
 
-	private readonly running = new Set();
+	private readonly running = new Set<string>();
 
 	private readonly JOINED_REGEXP = new RegExp(
 		`(?<time>.+): ${IGN_DEFAULT} (?:joined|created the guild)(?:\\n.+: ${IGN_DEFAULT} invited ${IGN_DEFAULT})*$`,

@@ -299,7 +299,7 @@ export class DiscordManager {
 					inlineCode: false,
 					codeBlockContent: false,
 					inlineCodeContent: false,
-					// escapeNonURL already escapes '*' and '_'
+					// escapeMarkdown already escapes '*' and '_'
 					italic: false,
 					bold: false,
 					underline: false,
