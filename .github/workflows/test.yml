@@ -21,18 +21,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js v18
+      - name: Install Node.js v19
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
         with:
-          node-version: 18
+          node-version: 19
           cache: yarn
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
-          yarn --immutable
+        run: yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -52,18 +49,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js v18
+      - name: Install Node.js v19
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
         with:
-          node-version: 18
+          node-version: 19
           cache: yarn
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
-          yarn --immutable
+        run: yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"

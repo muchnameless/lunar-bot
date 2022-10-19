@@ -1,4 +1,6 @@
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import { type Buffer } from 'node:buffer';
+import { createCanvas } from '@napi-rs/canvas';
+import Chart from 'chart.js/auto/auto.mjs';
 import { AttachmentBuilder, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { seconds, upperCaseFirstChar, type LeaderboardXPTypes } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
@@ -151,20 +153,17 @@ export default class TrackCommand extends ApplicationCommand {
 			}
 		}
 
-		const canvas = new ChartJSNodeCanvas({
-			width: 800,
-			height: 400,
-		});
-		const image = await canvas.renderToBuffer({
+		const chart = new Chart(createCanvas(800, 400), {
 			type: 'line',
 			data: {
-				labels: Array.from({ length: days }, (_, index) => days - 1 - index),
+				labels: Array.from({ length: days }, (_, index) => (days - 1 - index).toString()),
 				datasets,
 			},
 		});
+		const image: Buffer = await chart.canvas.encode('png');
 		const attachment = new AttachmentBuilder() //
 			.setFile(image)
-			.setName('graph.jpg');
+			.setName('graph.png');
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [
