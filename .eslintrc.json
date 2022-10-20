@@ -1,5 +1,5 @@
 {
-	"extends": ["neon/common", "neon/node", "neon/typescript", "neon/module", "neon/prettier"],
+	"extends": ["neon/common", "neon/node", "neon/typescript", "neon/no-deprecated", "neon/module", "neon/prettier"],
 	"parserOptions": {
 		"ecmaVersion": "latest",
 		"project": "./tsconfig.eslint.json",
