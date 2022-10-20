@@ -629,25 +629,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/node-pre-gyp@npm:^1.0.0":
-  version: 1.0.10
-  resolution: "@mapbox/node-pre-gyp@npm:1.0.10"
-  dependencies:
-    detect-libc: ^2.0.0
-    https-proxy-agent: ^5.0.0
-    make-dir: ^3.1.0
-    node-fetch: ^2.6.7
-    nopt: ^5.0.0
-    npmlog: ^5.0.1
-    rimraf: ^3.0.2
-    semver: ^7.3.5
-    tar: ^6.1.11
-  bin:
-    node-pre-gyp: bin/node-pre-gyp
-  checksum: 1a98db05d955b74dad3814679593df293b9194853698f3f5f1ed00ecd93128cdd4b14fb8767fe44ac6981ef05c23effcfdc88710e7c1de99ccb6f647890597c8
-  languageName: node
-  linkType: hard
-
 "@microsoft/tsdoc-config@npm:0.16.2":
   version: 0.16.2
   resolution: "@microsoft/tsdoc-config@npm:0.16.2"
@@ -664,6 +645,105 @@ __metadata:
   version: 0.14.2
   resolution: "@microsoft/tsdoc@npm:0.14.2"
   checksum: b167c89e916ba73ee20b9c9d5dba6aa3a0de25ed3d50050e8a344dca7cd43cb2e1059bd515c820369b6e708901dd3fda476a42bc643ca74a35671ce77f724a3a
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-android-arm64@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-android-arm64@npm:0.1.30"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-darwin-arm64@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-darwin-arm64@npm:0.1.30"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-darwin-x64@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-darwin-x64@npm:0.1.30"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-arm-gnueabihf@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-linux-arm-gnueabihf@npm:0.1.30"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-arm64-gnu@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-linux-arm64-gnu@npm:0.1.30"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-arm64-musl@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-linux-arm64-musl@npm:0.1.30"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-x64-gnu@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-linux-x64-gnu@npm:0.1.30"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-linux-x64-musl@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-linux-x64-musl@npm:0.1.30"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas-win32-x64-msvc@npm:0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas-win32-x64-msvc@npm:0.1.30"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/canvas@npm:^0.1.30":
+  version: 0.1.30
+  resolution: "@napi-rs/canvas@npm:0.1.30"
+  dependencies:
+    "@napi-rs/canvas-android-arm64": 0.1.30
+    "@napi-rs/canvas-darwin-arm64": 0.1.30
+    "@napi-rs/canvas-darwin-x64": 0.1.30
+    "@napi-rs/canvas-linux-arm-gnueabihf": 0.1.30
+    "@napi-rs/canvas-linux-arm64-gnu": 0.1.30
+    "@napi-rs/canvas-linux-arm64-musl": 0.1.30
+    "@napi-rs/canvas-linux-x64-gnu": 0.1.30
+    "@napi-rs/canvas-linux-x64-musl": 0.1.30
+    "@napi-rs/canvas-win32-x64-msvc": 0.1.30
+  dependenciesMeta:
+    "@napi-rs/canvas-android-arm64":
+      optional: true
+    "@napi-rs/canvas-darwin-arm64":
+      optional: true
+    "@napi-rs/canvas-darwin-x64":
+      optional: true
+    "@napi-rs/canvas-linux-arm-gnueabihf":
+      optional: true
+    "@napi-rs/canvas-linux-arm64-gnu":
+      optional: true
+    "@napi-rs/canvas-linux-arm64-musl":
+      optional: true
+    "@napi-rs/canvas-linux-x64-gnu":
+      optional: true
+    "@napi-rs/canvas-linux-x64-musl":
+      optional: true
+    "@napi-rs/canvas-win32-x64-msvc":
+      optional: true
+  checksum: ee5e6f308a530daf1df85d4fe03877f8d12e06ed00c36ca128166832dd7eefd2c0481c8031a4150688e32cf96838719d93a55c2e1f0a17feb012ce6981c0ab08
   languageName: node
   linkType: hard
 
@@ -822,6 +902,17 @@ __metadata:
     nan: ^2.15.0
     tslib: ^2.4.0
   checksum: 62e6bf090924af3ec809d27eec5fc1e475d0d1a46803086486f0311d1d934cf48b9ac2c951d38c1a550db60880b7ba62dccb7f4440bd260d71c0e9391f05948f
+  languageName: node
+  linkType: hard
+
+"@sapphire/type@patch:@sapphire/type@npm%3A2.2.5-next.cf34f61.0#./.yarn/patches/@sapphire-type-npm-2.2.5-next.cf34f61.0-c6bbabdd5f.patch::locator=lunar-bot%40workspace%3A.":
+  version: 2.2.5-next.cf34f61.0
+  resolution: "@sapphire/type@patch:@sapphire/type@npm%3A2.2.5-next.cf34f61.0#./.yarn/patches/@sapphire-type-npm-2.2.5-next.cf34f61.0-c6bbabdd5f.patch::version=2.2.5-next.cf34f61.0&hash=ed2085&locator=lunar-bot%40workspace%3A."
+  dependencies:
+    "@discordjs/node-pre-gyp": ^0.4.2
+    nan: ^2.15.0
+    tslib: ^2.4.0
+  checksum: e5dc534d6400b85c3b5a1e4138e59e38bbfb839fc16de71f1dba91c69b3a5dd55f557a16a6ac178996a863da95c5d0d6f6fceb286d4c1014ffbfab28a130269c
   languageName: node
   linkType: hard
 
@@ -1859,18 +1950,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"canvas@npm:^2.8.0":
-  version: 2.10.1
-  resolution: "canvas@npm:2.10.1"
-  dependencies:
-    "@mapbox/node-pre-gyp": ^1.0.0
-    nan: ^2.15.0
-    node-gyp: latest
-    simple-get: ^3.0.3
-  checksum: 29b162a59df8c63e5591cae62711ab3cc3b0a078f260b39b4594b51c5bcb9baa597eff40b52f25bd788aceb81756a41097c2dd0c01cbc17ae4a15e873da44cdf
-  languageName: node
-  linkType: hard
-
 "caseless@npm:~0.12.0":
   version: 0.12.0
   resolution: "caseless@npm:0.12.0"
@@ -1909,22 +1988,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:^3.9.1":
+"chart.js@npm:3.9.1":
   version: 3.9.1
   resolution: "chart.js@npm:3.9.1"
   checksum: 9ab0c0ac01215af0b3f020f2e313030fd6e347b48ed17d5484ee9c4e8ead45e78ae71bea16c397621c386b409ce0b14bf17f9f6c2492cd15b56c0f433efdfff6
   languageName: node
   linkType: hard
 
-"chartjs-node-canvas@npm:^4.1.6":
-  version: 4.1.6
-  resolution: "chartjs-node-canvas@npm:4.1.6"
-  dependencies:
-    canvas: ^2.8.0
-    tslib: ^2.3.1
-  peerDependencies:
-    chart.js: ^3.5.1
-  checksum: 93ee4f7bbcfbd381a63eeed0f5f5f3fecc9a74564aade5bfecd06464239db8a1491ade9d39a921cac3d29048d81b5b8366d31d3c880db50ecb9670d8861583af
+"chart.js@patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch::locator=lunar-bot%40workspace%3A.":
+  version: 3.9.1
+  resolution: "chart.js@patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch::version=3.9.1&hash=524bb7&locator=lunar-bot%40workspace%3A."
+  checksum: a199c3e718564c78efddd7a2d2e991e2a6aa66df34f6e73b7257ccc1f1403606b514ea8ec78e03722cf236c2fa644f4e52f7d1ae1d9b380fe9d4f7614fb20c06
   languageName: node
   linkType: hard
 
@@ -2292,15 +2366,6 @@ __metadata:
   version: 5.0.1
   resolution: "decamelize@npm:5.0.1"
   checksum: 7c3b1ed4b3e60e7fbc00a35fb248298527c1cdfe603e41dfcf05e6c4a8cb9efbee60630deb677ed428908fb4e74e322966c687a094d1478ddc9c3a74e9dc7140
-  languageName: node
-  linkType: hard
-
-"decompress-response@npm:^4.2.0":
-  version: 4.2.1
-  resolution: "decompress-response@npm:4.2.1"
-  dependencies:
-    mimic-response: ^2.0.0
-  checksum: 4e783ca4dfe9417354d61349750fe05236f565a4415a6ca20983a311be2371debaedd9104c0b0e7b36e5f167aeaae04f84f1a0b3f8be4162f1d7d15598b8fdba
   languageName: node
   linkType: hard
 
@@ -4685,6 +4750,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": ^17.1.2
     "@commitlint/config-angular": ^17.1.0
+    "@napi-rs/canvas": ^0.1.30
     "@sapphire/async-queue": 1.5.1-next.a90f287.0
     "@sapphire/discord-utilities": 2.11.7-next.a90f287.0
     "@sapphire/node-utilities": 1.0.1-next.a90f287.0
@@ -4702,7 +4768,6 @@ __metadata:
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#3161e8e687d869b17a1eb25a869ec75f0adab3a7"
     bufferutil: ^4.0.7
     chart.js: ^3.9.1
-    chartjs-node-canvas: ^4.1.6
     common-tags: ^1.8.2
     cron: ^2.1.0
     discord.js: 14.6.1-dev.1666181083-7083df7.0
@@ -4869,13 +4934,6 @@ __metadata:
   version: 4.0.0
   resolution: "mimic-fn@npm:4.0.0"
   checksum: 995dcece15ee29aa16e188de6633d43a3db4611bcf93620e7e62109ec41c79c0f34277165b8ce5e361205049766e371851264c21ac64ca35499acb5421c2ba56
-  languageName: node
-  linkType: hard
-
-"mimic-response@npm:^2.0.0":
-  version: 2.1.0
-  resolution: "mimic-response@npm:2.1.0"
-  checksum: 014fad6ab936657e5f2f48bd87af62a8e928ebe84472aaf9e14fec4fcb31257a5edff77324d8ac13ddc6685ba5135cf16e381efac324e5f174fb4ddbf902bf07
   languageName: node
   linkType: hard
 
@@ -6643,24 +6701,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-concat@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "simple-concat@npm:1.0.1"
-  checksum: 4d211042cc3d73a718c21ac6c4e7d7a0363e184be6a5ad25c8a1502e49df6d0a0253979e3d50dbdd3f60ef6c6c58d756b5d66ac1e05cda9cacd2e9fc59e3876a
-  languageName: node
-  linkType: hard
-
-"simple-get@npm:^3.0.3":
-  version: 3.1.1
-  resolution: "simple-get@npm:3.1.1"
-  dependencies:
-    decompress-response: ^4.2.0
-    once: ^1.3.1
-    simple-concat: ^1.0.0
-  checksum: 80195e70bf171486e75c31e28e5485468195cc42f85940f8b45c4a68472160144d223eb4d07bc82ef80cb974b7c401db021a540deb2d34ac4b3b8883da2d6401
-  languageName: node
-  linkType: hard
-
 "sisteransi@npm:^1.0.5":
   version: 1.0.5
   resolution: "sisteransi@npm:1.0.5"
@@ -7216,7 +7256,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0":
+"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.4.0":
   version: 2.4.0
   resolution: "tslib@npm:2.4.0"
   checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113

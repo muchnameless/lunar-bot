@@ -17,10 +17,6 @@ Lunar Guard Discord Bot
 
 - [`PostgreSQL`]
 
-- libs to build [`canvas`]
-
-  `sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev`
-
 ## Installation
 
 ```sh-session
@@ -40,7 +36,6 @@ edit the `.env`-file
 
 <!----------------- LINKS --------------->
 
-[`canvas`]: https://www.npmjs.com/package/canvas
 [`discord emoji map project`]: https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/
 [`discord.js`]: https://discord.js.org/
 [`maroapi`]: https://github.com/zt3h/MaroAPI
