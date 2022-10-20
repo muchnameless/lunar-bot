@@ -1,5 +1,4 @@
-import { type Buffer } from 'node:buffer';
-import { createCanvas } from '@napi-rs/canvas';
+import { createCanvas, type Canvas } from '@napi-rs/canvas';
 import Chart from 'chart.js/auto/auto.mjs';
 import { AttachmentBuilder, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { seconds, upperCaseFirstChar, type LeaderboardXPTypes } from '#functions';
@@ -160,7 +159,7 @@ export default class TrackCommand extends ApplicationCommand {
 				datasets,
 			},
 		});
-		const image: Buffer = await chart.canvas.encode('png');
+		const image = await (chart.canvas as Canvas).encode('png');
 		const attachment = new AttachmentBuilder() //
 			.setFile(image)
 			.setName('graph.png');
