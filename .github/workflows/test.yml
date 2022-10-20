@@ -21,12 +21,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js v19
+      - name: Install Node.js
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
         with:
-          node-version: 19
+          node-version-file: 'package.json'
           cache: yarn
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://registry.yarnpkg.org/
 
       - name: Install dependencies
         run: yarn --immutable
@@ -49,12 +49,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js v19
+      - name: Install Node.js
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
         with:
-          node-version: 19
+          node-version-file: 'package.json'
           cache: yarn
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://registry.yarnpkg.org/
 
       - name: Install dependencies
         run: yarn --immutable
