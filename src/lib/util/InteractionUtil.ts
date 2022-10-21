@@ -578,9 +578,10 @@ export class InteractionUtil extends null {
 				// "change" ephemeral state if the defer was a deferReply
 				if (!this.isFromMessage(interaction)) {
 					if (interaction.ephemeral) {
-						if (!_options.ephemeral) await interaction.editReply('\u200B'); // ephemeral defer -> not ephemeraly reply
+						if (!_options.ephemeral) await this.deleteReply(interaction); // ephemeral defer -> non-ephemeral reply
 					} else if (_options.ephemeral) {
-						await interaction.deleteReply(); // not ephemeral defer -> ephemeral reply
+						// no this.deleteReply so this line can throw, otherwise the followUp would be non-ephemeral
+						await interaction.deleteReply(); // non-ephemeral defer -> ephemeral reply
 					}
 				}
 
@@ -670,6 +671,17 @@ export class InteractionUtil extends null {
 			if (_options.rejectOnError) throw error;
 			logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION EDIT REPLY]');
 			return null;
+		}
+	}
+
+	/**
+	 * @param interaction
+	 */
+	public static async deleteReply(interaction: RepliableInteraction) {
+		try {
+			await interaction.deleteReply();
+		} catch (error) {
+			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION DELETE REPLY]');
 		}
 	}
 
@@ -776,20 +788,23 @@ export class InteractionUtil extends null {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
 
 			// replied
-			if (interaction.replied) return await MessageUtil.delete(interaction.message);
+			// eslint-disable-next-line @typescript-eslint/return-await
+			if (interaction.replied) return MessageUtil.delete(interaction.message);
 
 			await this.deferUpdate(interaction, { rejectOnError: true });
 
-			if (MessageUtil.isEphemeral(interaction.message)) {
-				logger.warn(this.logInfo(interaction), '[INTERACTION DELETE MESSAGE]: ephemeral message');
-				return null;
-			}
-
+			// no this.deleteReply so this line can throw and MessageUtil can take over
 			await interaction.deleteReply();
 
 			return interaction.message;
 		} catch (error) {
 			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION DELETE MESSAGE]');
+
+			// message is already deleted
+			if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage) {
+				return null;
+			}
+
 			return MessageUtil.delete(interaction.message);
 		}
 	}
