@@ -8,7 +8,6 @@
 		"helpers:followTypescriptNext",
 		"helpers:pinGitHubActionDigests"
 	],
-	"ignorePresets": ["workarounds:typesNodeVersioning"],
 	"postUpdateOptions": ["yarnDedupeHighest"],
 	"labels": ["dependencies"],
 	"npm": {
@@ -32,10 +31,6 @@
 				"followTag": "next",
 				"groupName": "sapphire",
 				"automerge": true
-			},
-			{
-				"matchDepTypes": ["engines"],
-				"enabled": false
 			}
 		]
 	},
