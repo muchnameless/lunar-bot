@@ -2514,10 +2514,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:0.37.15-next.5053ac3.1666065707":
-  version: 0.37.15-next.5053ac3.1666065707
-  resolution: "discord-api-types@npm:0.37.15-next.5053ac3.1666065707"
-  checksum: efa03107b73c434d9be705a53a8ded2023003b30e029a54a8bf69b1ecff453b9bfb4252effe3de39071b22ee28c30dfb06e1475a4fb4985cfeaff5ba8f2a9011
+"discord-api-types@npm:0.37.15-next.8d25f23.1666302882":
+  version: 0.37.15-next.8d25f23.1666302882
+  resolution: "discord-api-types@npm:0.37.15-next.8d25f23.1666302882"
+  checksum: 146c2ee35583bf1fbfc9c9191ed2d8e3f802151ea3e4f37e1364caaddabf4feda7eaad08b1527ca54aecf2a8b2d53adb2f2f8a97033bcd004f76b2b5e32e5121
   languageName: node
   linkType: hard
 
