@@ -647,14 +647,12 @@ export class InteractionUtil extends null {
 		this._addVisibilityButton(_options);
 
 		try {
-			if (message) return await interaction.webhook.editMessage(message, _options);
-
 			const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
 
 			if (deferReplyPromise) await deferReplyPromise;
 			if (deferUpdatePromise) await deferUpdatePromise;
 
-			return await interaction.editReply(_options);
+			return await interaction.editReply(_options, message);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION EDIT REPLY]');
@@ -749,17 +747,14 @@ export class InteractionUtil extends null {
 
 			// replied
 			if (interaction.replied) {
-				return (await interaction.webhook.editMessage(
-					interaction.message,
-					_options as WebhookEditMessageOptions,
-				)) as Message;
+				return await interaction.editReply(_options, interaction.message);
 			}
 
 			// await defer
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred) return await interaction.editReply(_options as WebhookEditMessageOptions);
+			if (interaction.deferred) return await interaction.editReply(_options);
 
 			// initial reply
 			clearTimeout(cached.autoDeferTimeout!);
