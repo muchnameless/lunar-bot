@@ -162,9 +162,9 @@ export default class InteractionCreateEvent extends Event {
 						allowedMentions: { parse: [] },
 					});
 
-					// remove the button from the ephemeral message
-					// eslint-disable-next-line @typescript-eslint/return-await
-					return await InteractionUtil.editReply(interaction, { components });
+					// delete the ephemeral message
+					await InteractionUtil.deleteReply(interaction);
+					return;
 				} finally {
 					this._visibilityButtonMessages.delete(interaction.message.id);
 				}

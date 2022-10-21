@@ -53,6 +53,7 @@ export class MessageUtil extends null {
 			messageId: message.id,
 			content: message.content,
 			messageType: MessageType[message.type],
+			flags: message.flags.toArray(),
 			author: UserUtil.logInfo(message.author),
 			channel: ChannelUtil.logInfo(message.channel),
 		};
@@ -136,7 +137,10 @@ export class MessageUtil extends null {
 	 * @param emojis
 	 */
 	public static async react(message: Message, ...emojis: EmojiIdentifierResolvable[]) {
-		if (this.isEphemeral(message)) return null;
+		if (this.isEphemeral(message)) {
+			logger.warn({ ...this.logInfo(message), data: emojis }, '[MESSAGE REACT]: ephemeral message');
+			return null;
+		}
 
 		// permission checks
 		const { channel } = message;
@@ -159,11 +163,6 @@ export class MessageUtil extends null {
 					{ long: true },
 				)}`,
 			);
-			return null;
-		}
-
-		if (this.isEphemeral(message)) {
-			logger.warn({ ...this.logInfo(message), data: emojis }, '[MESSAGE REACT]: ephemeral message');
 			return null;
 		}
 
