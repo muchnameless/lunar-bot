@@ -8,8 +8,10 @@ import {
 	time,
 	TimestampStyles,
 	type APISelectMenuOption,
+	type APIStringSelectComponent,
 	type ChatInputCommandInteraction,
 	type EmbedBuilder,
+	type SelectMenuComponent,
 	type SelectMenuInteraction,
 	type Snowflake,
 } from 'discord.js';
@@ -233,7 +235,7 @@ export default class AhCommand extends ApplicationCommand {
 	public override async selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]) {
 		const [uuid, ign, userId] = args as [string, string, string];
 		const [profileId] = interaction.values as [string];
-		const profiles = interaction.component.options;
+		const profiles = (interaction.component as APIStringSelectComponent | SelectMenuComponent).options;
 
 		// interaction from original requester -> edit message
 		if (interaction.user.id === userId) {
