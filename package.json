@@ -51,7 +51,7 @@
 		"chart.js": "^3.9.1",
 		"common-tags": "^1.8.2",
 		"cron": "^2.1.0",
-		"discord.js": "14.6.1-dev.1666743070-68d5712.0",
+		"discord.js": "14.6.1-dev.1666785886-68d5712.0",
 		"fast-xml-parser": "^4.0.11",
 		"ioredis": "^5.2.3",
 		"js-big-decimal": "^1.3.10",
@@ -102,10 +102,10 @@
 	},
 	"packageManager": "yarn@3.2.4",
 	"resolutions": {
-		"@discordjs/builders": "1.3.1-dev.1666743069-68d5712.0",
-		"@discordjs/collection": "1.2.1-dev.1666743087-68d5712.0",
-		"@discordjs/rest": "1.3.1-dev.1666743082-68d5712.0",
-		"@discordjs/util": "0.1.1-dev.1666743084-68d5712.0",
+		"@discordjs/builders": "1.3.1-dev.1666785885-68d5712.0",
+		"@discordjs/collection": "1.2.1-dev.1666785886-68d5712.0",
+		"@discordjs/rest": "1.3.1-dev.1666785896-68d5712.0",
+		"@discordjs/util": "0.1.1-dev.1666785887-68d5712.0",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.0e56a92.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.3eb5175.0-3223b22520.patch",
 		"@sapphire/ratelimits": "2.4.6-next.0e56a92.0",
 		"@sapphire/shapeshift": "3.7.1-next.9044582.0",
@@ -115,7 +115,7 @@
 		"@types/node": "patch:@types/node@^18.11.6#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch",
 		"chart.js": "patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch",
 		"discord-api-types": "0.37.15-next.aaa57b4.1666469569",
-		"discord.js": "patch:discord.js@14.6.1-dev.1666743070-68d5712.0#./.yarn/patches/discord.js-npm-14.6.1-dev.1666311341-b2658ce.0-0e6e62f350.patch",
+		"discord.js": "patch:discord.js@14.6.1-dev.1666785886-68d5712.0#./.yarn/patches/discord.js-npm-14.6.1-dev.1666311341-b2658ce.0-0e6e62f350.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
 }
