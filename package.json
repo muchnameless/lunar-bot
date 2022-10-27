@@ -115,7 +115,7 @@
 		"@types/node": "patch:@types/node@^18.11.7#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch",
 		"chart.js": "patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch",
 		"discord-api-types": "0.37.15-next.9448e9b.1666894619",
-		"discord.js": "patch:discord.js@14.7.0-dev.1666872298-fc10774.0#./.yarn/patches/discord.js-npm-14.6.1-dev.1666311341-b2658ce.0-0e6e62f350.patch",
+		"discord.js": "patch:discord.js@npm%3A14.7.0-dev.1666872298-fc10774.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1666872298-fc10774.0-090b91aaa4.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
 }
