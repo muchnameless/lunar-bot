@@ -1,5 +1,18 @@
+diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
+index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..3fdaa28dcae622316ed1d2a3173db02b1ba6bff6 100644
+--- a/src/client/websocket/WebSocketManager.js
++++ b/src/client/websocket/WebSocketManager.js
+@@ -345,7 +345,7 @@ class WebSocketManager extends EventEmitter {
+       const item = this.packetQueue.shift();
+       setImmediate(() => {
+         this.handlePacket(item.packet, item.shard);
+-      }).unref();
++      });
+     }
+ 
+     if (packet && PacketHandlers[packet.t]) {
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index 5683938f939d2ab001b20b2c3567d5c7edb9d005..4dee77fde2a31318171c8681f34ae0eac1936b53 100644
+index 5683938f939d2ab001b20b2c3567d5c7edb9d005..14918d30d17b1f7b878681173efb7ea3486c669c 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
 @@ -269,6 +269,7 @@ class WebSocketShard extends EventEmitter {
@@ -10,19 +23,56 @@ index 5683938f939d2ab001b20b2c3567d5c7edb9d005..4dee77fde2a31318171c8681f34ae0ea
        this.connectedAt = Date.now();
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
+@@ -535,7 +536,7 @@ class WebSocketShard extends EventEmitter {
+         this.emit(WebSocketShardEvents.AllReady, this.expectedGuilds);
+       },
+       hasGuildsIntent ? waitGuildTimeout : 0,
+-    ).unref();
++    );
+   }
+ 
+   /**
+@@ -556,7 +557,7 @@ class WebSocketShard extends EventEmitter {
+     this.helloTimeout = setTimeout(() => {
+       this.debug('Did not receive HELLO in time. Destroying and connecting again.');
+       this.destroy({ reset: true, closeCode: 4009 });
+-    }, 20_000).unref();
++    }, 20_000);
+   }
+ 
+   /**
+@@ -596,7 +597,7 @@ class WebSocketShard extends EventEmitter {
+       this.emitClose();
+       // Setting the variable false to check for zombie connections.
+       this.closeEmitted = false;
+-    }, time).unref();
++    }, time);
+   }
+ 
+   /**
+@@ -616,7 +617,7 @@ class WebSocketShard extends EventEmitter {
+     this.debug(`Setting a heartbeat interval for ${time}ms.`);
+     // Sanity checks
+     if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+-    this.heartbeatInterval = setInterval(() => this.sendHeartbeat(), time).unref();
++    this.heartbeatInterval = setInterval(() => this.sendHeartbeat(), time);
+   }
+ 
+   /**
+@@ -762,7 +768,7 @@ class WebSocketShard extends EventEmitter {
+       this.ratelimit.timer = setTimeout(() => {
+         this.ratelimit.remaining = this.ratelimit.total;
+         this.processQueue();
+-      }, this.ratelimit.time).unref();
++      }, this.ratelimit.time);
+     }
+     while (this.ratelimit.remaining > 0) {
+       const item = this.ratelimit.queue.shift();
 diff --git a/src/errors/ErrorCodes.js b/src/errors/ErrorCodes.js
-index f0566a0433a856744c7f97ada5fb821e9c7db9d6..c745d108dcec5d48b082d2508fa9d9787ebe086d 100644
+index b5faf0c1cefaf1c3f779ab5a63dec4e8d141dc27..9ec36057baaf56066a8ae00f0942d343878e3a81 100644
 --- a/src/errors/ErrorCodes.js
 +++ b/src/errors/ErrorCodes.js
-@@ -127,7 +127,6 @@
- 
-  * @property {'InteractionAlreadyReplied'} InteractionAlreadyReplied
-  * @property {'InteractionNotReplied'} InteractionNotReplied
-- * @property {'InteractionEphemeralReplied'} InteractionEphemeralReplied
- 
-  * @property {'CommandInteractionOptionNotFound'} CommandInteractionOptionNotFound
-  * @property {'CommandInteractionOptionType'} CommandInteractionOptionType
-@@ -273,7 +272,6 @@ const keys = [
+@@ -274,7 +274,6 @@ const keys = [
  
    'InteractionAlreadyReplied',
    'InteractionNotReplied',
@@ -42,6 +92,32 @@ index 24437b5023c97d1ba679a8e092a800ddeb6106e2..fe20d71fd253fc487d5c80a127c70724
  
    [DjsErrorCodes.CommandInteractionOptionNotFound]: name => `Required option "${name}" not found.`,
    [DjsErrorCodes.CommandInteractionOptionType]: (name, type, expected) =>
+diff --git a/src/managers/GuildManager.js b/src/managers/GuildManager.js
+index cf5137392e42e73e28c36553a3257cc9986ec69e..36917cdbc173013c27d7121950684291bc61ba7b 100644
+--- a/src/managers/GuildManager.js
++++ b/src/managers/GuildManager.js
+@@ -237,7 +237,7 @@ class GuildManager extends CachedManager {
+         this.client.removeListener(Events.GuildCreate, handleGuild);
+         this.client.decrementMaxListeners();
+         resolve(this.client.guilds._add(data));
+-      }, 10_000).unref();
++      }, 10_000);
+     });
+   }
+ 
+diff --git a/src/managers/GuildMemberManager.js b/src/managers/GuildMemberManager.js
+index e85e296b14ec0b933662ed3b64dddf80294a2644..245f0f48657054aa27c78926ddc456964238c0ad 100644
+--- a/src/managers/GuildMemberManager.js
++++ b/src/managers/GuildMemberManager.js
+@@ -534,7 +534,7 @@ class GuildMemberManager extends CachedManager {
+         this.client.removeListener(Events.GuildMembersChunk, handler);
+         this.client.decrementMaxListeners();
+         reject(new DiscordjsError(ErrorCodes.GuildMembersTimeout));
+-      }, time).unref();
++      }, time);
+       this.client.incrementMaxListeners();
+       this.client.on(Events.GuildMembersChunk, handler);
+     });
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
 index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1350d92fc 100644
 --- a/src/structures/AttachmentBuilder.js
@@ -184,6 +260,19 @@ index 8553889f33bb4176b365391cc21140a6784a941c..9ef42e9d34ce71c1bdc0529ccd6f3812
 -      (this.guild.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers) ?? false)
 +      this.guild.members.me.permissions.has(PermissionFlagsBits.ModerateMembers)
      );
+   }
+ 
+diff --git a/src/structures/GuildTemplate.js b/src/structures/GuildTemplate.js
+index 7f4cad43da587f288d515d921c1ae4bbe49867b4..1a41a2ecad6db44cacf203f3f157480d19f26015 100644
+--- a/src/structures/GuildTemplate.js
++++ b/src/structures/GuildTemplate.js
+@@ -149,7 +149,7 @@ class GuildTemplate extends Base {
+       client.incrementMaxListeners();
+       client.on(Events.GuildCreate, handleGuild);
+ 
+-      const timeout = setTimeout(() => resolveGuild(client.guilds._add(data)), 10_000).unref();
++      const timeout = setTimeout(() => resolveGuild(client.guilds._add(data)), 10_000);
+     });
    }
  
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
@@ -469,11 +558,49 @@ index ac2a72fbcaef21a51abf13ee03eb26929b59ea0f..528f5ca4cc0e423ceefa8ac9c1f1f64d
  }
  
  module.exports = ModalSubmitFields;
+diff --git a/src/structures/interfaces/Collector.js b/src/structures/interfaces/Collector.js
+index bcd7528a6c079cc226e437e28effea87584e224a..95801d20a2e3c21ee7cc4f58e6f2c53cbcd28f26 100644
+--- a/src/structures/interfaces/Collector.js
++++ b/src/structures/interfaces/Collector.js
+@@ -93,8 +93,8 @@ class Collector extends EventEmitter {
+     this.handleCollect = this.handleCollect.bind(this);
+     this.handleDispose = this.handleDispose.bind(this);
+ 
+-    if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time).unref();
+-    if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle).unref();
++    if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time);
++    if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle);
+   }
+ 
+   /**
+@@ -120,7 +120,7 @@ class Collector extends EventEmitter {
+ 
+         if (this._idletimeout) {
+           clearTimeout(this._idletimeout);
+-          this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle).unref();
++          this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
+         }
+       } else {
+         /**
+@@ -232,11 +232,11 @@ class Collector extends EventEmitter {
+   resetTimer({ time, idle } = {}) {
+     if (this._timeout) {
+       clearTimeout(this._timeout);
+-      this._timeout = setTimeout(() => this.stop('time'), time ?? this.options.time).unref();
++      this._timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
+     }
+     if (this._idletimeout) {
+       clearTimeout(this._idletimeout);
+-      this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle).unref();
++      this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
+     }
+   }
+ 
 diff --git a/src/structures/interfaces/InteractionResponses.js b/src/structures/interfaces/InteractionResponses.js
-index f8f32ebe607dcbe183a7ce68ed6c60e5ae42d5a4..e56007f505f481f861e51f702075f1f0fe083ca3 100644
+index f85fd7fe9a141d41fd8570e65011a41c01abadf1..192c6f8e102674ddb181e180f3ce30cbcb137468 100644
 --- a/src/structures/interfaces/InteractionResponses.js
 +++ b/src/structures/interfaces/InteractionResponses.js
-@@ -122,50 +122,52 @@ class InteractionResponses {
+@@ -122,49 +122,52 @@ class InteractionResponses {
    }
  
    /**
@@ -523,7 +650,7 @@ index f8f32ebe607dcbe183a7ce68ed6c60e5ae42d5a4..e56007f505f481f861e51f702075f1f0
 -   * Deletes the initial reply to this interaction.
 +   * Deletes a reply to this interaction.
     * @see Webhook#deleteMessage
-+   * @param {MessageResolvable|'@original'} [message='@original'] The response to edit
++   * @param {MessageResolvable|'@original'} [message='@original'] The response to delete
     * @returns {Promise<void>}
     * @example
 -   * // Delete the reply to this interaction
@@ -533,15 +660,27 @@ index f8f32ebe607dcbe183a7ce68ed6c60e5ae42d5a4..e56007f505f481f861e51f702075f1f0
     *   .catch(console.error);
     */
 -  async deleteReply() {
--    if (this.ephemeral) throw new DiscordjsError(ErrorCodes.InteractionEphemeralReplied);
 -    await this.webhook.deleteMessage('@original');
 +  async deleteReply(message = '@original') {
 +    await this.webhook.deleteMessage(message);
    }
  
    /**
+diff --git a/src/util/Sweepers.js b/src/util/Sweepers.js
+index 83892592ac6f42f1bfea81303347465c434c69c5..2fe28c7cfbd09b051ce2bb465a225f4e3cffa087 100644
+--- a/src/util/Sweepers.js
++++ b/src/util/Sweepers.js
+@@ -450,7 +450,7 @@ class Sweepers {
+       if (sweepFn === null) return;
+       if (typeof sweepFn !== 'function') throw new DiscordjsTypeError(ErrorCodes.SweepFilterReturn);
+       this[sweepKey](sweepFn);
+-    }, opts.interval * 1_000).unref();
++    }, opts.interval * 1_000);
+   }
+ }
+ 
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9ba6d61869 100644
+index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba9734eb72d2a 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -262,15 +262,15 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -597,7 +736,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1480,7 +1482,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1480,7 +1483,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -606,7 +745,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1488,12 +1490,18 @@ export type CacheTypeReducer<
+@@ -1488,12 +1491,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -625,7 +764,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1520,7 +1528,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1520,7 +1529,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -635,7 +774,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1757,16 +1766,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+@@ -1757,16 +1767,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -655,7 +794,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1808,6 +1817,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1808,6 +1818,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent,
      Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
@@ -663,7 +802,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
    public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
-@@ -1829,11 +1839,12 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1829,11 +1840,12 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      options: InteractionDeferUpdateOptions & { fetchReply: true },
    ): Promise<Message<BooleanCache<Cached>>>;
    public deferUpdate(options?: InteractionDeferUpdateOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
@@ -678,7 +817,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
    public followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<Message<BooleanCache<Cached>>>;
    public reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<Message<BooleanCache<Cached>>>;
    public reply(
-@@ -1975,12 +1986,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1975,12 +1987,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -697,7 +836,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1989,6 +2005,7 @@ export class ModalSubmitFields {
+@@ -1989,6 +2006,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -705,7 +844,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -2019,15 +2036,16 @@ export class ModalSubmitInteraction<Cached extends CacheType = CacheType> extend
+@@ -2019,15 +2037,16 @@ export class ModalSubmitInteraction<Cached extends CacheType = CacheType> extend
    public reply(
      options: string | MessagePayload | InteractionReplyOptions,
    ): Promise<InteractionResponse<BooleanCache<Cached>>>;
@@ -724,7 +863,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
    public followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<Message<BooleanCache<Cached>>>;
    public deferUpdate(
      options: InteractionDeferUpdateOptions & { fetchReply: true },
-@@ -2260,6 +2278,7 @@ export class SelectMenuInteraction<Cached extends CacheType = CacheType> extends
+@@ -2260,6 +2279,7 @@ export class SelectMenuInteraction<Cached extends CacheType = CacheType> extends
      SelectMenuComponent,
      APISelectMenuComponent,
      SelectMenuComponent | APISelectMenuComponent,
@@ -732,15 +871,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
      SelectMenuComponent | APISelectMenuComponent
    >;
    public componentType: ComponentType.SelectMenu;
-@@ -3246,7 +3265,6 @@ export enum DiscordjsErrorCodes {
- 
-   InteractionAlreadyReplied = 'InteractionAlreadyReplied',
-   InteractionNotReplied = 'InteractionNotReplied',
--  InteractionEphemeralReplied = 'InteractionEphemeralReplied',
- 
-   CommandInteractionOptionNotFound = 'CommandInteractionOptionNotFound',
-   CommandInteractionOptionType = 'CommandInteractionOptionType',
-@@ -3377,7 +3395,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3378,7 +3398,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -749,7 +880,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3875,11 +3893,6 @@ export interface BaseApplicationCommandData {
+@@ -3876,11 +3896,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -761,7 +892,7 @@ index e2586331a58d3ea0936ef0edb82ee2d17c78639c..848f7d5f59f1219e153e8c7d8679ce9b
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5300,14 +5313,7 @@ export interface BaseMessageOptions {
+@@ -5301,14 +5316,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
