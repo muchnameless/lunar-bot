@@ -447,9 +447,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/builders@npm:1.4.0-dev.1666872302-fc10774.0":
-  version: 1.4.0-dev.1666872302-fc10774.0
-  resolution: "@discordjs/builders@npm:1.4.0-dev.1666872302-fc10774.0"
+"@discordjs/builders@npm:1.3.1-dev.1666915915-e7cbc1b.0":
+  version: 1.3.1-dev.1666915915-e7cbc1b.0
+  resolution: "@discordjs/builders@npm:1.3.1-dev.1666915915-e7cbc1b.0"
   dependencies:
     "@discordjs/util": ^0.1.0
     "@sapphire/shapeshift": ^3.7.0
@@ -457,14 +457,14 @@ __metadata:
     fast-deep-equal: ^3.1.3
     ts-mixer: ^6.0.1
     tslib: ^2.4.0
-  checksum: 4ef4552db7e61792462ff905360fb0d2c3d1c7b05bf274f20c4cebc5bf73d1183d063fb5f0e804d3682bf2e847c3c90665f5223b24c8e94e49488ad636cebb43
+  checksum: 2e2ce717ce49d17d847accd74bd8ebeee8cdf744c3d1a77d45f08a44d3d01c9bc82165dfda22f06d93938245320aa81df8493d5e1afff023991b35f0b524a59f
   languageName: node
   linkType: hard
 
-"@discordjs/collection@npm:1.3.0-dev.1666872296-fc10774.0":
-  version: 1.3.0-dev.1666872296-fc10774.0
-  resolution: "@discordjs/collection@npm:1.3.0-dev.1666872296-fc10774.0"
-  checksum: 983e83beda7a474693e73d790991c52f7a8f6f6563bd29c38b96d2061cd5c00a31e2ed8c10e75d175fde3185f4a75245f82e0f39322f322a38079f6fa442510e
+"@discordjs/collection@npm:1.2.1-dev.1666915927-e7cbc1b.0":
+  version: 1.2.1-dev.1666915927-e7cbc1b.0
+  resolution: "@discordjs/collection@npm:1.2.1-dev.1666915927-e7cbc1b.0"
+  checksum: 6d2762d9786aa605e7d4454f38eb2197a2359b0379b2315b7ef00a984331d8eb57465b8f09e2e0345cc3cea2d03e99a0e190322b3bd5b240cd49f8566953adcb
   languageName: node
   linkType: hard
 
@@ -487,9 +487,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/rest@npm:1.4.0-dev.1666872298-fc10774.0":
-  version: 1.4.0-dev.1666872298-fc10774.0
-  resolution: "@discordjs/rest@npm:1.4.0-dev.1666872298-fc10774.0"
+"@discordjs/rest@npm:1.3.1-dev.1666915922-e7cbc1b.0":
+  version: 1.3.1-dev.1666915922-e7cbc1b.0
+  resolution: "@discordjs/rest@npm:1.3.1-dev.1666915922-e7cbc1b.0"
   dependencies:
     "@discordjs/collection": ^1.2.0
     "@discordjs/util": ^0.1.0
@@ -499,14 +499,14 @@ __metadata:
     file-type: ^18.0.0
     tslib: ^2.4.0
     undici: ^5.11.0
-  checksum: f5b3e8dfc1e798b23281b39cbc233798805c38617cc69a608b9aedcf23b9b22bd9107fd7abee7c91170c757f997a47c18b20b10cf2796e148216638aa0184721
+  checksum: 66b80ccf103ac445ab6bd0b87548aef3def9291e15b1bd0ee8ae8ed81289d6cc41864cc75a13606d589f78baf90acbe930ac31cda18794f15c870ab28c6fcaef
   languageName: node
   linkType: hard
 
-"@discordjs/util@npm:0.2.0-dev.1666872295-fc10774.0":
-  version: 0.2.0-dev.1666872295-fc10774.0
-  resolution: "@discordjs/util@npm:0.2.0-dev.1666872295-fc10774.0"
-  checksum: f4ab924565ab8db5162c661095d22b32a129425256cbaab7d1d3f98a39bb21dc1387d18bbf04960d1535ad119e75d1bf1f99491a9c0730ec281f4955ccf738db
+"@discordjs/util@npm:0.1.1-dev.1666915921-e7cbc1b.0":
+  version: 0.1.1-dev.1666915921-e7cbc1b.0
+  resolution: "@discordjs/util@npm:0.1.1-dev.1666915921-e7cbc1b.0"
+  checksum: 38cfd3dcf1c9e706abbef7def8834e214e45089800f719bd8e7c0e63b1943f86fad9bcd9197d4729984270812926fefa39b31b1d713d9ebe6a25617c0c31b214
   languageName: node
   linkType: hard
 
@@ -2459,9 +2459,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@npm:14.7.0-dev.1666872298-fc10774.0":
-  version: 14.7.0-dev.1666872298-fc10774.0
-  resolution: "discord.js@npm:14.7.0-dev.1666872298-fc10774.0"
+"discord.js@npm:14.6.1-dev.1666915943-e7cbc1b.0":
+  version: 14.6.1-dev.1666915943-e7cbc1b.0
+  resolution: "discord.js@npm:14.6.1-dev.1666915943-e7cbc1b.0"
   dependencies:
     "@discordjs/builders": ^1.3.0
     "@discordjs/collection": ^1.2.0
@@ -2475,13 +2475,13 @@ __metadata:
     tslib: ^2.4.0
     undici: ^5.11.0
     ws: ^8.9.0
-  checksum: baa51adf740095fd001c806df25dbf8fc967ee107bffe2db623ec3ec20740abc706198ee9244cdebc102d5d3df9abe2723559c2a8972024a905468a4dbfaeadf
+  checksum: 1d18fd79548eb63eb9cd0f8c5967c6359bddbe65b1553499f0357fd0d5a07788648752d8285047e4c5cc4f2914ee6218dafdc7c5a0d5393eae67f8ea31f22755
   languageName: node
   linkType: hard
 
-"discord.js@patch:discord.js@npm%3A14.7.0-dev.1666872298-fc10774.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1666872298-fc10774.0-090b91aaa4.patch::locator=lunar-bot%40workspace%3A.":
-  version: 14.7.0-dev.1666872298-fc10774.0
-  resolution: "discord.js@patch:discord.js@npm%3A14.7.0-dev.1666872298-fc10774.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1666872298-fc10774.0-090b91aaa4.patch::version=14.7.0-dev.1666872298-fc10774.0&hash=31b264&locator=lunar-bot%40workspace%3A."
+"discord.js@patch:discord.js@14.6.1-dev.1666915943-e7cbc1b.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1666872298-fc10774.0-090b91aaa4.patch::locator=lunar-bot%40workspace%3A.":
+  version: 14.6.1-dev.1666915943-e7cbc1b.0
+  resolution: "discord.js@patch:discord.js@npm%3A14.6.1-dev.1666915943-e7cbc1b.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1666872298-fc10774.0-090b91aaa4.patch::version=14.6.1-dev.1666915943-e7cbc1b.0&hash=31b264&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@discordjs/builders": ^1.3.0
     "@discordjs/collection": ^1.2.0
@@ -2495,7 +2495,7 @@ __metadata:
     tslib: ^2.4.0
     undici: ^5.11.0
     ws: ^8.9.0
-  checksum: 62eae569429521d6e014ba16c73f4a30866c0464130b3a8aee68ca518d070fd5f29b762f718944ec5f8b8d04c45d41062ac2fac76eda9e01fe9aa245a15d4110
+  checksum: 4b89e45c837816afae7fa47439fcc470d07bfb964b0ef2e2ddca7427ef162e6342cb94a49a8bd22ef1b7821861013701540b47df784cae1be5573c31a8d5fac0
   languageName: node
   linkType: hard
 
@@ -4786,7 +4786,7 @@ __metadata:
     chart.js: ^3.9.1
     common-tags: ^1.8.2
     cron: ^2.1.0
-    discord.js: 14.7.0-dev.1666872298-fc10774.0
+    discord.js: 14.6.1-dev.1666915943-e7cbc1b.0
     env-cmd: ^10.1.0
     eslint: ^8.26.0
     eslint-config-neon: ^0.1.39
