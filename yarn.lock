@@ -4814,7 +4814,7 @@ __metadata:
     sequelize: ^6.25.3
     ts-prune: ^0.10.3
     tslib: ^2.4.0
-    typescript: ^4.9.0-dev.20221030
+    typescript: ^4.9.0-dev.20221031
     undici: ^5.12.0
     utf-8-validate: ^5.0.10
     zlib-sync: ^0.1.7
@@ -7360,13 +7360,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.9.0-dev.20221030":
-  version: 4.9.0-dev.20221030
-  resolution: "typescript@npm:4.9.0-dev.20221030"
+"typescript@npm:^4.9.0-dev.20221031":
+  version: 4.9.0-dev.20221031
+  resolution: "typescript@npm:4.9.0-dev.20221031"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: f876eac2a8d6d5a4ef349e49c607c4e0f4228acfba6c61d992e39ec049e204ad17810f170b5109fc9a09ad8b3d9b56d4aba2e51953f30f43469beaa0671fc64a
+  checksum: 8c8e61980f9c4794c4ddf227e404cd6c8f396fa3db73c343aace411ddf1f61a5d3bd56dbd1272f22e588fbe5d456ca5c42da28056abd5784ce49b25ba3b0587c
   languageName: node
   linkType: hard
 
@@ -7380,13 +7380,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.9.0-dev.20221030#~builtin<compat/typescript>":
-  version: 4.9.0-dev.20221030
-  resolution: "typescript@patch:typescript@npm%3A4.9.0-dev.20221030#~builtin<compat/typescript>::version=4.9.0-dev.20221030&hash=701156"
+"typescript@patch:typescript@^4.9.0-dev.20221031#~builtin<compat/typescript>":
+  version: 4.9.0-dev.20221031
+  resolution: "typescript@patch:typescript@npm%3A4.9.0-dev.20221031#~builtin<compat/typescript>::version=4.9.0-dev.20221031&hash=701156"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 3c10c95ae8a8eb87a95693e24c30c81fabfaa6bdbe74912ba572166a8b83e21c5f2479a85100ecd5aab0b626f4a0147eab70763c90dea3f301376d93fa24d424
+  checksum: 26a4ecd48d579db382de3e219ace6c101c9cca3251bd7f4754251712aac33e5de260a8fbd3f890442ce093a3d95baad3b86ee8152f83389ae988a4456614b772
   languageName: node
   linkType: hard
 
