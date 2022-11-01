@@ -2422,10 +2422,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"detect-indent@npm:^7.0.0":
+  version: 7.0.1
+  resolution: "detect-indent@npm:7.0.1"
+  checksum: cbf3f0b1c3c881934ca94428e1179b26ab2a587e0d719031d37a67fb506d49d067de54ff057cb1e772e75975fed5155c01cd4518306fee60988b1486e3fc7768
+  languageName: node
+  linkType: hard
+
 "detect-libc@npm:^2.0.0":
   version: 2.0.1
   resolution: "detect-libc@npm:2.0.1"
   checksum: ccb05fcabbb555beb544d48080179c18523a343face9ee4e1a86605a8715b4169f94d663c21a03c310ac824592f2ba9a5270218819bb411ad7be578a527593d7
+  languageName: node
+  linkType: hard
+
+"detect-newline@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "detect-newline@npm:4.0.0"
+  checksum: 52767347c70f485b2d1db6493dde57b8c3c1f249e24bad7eb7424cc1129200aa7e671902ede18bc94a8b69e10dec91456aab4c7e2478559d9eedb31ef3847f36
   languageName: node
   linkType: hard
 
@@ -3339,7 +3353,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.2.7, fast-glob@npm:^3.2.9":
+"fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.7, fast-glob@npm:^3.2.9":
   version: 3.2.12
   resolution: "fast-glob@npm:3.2.12"
   dependencies:
@@ -3620,6 +3634,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"git-hooks-list@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "git-hooks-list@npm:3.0.0"
+  checksum: 32b3b8fed611b81e5ed069279608a6fcb6122901dcc56cb53f666977d006c6e7ab82febfd8c38ce56e6d47d17d5d822847bf857f3bd33980b8a036e55efcad7f
+  languageName: node
+  linkType: hard
+
 "git-raw-commits@npm:^2.0.0":
   version: 2.0.11
   resolution: "git-raw-commits@npm:2.0.11"
@@ -3737,6 +3758,19 @@ __metadata:
     merge2: ^1.4.1
     slash: ^3.0.0
   checksum: b4be8885e0cfa018fc783792942d53926c35c50b3aefd3fdcfb9d22c627639dc26bd2327a40a0b74b074100ce95bb7187bfeae2f236856aa3de183af7a02aea6
+  languageName: node
+  linkType: hard
+
+"globby@npm:^13.1.1":
+  version: 13.1.2
+  resolution: "globby@npm:13.1.2"
+  dependencies:
+    dir-glob: ^3.0.1
+    fast-glob: ^3.2.11
+    ignore: ^5.2.0
+    merge2: ^1.4.1
+    slash: ^4.0.0
+  checksum: c148fcda0c981f00fb434bb94ca258f0a9d23cedbde6fb3f37098e1abde5b065019e2c63fe2aa2fad4daf2b54bf360b4d0423d85fb3a63d09ed75a2837d4de0f
   languageName: node
   linkType: hard
 
@@ -4200,6 +4234,13 @@ __metadata:
   version: 1.1.0
   resolution: "is-plain-obj@npm:1.1.0"
   checksum: 0ee04807797aad50859652a7467481816cbb57e5cc97d813a7dcd8915da8195dc68c436010bf39d195226cde6a2d352f4b815f16f26b7bf486a5754290629931
+  languageName: node
+  linkType: hard
+
+"is-plain-obj@npm:^4.0.0":
+  version: 4.1.0
+  resolution: "is-plain-obj@npm:4.1.0"
+  checksum: 6dc45da70d04a81f35c9310971e78a6a3c7a63547ef782e3a07ee3674695081b6ca4e977fbb8efc48dae3375e0b34558d2bcd722aec9bddfa2d7db5b041be8ce
   languageName: node
   linkType: hard
 
@@ -4812,6 +4853,7 @@ __metadata:
     prismarine-nbt: ^2.2.1
     re2: ^1.17.7
     sequelize: ^6.25.3
+    sort-package-json: ^2.0.0
     ts-prune: ^0.10.3
     tslib: ^2.4.1
     typescript: ^4.9.0-dev.20221031
@@ -6731,6 +6773,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"slash@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "slash@npm:4.0.0"
+  checksum: da8e4af73712253acd21b7853b7e0dbba776b786e82b010a5bfc8b5051a1db38ed8aba8e1e8f400dd2c9f373be91eb1c42b66e91abb407ff42b10feece5e1d2d
+  languageName: node
+  linkType: hard
+
 "slice-ansi@npm:^3.0.0":
   version: 3.0.0
   resolution: "slice-ansi@npm:3.0.0"
@@ -6797,6 +6846,29 @@ __metadata:
   dependencies:
     atomic-sleep: ^1.0.0
   checksum: 526669b78e0ac3bcbe2a53e5ac8960d3b25e61d8e6a46eaed5a0c46d7212c5f638bb136236870babedfcb626063711ba8f81e538f88b79e6a90a5b2ff71943b4
+  languageName: node
+  linkType: hard
+
+"sort-object-keys@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "sort-object-keys@npm:1.1.3"
+  checksum: abea944d6722a1710a1aa6e4f9509da085d93d5fc0db23947cb411eedc7731f80022ce8fa68ed83a53dd2ac7441fcf72a3f38c09b3d9bbc4ff80546aa2e151ad
+  languageName: node
+  linkType: hard
+
+"sort-package-json@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "sort-package-json@npm:2.0.0"
+  dependencies:
+    detect-indent: ^7.0.0
+    detect-newline: ^4.0.0
+    git-hooks-list: ^3.0.0
+    globby: ^13.1.1
+    is-plain-obj: ^4.0.0
+    sort-object-keys: ^1.1.3
+  bin:
+    sort-package-json: cli.js
+  checksum: ed9cb138e5795f231a87df89c42d3ce81f64592de5ece9b2fa3ef647012bfd0e3101cb259d13a83b01c6a247e2efc74c8d83e24682fe53d66ff96c69cabe5a4e
   languageName: node
   linkType: hard
 

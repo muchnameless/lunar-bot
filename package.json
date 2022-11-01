@@ -1,9 +1,10 @@
 {
 	"name": "lunar-bot",
 	"version": "2.0.0",
-	"type": "module",
 	"description": "dev version of the lunar guard discord bot",
-	"main": "dist/index.js",
+	"license": "GPL-3.0",
+	"author": "muchnameless",
+	"type": "module",
 	"imports": {
 		"#api": "./dist/api/index.js",
 		"#chatBridge/*": "./dist/lib/chatBridge/*",
@@ -18,6 +19,7 @@
 		"#utils": "./dist/lib/util/index.js",
 		"#root/*": "./dist/*"
 	},
+	"main": "dist/index.js",
 	"scripts": {
 		"build": "yarn clean && tsc -b src",
 		"clean": "rm -rf dist",
@@ -34,8 +36,23 @@
 		"test": "tsc -b src",
 		"update": "yarn upgrade-interactive"
 	},
-	"author": "muchnameless",
-	"license": "GPL-3.0",
+	"resolutions": {
+		"@discordjs/builders": "1.4.0-dev.1667261611-8b400ca.0",
+		"@discordjs/collection": "1.3.0-dev.1667261595-8b400ca.0",
+		"@discordjs/rest": "1.4.0-dev.1667261614-8b400ca.0",
+		"@discordjs/util": "0.2.0-dev.1667261609-8b400ca.0",
+		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.117ba27.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.3eb5175.0-3223b22520.patch",
+		"@sapphire/ratelimits": "2.4.6-next.117ba27.0",
+		"@sapphire/shapeshift": "3.7.1-next.10945a5.0",
+		"@sapphire/snowflake": "3.3.0-next.117ba27.0",
+		"@sapphire/timer-manager": "1.0.1-next.117ba27.0",
+		"@sapphire/type": "patch:@sapphire/type@npm%3A2.2.5-next.cf34f61.0#./.yarn/patches/@sapphire-type-npm-2.2.5-next.cf34f61.0-c6bbabdd5f.patch",
+		"@types/node": "patch:@types/node@^18.11.8#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch",
+		"chart.js": "patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch",
+		"discord-api-types": "0.37.16-next.7040d9b.1667137080",
+		"discord.js": "patch:discord.js@npm%3A14.7.0-dev.1667261613-8b400ca.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1667261613-8b400ca.0-e4a42396f5.patch",
+		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
+	},
 	"dependencies": {
 		"@napi-rs/canvas": "^0.1.30",
 		"@sapphire/async-queue": "1.5.1-next.117ba27.0",
@@ -91,31 +108,15 @@
 		"lint-staged": "^13.0.3",
 		"pino-pretty": "^9.1.1",
 		"pretty-quick": "^3.1.3",
+		"sort-package-json": "^2.0.0",
 		"ts-prune": "^0.10.3",
 		"typescript": "^4.9.0-dev.20221031"
 	},
+	"packageManager": "yarn@3.2.4",
 	"engines": {
 		"node": ">=v19.0.0"
 	},
 	"volta": {
 		"node": "19.0.0"
-	},
-	"packageManager": "yarn@3.2.4",
-	"resolutions": {
-		"@discordjs/builders": "1.4.0-dev.1667261611-8b400ca.0",
-		"@discordjs/collection": "1.3.0-dev.1667261595-8b400ca.0",
-		"@discordjs/rest": "1.4.0-dev.1667261614-8b400ca.0",
-		"@discordjs/util": "0.2.0-dev.1667261609-8b400ca.0",
-		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.117ba27.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.3eb5175.0-3223b22520.patch",
-		"@sapphire/ratelimits": "2.4.6-next.117ba27.0",
-		"@sapphire/shapeshift": "3.7.1-next.10945a5.0",
-		"@sapphire/snowflake": "3.3.0-next.117ba27.0",
-		"@sapphire/timer-manager": "1.0.1-next.117ba27.0",
-		"@sapphire/type": "patch:@sapphire/type@npm%3A2.2.5-next.cf34f61.0#./.yarn/patches/@sapphire-type-npm-2.2.5-next.cf34f61.0-c6bbabdd5f.patch",
-		"@types/node": "patch:@types/node@^18.11.8#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch",
-		"chart.js": "patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch",
-		"discord-api-types": "0.37.16-next.7040d9b.1667137080",
-		"discord.js": "patch:discord.js@npm%3A14.7.0-dev.1667261613-8b400ca.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1667261613-8b400ca.0-e4a42396f5.patch",
-		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	}
 }
