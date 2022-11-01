@@ -28,12 +28,12 @@ import {
 	type Interaction,
 	type InteractionDeferReplyOptions,
 	type InteractionDeferUpdateOptions,
+	type InteractionEditReplyOptions,
 	type InteractionReplyOptions,
 	type InteractionUpdateOptions,
 	type MessageResolvable,
 	type ModalBuilder,
 	type TextBasedChannel,
-	type WebhookEditMessageOptions,
 } from 'discord.js';
 import { ChannelUtil, MessageUtil, UserUtil, type SendDMOptions } from './index.js';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '#constants';
@@ -83,7 +83,7 @@ export interface InteractionUtilReplyOptions extends InteractionReplyOptions {
 	split?: SplitOptions | boolean;
 }
 
-interface EditReplyOptions extends WebhookEditMessageOptions {
+interface EditReplyOptions extends InteractionEditReplyOptions {
 	rejectOnError?: boolean;
 }
 
@@ -626,22 +626,13 @@ export class InteractionUtil extends null {
 	 */
 	public static async editReply(
 		interaction: RepliableInteraction,
-		options: EditReplyOptions,
-		message: MessageResolvable,
-	): Promise<Message>;
-	public static async editReply(
-		interaction: RepliableInteraction,
-		options: EditReplyOptions & { rejectOnError: true },
+		options: (EditReplyOptions & { message: MessageResolvable }) | (EditReplyOptions & { rejectOnError: true }),
 	): Promise<Message>;
 	public static async editReply(
 		interaction: RepliableInteraction,
 		options: EditReplyOptions | string,
 	): Promise<Message | null>;
-	public static async editReply(
-		interaction: RepliableInteraction,
-		options: EditReplyOptions | string,
-		message?: MessageResolvable,
-	) {
+	public static async editReply(interaction: RepliableInteraction, options: EditReplyOptions | string) {
 		const _options = typeof options === 'string' ? { content: options } : { ...options };
 
 		this._addVisibilityButton(_options);
@@ -652,7 +643,7 @@ export class InteractionUtil extends null {
 			if (deferReplyPromise) await deferReplyPromise;
 			if (deferUpdatePromise) await deferUpdatePromise;
 
-			return await interaction.editReply(_options, message);
+			return await interaction.editReply(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error({ err: error, ...this.logInfo(interaction), data: _options }, '[INTERACTION EDIT REPLY]');
@@ -747,7 +738,7 @@ export class InteractionUtil extends null {
 
 			// replied
 			if (interaction.replied) {
-				return await interaction.editReply(_options, interaction.message);
+				return await interaction.editReply({ ..._options, message: interaction.message });
 			}
 
 			// await defer
@@ -962,7 +953,7 @@ export class InteractionUtil extends null {
 					case 'time': {
 						for (const component of row.components) component.setDisabled(true);
 
-						const editOptions = {
+						const editOptions: EditReplyOptions & InteractionUtilReplyOptions = {
 							embeds: [
 								new EmbedBuilder()
 									.setColor(Colors.NotQuiteBlack)
@@ -975,10 +966,11 @@ export class InteractionUtil extends null {
 									.setTimestamp(),
 							],
 							components: [row],
+							message: res instanceof Message ? res.id : '@original',
 						};
 
 						try {
-							await this.editReply(interaction, editOptions, res instanceof Message ? res.id : '@original');
+							await this.editReply(interaction, editOptions);
 						} catch (error) {
 							logger.error(
 								{ err: error, ...this.logInfo(interaction), data: _options },
