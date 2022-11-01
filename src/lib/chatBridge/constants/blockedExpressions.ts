@@ -10,6 +10,7 @@ export const BLOCKED_EXPRESSIONS_REGEXP = new RegExp(
 		/seks/,
 		/\bsemen\b/,
 		/nutte[dr]/,
+		/no *nut *november/,
 		/\bc *u+ *m+(?:ming?|s(?:hots?|lut)?)?\b/,
 		/\bslu+t+\b/,
 		/sluts/,
