@@ -12,10 +12,10 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..3fdaa28dcae622316ed1d2a3173db02b
  
      if (packet && PacketHandlers[packet.t]) {
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
-index 5683938f939d2ab001b20b2c3567d5c7edb9d005..14918d30d17b1f7b878681173efb7ea3486c669c 100644
+index b2d7bc1d5954b162a5d0dc6ef6cb629f0007b74c..25f39bb59e43ba5a0e35be4b041f8072b5c3a27e 100644
 --- a/src/client/websocket/WebSocketShard.js
 +++ b/src/client/websocket/WebSocketShard.js
-@@ -269,6 +269,7 @@ class WebSocketShard extends EventEmitter {
+@@ -278,6 +278,7 @@ class WebSocketShard extends EventEmitter {
        this.status = this.status === Status.Disconnected ? Status.Reconnecting : Status.Connecting;
        this.setHelloTimeout();
  
@@ -23,7 +23,7 @@ index 5683938f939d2ab001b20b2c3567d5c7edb9d005..14918d30d17b1f7b878681173efb7ea3
        this.connectedAt = Date.now();
  
        // Adding a handshake timeout to just make sure no zombie connection appears.
-@@ -535,7 +536,7 @@ class WebSocketShard extends EventEmitter {
+@@ -545,7 +546,7 @@ class WebSocketShard extends EventEmitter {
          this.emit(WebSocketShardEvents.AllReady, this.expectedGuilds);
        },
        hasGuildsIntent ? waitGuildTimeout : 0,
@@ -32,7 +32,7 @@ index 5683938f939d2ab001b20b2c3567d5c7edb9d005..14918d30d17b1f7b878681173efb7ea3
    }
  
    /**
-@@ -556,7 +557,7 @@ class WebSocketShard extends EventEmitter {
+@@ -566,7 +567,7 @@ class WebSocketShard extends EventEmitter {
      this.helloTimeout = setTimeout(() => {
        this.debug('Did not receive HELLO in time. Destroying and connecting again.');
        this.destroy({ reset: true, closeCode: 4009 });
@@ -41,7 +41,7 @@ index 5683938f939d2ab001b20b2c3567d5c7edb9d005..14918d30d17b1f7b878681173efb7ea3
    }
  
    /**
-@@ -596,7 +597,7 @@ class WebSocketShard extends EventEmitter {
+@@ -606,7 +607,7 @@ class WebSocketShard extends EventEmitter {
        this.emitClose();
        // Setting the variable false to check for zombie connections.
        this.closeEmitted = false;
@@ -50,7 +50,7 @@ index 5683938f939d2ab001b20b2c3567d5c7edb9d005..14918d30d17b1f7b878681173efb7ea3
    }
  
    /**
-@@ -616,7 +617,7 @@ class WebSocketShard extends EventEmitter {
+@@ -626,7 +627,7 @@ class WebSocketShard extends EventEmitter {
      this.debug(`Setting a heartbeat interval for ${time}ms.`);
      // Sanity checks
      if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
@@ -59,7 +59,7 @@ index 5683938f939d2ab001b20b2c3567d5c7edb9d005..14918d30d17b1f7b878681173efb7ea3
    }
  
    /**
-@@ -762,7 +768,7 @@ class WebSocketShard extends EventEmitter {
+@@ -777,7 +778,7 @@ class WebSocketShard extends EventEmitter {
        this.ratelimit.timer = setTimeout(() => {
          this.ratelimit.remaining = this.ratelimit.total;
          this.processQueue();
@@ -294,7 +294,7 @@ index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf4448
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 7245e004bf61cd7a005b336d3ff2346a3d9d1023..489315330ba6347ebb05abb8aa2fa8b6f37cf6ee 100644
+index 9ee5ebc49a0e755db0f3a1b0621614b7aed829fb..8954275670181b8cd5855f63835feca1b0eeb510 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -295,10 +295,13 @@ class Message extends Base {
@@ -455,7 +455,7 @@ index 7245e004bf61cd7a005b336d3ff2346a3d9d1023..489315330ba6347ebb05abb8aa2fa8b6
      return this;
    }
  
-@@ -786,7 +805,8 @@ class Message extends Base {
+@@ -785,7 +804,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -465,7 +465,7 @@ index 7245e004bf61cd7a005b336d3ff2346a3d9d1023..489315330ba6347ebb05abb8aa2fa8b6
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -799,7 +819,7 @@ class Message extends Base {
+@@ -798,7 +818,7 @@ class Message extends Base {
          },
        });
      }
@@ -474,7 +474,7 @@ index 7245e004bf61cd7a005b336d3ff2346a3d9d1023..489315330ba6347ebb05abb8aa2fa8b6
    }
  
    /**
-@@ -819,12 +839,13 @@ class Message extends Base {
+@@ -818,12 +838,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -491,7 +491,7 @@ index 7245e004bf61cd7a005b336d3ff2346a3d9d1023..489315330ba6347ebb05abb8aa2fa8b6
    }
  
    /**
-@@ -833,8 +854,9 @@ class Message extends Base {
+@@ -832,8 +853,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -596,76 +596,6 @@ index bcd7528a6c079cc226e437e28effea87584e224a..95801d20a2e3c21ee7cc4f58e6f2c53c
      }
    }
  
-diff --git a/src/structures/interfaces/InteractionResponses.js b/src/structures/interfaces/InteractionResponses.js
-index f85fd7fe9a141d41fd8570e65011a41c01abadf1..192c6f8e102674ddb181e180f3ce30cbcb137468 100644
---- a/src/structures/interfaces/InteractionResponses.js
-+++ b/src/structures/interfaces/InteractionResponses.js
-@@ -122,49 +122,52 @@ class InteractionResponses {
-   }
- 
-   /**
--   * Fetches the initial reply to this interaction.
-+   * Fetches a reply to this interaction.
-    * @see Webhook#fetchMessage
-+   * @param {MessageResolvable|'@original'} [message='@original'] The response to fetch
-    * @returns {Promise<Message>}
-    * @example
--   * // Fetch the reply to this interaction
-+   * // Fetch the initial reply to this interaction
-    * interaction.fetchReply()
-    *   .then(reply => console.log(`Replied with ${reply.content}`))
-    *   .catch(console.error);
-    */
--  fetchReply() {
--    return this.webhook.fetchMessage('@original');
-+  fetchReply(message = '@original') {
-+    return this.webhook.fetchMessage(message);
-   }
- 
-   /**
--   * Edits the initial reply to this interaction.
-+   * Edits a reply to this interaction.
-    * @see Webhook#editMessage
-    * @param {string|MessagePayload|WebhookEditMessageOptions} options The new options for the message
-+   * @param {MessageResolvable|'@original'} [message='@original'] The response to edit
-    * @returns {Promise<Message>}
-    * @example
--   * // Edit the reply to this interaction
-+   * // Edit the initial reply to this interaction
-    * interaction.editReply('New content')
-    *   .then(console.log)
-    *   .catch(console.error);
-    */
--  async editReply(options) {
-+  async editReply(options, message = '@original') {
-     if (!this.deferred && !this.replied) throw new DiscordjsError(ErrorCodes.InteractionNotReplied);
--    const message = await this.webhook.editMessage('@original', options);
-+    const msg = await this.webhook.editMessage(message, options);
-     this.replied = true;
--    return message;
-+    return msg;
-   }
- 
-   /**
--   * Deletes the initial reply to this interaction.
-+   * Deletes a reply to this interaction.
-    * @see Webhook#deleteMessage
-+   * @param {MessageResolvable|'@original'} [message='@original'] The response to delete
-    * @returns {Promise<void>}
-    * @example
--   * // Delete the reply to this interaction
-+   * // Delete the initial reply to this interaction
-    * interaction.deleteReply()
-    *   .then(console.log)
-    *   .catch(console.error);
-    */
--  async deleteReply() {
--    await this.webhook.deleteMessage('@original');
-+  async deleteReply(message = '@original') {
-+    await this.webhook.deleteMessage(message);
-   }
- 
-   /**
 diff --git a/src/util/Sweepers.js b/src/util/Sweepers.js
 index 83892592ac6f42f1bfea81303347465c434c69c5..2fe28c7cfbd09b051ce2bb465a225f4e3cffa087 100644
 --- a/src/util/Sweepers.js
@@ -679,8 +609,28 @@ index 83892592ac6f42f1bfea81303347465c434c69c5..2fe28c7cfbd09b051ce2bb465a225f4e
    }
  }
  
+diff --git a/src/util/Util.js b/src/util/Util.js
+index dc722e13f63610891dc74e677624dec335f40d5b..44c0e1e6a4b6b5510a6d601d787956e66889082d 100644
+--- a/src/util/Util.js
++++ b/src/util/Util.js
+@@ -140,6 +140,7 @@ function escapeMarkdown(
+       })
+       .join(inlineCode ? '\\`' : '`');
+   }
++  if (escape) text = escapeEscape(text);
+   if (inlineCode) text = escapeInlineCode(text);
+   if (codeBlock) text = escapeCodeBlock(text);
+   if (italic) text = escapeItalic(text);
+@@ -147,7 +148,6 @@ function escapeMarkdown(
+   if (underline) text = escapeUnderline(text);
+   if (strikethrough) text = escapeStrikethrough(text);
+   if (spoiler) text = escapeSpoiler(text);
+-  if (escape) text = escapeEscape(text);
+   if (heading) text = escapeHeading(text);
+   if (bulletedList) text = escapeBulletedList(text);
+   if (numberedList) text = escapeNumberedList(text);
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba9734eb72d2a 100644
+index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf422dbf369 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -262,15 +262,15 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
@@ -704,22 +654,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -439,11 +439,12 @@ export abstract class CommandInteraction<Cached extends CacheType = CacheType> e
-     options: InteractionDeferReplyOptions & { fetchReply: true },
-   ): Promise<Message<BooleanCache<Cached>>>;
-   public deferReply(options?: InteractionDeferReplyOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
--  public deleteReply(): Promise<void>;
-+  public deleteReply(message?: MessageResolvable | '@original'): Promise<void>;
-   public editReply(
-     options: string | MessagePayload | WebhookEditMessageOptions,
-+    message?: MessageResolvable | '@original',
-   ): Promise<Message<BooleanCache<Cached>>>;
--  public fetchReply(): Promise<Message<BooleanCache<Cached>>>;
-+  public fetchReply(message?: MessageResolvable | '@original'): Promise<Message<BooleanCache<Cached>>>;
-   public followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<Message<BooleanCache<Cached>>>;
-   public reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<Message<BooleanCache<Cached>>>;
-   public reply(
-@@ -567,6 +568,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
+@@ -567,6 +567,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
      ButtonComponent,
      APIButtonComponent,
      ButtonComponent | APIButtonComponent,
@@ -727,7 +662,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
      ButtonComponent | APIButtonComponent
    >;
    public inGuild(): this is ButtonInteraction<'raw' | 'cached'>;
-@@ -687,7 +689,7 @@ export class EmbedBuilder extends BuildersEmbed {
+@@ -687,7 +688,7 @@ export class EmbedBuilder extends BuildersEmbed {
  export class Embed {
    private constructor(data: APIEmbed);
    public readonly data: Readonly<APIEmbed>;
@@ -736,7 +671,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1480,7 +1483,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1481,7 +1482,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -745,7 +680,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1488,12 +1491,18 @@ export type CacheTypeReducer<
+@@ -1489,12 +1490,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -764,7 +699,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1520,7 +1529,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1521,7 +1528,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -774,7 +709,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1757,16 +1767,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+@@ -1758,16 +1766,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -794,7 +729,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1808,6 +1818,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1809,6 +1817,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent,
      Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
@@ -802,22 +737,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
    public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
-@@ -1829,11 +1840,12 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
-     options: InteractionDeferUpdateOptions & { fetchReply: true },
-   ): Promise<Message<BooleanCache<Cached>>>;
-   public deferUpdate(options?: InteractionDeferUpdateOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
--  public deleteReply(): Promise<void>;
-+  public deleteReply(message?: MessageResolvable | '@original'): Promise<void>;
-   public editReply(
-     options: string | MessagePayload | WebhookEditMessageOptions,
-+    message?: MessageResolvable | '@original',
-   ): Promise<Message<BooleanCache<Cached>>>;
--  public fetchReply(): Promise<Message<BooleanCache<Cached>>>;
-+  public fetchReply(message?: MessageResolvable | '@original'): Promise<Message<BooleanCache<Cached>>>;
-   public followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<Message<BooleanCache<Cached>>>;
-   public reply(options: InteractionReplyOptions & { fetchReply: true }): Promise<Message<BooleanCache<Cached>>>;
-   public reply(
-@@ -1975,12 +1987,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -1976,12 +1985,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -836,7 +756,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1989,6 +2006,7 @@ export class ModalSubmitFields {
+@@ -1990,6 +2004,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -844,26 +764,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -2019,15 +2037,16 @@ export class ModalSubmitInteraction<Cached extends CacheType = CacheType> extend
-   public reply(
-     options: string | MessagePayload | InteractionReplyOptions,
-   ): Promise<InteractionResponse<BooleanCache<Cached>>>;
--  public deleteReply(): Promise<void>;
-+  public deleteReply(message?: MessageResolvable | '@original'): Promise<void>;
-   public editReply(
-     options: string | MessagePayload | WebhookEditMessageOptions,
-+    message?: MessageResolvable | '@original',
-   ): Promise<Message<BooleanCache<Cached>>>;
-   public deferReply(
-     options: InteractionDeferReplyOptions & { fetchReply: true },
-   ): Promise<Message<BooleanCache<Cached>>>;
-   public deferReply(options?: InteractionDeferReplyOptions): Promise<InteractionResponse<BooleanCache<Cached>>>;
--  public fetchReply(): Promise<Message<BooleanCache<Cached>>>;
-+  public fetchReply(message?: MessageResolvable | '@original'): Promise<Message<BooleanCache<Cached>>>;
-   public followUp(options: string | MessagePayload | InteractionReplyOptions): Promise<Message<BooleanCache<Cached>>>;
-   public deferUpdate(
-     options: InteractionDeferUpdateOptions & { fetchReply: true },
-@@ -2260,6 +2279,7 @@ export class SelectMenuInteraction<Cached extends CacheType = CacheType> extends
+@@ -2261,6 +2276,7 @@ export class SelectMenuInteraction<Cached extends CacheType = CacheType> extends
      SelectMenuComponent,
      APISelectMenuComponent,
      SelectMenuComponent | APISelectMenuComponent,
@@ -871,7 +772,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
      SelectMenuComponent | APISelectMenuComponent
    >;
    public componentType: ComponentType.SelectMenu;
-@@ -3378,7 +3398,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3380,7 +3396,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -880,7 +781,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3876,11 +3896,6 @@ export interface BaseApplicationCommandData {
+@@ -3878,11 +3894,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -892,7 +793,7 @@ index 3f68e6f21e4ca1f2dc21914c7f3a6aa8a298a625..49fc1239c10affc76e309812415ba973
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5301,14 +5316,7 @@ export interface BaseMessageOptions {
+@@ -5303,14 +5314,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
