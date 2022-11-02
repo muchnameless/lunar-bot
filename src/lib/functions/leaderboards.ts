@@ -6,8 +6,8 @@ import {
 	ButtonStyle,
 	codeBlock,
 	EmbedBuilder,
-	SelectMenuBuilder,
 	SelectMenuOptionBuilder,
+	StringSelectMenuBuilder,
 	time,
 	TimestampStyles,
 	type APIEmbed,
@@ -15,8 +15,8 @@ import {
 	type JSONEncodable,
 	type Message,
 	type MessageActionRowComponentBuilder,
-	type SelectMenuInteraction,
 	type Snowflake,
+	type StringSelectMenuInteraction,
 	type User,
 } from 'discord.js';
 import {
@@ -198,7 +198,7 @@ function createActionRows(
 	isExpired = false,
 ) {
 	const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
-	const guildSelectMenu = new SelectMenuBuilder()
+	const guildSelectMenu = new StringSelectMenuBuilder()
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(hypixelGuild === GUILD_ID_ALL ? 'Guilds: All' : `Guild: ${hypixelGuild}`)
 		.addOptions(
@@ -213,7 +213,7 @@ function createActionRows(
 		);
 
 	if (xpType !== 'purge') {
-		const offsetSelectMenu = new SelectMenuBuilder()
+		const offsetSelectMenu = new StringSelectMenuBuilder()
 			.setCustomId(`${cacheKey}:offset`)
 			.setPlaceholder(
 				`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset as keyof typeof XP_OFFSETS_CONVERTER] ?? 'None')}`,
@@ -235,8 +235,8 @@ function createActionRows(
 		}
 
 		rows.push(
-			new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-				new SelectMenuBuilder()
+			new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+				new StringSelectMenuBuilder()
 					.setCustomId(`${cacheKey}:lbType`)
 					.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
 					.addOptions(
@@ -248,8 +248,8 @@ function createActionRows(
 							.setValue('gained'),
 					),
 			),
-			new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-				new SelectMenuBuilder()
+			new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+				new StringSelectMenuBuilder()
 					.setCustomId(`${cacheKey}:xpType`)
 					.setPlaceholder(
 						`XP Type: ${xpType
@@ -265,12 +265,12 @@ function createActionRows(
 						),
 					),
 			),
-			new ActionRowBuilder<SelectMenuBuilder>().addComponents(offsetSelectMenu),
+			new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(offsetSelectMenu),
 		);
 	}
 
 	rows.push(
-		new ActionRowBuilder<SelectMenuBuilder>().addComponents(guildSelectMenu),
+		new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(guildSelectMenu),
 		buildPaginationActionRow(cacheKey, page, totalPages, {
 			disablePages: isExpired,
 			pageStyle: isExpired ? ButtonStyle.Secondary : ButtonStyle.Primary,
@@ -350,7 +350,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
  * @param args parsed customId, split by ':'
  */
 export async function handleLeaderboardSelectMenuInteraction(
-	interaction: SelectMenuInteraction<'cachedOrDM'>,
+	interaction: StringSelectMenuInteraction<'cachedOrDM'>,
 	args: string[],
 ) {
 	const [USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE] = args as SelectMenuCustomIdParsed;

@@ -13,16 +13,20 @@ import {
 	type ApplicationCommandOptionChoiceData,
 	type AutocompleteInteraction,
 	type ButtonInteraction,
+	type ChannelSelectMenuInteraction,
 	type ChatInputCommandInteraction,
 	type ClientEvents,
 	type Events,
 	type JSONEncodable,
+	type MentionableSelectMenuInteraction,
 	type MessageActionRowComponentBuilder,
 	type MessageContextMenuCommandInteraction,
 	type ModalSubmitInteraction,
-	type SelectMenuInteraction,
+	type RoleSelectMenuInteraction,
 	type Snowflake,
+	type StringSelectMenuInteraction,
 	type UserContextMenuCommandInteraction,
+	type UserSelectMenuInteraction,
 } from 'discord.js';
 import ms from 'ms';
 import { CustomIdKey, GUILD_ID_ALL } from '#constants';
@@ -195,7 +199,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	private async _handleSelectMenuInteraction(interaction: SelectMenuInteraction<'cachedOrDM'>) {
+	private async _handleStringSelectMenuInteraction(interaction: StringSelectMenuInteraction<'cachedOrDM'>) {
 		const args = interaction.customId.split(':');
 		const type = args.shift();
 
@@ -204,7 +208,7 @@ export default class InteractionCreateEvent extends Event {
 			case CustomIdKey.Leaderboard:
 				return handleLeaderboardSelectMenuInteraction(interaction, args);
 
-			// command message buttons
+			// command string select menus
 			case CustomIdKey.Command: {
 				const commandName = args.shift();
 				const command = this.client.commands.get(commandName!);
@@ -220,7 +224,131 @@ export default class InteractionCreateEvent extends Event {
 				// role permissions
 				await command.assertPermissions(interaction);
 
-				return command.selectMenuRun(interaction, args);
+				return command.stringSelectMenuRun(interaction, args);
+			}
+
+			default:
+		}
+	}
+
+	/**
+	 * @param interaction
+	 */
+	private async _handleUserSelectMenuInteraction(interaction: UserSelectMenuInteraction<'cachedOrDM'>) {
+		const args = interaction.customId.split(':');
+		const type = args.shift();
+
+		switch (type) {
+			// command user select menus
+			case CustomIdKey.Command: {
+				const commandName = args.shift();
+				const command = this.client.commands.get(commandName!);
+
+				if (!command) {
+					if (commandName) {
+						throw `the \`${commandName}\` command is currently disabled`;
+					}
+
+					return;
+				}
+
+				// role permissions
+				await command.assertPermissions(interaction);
+
+				return command.userSelectMenuRun(interaction, args);
+			}
+
+			default:
+		}
+	}
+
+	/**
+	 * @param interaction
+	 */
+	private async _handleRoleSelectMenuInteraction(interaction: RoleSelectMenuInteraction<'cachedOrDM'>) {
+		const args = interaction.customId.split(':');
+		const type = args.shift();
+
+		switch (type) {
+			// command role select menus
+			case CustomIdKey.Command: {
+				const commandName = args.shift();
+				const command = this.client.commands.get(commandName!);
+
+				if (!command) {
+					if (commandName) {
+						throw `the \`${commandName}\` command is currently disabled`;
+					}
+
+					return;
+				}
+
+				// role permissions
+				await command.assertPermissions(interaction);
+
+				return command.roleSelectMenuRun(interaction, args);
+			}
+
+			default:
+		}
+	}
+
+	/**
+	 * @param interaction
+	 */
+	private async _handleMentionableSelectMenuInteraction(interaction: MentionableSelectMenuInteraction<'cachedOrDM'>) {
+		const args = interaction.customId.split(':');
+		const type = args.shift();
+
+		switch (type) {
+			// command mentionable select menus
+			case CustomIdKey.Command: {
+				const commandName = args.shift();
+				const command = this.client.commands.get(commandName!);
+
+				if (!command) {
+					if (commandName) {
+						throw `the \`${commandName}\` command is currently disabled`;
+					}
+
+					return;
+				}
+
+				// role permissions
+				await command.assertPermissions(interaction);
+
+				return command.mentionableSelectMenuRun(interaction, args);
+			}
+
+			default:
+		}
+	}
+
+	/**
+	 * @param interaction
+	 */
+	private async _handleChannelSelectMenuInteraction(interaction: ChannelSelectMenuInteraction<'cachedOrDM'>) {
+		const args = interaction.customId.split(':');
+		const type = args.shift();
+
+		switch (type) {
+			// command channel select menus
+			case CustomIdKey.Command: {
+				const commandName = args.shift();
+				const command = this.client.commands.get(commandName!);
+
+				if (!command) {
+					if (commandName) {
+						throw `the \`${commandName}\` command is currently disabled`;
+					}
+
+					return;
+				}
+
+				// role permissions
+				await command.assertPermissions(interaction);
+
+				return command.channelSelectMenuRun(interaction, args);
 			}
 
 			default:
@@ -455,8 +583,24 @@ export default class InteractionCreateEvent extends Event {
 							await this._handleButtonInteraction(interaction);
 							return;
 
-						case ComponentType.SelectMenu:
-							await this._handleSelectMenuInteraction(interaction);
+						case ComponentType.StringSelect:
+							await this._handleStringSelectMenuInteraction(interaction);
+							return;
+
+						case ComponentType.UserSelect:
+							await this._handleUserSelectMenuInteraction(interaction);
+							return;
+
+						case ComponentType.RoleSelect:
+							await this._handleRoleSelectMenuInteraction(interaction);
+							return;
+
+						case ComponentType.MentionableSelect:
+							await this._handleMentionableSelectMenuInteraction(interaction);
+							return;
+
+						case ComponentType.ChannelSelect:
+							await this._handleChannelSelectMenuInteraction(interaction);
 							return;
 
 						default:

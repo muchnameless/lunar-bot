@@ -7,16 +7,21 @@ import { Type } from '@sapphire/type';
 import commonTags from 'common-tags';
 import Discord, {
 	ActionRowBuilder,
+	BaseSelectMenuBuilder,
 	ButtonBuilder,
+	ChannelSelectMenuBuilder,
 	ContextMenuCommandBuilder,
 	EmbedBuilder,
+	MentionableSelectMenuBuilder,
 	ModalBuilder,
+	RoleSelectMenuBuilder,
 	Routes,
-	SelectMenuBuilder,
 	SlashCommandBuilder,
+	StringSelectMenuBuilder,
 	TextInputBuilder,
 	TextInputStyle,
 	userMention,
+	UserSelectMenuBuilder,
 	type ButtonInteraction,
 	type ChatInputCommandInteraction,
 	type Message,
@@ -58,6 +63,11 @@ Routes;
 fetch;
 ms;
 commonTags;
+StringSelectMenuBuilder;
+UserSelectMenuBuilder;
+RoleSelectMenuBuilder;
+MentionableSelectMenuBuilder;
+ChannelSelectMenuBuilder;
 ChannelUtil;
 EmbedUtil;
 GuildMemberUtil;
@@ -183,7 +193,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 					? { content: options, ephemeral: false, rejectOnError: true, fetchReply: true }
 					: options instanceof EmbedBuilder
 					? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
-					: options instanceof ButtonBuilder || options instanceof SelectMenuBuilder
+					: options instanceof ButtonBuilder || options instanceof BaseSelectMenuBuilder
 					? {
 							components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(options)],
 							fetchReply: true,

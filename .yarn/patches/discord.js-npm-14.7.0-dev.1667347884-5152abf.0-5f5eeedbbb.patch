@@ -630,10 +630,10 @@ index dc722e13f63610891dc74e677624dec335f40d5b..44c0e1e6a4b6b5510a6d601d787956e6
    if (bulletedList) text = escapeBulletedList(text);
    if (numberedList) text = escapeNumberedList(text);
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf422dbf369 100644
+index 36e3e6a9acfbcca59f77b24e9d2b1d364cc14a1e..c87e345447b82dc30d3cc9ada617d77f9fa10b3f 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -262,15 +262,15 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
+@@ -277,11 +277,11 @@ export class ActionRowBuilder<T extends AnyComponentBuilder = AnyComponentBuilde
        | APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
      >,
    );
@@ -648,13 +648,23 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
 +  ): ActionRowBuilder<T>;
  }
  
- export type MessageActionRowComponent = ButtonComponent | SelectMenuComponent;
+ export type MessageActionRowComponent =
+@@ -291,7 +291,13 @@ export type MessageActionRowComponent =
+   | RoleSelectMenuComponent
+   | MentionableSelectMenuComponent
+   | ChannelSelectMenuComponent;
 -export type ModalActionRowComponent = TextInputComponent;
-+export type ModalActionRowComponent = TextInputComponent | SelectMenuComponent;
++export type ModalActionRowComponent =
++  | TextInputComponent
++  | StringSelectMenuComponent
++  | UserSelectMenuComponent
++  | RoleSelectMenuComponent
++  | MentionableSelectMenuComponent
++  | ChannelSelectMenuComponent;
  
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -567,6 +567,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
+@@ -588,6 +594,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
      ButtonComponent,
      APIButtonComponent,
      ButtonComponent | APIButtonComponent,
@@ -662,7 +672,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
      ButtonComponent | APIButtonComponent
    >;
    public inGuild(): this is ButtonInteraction<'raw' | 'cached'>;
-@@ -687,7 +688,7 @@ export class EmbedBuilder extends BuildersEmbed {
+@@ -753,7 +760,7 @@ export class EmbedBuilder extends BuildersEmbed {
  export class Embed {
    private constructor(data: APIEmbed);
    public readonly data: Readonly<APIEmbed>;
@@ -671,7 +681,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1481,7 +1482,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1547,7 +1554,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -680,7 +690,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1489,12 +1490,18 @@ export type CacheTypeReducer<
+@@ -1555,12 +1562,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -699,7 +709,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1521,7 +1528,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1587,7 +1600,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -709,7 +719,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1758,16 +1766,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+@@ -1839,16 +1853,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -729,7 +739,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1809,6 +1817,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1890,6 +1904,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent,
      Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
@@ -737,7 +747,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
    public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
-@@ -1976,12 +1985,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -2057,12 +2072,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -756,7 +766,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -1990,6 +2004,7 @@ export class ModalSubmitFields {
+@@ -2071,6 +2091,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -764,15 +774,15 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -2261,6 +2276,7 @@ export class SelectMenuInteraction<Cached extends CacheType = CacheType> extends
-     SelectMenuComponent,
-     APISelectMenuComponent,
-     SelectMenuComponent | APISelectMenuComponent,
-+    SelectMenuComponent | APISelectMenuComponent,
-     SelectMenuComponent | APISelectMenuComponent
+@@ -2344,6 +2365,7 @@ export class StringSelectMenuInteraction<
+     StringSelectMenuComponent,
+     APIStringSelectComponent,
+     StringSelectMenuComponent | APIStringSelectComponent,
++    StringSelectMenuComponent | APIStringSelectComponent,
+     StringSelectMenuComponent | APIStringSelectComponent
    >;
-   public componentType: ComponentType.SelectMenu;
-@@ -3380,7 +3396,7 @@ export class ApplicationCommandPermissionsManager<
+   public componentType: ComponentType.StringSelect;
+@@ -3564,7 +3586,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -781,7 +791,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -3878,11 +3894,6 @@ export interface BaseApplicationCommandData {
+@@ -4062,11 +4084,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -793,7 +803,7 @@ index 5edb087bf6b7613a1293c1219e1f90286bfbbec7..5e86efe75fc8876caf3f59c2efb9cdf4
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5303,14 +5314,7 @@ export interface BaseMessageOptions {
+@@ -5501,14 +5518,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
