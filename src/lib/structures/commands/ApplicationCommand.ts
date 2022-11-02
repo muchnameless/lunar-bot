@@ -6,18 +6,20 @@ import {
 	type AutocompleteInteraction,
 	type Awaitable,
 	type ButtonInteraction,
+	type ChannelSelectMenuInteraction,
 	type ChatInputCommandInteraction,
 	type CommandInteraction,
 	type ContextMenuCommandBuilder,
 	type GuildMember,
 	type Interaction,
+	type MentionableSelectMenuInteraction,
 	type Message,
 	type MessageContextMenuCommandInteraction,
 	type ModalSubmitInteraction,
 	type RESTPostAPIApplicationCommandsJSONBody,
 	type RESTPostAPIChatInputApplicationCommandsJSONBody,
 	type RESTPostAPIContextMenuApplicationCommandsJSONBody,
-	type SelectMenuInteraction,
+	type RoleSelectMenuInteraction,
 	type SlashCommandBooleanOption,
 	type SlashCommandBuilder,
 	type SlashCommandChannelOption,
@@ -30,8 +32,10 @@ import {
 	type SlashCommandSubcommandsOnlyBuilder,
 	type SlashCommandUserOption,
 	type Snowflake,
+	type StringSelectMenuInteraction,
 	type User,
 	type UserContextMenuCommandInteraction,
+	type UserSelectMenuInteraction,
 } from 'discord.js';
 import { BaseCommand, type CommandContext, type CommandData } from './BaseCommand.js';
 import { ephemeralOption } from './commonOptions.js';
@@ -340,7 +344,7 @@ export class ApplicationCommand extends BaseCommand {
 		value: number | string,
 		name: string,
 	): Awaitable<unknown> {
-		throw new Error('no run function specified for autocomplete');
+		throw new Error('no run function specified for autocomplete options');
 	}
 
 	/**
@@ -377,8 +381,57 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args - parsed customId, split by ':'
 	 */
-	public selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
-		throw new Error('no run function specified for select menus');
+	public stringSelectMenuRun(
+		interaction: StringSelectMenuInteraction<'cachedOrDM'>,
+		args: string[],
+	): Awaitable<unknown> {
+		throw new Error('no run function specified for string select menus');
+	}
+
+	/**
+	 * execute the command
+	 *
+	 * @param interaction
+	 * @param args - parsed customId, split by ':'
+	 */
+	public userSelectMenuRun(interaction: UserSelectMenuInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
+		throw new Error('no run function specified for user select menus');
+	}
+
+	/**
+	 * execute the command
+	 *
+	 * @param interaction
+	 * @param args - parsed customId, split by ':'
+	 */
+	public roleSelectMenuRun(interaction: RoleSelectMenuInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
+		throw new Error('no run function specified for role select menus');
+	}
+
+	/**
+	 * execute the command
+	 *
+	 * @param interaction
+	 * @param args - parsed customId, split by ':'
+	 */
+	public mentionableSelectMenuRun(
+		interaction: MentionableSelectMenuInteraction<'cachedOrDM'>,
+		args: string[],
+	): Awaitable<unknown> {
+		throw new Error('no run function specified for mentionable select menus');
+	}
+
+	/**
+	 * execute the command
+	 *
+	 * @param interaction
+	 * @param args - parsed customId, split by ':'
+	 */
+	public channelSelectMenuRun(
+		interaction: ChannelSelectMenuInteraction<'cachedOrDM'>,
+		args: string[],
+	): Awaitable<unknown> {
+		throw new Error('no run function specified for channel select menus');
 	}
 
 	/**
@@ -398,7 +451,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param args - parsed customId, split by ':'
 	 */
 	public modalSubmitRun(interaction: ModalSubmitInteraction<'cachedOrDM'>, args: string[]): Awaitable<unknown> {
-		throw new Error('no run function specified for buttons');
+		throw new Error('no run function specified for modal submits');
 	}
 
 	/**

@@ -2,18 +2,16 @@ import { type Components } from '@zikeji/hypixel';
 import { stripIndents } from 'common-tags';
 import {
 	ActionRowBuilder,
-	SelectMenuBuilder,
 	SelectMenuOptionBuilder,
 	SlashCommandBuilder,
+	StringSelectMenuBuilder,
 	time,
 	TimestampStyles,
 	type APISelectMenuOption,
-	type APIStringSelectComponent,
 	type ChatInputCommandInteraction,
 	type EmbedBuilder,
-	type SelectMenuComponent,
-	type SelectMenuInteraction,
 	type Snowflake,
+	type StringSelectMenuInteraction,
 } from 'discord.js';
 import { getSkyBlockProfiles, hypixel } from '#api';
 import { PROFILE_EMOJIS, STATS_URL_BASE, type FindProfileStrategy } from '#constants';
@@ -92,8 +90,8 @@ export default class AhCommand extends ApplicationCommand {
 				return {
 					embeds: [embed.setDescription('no unclaimed auctions')],
 					components: [
-						new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-							new SelectMenuBuilder()
+						new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+							new StringSelectMenuBuilder()
 								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 								.addOptions(profiles),
@@ -155,8 +153,8 @@ export default class AhCommand extends ApplicationCommand {
 					`),
 				],
 				components: [
-					new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-						new SelectMenuBuilder()
+					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+						new StringSelectMenuBuilder()
 							.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 							.addOptions(profiles),
@@ -216,8 +214,8 @@ export default class AhCommand extends ApplicationCommand {
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
-				new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-					new SelectMenuBuilder()
+				new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+					new StringSelectMenuBuilder()
 						.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 						.setDisabled(true)
 						.setPlaceholder('Profile: None'),
@@ -232,10 +230,10 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	public override async selectMenuRun(interaction: SelectMenuInteraction<'cachedOrDM'>, args: string[]) {
+	public override async stringSelectMenuRun(interaction: StringSelectMenuInteraction<'cachedOrDM'>, args: string[]) {
 		const [uuid, ign, userId] = args as [string, string, string];
 		const [profileId] = interaction.values as [string];
-		const profiles = (interaction.component as APIStringSelectComponent | SelectMenuComponent).options;
+		const profiles = interaction.component.options;
 
 		// interaction from original requester -> edit message
 		if (interaction.user.id === userId) {
@@ -283,8 +281,8 @@ export default class AhCommand extends ApplicationCommand {
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [
-							new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-								new SelectMenuBuilder()
+							new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+								new StringSelectMenuBuilder()
 									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
 									.addOptions(this._generateProfileOptions(profiles)),

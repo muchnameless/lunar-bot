@@ -299,11 +299,82 @@ export class InteractionUtil extends null {
 							guildId: interaction.guildId,
 						};
 
-					case ComponentType.SelectMenu:
+					case ComponentType.StringSelect:
 						return {
 							type: ComponentType[interaction.componentType],
 							customId: interaction.customId,
 							values: interaction.values,
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							userId: interaction.user.id,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								: 'DM',
+							channelId: interaction.channelId,
+							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
+						};
+
+					case ComponentType.UserSelect:
+						return {
+							type: ComponentType[interaction.componentType],
+							customId: interaction.customId,
+							values: interaction.users.map((user) => UserUtil.logInfo(user)),
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							userId: interaction.user.id,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								: 'DM',
+							channelId: interaction.channelId,
+							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
+						};
+
+					case ComponentType.RoleSelect:
+						return {
+							type: ComponentType[interaction.componentType],
+							customId: interaction.customId,
+							values: interaction.roles.map((role) => role && { name: role.name, roleId: role.id }),
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							userId: interaction.user.id,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								: 'DM',
+							channelId: interaction.channelId,
+							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
+						};
+
+					case ComponentType.MentionableSelect:
+						return {
+							type: ComponentType[interaction.componentType],
+							customId: interaction.customId,
+							values: [
+								...interaction.users.map((user) => UserUtil.logInfo(user)),
+								...interaction.roles.map((role) => role && { name: role.name, roleId: role.id }),
+							],
+							user: interaction.member
+								? `${interaction.member.displayName} | ${interaction.user.tag}`
+								: interaction.user.tag,
+							userId: interaction.user.id,
+							channel: interaction.guildId
+								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								: 'DM',
+							channelId: interaction.channelId,
+							guild: interaction.guild?.name ?? null,
+							guildId: interaction.guildId,
+						};
+
+					case ComponentType.ChannelSelect:
+						return {
+							type: ComponentType[interaction.componentType],
+							customId: interaction.customId,
+							values: interaction.channels.map((channel) => ChannelUtil.logInfo(channel)),
 							user: interaction.member
 								? `${interaction.member.displayName} | ${interaction.user.tag}`
 								: interaction.user.tag,
@@ -504,7 +575,7 @@ export class InteractionUtil extends null {
 
 				const LAST_NON_FULL_ROW = components.findLastIndex(
 					({ components }) =>
-						components[0]?.type !== ComponentType.SelectMenu &&
+						components[0]?.type === ComponentType.Button &&
 						components.length < InteractionLimits.MaximumButtonsPerActionRow,
 				);
 
