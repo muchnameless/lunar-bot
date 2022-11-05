@@ -31,6 +31,10 @@
 				"followTag": "next",
 				"groupName": "sapphire",
 				"automerge": true
+			},
+			{
+				"matchPackageNames": ["node"],
+				"ignoreUnstable": false
 			}
 		]
 	},
