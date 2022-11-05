@@ -114,9 +114,9 @@
 	},
 	"packageManager": "yarn@3.2.4",
 	"engines": {
-		"node": ">=v19.0.0"
+		"node": ">=v19.0.1"
 	},
 	"volta": {
-		"node": "19.0.0"
+		"node": "19.0.1"
 	}
 }
