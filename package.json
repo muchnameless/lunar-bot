@@ -31,7 +31,7 @@
 		"migrate": "env-cmd ley",
 		"prepare": "husky install",
 		"prune": "ts-prune -p src/tsconfig.json | grep --invert-match ' - default$'",
-		"start": "scripts/save_commit.sh && env-cmd node . | tee -a logs/lunar-bot-out.log",
+		"start": "scripts/pre_start.sh && env-cmd node . | tee -a logs/lunar-bot-out.log",
 		"start:dev": "NODE_ENV=development yarn start | pino-pretty",
 		"test": "tsc -b src",
 		"update": "yarn upgrade-interactive"
