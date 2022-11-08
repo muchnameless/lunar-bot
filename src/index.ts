@@ -1,4 +1,5 @@
-import { env } from 'node:process';
+import { exec } from 'node:child_process';
+import { env, pid } from 'node:process';
 import { URL } from 'node:url';
 import {
 	ActivityType,
@@ -15,6 +16,7 @@ import {
 } from 'discord.js';
 import { Agent, setGlobalDispatcher } from 'undici';
 import { hours, minutes, seconds } from '#functions';
+import { logger } from '#logger';
 import { startJobs } from '#root/jobs/index.js';
 import { LunarClient } from '#structures/LunarClient.js';
 
@@ -118,3 +120,9 @@ startJobs(client);
 
 // connect to Discord
 await client.login();
+
+exec(`systemd-notify --ready --pid=${pid}`, (error, stdout, stderr) => {
+	if (error) logger.error(error, '[SYSTEMD-NOTIFY]: error');
+	if (stdout) logger.info(stdout, '[SYSTEMD-NOTIFY]: stdout');
+	if (stderr) logger.error(stderr, '[SYSTEMD-NOTIFY]: stderr');
+});

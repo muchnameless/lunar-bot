@@ -5,7 +5,8 @@ After=redis-server.service
 After=postgresql.service
 
 [Service]
-Type=simple
+Type=notify
+NotifyAccess=all
 User=USER
 WorkingDirectory=HOME/lunar-bot
 EnvironmentFile=HOME/lunar-bot/.env
@@ -15,7 +16,7 @@ ExecStartPre=HOME/lunar-bot/scripts/pre_start.sh
 ExecStartPost=HOME/lunar-bot/scripts/post_start.sh
 ExecStart=NODE HOME/lunar-bot
 Restart=always
-RestartSec=1
+TimeoutStartSec=60
 
 [Install]
 WantedBy=multi-user.target
