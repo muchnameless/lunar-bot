@@ -103,7 +103,7 @@
 		"env-cmd": "^10.1.0",
 		"eslint": "^8.27.0",
 		"eslint-config-neon": "^0.1.39",
-		"husky": "^8.0.1",
+		"husky": "^8.0.2",
 		"ley": "^0.8.1",
 		"lint-staged": "^13.0.3",
 		"pino-pretty": "^9.1.1",
