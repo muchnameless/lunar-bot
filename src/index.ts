@@ -123,6 +123,6 @@ await client.login();
 
 exec(`systemd-notify --ready --pid=${pid}`, (error, stdout, stderr) => {
 	if (error) logger.error(error, '[SYSTEMD-NOTIFY]: error');
-	if (stdout) logger.info(stdout, '[SYSTEMD-NOTIFY]: stdout');
-	if (stderr) logger.error(stderr, '[SYSTEMD-NOTIFY]: stderr');
+	if (stdout) logger.info(`[SYSTEMD-NOTIFY]: stdout: ${stdout}`);
+	if (stderr) logger.error(`[SYSTEMD-NOTIFY]: stderr: ${stderr}`);
 });
