@@ -28,7 +28,7 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn --immutable
+        run: yarn --immutable --mode=skip-build
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -55,7 +55,7 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn --immutable
+        run: yarn --immutable --mode=skip-build
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
