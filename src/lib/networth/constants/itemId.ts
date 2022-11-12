@@ -155,6 +155,7 @@ export const enum ItemId {
 	PrecursorGear = 'PRECURSOR_GEAR',
 	PremiumFlesh = 'PREMIUM_FLESH',
 	Prismapump = 'PRISMAPUMP',
+	PromisingShovel = 'PROMISING_SPADE',
 	PulseRing = 'PULSE_RING',
 	PumpkinDicer = 'PUMPKIN_DICER',
 	PureMithril = 'PURE_MITHRIL',

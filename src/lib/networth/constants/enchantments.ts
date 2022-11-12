@@ -17,6 +17,10 @@ export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
 		Enchantment.Power,
 		Enchantment.UltimateSoulEater,
 	]),
+	[ItemId.PromisingShovel]: new Set([
+		//
+		Enchantment.Efficiency,
+	]),
 } as const;
 /* eslint-enable @typescript-eslint/no-use-before-define */
 
