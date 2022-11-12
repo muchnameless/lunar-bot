@@ -10,6 +10,9 @@ on:
     paths:
       - 'src/scripts/generateEmojiParser.ts'
 
+env:
+  NODE_ENV: production
+
 jobs:
   unicode-emojis:
     name: Update unicode emojis
@@ -26,7 +29,7 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn --immutable
+        run: yarn --immutable --mode=skip-build
 
       - name: Build
         run: yarn build

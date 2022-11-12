@@ -55,7 +55,7 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn --immutable --mode=skip-build
+        run: yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
