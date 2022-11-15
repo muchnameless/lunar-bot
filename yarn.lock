@@ -1999,17 +1999,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:3.9.1":
-  version: 3.9.1
-  resolution: "chart.js@npm:3.9.1"
-  checksum: 9ab0c0ac01215af0b3f020f2e313030fd6e347b48ed17d5484ee9c4e8ead45e78ae71bea16c397621c386b409ce0b14bf17f9f6c2492cd15b56c0f433efdfff6
+"chart.js@npm:4.0.1":
+  version: 4.0.1
+  resolution: "chart.js@npm:4.0.1"
+  checksum: 013dabf3cd4ad2d71574e1d616906ae6f5b3f5914efb7f8ac7407bfe9b621e997f30966350bbdf31e3a1322c8c602715ef4dd6d0b6072590bb48db03861ac401
   languageName: node
   linkType: hard
 
-"chart.js@patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch::locator=lunar-bot%40workspace%3A.":
-  version: 3.9.1
-  resolution: "chart.js@patch:chart.js@npm%3A3.9.1#./.yarn/patches/chart.js-npm-3.9.1-931bfaba91.patch::version=3.9.1&hash=524bb7&locator=lunar-bot%40workspace%3A."
-  checksum: a199c3e718564c78efddd7a2d2e991e2a6aa66df34f6e73b7257ccc1f1403606b514ea8ec78e03722cf236c2fa644f4e52f7d1ae1d9b380fe9d4f7614fb20c06
+"chart.js@patch:chart.js@npm%3A4.0.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::locator=lunar-bot%40workspace%3A.":
+  version: 4.0.1
+  resolution: "chart.js@patch:chart.js@npm%3A4.0.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::version=4.0.1&hash=460a40&locator=lunar-bot%40workspace%3A."
+  checksum: 21d247f14fcd90dd106f64f1a179e10100cb0b3c65a4a3641c1e7cb26f2fe49a6206236996729d9307eb44c1ee75a4dba9859421a1176ebb8f4c70a9c47cf7eb
   languageName: node
   linkType: hard
 
@@ -4827,7 +4827,7 @@ __metadata:
     "@types/prettier": ^2.7.1
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#3161e8e687d869b17a1eb25a869ec75f0adab3a7"
     bufferutil: ^4.0.7
-    chart.js: ^3.9.1
+    chart.js: ^4.0.1
     common-tags: ^1.8.2
     cron: ^2.1.0
     discord.js: 14.7.0-dev.1668514149-ff85481.0
