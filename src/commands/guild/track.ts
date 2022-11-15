@@ -1,5 +1,5 @@
 import { createCanvas, type Canvas } from '@napi-rs/canvas';
-import Chart from 'chart.js/auto/auto.mjs';
+import { Chart } from 'chart.js/auto';
 import { AttachmentBuilder, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { seconds, upperCaseFirstChar, type LeaderboardXPTypes } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
