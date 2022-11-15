@@ -121,8 +121,11 @@ startJobs(client);
 // connect to Discord
 await client.login();
 
-exec(`systemd-notify --ready --pid=${pid}`, (error, stdout, stderr) => {
-	if (error) logger.error(error, '[SYSTEMD-NOTIFY]: error');
-	if (stdout) logger.info({ stdout }, '[SYSTEMD-NOTIFY]: stdout');
-	if (stderr) logger.error({ stderr }, '[SYSTEMD-NOTIFY]: stderr');
-});
+// systemd ready notification
+if ('NOTIFY_SOCKET' in env) {
+	exec(`systemd-notify --ready --pid=${pid}`, (error, stdout, stderr) => {
+		if (error) logger.error(error, '[SYSTEMD-NOTIFY]: error');
+		if (stdout) logger.info({ stdout }, '[SYSTEMD-NOTIFY]: stdout');
+		if (stderr) logger.error({ stderr }, '[SYSTEMD-NOTIFY]: stderr');
+	});
+}
