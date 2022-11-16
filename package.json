@@ -112,7 +112,7 @@
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.0.0-dev.20221116"
 	},
-	"packageManager": "yarn@3.2.4",
+	"packageManager": "yarn@3.3.0",
 	"engines": {
 		"node": ">=v19.1.0"
 	},
