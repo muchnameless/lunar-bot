@@ -863,13 +863,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/shapeshift@npm:3.7.1-next.ea85cf7.0":
-  version: 3.7.1-next.ea85cf7.0
-  resolution: "@sapphire/shapeshift@npm:3.7.1-next.ea85cf7.0"
+"@sapphire/shapeshift@npm:3.7.1-next.1c11147.0":
+  version: 3.7.1-next.1c11147.0
+  resolution: "@sapphire/shapeshift@npm:3.7.1-next.1c11147.0"
   dependencies:
     fast-deep-equal: ^3.1.3
     lodash.uniqwith: ^4.5.0
-  checksum: 4a132dd0767e19c4d43b7dee009098a74fe1101236d460cceaa99a3203ef728ca169da215d58c8f2cdb8b7769f0d091041b6fae615d75a18ee92e2818d6c5a70
+  checksum: fa65e350a52d30a098cafa76fe4d37281c94bbf85e4ca87b2a89916f595b21d554e7d166e612ed44b36262283a5531be7900e807fc7d69b4b651b381d26c27cf
   languageName: node
   linkType: hard
 
@@ -2469,10 +2469,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:0.37.19-next.f91e10f.1668765511":
-  version: 0.37.19-next.f91e10f.1668765511
-  resolution: "discord-api-types@npm:0.37.19-next.f91e10f.1668765511"
-  checksum: 19828c4bab86a21522ea8593fa07bbee728bb60f70858398ba4c6c75d3bd17836e45263cc18863ee780e3a2cdf382f2a374a1a2e9fa43e9dde4585a8d79e3399
+"discord-api-types@npm:0.37.19-next.2695dad.1668982563":
+  version: 0.37.19-next.2695dad.1668982563
+  resolution: "discord-api-types@npm:0.37.19-next.2695dad.1668982563"
+  checksum: 37e8a830c5b4e46bba7eeba70b39e74bcd8c00cc1c8fcee5c2fb3f4843bbaffa8a5c1c47f2c752f0ff960152f1cf52d57d3d7d22a545e645f9abf724dc4fac8c
   languageName: node
   linkType: hard
 
