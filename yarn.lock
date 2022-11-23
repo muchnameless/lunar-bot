@@ -4909,7 +4909,7 @@ __metadata:
     pretty-quick: ^3.1.3
     prismarine-chat: ^1.7.2
     prismarine-nbt: ^2.2.1
-    re2: ^1.17.7
+    re2: ^1.17.8
     sequelize: ^6.25.8
     sort-package-json: ^2.1.0
     ts-prune: ^0.10.3
@@ -5326,7 +5326,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.14.0, nan@npm:^2.15.0, nan@npm:^2.16.0":
+"nan@npm:^2.14.0, nan@npm:^2.15.0, nan@npm:^2.17.0":
   version: 2.17.0
   resolution: "nan@npm:2.17.0"
   dependencies:
@@ -5407,7 +5407,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:^9.0.0, node-gyp@npm:latest":
+"node-gyp@npm:^9.3.0, node-gyp@npm:latest":
   version: 9.3.0
   resolution: "node-gyp@npm:9.3.0"
   dependencies:
@@ -6282,14 +6282,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"re2@npm:^1.17.7":
-  version: 1.17.7
-  resolution: "re2@npm:1.17.7"
+"re2@npm:^1.17.8":
+  version: 1.17.8
+  resolution: "re2@npm:1.17.8"
   dependencies:
     install-artifact-from-github: ^1.3.1
-    nan: ^2.16.0
-    node-gyp: ^9.0.0
-  checksum: a53efcf1fd77ee9071206e9600791602f95818a471f9313aee931c6417bae4462e8441487ddf78be707ab3faa6cf9956e8deb5a3048c73ba4c024b16a05e5655
+    nan: ^2.17.0
+    node-gyp: ^9.3.0
+  checksum: 451a12888650fb1b9baaf5ec7441396f00fc5a7289fc0c0704732cb8eec668489ec6f4372aea9cd3fc5ddf6ff5dc42cd7c93c118939fea3e7f4f5c512e292fe3
   languageName: node
   linkType: hard
 
