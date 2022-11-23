@@ -2,7 +2,6 @@
 import { TextInputLimits } from '@sapphire/discord-utilities';
 import {
 	ActionRowBuilder,
-	escapeMarkdown,
 	InteractionType,
 	ModalBuilder,
 	SlashCommandBuilder,
@@ -388,10 +387,10 @@ export default class MathsCommand extends DualCommand {
 		try {
 			const { input, formattedOutput } = this.calculate(rawInput);
 
-			return InteractionUtil.reply(interaction, escapeMarkdown(`${input} = ${formattedOutput}`, { inlineCode: false }));
+			return InteractionUtil.reply(interaction, `${input} = ${formattedOutput}`);
 		} catch (error) {
 			if (interaction.type === InteractionType.ModalSubmit) {
-				return InteractionUtil.reply(interaction, escapeMarkdown(`${error}`, { inlineCode: false }));
+				return InteractionUtil.reply(interaction, `${error}`);
 			}
 
 			try {
@@ -427,7 +426,7 @@ export default class MathsCommand extends DualCommand {
 				);
 			} catch (_error) {
 				logger.error(_error, '[MATHS CMD]: modal');
-				return InteractionUtil.reply(interaction, escapeMarkdown(`${error}`, { inlineCode: false }));
+				return InteractionUtil.reply(interaction, `${error}`);
 			}
 		}
 	}
