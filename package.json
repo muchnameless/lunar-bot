@@ -37,10 +37,10 @@
 		"update": "yarn upgrade-interactive"
 	},
 	"resolutions": {
-		"@discordjs/builders": "1.3.1-dev.1669118646-65bc0ad.0",
-		"@discordjs/collection": "1.2.1-dev.1669118646-65bc0ad.0",
-		"@discordjs/rest": "1.3.1-dev.1669118654-65bc0ad.0",
-		"@discordjs/util": "0.1.1-dev.1669118653-65bc0ad.0",
+		"@discordjs/builders": "1.3.1-dev.1669162204-ee7d2fd.0",
+		"@discordjs/collection": "1.2.1-dev.1669162219-ee7d2fd.0",
+		"@discordjs/rest": "1.3.1-dev.1669162219-ee7d2fd.0",
+		"@discordjs/util": "0.1.1-dev.1669162202-ee7d2fd.0",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.edd1210.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.3eb5175.0-3223b22520.patch",
 		"@sapphire/ratelimits": "2.4.6-next.edd1210.0",
 		"@sapphire/shapeshift": "3.7.1-next.1c11147.0",
