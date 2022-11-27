@@ -869,13 +869,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/shapeshift@npm:3.7.1-next.09e9a4d.0":
-  version: 3.7.1-next.09e9a4d.0
-  resolution: "@sapphire/shapeshift@npm:3.7.1-next.09e9a4d.0"
+"@sapphire/shapeshift@npm:3.7.2-next.ef17e9a.0":
+  version: 3.7.2-next.ef17e9a.0
+  resolution: "@sapphire/shapeshift@npm:3.7.2-next.ef17e9a.0"
   dependencies:
     fast-deep-equal: ^3.1.3
     lodash.uniqwith: ^4.5.0
-  checksum: 8d150fd5950ebf3612f1fd470e477b3f3a1a4febf7415da67d52f3a75f66548bff92dd875cc4e02df654552b55925f20a9322bd75b733433a4f05d3ccaa95e06
+  checksum: d1e6962142e25a539e8782a4501d236d0d10ff4968fa2c637a444eff4d47ed5772ef19849692b4daba0fa79f4c8b565a0a250b7140d8c0134e4a3767fe17f54e
   languageName: node
   linkType: hard
 
