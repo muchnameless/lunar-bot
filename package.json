@@ -51,7 +51,7 @@
 		"chart.js": "patch:chart.js@npm%3A4.0.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch",
 		"discord-api-types": "0.37.20-next.33e0f3f.1669288489",
 		"discord.js": "patch:discord.js@14.7.1-dev.1669680652-6bcebd4.0#./.yarn/patches/discord.js-npm-14.7.0-dev.1669421388-650f4dd.0-219b3c2519.patch",
-		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
+		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
 	"dependencies": {
 		"@napi-rs/canvas": "^0.1.30",
@@ -75,7 +75,7 @@
 		"lilyweight": "^2.7.0",
 		"luxon": "^3.1.1",
 		"minecraft-data": "^3.18.0",
-		"minecraft-protocol": "1.36.1",
+		"minecraft-protocol": "1.36.2",
 		"ms": "3.0.0-canary.1",
 		"pg": "^8.8.0",
 		"pg-hstore": "^2.3.4",
