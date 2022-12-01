@@ -33,12 +33,3 @@ export const enum ItemCategory {
 	TravelScroll = 'TRAVEL_SCROLL',
 	Wand = 'WAND',
 }
-
-export const ALLOWED_RECOMB_CATEGORIES = new Set([
-	ItemCategory.Accessory,
-	ItemCategory.Belt,
-	ItemCategory.Bracelet,
-	ItemCategory.Cloak,
-	ItemCategory.Gloves,
-	ItemCategory.Necklace,
-] as const);

@@ -6,5 +6,6 @@ export * from './itemId.js';
 export * from './itemRarity.js';
 export * from './modifiers.js';
 export * from './pets.js';
+export * from './recombs.js';
 export * from './stars.js';
 export * from './thunderCharge.js';

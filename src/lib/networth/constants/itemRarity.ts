@@ -34,4 +34,4 @@ export const colourCodeToRarity = {
 	[ItemRarityColourCode.Divine]: ItemRarity.Divine,
 	[ItemRarityColourCode.Special]: ItemRarity.Special,
 	// [ItemRarityColourCode.VerySpecial]: ItemRarity.VerySpecial,
-} as const;
+} as const satisfies Record<ItemRarityColourCode, ItemRarity>;
