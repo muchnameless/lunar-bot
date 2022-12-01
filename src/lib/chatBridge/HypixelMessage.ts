@@ -18,7 +18,7 @@ import { type DualCommand } from '#structures/commands/DualCommand.js';
 import { type Player } from '#structures/database/models/Player.js';
 import { MessageUtil } from '#utils';
 
-type ParseArgsConfigOptions = NonNullable<ParseArgsConfig['options']>;
+export type ParseArgsConfigOptions = NonNullable<ParseArgsConfig['options']>;
 
 type CommandData = {
 	args: string[];

@@ -2,7 +2,7 @@ import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
 import { AsyncQueue } from '@sapphire/async-queue';
-import { RateLimitManager } from '@sapphire/ratelimits';
+import { RateLimitManager, type RateLimit } from '@sapphire/ratelimits';
 import { fetch, type Headers, type RequestInit, type Response } from 'undici';
 import { FetchError } from './errors/FetchError.js';
 import { consumeBody, days, hours, isAbortError, seconds } from '#functions';
@@ -56,6 +56,14 @@ interface ImgurClientOptions {
 	timeout?: number;
 }
 
+interface RateLimitManagersEntry {
+	limitKey: string;
+	manager: RateLimitManager;
+	rateLimit: RateLimit;
+	remainingKey: string;
+	resetKey: string;
+}
+
 export class ImgurClient {
 	#authorisation!: string;
 
@@ -96,7 +104,7 @@ export class ImgurClient {
 			resetKey: 'x-post-rate-limit-reset',
 			limitKey: 'x-post-rate-limit-limit',
 		},
-	] as const;
+	] as const satisfies readonly RateLimitManagersEntry[];
 
 	public readonly queue = new AsyncQueue();
 

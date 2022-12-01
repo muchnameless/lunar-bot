@@ -1,7 +1,7 @@
 /**
  * bot events that should only be listened to once
  */
-export const SPAWN_EVENTS = new Set(['login'] as const);
+export const SPAWN_EVENTS = new Set(['login'] as const satisfies readonly string[]);
 
 /**
  * https://wiki.vg/Protocol -> Player Chat Message -> Type
@@ -36,14 +36,14 @@ export const PREFIX_BY_TYPE = {
 	[HypixelMessageType.Officer]: ChatPrefix.Officer,
 	[HypixelMessageType.Party]: ChatPrefix.Party,
 	[HypixelMessageType.Whisper]: ChatPrefix.Whisper,
-} as const;
+} as const satisfies Record<HypixelMessageType, ChatPrefix>;
 
 export const CHAT_METHOD_BY_TYPE = {
 	[HypixelMessageType.Guild]: 'gchat',
 	[HypixelMessageType.Officer]: 'ochat',
 	[HypixelMessageType.Party]: 'pchat',
 	[HypixelMessageType.Whisper]: 'whisper',
-} as const;
+} as const satisfies Record<HypixelMessageType, string>;
 
 /**
  * characters that don't render in mc chat and ZWS

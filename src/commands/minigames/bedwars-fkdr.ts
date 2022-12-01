@@ -37,7 +37,7 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 					{ name: 'Doubles', key: 'eight_two_' },
 					{ name: '3s', key: 'four_three_' },
 					{ name: '4s', key: 'four_four_' },
-				] as const
+				] as const satisfies readonly { key: string; name: string }[]
 			)
 				.map(({ name, key }) => ({
 					name,

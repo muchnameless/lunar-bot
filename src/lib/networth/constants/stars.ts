@@ -6,4 +6,4 @@ export const MASTER_STARS = [
 	ItemId.ThirdMasterStar,
 	ItemId.FourthMasterStar,
 	ItemId.FifthMasterStar,
-] as const;
+] as const satisfies readonly ItemId[];

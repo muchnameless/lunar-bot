@@ -32,7 +32,7 @@ export default class FetchurCommand extends DualCommand {
 		'1 flint and steel',
 		'50 quartz ore (mine with silk touch)',
 		'50 red wool (Wool Weaver near builder merch in hub)',
-	] as const;
+	] as const satisfies readonly string[];
 
 	/**
 	 * execute the command

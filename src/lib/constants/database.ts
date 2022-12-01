@@ -77,7 +77,7 @@ export const DEFAULT_CONFIG = {
 	TAX_TRACKING_ENABLED: true,
 	USER_INPUT_MAX_RETRIES: 3,
 	XP_TRACKING_ENABLED: true,
-} as const;
+} as const satisfies Record<string, unknown>;
 
 type Loosen<T> = {
 	[P in keyof T]: T[P] extends Offset
@@ -113,14 +113,14 @@ export const XP_OFFSETS = [
 	Offset.Mayor,
 	Offset.Week,
 	Offset.Month,
-] as const;
+] as const satisfies readonly Offset[];
 
 export const XP_OFFSETS_SHORT = {
 	competition: Offset.CompetitionStart,
 	mayor: Offset.Mayor,
 	week: Offset.Week,
 	month: Offset.Month,
-} as const;
+} as const satisfies Record<string, Offset>;
 
 export const XP_OFFSETS_CONVERTER = {
 	...XP_OFFSETS_SHORT,
@@ -142,12 +142,17 @@ export const XP_OFFSETS_TIME = {
 
 export type XPOffsets = ArrayElementType<typeof XP_OFFSETS> | '';
 
-export const SKYBLOCK_XP_TYPES = [...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES] as const;
-export const XP_TYPES = [...SKYBLOCK_XP_TYPES, 'guild'] as const;
+export const SKYBLOCK_XP_TYPES = [
+	...SKILLS,
+	...COSMETIC_SKILLS,
+	...SLAYERS,
+	...DUNGEON_TYPES_AND_CLASSES,
+] as const satisfies readonly string[];
+export const XP_TYPES = [...SKYBLOCK_XP_TYPES, 'guild'] as const satisfies readonly string[];
 export const XP_AND_DATA_TYPES = [
 	...XP_TYPES,
 	...DUNGEON_TYPES.flatMap((type) => [`${type}Completions`, `${type}MasterCompletions`] as const),
-] as const;
+] as const satisfies readonly string[];
 
 const XP_TYPES_SET = new Set(XP_TYPES);
 export const isXPType = (type: unknown): type is XPTypes => XP_TYPES_SET.has(type as XPTypes);
@@ -166,7 +171,7 @@ export const LEADERBOARD_XP_TYPES = [
 	...SLAYERS,
 	...DUNGEON_TYPES_AND_CLASSES,
 	'guild',
-] as const;
+] as const satisfies readonly string[];
 
 // IGNs
 export const UNKNOWN_IGN = 'UNKNOWN_IGN';
