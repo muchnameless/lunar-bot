@@ -30,7 +30,7 @@ import Discord, {
 	type ModalSubmitInteraction,
 } from 'discord.js';
 import ms from 'ms';
-import { format } from 'prettier';
+import { format, type Options as PrettierFormatOptions } from 'prettier';
 import { fetch } from 'undici';
 import BaseOwnerCommand from './~base.js';
 import { redis, hypixel, imgur, mojang } from '#api';
@@ -99,7 +99,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 		printWidth: 120,
 		trailingComma: 'all',
 		useTabs: true,
-	} as const;
+	} as const satisfies PrettierFormatOptions;
 
 	public constructor(context: CommandContext) {
 		super(context, {

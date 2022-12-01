@@ -24,7 +24,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Cultivating:
 		case Enchantment.Expertise:
 		case Enchantment.Hecatomb:
-			return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 1 } as const;
+			return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 1 } as const satisfies EnchantmentData;
 
 		// not combinable
 		case Enchantment.AquaAffinity:
@@ -38,15 +38,18 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.SmeltingTouch:
 		case Enchantment.Telekinesis:
 		case Enchantment.TrueProtection:
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 1->2
 		case Enchantment.FireAspect:
 		case Enchantment.FrostWalker:
 		case Enchantment.Knockback:
 		case Enchantment.Punch:
-			if (level <= 2) return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 2) {
+				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 1->3
 		case Enchantment.Chance:
@@ -64,14 +67,20 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.SugarRush:
 		case Enchantment.Syphon:
 		case Enchantment.Thorns:
-			if (level <= 3) return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 3) {
+				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 1->4
 		case Enchantment.FirstStrike:
 		case Enchantment.TripleStrike:
-			if (level <= 4) return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 4) {
+				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 1->5
 		case Enchantment.Angler:
@@ -118,45 +127,60 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.TitanKiller:
 		case Enchantment.Vampirism:
 		case Enchantment.Venomous:
-			if (level <= 5) return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 5) {
+				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 1->10
 		case Enchantment.FerociousMana:
 		case Enchantment.HardenedMana:
 		case Enchantment.ManaVampire:
 		case Enchantment.StrongMana:
-			if (level <= 10) return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 10) {
+				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 1->5, 6->10
 		case Enchantment.FeatherFalling:
 		case Enchantment.InfiniteQuiver:
 			if (level <= 5) {
-				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
+				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
 			}
 
 			if (level <= 10) {
-				return { itemId: `ENCHANTMENT_${enchantment}_6`, count: 2 ** (level - 6) } as const;
+				return { itemId: `ENCHANTMENT_${enchantment}_6`, count: 2 ** (level - 6) } as const satisfies EnchantmentData;
 			}
 
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 2->3
 		case Enchantment.Tabasco:
-			if (level <= 3) return { itemId: `ENCHANTMENT_${enchantment}_2`, count: 2 ** (level - 2) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 3) {
+				return { itemId: `ENCHANTMENT_${enchantment}_2`, count: 2 ** (level - 2) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 3->5
 		case Enchantment.BigBrain:
 		case Enchantment.Vicious:
-			if (level <= 5) return { itemId: `ENCHANTMENT_${enchantment}_3`, count: 2 ** (level - 3) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 5) {
+				return { itemId: `ENCHANTMENT_${enchantment}_3`, count: 2 ** (level - 3) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 4->5
 		case Enchantment.Cayenne:
-			if (level <= 5) return { itemId: `ENCHANTMENT_${enchantment}_4`, count: 2 ** (level - 4) } as const;
-			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const;
+			if (level <= 5) {
+				return { itemId: `ENCHANTMENT_${enchantment}_4`, count: 2 ** (level - 4) } as const satisfies EnchantmentData;
+			}
+
+			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 } as const satisfies EnchantmentData;
 
 		// combinable 1->x
 		case Enchantment.TurboCactus: // turbo
@@ -188,7 +212,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.UltimateSwarm:
 		case Enchantment.UltimateWisdom:
 		case Enchantment.UltimateWise:
-			return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
+			return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
 
 		default: {
 			// make sure TS errors if the switch is not exhaustive
@@ -199,11 +223,11 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 
 			// unknown ultimate and turbo enchantments fallback
 			if (itemId.startsWith('ultimate_') || itemId.startsWith('turbo_')) {
-				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const;
+				return { itemId: `ENCHANTMENT_${enchantment}_1`, count: 2 ** (level - 1) } as const satisfies EnchantmentData;
 			}
 
 			// generic fallback
-			return { itemId: `ENCHANTMENT_${itemId}`, count: 1 } as const;
+			return { itemId: `ENCHANTMENT_${itemId}`, count: 1 } as const satisfies EnchantmentData;
 		}
 	}
 };

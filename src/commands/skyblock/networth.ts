@@ -4,7 +4,7 @@ import BaseSkyBlockCommand, {
 	type BaseSkyBlockSlashData,
 	type FetchedData,
 } from './~base-skyblock-command.js';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { type HypixelUserMessage, type ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES, UnicodeEmoji } from '#constants';
 import { autocorrect, formatError, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
 import { logger } from '#logger';
@@ -23,7 +23,7 @@ const parseArgsOptions = {
 		type: 'boolean',
 		short: 'a',
 	},
-} as const;
+} as const satisfies ParseArgsConfigOptions;
 
 export default class NetworthCommand extends BaseSkyBlockCommand {
 	public constructor(context: CommandContext, slashData?: BaseSkyBlockSlashData, bridgeData?: BridgeCommandData) {

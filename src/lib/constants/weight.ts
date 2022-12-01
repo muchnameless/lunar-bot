@@ -1,5 +1,6 @@
-import { objectKeys } from '@sapphire/utilities';
+import { type ArrayElementType, objectKeys } from '@sapphire/utilities';
 import lilyConstants from 'lilyweight/lib/constants.json' assert { type: 'json' };
+import { type DungeonTypes, type SKILLS, type SLAYERS } from './skyblock.js';
 
 /**
  * senither
@@ -15,7 +16,7 @@ export const SKILL_EXPONENTS = {
 	fishing: 1.406_418,
 	enchanting: 0.969_765_83,
 	alchemy: 1,
-} as const;
+} as const satisfies Record<ArrayElementType<typeof SKILLS>, number>;
 
 export const SKILL_DIVIDER = {
 	taming: 441_379,
@@ -26,7 +27,7 @@ export const SKILL_DIVIDER = {
 	fishing: 88_274,
 	enchanting: 882_758,
 	alchemy: 1_103_448,
-} as const;
+} as const satisfies Record<ArrayElementType<typeof SKILLS>, number>;
 
 export const SLAYER_DIVIDER = {
 	zombie: 2_208,
@@ -35,7 +36,7 @@ export const SLAYER_DIVIDER = {
 	enderman: 1_430,
 	// TODO
 	blaze: Number.POSITIVE_INFINITY,
-} as const;
+} as const satisfies Record<ArrayElementType<typeof SLAYERS>, number>;
 
 export const SLAYER_MODIFIER = {
 	zombie: 0.15,
@@ -44,7 +45,7 @@ export const SLAYER_MODIFIER = {
 	enderman: 0.017,
 	// TODO
 	blaze: 0,
-} as const;
+} as const satisfies Record<ArrayElementType<typeof SLAYERS>, number>;
 
 export const DUNGEON_EXPONENTS = {
 	catacombs: 0.000_214_960_461_5,
@@ -53,7 +54,7 @@ export const DUNGEON_EXPONENTS = {
 	berserk: 0.000_004_525_483_4,
 	archer: 0.000_004_525_483_4,
 	tank: 0.000_004_525_483_4,
-} as const;
+} as const satisfies Record<DungeonTypes, number>;
 
 /**
  * lily

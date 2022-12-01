@@ -353,7 +353,7 @@ export class MinecraftChatManager extends ChatManager {
 		120,
 		150,
 		...Array.from({ length: 20 }, () => this.SAFE_DELAY),
-	] as const;
+	] as const satisfies readonly number[];
 
 	/**
 	 * delay which can be used after triggering anti spam

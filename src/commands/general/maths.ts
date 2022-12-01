@@ -20,6 +20,15 @@ import { type CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { InteractionUtil, type ModalRepliableInteraction, type RepliableInteraction } from '#utils';
 
+interface Operator {
+	readonly associativity: OperatorAssociativity;
+	readonly precedence: number;
+}
+
+interface Operators {
+	readonly [key: string]: (x?: number) => number | string;
+}
+
 export default class MathsCommand extends DualCommand {
 	/**
 	 * >= 10 -> sin(90°) = 0
@@ -51,47 +60,47 @@ export default class MathsCommand extends DualCommand {
 	private readonly percent = {
 		precedence: 8,
 		associativity: OperatorAssociativity.Right,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly multiplier = {
 		precedence: 7,
 		associativity: OperatorAssociativity.Right,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly degree = {
 		precedence: 6,
 		associativity: OperatorAssociativity.Right,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly factorialPost = {
 		precedence: 5,
 		associativity: OperatorAssociativity.Right,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly factorialPre = {
 		precedence: 5,
 		associativity: OperatorAssociativity.Left,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly func = {
 		precedence: 4,
 		associativity: OperatorAssociativity.Left,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly power = {
 		precedence: 3,
 		associativity: OperatorAssociativity.Left,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly factor = {
 		precedence: 2,
 		associativity: OperatorAssociativity.Left,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly term = {
 		precedence: 1,
 		associativity: OperatorAssociativity.Left,
-	} as const;
+	} as const satisfies Operator;
 
 	private readonly unaryOperators = {
 		m: (x = 1) => {
@@ -146,7 +155,7 @@ export default class MathsCommand extends DualCommand {
 			if (typeof x === 'undefined') throw new Error('`%` requires one argument');
 			return BigDecimal.divide(x, 100, this.precision);
 		},
-	} as const;
+	} as const satisfies Operators;
 
 	private readonly binaryOperators = {
 		'^': (a?: number, b?: number) => {
@@ -170,7 +179,7 @@ export default class MathsCommand extends DualCommand {
 			if (a <= 0 || b! <= 0) return Number.NaN;
 			return BigDecimal.divide(Math.log(a), Math.log(b!), this.precision);
 		},
-	} as const;
+	} as const satisfies Operators;
 
 	/**
 	 * @param start

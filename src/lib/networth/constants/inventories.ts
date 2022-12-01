@@ -10,4 +10,4 @@ export const SKYBLOCK_INVENTORIES = [
 	'quiver',
 	'talisman_bag',
 	'wardrobe_contents',
-] as const;
+] as const satisfies readonly string[];

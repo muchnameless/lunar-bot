@@ -3,6 +3,7 @@ import { type Components, type NBTExtraAttributes, type NBTInventoryItem } from 
 import { parse, simplify } from 'prismarine-nbt';
 import {
 	ALLOWED_RECOMB_CATEGORIES,
+	ALLOWED_RECOMB_ITEMS,
 	CRAFTING_RECIPES,
 	Enchantment,
 	ITEM_SPECIFIC_IGNORED_ENCHANTS,
@@ -331,7 +332,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	if (
 		extraAttributes.rarity_upgrades! > 0 &&
 		!extraAttributes.item_tier &&
-		(extraAttributes.enchantments || ALLOWED_RECOMB_CATEGORIES.has(skyblockItem?.category as any))
+		(extraAttributes.enchantments ||
+			ALLOWED_RECOMB_CATEGORIES.has(skyblockItem?.category as any) ||
+			ALLOWED_RECOMB_ITEMS.has(itemId as any))
 	) {
 		price += getPrice(ItemId.Recombobulator) * PriceModifier.Recomb;
 	}

@@ -39,5 +39,5 @@ export const SMALL_LATIN_CAPITAL_LETTERS = {
 	// x: ''
 	y: '\u028F',
 	z: '\u1D22',
-} as const;
+} as const satisfies Record<string, string>;
 /* eslint-enable id-length */

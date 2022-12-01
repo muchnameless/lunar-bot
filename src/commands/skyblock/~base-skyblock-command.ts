@@ -1,7 +1,7 @@
 import { type Components } from '@zikeji/hypixel';
 import { type Awaitable, type ChatInputCommandInteraction, type SlashCommandBuilder } from 'discord.js';
 import { getSkyBlockProfiles } from '#api';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { type HypixelUserMessage, type ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES } from '#constants';
 import {
 	autocorrect,
@@ -40,7 +40,7 @@ export const baseParseArgsOptions = {
 		type: 'boolean',
 		short: 'l',
 	},
-} as const;
+} as const satisfies ParseArgsConfigOptions;
 
 interface ReplyData {
 	ign: string;

@@ -51,7 +51,7 @@ export const PROFILE_EMOJIS = {
 	Tomato: '🍅',
 	Watermelon: '🍉',
 	Zucchini: '🥬',
-} as const;
+} as const satisfies Record<string, string>;
 
 /**
  * SkyBlock profile game_mode emojis
@@ -59,4 +59,4 @@ export const PROFILE_EMOJIS = {
 export const GAME_MODE_EMOJIS = {
 	bingo: 'Ⓑ',
 	ironman: '♲',
-} as const;
+} as const satisfies Record<string, string>;

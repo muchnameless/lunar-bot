@@ -78,7 +78,7 @@ interface RunKickOptions extends RunModerationOptions {
 }
 
 export default class GuildCommand extends ApplicationCommand {
-	private readonly GUILD_IDENTIFIER = new Set(['guild', 'everyone'] as const);
+	private readonly GUILD_IDENTIFIER = new Set(['guild', 'everyone'] as const satisfies readonly string[]);
 
 	public constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()

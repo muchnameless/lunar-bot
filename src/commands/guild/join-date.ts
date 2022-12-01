@@ -1,7 +1,7 @@
 import { bold, SlashCommandBuilder, time, type ChatInputCommandInteraction } from 'discord.js';
 import ms from 'ms';
 import { type ChatBridge } from '#chatBridge/ChatBridge.js';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import { type HypixelUserMessage, type ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { IGN_DEFAULT, logErrors } from '#chatBridge/constants/index.js';
 import { MinecraftChatManager } from '#chatBridge/managers/MinecraftChatManager.js';
 import { escapeIgn, seconds } from '#functions';
@@ -21,7 +21,7 @@ const parseArgsOptions = {
 		type: 'string',
 		short: 'g',
 	},
-} as const;
+} as const satisfies ParseArgsConfigOptions;
 
 export default class JoinDateCommand extends DualCommand {
 	public constructor(context: CommandContext) {
