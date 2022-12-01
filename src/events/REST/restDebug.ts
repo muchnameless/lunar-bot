@@ -12,6 +12,6 @@ export default class RESTDebugEvent extends RESTEvent {
 	 * @param info
 	 */
 	public override run(info: RestEvents[RESTEvents.Debug][0]) {
-		logger.debug(info);
+		logger.debug({ info }, '[REST DEBUG]');
 	}
 }
