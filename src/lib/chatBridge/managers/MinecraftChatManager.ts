@@ -158,7 +158,7 @@ class LastMessages {
 	 */
 	private static _cleanContent(content: string) {
 		return content
-			.replaceAll(/\d/g, '') // remove numbers
+			.replace(/\d/g, '') // remove numbers
 			.trim(); // remove whitespaces at the beginning and end
 	}
 
@@ -374,7 +374,7 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param messages
 	 */
 	public static cleanCommandResponse(messages: HypixelMessage[]) {
-		return messages.map(({ content }) => content.replaceAll(/^-{29,}|-{29,}$/g, '').trim()).join('\n');
+		return messages.map(({ content }) => content.replace(/^-{29,}|-{29,}$/g, '').trim()).join('\n');
 	}
 
 	/**
