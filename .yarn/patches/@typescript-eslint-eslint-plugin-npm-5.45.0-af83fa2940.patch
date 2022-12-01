@@ -1,0 +1,28 @@
+diff --git a/dist/rules/prefer-optional-chain.js b/dist/rules/prefer-optional-chain.js
+index 2d222ae73e2cd885919369152057435a51e29729..6008998bbbb29be4221589233af57174f958ef65 100644
+--- a/dist/rules/prefer-optional-chain.js
++++ b/dist/rules/prefer-optional-chain.js
+@@ -272,6 +272,10 @@ exports.default = util.createRule({
+             let objectText;
+             // cases should match the list in ALLOWED_MEMBER_OBJECT_TYPES
+             switch (node.object.type) {
++                case utils_1.AST_NODE_TYPES.TSAsExpression:
++                case utils_1.AST_NODE_TYPES.AwaitExpression:
++                case utils_1.AST_NODE_TYPES.NewExpression:
++                    return '';
+                 case utils_1.AST_NODE_TYPES.CallExpression:
+                 case utils_1.AST_NODE_TYPES.Identifier:
+                     objectText = getText(node.object);
+@@ -313,6 +317,12 @@ exports.default = util.createRule({
+                     case utils_1.AST_NODE_TYPES.Identifier:
+                         propertyText = getText(node.property);
+                         break;
++                    case utils_1.AST_NODE_TYPES.Identifier:
++                    case utils_1.AST_NODE_TYPES.ThisExpression:
++                    case utils_1.AST_NODE_TYPES.CallExpression:
++                    case utils_1.AST_NODE_TYPES.MemberExpression:
++                        propertyText = sourceCode.getText(node.property);
++                        break;
+                     /* istanbul ignore next */
+                     default:
+                         throw new Error(`Unexpected member property type: ${node.object.type}`);

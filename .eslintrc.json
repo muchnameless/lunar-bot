@@ -24,6 +24,7 @@
 		"require-atomic-updates": 0,
 		"sonarjs/no-nested-switch": 0,
 		"tsdoc/syntax": 0,
-		"unicorn/no-unsafe-regex": 0
+		"unicorn/no-unsafe-regex": 0,
+		"unicorn/prefer-string-replace-all": 0
 	}
 }
