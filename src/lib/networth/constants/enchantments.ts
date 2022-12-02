@@ -86,6 +86,7 @@ export const enum Enchantment {
 	Pristine = 'pristine',
 	ProjectileProtection = 'projectile_protection',
 	Prosecute = 'prosecute', // API shows it as 'PROSECUTE'
+	Prosperity = 'prosperity',
 	Protection = 'protection',
 	Punch = 'punch',
 	Rainbow = 'rainbow',
