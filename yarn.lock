@@ -4552,10 +4552,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-big-decimal@npm:^1.3.12":
-  version: 1.3.12
-  resolution: "js-big-decimal@npm:1.3.12"
-  checksum: a56a73f7b9b9156b5529f265a891584705ba09ab6ce4bb779f3b7b09732c6955010dd34b1b0a1ee154d37f19db90d791d6351907cb1f3200fd0a632e1c0ae0de
+"js-big-decimal@npm:^1.3.13":
+  version: 1.3.13
+  resolution: "js-big-decimal@npm:1.3.13"
+  checksum: 87f218f1e3c8cb0005bc38099c9dfca2293f5ddb1606373d7e0c4eb13d0c84e841e18762dcaaee252bbbb5fcf0af6cb2b41d5159cfcc45bbdeae54a5dcad0bd7
   languageName: node
   linkType: hard
 
@@ -5103,7 +5103,7 @@ __metadata:
     fast-xml-parser: ^4.0.12
     husky: ^8.0.2
     ioredis: ^5.2.4
-    js-big-decimal: ^1.3.12
+    js-big-decimal: ^1.3.13
     ley: ^0.8.1
     lilyweight: ^2.7.0
     lint-staged: ^13.0.4
