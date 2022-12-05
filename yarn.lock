@@ -69,9 +69,9 @@ __metadata:
   linkType: hard
 
 "@astrojs/compiler@npm:^0.27.0 || ^0.28.0 || ^0.29.0":
-  version: 0.29.17
-  resolution: "@astrojs/compiler@npm:0.29.17"
-  checksum: 7b9e7ccd4fda0eb793dcbe4030db8cc2f65d7fac3bdb4cd8c0ab11cf753ebb1c50521b79b433b8e69c59e98466252dba9d6d3ac63214a8c31f8066b385157e12
+  version: 0.29.18
+  resolution: "@astrojs/compiler@npm:0.29.18"
+  checksum: 97e3d54e255a8a70ded3d7e5bdeb481df690cd7ddd8f1b506f0eff01d341b6e4ade5f55ed3372bfd37e9963a6ea80984c1301c402f824223470ce2520e5b44ac
   languageName: node
   linkType: hard
 
@@ -776,11 +776,11 @@ __metadata:
   linkType: hard
 
 "@next/eslint-plugin-next@npm:^13.0.4":
-  version: 13.0.5
-  resolution: "@next/eslint-plugin-next@npm:13.0.5"
+  version: 13.0.6
+  resolution: "@next/eslint-plugin-next@npm:13.0.6"
   dependencies:
     glob: 7.1.7
-  checksum: 94d60dd108325db191fc3a2cf53a07984f18c98f92e62c7383e75eade72b0696d1abe27d12d20cc4b1bab365243f279c2cf0faa5009043c5890bb57b0cb5275f
+  checksum: 0f6964513af4fd6051974e6c1542d2660ac9cc0e89c4774e793ede0e3e3f8e158826bf9ae06aa29741c4c4a22bed7ddf3db265ee21a8593ba7d53f39014764f0
   languageName: node
   linkType: hard
 
@@ -3529,11 +3529,11 @@ __metadata:
   linkType: hard
 
 "fastq@npm:^1.6.0":
-  version: 1.13.0
-  resolution: "fastq@npm:1.13.0"
+  version: 1.14.0
+  resolution: "fastq@npm:1.14.0"
   dependencies:
     reusify: ^1.0.4
-  checksum: 32cf15c29afe622af187d12fc9cd93e160a0cb7c31a3bb6ace86b7dea3b28e7b72acde89c882663f307b2184e14782c6c664fa315973c03626c7d4bff070bb0b
+  checksum: da2c05ec1446ef77b8ba2b76619c90d483404f5087e71e77469fbee797280a1f4ef26a63be15b2377198bc20d09fdf25c7d6e1e492a1e568a29dfdd9bcb7538c
   languageName: node
   linkType: hard
 
@@ -4752,7 +4752,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"language-subtag-registry@npm:~0.3.2":
+"language-subtag-registry@npm:^0.3.20":
   version: 0.3.22
   resolution: "language-subtag-registry@npm:0.3.22"
   checksum: 8ab70a7e0e055fe977ac16ea4c261faec7205ac43db5e806f72e5b59606939a3b972c4bd1e10e323b35d6ffa97c3e1c4c99f6553069dad2dfdd22020fa3eb56a
@@ -4760,11 +4760,11 @@ __metadata:
   linkType: hard
 
 "language-tags@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "language-tags@npm:1.0.5"
+  version: 1.0.6
+  resolution: "language-tags@npm:1.0.6"
   dependencies:
-    language-subtag-registry: ~0.3.2
-  checksum: c81b5d8b9f5f9cfd06ee71ada6ddfe1cf83044dd5eeefcd1e420ad491944da8957688db4a0a9bc562df4afdc2783425cbbdfd152c01d93179cf86888903123cf
+    language-subtag-registry: ^0.3.20
+  checksum: dc2927f7ce8f108ffd1d02ae0284b78ff6b4e03e631642794fa79d554d77b653f3f64cd1fb83acc9f3746ef7c18d43241b97feb712c05cc26e25aacd68f7a006
   languageName: node
   linkType: hard
 
@@ -6367,9 +6367,9 @@ __metadata:
   linkType: hard
 
 "process-warning@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "process-warning@npm:2.0.0"
-  checksum: a2bb299835bced58e63cbe06a8fd6e048a648d3649e81b62c442b63112a3f0a86912e7b1a9c557daca30652232d3b0a7f1972fb87c36334e2a5a6f3d5c4a76c9
+  version: 2.1.0
+  resolution: "process-warning@npm:2.1.0"
+  checksum: 2f22a3b8ec0de018c3a35e5945a2261c006aa3dfecf3d4f7aa323bc57e4fcdedfd566003283708547fde666d3ab7097d70f8d9765cd831d300723e4008adb7ab
   languageName: node
   linkType: hard
 
@@ -6853,11 +6853,11 @@ __metadata:
   linkType: hard
 
 "rxjs@npm:^7.5.7":
-  version: 7.5.7
-  resolution: "rxjs@npm:7.5.7"
+  version: 7.6.0
+  resolution: "rxjs@npm:7.6.0"
   dependencies:
     tslib: ^2.1.0
-  checksum: edabcdb73b0f7e0f5f6e05c2077aff8c52222ac939069729704357d6406438acca831c24210db320aba269e86dbe1a400f3769c89101791885121a342fb15d9c
+  checksum: b3abbbfe1ddfd06fca9314b83cbd13bcddc3320429218136f75c79a4802ac430dd13873364aac1ded54fd457f8c77df332d205a92d8a1c61656565bb718c50af
   languageName: node
   linkType: hard
 
@@ -6919,9 +6919,9 @@ __metadata:
   linkType: hard
 
 "secure-json-parse@npm:^2.4.0":
-  version: 2.5.0
-  resolution: "secure-json-parse@npm:2.5.0"
-  checksum: 84147a32615ce0d93d2fbba60cde85ae362f45cc948ea134e4d6d1e678bb4b7f3a5ce9b9692ed052baefeb2e1c8ba183b34920390e6a089925b97b0d8f7ab064
+  version: 2.6.0
+  resolution: "secure-json-parse@npm:2.6.0"
+  checksum: 6a10529b095cd2d4b7f3ae0a7f9877b67f6a206ffda01ba6fd29012c94b77197d6be3aea21f950120d3ac69b98b1251870554a504d47ab0e32f45531ebe92a2c
   languageName: node
   linkType: hard
 
