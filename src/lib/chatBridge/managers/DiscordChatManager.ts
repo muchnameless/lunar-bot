@@ -166,7 +166,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// name includes the extension
-		return `[${name.replaceAll('.', ' ')}]`;
+		return `[${name}]`;
 	}
 
 	/**
