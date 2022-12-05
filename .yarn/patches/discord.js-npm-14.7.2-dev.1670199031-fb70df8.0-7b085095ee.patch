@@ -92,6 +92,15 @@ index 24437b5023c97d1ba679a8e092a800ddeb6106e2..fe20d71fd253fc487d5c80a127c70724
  
    [DjsErrorCodes.CommandInteractionOptionNotFound]: name => `Required option "${name}" not found.`,
    [DjsErrorCodes.CommandInteractionOptionType]: (name, type, expected) =>
+diff --git a/src/index.js b/src/index.js
+index 35f885ed2f985201a91ba9999acda4ac44f69ee1..348274a1fda954b85ab3c00d68ce5148aa5390d4 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -208,3 +208,4 @@ __exportStar(require('discord-api-types/v10'), exports);
+ __exportStar(require('@discordjs/builders'), exports);
+ __exportStar(require('@discordjs/rest'), exports);
+ __exportStar(require('@discordjs/util'), exports);
++__exportStar(require('@discordjs/formatters'), exports);
 diff --git a/src/managers/GuildManager.js b/src/managers/GuildManager.js
 index cf5137392e42e73e28c36553a3257cc9986ec69e..36917cdbc173013c27d7121950684291bc61ba7b 100644
 --- a/src/managers/GuildManager.js
@@ -610,7 +619,7 @@ index 7796ddc99a96d7c431052895c2c0a9d4c23a6790..eb0c680121aed6bde625f7d4da0fac8b
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba57b21ee39 100644
+index 72b715e31e4243e06d1e7574effcc0d2658bc11d..91b23a0f8498707870f93c4eafda073b0d34d247 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -1,6 +1,3 @@
@@ -668,7 +677,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1611,7 +1615,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1612,7 +1616,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -677,7 +686,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1619,12 +1623,18 @@ export type CacheTypeReducer<
+@@ -1620,12 +1624,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -696,7 +705,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
    : Fallback;
  
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1651,7 +1661,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1652,7 +1662,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -706,7 +715,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -1904,16 +1915,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+@@ -1905,16 +1916,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -726,7 +735,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -1955,6 +1966,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -1956,6 +1967,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent,
      Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
@@ -734,7 +743,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
    public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
-@@ -2122,12 +2134,17 @@ export interface TextInputModalData extends BaseModalData {
+@@ -2123,12 +2135,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -753,7 +762,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
  
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
-@@ -2136,6 +2153,7 @@ export class ModalSubmitFields {
+@@ -2137,6 +2154,7 @@ export class ModalSubmitFields {
    public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
    public getField(customId: string, type?: ComponentType): ModalData;
    public getTextInputValue(customId: string): string;
@@ -761,7 +770,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -2409,6 +2427,7 @@ export class StringSelectMenuInteraction<
+@@ -2410,6 +2428,7 @@ export class StringSelectMenuInteraction<
      StringSelectMenuComponent,
      APIStringSelectComponent,
      StringSelectMenuComponent | APIStringSelectComponent,
@@ -769,7 +778,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
      StringSelectMenuComponent | APIStringSelectComponent
    >;
    public componentType: ComponentType.StringSelect;
-@@ -3652,7 +3671,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3654,7 +3673,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -778,7 +787,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -4167,11 +4186,6 @@ export interface BaseApplicationCommandData {
+@@ -4169,11 +4188,6 @@ export interface BaseApplicationCommandData {
    defaultMemberPermissions?: PermissionResolvable | null;
  }
  
@@ -790,7 +799,7 @@ index 211c15268494d56e6c67fb6cb459aecbfc2860e5..5cb3a31206f22857c24d2c9044f57ba5
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5688,14 +5702,7 @@ export interface BaseMessageOptions {
+@@ -5690,14 +5704,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
