@@ -748,7 +748,7 @@ export class MinecraftChatManager extends ChatManager {
 			)
 			.replace(MAYBE_URL_REGEXP, (match) =>
 				// replace dots for blocked "URLs"
-				MinecraftChatManager.ALLOWED_URLS_REGEXP.test(match) ? match : match.replaceAll('.', '․'),
+				MinecraftChatManager.ALLOWED_URLS_REGEXP.test(match) ? match : match.replaceAll('.', '܂'),
 			);
 	}
 
