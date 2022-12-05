@@ -142,7 +142,7 @@ export default class DebugCommand extends ApplicationCommand {
 									.map((channel) =>
 										quote(
 											`${
-												channel.type === ChannelType.DM ? channel.recipient?.tag ?? 'unknown channel' : `${channel}`
+												channel.type === ChannelType.DM ? channel.recipient?.tag ?? 'unknown channel' : channel
 											}: ${formatNumber(channel.messages.cache.size)}`,
 										),
 									)
