@@ -226,7 +226,7 @@ export class ApplicationCommand extends BaseCommand {
 					a1 +
 					c1.name.length +
 					c1.description.length +
-					((c1 as SlashCommandStringOption).choices?.reduce(
+					((c1 as SlashCommandNumberOption).choices?.reduce(
 						(a2, c2) => a2 + c2.name.length + `${c2.value}`.length,
 						0,
 					) ?? 0) +
