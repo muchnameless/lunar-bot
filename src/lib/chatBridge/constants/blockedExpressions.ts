@@ -69,7 +69,7 @@ export const BLOCKED_EXPRESSIONS_REGEXP = new RegExp(
 		/autist/,
 		/de(?:generate|ranged)/,
 		/brain *dead/,
-		/retarted/,
+		/retar[dt]ed/,
 		/\bdownie\b/,
 
 		/\bslaves?\b/,
