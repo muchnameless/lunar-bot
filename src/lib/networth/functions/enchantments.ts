@@ -11,8 +11,8 @@ interface EnchantmentData {
 /**
  * returns the enchantment id (name_level) and count
  *
- * @link https://hypixel-skyblock.fandom.com/wiki/Enchantments
- * @link https://wiki.hypixel.net/Enchantments
+ * @see https://hypixel-skyblock.fandom.com/wiki/Enchantments
+ * @see https://wiki.hypixel.net/Enchantments
  * @param enchantment
  * @param level
  */

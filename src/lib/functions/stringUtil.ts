@@ -23,7 +23,7 @@ export const ansiTag = (options?: AnsiOptions) => `\u001B[${options?.join(';') |
 /**
  * wraps the content in ansi tags
  *
- * @link https://gist.github.com/kkrypt0nn/a02506f3712ff2d1c8ca7c9e0aed7c06
+ * @see https://gist.github.com/kkrypt0nn/a02506f3712ff2d1c8ca7c9e0aed7c06
  * @param content
  * @param options format | background | colour
  */
