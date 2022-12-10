@@ -3,12 +3,12 @@ import { Collection } from 'discord.js';
 import { fetch } from 'undici';
 
 /**
- * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/');
- * @link https://gitlab.emzi0767.dev/Emzi0767/discord-emoji');
- * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.json');
- * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.json');
- * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.min.json');
- * @link https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.min.json');
+ * @see https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/');
+ * @see https://gitlab.emzi0767.dev/Emzi0767/discord-emoji');
+ * @see https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.json');
+ * @see https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.json');
+ * @see https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap.min.json');
+ * @see https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.min.json');
  */
 const url = 'https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.min.json';
 
