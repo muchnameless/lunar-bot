@@ -24,6 +24,7 @@ export const BLOCKED_EXPRESSIONS_REGEXP = new RegExp(
 		/\bp *[3e] *n *[1i] *s\b/,
 		/d *(?:i+|1+) *c+ *k/,
 		/schl[0o]ng/,
+		/test[1i]cle/,
 		/chode/,
 		/tit(?:tie)?s/,
 		/\bvagina\b/,
