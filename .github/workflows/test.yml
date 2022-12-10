@@ -25,10 +25,9 @@ jobs:
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
         with:
           node-version-file: 'package.json'
-          cache: yarn
 
       - name: Install dependencies
-        run: yarn --immutable --mode=skip-build
+        uses: ./.github/actions/yarn-install
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -52,10 +51,9 @@ jobs:
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
         with:
           node-version-file: 'package.json'
-          cache: yarn
 
       - name: Install dependencies
-        run: yarn --immutable
+        uses: ./.github/actions/yarn-install
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
