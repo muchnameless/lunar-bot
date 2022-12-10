@@ -224,6 +224,7 @@ export class ChannelUtil extends null {
 		}
 
 		if (_options.files) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
+		if (_options.tts) requiredChannelPermissions |= PermissionFlagsBits.SendTTSMessages;
 
 		// permission checks
 		if (!permissions.has(requiredChannelPermissions, false)) {
