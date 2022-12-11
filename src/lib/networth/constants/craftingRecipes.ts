@@ -1,48 +1,50 @@
 import { ItemId } from './index.js';
 
+type CraftingRecipe = Partial<Record<ItemId, number>>;
+
 const ITEMS_PER_BLOCK = 9;
 
 const CAMPFIRE_TALISMAN_ADEPT = {
 	[ItemId.DarkOakWood]: 160,
-} as const;
+} as const satisfies CraftingRecipe;
 const CAMPFIRE_TALISMAN_CULTIST = {
 	[ItemId.DarkOakWood]: 160,
 	[ItemId.SpruceWood]: 1_000,
-} as const;
+} as const satisfies CraftingRecipe;
 const CAMPFIRE_TALISMAN_SCION = {
 	[ItemId.DarkOakWood]: 160,
 	[ItemId.SpruceWood]: 1_000,
 	[ItemId.AcaciaWood]: 16_000,
-} as const;
+} as const satisfies CraftingRecipe;
 const CAMPFIRE_TALISMAN_GOD = {
 	[ItemId.DarkOakWood]: 160,
 	[ItemId.SpruceWood]: 1_000,
 	[ItemId.AcaciaWood]: 16_000,
 	[ItemId.JungleWood]: 240_000,
-} as const;
+} as const satisfies CraftingRecipe;
 
 const BRONZE_MEDAL = (count = 1) => ({} as const);
 const SILVER_MEDAL = (count = 1) => ({} as const);
 const GOLD_MEDAL = (count = 1) =>
 	({
 		[ItemId.Coins]: count * 800_000,
-	} as const);
+	} as const satisfies CraftingRecipe);
 
 const THEORETICAL_HOE = {
 	...GOLD_MEDAL(),
 	[ItemId.JacobsTicket]: 32,
-} as const;
+} as const satisfies CraftingRecipe;
 const UPGRADED_HOE_1 = {
 	...THEORETICAL_HOE,
-} as const;
+} as const satisfies CraftingRecipe;
 const UPGRADED_HOE_2 = {
 	...UPGRADED_HOE_1,
 	[ItemId.JacobsTicket]: UPGRADED_HOE_1[ItemId.JacobsTicket] + 4 * 16,
-} as const;
+} as const satisfies CraftingRecipe;
 const UPGRADED_HOE_3 = {
 	...UPGRADED_HOE_2,
 	[ItemId.JacobsTicket]: UPGRADED_HOE_2[ItemId.JacobsTicket] + 4 * 64,
-} as const;
+} as const satisfies CraftingRecipe;
 
 /**
  * SkyBlock item crafting recipes, holds an array of { id, count } for each item
@@ -274,7 +276,7 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 		[ItemId.MagmaArrow]: {
 			[ItemId.ArrowBundleMagma]: 1 / 256,
 		},
-	}).map(([id, recipe]) => [
+	} satisfies Partial<Record<ItemId, CraftingRecipe>>).map(([id, recipe]) => [
 		id,
 		Object.entries(recipe)
 			.map(([_id, count]: [string, number]) => ({ id: _id, count }))

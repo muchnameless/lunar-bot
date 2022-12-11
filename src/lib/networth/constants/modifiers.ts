@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values, @typescript-eslint/prefer-literal-enum-member */
 /**
  * multiplicative price modifier for the applied item
  *
@@ -11,6 +11,7 @@ export const enum PriceModifier {
 	AppliedEnchantmentDefault = 0.85,
 	ArtOfPeace = 0.8,
 	ArtOfWar = 0.6,
+	Attributes = 1,
 	BookOfStats = 0.6,
 	DrillUpgrade = 1,
 	DungeonMasterStar = 1,
@@ -21,7 +22,7 @@ export const enum PriceModifier {
 	FumingPotatoBook = 0.6,
 	Gemstone = 1,
 	GemstoneChamber = 0.9,
-	GemstoneSlots = 0.75,
+	GemstoneSlots = GemstoneChamber,
 	HotPotatoBook = 1,
 	ItemSkin = 0.9,
 	JalapenoBook = 0.7,
@@ -36,11 +37,11 @@ export const enum PriceModifier {
 	Reforge = 1,
 	Rune = 0.6,
 	ShensAuction = 0.85,
-	Silex = 0.75,
+	Silex = 0.7,
 	TalismanEnrichment = 0.75,
 	ThunderInABottle = 0.8,
 	TransmissionTuner = 0.7,
 	WinningBid = 1,
 	WoodSingularity = 0.5,
 }
-/* eslint-enable @typescript-eslint/no-duplicate-enum-values */
+/* eslint-enable @typescript-eslint/no-duplicate-enum-values, @typescript-eslint/prefer-literal-enum-member */

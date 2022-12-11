@@ -1,3 +1,4 @@
+export * from './attributes.js';
 export * from './craftingRecipes.js';
 export * from './enchantments.js';
 export * from './inventories.js';

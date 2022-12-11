@@ -21,7 +21,7 @@ export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
 		//
 		Enchantment.Efficiency,
 	]),
-} as const;
+} as const; // satisfies Partial<Record<ItemId, Set<Enchantment>>>; // TODO: breaks networth:180
 /* eslint-enable @typescript-eslint/no-use-before-define */
 
 export const enum Enchantment {

@@ -42,7 +42,7 @@ const PET_RARITY_OFFSET = {
 	[ItemRarity.Epic]: 16,
 	[ItemRarity.Legendary]: 20,
 	[ItemRarity.Mythic]: 20,
-} as const;
+} as const satisfies Partial<Record<ItemRarity, number>>;
 
 // pets start at level 1
 const MAX_LEVEL_DELTA = 100 - 1;
@@ -83,4 +83,4 @@ export const PET_XP_TOTAL = {
 		0,
 		...PET_XP.slice(PET_RARITY_OFFSET[ItemRarity.Mythic], MAX_LEVEL_DELTA + 100 + PET_RARITY_OFFSET[ItemRarity.Mythic]),
 	]),
-} as const;
+} as const satisfies Partial<Record<ItemId | ItemRarity, readonly number[]>>;

@@ -298,13 +298,17 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 		const [item] = await transformItemData(auction.item_bytes);
 
 		let itemId = item.tag?.ExtraAttributes?.id;
+		let count = item.Count;
 
 		switch (itemId) {
 			case ItemId.EnchantedBook:
 				return;
 
 			case ItemId.Pet: {
-				const pet = JSON.parse(item.tag!.ExtraAttributes!.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
+				const { petInfo } = item.tag!.ExtraAttributes!;
+				if (!petInfo) return;
+
+				const pet = JSON.parse(petInfo) as Components.Schemas.SkyBlockProfilePet;
 
 				// ignore candied pets
 				if (pet.candyUsed) return;
@@ -335,7 +339,13 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 			}
 
 			case ItemId.Rune: {
-				const [RUNE, LEVEL] = Object.entries(item.tag!.ExtraAttributes!.runes!)[0]!;
+				const { runes } = item.tag!.ExtraAttributes!;
+				if (!runes) return;
+
+				const entries = Object.entries(runes);
+				if (entries.length !== 1) return;
+
+				const [RUNE, LEVEL] = entries[0]!;
 
 				itemId = `${ItemId.Rune}_${RUNE}_${LEVEL}`;
 				break;
@@ -344,9 +354,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 			case ItemId.Potion:
 				switch (item.tag!.ExtraAttributes!.potion_name) {
 					case 'Dungeon': // Dungeon potions
-						itemId = `${ItemId.Potion}_${item.tag!.ExtraAttributes!.potion_name}_${
-							item.tag!.ExtraAttributes!.potion_level
-						}`;
+						itemId = `${ItemId.Potion}_Dungeon_${item.tag!.ExtraAttributes!.potion_level}`;
 						break;
 
 					default:
@@ -359,15 +367,33 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 
 				break;
 
-			case ItemId.NewYearCake:
-				itemId = `${ItemId.NewYearCake}_${item.tag!.ExtraAttributes!.new_years_cake}`;
+			case ItemId.NewYearCake: {
+				const { new_years_cake } = item.tag!.ExtraAttributes!;
+				if (!new_years_cake) return;
+
+				itemId = `${ItemId.NewYearCake}_${new_years_cake}`;
 				break;
+			}
+
+			case ItemId.AttributeShard: {
+				const { attributes } = item.tag!.ExtraAttributes!;
+				if (!attributes) return;
+
+				const entries = Object.entries(attributes);
+				if (entries.length !== 1) return;
+
+				const [ATTRIBUTE, TIER] = entries[0]!;
+
+				itemId = `${ItemId.AttributeShard}_${ATTRIBUTE}`;
+				count = 2 ** (TIER - 1);
+				break;
+			}
 
 			case undefined: // no itemId
 				return logger.warn({ auction, item }, '[UPDATE PRICES]: malformed item data');
 		}
 
-		binAuctions.ensure(itemId, () => []).push(price / item.Count);
+		binAuctions.ensure(itemId, () => []).push(price / count);
 	};
 
 	const processAuctions = async (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>

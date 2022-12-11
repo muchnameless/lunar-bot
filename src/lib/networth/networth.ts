@@ -4,6 +4,7 @@ import { parse, simplify } from 'prismarine-nbt';
 import {
 	ALLOWED_RECOMB_CATEGORIES,
 	ALLOWED_RECOMB_ITEMS,
+	ATTRIBUTES_BASE,
 	CRAFTING_RECIPES,
 	Enchantment,
 	ITEM_SPECIFIC_IGNORED_ENCHANTS,
@@ -82,7 +83,6 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		mana_disintegrator_count: number;
 		modifier: string;
 		new_years_cake: number;
-		petInfo: string;
 		price: number[];
 		skin: string;
 		stats_book: number;
@@ -380,6 +380,27 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		}
 	}
 
+	// attributes
+	if (extraAttributes.attributes) {
+		const basePrice =
+			itemId in ATTRIBUTES_BASE ? getPrice(ATTRIBUTES_BASE[itemId as keyof typeof ATTRIBUTES_BASE]) : null;
+
+		for (const [attribute, tier] of Object.entries(extraAttributes.attributes)) {
+			// items start with tier 1
+			if (tier === 1) continue;
+
+			let baseAttributePrice = getPrice(`${ItemId.AttributeShard}_${attribute}`);
+
+			// can also use the same item instead of a shard to upgrade an attribute
+			if (basePrice !== null) {
+				baseAttributePrice = Math.min(baseAttributePrice, basePrice);
+			}
+
+			// -1 because items start with 1
+			price += baseAttributePrice * (2 ** (tier - 1) - 1) * PriceModifier.Attributes;
+		}
+	}
+
 	// wood singularity
 	if (extraAttributes.wood_singularity_count) {
 		price += extraAttributes.wood_singularity_count * getPrice(ItemId.WoodSingularity) * PriceModifier.WoodSingularity;
@@ -613,6 +634,13 @@ export async function getNetworth(
 	if (member.sacks_counts) {
 		for (const [index, count] of Object.entries(member.sacks_counts)) {
 			networth += (count ?? 0) * getPrice(index);
+		}
+	}
+
+	// essence
+	for (const key of Object.keys(member)) {
+		if (key.startsWith('essence_')) {
+			networth += ((member[key as keyof typeof member] as number | undefined) ?? 0) * getPrice(key.toUpperCase());
 		}
 	}
 

@@ -138,7 +138,7 @@ export const XP_OFFSETS_TIME = {
 	[Offset.Week]: 'LAST_WEEKLY_XP_RESET_TIME',
 	[Offset.Month]: 'LAST_MONTHLY_XP_RESET_TIME',
 	[Offset.Day]: 'LAST_DAILY_XP_RESET_TIME',
-} as const;
+} as const satisfies Partial<Record<Offset, keyof typeof DEFAULT_CONFIG>>;
 
 export type XPOffsets = ArrayElementType<typeof XP_OFFSETS> | '';
 
