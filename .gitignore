@@ -13,7 +13,6 @@ logs/
 
 # Environment variables
 .env
-launcher_accounts.json
 
 # Tests and debug data
 src/tests/
