@@ -384,10 +384,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	if (extraAttributes.attributes) {
 		const basePrice =
 			itemId in ATTRIBUTES_BASE ? getPrice(ATTRIBUTES_BASE[itemId as keyof typeof ATTRIBUTES_BASE]) : null;
+		const isShard = itemId === ItemId.AttributeShard;
 
 		for (const [attribute, tier] of Object.entries(extraAttributes.attributes)) {
 			// items start with tier 1
-			if (tier === 1) continue;
+			if (tier === 1 && !isShard) continue;
 
 			let baseAttributePrice = getPrice(`${ItemId.AttributeShard}_${attribute}`);
 
@@ -397,7 +398,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			}
 
 			// -1 because items start with 1
-			price += baseAttributePrice * (2 ** (tier - 1) - 1) * PriceModifier.Attributes;
+			price += baseAttributePrice * (2 ** (tier - 1) - (isShard ? 0 : 1)) * PriceModifier.Attributes;
 		}
 	}
 

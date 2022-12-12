@@ -301,8 +301,30 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 		let count = item.Count;
 
 		switch (itemId) {
+			case ItemId.AttributeShard: {
+				const { attributes } = item.tag!.ExtraAttributes!;
+				if (!attributes) return;
+
+				const entries = Object.entries(attributes);
+				if (entries.length !== 1) return;
+
+				const [ATTRIBUTE, TIER] = entries[0]!;
+
+				itemId = `${ItemId.AttributeShard}_${ATTRIBUTE}`;
+				count = 2 ** (TIER - 1);
+				break;
+			}
+
 			case ItemId.EnchantedBook:
 				return;
+
+			case ItemId.NewYearCake: {
+				const { new_years_cake } = item.tag!.ExtraAttributes!;
+				if (!new_years_cake) return;
+
+				itemId = `${ItemId.NewYearCake}_${new_years_cake}`;
+				break;
+			}
 
 			case ItemId.Pet: {
 				const { petInfo } = item.tag!.ExtraAttributes!;
@@ -338,19 +360,6 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 				break;
 			}
 
-			case ItemId.Rune: {
-				const { runes } = item.tag!.ExtraAttributes!;
-				if (!runes) return;
-
-				const entries = Object.entries(runes);
-				if (entries.length !== 1) return;
-
-				const [RUNE, LEVEL] = entries[0]!;
-
-				itemId = `${ItemId.Rune}_${RUNE}_${LEVEL}`;
-				break;
-			}
-
 			case ItemId.Potion:
 				switch (item.tag!.ExtraAttributes!.potion_name) {
 					case 'Dungeon': // Dungeon potions
@@ -367,25 +376,16 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 
 				break;
 
-			case ItemId.NewYearCake: {
-				const { new_years_cake } = item.tag!.ExtraAttributes!;
-				if (!new_years_cake) return;
+			case ItemId.Rune: {
+				const { runes } = item.tag!.ExtraAttributes!;
+				if (!runes) return;
 
-				itemId = `${ItemId.NewYearCake}_${new_years_cake}`;
-				break;
-			}
-
-			case ItemId.AttributeShard: {
-				const { attributes } = item.tag!.ExtraAttributes!;
-				if (!attributes) return;
-
-				const entries = Object.entries(attributes);
+				const entries = Object.entries(runes);
 				if (entries.length !== 1) return;
 
-				const [ATTRIBUTE, TIER] = entries[0]!;
+				const [RUNE, LEVEL] = entries[0]!;
 
-				itemId = `${ItemId.AttributeShard}_${ATTRIBUTE}`;
-				count = 2 ** (TIER - 1);
+				itemId = `${ItemId.Rune}_${RUNE}_${LEVEL}`;
 				break;
 			}
 

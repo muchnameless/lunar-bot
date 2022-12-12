@@ -33,16 +33,31 @@ export async function populateCaches() {
 
 		prices.clear();
 
-		// hardcoded prices
-		prices.set(ItemId.Coins, 1);
-		prices.set(ItemId.Potion, 0);
-		prices.set(ItemId.EnchantedBook, 0);
-		// https://hypixel-skyblock.fandom.com/wiki/Divine_Gift
-		prices.set(`ENCHANTMENT_${Enchantment.DivineGift}_1`, 25e6);
-
 		for (const { id, median } of pricesRows) {
 			prices.set(id, median);
 		}
+
+		/**
+		 * hardcoded prices
+		 */
+
+		// coins (for crafting recipes)
+		prices.set(ItemId.Coins, 1);
+
+		// base items (price is determined using ExtraAttributes)
+		for (const itemId of [
+			ItemId.AttributeShard,
+			ItemId.EnchantedBook,
+			ItemId.NewYearCake,
+			ItemId.Pet,
+			ItemId.Potion,
+			ItemId.Rune,
+		]) {
+			prices.set(itemId, 0);
+		}
+
+		// https://hypixel-skyblock.fandom.com/wiki/Divine_Gift
+		prices.set(`ENCHANTMENT_${Enchantment.DivineGift}_1`, 25e6);
 
 		await populateSkyBlockItems();
 	} catch (error) {
