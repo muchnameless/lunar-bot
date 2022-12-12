@@ -301,6 +301,14 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 		let count = item.Count;
 
 		switch (itemId) {
+			case ItemId.AbiCase: {
+				const { model } = item.tag!.ExtraAttributes!;
+				if (!model) return;
+
+				itemId = `${ItemId.AbiCase}_${model}`;
+				break;
+			}
+
 			case ItemId.AttributeShard: {
 				const { attributes } = item.tag!.ExtraAttributes!;
 				if (!attributes) return;

@@ -46,6 +46,7 @@ export async function populateCaches() {
 
 		// base items (price is determined using ExtraAttributes)
 		for (const itemId of [
+			ItemId.AbiCase,
 			ItemId.AttributeShard,
 			ItemId.EnchantedBook,
 			ItemId.NewYearCake,

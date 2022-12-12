@@ -81,6 +81,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		gemstone_slots: number;
 		jalapeno_count: number;
 		mana_disintegrator_count: number;
+		model: string;
 		modifier: string;
 		new_years_cake: number;
 		price: number[];
@@ -121,21 +122,27 @@ const getShensAuctionPrice = (extraAttributes: SkyBlockNBTExtraAttributes) => {
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
 	const extraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
+	const itemId = extraAttributes.id;
 
-	// pet item
-	if (extraAttributes.petInfo) {
-		return getPetPrice(JSON.parse(extraAttributes.petInfo) as Components.Schemas.SkyBlockProfilePet);
-	}
+	switch (itemId) {
+		case ItemId.Pet:
+			try {
+				return getPetPrice(JSON.parse(extraAttributes.petInfo!) as Components.Schemas.SkyBlockProfilePet);
+			} catch (error) {
+				logger.error({ error, item }, '[CALCULATE ITEM PRICE]: petInfo parse error');
+				return 0;
+			}
 
-	// new year cake item
-	if (extraAttributes.new_years_cake) {
-		return getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
+		case ItemId.NewYearCake:
+			return getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
+
+		case ItemId.AbiCase:
+			return getPrice(`${ItemId.AbiCase}_${extraAttributes.model}`);
 	}
 
 	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
 	if (isVanillaItem(item)) return 0;
 
-	const itemId = extraAttributes.id;
 	const skyblockItem = skyblockItems.get(itemId);
 
 	let price =

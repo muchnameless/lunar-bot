@@ -2,6 +2,7 @@
 export const enum ItemId {
 	Coins = '$COINS',
 
+	AbiCase = 'ABICASE',
 	AcaciaBirdhouse = 'ACACIA_BIRDHOUSE',
 	AcaciaWood = 'LOG_2',
 	AmberMaterial = 'AMBER_MATERIAL',
