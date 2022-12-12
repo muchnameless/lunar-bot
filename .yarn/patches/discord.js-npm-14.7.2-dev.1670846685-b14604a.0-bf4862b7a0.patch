@@ -92,15 +92,6 @@ index 24437b5023c97d1ba679a8e092a800ddeb6106e2..fe20d71fd253fc487d5c80a127c70724
  
    [DjsErrorCodes.CommandInteractionOptionNotFound]: name => `Required option "${name}" not found.`,
    [DjsErrorCodes.CommandInteractionOptionType]: (name, type, expected) =>
-diff --git a/src/index.js b/src/index.js
-index 35f885ed2f985201a91ba9999acda4ac44f69ee1..348274a1fda954b85ab3c00d68ce5148aa5390d4 100644
---- a/src/index.js
-+++ b/src/index.js
-@@ -208,3 +208,4 @@ __exportStar(require('discord-api-types/v10'), exports);
- __exportStar(require('@discordjs/builders'), exports);
- __exportStar(require('@discordjs/rest'), exports);
- __exportStar(require('@discordjs/util'), exports);
-+__exportStar(require('@discordjs/formatters'), exports);
 diff --git a/src/managers/GuildManager.js b/src/managers/GuildManager.js
 index cf5137392e42e73e28c36553a3257cc9986ec69e..36917cdbc173013c27d7121950684291bc61ba7b 100644
 --- a/src/managers/GuildManager.js
@@ -619,7 +610,7 @@ index 7796ddc99a96d7c431052895c2c0a9d4c23a6790..eb0c680121aed6bde625f7d4da0fac8b
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 72b715e31e4243e06d1e7574effcc0d2658bc11d..91b23a0f8498707870f93c4eafda073b0d34d247 100644
+index 0dca5a1717b60aa0bcc035f1bdbe65cdf0031052..946de916b98f50ad3827e114c73abe6c50bb2438 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -1,6 +1,3 @@
