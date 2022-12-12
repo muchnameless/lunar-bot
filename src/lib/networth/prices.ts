@@ -50,6 +50,8 @@ export async function populateCaches() {
 			ItemId.AttributeShard,
 			ItemId.EnchantedBook,
 			ItemId.NewYearCake,
+			ItemId.PartyHatCrab,
+			ItemId.PartyHatCrabAnimated,
 			ItemId.Pet,
 			ItemId.Potion,
 			ItemId.Rune,

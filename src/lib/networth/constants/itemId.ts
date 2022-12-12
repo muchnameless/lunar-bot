@@ -152,6 +152,8 @@ export const enum ItemId {
 	Onyx = 'ONYX',
 	OpticalLens = 'OPTICAL_LENS',
 	PackedIce = 'PACKED_ICE',
+	PartyHatCrab = 'PARTY_HAT_CRAB',
+	PartyHatCrabAnimated = 'PARTY_HAT_CRAB_ANIMATED',
 	PersonalDeletor4000 = 'PERSONAL_DELETOR_4000',
 	PersonalDeletor5000 = 'PERSONAL_DELETOR_5000',
 	PersonalDeletor6000 = 'PERSONAL_DELETOR_6000',

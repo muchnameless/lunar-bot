@@ -334,6 +334,15 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 				break;
 			}
 
+			case ItemId.PartyHatCrab:
+			case ItemId.PartyHatCrabAnimated: {
+				const { party_hat_color } = item.tag!.ExtraAttributes!;
+				if (!party_hat_color) return;
+
+				itemId = `${itemId}_${party_hat_color}`;
+				break;
+			}
+
 			case ItemId.Pet: {
 				const { petInfo } = item.tag!.ExtraAttributes!;
 				if (!petInfo) return;

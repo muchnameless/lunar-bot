@@ -125,6 +125,16 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	const itemId = extraAttributes.id;
 
 	switch (itemId) {
+		case ItemId.AbiCase:
+			return getPrice(`${ItemId.AbiCase}_${extraAttributes.model}`);
+
+		case ItemId.NewYearCake:
+			return getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
+
+		case ItemId.PartyHatCrab:
+		case ItemId.PartyHatCrabAnimated:
+			return getPrice(`${itemId}_${extraAttributes.party_hat_color}`);
+
 		case ItemId.Pet:
 			try {
 				return getPetPrice(JSON.parse(extraAttributes.petInfo!) as Components.Schemas.SkyBlockProfilePet);
@@ -132,12 +142,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				logger.error({ error, item }, '[CALCULATE ITEM PRICE]: petInfo parse error');
 				return 0;
 			}
-
-		case ItemId.NewYearCake:
-			return getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
-
-		case ItemId.AbiCase:
-			return getPrice(`${ItemId.AbiCase}_${extraAttributes.model}`);
 	}
 
 	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
