@@ -34,7 +34,7 @@ jobs:
         id: restore-dependencies
         with:
           path: node_modules/
-          key: ${{ github.sha }}
+          key: ${{ runner.os }}-dependencies-${{ github.sha }}
 
   Linting:
     name: ESLint
@@ -59,7 +59,7 @@ jobs:
         id: restore-dependencies
         with:
           path: node_modules/
-          key: ${{ github.sha }}
+          key: ${{ runner.os }}-dependencies-${{ github.sha }}
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -90,7 +90,7 @@ jobs:
         id: restore-dependencies
         with:
           path: node_modules/
-          key: ${{ github.sha }}
+          key: ${{ runner.os }}-dependencies-${{ github.sha }}
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
