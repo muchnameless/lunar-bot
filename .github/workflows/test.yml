@@ -22,9 +22,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Node.js
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
-        with:
-          node-version-file: 'package.json'
+        uses: volta-cli/action@v3
 
       - name: Install dependencies
         uses: ./.github/actions/yarn-install
@@ -50,9 +48,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Node.js
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
-        with:
-          node-version-file: 'package.json'
+        uses: volta-cli/action@v3
 
       - name: Restore dependencies
         uses: actions/cache@v3
@@ -81,9 +77,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Node.js
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
-        with:
-          node-version-file: 'package.json'
+        uses: volta-cli/action@v3
 
       - name: Restore dependencies
         uses: actions/cache@v3
