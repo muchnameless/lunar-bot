@@ -15,6 +15,7 @@ export const enum ItemId {
 	AttributeShard = 'ATTRIBUTE_SHARD',
 	BasketOfSeeds = 'BASKET_OF_SEEDS',
 	BeatingHeart = 'BEATING_HEART',
+	BingoPet = 'BINGO',
 	BlazeBelt = 'BLAZE_BELT',
 	BlazeWax = 'BLAZE_WAX',
 	BlessedFruit = 'BLESSED_FRUIT',

@@ -47,12 +47,14 @@ const PET_RARITY_OFFSET = {
 // pets start at level 1
 const MAX_LEVEL_DELTA = 100 - 1;
 
+const COMMON_XP_TOTAL = toTotal([
+	0,
+	0,
+	...PET_XP.slice(PET_RARITY_OFFSET[ItemRarity.Common], MAX_LEVEL_DELTA + PET_RARITY_OFFSET[ItemRarity.Common]),
+]);
+
 export const PET_XP_TOTAL = {
-	[ItemRarity.Common]: toTotal([
-		0,
-		0,
-		...PET_XP.slice(PET_RARITY_OFFSET[ItemRarity.Common], MAX_LEVEL_DELTA + PET_RARITY_OFFSET[ItemRarity.Common]),
-	]),
+	[ItemRarity.Common]: COMMON_XP_TOTAL,
 	[ItemRarity.Uncommon]: toTotal([
 		0,
 		0,
@@ -78,6 +80,7 @@ export const PET_XP_TOTAL = {
 		0,
 		...PET_XP.slice(PET_RARITY_OFFSET[ItemRarity.Mythic], MAX_LEVEL_DELTA + PET_RARITY_OFFSET[ItemRarity.Mythic]),
 	]),
+	[ItemId.BingoPet]: COMMON_XP_TOTAL,
 	[ItemId.GoldenDragon]: toTotal([
 		0,
 		0,
