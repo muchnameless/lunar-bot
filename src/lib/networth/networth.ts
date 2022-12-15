@@ -121,19 +121,27 @@ const getShensAuctionPrice = (extraAttributes: SkyBlockNBTExtraAttributes) => {
  * @param item
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
+	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
+	if (isVanillaItem(item)) return 0;
+
 	const extraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
 	const itemId = extraAttributes.id;
 
+	let price: number;
+
 	switch (itemId) {
 		case ItemId.AbiCase:
-			return getPrice(`${ItemId.AbiCase}_${extraAttributes.model}`);
+			price = getPrice(`${ItemId.AbiCase}_${extraAttributes.model}`);
+			break;
 
 		case ItemId.NewYearCake:
-			return getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
+			price = getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
+			break;
 
 		case ItemId.PartyHatCrab:
 		case ItemId.PartyHatCrabAnimated:
-			return getPrice(`${itemId}_${extraAttributes.party_hat_color}`);
+			price = getPrice(`${itemId}_${extraAttributes.party_hat_color}`);
+			break;
 
 		case ItemId.Pet:
 			try {
@@ -142,22 +150,20 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				logger.error({ error, item }, '[CALCULATE ITEM PRICE]: petInfo parse error');
 				return 0;
 			}
+
+		default:
+			price =
+				item.Count *
+				(prices.get(itemId) ??
+					// non auctionable craftable items
+					CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + count * getPrice(id), 0) ??
+					// shen's auction items
+					getShensAuctionPrice(extraAttributes) ??
+					// unknown item
+					(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 	}
 
-	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
-	if (isVanillaItem(item)) return 0;
-
 	const skyblockItem = skyblockItems.get(itemId);
-
-	let price =
-		item.Count *
-		(prices.get(itemId) ??
-			// non auctionable craftable items
-			CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + count * getPrice(id), 0) ??
-			// shen's auction items
-			getShensAuctionPrice(extraAttributes) ??
-			// unknown item
-			(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 
 	// dark auction items
 	if (extraAttributes.winning_bid) {
@@ -256,7 +262,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			extraAttributes.farming_for_dummies_count * getPrice(ItemId.FarmingForDummies) * PriceModifier.FarmingForDummies;
 	}
 
-	// upgradable armor (e.g. crimson)
+	// upgradable armour (e.g. crimson)
 	if (skyblockItem?.prestige) {
 		let currentItemUpgrade: SkyBlockItem | undefined = skyblockItem;
 
