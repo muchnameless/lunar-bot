@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
 
       - name: Install Node.js
-        uses: volta-cli/action@v3
+        uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Install dependencies
         uses: ./.github/actions/yarn-install
