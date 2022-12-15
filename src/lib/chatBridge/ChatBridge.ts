@@ -10,6 +10,7 @@ import { ForwardRejectionType } from './managers/DiscordChatManager.js';
 import { DiscordManager, type ReadyDiscordManager } from './managers/DiscordManager.js';
 import {
 	MinecraftChatManager,
+	MinecraftChatManagerState,
 	type MinecraftChatOptions,
 	type ReadyMinecraftChatManager,
 } from './managers/MinecraftChatManager.js';
@@ -324,7 +325,9 @@ export class ChatBridge extends EventEmitter {
 	public async handleDiscordMessage(message: DiscordMessage, signal: AbortSignal) {
 		if (!this.hypixelGuild?.chatBridgeEnabled) {
 			// linked but not enabled
-			if (this.hypixelGuild) return this.handleError(message);
+			if (this.hypixelGuild || this.minecraft.state === MinecraftChatManagerState.Errored) {
+				return this.handleError(message);
+			}
 
 			// not linked yet
 			try {
@@ -337,6 +340,10 @@ export class ChatBridge extends EventEmitter {
 
 		// mc bot not ready yet
 		if (!this.isMinecraftReady()) {
+			if (this.minecraft.state === MinecraftChatManagerState.Errored) {
+				return this.handleError(message);
+			}
+
 			try {
 				await once(this, ChatBridgeEvent.Ready, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {
