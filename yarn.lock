@@ -891,13 +891,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/shapeshift@npm:3.8.1-next.ae55fd9.0":
-  version: 3.8.1-next.ae55fd9.0
-  resolution: "@sapphire/shapeshift@npm:3.8.1-next.ae55fd9.0"
+"@sapphire/shapeshift@npm:3.8.2-next.1799a07.0":
+  version: 3.8.2-next.1799a07.0
+  resolution: "@sapphire/shapeshift@npm:3.8.2-next.1799a07.0"
   dependencies:
     fast-deep-equal: ^3.1.3
     lodash: ^4.17.21
-  checksum: ac766f86cc027c63f27cdfd8f50e7fc40578ccec29ac3340cbd9f4be9a87f633e0729a0d46789ee161cac5e6f5ec853f64f71683d6e731ba05432f22b09c07b2
+  checksum: f720984cd42f8ce4a61dfff08870a63e3f4ef44b7fc368816db1520cf7d47df6a64f6ed99eea9b10d43665069cb9126643dda691acc1143c6b89d79281e31dc6
   languageName: node
   linkType: hard
 
