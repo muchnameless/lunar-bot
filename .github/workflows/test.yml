@@ -22,7 +22,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Node.js
-        uses: volta-cli/action@v3
+        uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Install dependencies
         uses: ./.github/actions/yarn-install
@@ -48,7 +48,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Node.js
-        uses: volta-cli/action@v3
+        uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Restore dependencies
         uses: actions/cache@v3
@@ -77,7 +77,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Node.js
-        uses: volta-cli/action@v3
+        uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Restore dependencies
         uses: actions/cache@v3
