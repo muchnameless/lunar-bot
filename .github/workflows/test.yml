@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  Linting:
-    name: ESLint
+  Dependencies:
+    name: Install dependencies
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,6 +28,38 @@ jobs:
 
       - name: Install dependencies
         uses: ./.github/actions/yarn-install
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: restore-dependencies
+        with:
+          path: node_modules/
+          key: ${{ github.sha }}
+
+  Linting:
+    name: ESLint
+    needs: Dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3
+        with:
+          node-version-file: 'package.json'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        id: restore-dependencies
+        with:
+          path: node_modules/
+          key: ${{ github.sha }}
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -37,6 +69,7 @@ jobs:
 
   Building:
     name: TypeScript
+    needs: Dependencies
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,8 +85,12 @@ jobs:
         with:
           node-version-file: 'package.json'
 
-      - name: Install dependencies
-        uses: ./.github/actions/yarn-install
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        id: restore-dependencies
+        with:
+          path: node_modules/
+          key: ${{ github.sha }}
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
