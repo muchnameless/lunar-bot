@@ -16,7 +16,7 @@ import {
 	type Snowflake,
 	type TextChannel,
 	type Webhook,
-	type WebhookCreateMessageOptions,
+	type WebhookMessageCreateOptions,
 } from 'discord.js';
 import ms from 'ms';
 import { fetch } from 'undici';
@@ -48,7 +48,7 @@ interface SendViaBotOptions extends MessageCreateOptions {
 	hypixelMessage?: HypixelMessage | null;
 }
 
-interface SendViaWebhookOptions extends WebhookCreateMessageOptions {
+interface SendViaWebhookOptions extends WebhookMessageCreateOptions {
 	abortController?: AbortController;
 	queuePromise?: Promise<void>;
 }
@@ -537,7 +537,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param options
 	 * @internal
 	 */
-	async #sendViaWebhook(options: WebhookCreateMessageOptions): Promise<Message> {
+	async #sendViaWebhook(options: WebhookMessageCreateOptions): Promise<Message> {
 		try {
 			// fetch / create webhook if non existent
 			if (!this.isReady()) {
