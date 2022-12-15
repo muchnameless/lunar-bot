@@ -1,5 +1,4 @@
 import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
-import { MinecraftChatManagerState } from '../managers/MinecraftChatManager.js';
 import { logger } from '#logger';
 
 export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
@@ -16,10 +15,19 @@ export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 			if (error.message.startsWith('Failed to obtain profile data')) {
 				void this.chatBridge.minecraft.reconnect();
 			} else if (error.message.startsWith('Invalid credentials')) {
-				this.chatBridge.minecraft.state = MinecraftChatManagerState.Errored;
-				this.chatBridge.minecraft.disconnect();
+				this.chatBridge.minecraft.disconnect(true);
 
 				logger.error(this.chatBridge.logInfo, '[CHATBRIDGE ERROR]: invalid credentials detected');
+			} else if (
+				error.message.startsWith('Failed to authenticate your connection') &&
+				this.chatBridge.minecraft.loginAttempts >= 10
+			) {
+				this.chatBridge.minecraft.disconnect(true);
+
+				logger.error(
+					this.chatBridge.logInfo,
+					`[CHATBRIDGE ERROR]: failed to authenticate ${this.chatBridge.minecraft.loginAttempts} times`,
+				);
 			}
 		}
 	}

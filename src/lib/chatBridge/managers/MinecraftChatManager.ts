@@ -284,7 +284,7 @@ export class MinecraftChatManager extends ChatManager {
 	public botUsername: string | null = null;
 
 	/**
-	 * increases each login, reset to 0 on successfull spawn
+	 * increases each login, reset to 0 on successful spawn
 	 */
 	public loginAttempts = 0;
 
@@ -488,13 +488,13 @@ export class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * disconnects the bot
+	 *
+	 * @param errored
 	 */
-	public disconnect() {
+	public disconnect(errored = true) {
 		this.clearAbortLoginTimeout();
 
-		if (this.state !== MinecraftChatManagerState.Errored) {
-			this.state = MinecraftChatManagerState.Connecting;
-		}
+		this.state = errored ? MinecraftChatManagerState.Errored : MinecraftChatManagerState.Connecting;
 
 		try {
 			this.bot?.end('disconnect.quitting');
