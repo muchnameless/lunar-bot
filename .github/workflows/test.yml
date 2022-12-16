@@ -21,7 +21,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js
+      - name: Install Volta
         uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Install dependencies
@@ -47,7 +47,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js
+      - name: Install Volta
         uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Restore dependencies
@@ -76,7 +76,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js
+      - name: Install Volta
         uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Restore dependencies
@@ -90,4 +90,11 @@ jobs:
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
 
       - name: Run TypeScript compiler
-        run: yarn test
+        run: yarn build
+
+      - name: Cache build output
+        if: github.ref_name == 'main'
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3
+        with:
+          path: dist/
+          key: ${{ runner.os }}-build-output-${{ github.sha }}

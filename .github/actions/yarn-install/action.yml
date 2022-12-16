@@ -8,8 +8,7 @@ runs:
     - name: Expose yarn config as "$GITHUB_OUTPUT"
       id: yarn-config
       shell: bash
-      run: |
-        echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      run: echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
     - name: Restore yarn cache
       uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3
@@ -17,8 +16,7 @@ runs:
       with:
         path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
         key: yarn-download-cache-${{ hashFiles('yarn.lock') }}
-        restore-keys: |
-          yarn-download-cache-
+        restore-keys: yarn-download-cache-
 
     - name: Restore yarn install state
       id: yarn-install-state-cache
@@ -29,8 +27,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: |
-        yarn install --immutable --inline-builds
+      run: yarn install --immutable --inline-builds
       env:
         YARN_ENABLE_GLOBAL_CACHE: 'false'
         YARN_NM_MODE: 'hardlinks-local'

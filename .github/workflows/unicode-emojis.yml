@@ -22,20 +22,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
 
-      - name: Install Node.js
+      - name: Install Volta
         uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
+      - name: Restore dependencies
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3
+        id: restore-dependencies
+        with:
+          path: node_modules/
+          key: ${{ runner.os }}-dependencies-${{ github.sha }}
+
       - name: Install dependencies
+        if: steps.restore-dependencies.outputs.cache-hit != 'true'
         uses: ./.github/actions/yarn-install
 
+      - name: Restore build output
+        id: restore-build-output
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3
+        with:
+          path: dist/
+          key: ${{ runner.os }}-build-output-${{ github.sha }}
+
       - name: Build
+        if: steps.restore-build-output.outputs.cache-hit != 'true'
         run: yarn build
 
       - name: Run script
         run: node dist/scripts/generateEmojiParser.js
 
       - name: Generate token
-        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # tag=v1
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # v1
         id: generate-token
         with:
           app_id: ${{ secrets.APP_ID }}
