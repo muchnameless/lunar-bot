@@ -657,6 +657,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.1
+  resolution: "@kurkle/color@npm:0.3.1"
+  checksum: e6be5c081bf5acfd4a1803dcd5a0733caf450e73148d5f02dc536b1ff0c60c959c23472a26c9c3c6c78ada04fb6a53c9202db9b2de8ea56f6eeec381f9cc3a1a
+  languageName: node
+  linkType: hard
+
 "@microsoft/tsdoc-config@npm:0.16.2":
   version: 0.16.2
   resolution: "@microsoft/tsdoc-config@npm:0.16.2"
@@ -2140,17 +2147,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:4.0.1":
-  version: 4.0.1
-  resolution: "chart.js@npm:4.0.1"
-  checksum: 013dabf3cd4ad2d71574e1d616906ae6f5b3f5914efb7f8ac7407bfe9b621e997f30966350bbdf31e3a1322c8c602715ef4dd6d0b6072590bb48db03861ac401
+"chart.js@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "chart.js@npm:4.1.0"
+  dependencies:
+    "@kurkle/color": ^0.3.0
+  checksum: deb2ce0ec76d090e4d03af7b1ced84a8a0ab49898f5a30fa4c52ba2475c06a91e49c4edeedbab04a55dd4cea7615d7405128fec2554f450b3240c2475e3298f9
   languageName: node
   linkType: hard
 
-"chart.js@patch:chart.js@npm%3A4.0.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::locator=lunar-bot%40workspace%3A.":
-  version: 4.0.1
-  resolution: "chart.js@patch:chart.js@npm%3A4.0.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::version=4.0.1&hash=ac21be&locator=lunar-bot%40workspace%3A."
-  checksum: 21d247f14fcd90dd106f64f1a179e10100cb0b3c65a4a3641c1e7cb26f2fe49a6206236996729d9307eb44c1ee75a4dba9859421a1176ebb8f4c70a9c47cf7eb
+"chart.js@patch:chart.js@^4.1.0#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::locator=lunar-bot%40workspace%3A.":
+  version: 4.1.0
+  resolution: "chart.js@patch:chart.js@npm%3A4.1.0#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::version=4.1.0&hash=ac21be&locator=lunar-bot%40workspace%3A."
+  dependencies:
+    "@kurkle/color": ^0.3.0
+  checksum: a7d132492c93b2c8cfeba3056311fe2ac44af94989bb06bd986c37c5bbf788fa9ec259c84c051b70c2f820eee1e4db8c8038eb9822202b485e293f04438cae65
   languageName: node
   linkType: hard
 
@@ -5150,7 +5161,7 @@ __metadata:
     "@types/prettier": ^2.7.1
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#0eac00a31bf1f4434c0d5d60f9122a4c8d26a595"
     bufferutil: ^4.0.7
-    chart.js: ^4.0.1
+    chart.js: ^4.1.0
     common-tags: ^1.8.2
     cron: ^2.1.0
     discord.js: 14.7.2-dev.1671149366-6540914.0
