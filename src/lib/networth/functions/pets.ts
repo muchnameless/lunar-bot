@@ -1,5 +1,4 @@
 import { type Components } from '@zikeji/hypixel';
-import { ItemId } from '../constants/index.js';
 import { PET_XP_TOTAL } from '../constants/pets.js';
 
 /**
