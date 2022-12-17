@@ -103,7 +103,7 @@
 		"@types/pg": "^8.6.5",
 		"@types/prettier": "^2.7.1",
 		"env-cmd": "^10.1.0",
-		"eslint": "^8.29.0",
+		"eslint": "^8.30.0",
 		"eslint-config-neon": "^0.1.40",
 		"husky": "^8.0.2",
 		"ley": "^0.8.1",
