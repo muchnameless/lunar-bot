@@ -2147,21 +2147,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "chart.js@npm:4.1.0"
+"chart.js@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "chart.js@npm:4.1.1"
   dependencies:
     "@kurkle/color": ^0.3.0
-  checksum: deb2ce0ec76d090e4d03af7b1ced84a8a0ab49898f5a30fa4c52ba2475c06a91e49c4edeedbab04a55dd4cea7615d7405128fec2554f450b3240c2475e3298f9
+  checksum: e195abc7b1271a0d4f616b90ac56465b639bffef8e965d26bf1fd65050011bf359fdc25e43dac1576420c1173dc1430c576fd0f953ae8b62bf257ec571424882
   languageName: node
   linkType: hard
 
-"chart.js@patch:chart.js@^4.1.0#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::locator=lunar-bot%40workspace%3A.":
-  version: 4.1.0
-  resolution: "chart.js@patch:chart.js@npm%3A4.1.0#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::version=4.1.0&hash=ac21be&locator=lunar-bot%40workspace%3A."
+"chart.js@patch:chart.js@^4.1.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::locator=lunar-bot%40workspace%3A.":
+  version: 4.1.1
+  resolution: "chart.js@patch:chart.js@npm%3A4.1.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::version=4.1.1&hash=ac21be&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@kurkle/color": ^0.3.0
-  checksum: a7d132492c93b2c8cfeba3056311fe2ac44af94989bb06bd986c37c5bbf788fa9ec259c84c051b70c2f820eee1e4db8c8038eb9822202b485e293f04438cae65
+  checksum: c39834aadcb956a37fb584e4c3d7ff0433d8f0c925edb35ae2a2b2ff226acad9ee6a6093d44ec13a03ae615910b56bc47954f4cc1fa1dab2b7f14769cc428ac4
   languageName: node
   linkType: hard
 
@@ -5163,7 +5163,7 @@ __metadata:
     "@types/prettier": ^2.7.1
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#0eac00a31bf1f4434c0d5d60f9122a4c8d26a595"
     bufferutil: ^4.0.7
-    chart.js: ^4.1.0
+    chart.js: ^4.1.1
     common-tags: ^1.8.2
     cron: ^2.1.0
     discord.js: 14.7.2-dev.1671278643-dd62be0.0
