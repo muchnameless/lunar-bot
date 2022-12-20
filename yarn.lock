@@ -485,7 +485,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/node-pre-gyp@npm:^0.4.2":
+"@discordjs/node-pre-gyp@npm:^0.4.5":
   version: 0.4.5
   resolution: "@discordjs/node-pre-gyp@npm:0.4.5"
   dependencies:
@@ -931,25 +931,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/type@npm:2.2.5-next.cf34f61.0":
-  version: 2.2.5-next.cf34f61.0
-  resolution: "@sapphire/type@npm:2.2.5-next.cf34f61.0"
+"@sapphire/type@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "@sapphire/type@npm:2.3.0"
   dependencies:
-    "@discordjs/node-pre-gyp": ^0.4.2
-    nan: ^2.15.0
-    tslib: ^2.4.0
-  checksum: 62e6bf090924af3ec809d27eec5fc1e475d0d1a46803086486f0311d1d934cf48b9ac2c951d38c1a550db60880b7ba62dccb7f4440bd260d71c0e9391f05948f
-  languageName: node
-  linkType: hard
-
-"@sapphire/type@patch:@sapphire/type@npm%3A2.2.5-next.cf34f61.0#./.yarn/patches/@sapphire-type-npm-2.2.5-next.cf34f61.0-c6bbabdd5f.patch::locator=lunar-bot%40workspace%3A.":
-  version: 2.2.5-next.cf34f61.0
-  resolution: "@sapphire/type@patch:@sapphire/type@npm%3A2.2.5-next.cf34f61.0#./.yarn/patches/@sapphire-type-npm-2.2.5-next.cf34f61.0-c6bbabdd5f.patch::version=2.2.5-next.cf34f61.0&hash=a54703&locator=lunar-bot%40workspace%3A."
-  dependencies:
-    "@discordjs/node-pre-gyp": ^0.4.2
-    nan: ^2.15.0
-    tslib: ^2.4.0
-  checksum: e5dc534d6400b85c3b5a1e4138e59e38bbfb839fc16de71f1dba91c69b3a5dd55f557a16a6ac178996a863da95c5d0d6f6fceb286d4c1014ffbfab28a130269c
+    "@discordjs/node-pre-gyp": ^0.4.5
+    nan: ^2.17.0
+    tslib: ^2.4.1
+  checksum: 78473401140eb4af26c11f8cb2eb5f186369300a4a4105fcd720746abc32c69e3065e779f304416ea21a535ed0afcb9b298dfac3f9c92c13e9b045203b45f5fd
   languageName: node
   linkType: hard
 
@@ -5152,7 +5141,7 @@ __metadata:
     "@sapphire/node-utilities": 1.0.1-next.c6b55b5.0
     "@sapphire/ratelimits": 2.4.6-next.c6b55b5.0
     "@sapphire/stopwatch": 1.5.1-next.c6b55b5.0
-    "@sapphire/type": 2.2.5-next.cf34f61.0
+    "@sapphire/type": ^2.3.0
     "@sapphire/utilities": 3.11.1-next.c6b55b5.0
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
@@ -5616,7 +5605,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.14.0, nan@npm:^2.15.0, nan@npm:^2.17.0":
+"nan@npm:^2.14.0, nan@npm:^2.17.0":
   version: 2.17.0
   resolution: "nan@npm:2.17.0"
   dependencies:
