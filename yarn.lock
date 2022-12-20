@@ -931,7 +931,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/type@npm:^2.3.0":
+"@sapphire/type@npm:^2.2.5-next":
   version: 2.3.0
   resolution: "@sapphire/type@npm:2.3.0"
   dependencies:
@@ -5141,7 +5141,7 @@ __metadata:
     "@sapphire/node-utilities": 1.0.1-next.c6b55b5.0
     "@sapphire/ratelimits": 2.4.6-next.c6b55b5.0
     "@sapphire/stopwatch": 1.5.1-next.c6b55b5.0
-    "@sapphire/type": ^2.3.0
+    "@sapphire/type": ^2.2.5-next
     "@sapphire/utilities": 3.11.1-next.c6b55b5.0
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
