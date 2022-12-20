@@ -101,7 +101,7 @@
 		"@types/luxon": "^3",
 		"@types/node": "^18.11.17",
 		"@types/pg": "^8.6.5",
-		"@types/prettier": "^2.7.1",
+		"@types/prettier": "^2.7.2",
 		"env-cmd": "^10.1.0",
 		"eslint": "^8.30.0",
 		"eslint-config-neon": "^0.1.40",
