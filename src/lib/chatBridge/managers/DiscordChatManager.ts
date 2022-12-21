@@ -260,11 +260,9 @@ export class DiscordChatManager extends ChatManager {
 			return this;
 		}
 
-		let channel: TextChannel | undefined;
+		const { channel } = this;
 
 		try {
-			({ channel } = this);
-
 			if (!channel) {
 				throw new WebhookError('unknown channel');
 			}
