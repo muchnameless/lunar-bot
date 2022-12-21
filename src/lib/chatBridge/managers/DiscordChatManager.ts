@@ -6,6 +6,7 @@ import {
 	EmbedBuilder,
 	MessageCollector,
 	PermissionFlagsBits,
+	RESTJSONErrorCodes,
 	SnowflakeUtil,
 	time,
 	TimestampStyles,
@@ -259,15 +260,17 @@ export class DiscordChatManager extends ChatManager {
 			return this;
 		}
 
+		let channel: TextChannel | undefined;
+
 		try {
-			const { channel } = this;
+			({ channel } = this);
 
 			if (!channel) {
-				throw new WebhookError('unknown channel', channel, this.hypixelGuild);
+				throw new WebhookError('unknown channel');
 			}
 
 			if (!ChannelUtil.botPermissions(channel).has(PermissionFlagsBits.ManageWebhooks, false)) {
-				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.hypixelGuild);
+				throw new WebhookError('missing `MANAGE_WEBHOOKS`');
 			}
 
 			const webhooks = await channel.fetchWebhooks();
@@ -276,7 +279,7 @@ export class DiscordChatManager extends ChatManager {
 
 			if (!webhook) {
 				if (webhooks.size >= MAX_WEBHOOKS_PER_CHANNEL) {
-					throw new WebhookError('cannot create more webhooks', channel, this.hypixelGuild);
+					throw new WebhookError('cannot create more webhooks');
 				}
 
 				webhook = await channel.createWebhook({
@@ -302,14 +305,21 @@ export class DiscordChatManager extends ChatManager {
 			);
 			return this;
 		} catch (error) {
-			if (error instanceof WebhookError) {
+			if (
+				error instanceof WebhookError ||
+				(error instanceof DiscordAPIError &&
+					[
+						RESTJSONErrorCodes.MaximumNumberOfWebhooksReached,
+						30_058, // TODO: RESTJSONErrorCodes.MaximumNumberOfWebhooksPerGuildReached,
+					].includes(error.code as RESTJSONErrorCodes))
+			) {
 				this.chatBridge.shouldRetryLinking = false;
 
 				void this.client.log(
 					new EmbedBuilder()
 						.setColor(this.client.config.get('EMBED_RED'))
-						.setTitle(`${error.hypixelGuild} Chat Bridge`)
-						.setDescription(`${bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
+						.setTitle(`${this.hypixelGuild} Chat Bridge`)
+						.setDescription(`${bold('Error')}: ${error.message}${channel ? ` in ${channel}` : ''}`)
 						.setTimestamp(),
 				);
 			}
