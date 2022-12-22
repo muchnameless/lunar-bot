@@ -931,7 +931,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/type@npm:^2.3.0":
+"@sapphire/type@npm:^2.2.5-next":
   version: 2.3.0
   resolution: "@sapphire/type@npm:2.3.0"
   dependencies:
@@ -2633,10 +2633,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:0.37.24-next.8df9f14.1671200141":
-  version: 0.37.24-next.8df9f14.1671200141
-  resolution: "discord-api-types@npm:0.37.24-next.8df9f14.1671200141"
-  checksum: a528e690ffe91569003319270b543a521eb5c205689e5255c90d9a7216460dd67384a566352c6a1220fe95893367fb547f6e64e76ac2331077c0270c0c39f1c1
+"discord-api-types@npm:0.37.25-next.4c334f6.1671732642":
+  version: 0.37.25-next.4c334f6.1671732642
+  resolution: "discord-api-types@npm:0.37.25-next.4c334f6.1671732642"
+  checksum: 270f07a71e7b852d0e56a23ce2973685cded05db6af96b8c0ff1f3a4f5d924d9fcec5d8f06d6e711514f53e8c2c61be6a351a31542561632bd77b0bb5cd0cc11
   languageName: node
   linkType: hard
 
@@ -5141,7 +5141,7 @@ __metadata:
     "@sapphire/node-utilities": 1.0.1-next.c6b55b5.0
     "@sapphire/ratelimits": 2.4.6-next.c6b55b5.0
     "@sapphire/stopwatch": 1.5.1-next.c6b55b5.0
-    "@sapphire/type": ^2.3.0
+    "@sapphire/type": ^2.2.5-next
     "@sapphire/utilities": 3.11.1-next.c6b55b5.0
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
