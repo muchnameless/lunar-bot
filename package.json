@@ -50,7 +50,7 @@
 		"@types/node": "patch:@types/node@^18.11.17#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch",
 		"@typescript-eslint/eslint-plugin": "patch:@typescript-eslint/eslint-plugin@npm%3A5.45.0#./.yarn/patches/@typescript-eslint-eslint-plugin-npm-5.45.0-af83fa2940.patch",
 		"chart.js": "patch:chart.js@^4.1.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch",
-		"discord-api-types": "0.37.24-next.8df9f14.1671200141",
+		"discord-api-types": "0.37.25-next.4c334f6.1671732642",
 		"discord.js": "patch:discord.js@14.8.0-dev.1671710685-429dbcc.0#./.yarn/patches/discord.js-npm-14.7.2-dev.1671209916-18b3a19.0-e07fc5ac18.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
@@ -61,7 +61,7 @@
 		"@sapphire/node-utilities": "1.0.1-next.c6b55b5.0",
 		"@sapphire/ratelimits": "2.4.6-next.c6b55b5.0",
 		"@sapphire/stopwatch": "1.5.1-next.c6b55b5.0",
-		"@sapphire/type": "^2.3.0",
+		"@sapphire/type": "^2.2.5-next",
 		"@sapphire/utilities": "3.11.1-next.c6b55b5.0",
 		"@skyra/jaro-winkler": "^1.1.0",
 		"@zikeji/hypixel": "github:muchnameless/node-hypixel#0eac00a31bf1f4434c0d5d60f9122a4c8d26a595",
