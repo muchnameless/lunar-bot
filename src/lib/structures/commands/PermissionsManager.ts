@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandPermissionType,
 	Collection,
+	inlineCode,
 	type ClientEvents,
 	type Events,
 	type GuildMember,
@@ -120,13 +121,19 @@ export class PermissionsManager {
 	 * @param commandId
 	 * @param member
 	 */
-	public async assert(guildId: Snowflake, commandId: Snowflake, member: GuildMember) {
+	public async assert(guildId: Snowflake, commandId: Snowflake, member: GuildMember | null) {
 		if (!this._ready) await this.init();
 
 		const permissions = this.cache.get(guildId)?.get(commandId);
 
 		// no permissions to check for the command
 		if (!permissions) return;
+
+		if (!member) {
+			throw `no discord member to check permissions for the ${inlineCode(
+				this.client.application.commands.cache.get(commandId)?.name ?? commandId,
+			)} command in ${inlineCode(this.client.guilds.cache.get(guildId)?.name ?? guildId)}`;
+		}
 
 		// users
 		switch (permissions.users?.get(member.id)) {
@@ -136,9 +143,9 @@ export class PermissionsManager {
 
 			case false:
 				// explicit deny
-				throw `you are explicitly denied access to the \`${
-					this.client.application.commands.cache.get(commandId)?.name ?? commandId
-				}\` command`;
+				throw `you are explicitly denied access to the ${inlineCode(
+					this.client.application.commands.cache.get(commandId)?.name ?? commandId,
+				)} command in ${inlineCode(this.client.guilds.cache.get(guildId)?.name ?? guildId)}`;
 
 			case undefined:
 		}
@@ -161,11 +168,13 @@ export class PermissionsManager {
 			for (const roleId of permissions.roles.denied) {
 				if (roleCache.has(roleId)) {
 					// explicit deny
-					throw `the ${this.client.guilds.cache.get(guildId)?.roles.cache.get(roleId)?.name ?? roleId} role in \`${
-						this.client.guilds.cache.get(guildId)?.name ?? guildId
-					}\` is denied access to the \`${
-						this.client.application.commands.cache.get(commandId)?.name ?? commandId
-					}\` command`;
+					throw `the ${
+						this.client.guilds.cache.get(guildId)?.roles.cache.get(roleId)?.name ?? roleId
+					} role in ${inlineCode(
+						this.client.guilds.cache.get(guildId)?.name ?? guildId,
+					)} is denied access to the ${inlineCode(
+						this.client.application.commands.cache.get(commandId)?.name ?? commandId,
+					)} command`;
 				}
 			}
 		}

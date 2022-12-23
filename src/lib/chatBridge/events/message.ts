@@ -584,7 +584,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				command.category === 'owner' ||
 				(commandId && this.client.application?.commands.cache.get(commandId)?.defaultMemberPermissions?.bitfield === 0n)
 			) {
-				// siltently ignore owner commands
+				// silently ignore owner commands
 				return logger.info({
 					author: hypixelMessage.author.ign,
 					content: hypixelMessage.content,
@@ -608,53 +608,63 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			// role permissions
 			const requiredRoles = command.requiredRoles(hypixelGuild);
-
 			const { member } = hypixelMessage;
-			const { discordGuild } = hypixelGuild;
-			if (!member || !discordGuild) {
-				logger.info({
-					author: hypixelMessage.author.ign,
-					content: hypixelMessage.content,
-					channel: hypixelMessage.type,
-					discordGuild: discordGuild?.id ?? hypixelGuild.discordId,
-					status: 'unable to find linked discord member',
-				});
-
-				void hypixelMessage.author.send(
-					`the '${command.name}' command requires a role ${
-						requiredRoles
-							? `(${commaListOr(
-									requiredRoles.map((roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId),
-							  )}) `
-							: ''
-					}from the ${discordGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`,
-				);
-				return;
-			}
 
 			// hardcoded role ids
-			if (requiredRoles && !member.roles.cache.hasAny(...requiredRoles)) {
-				logger.info({
-					author: hypixelMessage.author.ign,
-					member: member.user.tag,
-					content: hypixelMessage.content,
-					channel: hypixelMessage.type,
-					requiredRoles,
-					status: 'missing required role',
-				});
+			if (requiredRoles) {
+				if (!member) {
+					const { discordGuild } = hypixelGuild;
 
-				void hypixelMessage.author.send(
-					`the '${command.name}' command requires you to have a role (${commaListOr(
-						requiredRoles.map((roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId),
-					)}) from the ${member.guild.name} Discord Server`,
-				);
-				return;
+					logger.info({
+						author: hypixelMessage.author.ign,
+						content: hypixelMessage.content,
+						channel: hypixelMessage.type,
+						discordGuild: discordGuild?.id ?? hypixelGuild.discordId,
+						status: 'unable to find linked discord member',
+					});
+
+					void hypixelMessage.author.send(
+						`the '${command.name}' command requires a role ${
+							requiredRoles
+								? `(${commaListOr(
+										requiredRoles.map((roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId),
+								  )}) `
+								: ''
+						}from the ${discordGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`,
+					);
+					return;
+				}
+
+				if (!member.roles.cache.hasAny(...requiredRoles)) {
+					logger.info({
+						author: hypixelMessage.author.ign,
+						member: member.user.tag,
+						content: hypixelMessage.content,
+						channel: hypixelMessage.type,
+						requiredRoles,
+						status: 'missing required role',
+					});
+
+					void hypixelMessage.author.send(
+						`the '${command.name}' command requires you to have a role (${commaListOr(
+							requiredRoles.map((roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId),
+						)}) from the ${member.guild.name} Discord Server`,
+					);
+					return;
+				}
 			}
 
 			// application command permissions
 			if (commandId) {
+				if (!hypixelGuild.discordId) {
+					void hypixelMessage.author.send(
+						`unable to find the linked discord server to check role permissions for the '${command.name}' command`,
+					);
+					return;
+				}
+
 				try {
-					await this.client.permissions.assert(hypixelGuild.discordId!, commandId, member);
+					await this.client.permissions.assert(hypixelGuild.discordId, commandId, member);
 				} catch (error) {
 					logger.error(error);
 					void hypixelMessage.author.send(formatError(error));
