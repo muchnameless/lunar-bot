@@ -1970,6 +1970,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			profiles = await getSkyBlockProfiles(this.minecraftUuid);
 		} catch (error) {
 			logger.error({ err: error, ...this.logInfo }, '[FETCH MAIN PROFILE]');
+			return null;
 		}
 
 		const mainProfile = findSkyBlockProfile(profiles, this.minecraftUuid, FindProfileStrategy.MaxWeight);

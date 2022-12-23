@@ -84,6 +84,14 @@ export class BaseCommand {
 	}
 
 	/**
+	 * @param aliases
+	 */
+	protected static _parseAliases(aliases: string[] | undefined) {
+		const parsed = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean);
+		return parsed?.length ? parsed : null;
+	}
+
+	/**
 	 * client config
 	 */
 	public get config() {

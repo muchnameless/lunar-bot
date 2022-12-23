@@ -39,8 +39,7 @@ export class BridgeCommand extends BaseCommand {
 	) {
 		super(context, data);
 
-		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-		this.aliases = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
+		this.aliases = BridgeCommand._parseAliases(aliases);
 		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 		this.description = description || null;
 		this.guildOnly = guildOnly ?? false;
