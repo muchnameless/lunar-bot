@@ -103,8 +103,7 @@ export class ApplicationCommand extends BaseCommand {
 				this.aliases ??= [];
 				this.aliases.push(...aliases);
 
-				const nonEmptyAliases = aliases.map((alias) => alias.toLowerCase()).filter(Boolean);
-				this.slashAliases = nonEmptyAliases.length ? nonEmptyAliases : null;
+				this.slashAliases = ApplicationCommand._parseAliases(aliases);
 			}
 
 			if (!slash.name) {

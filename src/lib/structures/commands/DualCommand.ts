@@ -34,8 +34,7 @@ export class DualCommand
 	) {
 		super(context, slashData);
 
-		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-		this.aliasesInGame = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
+		this.aliasesInGame = DualCommand._parseAliases(aliases);
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
 		this.parseArgsOptions = parseArgsOptions;
