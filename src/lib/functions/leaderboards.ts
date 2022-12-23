@@ -282,7 +282,7 @@ function createActionRows(
 }
 
 /**
- * handles a leaderbaord message
+ * handles a leaderboard message
  *
  * @param interaction
  * @param leaderboardArgs
@@ -295,7 +295,7 @@ export async function handleLeaderboardCommandInteraction(
 }
 
 /**
- * handles a leaderbaord message
+ * handles a leaderboard message
  *
  * @param interaction
  * @param args parsed customId, split by ':'
@@ -344,7 +344,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 }
 
 /**
- * handles a leaderbaord message
+ * handles a leaderboard message
  *
  * @param interaction
  * @param args parsed customId, split by ':'
@@ -616,8 +616,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
 				// use weight from the first time they got alch xp, assume player has not been tracked before
 				const XP_TRACKING_START = player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0);
-				const { totalWeight: totalWeightOffet } = player.getLilyWeightHistory(XP_TRACKING_START);
-				const gainedWeight = totalWeight - totalWeightOffet;
+				const { totalWeight: totalWeightOffset } = player.getLilyWeightHistory(XP_TRACKING_START);
+				const gainedWeight = totalWeight - totalWeightOffset;
 				const gainedGuildXp = player.guildXp - (player.guildXpHistory[XP_TRACKING_START] ?? 0);
 				return {
 					ign: player.ign,
@@ -671,9 +671,9 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				const {
 					weight: weightOffset,
 					overflow: overflowOffset,
-					totalWeight: totalWeightOffet,
+					totalWeight: totalWeightOffset,
 				} = player.getLilyWeight(offset);
-				const totalWeightGain = totalWeight - totalWeightOffet;
+				const totalWeightGain = totalWeight - totalWeightOffset;
 				return {
 					ign: player.ign,
 					discordId: player.discordId,
@@ -712,9 +712,9 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				const {
 					weight: weightOffset,
 					overflow: overflowOffset,
-					totalWeight: totalWeightOffet,
+					totalWeight: totalWeightOffset,
 				} = player.getSenitherWeight(offset);
-				const totalWeightGain = totalWeight - totalWeightOffet;
+				const totalWeightGain = totalWeight - totalWeightOffset;
 				return {
 					ign: player.ign,
 					discordId: player.discordId,

@@ -118,16 +118,16 @@ export class MessageUtil extends null {
 
 	/**
 	 * @param message
-	 * @param emojiIndetifier
+	 * @param emojiIdentifier
 	 */
-	private static async _reactSingle(message: Message, emojiIndetifier: EmojiIdentifierResolvable) {
-		const emoji = resolvePartialEmoji(emojiIndetifier);
+	private static async _reactSingle(message: Message, emojiIdentifier: EmojiIdentifierResolvable) {
+		const emoji = resolvePartialEmoji(emojiIdentifier);
 		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 		const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
 
 		return reaction?.me
 			? reaction // reaction from bot already exists
-			: message.react(emojiIndetifier); // new reaction
+			: message.react(emojiIdentifier); // new reaction
 	}
 
 	/**
@@ -180,8 +180,8 @@ export class MessageUtil extends null {
 		const res: MessageReaction[] = [];
 
 		try {
-			for (const emojiIndetifier of emojis) {
-				res.push(await this._reactSingle(message, emojiIndetifier));
+			for (const emojiIdentifier of emojis) {
+				res.push(await this._reactSingle(message, emojiIdentifier));
 			}
 		} catch (error) {
 			logger.error({ err: error, ...this.logInfo(message), data: emojis }, '[MESSAGE REACT]');

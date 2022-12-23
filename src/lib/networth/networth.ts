@@ -442,7 +442,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		}
 	}
 
-	// divan armor
+	// divan armour
 	if (extraAttributes.gemstone_slots) {
 		price += extraAttributes.gemstone_slots * getPrice(ItemId.GemstoneChamber) * PriceModifier.GemstoneChamber;
 	}

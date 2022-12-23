@@ -31,7 +31,7 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import { type ModelResovable } from '../managers/ModelManager.js';
+import { type ModelResolvable } from '../managers/ModelManager.js';
 import { type GuildRank, type HypixelGuild } from './HypixelGuild.js';
 import { type TaxCollector } from './TaxCollector.js';
 import { TransactionType, type Transaction } from './Transaction.js';
@@ -106,7 +106,7 @@ export interface PlayerUpdateOptions {
 	 */
 	reason?: string;
 	/**
-	 * whether to reject if the hypixel API reponded with an error
+	 * whether to reject if the hypixel API responded with an error
 	 */
 	rejectOnAPIError?: boolean;
 	/**
@@ -142,12 +142,12 @@ interface SetToPaidOptions {
 	/**
 	 * minecraft uuid of the player who collected
 	 */
-	collectedBy?: ModelResovable<TaxCollector>;
+	collectedBy?: ModelResolvable<TaxCollector>;
 }
 
 interface AddTransferOptions extends SetToPaidOptions {
 	amount: number;
-	collectedBy: ModelResovable<TaxCollector>;
+	collectedBy: ModelResolvable<TaxCollector>;
 	notes?: string | null;
 	type?: TransactionType;
 }
@@ -1297,7 +1297,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 								.filter(({ currentWeightReq }) => currentWeightReq !== null)
 								// sort descendingly by weight req
 								.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
-								// find first rank that the player is eligable for
+								// find first rank that the player is eligible for
 								.find(({ currentWeightReq }) => weight >= currentWeightReq!)?.priority
 						: this.guildRankPriority;
 
@@ -1638,7 +1638,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		const member = await this.fetchDiscordMember();
 		if (!member) return false;
 
-		// check if IDs are proper roles and managable by the bot
+		// check if IDs are proper roles and manageable by the bot
 		const _rolesToAdd = GuildUtil.resolveRoles(member.guild, rolesToAdd);
 		const _rolesToRemove = GuildUtil.resolveRoles(member.guild, rolesToRemove);
 
@@ -2080,12 +2080,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						const xpHistory = this[`${type}XpHistory`];
 						xpHistory.shift();
 						xpHistory.push(this[`${type}Xp`]);
-						this.changed(`${type}XpHistory`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+						this.changed(`${type}XpHistory`, true); // necessary so that sequelize knows an array has changed and the db needs to be updated
 					} else {
 						const xpHistory = this[`${type}History`];
 						xpHistory.shift();
 						xpHistory.push(this[type]);
-						this.changed(`${type}History`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+						this.changed(`${type}History`, true); // necessary so that sequelize knows an array has changed and the db needs to be updated
 					}
 				}
 
@@ -2515,7 +2515,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	public async addInfraction() {
 		this._infractions ??= []; // create infractions array if non-existent
 		this._infractions.push(Date.now()); // add current time
-		this.changed('_infractions', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+		this.changed('_infractions', true); // necessary so that sequelize knows an array has changed and the db needs to be updated
 
 		try {
 			return await this.save();

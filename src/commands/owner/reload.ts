@@ -296,7 +296,7 @@ export default class ReloadCommand extends ApplicationCommand {
 				}
 
 			default:
-				throw new Error(`unknown subcommand gropu '${subcommandGroup}'`);
+				throw new Error(`unknown subcommand group '${subcommandGroup}'`);
 		}
 	}
 }

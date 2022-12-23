@@ -177,7 +177,7 @@ export default class XpCommand extends ApplicationCommand {
 
 		const { totalWeight, weight, overflow } = player.getLilyWeight();
 		const {
-			totalWeight: totalWeightOffet,
+			totalWeight: totalWeightOffset,
 			weight: weightOffset,
 			overflow: overflowOffset,
 		} = player.getLilyWeight(OFFSET);
@@ -202,7 +202,7 @@ export default class XpCommand extends ApplicationCommand {
 					${bold('Total')}: ${formatDecimalNumber(totalWeight)} [ ${formatDecimalNumber(weight)} + ${formatDecimalNumber(
 					overflow,
 				)} ]
-					${bold('Δ:')} ${formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${formatDecimalNumber(
+					${bold('Δ:')} ${formatDecimalNumber(totalWeight - totalWeightOffset)} [ ${formatDecimalNumber(
 					weight - weightOffset,
 				)} + ${formatDecimalNumber(overflow - overflowOffset)} ]
 				`,

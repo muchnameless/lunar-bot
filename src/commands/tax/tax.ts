@@ -79,7 +79,7 @@ export default class TaxCommand extends ApplicationCommand {
 						.addBooleanOption((option) =>
 							option
 								.setName('ghostping')
-								.setDescription('whether to immediatly delete the pings after sending them')
+								.setDescription('whether to immediately delete the pings after sending them')
 								.setRequired(false),
 						)
 						.addStringOption(hypixelGuildOption)

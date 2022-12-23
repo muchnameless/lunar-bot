@@ -12,7 +12,7 @@ import {
 	type TransferXpOptions,
 } from '../models/Player.js';
 import { sql } from '../sql.js';
-import { ModelManager, type ModelResovable } from './ModelManager.js';
+import { ModelManager, type ModelResolvable } from './ModelManager.js';
 import { hypixel } from '#api';
 import {
 	HYPIXEL_UPDATE_INTERVAL,
@@ -106,7 +106,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 *
 	 * @param idOrPlayer
 	 */
-	public delete(idOrPlayer: ModelResovable<Player>) {
+	public delete(idOrPlayer: ModelResolvable<Player>) {
 		const player = this.resolve(idOrPlayer);
 		if (!player) throw new Error(`[PLAYERS DELETE]: invalid input: ${idOrPlayer}`);
 
@@ -265,7 +265,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	async #updateXp(options?: PlayerUpdateOptions) {
 		try {
-			// the hypxiel api encountered an error before
+			// the hypixel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 				// reset error every full hour
 				if (isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)) {
@@ -311,7 +311,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @internal
 	 */
 	async #updateIgns() {
-		// the hypxiel api encountered an error before
+		// the hypixel api encountered an error before
 		if (this.client.config.get('MOJANG_API_ERROR')) {
 			// reset error every full hour
 			if (isFirstMinutesOfHour(MOJANG_UPDATE_INTERVAL)) {
@@ -450,7 +450,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @internal
 	 */
 	async #updateMainProfiles() {
-		// the hypxiel api encountered an error before
+		// the hypixel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
 			if (isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)) {

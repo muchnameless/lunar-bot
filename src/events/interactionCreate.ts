@@ -89,7 +89,7 @@ export default class InteractionCreateEvent extends Event {
 			case CustomIdKey.Confirm:
 				return;
 
-			// leaderboards edit
+			// leaderboard edits
 			case CustomIdKey.Leaderboard:
 				return handleLeaderboardButtonInteraction(interaction, args);
 
@@ -124,7 +124,7 @@ export default class InteractionCreateEvent extends Event {
 
 			// change message visibility
 			case CustomIdKey.Visibility:
-				// deferUpdate to be able to edit the epehemeral message later after replying
+				// deferUpdate to be able to edit the ephemeral message later after replying
 				void InteractionUtil.deferUpdate(interaction);
 
 				// no-op additional clicks on the same button
@@ -204,7 +204,7 @@ export default class InteractionCreateEvent extends Event {
 		const type = args.shift();
 
 		switch (type) {
-			// leaderboards edit
+			// leaderboard edits
 			case CustomIdKey.Leaderboard:
 				return handleLeaderboardSelectMenuInteraction(interaction, args);
 

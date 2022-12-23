@@ -103,7 +103,7 @@ export const enum ItemId {
 	GoldenBall = 'GOLDEN_BALL',
 	GoldenDragon = 'GOLDEN_DRAGON',
 	GoldIngot = 'GOLD_INGOT',
-	GoldTippedArrwow = 'GOLD_TIPPED_ARRWOW',
+	GoldTippedArrow = 'GOLD_TIPPED_ARROW',
 	HardenedWood = 'HARDENED_WOOD',
 	HazmatEnderman = 'HAZMAT_ENDERMAN',
 	HegemonyArtifact = 'HEGEMONY_ARTIFACT',

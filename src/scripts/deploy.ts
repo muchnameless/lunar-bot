@@ -41,7 +41,7 @@ try {
 		},
 	);
 
-	logger.info(`[DEPLOY]: sucessfully ${SHOULD_DELETE ? 'deleted' : 'reloaded'} slash commands`);
+	logger.info(`[DEPLOY]: successfully ${SHOULD_DELETE ? 'deleted' : 'reloaded'} slash commands`);
 } catch (error) {
 	logger.error(error, '[DEPLOY]');
 }

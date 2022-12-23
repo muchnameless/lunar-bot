@@ -2,10 +2,10 @@ import { stripIndents } from 'common-tags';
 import { bold } from 'discord.js';
 import { type Player } from '../models/Player.js';
 import { type TaxCollector } from '../models/TaxCollector.js';
-import { ModelManager, type ModelResovable } from './ModelManager.js';
+import { ModelManager, type ModelResolvable } from './ModelManager.js';
 import { escapeIgn, formatNumber } from '#functions';
 
-export type TaxCollectorResovable = ModelResovable<TaxCollector>;
+export type TaxCollectorResolvable = ModelResolvable<TaxCollector>;
 
 export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	/**
@@ -21,7 +21,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	 * @param uuidOrPlayer
 	 */
 	// @ts-expect-error incompatible override
-	public override async add(uuidOrPlayer: ModelResovable<Player>) {
+	public override async add(uuidOrPlayer: ModelResolvable<Player>) {
 		const player = this.client.players.resolve(uuidOrPlayer);
 		if (!player) throw new Error(`[TAX COLLECTOR ADD]: invalid input: ${uuidOrPlayer}`);
 
@@ -49,7 +49,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	 *
 	 * @param taxCollector
 	 */
-	public async setInactive(taxCollector: TaxCollectorResovable) {
+	public async setInactive(taxCollector: TaxCollectorResolvable) {
 		const _taxCollector = this.resolve(taxCollector);
 		if (!_taxCollector) return this;
 

@@ -11,8 +11,8 @@ export enum MessagePosition {
 	System,
 	GameInfo,
 	SayCommand,
-	MsgCommandd,
-	TeamMsgCommandd,
+	MsgCommand,
+	TeamMsgCommand,
 	Emote,
 	Tellraw,
 }

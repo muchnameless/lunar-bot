@@ -375,7 +375,7 @@ export class HypixelGuild extends Model<
 	}
 
 	/**
-	 * transformes a log array
+	 * transforms a log array
 	 *
 	 * @param logArray
 	 */
@@ -689,7 +689,7 @@ export class HypixelGuild extends Model<
 		const { statsHistory } = this;
 		statsHistory.shift();
 		statsHistory.push({ playerCount: this.playerCount, ...this.stats });
-		this.changed('statsHistory', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+		this.changed('statsHistory', true); // necessary so that sequelize knows an array has changed and the db needs to be updated
 
 		try {
 			return await this.save();

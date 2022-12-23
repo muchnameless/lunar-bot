@@ -2,11 +2,11 @@ import { CronJob } from 'cron';
 import { type GuildResolvable, type Snowflake } from 'discord.js';
 import { type FindOptions } from 'sequelize';
 import { type HypixelGuild, type UpdateOptions } from '../models/HypixelGuild.js';
-import { type ModelResovable, ModelManager } from './ModelManager.js';
+import { type ModelResolvable, ModelManager } from './ModelManager.js';
 import { autocorrect, compareAlphabetically } from '#functions';
 import { logger } from '#logger';
 
-export type HypixelGuildResolvable = ModelResovable<HypixelGuild>;
+export type HypixelGuildResolvable = ModelResolvable<HypixelGuild>;
 
 export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**

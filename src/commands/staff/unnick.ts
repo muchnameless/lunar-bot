@@ -60,7 +60,7 @@ export default class UnnickCommand extends ApplicationCommand {
 		const player = GuildMemberUtil.getPlayer(member);
 		const NEW_NICK = player && player.ign !== UNKNOWN_IGN ? player.ign : null; // remove to username if IGN is unknown
 
-		// check if change is neccessary
+		// check if change is necessary
 		if (NEW_NICK === null) {
 			if (!member.nickname) {
 				return InteractionUtil.reply(interaction, {

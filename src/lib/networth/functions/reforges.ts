@@ -139,7 +139,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 				return ItemId.WarpedStone; // sword reforge stone
 			}
 
-			return ItemId.EndstoneGeode; // armor reforge stone (warped renamed to hyper for armor)
+			return ItemId.EndstoneGeode; // armour reforge stone (warped renamed to hyper for armour)
 		case 'waxed':
 			return ItemId.BlazeWax;
 		case 'withered':

@@ -11,7 +11,7 @@ import {
 import { logger } from '#logger';
 import { type LunarClient } from '#structures/LunarClient.js';
 
-export type ModelResovable<M extends Model> = M | string;
+export type ModelResolvable<M extends Model> = M | string;
 
 export class ModelManager<M extends Model> {
 	public declare readonly client: LunarClient;
@@ -109,7 +109,7 @@ export class ModelManager<M extends Model> {
 	 * @param idOrInstance - The id or instance of something in this Manager
 	 * @param options
 	 */
-	public async destroy(idOrInstance: ModelResovable<M>, options?: InstanceDestroyOptions) {
+	public async destroy(idOrInstance: ModelResolvable<M>, options?: InstanceDestroyOptions) {
 		const element = this.resolve(idOrInstance);
 		if (!element) throw new Error(`[${this.constructor.name} REMOVE]: unknown element: ${idOrInstance}`);
 
@@ -123,7 +123,7 @@ export class ModelManager<M extends Model> {
 	 *
 	 * @param idOrInstance - The id or instance of something in this Manager
 	 */
-	public resolve(idOrInstance: ModelResovable<M>) {
+	public resolve(idOrInstance: ModelResolvable<M>) {
 		if (this.isModel(idOrInstance)) return idOrInstance;
 		if (typeof idOrInstance === 'string') return this.cache.get(idOrInstance) ?? null;
 		return null;
@@ -134,7 +134,7 @@ export class ModelManager<M extends Model> {
 	 *
 	 * @param idOrInstance - The id or instance of something in this Manager
 	 */
-	public resolveId(idOrInstance: ModelResovable<M>) {
+	public resolveId(idOrInstance: ModelResolvable<M>) {
 		if (this.isModel(idOrInstance)) return idOrInstance[this.primaryKey] as unknown as string;
 		if (typeof idOrInstance === 'string') return idOrInstance;
 		return null;

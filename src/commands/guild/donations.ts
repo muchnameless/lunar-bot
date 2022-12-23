@@ -22,7 +22,7 @@ export default class DonationsCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		// aquire donations from db
+		// acquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: TransactionType.Donation },
 		});

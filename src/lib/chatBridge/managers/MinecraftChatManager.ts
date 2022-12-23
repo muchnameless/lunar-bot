@@ -126,7 +126,7 @@ class LastMessages {
 	private static readonly MAX_INDEX = 4 as const;
 
 	/**
-	 * treshold above which the message to send gets additional random padding
+	 * threshold above which the message to send gets additional random padding
 	 */
 	private static readonly JARO_WINKLER_THRESHOLD = 0.98 as const;
 
@@ -338,7 +338,7 @@ export class MinecraftChatManager extends ChatManager {
 	public static readonly MAX_RETRIES = 3 as const;
 
 	/**
-	 * delay which can be used to send messages to in-game chat continously
+	 * delay which can be used to send messages to in-game chat continuously
 	 */
 	public static readonly SAFE_DELAY = 600 as const;
 
@@ -971,7 +971,7 @@ export class MinecraftChatManager extends ChatManager {
 		if (lastMessages) {
 			let index = this._retries;
 
-			// 1 for each retry + additional if lastMessages includes curent padding
+			// 1 for each retry + additional if lastMessages includes current padding
 			while (
 				(--index >= 0 || lastMessages.check(content, this._retries)) &&
 				prefix.length + content.length <= MinecraftChatManager.MAX_MESSAGE_LENGTH

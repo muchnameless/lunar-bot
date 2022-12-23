@@ -74,7 +74,7 @@ export class MojangClient {
 	}
 
 	/**
-	 * bulk convertion (1 <= amount  <= 10) for ign -> uuid
+	 * bulk conversion (1 <= amount  <= 10) for ign -> uuid
 	 *
 	 * @param usernames
 	 * @param options

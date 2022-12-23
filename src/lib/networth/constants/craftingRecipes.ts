@@ -244,7 +244,7 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 		[ItemId.ReinforcedIronArrow]: {
 			[ItemId.IronIngot]: 24 / 64,
 		},
-		[ItemId.GoldTippedArrwow]: {
+		[ItemId.GoldTippedArrow]: {
 			[ItemId.GoldIngot]: 40 / 64,
 		},
 		[ItemId.RedstoneTippedArrow]: {

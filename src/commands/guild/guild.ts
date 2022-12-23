@@ -514,7 +514,7 @@ export default class GuildCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.setTitle(`/${escapeIgn(commandOptions.command)}`) // command can inclue a player IGN
+					.setTitle(`/${escapeIgn(commandOptions.command)}`) // command can include a player IGN
 					.setDescription(codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions)))
 					.setFooter({ text: hypixelGuild.name }),
 			],
@@ -818,7 +818,7 @@ export default class GuildCommand extends ApplicationCommand {
 				// add to ban list
 				void (async () => {
 					switch (interaction.options.getBoolean('add-to-ban-list')) {
-						case false: // option false choosen
+						case false: // option false chosen
 							return;
 
 						case null: // no option chosen

@@ -14,7 +14,7 @@ interface AutocorrectResult<T> {
 }
 
 /**
- * checks the query agains the validInput and returns the most likely match
+ * checks the query against the validInput and returns the most likely match
  *
  * @param query
  * @param validInput
@@ -164,7 +164,7 @@ export async function safePromiseAll(array: unknown[]) {
 }
 
 /**
- * build autocomplete reponse from cached database entries
+ * build autocomplete response from cached database entries
  *
  * @param cache
  * @param value

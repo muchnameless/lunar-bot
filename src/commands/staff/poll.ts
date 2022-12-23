@@ -116,7 +116,7 @@ export default class PollCommand extends DualCommand {
 				${pollOptions.map(({ number, option }) => `${number}: ${option}`).join('\n')}
 			`);
 
-			// aquire in-game votes
+			// acquire in-game votes
 			for (const msg of await hypixelMessages) {
 				const votedFor = Number.parseInt(msg.content, 10);
 
@@ -126,7 +126,7 @@ export default class PollCommand extends DualCommand {
 				pollOptions[votedFor - 1]!.votes.add(msg.player?.minecraftUuid ?? msg.author.ign);
 			}
 
-			// aquire discord votes
+			// acquire discord votes
 			if (discordMessages) {
 				for (const msg of (await discordMessages).values()) {
 					const votedFor = Number.parseInt(msg.content, 10);

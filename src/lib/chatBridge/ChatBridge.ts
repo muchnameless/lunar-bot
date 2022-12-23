@@ -14,14 +14,12 @@ import {
 	type MinecraftChatOptions,
 	type ReadyMinecraftChatManager,
 } from './managers/MinecraftChatManager.js';
-import { UnicodeEmoji } from '#constants';
 import { minutes, seconds } from '#functions';
 import { logger } from '#logger';
 import { type LunarClient } from '#structures/LunarClient.js';
 import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
 import { type Player } from '#structures/database/models/Player.js';
 import { EventCollection } from '#structures/events/EventCollection.js';
-import { MessageUtil } from '#utils';
 
 export interface BroadcastOptions {
 	content: string;

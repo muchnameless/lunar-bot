@@ -429,7 +429,7 @@ export class DatabaseManager {
 		try {
 			const { config, players, hypixelGuilds } = this.modelManagers;
 
-			// the hypxiel api encountered an error before
+			// the hypixel api encountered an error before
 			if (config.get('HYPIXEL_API_ERROR')) {
 				// reset error every full hour
 				if (isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)) {

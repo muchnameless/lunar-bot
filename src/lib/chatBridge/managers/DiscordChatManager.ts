@@ -497,7 +497,7 @@ export class DiscordChatManager extends ChatManager {
 			try {
 				await InteractionUtil.followUp(interaction, { content, ephemeral: true, rejectOnError: true });
 				if (redisKey) void redis.psetex(redisKey, cooldown, 1); // prevent additional DMs
-				return; // successfull
+				return; // successful
 			} catch (error) {
 				logger.error({ err: error, ...this.logInfo }, '[SEND DM]');
 
