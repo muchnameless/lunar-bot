@@ -172,9 +172,11 @@ export class ChatBridge extends EventEmitter {
 
 	/**
 	 * create and log the bot into hypixel
+	 *
+	 * @param force whether to connect even if the bot encountered a critical error previously
 	 */
-	public async connect() {
-		await this.minecraft.connect();
+	public async connect(force?: boolean) {
+		await this.minecraft.connect(force);
 		return this;
 	}
 

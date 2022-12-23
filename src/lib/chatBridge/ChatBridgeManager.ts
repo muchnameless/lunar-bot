@@ -106,17 +106,23 @@ export class ChatBridgeManager {
 	/**
 	 * connects a single or all bridges, instantiating them first if not already done
 	 *
-	 * @param index
+	 * @param indexOrForce
+	 * @param force
 	 */
-	public async connect(index?: number) {
-		// load commands if none are present
+	public async connect(index: number, force?: boolean): Promise<this>;
+	public async connect(force?: boolean): Promise<this>;
+	public async connect(indexOrForce?: boolean | number, force?: boolean) {
 		await this.commands.loadAll();
 
 		// single
-		if (typeof index === 'number' && index >= 0 && index < this._accounts.length) {
-			const chatBridge = this.cache[index]!;
+		if (typeof indexOrForce === 'number') {
+			if (indexOrForce < 0 || indexOrForce >= this.cache.length) {
+				throw new Error(`no ChatBridge with index #${indexOrForce}`);
+			}
 
-			await chatBridge.connect();
+			const chatBridge = this.cache[indexOrForce]!;
+
+			await chatBridge.connect(force);
 			await once(chatBridge, ChatBridgeEvent.Ready);
 
 			return this;
@@ -125,7 +131,7 @@ export class ChatBridgeManager {
 		// all
 		await Promise.all(
 			this.cache.map(async (chatBridge) => {
-				await chatBridge.connect();
+				await chatBridge.connect(indexOrForce);
 				return once(chatBridge, ChatBridgeEvent.Ready);
 			}),
 		);

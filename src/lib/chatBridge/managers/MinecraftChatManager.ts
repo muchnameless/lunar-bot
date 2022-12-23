@@ -443,9 +443,11 @@ export class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * create and log the bot into hypixel
+	 *
+	 * @param force whether to connect even if the bot encountered a critical error previously
 	 */
-	public async connect() {
-		if (this.state === MinecraftChatManagerState.Errored) {
+	public async connect(force = false) {
+		if (!force && this.state === MinecraftChatManagerState.Errored) {
 			throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
 		}
 
@@ -460,7 +462,6 @@ export class MinecraftChatManager extends ChatManager {
 
 		this.bot = await createBot(this.chatBridge, {
 			host: 'mc.hypixel.net',
-			port: 25_565,
 			username: env.MINECRAFT_USERNAME.split(/\s+/, this.mcAccount + 1)[this.mcAccount]!,
 			password: env.MINECRAFT_PASSWORD.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
 			version: MC_CLIENT_VERSION,
