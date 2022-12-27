@@ -492,7 +492,7 @@ export class MinecraftChatManager extends ChatManager {
 	 *
 	 * @param errored
 	 */
-	public disconnect(errored = true) {
+	public disconnect(errored = false) {
 		this.clearAbortLoginTimeout();
 
 		this.state = errored ? MinecraftChatManagerState.Errored : MinecraftChatManagerState.Connecting;
