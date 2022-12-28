@@ -37,11 +37,11 @@
 		"update": "yarn upgrade-interactive"
 	},
 	"resolutions": {
-		"@discordjs/builders": "1.4.1-dev.1672186166-3160ab0.0",
-		"@discordjs/collection": "1.3.1-dev.1672186131-3160ab0.0",
-		"@discordjs/formatters": "0.1.1-dev.1672186156-3160ab0.0",
-		"@discordjs/rest": "1.5.1-dev.1672186150-3160ab0.0",
-		"@discordjs/util": "0.1.1-dev.1672186152-3160ab0.0",
+		"@discordjs/builders": "1.4.1-dev.1672229095-3160ab0.0",
+		"@discordjs/collection": "1.3.1-dev.1672229078-3160ab0.0",
+		"@discordjs/formatters": "0.1.1-dev.1672229059-3160ab0.0",
+		"@discordjs/rest": "1.5.1-dev.1672229055-3160ab0.0",
+		"@discordjs/util": "0.1.1-dev.1672229063-3160ab0.0",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.23b8fea.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.3eb5175.0-3223b22520.patch",
 		"@sapphire/ratelimits": "2.4.6-next.23b8fea.0",
 		"@sapphire/shapeshift": "3.8.2-next.1d0013f.0",
@@ -51,7 +51,7 @@
 		"@typescript-eslint/eslint-plugin": "patch:@typescript-eslint/eslint-plugin@npm%3A5.45.0#./.yarn/patches/@typescript-eslint-eslint-plugin-npm-5.45.0-af83fa2940.patch",
 		"chart.js": "patch:chart.js@^4.1.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch",
 		"discord-api-types": "0.37.25-next.4c334f6.1671732642",
-		"discord.js": "patch:discord.js@14.7.2-dev.1672186145-3160ab0.0#./.yarn/patches/discord.js-npm-14.7.2-dev.1671840548-153352a.0-eccc777c87.patch",
+		"discord.js": "patch:discord.js@14.7.2-dev.1672229059-3160ab0.0#./.yarn/patches/discord.js-npm-14.7.2-dev.1671840548-153352a.0-eccc777c87.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
 	"dependencies": {
@@ -69,7 +69,7 @@
 		"chart.js": "^4.1.1",
 		"common-tags": "^1.8.2",
 		"cron": "^2.1.0",
-		"discord.js": "14.7.2-dev.1672186145-3160ab0.0",
+		"discord.js": "14.7.2-dev.1672229059-3160ab0.0",
 		"fast-xml-parser": "^4.0.12",
 		"ioredis": "^5.2.4",
 		"js-big-decimal": "^1.3.13",
