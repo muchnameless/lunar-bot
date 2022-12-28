@@ -142,20 +142,24 @@ export class ChatBridgeManager {
 	/**
 	 * disconnects a single or all bridges
 	 *
-	 * @param index
+	 * @param indexOrErrored
+	 * @param errored
 	 */
-	public disconnect(index?: undefined): ChatBridge[];
-	public disconnect(index: number): ChatBridge;
-	public disconnect(index?: number) {
+	public disconnect(index: number, errored?: boolean): ChatBridge;
+	public disconnect(errored?: boolean): ChatBridge[];
+	public disconnect(indexOrErrored?: boolean | number, errored?: boolean) {
 		// single
-		if (typeof index === 'number') {
-			const chatBridge = this.cache[index];
-			if (!chatBridge) throw new Error(`no chatBridge with index #${index}`);
-			return chatBridge.disconnect();
+		if (typeof indexOrErrored === 'number') {
+			if (indexOrErrored < 0 || indexOrErrored >= this.cache.length) {
+				throw new Error(`no ChatBridge with index #${indexOrErrored}`);
+			}
+
+			const chatBridge = this.cache[indexOrErrored]!;
+			return chatBridge.disconnect(errored);
 		}
 
 		// all
-		return this.cache.map((chatBridge) => chatBridge.disconnect());
+		return this.cache.map((chatBridge) => chatBridge.disconnect(indexOrErrored));
 	}
 
 	/**

@@ -170,11 +170,9 @@ export class ChatBridge extends EventEmitter {
 
 	/**
 	 * create and log the bot into hypixel
-	 *
-	 * @param force whether to connect even if the bot encountered a critical error previously
 	 */
-	public async connect(force?: boolean) {
-		await this.minecraft.connect(force);
+	public async connect(...args: Parameters<MinecraftChatManager['connect']>) {
+		await this.minecraft.connect(...args);
 		return this;
 	}
 
@@ -189,9 +187,9 @@ export class ChatBridge extends EventEmitter {
 	/**
 	 * disconnects the bot and resets the chatBridge
 	 */
-	public disconnect() {
+	public disconnect(...args: Parameters<MinecraftChatManager['disconnect']>) {
 		this.unlink();
-		this.minecraft.disconnect();
+		this.minecraft.disconnect(...args);
 		return this;
 	}
 
