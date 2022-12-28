@@ -155,15 +155,16 @@ export class DiscordChatManager extends ChatManager {
 	 * @param name - file name
 	 * @param contentType - content type of the file (if available)
 	 */
-	private static _getAttachmentName(name: string | null, contentType: string | null | undefined) {
-		// no name -> use contentType if available
-		if (name === null) {
-			return `[${contentType?.slice(0, contentType.indexOf('/')) ?? 'unknown'} attachment]`;
-		}
+	private static _getAttachmentName(name: string | null, contentType: string | null) {
+		// no name or discord's name placeholder -> use contentType if available
+		if (name === null || name.startsWith('unknown.')) {
+			if (contentType === null) return '[unknown attachment]';
 
-		// discord's name placeholder -> use contentType if available
-		if (name.startsWith('unknown.') && contentType) {
-			return `[${contentType.slice(0, contentType.indexOf('/'))} attachment]`;
+			let idx = contentType.indexOf('/');
+			if (idx !== -1) return `[${contentType.slice(0, idx)} attachment]`;
+
+			idx = contentType.indexOf(';');
+			return `[${idx === -1 ? contentType : contentType.slice(0, idx)} attachment]`;
 		}
 
 		// name includes the extension
