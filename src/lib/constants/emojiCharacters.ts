@@ -59,4 +59,5 @@ export const PROFILE_EMOJIS = {
 export const GAME_MODE_EMOJIS = {
 	bingo: 'Ⓑ',
 	ironman: '♲',
+	island: '☀', // stranded
 } as const satisfies Record<string, string>;
