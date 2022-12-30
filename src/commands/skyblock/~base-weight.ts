@@ -3,7 +3,7 @@ import { type ChatInputCommandInteraction } from 'discord.js';
 import BaseSkyBlockCommand from './~base-skyblock-command.js';
 import { getSkyBlockProfiles } from '#api';
 import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { UnicodeEmoji } from '#constants';
+import { FindProfileStrategy, UnicodeEmoji } from '#constants';
 import { formatDecimalNumber, formatPercent, getUuidAndIgn, type WeightData } from '#functions';
 
 export default class BaseWeightCommand extends BaseSkyBlockCommand {
@@ -46,12 +46,14 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 * @param ctx
 	 * @param ignOrUuid command arguments
 	 * @param profileName
+	 * @param findProfileStrategy
 	 */
 	// @ts-expect-error override
 	protected override async _fetchData(
 		ctx: ChatInputCommandInteraction<'cachedOrDM'> | HypixelUserMessage,
-		ignOrUuid?: string | null,
-		profileName?: string | null,
+		ignOrUuid: string | null,
+		profileName: string | null,
+		findProfileStrategy: FindProfileStrategy | null,
 	) {
 		// API requests
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
@@ -63,6 +65,8 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 			ign,
 			weightData: profileName
 				? this._transformProfileToWeightData(this._findProfileByName(profiles, profileName, ign), uuid)
+				: findProfileStrategy === FindProfileStrategy.LastActive
+				? this._transformProfileToWeightData(profiles.find(({ selected }) => selected)!, uuid)
 				: profiles
 						.map((profile) => this._transformProfileToWeightData(profile, uuid))
 						.sort(({ totalWeight: a }, { totalWeight: b }) => b - a)[0]!,
