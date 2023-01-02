@@ -2161,15 +2161,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@patch:chart.js@^4.1.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::locator=lunar-bot%40workspace%3A.":
-  version: 4.1.1
-  resolution: "chart.js@patch:chart.js@npm%3A4.1.1#./.yarn/patches/chart.js-npm-4.0.1-237de58978.patch::version=4.1.1&hash=ac21be&locator=lunar-bot%40workspace%3A."
-  dependencies:
-    "@kurkle/color": ^0.3.0
-  checksum: c39834aadcb956a37fb584e4c3d7ff0433d8f0c925edb35ae2a2b2ff226acad9ee6a6093d44ec13a03ae615910b56bc47954f4cc1fa1dab2b7f14769cc428ac4
-  languageName: node
-  linkType: hard
-
 "chownr@npm:^2.0.0":
   version: 2.0.0
   resolution: "chownr@npm:2.0.0"
