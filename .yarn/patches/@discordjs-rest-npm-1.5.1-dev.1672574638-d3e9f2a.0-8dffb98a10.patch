@@ -1,0 +1,951 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 3536eda629c138a2efec391668d868749a6b345c..2d0abd85bfd506502b7a7a83e97f18cd71988bc4 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -40,6 +40,7 @@ declare const ALLOWED_SIZES: readonly [16, 32, 64, 128, 256, 512, 1024, 2048, 40
+ type ImageExtension = typeof ALLOWED_EXTENSIONS[number];
+ type StickerExtension = typeof ALLOWED_STICKER_EXTENSIONS[number];
+ type ImageSize = typeof ALLOWED_SIZES[number];
++declare const BurstHandlerMajorIdKey = "burst";
+ 
+ /**
+  * The options used for image URLs
+@@ -747,6 +748,12 @@ declare class RequestManager extends EventEmitter {
+      * Stops the request handler sweeping interval
+      */
+     clearHandlerSweeper(): void;
++    /**
++     * Increment the invalid request count and emit warning if necessary
++     *
++     * @internal
++     */
++    incrementInvalidCount(): void;
+     /**
+      * Generates route data for an endpoint:method
+      *
+@@ -862,4 +869,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
+  */
+ declare const version: string;
+ 
+-export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
+diff --git a/dist/index.js b/dist/index.js
+index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377e1e02d70 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -30,6 +30,7 @@ __export(src_exports, {
+   ALLOWED_EXTENSIONS: () => ALLOWED_EXTENSIONS,
+   ALLOWED_SIZES: () => ALLOWED_SIZES,
+   ALLOWED_STICKER_EXTENSIONS: () => ALLOWED_STICKER_EXTENSIONS,
++  BurstHandlerMajorIdKey: () => BurstHandlerMajorIdKey,
+   CDN: () => CDN,
+   DefaultRestOptions: () => DefaultRestOptions,
+   DefaultUserAgent: () => DefaultUserAgent,
+@@ -90,6 +91,7 @@ var RESTEvents = /* @__PURE__ */ ((RESTEvents2) => {
+ var ALLOWED_EXTENSIONS = ["webp", "png", "jpg", "jpeg", "gif"];
+ var ALLOWED_STICKER_EXTENSIONS = ["png", "json"];
+ var ALLOWED_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
++var BurstHandlerMajorIdKey = "burst";
+ 
+ // src/lib/CDN.ts
+ var CDN = class {
+@@ -271,16 +273,15 @@ __name(RateLimitError, "RateLimitError");
+ // src/lib/RequestManager.ts
+ var import_node_buffer2 = require("buffer");
+ var import_node_events = require("events");
+-var import_node_timers2 = require("timers");
++var import_node_timers3 = require("timers");
+ var import_collection = require("@discordjs/collection");
+ var import_util = require("@discordjs/util");
+ var import_snowflake = require("@sapphire/snowflake");
+-var import_undici4 = require("undici");
++var import_undici5 = require("undici");
+ 
+-// src/lib/handlers/SequentialHandler.ts
++// src/lib/handlers/BurstHandler.ts
+ var import_node_timers = require("timers");
+ var import_promises = require("timers/promises");
+-var import_async_queue = require("@sapphire/async-queue");
+ var import_undici3 = require("undici");
+ 
+ // src/lib/utils/utils.ts
+@@ -392,10 +393,119 @@ function shouldRetry(error) {
+   return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
+ }
+ __name(shouldRetry, "shouldRetry");
++async function onRateLimit(manager, rateLimitData) {
++  const { options } = manager;
++  if (!options.rejectOnRateLimit)
++    return;
++  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
++  if (shouldThrow) {
++    throw new RateLimitError(rateLimitData);
++  }
++}
++__name(onRateLimit, "onRateLimit");
++
++// src/lib/handlers/BurstHandler.ts
++var BurstHandler = class {
++  constructor(manager, hash, majorParameter) {
++    this.manager = manager;
++    this.hash = hash;
++    this.majorParameter = majorParameter;
++    this.id = `${hash}:${majorParameter}`;
++  }
++  id;
++  inactive = false;
++  debug(message) {
++    this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
++  }
++  async queueRequest(routeId, url, options, requestData) {
++    return this.runRequest(routeId, url, options, requestData);
++  }
++  async runRequest(routeId, url, options, requestData, retries = 0) {
++    const method = options.method ?? "get";
++    const controller = new AbortController();
++    const timeout = (0, import_node_timers.setTimeout)(() => controller.abort(), this.manager.options.timeout);
++    if (requestData.signal) {
++      const signal = requestData.signal;
++      if (signal.aborted)
++        controller.abort();
++      else
++        signal.addEventListener("abort", () => controller.abort());
++    }
++    let res;
++    try {
++      res = await (0, import_undici3.request)(url, { ...options, signal: controller.signal });
++    } catch (error) {
++      if (!(error instanceof Error))
++        throw error;
++      if (shouldRetry(error) && retries !== this.manager.options.retries) {
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
++      }
++      throw error;
++    } finally {
++      (0, import_node_timers.clearTimeout)(timeout);
++    }
++    const status = res.statusCode;
++    let retryAfter = 0;
++    const retry = parseHeader(res.headers["retry-after"]);
++    if (retry)
++      retryAfter = Number(retry) * 1e3 + this.manager.options.offset;
++    if (status === 401 || status === 403 || status === 429) {
++      this.manager.incrementInvalidCount();
++    }
++    if (status >= 200 && status < 300) {
++      return res;
++    } else if (status === 429) {
++      const isGlobal = res.headers["x-ratelimit-global"] !== void 0;
++      await onRateLimit(this.manager, {
++        timeToReset: retryAfter,
++        limit: Number.POSITIVE_INFINITY,
++        method,
++        hash: this.hash,
++        url,
++        route: routeId.bucketRoute,
++        majorParameter: this.majorParameter,
++        global: isGlobal
++      });
++      this.debug(
++        [
++          "Encountered unexpected 429 rate limit",
++          `  Global         : ${isGlobal}`,
++          `  Method         : ${method}`,
++          `  URL            : ${url}`,
++          `  Bucket         : ${routeId.bucketRoute}`,
++          `  Major parameter: ${routeId.majorParameter}`,
++          `  Hash           : ${this.hash}`,
++          `  Limit          : ${Number.POSITIVE_INFINITY}`,
++          `  Retry After    : ${retryAfter}ms`,
++          `  Sublimit       : None`
++        ].join("\n")
++      );
++      await (0, import_promises.setTimeout)(retryAfter);
++      return this.runRequest(routeId, url, options, requestData, retries);
++    } else if (status >= 500 && status < 600) {
++      if (retries !== this.manager.options.retries) {
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
++      }
++      throw new HTTPError(status, method, url, requestData);
++    } else {
++      if (status >= 400 && status < 500) {
++        if (status === 401 && requestData.auth) {
++          this.manager.setToken(null);
++        }
++        const data = await parseResponse(res);
++        throw new DiscordAPIError(data, "code" in data ? data.code : data.error, status, method, url, requestData);
++      }
++      return res;
++    }
++  }
++};
++__name(BurstHandler, "BurstHandler");
+ 
+ // src/lib/handlers/SequentialHandler.ts
+-var invalidCount = 0;
+-var invalidCountResetTime = null;
++var import_node_timers2 = require("timers");
++var import_promises2 = require("timers/promises");
++var import_async_queue = require("@sapphire/async-queue");
++var import_undici4 = require("undici");
+ var SequentialHandler = class {
+   constructor(manager, hash, majorParameter) {
+     this.manager = manager;
+@@ -430,18 +540,9 @@ var SequentialHandler = class {
+     this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
+   }
+   async globalDelayFor(time) {
+-    await (0, import_promises.setTimeout)(time);
++    await (0, import_promises2.setTimeout)(time);
+     this.manager.globalDelay = null;
+   }
+-  async onRateLimit(rateLimitData) {
+-    const { options } = this.manager;
+-    if (!options.rejectOnRateLimit)
+-      return;
+-    const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
+-    if (shouldThrow) {
+-      throw new RateLimitError(rateLimitData);
+-    }
+-  }
+   async queueRequest(routeId, url, options, requestData) {
+     let queue = this.#asyncQueue;
+     let queueType = 0 /* Standard */;
+@@ -490,7 +591,7 @@ var SequentialHandler = class {
+       } else {
+         limit2 = this.limit;
+         timeout2 = this.timeToReset;
+-        delay = (0, import_promises.setTimeout)(timeout2);
++        delay = (0, import_promises2.setTimeout)(timeout2);
+       }
+       const rateLimitData = {
+         timeToReset: timeout2,
+@@ -503,7 +604,7 @@ var SequentialHandler = class {
+         global: isGlobal
+       };
+       this.manager.emit("rateLimited" /* RateLimited */, rateLimitData);
+-      await this.onRateLimit(rateLimitData);
++      await onRateLimit(this.manager, rateLimitData);
+       if (isGlobal) {
+         this.debug(`Global rate limit hit, blocking all requests for ${timeout2}ms`);
+       } else {
+@@ -518,7 +619,7 @@ var SequentialHandler = class {
+     this.manager.globalRemaining--;
+     const method = options.method ?? "get";
+     const controller = new AbortController();
+-    const timeout = (0, import_node_timers.setTimeout)(() => controller.abort(), this.manager.options.timeout).unref();
++    const timeout = (0, import_node_timers2.setTimeout)(() => controller.abort(), this.manager.options.timeout);
+     if (requestData.signal) {
+       const signal = requestData.signal;
+       if (signal.aborted)
+@@ -528,16 +629,16 @@ var SequentialHandler = class {
+     }
+     let res;
+     try {
+-      res = await (0, import_undici3.request)(url, { ...options, signal: controller.signal });
++      res = await (0, import_undici4.request)(url, { ...options, signal: controller.signal });
+     } catch (error) {
+       if (!(error instanceof Error))
+         throw error;
+       if (shouldRetry(error) && retries !== this.manager.options.retries) {
+-        return await this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       throw error;
+     } finally {
+-      (0, import_node_timers.clearTimeout)(timeout);
++      (0, import_node_timers2.clearTimeout)(timeout);
+     }
+     if (this.manager.listenerCount("response" /* Response */)) {
+       this.manager.emit(
+@@ -584,18 +685,7 @@ var SequentialHandler = class {
+       }
+     }
+     if (status === 401 || status === 403 || status === 429) {
+-      if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
+-        invalidCountResetTime = Date.now() + 1e3 * 60 * 10;
+-        invalidCount = 0;
+-      }
+-      invalidCount++;
+-      const emitInvalid = this.manager.options.invalidRequestWarningInterval > 0 && invalidCount % this.manager.options.invalidRequestWarningInterval === 0;
+-      if (emitInvalid) {
+-        this.manager.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
+-          count: invalidCount,
+-          remainingTime: invalidCountResetTime - Date.now()
+-        });
+-      }
++      this.manager.incrementInvalidCount();
+     }
+     if (status >= 200 && status < 300) {
+       return res;
+@@ -610,7 +700,7 @@ var SequentialHandler = class {
+         limit2 = this.limit;
+         timeout2 = this.timeToReset;
+       }
+-      await this.onRateLimit({
++      await onRateLimit(this.manager, {
+         timeToReset: timeout2,
+         limit: limit2,
+         method,
+@@ -643,7 +733,7 @@ var SequentialHandler = class {
+         }
+         this.#sublimitPromise?.resolve();
+         this.#sublimitPromise = null;
+-        await (0, import_promises.setTimeout)(sublimitTimeout);
++        await (0, import_promises2.setTimeout)(sublimitTimeout);
+         let resolve;
+         const promise = new Promise((res2) => resolve = res2);
+         this.#sublimitPromise = { promise, resolve };
+@@ -655,7 +745,7 @@ var SequentialHandler = class {
+       return this.runRequest(routeId, url, options, requestData, retries);
+     } else if (status >= 500 && status < 600) {
+       if (retries !== this.manager.options.retries) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       throw new HTTPError(status, method, url, requestData);
+     } else {
+@@ -682,6 +772,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+   RequestMethod2["Put"] = "PUT";
+   return RequestMethod2;
+ })(RequestMethod || {});
++var invalidCount = 0;
++var invalidCountResetTime = null;
+ var RequestManager = class extends import_node_events.EventEmitter {
+   agent = null;
+   globalRemaining;
+@@ -709,7 +801,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     }, "validateMaxInterval");
+     if (this.options.hashSweepInterval !== 0 && this.options.hashSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.hashSweepInterval);
+-      this.hashTimer = (0, import_node_timers2.setInterval)(() => {
++      this.hashTimer = (0, import_node_timers3.setInterval)(() => {
+         const sweptHashes = new import_collection.Collection();
+         const currentDate = Date.now();
+         this.hashes.sweep((val, key) => {
+@@ -723,11 +815,11 @@ var RequestManager = class extends import_node_events.EventEmitter {
+           return shouldSweep;
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+-      }, this.options.hashSweepInterval).unref();
++      }, this.options.hashSweepInterval);
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+-      this.handlerTimer = (0, import_node_timers2.setInterval)(() => {
++      this.handlerTimer = (0, import_node_timers3.setInterval)(() => {
+         const sweptHandlers = new import_collection.Collection();
+         this.handlers.sweep((val, key) => {
+           const { inactive } = val;
+@@ -738,7 +830,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+           return inactive;
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+-      }, this.options.handlerSweepInterval).unref();
++      }, this.options.handlerSweepInterval);
+     }
+   }
+   setAgent(agent) {
+@@ -749,31 +841,31 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     this.#token = token;
+     return this;
+   }
+-  async queueRequest(request2) {
+-    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
+-    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+-      value: `Global(${request2.method}:${routeId.bucketRoute})`,
++  async queueRequest(request3) {
++    const routeId = RequestManager.generateRouteData(request3.fullRoute, request3.method);
++    const hash = this.hashes.get(`${request3.method}:${routeId.bucketRoute}`) ?? {
++      value: `Global(${request3.method}:${routeId.bucketRoute})`,
+       lastAccess: -1
+     };
+     const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
+-    const { url, fetchOptions } = await this.resolveRequest(request2);
++    const { url, fetchOptions } = await this.resolveRequest(request3);
+     return handler.queueRequest(routeId, url, fetchOptions, {
+-      body: request2.body,
+-      files: request2.files,
+-      auth: request2.auth !== false,
+-      signal: request2.signal
++      body: request3.body,
++      files: request3.files,
++      auth: request3.auth !== false,
++      signal: request3.signal
+     });
+   }
+   createHandler(hash, majorParameter) {
+-    const queue = new SequentialHandler(this, hash, majorParameter);
++    const queue = majorParameter === BurstHandlerMajorIdKey ? new BurstHandler(this, hash, majorParameter) : new SequentialHandler(this, hash, majorParameter);
+     this.handlers.set(queue.id, queue);
+     return queue;
+   }
+-  async resolveRequest(request2) {
++  async resolveRequest(request3) {
+     const { options } = this;
+     let query = "";
+-    if (request2.query) {
+-      const resolvedQuery = request2.query.toString();
++    if (request3.query) {
++      const resolvedQuery = request3.query.toString();
+       if (resolvedQuery !== "") {
+         query = `?${resolvedQuery}`;
+       }
+@@ -782,21 +874,21 @@ var RequestManager = class extends import_node_events.EventEmitter {
+       ...this.options.headers,
+       "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
+     };
+-    if (request2.auth !== false) {
++    if (request3.auth !== false) {
+       if (!this.#token) {
+         throw new Error("Expected token to be set for this request, but none was present");
+       }
+-      headers.Authorization = `${request2.authPrefix ?? this.options.authPrefix} ${this.#token}`;
++      headers.Authorization = `${request3.authPrefix ?? this.options.authPrefix} ${this.#token}`;
+     }
+-    if (request2.reason?.length) {
+-      headers["X-Audit-Log-Reason"] = encodeURIComponent(request2.reason);
++    if (request3.reason?.length) {
++      headers["X-Audit-Log-Reason"] = encodeURIComponent(request3.reason);
+     }
+-    const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
++    const url = `${options.api}${request3.versioned === false ? "" : `/v${options.version}`}${request3.fullRoute}${query}`;
+     let finalBody;
+     let additionalHeaders = {};
+-    if (request2.files?.length) {
+-      const formData = new import_undici4.FormData();
+-      for (const [index, file] of request2.files.entries()) {
++    if (request3.files?.length) {
++      const formData = new import_undici5.FormData();
++      for (const [index, file] of request3.files.entries()) {
+         const fileKey = file.key ?? `files[${index}]`;
+         if (import_node_buffer2.Buffer.isBuffer(file.data)) {
+           const { fileTypeFromBuffer } = await getFileType();
+@@ -806,42 +898,63 @@ var RequestManager = class extends import_node_events.EventEmitter {
+           formData.append(fileKey, new import_node_buffer2.Blob([`${file.data}`], { type: file.contentType }), file.name);
+         }
+       }
+-      if (request2.body != null) {
+-        if (request2.appendToFormData) {
+-          for (const [key, value] of Object.entries(request2.body)) {
++      if (request3.body != null) {
++        if (request3.appendToFormData) {
++          for (const [key, value] of Object.entries(request3.body)) {
+             formData.append(key, value);
+           }
+         } else {
+-          formData.append("payload_json", JSON.stringify(request2.body));
++          formData.append("payload_json", JSON.stringify(request3.body));
+         }
+       }
+       finalBody = formData;
+-    } else if (request2.body != null) {
+-      if (request2.passThroughBody) {
+-        finalBody = request2.body;
++    } else if (request3.body != null) {
++      if (request3.passThroughBody) {
++        finalBody = request3.body;
+       } else {
+-        finalBody = JSON.stringify(request2.body);
++        finalBody = JSON.stringify(request3.body);
+         additionalHeaders = { "Content-Type": "application/json" };
+       }
+     }
+     finalBody = await resolveBody(finalBody);
+     const fetchOptions = {
+-      headers: { ...request2.headers, ...additionalHeaders, ...headers },
+-      method: request2.method.toUpperCase()
++      headers: { ...request3.headers, ...additionalHeaders, ...headers },
++      method: request3.method.toUpperCase()
+     };
+     if (finalBody !== void 0) {
+       fetchOptions.body = finalBody;
+     }
+-    fetchOptions.dispatcher = request2.dispatcher ?? this.agent ?? void 0;
++    fetchOptions.dispatcher = request3.dispatcher ?? this.agent ?? void 0;
+     return { url, fetchOptions };
+   }
+   clearHashSweeper() {
+-    (0, import_node_timers2.clearInterval)(this.hashTimer);
++    (0, import_node_timers3.clearInterval)(this.hashTimer);
+   }
+   clearHandlerSweeper() {
+-    (0, import_node_timers2.clearInterval)(this.handlerTimer);
++    (0, import_node_timers3.clearInterval)(this.handlerTimer);
++  }
++  incrementInvalidCount() {
++    if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
++      invalidCountResetTime = Date.now() + 1e3 * 60 * 10;
++      invalidCount = 0;
++    }
++    invalidCount++;
++    const emitInvalid = this.options.invalidRequestWarningInterval > 0 && invalidCount % this.options.invalidRequestWarningInterval === 0;
++    if (emitInvalid) {
++      this.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
++        count: invalidCount,
++        remainingTime: invalidCountResetTime - Date.now()
++      });
++    }
+   }
+   static generateRouteData(endpoint, method) {
++    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
++      return {
++        majorParameter: BurstHandlerMajorIdKey,
++        bucketRoute: "/interactions/:id/:token/callback",
++        original: endpoint
++      };
++    }
+     const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{16,19})/.exec(endpoint);
+     const majorId = majorIdMatch?.[1] ?? "global";
+     const baseRoute = endpoint.replaceAll(/\d{16,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+@@ -923,6 +1036,7 @@ var version = "1.5.1-dev.1672574638-d3e9f2a.0";
+   ALLOWED_EXTENSIONS,
+   ALLOWED_SIZES,
+   ALLOWED_STICKER_EXTENSIONS,
++  BurstHandlerMajorIdKey,
+   CDN,
+   DefaultRestOptions,
+   DefaultUserAgent,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adfccf1c943 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -45,6 +45,7 @@ var RESTEvents = /* @__PURE__ */ ((RESTEvents2) => {
+ var ALLOWED_EXTENSIONS = ["webp", "png", "jpg", "jpeg", "gif"];
+ var ALLOWED_STICKER_EXTENSIONS = ["png", "json"];
+ var ALLOWED_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
++var BurstHandlerMajorIdKey = "burst";
+ 
+ // src/lib/CDN.ts
+ var CDN = class {
+@@ -232,10 +233,9 @@ import { lazy } from "@discordjs/util";
+ import { DiscordSnowflake } from "@sapphire/snowflake";
+ import { FormData as FormData2 } from "undici";
+ 
+-// src/lib/handlers/SequentialHandler.ts
++// src/lib/handlers/BurstHandler.ts
+ import { setTimeout, clearTimeout } from "node:timers";
+ import { setTimeout as sleep } from "node:timers/promises";
+-import { AsyncQueue } from "@sapphire/async-queue";
+ import { request } from "undici";
+ 
+ // src/lib/utils/utils.ts
+@@ -347,10 +347,119 @@ function shouldRetry(error) {
+   return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
+ }
+ __name(shouldRetry, "shouldRetry");
++async function onRateLimit(manager, rateLimitData) {
++  const { options } = manager;
++  if (!options.rejectOnRateLimit)
++    return;
++  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
++  if (shouldThrow) {
++    throw new RateLimitError(rateLimitData);
++  }
++}
++__name(onRateLimit, "onRateLimit");
++
++// src/lib/handlers/BurstHandler.ts
++var BurstHandler = class {
++  constructor(manager, hash, majorParameter) {
++    this.manager = manager;
++    this.hash = hash;
++    this.majorParameter = majorParameter;
++    this.id = `${hash}:${majorParameter}`;
++  }
++  id;
++  inactive = false;
++  debug(message) {
++    this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
++  }
++  async queueRequest(routeId, url, options, requestData) {
++    return this.runRequest(routeId, url, options, requestData);
++  }
++  async runRequest(routeId, url, options, requestData, retries = 0) {
++    const method = options.method ?? "get";
++    const controller = new AbortController();
++    const timeout = setTimeout(() => controller.abort(), this.manager.options.timeout);
++    if (requestData.signal) {
++      const signal = requestData.signal;
++      if (signal.aborted)
++        controller.abort();
++      else
++        signal.addEventListener("abort", () => controller.abort());
++    }
++    let res;
++    try {
++      res = await request(url, { ...options, signal: controller.signal });
++    } catch (error) {
++      if (!(error instanceof Error))
++        throw error;
++      if (shouldRetry(error) && retries !== this.manager.options.retries) {
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
++      }
++      throw error;
++    } finally {
++      clearTimeout(timeout);
++    }
++    const status = res.statusCode;
++    let retryAfter = 0;
++    const retry = parseHeader(res.headers["retry-after"]);
++    if (retry)
++      retryAfter = Number(retry) * 1e3 + this.manager.options.offset;
++    if (status === 401 || status === 403 || status === 429) {
++      this.manager.incrementInvalidCount();
++    }
++    if (status >= 200 && status < 300) {
++      return res;
++    } else if (status === 429) {
++      const isGlobal = res.headers["x-ratelimit-global"] !== void 0;
++      await onRateLimit(this.manager, {
++        timeToReset: retryAfter,
++        limit: Number.POSITIVE_INFINITY,
++        method,
++        hash: this.hash,
++        url,
++        route: routeId.bucketRoute,
++        majorParameter: this.majorParameter,
++        global: isGlobal
++      });
++      this.debug(
++        [
++          "Encountered unexpected 429 rate limit",
++          `  Global         : ${isGlobal}`,
++          `  Method         : ${method}`,
++          `  URL            : ${url}`,
++          `  Bucket         : ${routeId.bucketRoute}`,
++          `  Major parameter: ${routeId.majorParameter}`,
++          `  Hash           : ${this.hash}`,
++          `  Limit          : ${Number.POSITIVE_INFINITY}`,
++          `  Retry After    : ${retryAfter}ms`,
++          `  Sublimit       : None`
++        ].join("\n")
++      );
++      await sleep(retryAfter);
++      return this.runRequest(routeId, url, options, requestData, retries);
++    } else if (status >= 500 && status < 600) {
++      if (retries !== this.manager.options.retries) {
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
++      }
++      throw new HTTPError(status, method, url, requestData);
++    } else {
++      if (status >= 400 && status < 500) {
++        if (status === 401 && requestData.auth) {
++          this.manager.setToken(null);
++        }
++        const data = await parseResponse(res);
++        throw new DiscordAPIError(data, "code" in data ? data.code : data.error, status, method, url, requestData);
++      }
++      return res;
++    }
++  }
++};
++__name(BurstHandler, "BurstHandler");
+ 
+ // src/lib/handlers/SequentialHandler.ts
+-var invalidCount = 0;
+-var invalidCountResetTime = null;
++import { setTimeout as setTimeout2, clearTimeout as clearTimeout2 } from "node:timers";
++import { setTimeout as sleep2 } from "node:timers/promises";
++import { AsyncQueue } from "@sapphire/async-queue";
++import { request as request2 } from "undici";
+ var SequentialHandler = class {
+   constructor(manager, hash, majorParameter) {
+     this.manager = manager;
+@@ -385,18 +494,9 @@ var SequentialHandler = class {
+     this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
+   }
+   async globalDelayFor(time) {
+-    await sleep(time);
++    await sleep2(time);
+     this.manager.globalDelay = null;
+   }
+-  async onRateLimit(rateLimitData) {
+-    const { options } = this.manager;
+-    if (!options.rejectOnRateLimit)
+-      return;
+-    const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
+-    if (shouldThrow) {
+-      throw new RateLimitError(rateLimitData);
+-    }
+-  }
+   async queueRequest(routeId, url, options, requestData) {
+     let queue = this.#asyncQueue;
+     let queueType = 0 /* Standard */;
+@@ -445,7 +545,7 @@ var SequentialHandler = class {
+       } else {
+         limit2 = this.limit;
+         timeout2 = this.timeToReset;
+-        delay = sleep(timeout2);
++        delay = sleep2(timeout2);
+       }
+       const rateLimitData = {
+         timeToReset: timeout2,
+@@ -458,7 +558,7 @@ var SequentialHandler = class {
+         global: isGlobal
+       };
+       this.manager.emit("rateLimited" /* RateLimited */, rateLimitData);
+-      await this.onRateLimit(rateLimitData);
++      await onRateLimit(this.manager, rateLimitData);
+       if (isGlobal) {
+         this.debug(`Global rate limit hit, blocking all requests for ${timeout2}ms`);
+       } else {
+@@ -473,7 +573,7 @@ var SequentialHandler = class {
+     this.manager.globalRemaining--;
+     const method = options.method ?? "get";
+     const controller = new AbortController();
+-    const timeout = setTimeout(() => controller.abort(), this.manager.options.timeout).unref();
++    const timeout = setTimeout2(() => controller.abort(), this.manager.options.timeout);
+     if (requestData.signal) {
+       const signal = requestData.signal;
+       if (signal.aborted)
+@@ -483,16 +583,16 @@ var SequentialHandler = class {
+     }
+     let res;
+     try {
+-      res = await request(url, { ...options, signal: controller.signal });
++      res = await request2(url, { ...options, signal: controller.signal });
+     } catch (error) {
+       if (!(error instanceof Error))
+         throw error;
+       if (shouldRetry(error) && retries !== this.manager.options.retries) {
+-        return await this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       throw error;
+     } finally {
+-      clearTimeout(timeout);
++      clearTimeout2(timeout);
+     }
+     if (this.manager.listenerCount("response" /* Response */)) {
+       this.manager.emit(
+@@ -539,18 +639,7 @@ var SequentialHandler = class {
+       }
+     }
+     if (status === 401 || status === 403 || status === 429) {
+-      if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
+-        invalidCountResetTime = Date.now() + 1e3 * 60 * 10;
+-        invalidCount = 0;
+-      }
+-      invalidCount++;
+-      const emitInvalid = this.manager.options.invalidRequestWarningInterval > 0 && invalidCount % this.manager.options.invalidRequestWarningInterval === 0;
+-      if (emitInvalid) {
+-        this.manager.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
+-          count: invalidCount,
+-          remainingTime: invalidCountResetTime - Date.now()
+-        });
+-      }
++      this.manager.incrementInvalidCount();
+     }
+     if (status >= 200 && status < 300) {
+       return res;
+@@ -565,7 +654,7 @@ var SequentialHandler = class {
+         limit2 = this.limit;
+         timeout2 = this.timeToReset;
+       }
+-      await this.onRateLimit({
++      await onRateLimit(this.manager, {
+         timeToReset: timeout2,
+         limit: limit2,
+         method,
+@@ -598,7 +687,7 @@ var SequentialHandler = class {
+         }
+         this.#sublimitPromise?.resolve();
+         this.#sublimitPromise = null;
+-        await sleep(sublimitTimeout);
++        await sleep2(sublimitTimeout);
+         let resolve;
+         const promise = new Promise((res2) => resolve = res2);
+         this.#sublimitPromise = { promise, resolve };
+@@ -610,7 +699,7 @@ var SequentialHandler = class {
+       return this.runRequest(routeId, url, options, requestData, retries);
+     } else if (status >= 500 && status < 600) {
+       if (retries !== this.manager.options.retries) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       throw new HTTPError(status, method, url, requestData);
+     } else {
+@@ -637,6 +726,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+   RequestMethod2["Put"] = "PUT";
+   return RequestMethod2;
+ })(RequestMethod || {});
++var invalidCount = 0;
++var invalidCountResetTime = null;
+ var RequestManager = class extends EventEmitter {
+   agent = null;
+   globalRemaining;
+@@ -678,7 +769,7 @@ var RequestManager = class extends EventEmitter {
+           return shouldSweep;
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+-      }, this.options.hashSweepInterval).unref();
++      }, this.options.hashSweepInterval);
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -693,7 +784,7 @@ var RequestManager = class extends EventEmitter {
+           return inactive;
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+-      }, this.options.handlerSweepInterval).unref();
++      }, this.options.handlerSweepInterval);
+     }
+   }
+   setAgent(agent) {
+@@ -704,31 +795,31 @@ var RequestManager = class extends EventEmitter {
+     this.#token = token;
+     return this;
+   }
+-  async queueRequest(request2) {
+-    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
+-    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+-      value: `Global(${request2.method}:${routeId.bucketRoute})`,
++  async queueRequest(request3) {
++    const routeId = RequestManager.generateRouteData(request3.fullRoute, request3.method);
++    const hash = this.hashes.get(`${request3.method}:${routeId.bucketRoute}`) ?? {
++      value: `Global(${request3.method}:${routeId.bucketRoute})`,
+       lastAccess: -1
+     };
+     const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
+-    const { url, fetchOptions } = await this.resolveRequest(request2);
++    const { url, fetchOptions } = await this.resolveRequest(request3);
+     return handler.queueRequest(routeId, url, fetchOptions, {
+-      body: request2.body,
+-      files: request2.files,
+-      auth: request2.auth !== false,
+-      signal: request2.signal
++      body: request3.body,
++      files: request3.files,
++      auth: request3.auth !== false,
++      signal: request3.signal
+     });
+   }
+   createHandler(hash, majorParameter) {
+-    const queue = new SequentialHandler(this, hash, majorParameter);
++    const queue = majorParameter === BurstHandlerMajorIdKey ? new BurstHandler(this, hash, majorParameter) : new SequentialHandler(this, hash, majorParameter);
+     this.handlers.set(queue.id, queue);
+     return queue;
+   }
+-  async resolveRequest(request2) {
++  async resolveRequest(request3) {
+     const { options } = this;
+     let query = "";
+-    if (request2.query) {
+-      const resolvedQuery = request2.query.toString();
++    if (request3.query) {
++      const resolvedQuery = request3.query.toString();
+       if (resolvedQuery !== "") {
+         query = `?${resolvedQuery}`;
+       }
+@@ -737,21 +828,21 @@ var RequestManager = class extends EventEmitter {
+       ...this.options.headers,
+       "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
+     };
+-    if (request2.auth !== false) {
++    if (request3.auth !== false) {
+       if (!this.#token) {
+         throw new Error("Expected token to be set for this request, but none was present");
+       }
+-      headers.Authorization = `${request2.authPrefix ?? this.options.authPrefix} ${this.#token}`;
++      headers.Authorization = `${request3.authPrefix ?? this.options.authPrefix} ${this.#token}`;
+     }
+-    if (request2.reason?.length) {
+-      headers["X-Audit-Log-Reason"] = encodeURIComponent(request2.reason);
++    if (request3.reason?.length) {
++      headers["X-Audit-Log-Reason"] = encodeURIComponent(request3.reason);
+     }
+-    const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
++    const url = `${options.api}${request3.versioned === false ? "" : `/v${options.version}`}${request3.fullRoute}${query}`;
+     let finalBody;
+     let additionalHeaders = {};
+-    if (request2.files?.length) {
++    if (request3.files?.length) {
+       const formData = new FormData2();
+-      for (const [index, file] of request2.files.entries()) {
++      for (const [index, file] of request3.files.entries()) {
+         const fileKey = file.key ?? `files[${index}]`;
+         if (Buffer3.isBuffer(file.data)) {
+           const { fileTypeFromBuffer } = await getFileType();
+@@ -761,33 +852,33 @@ var RequestManager = class extends EventEmitter {
+           formData.append(fileKey, new Blob2([`${file.data}`], { type: file.contentType }), file.name);
+         }
+       }
+-      if (request2.body != null) {
+-        if (request2.appendToFormData) {
+-          for (const [key, value] of Object.entries(request2.body)) {
++      if (request3.body != null) {
++        if (request3.appendToFormData) {
++          for (const [key, value] of Object.entries(request3.body)) {
+             formData.append(key, value);
+           }
+         } else {
+-          formData.append("payload_json", JSON.stringify(request2.body));
++          formData.append("payload_json", JSON.stringify(request3.body));
+         }
+       }
+       finalBody = formData;
+-    } else if (request2.body != null) {
+-      if (request2.passThroughBody) {
+-        finalBody = request2.body;
++    } else if (request3.body != null) {
++      if (request3.passThroughBody) {
++        finalBody = request3.body;
+       } else {
+-        finalBody = JSON.stringify(request2.body);
++        finalBody = JSON.stringify(request3.body);
+         additionalHeaders = { "Content-Type": "application/json" };
+       }
+     }
+     finalBody = await resolveBody(finalBody);
+     const fetchOptions = {
+-      headers: { ...request2.headers, ...additionalHeaders, ...headers },
+-      method: request2.method.toUpperCase()
++      headers: { ...request3.headers, ...additionalHeaders, ...headers },
++      method: request3.method.toUpperCase()
+     };
+     if (finalBody !== void 0) {
+       fetchOptions.body = finalBody;
+     }
+-    fetchOptions.dispatcher = request2.dispatcher ?? this.agent ?? void 0;
++    fetchOptions.dispatcher = request3.dispatcher ?? this.agent ?? void 0;
+     return { url, fetchOptions };
+   }
+   clearHashSweeper() {
+@@ -796,7 +887,28 @@ var RequestManager = class extends EventEmitter {
+   clearHandlerSweeper() {
+     clearInterval(this.handlerTimer);
+   }
++  incrementInvalidCount() {
++    if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
++      invalidCountResetTime = Date.now() + 1e3 * 60 * 10;
++      invalidCount = 0;
++    }
++    invalidCount++;
++    const emitInvalid = this.options.invalidRequestWarningInterval > 0 && invalidCount % this.options.invalidRequestWarningInterval === 0;
++    if (emitInvalid) {
++      this.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
++        count: invalidCount,
++        remainingTime: invalidCountResetTime - Date.now()
++      });
++    }
++  }
+   static generateRouteData(endpoint, method) {
++    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
++      return {
++        majorParameter: BurstHandlerMajorIdKey,
++        bucketRoute: "/interactions/:id/:token/callback",
++        original: endpoint
++      };
++    }
+     const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{16,19})/.exec(endpoint);
+     const majorId = majorIdMatch?.[1] ?? "global";
+     const baseRoute = endpoint.replaceAll(/\d{16,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+@@ -877,6 +989,7 @@ export {
+   ALLOWED_EXTENSIONS,
+   ALLOWED_SIZES,
+   ALLOWED_STICKER_EXTENSIONS,
++  BurstHandlerMajorIdKey,
+   CDN,
+   DefaultRestOptions,
+   DefaultUserAgent,
