@@ -189,7 +189,7 @@ export class GuildMemberUtil extends null {
 
 		try {
 			return await member.roles.set(
-				Array.isArray(roles) ? roles.filter((x): x is Role | Snowflake => x !== null) : roles,
+				Array.isArray(roles) ? roles.filter((x): x is NonNullable<typeof x> => x !== null) : roles,
 			);
 		} catch (error) {
 			logger.error({ member: this.logInfo(member), err: error, data: roles }, '[GUILDMEMBER SET ROLES]');
@@ -207,13 +207,15 @@ export class GuildMemberUtil extends null {
 		member: GuildMember,
 		{ add = [], remove = [] }: { add?: RoleResolvables; remove?: RoleResolvables },
 	) {
-		const rolesToAdd = GuildUtil.resolveRoles(member.guild, add);
 		const rolesToRemove = GuildUtil.resolveRoles(member.guild, remove);
+		let rolesToAdd = GuildUtil.resolveRoles(member.guild, add);
 
-		if (!rolesToAdd.length || !rolesToRemove.length) return member;
+		if (rolesToAdd === null && rolesToRemove === null) return member;
+
+		rolesToAdd ??= [];
 
 		for (const role of member.roles.cache.values()) {
-			if (rolesToRemove.some(({ id }) => id === role.id)) continue;
+			if (rolesToRemove?.some(({ id }) => id === role.id)) continue;
 			rolesToAdd.push(role);
 		}
 

@@ -1639,10 +1639,10 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		if (!member) return false;
 
 		// check if IDs are proper roles and manageable by the bot
-		const _rolesToAdd = GuildUtil.resolveRoles(member.guild, rolesToAdd);
 		const _rolesToRemove = GuildUtil.resolveRoles(member.guild, rolesToRemove);
+		let _rolesToAdd = GuildUtil.resolveRoles(member.guild, rolesToAdd);
 
-		if (!_rolesToAdd.length && !_rolesToRemove.length) return true;
+		if (_rolesToAdd === null && _rolesToRemove === null) return true;
 
 		// permission check
 		if (!member.guild.members.me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
@@ -1664,14 +1664,16 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				`,
 			)
 			.setTimestamp();
-		const NAMES_TO_ADD = _rolesToAdd.length ? codeBlock(_rolesToAdd.map(({ name }) => name).join('\n')) : null;
-		const NAMES_TO_REMOVE = _rolesToRemove.length ? codeBlock(_rolesToRemove.map(({ name }) => name).join('\n')) : null;
+		const NAMES_TO_ADD = _rolesToAdd ? codeBlock(_rolesToAdd.map(({ name }) => name).join('\n')) : null;
+		const NAMES_TO_REMOVE = _rolesToRemove ? codeBlock(_rolesToRemove.map(({ name }) => name).join('\n')) : null;
 		const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.GUILD_ROLE_ID;
 		const GUILD_2_ROLE_ID = this.hypixelGuild?.GUILD_ROLE_ID;
-		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === GUILD_ROLE_ID || id === GUILD_2_ROLE_ID);
+		const IS_ADDING_GUILD_ROLE = _rolesToAdd?.some(({ id }) => id === GUILD_ROLE_ID || id === GUILD_2_ROLE_ID);
+
+		_rolesToAdd ??= [];
 
 		for (const role of member.roles.cache.values()) {
-			if (_rolesToRemove.some(({ id }) => role.id === id)) continue;
+			if (_rolesToRemove?.some(({ id }) => role.id === id)) continue;
 			_rolesToAdd.push(role);
 		}
 
