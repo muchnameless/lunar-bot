@@ -1,5 +1,5 @@
 import { env } from 'node:process';
-import { Client, type Components, type DefaultMeta } from '@zikeji/hypixel';
+import { Client, type DefaultMeta } from '@zikeji/hypixel';
 import { redis } from './index.js';
 import { RedisKey } from '#constants';
 import { days, minutes, seconds } from '#functions';
@@ -48,6 +48,4 @@ hypixel
 	.on('reset', () => logger.info('[HYPIXEL API]: ratelimit reset'));
 
 export const getSkyBlockProfiles = async (uuid: string) =>
-	(await hypixel.skyblock.profiles.uuid(uuid)).profiles?.filter(
-		(x): x is NonNullable<Components.Schemas.SkyBlockProfileCuteName> => x !== null,
-	) ?? null;
+	(await hypixel.skyblock.profiles.uuid(uuid)).profiles?.filter((x): x is NonNullable<typeof x> => x !== null) ?? null;

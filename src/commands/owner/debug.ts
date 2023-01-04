@@ -77,8 +77,8 @@ export default class DebugCommand extends ApplicationCommand {
 						{
 							name: 'General',
 							value: stripIndents`
-								Ready at: ${time(seconds.fromMilliseconds(this.client.readyTimestamp!), TimestampStyles.LongDateTime)}
-								Uptime: ${ms(this.client.uptime!)}
+								Ready at: ${time(seconds.fromMilliseconds(this.client.readyTimestamp), TimestampStyles.LongDateTime)}
+								Uptime: ${ms(this.client.uptime)}
 								Discord.js v${djsVersion}
 								Node.js ${processVersion}
 								Env: ${env.NODE_ENV}

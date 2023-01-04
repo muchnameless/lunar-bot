@@ -1,5 +1,5 @@
 import { CronJob } from 'cron';
-import { type GuildResolvable, type Snowflake } from 'discord.js';
+import { type GuildResolvable } from 'discord.js';
 import { type FindOptions } from 'sequelize';
 import { type HypixelGuild, type UpdateOptions } from '../models/HypixelGuild.js';
 import { type ModelResolvable, ModelManager } from './ModelManager.js';
@@ -41,7 +41,9 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	public get uniqueDiscordGuildIds() {
 		return [
 			...new Set(
-				this.client.hypixelGuilds.cache.map(({ discordId }) => discordId).filter((x): x is Snowflake => x !== null),
+				this.client.hypixelGuilds.cache
+					.map(({ discordId }) => discordId)
+					.filter((x): x is NonNullable<typeof x> => x !== null),
 			),
 		];
 	}

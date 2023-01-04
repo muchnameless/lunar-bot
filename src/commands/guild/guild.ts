@@ -439,7 +439,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param executor
 	 */
 	private _assertExecutorIsStaff(hypixelGuild: HypixelGuild, executor: Player | null): asserts executor is Player {
-		if (!executor) {
+		if (executor === null) {
 			throw 'unable to find a linked player for your discord account';
 		}
 
