@@ -49,7 +49,7 @@
 		"@sapphire/timer-manager": "1.0.1-next.fc311bf.0",
 		"@types/node": "patch:@types/node@^18.11.18#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch",
 		"@typescript-eslint/eslint-plugin": "patch:@typescript-eslint/eslint-plugin@npm%3A5.45.0#./.yarn/patches/@typescript-eslint-eslint-plugin-npm-5.45.0-af83fa2940.patch",
-		"discord-api-types": "0.37.25-next.4c334f6.1671732642",
+		"discord-api-types": "0.37.26-next.bb2ef84.1672867369",
 		"discord.js": "patch:discord.js@14.8.0-dev.1672833880-3407e1e.0#./.yarn/patches/discord.js-npm-14.7.2-dev.1672618203-876b181.0-fadf8a7e8f.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.36.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
