@@ -1,5 +1,5 @@
 // channels
-export const MAX_WEBHOOKS_PER_CHANNEL = 10;
+export const MAX_WEBHOOKS_PER_CHANNEL = 15;
 
 // formatting
 export const enum AnsiFormat {
