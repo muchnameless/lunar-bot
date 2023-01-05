@@ -309,7 +309,7 @@ export class DiscordChatManager extends ChatManager {
 				(error instanceof DiscordAPIError &&
 					[
 						RESTJSONErrorCodes.MaximumNumberOfWebhooksReached,
-						30_058, // TODO: RESTJSONErrorCodes.MaximumNumberOfWebhooksPerGuildReached,
+						RESTJSONErrorCodes.MaximumNumberOfWebhooksPerGuildReached,
 					].includes(error.code as RESTJSONErrorCodes))
 			) {
 				this.chatBridge.shouldRetryLinking = false;
