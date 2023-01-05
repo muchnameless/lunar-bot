@@ -2151,12 +2151,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "chart.js@npm:4.1.1"
+"chart.js@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "chart.js@npm:4.1.2"
   dependencies:
     "@kurkle/color": ^0.3.0
-  checksum: e195abc7b1271a0d4f616b90ac56465b639bffef8e965d26bf1fd65050011bf359fdc25e43dac1576420c1173dc1430c576fd0f953ae8b62bf257ec571424882
+  checksum: 938ac88baf04eb8d784a8d89064696375bc12545421186f5ec9b69ba9b6f7b7da960754f351b59b1df2b1c314dfa848aab44267076888e664d5253bc6a4059dd
   languageName: node
   linkType: hard
 
@@ -5171,7 +5171,7 @@ __metadata:
     "@types/prettier": ^2.7.2
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#0eac00a31bf1f4434c0d5d60f9122a4c8d26a595"
     bufferutil: ^4.0.7
-    chart.js: ^4.1.1
+    chart.js: ^4.1.2
     common-tags: ^1.8.2
     cron: ^2.1.0
     discord.js: 14.8.0-dev.1672920292-3407e1e.0

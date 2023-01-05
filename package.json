@@ -66,7 +66,7 @@
 		"@skyra/jaro-winkler": "^1.1.0",
 		"@zikeji/hypixel": "github:muchnameless/node-hypixel#0eac00a31bf1f4434c0d5d60f9122a4c8d26a595",
 		"bufferutil": "^4.0.7",
-		"chart.js": "^4.1.1",
+		"chart.js": "^4.1.2",
 		"common-tags": "^1.8.2",
 		"cron": "^2.1.0",
 		"discord.js": "14.8.0-dev.1672920292-3407e1e.0",
