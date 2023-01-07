@@ -1,16 +1,16 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 3536eda629c138a2efec391668d868749a6b345c..2d0abd85bfd506502b7a7a83e97f18cd71988bc4 100644
+index c6d22b553c99ffa477d425cff9910d7b56521c76..66fcc89b6c4bf13d57e1082e052a5300df6b2430 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
-@@ -40,6 +40,7 @@ declare const ALLOWED_SIZES: readonly [16, 32, 64, 128, 256, 512, 1024, 2048, 40
- type ImageExtension = typeof ALLOWED_EXTENSIONS[number];
- type StickerExtension = typeof ALLOWED_STICKER_EXTENSIONS[number];
- type ImageSize = typeof ALLOWED_SIZES[number];
+@@ -43,6 +43,7 @@ type ImageSize = typeof ALLOWED_SIZES[number];
+ declare const OverwrittenMimeTypes: {
+     readonly 'image/apng': "image/png";
+ };
 +declare const BurstHandlerMajorIdKey = "burst";
  
  /**
   * The options used for image URLs
-@@ -747,6 +748,12 @@ declare class RequestManager extends EventEmitter {
+@@ -750,6 +751,12 @@ declare class RequestManager extends EventEmitter {
       * Stops the request handler sweeping interval
       */
      clearHandlerSweeper(): void;
@@ -23,14 +23,14 @@ index 3536eda629c138a2efec391668d868749a6b345c..2d0abd85bfd506502b7a7a83e97f18cd
      /**
       * Generates route data for an endpoint:method
       *
-@@ -862,4 +869,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
+@@ -865,4 +872,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
   */
  declare const version: string;
  
--export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
-+export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
+-export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377e1e02d70 100644
+index ada61c8e46ccb5b2199dbd55780483b3b3ff2df9..cd809cef29a50d5fb538e297b443513ef8a331de 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -30,6 +30,7 @@ __export(src_exports, {
@@ -41,15 +41,15 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
    CDN: () => CDN,
    DefaultRestOptions: () => DefaultRestOptions,
    DefaultUserAgent: () => DefaultUserAgent,
-@@ -90,6 +91,7 @@ var RESTEvents = /* @__PURE__ */ ((RESTEvents2) => {
- var ALLOWED_EXTENSIONS = ["webp", "png", "jpg", "jpeg", "gif"];
- var ALLOWED_STICKER_EXTENSIONS = ["png", "json"];
- var ALLOWED_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+@@ -94,6 +95,7 @@ var ALLOWED_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+ var OverwrittenMimeTypes = {
+   "image/apng": "image/png"
+ };
 +var BurstHandlerMajorIdKey = "burst";
  
  // src/lib/CDN.ts
  var CDN = class {
-@@ -271,16 +273,15 @@ __name(RateLimitError, "RateLimitError");
+@@ -275,16 +277,15 @@ __name(RateLimitError, "RateLimitError");
  // src/lib/RequestManager.ts
  var import_node_buffer2 = require("buffer");
  var import_node_events = require("events");
@@ -69,7 +69,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
  var import_undici3 = require("undici");
  
  // src/lib/utils/utils.ts
-@@ -392,10 +393,119 @@ function shouldRetry(error) {
+@@ -396,10 +397,119 @@ function shouldRetry(error) {
    return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
  }
  __name(shouldRetry, "shouldRetry");
@@ -191,7 +191,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
  var SequentialHandler = class {
    constructor(manager, hash, majorParameter) {
      this.manager = manager;
-@@ -430,18 +540,9 @@ var SequentialHandler = class {
+@@ -434,18 +544,9 @@ var SequentialHandler = class {
      this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
    }
    async globalDelayFor(time) {
@@ -211,7 +211,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
    async queueRequest(routeId, url, options, requestData) {
      let queue = this.#asyncQueue;
      let queueType = 0 /* Standard */;
-@@ -490,7 +591,7 @@ var SequentialHandler = class {
+@@ -494,7 +595,7 @@ var SequentialHandler = class {
        } else {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
@@ -220,7 +220,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
        }
        const rateLimitData = {
          timeToReset: timeout2,
-@@ -503,7 +604,7 @@ var SequentialHandler = class {
+@@ -507,7 +608,7 @@ var SequentialHandler = class {
          global: isGlobal
        };
        this.manager.emit("rateLimited" /* RateLimited */, rateLimitData);
@@ -229,7 +229,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
        if (isGlobal) {
          this.debug(`Global rate limit hit, blocking all requests for ${timeout2}ms`);
        } else {
-@@ -518,7 +619,7 @@ var SequentialHandler = class {
+@@ -522,7 +623,7 @@ var SequentialHandler = class {
      this.manager.globalRemaining--;
      const method = options.method ?? "get";
      const controller = new AbortController();
@@ -238,7 +238,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
      if (requestData.signal) {
        const signal = requestData.signal;
        if (signal.aborted)
-@@ -528,16 +629,16 @@ var SequentialHandler = class {
+@@ -532,16 +633,16 @@ var SequentialHandler = class {
      }
      let res;
      try {
@@ -258,7 +258,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
      }
      if (this.manager.listenerCount("response" /* Response */)) {
        this.manager.emit(
-@@ -584,18 +685,7 @@ var SequentialHandler = class {
+@@ -588,18 +689,7 @@ var SequentialHandler = class {
        }
      }
      if (status === 401 || status === 403 || status === 429) {
@@ -278,7 +278,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
      }
      if (status >= 200 && status < 300) {
        return res;
-@@ -610,7 +700,7 @@ var SequentialHandler = class {
+@@ -614,7 +704,7 @@ var SequentialHandler = class {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
        }
@@ -287,7 +287,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
          timeToReset: timeout2,
          limit: limit2,
          method,
-@@ -643,7 +733,7 @@ var SequentialHandler = class {
+@@ -647,7 +737,7 @@ var SequentialHandler = class {
          }
          this.#sublimitPromise?.resolve();
          this.#sublimitPromise = null;
@@ -296,7 +296,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
          let resolve;
          const promise = new Promise((res2) => resolve = res2);
          this.#sublimitPromise = { promise, resolve };
-@@ -655,7 +745,7 @@ var SequentialHandler = class {
+@@ -659,7 +749,7 @@ var SequentialHandler = class {
        return this.runRequest(routeId, url, options, requestData, retries);
      } else if (status >= 500 && status < 600) {
        if (retries !== this.manager.options.retries) {
@@ -305,7 +305,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
        }
        throw new HTTPError(status, method, url, requestData);
      } else {
-@@ -682,6 +772,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+@@ -686,6 +776,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Put"] = "PUT";
    return RequestMethod2;
  })(RequestMethod || {});
@@ -314,7 +314,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
  var RequestManager = class extends import_node_events.EventEmitter {
    agent = null;
    globalRemaining;
-@@ -709,7 +801,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -713,7 +805,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
      }, "validateMaxInterval");
      if (this.options.hashSweepInterval !== 0 && this.options.hashSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.hashSweepInterval);
@@ -323,7 +323,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
          const sweptHashes = new import_collection.Collection();
          const currentDate = Date.now();
          this.hashes.sweep((val, key) => {
-@@ -723,11 +815,11 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -727,11 +819,11 @@ var RequestManager = class extends import_node_events.EventEmitter {
            return shouldSweep;
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
@@ -337,7 +337,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
          const sweptHandlers = new import_collection.Collection();
          this.handlers.sweep((val, key) => {
            const { inactive } = val;
-@@ -738,7 +830,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -742,7 +834,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
            return inactive;
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
@@ -346,7 +346,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
      }
    }
    setAgent(agent) {
-@@ -749,31 +841,31 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -753,31 +845,31 @@ var RequestManager = class extends import_node_events.EventEmitter {
      this.#token = token;
      return this;
    }
@@ -391,7 +391,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
        if (resolvedQuery !== "") {
          query = `?${resolvedQuery}`;
        }
-@@ -782,21 +874,21 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -786,21 +878,21 @@ var RequestManager = class extends import_node_events.EventEmitter {
        ...this.options.headers,
        "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
      };
@@ -421,7 +421,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
          const fileKey = file.key ?? `files[${index}]`;
          if (import_node_buffer2.Buffer.isBuffer(file.data)) {
            const { fileTypeFromBuffer } = await getFileType();
-@@ -806,42 +898,63 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -816,42 +908,63 @@ var RequestManager = class extends import_node_events.EventEmitter {
            formData.append(fileKey, new import_node_buffer2.Blob([`${file.data}`], { type: file.contentType }), file.name);
          }
        }
@@ -498,7 +498,7 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
      const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{16,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
      const baseRoute = endpoint.replaceAll(/\d{16,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
-@@ -923,6 +1036,7 @@ var version = "1.5.1-dev.1672574638-d3e9f2a.0";
+@@ -933,6 +1046,7 @@ var version = "1.5.1-dev.1673050149-ecb4281.0";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -507,18 +507,18 @@ index 9634f1f47649f6c23b08b341df0add4b5dcfe800..2bd3ef78c21a3f36a67e89960eb03377
    DefaultRestOptions,
    DefaultUserAgent,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adfccf1c943 100644
+index 37c30723d5003384684dd98c2b049ecd6ed66bbf..d9e0c307e72522fff3cf8c84d9ab32b083745da3 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -45,6 +45,7 @@ var RESTEvents = /* @__PURE__ */ ((RESTEvents2) => {
- var ALLOWED_EXTENSIONS = ["webp", "png", "jpg", "jpeg", "gif"];
- var ALLOWED_STICKER_EXTENSIONS = ["png", "json"];
- var ALLOWED_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+@@ -48,6 +48,7 @@ var ALLOWED_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+ var OverwrittenMimeTypes = {
+   "image/apng": "image/png"
+ };
 +var BurstHandlerMajorIdKey = "burst";
  
  // src/lib/CDN.ts
  var CDN = class {
-@@ -232,10 +233,9 @@ import { lazy } from "@discordjs/util";
+@@ -235,10 +236,9 @@ import { lazy } from "@discordjs/util";
  import { DiscordSnowflake } from "@sapphire/snowflake";
  import { FormData as FormData2 } from "undici";
  
@@ -530,7 +530,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
  import { request } from "undici";
  
  // src/lib/utils/utils.ts
-@@ -347,10 +347,119 @@ function shouldRetry(error) {
+@@ -350,10 +350,119 @@ function shouldRetry(error) {
    return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
  }
  __name(shouldRetry, "shouldRetry");
@@ -652,7 +652,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
  var SequentialHandler = class {
    constructor(manager, hash, majorParameter) {
      this.manager = manager;
-@@ -385,18 +494,9 @@ var SequentialHandler = class {
+@@ -388,18 +497,9 @@ var SequentialHandler = class {
      this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
    }
    async globalDelayFor(time) {
@@ -672,7 +672,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
    async queueRequest(routeId, url, options, requestData) {
      let queue = this.#asyncQueue;
      let queueType = 0 /* Standard */;
-@@ -445,7 +545,7 @@ var SequentialHandler = class {
+@@ -448,7 +548,7 @@ var SequentialHandler = class {
        } else {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
@@ -681,7 +681,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
        }
        const rateLimitData = {
          timeToReset: timeout2,
-@@ -458,7 +558,7 @@ var SequentialHandler = class {
+@@ -461,7 +561,7 @@ var SequentialHandler = class {
          global: isGlobal
        };
        this.manager.emit("rateLimited" /* RateLimited */, rateLimitData);
@@ -690,7 +690,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
        if (isGlobal) {
          this.debug(`Global rate limit hit, blocking all requests for ${timeout2}ms`);
        } else {
-@@ -473,7 +573,7 @@ var SequentialHandler = class {
+@@ -476,7 +576,7 @@ var SequentialHandler = class {
      this.manager.globalRemaining--;
      const method = options.method ?? "get";
      const controller = new AbortController();
@@ -699,7 +699,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
      if (requestData.signal) {
        const signal = requestData.signal;
        if (signal.aborted)
-@@ -483,16 +583,16 @@ var SequentialHandler = class {
+@@ -486,16 +586,16 @@ var SequentialHandler = class {
      }
      let res;
      try {
@@ -719,7 +719,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
      }
      if (this.manager.listenerCount("response" /* Response */)) {
        this.manager.emit(
-@@ -539,18 +639,7 @@ var SequentialHandler = class {
+@@ -542,18 +642,7 @@ var SequentialHandler = class {
        }
      }
      if (status === 401 || status === 403 || status === 429) {
@@ -739,7 +739,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
      }
      if (status >= 200 && status < 300) {
        return res;
-@@ -565,7 +654,7 @@ var SequentialHandler = class {
+@@ -568,7 +657,7 @@ var SequentialHandler = class {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
        }
@@ -748,7 +748,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
          timeToReset: timeout2,
          limit: limit2,
          method,
-@@ -598,7 +687,7 @@ var SequentialHandler = class {
+@@ -601,7 +690,7 @@ var SequentialHandler = class {
          }
          this.#sublimitPromise?.resolve();
          this.#sublimitPromise = null;
@@ -757,7 +757,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
          let resolve;
          const promise = new Promise((res2) => resolve = res2);
          this.#sublimitPromise = { promise, resolve };
-@@ -610,7 +699,7 @@ var SequentialHandler = class {
+@@ -613,7 +702,7 @@ var SequentialHandler = class {
        return this.runRequest(routeId, url, options, requestData, retries);
      } else if (status >= 500 && status < 600) {
        if (retries !== this.manager.options.retries) {
@@ -766,7 +766,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
        }
        throw new HTTPError(status, method, url, requestData);
      } else {
-@@ -637,6 +726,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+@@ -640,6 +729,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Put"] = "PUT";
    return RequestMethod2;
  })(RequestMethod || {});
@@ -775,7 +775,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
  var RequestManager = class extends EventEmitter {
    agent = null;
    globalRemaining;
-@@ -678,7 +769,7 @@ var RequestManager = class extends EventEmitter {
+@@ -681,7 +772,7 @@ var RequestManager = class extends EventEmitter {
            return shouldSweep;
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
@@ -784,7 +784,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -693,7 +784,7 @@ var RequestManager = class extends EventEmitter {
+@@ -696,7 +787,7 @@ var RequestManager = class extends EventEmitter {
            return inactive;
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
@@ -793,7 +793,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
      }
    }
    setAgent(agent) {
-@@ -704,31 +795,31 @@ var RequestManager = class extends EventEmitter {
+@@ -707,31 +798,31 @@ var RequestManager = class extends EventEmitter {
      this.#token = token;
      return this;
    }
@@ -838,7 +838,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
        if (resolvedQuery !== "") {
          query = `?${resolvedQuery}`;
        }
-@@ -737,21 +828,21 @@ var RequestManager = class extends EventEmitter {
+@@ -740,21 +831,21 @@ var RequestManager = class extends EventEmitter {
        ...this.options.headers,
        "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
      };
@@ -867,7 +867,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
          const fileKey = file.key ?? `files[${index}]`;
          if (Buffer3.isBuffer(file.data)) {
            const { fileTypeFromBuffer } = await getFileType();
-@@ -761,33 +852,33 @@ var RequestManager = class extends EventEmitter {
+@@ -770,33 +861,33 @@ var RequestManager = class extends EventEmitter {
            formData.append(fileKey, new Blob2([`${file.data}`], { type: file.contentType }), file.name);
          }
        }
@@ -912,7 +912,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
      return { url, fetchOptions };
    }
    clearHashSweeper() {
-@@ -796,7 +887,28 @@ var RequestManager = class extends EventEmitter {
+@@ -805,7 +896,28 @@ var RequestManager = class extends EventEmitter {
    clearHandlerSweeper() {
      clearInterval(this.handlerTimer);
    }
@@ -941,7 +941,7 @@ index b96dddf013c9e556f19bf1935943582ee3c4cafd..218a8baa64d251860c5d6610615f4adf
      const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{16,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
      const baseRoute = endpoint.replaceAll(/\d{16,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
-@@ -877,6 +989,7 @@ export {
+@@ -886,6 +998,7 @@ export {
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
