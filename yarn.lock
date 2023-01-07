@@ -1495,14 +1495,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zikeji/hypixel@github:muchnameless/node-hypixel#0eac00a31bf1f4434c0d5d60f9122a4c8d26a595":
+"@zikeji/hypixel@github:muchnameless/node-hypixel#dc7bc5a200f1b0c50776f45c8f5ef852d41dc034":
   version: 3.1.1
-  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=0eac00a31bf1f4434c0d5d60f9122a4c8d26a595"
+  resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=dc7bc5a200f1b0c50776f45c8f5ef852d41dc034"
   dependencies:
     "@sapphire/async-queue": ^1.5.0
     "@sapphire/ratelimits": ^2.4.4
     undici: ^5.10.0
-  checksum: 1709bb1913084db0717befffaa0997392692088418579cd5af025b6caae5cfa0bc707a115168d740d53c46f797e6fc3645c60346c9d8c5e8d78fdb6dceb19234
+  checksum: 1a68e9205bfb9d3856f8ec37494dfd61180ea36c84cbf6fe11403f0f1ceb4373666d95aa462870a39c08407bb816e4e2284960a088c383cf409b561ac8e34d8a
   languageName: node
   linkType: hard
 
@@ -5169,7 +5169,7 @@ __metadata:
     "@types/node": ^18.11.18
     "@types/pg": ^8.6.6
     "@types/prettier": ^2.7.2
-    "@zikeji/hypixel": "github:muchnameless/node-hypixel#0eac00a31bf1f4434c0d5d60f9122a4c8d26a595"
+    "@zikeji/hypixel": "github:muchnameless/node-hypixel#dc7bc5a200f1b0c50776f45c8f5ef852d41dc034"
     bufferutil: ^4.0.7
     chart.js: ^4.1.2
     common-tags: ^1.8.2
