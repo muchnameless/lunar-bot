@@ -6,8 +6,8 @@ import {
 	ButtonStyle,
 	codeBlock,
 	EmbedBuilder,
-	SelectMenuOptionBuilder,
 	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder,
 	time,
 	TimestampStyles,
 	type APIEmbed,
@@ -124,7 +124,7 @@ type DataConverter = (player: Player) => PlayerData;
 
 type LeaderboardType = 'gained' | 'total';
 
-export type LeaderboardXPOffsets = typeof XP_OFFSETS_SHORT[keyof typeof XP_OFFSETS_SHORT] | '';
+export type LeaderboardXPOffsets = (typeof XP_OFFSETS_SHORT)[keyof typeof XP_OFFSETS_SHORT] | '';
 
 interface LeaderboardArgs {
 	hypixelGuild: HypixelGuild | typeof GUILD_ID_ALL;
@@ -203,11 +203,11 @@ function createActionRows(
 		.setPlaceholder(hypixelGuild === GUILD_ID_ALL ? 'Guilds: All' : `Guild: ${hypixelGuild}`)
 		.addOptions(
 			...client.hypixelGuilds.cache.map(({ guildId, name }) =>
-				new SelectMenuOptionBuilder() //
+				new StringSelectMenuOptionBuilder() //
 					.setLabel(name)
 					.setValue(guildId),
 			),
-			new SelectMenuOptionBuilder() //
+			new StringSelectMenuOptionBuilder() //
 				.setLabel('ALL')
 				.setValue(GUILD_ID_ALL),
 		);
@@ -220,7 +220,7 @@ function createActionRows(
 			)
 			.addOptions(
 				Object.keys(XP_OFFSETS_SHORT).map((_offset) =>
-					new SelectMenuOptionBuilder()
+					new StringSelectMenuOptionBuilder()
 						.setLabel(upperCaseFirstChar(_offset))
 						.setValue(XP_OFFSETS_CONVERTER[_offset as keyof typeof XP_OFFSETS_CONVERTER]),
 				),
@@ -228,7 +228,7 @@ function createActionRows(
 
 		if (lbType === 'total') {
 			offsetSelectMenu.addOptions(
-				new SelectMenuOptionBuilder() //
+				new StringSelectMenuOptionBuilder() //
 					.setLabel('None')
 					.setValue('none'),
 			);
@@ -240,10 +240,10 @@ function createActionRows(
 					.setCustomId(`${cacheKey}:lbType`)
 					.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
 					.addOptions(
-						new SelectMenuOptionBuilder() //
+						new StringSelectMenuOptionBuilder() //
 							.setLabel('Total XP')
 							.setValue('total'),
-						new SelectMenuOptionBuilder() //
+						new StringSelectMenuOptionBuilder() //
 							.setLabel('Gained XP')
 							.setValue('gained'),
 					),
@@ -259,7 +259,7 @@ function createActionRows(
 					)
 					.addOptions(
 						LEADERBOARD_XP_TYPES.map((type) =>
-							new SelectMenuOptionBuilder() //
+							new StringSelectMenuOptionBuilder() //
 								.setLabel(upperCaseFirstChar(type.replaceAll('-', ' ')))
 								.setValue(type),
 						),

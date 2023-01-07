@@ -91,7 +91,7 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * hypixel chat prefix
 	 */
-	public readonly prefix: typeof PREFIX_BY_TYPE[HypixelMessageType];
+	public readonly prefix: (typeof PREFIX_BY_TYPE)[HypixelMessageType];
 
 	/**
 	 * channel webhook

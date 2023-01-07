@@ -100,7 +100,7 @@ export default class BanListCommand extends ApplicationCommand {
 		return (
 			InteractionUtil[
 				interaction.type === InteractionType.ApplicationCommand || interaction.user.id !== userId ? 'reply' : 'update'
-			] as typeof InteractionUtil['reply']
+			] as (typeof InteractionUtil)['reply']
 		)(interaction as ButtonInteraction<'cachedOrDM'>, {
 			embeds: [
 				this.client.defaultEmbed //

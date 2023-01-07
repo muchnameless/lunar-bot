@@ -128,7 +128,7 @@ export function formatDecimalNumber(
 ) {
 	if (Number.isNaN(number)) return 'NaN'.padStart(padding, ' ');
 
-	const [BEFORE_DOT, AFTER_DOT] = number.toFixed(decimals).split('.');
+	const [BEFORE_DOT, AFTER_DOT] = number.toFixed(decimals).split('.', 2);
 
 	return `${Number(BEFORE_DOT).toLocaleString('fr-FR').padStart(padding, ' ')}.${AFTER_DOT}`;
 }
