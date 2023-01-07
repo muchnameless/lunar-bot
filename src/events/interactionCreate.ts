@@ -81,8 +81,7 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleButtonInteraction(interaction: ButtonInteraction<'cachedOrDM'>) {
-		const args = interaction.customId.split(':');
-		const TYPE = args.shift();
+		const [TYPE, ...args] = interaction.customId.split(':');
 
 		switch (TYPE) {
 			// InteractionUtil.awaitConfirmation, handled by a collector
@@ -200,10 +199,9 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleStringSelectMenuInteraction(interaction: StringSelectMenuInteraction<'cachedOrDM'>) {
-		const args = interaction.customId.split(':');
-		const type = args.shift();
+		const [TYPE, ...args] = interaction.customId.split(':');
 
-		switch (type) {
+		switch (TYPE) {
 			// leaderboard edits
 			case CustomIdKey.Leaderboard:
 				return handleLeaderboardSelectMenuInteraction(interaction, args);
@@ -235,10 +233,9 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleUserSelectMenuInteraction(interaction: UserSelectMenuInteraction<'cachedOrDM'>) {
-		const args = interaction.customId.split(':');
-		const type = args.shift();
+		const [TYPE, ...args] = interaction.customId.split(':');
 
-		switch (type) {
+		switch (TYPE) {
 			// command user select menus
 			case CustomIdKey.Command: {
 				const commandName = args.shift();
@@ -266,10 +263,9 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleRoleSelectMenuInteraction(interaction: RoleSelectMenuInteraction<'cachedOrDM'>) {
-		const args = interaction.customId.split(':');
-		const type = args.shift();
+		const [TYPE, ...args] = interaction.customId.split(':');
 
-		switch (type) {
+		switch (TYPE) {
 			// command role select menus
 			case CustomIdKey.Command: {
 				const commandName = args.shift();
@@ -297,10 +293,9 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleMentionableSelectMenuInteraction(interaction: MentionableSelectMenuInteraction<'cachedOrDM'>) {
-		const args = interaction.customId.split(':');
-		const type = args.shift();
+		const [TYPE, ...args] = interaction.customId.split(':');
 
-		switch (type) {
+		switch (TYPE) {
 			// command mentionable select menus
 			case CustomIdKey.Command: {
 				const commandName = args.shift();
@@ -328,10 +323,9 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleChannelSelectMenuInteraction(interaction: ChannelSelectMenuInteraction<'cachedOrDM'>) {
-		const args = interaction.customId.split(':');
-		const type = args.shift();
+		const [TYPE, ...args] = interaction.customId.split(':');
 
-		switch (type) {
+		switch (TYPE) {
 			// command channel select menus
 			case CustomIdKey.Command: {
 				const commandName = args.shift();
@@ -361,7 +355,7 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleAutocompleteInteraction(interaction: AutocompleteInteraction<'cachedOrDM'>) {
-		const { name, value } = interaction.options.getFocused(true) as { name: string; value: string };
+		const { name, value } = interaction.options.getFocused(true);
 
 		switch (name) {
 			case 'player':
@@ -505,8 +499,7 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	private async _handleModalSubmitInteraction(interaction: ModalSubmitInteraction<'cachedOrDM'>) {
-		const args = interaction.customId.split(':');
-		const TYPE = args.shift();
+		const [TYPE, ...args] = interaction.customId.split(':');
 
 		switch (TYPE) {
 			// command message buttons

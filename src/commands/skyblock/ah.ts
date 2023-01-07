@@ -2,9 +2,9 @@ import { type Components } from '@zikeji/hypixel';
 import { stripIndents } from 'common-tags';
 import {
 	ActionRowBuilder,
-	SelectMenuOptionBuilder,
 	SlashCommandBuilder,
 	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder,
 	time,
 	TimestampStyles,
 	type APISelectMenuOption,
@@ -181,7 +181,7 @@ export default class AhCommand extends ApplicationCommand {
 	 */
 	private _generateProfileOptions(profiles: NonNullable<Components.Schemas.SkyBlockProfileCuteName>[]) {
 		return profiles.map((profile) =>
-			new SelectMenuOptionBuilder()
+			new StringSelectMenuOptionBuilder()
 				.setEmoji({ name: PROFILE_EMOJIS[profile.cute_name as keyof typeof PROFILE_EMOJIS] })
 				.setLabel(formatSkyBlockProfileName(profile))
 				.setValue(profile.profile_id)
