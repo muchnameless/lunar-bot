@@ -177,11 +177,10 @@ export class HypixelMessage {
 					'i',
 				).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
 
-			const args = this.content // command arguments
-				.slice(prefixMatched?.length ?? 0)
+			// command name and arguments
+			const [COMMAND_NAME, ...args] = (prefixMatched ? this.content.slice(prefixMatched.length) : this.content)
 				.trim()
 				.split(/ +/);
-			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
 			if ((!prefixMatched && this.type !== HypixelMessageType.Whisper) || !COMMAND_NAME) {
