@@ -32,7 +32,7 @@ jobs:
         uses: ./.github/actions/yarn-install
 
       - name: Cache dependencies
-        uses: actions/cache/save@4723a57e26efda3a62cbde1812113b730952852d # v3
+        uses: actions/cache/save@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3
         id: restore-dependencies
         with:
           path: node_modules/
@@ -55,7 +55,7 @@ jobs:
         uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Restore dependencies
-        uses: actions/cache/restore@4723a57e26efda3a62cbde1812113b730952852d # v3
+        uses: actions/cache/restore@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3
         id: restore-dependencies
         with:
           path: node_modules/
@@ -84,7 +84,7 @@ jobs:
         uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
 
       - name: Restore dependencies
-        uses: actions/cache/restore@4723a57e26efda3a62cbde1812113b730952852d # v3
+        uses: actions/cache/restore@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3
         id: restore-dependencies
         with:
           path: node_modules/
@@ -98,7 +98,7 @@ jobs:
 
       - name: Cache build output
         if: github.ref_name == 'main'
-        uses: actions/cache/save@4723a57e26efda3a62cbde1812113b730952852d # v3
+        uses: actions/cache/save@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3
         with:
           path: dist/
           key: ${{ runner.os }}-build-output-${{ github.sha }}
