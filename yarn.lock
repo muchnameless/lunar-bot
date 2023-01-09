@@ -5252,7 +5252,6 @@ __metadata:
     tslib: ^2.4.1
     typescript: ^5.0.0-dev.20230108
     undici: ^5.14.0
-    utf-8-validate: ^6.0.0
     zlib-sync: ^0.1.7
   languageName: unknown
   linkType: soft
@@ -7945,16 +7944,6 @@ __metadata:
   dependencies:
     punycode: ^2.1.0
   checksum: 7167432de6817fe8e9e0c9684f1d2de2bb688c94388f7569f7dbdb1587c9f4ca2a77962f134ec90be0cc4d004c939ff0d05acc9f34a0db39a3c797dada262633
-  languageName: node
-  linkType: hard
-
-"utf-8-validate@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "utf-8-validate@npm:6.0.0"
-  dependencies:
-    node-gyp: latest
-    node-gyp-build: ^4.3.0
-  checksum: b66479e3e5e3350632eefdddaf9d94461fb29922421d515a03987f3afcdd1902ac951c9f1bf6782bbb3c1be178ddbe7e48c106c92539a4baa223a9f01e7f3679
   languageName: node
   linkType: hard
 

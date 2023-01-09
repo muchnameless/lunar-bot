@@ -89,7 +89,6 @@
 		"sequelize": "^6.28.0",
 		"tslib": "^2.4.1",
 		"undici": "^5.14.0",
-		"utf-8-validate": "^6.0.0",
 		"zlib-sync": "^0.1.7"
 	},
 	"devDependencies": {
