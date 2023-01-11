@@ -469,10 +469,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/collection@npm:1.3.1-dev.1673353299-7dad50e.0":
-  version: 1.3.1-dev.1673353299-7dad50e.0
-  resolution: "@discordjs/collection@npm:1.3.1-dev.1673353299-7dad50e.0"
-  checksum: 8cb7162d3035160c8b939d68152b8bba7b072e29bf231bf30bd4ccfb283ca930039079ddf0f26cde8c75779cf3b8e7dbdaff807bf5ac13a43cbebeba82989b67
+"@discordjs/collection@npm:1.3.1-dev.1673398543-8dfd003.0":
+  version: 1.3.1-dev.1673398543-8dfd003.0
+  resolution: "@discordjs/collection@npm:1.3.1-dev.1673398543-8dfd003.0"
+  checksum: a0bb1a13f4e047da85c04723e7b2036beadd52dfc3f773a918a64d483d24c52d105827d1470a9d5af979609a74816aa25eca9a941e70c6417b8e47565e5c538a
   languageName: node
   linkType: hard
 
@@ -536,10 +536,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/util@npm:0.1.1-dev.1673353294-7dad50e.0":
-  version: 0.1.1-dev.1673353294-7dad50e.0
-  resolution: "@discordjs/util@npm:0.1.1-dev.1673353294-7dad50e.0"
-  checksum: c16c4764b0b75598af387764f8ac249645d5b2fb4e6abbf83529901ed9093ad503ebcf58d0cbf7e03c4a73a36bb20a1ac3ec28916e91faac8b20634f2c14bbbc
+"@discordjs/util@npm:0.1.1-dev.1673398580-8dfd003.0":
+  version: 0.1.1-dev.1673398580-8dfd003.0
+  resolution: "@discordjs/util@npm:0.1.1-dev.1673398580-8dfd003.0"
+  checksum: 8b1b5fc4b07cfde0a94230ef9ba6c8ff2cecf91a2f10fbcc02caf47b1a33ce074954df73895a328ece3170a817dbed139baa3745c001b6d4e1cf153ceac0034a
   languageName: node
   linkType: hard
 
