@@ -5235,7 +5235,7 @@ __metadata:
     lint-staged: ^13.1.0
     luxon: ^3.2.1
     minecraft-data: ^3.21.0
-    minecraft-protocol: 1.36.2
+    minecraft-protocol: 1.37.0
     ms: 3.0.0-canary.1
     pg: ^8.8.0
     pg-hstore: ^2.3.4
@@ -5389,7 +5389,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^3.0.0, minecraft-data@npm:^3.21.0, minecraft-data@npm:^3.8.0":
+"minecraft-data@npm:^3.0.0, minecraft-data@npm:^3.21.0":
   version: 3.21.0
   resolution: "minecraft-data@npm:3.21.0"
   checksum: 36f057e307a147eb87b85b450b6b25022e7d555f230b738b40acf662450b6ddcd03bf5894b13a593f51947acaf4f234263334438b805df92b87db2710a08b25d
@@ -5403,9 +5403,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:1.36.2":
-  version: 1.36.2
-  resolution: "minecraft-protocol@npm:1.36.2"
+"minecraft-protocol@npm:1.37.0":
+  version: 1.37.0
+  resolution: "minecraft-protocol@npm:1.37.0"
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -5414,23 +5414,23 @@ __metadata:
     endian-toggle: ^0.0.0
     lodash.get: ^4.1.2
     lodash.merge: ^4.3.0
-    minecraft-data: ^3.8.0
+    minecraft-data: ^3.21.0
     minecraft-folder-path: ^1.2.0
     node-fetch: ^2.6.1
     node-rsa: ^0.4.2
-    prismarine-auth: ^2.0.0
+    prismarine-auth: ^2.2.0
     prismarine-nbt: ^2.0.0
     protodef: ^1.8.0
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: cd0b0081a6c949f121014caf328964555aa477460f070b95cefe320bb52b558dd768808602dfc765b5ba0c1f6a4fc8afd8d2a4790d04932ffc7799da65b29f9c
+  checksum: 435d4c8120244ea6aca031e85b29bdc58a675365a1088286d35102fcad417415b6b45d00516171e3b6a539b2a7f85e9035b8b8ffa5da9ed18830c2e4a9b39658
   languageName: node
   linkType: hard
 
-"minecraft-protocol@patch:minecraft-protocol@npm:1.36.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
-  version: 1.36.2
-  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.36.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.36.2&hash=85fe55&locator=lunar-bot%40workspace%3A."
+"minecraft-protocol@patch:minecraft-protocol@npm:1.37.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.37.0
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.37.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.37.0&hash=85fe55&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -5439,17 +5439,17 @@ __metadata:
     endian-toggle: ^0.0.0
     lodash.get: ^4.1.2
     lodash.merge: ^4.3.0
-    minecraft-data: ^3.8.0
+    minecraft-data: ^3.21.0
     minecraft-folder-path: ^1.2.0
     node-fetch: ^2.6.1
     node-rsa: ^0.4.2
-    prismarine-auth: ^2.0.0
+    prismarine-auth: ^2.2.0
     prismarine-nbt: ^2.0.0
     protodef: ^1.8.0
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: b08469b44632ad28a3d4363d9c4304a6861c7fe27f17683773a533179b39d2b765989fb722a09a1d768755e4418d280e94d0313c74e44ecc41008c7fe0b6167a
+  checksum: 6692e3b1806ead02ff5fe0ca1ad1c007946f20f7da115848ae27203e1073425cb32a74ef928d617b31723549db615ca83eb84104dc50be3fe2ab355c9167a5ee
   languageName: node
   linkType: hard
 
@@ -6436,9 +6436,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-auth@npm:^2.0.0":
-  version: 2.1.1
-  resolution: "prismarine-auth@npm:2.1.1"
+"prismarine-auth@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "prismarine-auth@npm:2.2.0"
   dependencies:
     "@azure/msal-node": ^1.1.0
     "@xboxreplay/xboxlive-auth": ^3.3.3
@@ -6447,7 +6447,7 @@ __metadata:
     node-fetch: ^2.6.1
     smart-buffer: ^4.1.0
     uuid-1345: ^1.0.2
-  checksum: 0d0006109a2401f6f07e07ba2ebdd2598ef165bef46e3496a68a4d279b11119432ab8f46c8fc99a2e5abe48a9753db2c9d20ea474b32bb5eea26ad9d3e483ec9
+  checksum: f4eb72421dee7e7e1aceb58a6ff7ca1d81edb614affc6a36e00740ea6cb667a7f59da0fa8ea41527a40480be9421df1d60300c9d0626a83a4e80c3604b02f443
   languageName: node
   linkType: hard
 
