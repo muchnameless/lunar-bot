@@ -37,7 +37,6 @@ export const DEFAULT_CONFIG = {
 	COMPETITION_SCHEDULED: false,
 	COMPETITION_START_TIME: Number.POSITIVE_INFINITY,
 	CURRENT_COMPETITION: 'lily-weight',
-	DEFAULT_MAX_PARTS: 5,
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	DEFAULT_XP_OFFSET: Offset.Week,
 	ELEMENTS_PER_PAGE: 10,

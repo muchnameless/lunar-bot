@@ -77,7 +77,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	 * @param key
 	 */
 	private _transformKey(key: string) {
-		return key.toUpperCase().replace(/ +/g, '');
+		return key.toUpperCase().replace(/ +/g, '_');
 	}
 
 	/**
