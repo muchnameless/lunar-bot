@@ -5235,7 +5235,7 @@ __metadata:
     lint-staged: ^13.1.0
     luxon: ^3.2.1
     minecraft-data: ^3.24.0
-    minecraft-protocol: 1.37.0
+    minecraft-protocol: 1.38.0
     ms: 3.0.0-canary.1
     pg: ^8.8.0
     pg-hstore: ^2.3.4
@@ -5403,9 +5403,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:1.37.0":
-  version: 1.37.0
-  resolution: "minecraft-protocol@npm:1.37.0"
+"minecraft-protocol@npm:1.38.0":
+  version: 1.38.0
+  resolution: "minecraft-protocol@npm:1.38.0"
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -5420,17 +5420,18 @@ __metadata:
     node-rsa: ^0.4.2
     prismarine-auth: ^2.2.0
     prismarine-nbt: ^2.0.0
+    prismarine-realms: ^1.2.0
     protodef: ^1.8.0
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 435d4c8120244ea6aca031e85b29bdc58a675365a1088286d35102fcad417415b6b45d00516171e3b6a539b2a7f85e9035b8b8ffa5da9ed18830c2e4a9b39658
+  checksum: a734a15e26a3b04899c0f565f804b8736df2da814f404612cb3f2d6e278e17625d9c307e44bcd01d2489f5e1daf6265de6bb2eaa9adf8b5426dde65c3f18f172
   languageName: node
   linkType: hard
 
-"minecraft-protocol@patch:minecraft-protocol@npm:1.37.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
-  version: 1.37.0
-  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.37.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.37.0&hash=85fe55&locator=lunar-bot%40workspace%3A."
+"minecraft-protocol@patch:minecraft-protocol@npm:1.38.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.38.0
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.38.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.38.0&hash=85fe55&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -5445,11 +5446,12 @@ __metadata:
     node-rsa: ^0.4.2
     prismarine-auth: ^2.2.0
     prismarine-nbt: ^2.0.0
+    prismarine-realms: ^1.2.0
     protodef: ^1.8.0
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 6692e3b1806ead02ff5fe0ca1ad1c007946f20f7da115848ae27203e1073425cb32a74ef928d617b31723549db615ca83eb84104dc50be3fe2ab355c9167a5ee
+  checksum: 8b67ec71d065017e3fd9b32c2ce711ec8bba816fa6c387d37609f48bceed516f5df2ccca6b14b7918f7d48add02d795c387272b0b51645c1b1232aa3054a2a1f
   languageName: node
   linkType: hard
 
@@ -6480,6 +6482,16 @@ __metadata:
   dependencies:
     protodef: ^1.9.0
   checksum: 264ab200c65e9cf3ee47f810df266de5db1116a9a1139531a65dd3471d573ea67a11500c4053dbb590a5c11b290b63a41acdc5b41f3ba9f38972788a6161d24a
+  languageName: node
+  linkType: hard
+
+"prismarine-realms@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "prismarine-realms@npm:1.2.0"
+  dependencies:
+    debug: ^4.3.3
+    node-fetch: ^2.6.1
+  checksum: c3cdc518f3f03061073dbd796df3bce89c4da0e55b1de0d9d96493ed7f1e1d903e34eb0d504adf1175f4fffdc7c87ac2e7fcaa582d1961f80edf28c0b53032e7
   languageName: node
   linkType: hard
 
