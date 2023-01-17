@@ -16,8 +16,8 @@ jobs:
         run: |
           gh extension install actions/gh-actions-cache
 
-          REPO=$
-          BRANCH=$
+          REPO=${{ github.repository }}
+          BRANCH=main
 
           echo "Fetching list of cache key"
           cacheKeysForPR=$(gh actions-cache list -L 100 --key yarn -R $REPO -B $BRANCH | cut -f 1 )

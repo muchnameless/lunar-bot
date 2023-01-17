@@ -4,7 +4,6 @@ on:
   pull_request:
     types:
       - closed
-  workflow_dispatch:
 
 jobs:
   cleanup:
@@ -17,8 +16,8 @@ jobs:
         run: |
           gh extension install actions/gh-actions-cache
 
-          REPO=$
-          BRANCH=$
+          REPO=${{ github.repository }}
+          BRANCH=refs/pull/${{ github.event.number }}/merge
 
           echo "Fetching list of cache key"
           cacheKeysForPR=$(gh actions-cache list -L 100 -R $REPO -B $BRANCH | cut -f 1 )
