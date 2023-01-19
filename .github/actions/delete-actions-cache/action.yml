@@ -41,6 +41,7 @@ runs:
         elif [[ -n "${{ inputs.filter }}" ]]; then
           for filter in ${{ inputs.filter }}; do
             echo "Fetching list of cache keys filtered by '$filter'"
+            keys+=$'\n'
             keys+=$(gh actions-cache list -L 100 -R $REPO -B $BRANCH --key $filter | cut -f 1)
           done
         else
