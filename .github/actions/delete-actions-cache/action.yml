@@ -32,13 +32,10 @@ runs:
       run: |
         gh extension install actions/gh-actions-cache
 
-        REPO=${{ inputs.repo }}
-        BRANCH=${{ inputs.branch }}
-
-        if [[ -n "${{ inputs.key }}" ]]; then
-          keys="${{ inputs.key }}"
-        elif [[ -n "${{ inputs.filter }}" ]]; then
-          for filter in ${{ inputs.filter }}; do
+        if [[ -n "$KEY" ]]; then
+          keys="$KEY"
+        elif [[ -n "$FILTER" ]]; then
+          for filter in $FILTER; do
             echo "Fetching list of cache keys filtered by '$filter'"
             keys+=$'\n'
             keys+=$(gh actions-cache list -L 100 -R $REPO -B $BRANCH --key $filter | cut -f 1)
@@ -48,8 +45,8 @@ runs:
           keys=$(gh actions-cache list -L 100 -R $REPO -B $BRANCH | cut -f 1)
         fi
           
-        if [[ -n "${{ inputs.exclude }}" ]]; then
-          keys=$(echo "$keys" | grep -v "${{ inputs.exclude }}")
+        if [[ -n "$EXCLUDE" ]]; then
+          keys=$(echo "$keys" | grep -v "$EXCLUDE")
         fi
 
         # setting this to not fail the workflow while deleting cache keys
@@ -62,3 +59,8 @@ runs:
         echo "Done"
       env:
         GH_TOKEN: ${{ inputs.gh_token }}
+        REPO: ${{ inputs.repo }}
+        BRANCH: ${{ inputs.branch }}
+        KEY: ${{ inputs.key }}
+        FILTER: ${{ inputs.filter }}
+        EXCLUDE: ${{ inputs.exclude }}
