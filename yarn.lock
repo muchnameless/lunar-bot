@@ -5168,7 +5168,7 @@ __metadata:
     postgres: 3.3.3
     prettier: ^2.8.3
     pretty-quick: ^3.1.3
-    prismarine-chat: ^1.7.2
+    prismarine-chat: ^1.8.0
     prismarine-nbt: ^2.2.1
     re2: ^1.18.0
     sequelize: ^6.28.0
@@ -6377,16 +6377,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-chat@npm:^1.7.2":
-  version: 1.7.2
-  resolution: "prismarine-chat@npm:1.7.2"
+"prismarine-chat@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "prismarine-chat@npm:1.8.0"
   dependencies:
     mojangson: ^2.0.1
     prismarine-item: ^1.10.0
     prismarine-nbt: ^2.0.0
     prismarine-registry: ^1.4.0
-    sprintf-js: ^1.1.2
-  checksum: 51aaea67efeb8a57933b4879c366988f8b148e27f4db3e80ab919297440afd6048bb0620541b2b245accab877b666d0415defb0caf0d809f6521177000ddd0b1
+  checksum: 8a0c7e86abae0e33069406b67b7340d75f5a6152a31d6da52bc27d90ff9afbb7b08140596a67fc0b9e14b859c83ad974b7c4530f5837c9a390739cce95244f78
   languageName: node
   linkType: hard
 
@@ -7275,13 +7274,6 @@ __metadata:
   version: 4.1.0
   resolution: "split2@npm:4.1.0"
   checksum: ec581597cb74c13cdfb5e2047543dd40cb1e8e9803c7b1e0c29ede05f2b4f049b2d6e7f2788a225d544549375719658b8f38e9366364dec35dc7a12edfda5ee5
-  languageName: node
-  linkType: hard
-
-"sprintf-js@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "sprintf-js@npm:1.1.2"
-  checksum: d4bb46464632b335e5faed381bd331157e0af64915a98ede833452663bc672823db49d7531c32d58798e85236581fb7342fd0270531ffc8f914e186187bf1c90
   languageName: node
   linkType: hard
 
