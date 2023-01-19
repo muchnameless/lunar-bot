@@ -17,5 +17,6 @@ jobs:
       - name: Cleanup caches
         uses: ./.github/actions/delete-actions-cache
         with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           key: '${{ runner.os }}-dependencies- ${{ runner.os }}-build-output-'
           exclude: ${{ github.sha }}

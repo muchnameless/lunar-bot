@@ -15,4 +15,5 @@ jobs:
       - name: Cleanup caches
         uses: ./.github/actions/delete-actions-cache
         with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           filter: 'yarn- ${{ runner.os }}-yarn-'

@@ -2,6 +2,9 @@ name: 'Delete actions cache'
 description: 'Deletes GitHub actions caches from a repository and branch'
 
 inputs:
+  gh_token:
+    description: 'GitHub token'
+    required: true
   repo:
     description: 'Repository to fetch cache from'
     required: true
@@ -58,4 +61,4 @@ runs:
         done
         echo "Done"
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ inputs.gh_token }}
