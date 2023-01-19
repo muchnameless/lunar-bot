@@ -1,0 +1,64 @@
+name: 'Delete actions cache'
+description: 'Deletes GitHub actions caches from a repository and branch'
+
+inputs:
+  gh_token:
+    description: 'GitHub token'
+    required: true
+    default: ${{ secrets.GITHUB_TOKEN }}
+  repo:
+    description: 'Repository to fetch cache from'
+    required: true
+    default: ${{ github.repository }}
+  branch:
+    description: 'Branch to fetch cache from'
+    required: true
+    default: ${{ github.ref }}
+  key:
+    description: 'Specific cache key to delete'
+    required: false
+  filter:
+    description: 'Delete all keys matching this filter'
+    required: false
+  exclude:
+    description: 'Exclude a filtered key from deletion'
+    required: false
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Cleanup
+      shell: bash
+      run: |
+        gh extension install actions/gh-actions-cache
+
+        REPO=${{ inputs.repo }}
+        BRANCH=${{ inputs.branch }}
+
+        if [[ -n "${{ inputs.key }}" ]]; then
+          keys="${{ inputs.key }}"
+        elif [[ -n "${{ inputs.filter }}" ]]; then
+          for filter in ${{ inputs.filter }}; do
+            echo "Fetching list of cache keys filtered by '$filter'"
+            keys+=$(gh actions-cache list -L 100 -R $REPO -B $BRANCH --key $filter | cut -f 1)
+          done
+        else
+          echo "Fetching list of cache keys"
+          keys=$(gh actions-cache list -L 100 -R $REPO -B $BRANCH | cut -f 1)
+        fi
+          
+        if [[ -n "${{ inputs.exclude }}" ]]; then
+          keys=$(echo "$keys" | grep -v "${{ inputs.exclude }}")
+        fi
+
+        # setting this to not fail the workflow while deleting cache keys
+        set +e
+
+        echo "Deleting caches..."
+        for key in $keys; do
+            gh actions-cache delete $key -R $REPO -B $BRANCH --confirm
+        done
+        echo "Done"
+      env:
+        GH_TOKEN: ${{ inputs.gh_token }}

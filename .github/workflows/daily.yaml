@@ -1,13 +1,15 @@
-name: Cleanup branch caches
+name: Daily scheduled jobs
 
 on:
-  pull_request:
-    types:
-      - closed
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
-  cleanup:
+  main-cache-cleanup:
+    name: Main cache cleanup
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
@@ -15,4 +17,5 @@ jobs:
       - name: Cleanup caches
         uses: ./.github/actions/delete-actions-cache
         with:
-          branch: refs/pull/${{ github.event.number }}/merge
+          key: '${{ runner.os }}-dependencies- ${{ runner.os }}-build-output-'
+          exclude: ${{ github.sha }}
