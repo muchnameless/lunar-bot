@@ -247,9 +247,7 @@ export class ApplicationCommand extends BaseCommand {
 	 */
 	private static _setDefaultPermissions(
 		command: ApplicationCommand,
-		builder:
-			| Pick<ContextMenuCommandBuilder, 'setDefaultMemberPermissions' | 'setDMPermission'>
-			| Pick<SlashCommandBuilder, 'setDefaultMemberPermissions' | 'setDMPermission'>,
+		builder: Pick<ContextMenuCommandBuilder | SlashCommandBuilder, 'setDefaultMemberPermissions'>,
 	) {
 		switch (command.category) {
 			case 'staff':
