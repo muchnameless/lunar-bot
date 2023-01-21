@@ -702,7 +702,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		// legacy argument handling
-		if (command.args && hypixelMessage.commandData.args.length < command.args) {
+		if (command.args && hypixelMessage.commandData.args.length < (command.args as number)) {
 			const reply: string[] = [];
 
 			reply.push(
