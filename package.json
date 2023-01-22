@@ -51,7 +51,7 @@
 		"@typescript-eslint/eslint-plugin": "patch:@typescript-eslint/eslint-plugin@npm%3A5.45.0#./.yarn/patches/@typescript-eslint-eslint-plugin-npm-5.45.0-af83fa2940.patch",
 		"discord-api-types": "0.37.29-next.4edcd6a.1674417393",
 		"discord.js": "patch:discord.js@14.7.2-dev.1674389039-8b70f49.0#./.yarn/patches/discord.js-npm-14.7.2-dev.1672618203-876b181.0-fadf8a7e8f.patch",
-		"minecraft-protocol": "patch:minecraft-protocol@npm:1.40.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
+		"minecraft-protocol": "patch:minecraft-protocol@npm:1.40.1#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
 	"dependencies": {
 		"@discordjs/rest": "1.5.1-dev.1674389040-8b70f49.0",
@@ -76,7 +76,7 @@
 		"lilyweight": "^2.7.0",
 		"luxon": "^3.2.1",
 		"minecraft-data": "^3.25.2",
-		"minecraft-protocol": "1.40.0",
+		"minecraft-protocol": "1.40.1",
 		"ms": "3.0.0-canary.1",
 		"pg": "^8.8.0",
 		"pg-hstore": "^2.3.4",
