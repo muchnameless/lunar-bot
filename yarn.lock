@@ -5172,7 +5172,7 @@ __metadata:
     prismarine-nbt: ^2.2.1
     re2: ^1.18.0
     sequelize: ^6.28.0
-    sort-package-json: ^2.1.0
+    sort-package-json: ^2.2.0
     ts-prune: ^0.10.3
     tslib: ^2.4.1
     typescript: ^5.0.0-dev.20230122
@@ -7204,7 +7204,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sort-package-json@npm:^2.1.0":
+"sort-package-json@npm:^2.2.0":
   version: 2.2.0
   resolution: "sort-package-json@npm:2.2.0"
   dependencies:
