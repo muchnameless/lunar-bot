@@ -37,10 +37,9 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 		ignOrUuid: string,
 	) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-		const [{ player: playerData }, { guild: guildData }, { records: friendsData }] = await Promise.all([
+		const [{ player: playerData }, { guild: guildData }] = await Promise.all([
 			hypixel.player.uuid(uuid),
 			hypixel.guild.player(uuid),
-			hypixel.friends.uuid(uuid),
 		]);
 		const statusData =
 			playerData?.lastLogin && playerData.lastLogout
@@ -51,7 +50,6 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			ign,
 			playerData,
 			guildData,
-			friendsData,
 			statusData,
 		};
 	}
@@ -61,7 +59,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	 *
 	 * @param data
 	 */
-	protected override _generateReply({ ign, playerData, guildData, friendsData, statusData }: FetchedData) {
+	protected override _generateReply({ ign, playerData, guildData, statusData }: FetchedData) {
 		if (!playerData?._id) return `\`${ign}\` never logged into hypixel`;
 
 		const { cleanName: RANK_NAME } = getPlayerRank(playerData);
@@ -72,7 +70,6 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			rank: ${RANK_NAME},
 			guild: ${guildData?.name ?? 'none'},
 			status: ${statusData ? 'online' : 'offline'},
-			friends: ${formatNumber(friendsData.length)},
 			level: ${level},
 			achievement points: ${formatNumber(playerData.achievementPoints ?? 0)},
 			karma: ${formatNumber(playerData.karma ?? 0)},
