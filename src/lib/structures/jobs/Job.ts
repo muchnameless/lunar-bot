@@ -42,27 +42,32 @@ export class Job {
 		};
 	}
 
-	public onError(error: Error) {
-		logger.error({ err: error, job: this.name }, '[JOB]: error');
-	}
-
-	public onExit(code: number) {
-		logger.error({ code, job: this.name }, '[JOB]: exited');
-
+	private restartWorker() {
+		void this._worker?.terminate();
 		this._worker = null;
 
 		if (this._shouldRestart) this.start();
 	}
 
-	public onMessage(message: unknown) {
+	private onError(error: Error) {
+		logger.error({ err: error, job: this.name }, '[JOB]: error');
+		this.restartWorker();
+	}
+
+	private onExit(code: number) {
+		logger.error({ code, job: this.name }, '[JOB]: exited');
+		this.restartWorker();
+	}
+
+	private onMessage(message: unknown) {
 		logger.info({ job: this.name, message }, '[JOB]: message');
 	}
 
-	public onMessageerror(error: Error) {
+	private onMessageerror(error: Error) {
 		logger.error({ err: error, job: this.name }, '[JOB]: messageerror');
 	}
 
-	public onOnline() {
+	private onOnline() {
 		logger.info({ job: this.name }, '[JOB]: worker online');
 	}
 
