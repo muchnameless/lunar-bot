@@ -594,7 +594,8 @@ export class DiscordChatManager extends ChatManager {
 		const _options: SendViaBotOptions = {
 			content: await this.chatBridge.discord.parseContent(
 				discordMessage || !hypixelMessage ? content : `${hypixelMessage.member ?? hypixelMessage.author}, ${content}`,
-				fromMinecraft,
+				// escape markdown if the message is from minecraft and not from the bot itself
+				fromMinecraft && !hypixelMessage?.me,
 			),
 			reply: discordMessage
 				? {
