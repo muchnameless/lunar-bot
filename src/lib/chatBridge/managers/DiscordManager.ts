@@ -129,9 +129,9 @@ export class DiscordManager {
 	 * async to allow database queries for @uncached_player_ign
 	 *
 	 * @param string
-	 * @param fromMinecraft whether the message was sent in mc chat
+	 * @param escapeEverything whether to escape every markdown character
 	 */
-	public async parseContent(string: string, fromMinecraft = false) {
+	public async parseContent(string: string, escapeEverything = false) {
 		return escapeMarkdown(
 			djsEscapeMarkdown(
 				// @mentions
@@ -305,7 +305,7 @@ export class DiscordManager {
 					underline: false,
 				},
 			),
-			fromMinecraft,
+			escapeEverything,
 		);
 	}
 }
