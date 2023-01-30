@@ -11,14 +11,14 @@ runs:
       run: echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
     - name: Restore yarn cache
-      uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3
+      uses: actions/cache@627f0f41f6904a5b1efbaed9f96d9eb58e92e920 # v3
       with:
         path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
         key: yarn-download-cache-${{ hashFiles('yarn.lock') }}
         restore-keys: yarn-download-cache-
 
     - name: Restore yarn install state
-      uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3
+      uses: actions/cache@627f0f41f6904a5b1efbaed9f96d9eb58e92e920 # v3
       with:
         path: .yarn/ci-cache/
         key: ${{ runner.os }}-yarn-install-state-cache-${{ hashFiles('yarn.lock', '.yarnrc.yml') }}
