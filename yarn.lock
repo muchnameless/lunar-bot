@@ -3594,14 +3594,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:^4.0.15":
-  version: 4.0.15
-  resolution: "fast-xml-parser@npm:4.0.15"
+"fast-xml-parser@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "fast-xml-parser@npm:4.1.0"
   dependencies:
     strnum: ^1.0.5
   bin:
     fxparser: src/cli/cli.js
-  checksum: bf0f2cba65d6ef40bee95e8b05b48738c53260ac0f8e7e938861364dae8d242ee6fa7247079d0b8a53ddd67bfb2468ac04b64c418ac44ff5cccafb72a4a760aa
+  checksum: 3d45a3b26bb2748a5de040391777465b7b97106bd2fd9a35a00774cfb7e5fc68c48b31b7b16e1f2d2a92d09bd1644e03a2e3b1b222771f93a882bb79f5b0ada5
   languageName: node
   linkType: hard
 
@@ -5150,7 +5150,7 @@ __metadata:
     env-cmd: ^10.1.0
     eslint: ^8.33.0
     eslint-config-neon: ^0.1.40
-    fast-xml-parser: ^4.0.15
+    fast-xml-parser: ^4.1.0
     husky: ^8.0.3
     ioredis: ^5.3.0
     js-big-decimal: ^1.3.15
