@@ -383,6 +383,7 @@ export class ChatBridge extends EventEmitter {
 			this.discord.resolve(type)?.sendViaBot({
 				content,
 				hypixelMessage,
+				fromMinecraft: false,
 				...discord,
 			}) ?? null,
 		]);

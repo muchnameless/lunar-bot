@@ -19,7 +19,7 @@ export default class SlayersCommand extends BaseSkyBlockCommand {
 	 */
 	protected override _generateReply({ ign, uuid, profile }: FetchedData) {
 		const member = profile.members[uuid]!;
-		const reply: string[] = [];
+		const reply: string[] = [null!];
 
 		let totalXp = 0;
 
@@ -31,7 +31,7 @@ export default class SlayersCommand extends BaseSkyBlockCommand {
 			reply.push(`${upperCaseFirstChar(slayer)} ${getSlayerLevel(XP)} (${shortenNumber(XP)} XP)`);
 		}
 
-		reply[0] += `${shortenNumber(totalXp)} Slayer XP`;
+		reply[0] = `${shortenNumber(totalXp)} Slayer XP`;
 
 		return { ign, profile, reply: reply.join(' | ') };
 	}
