@@ -303,6 +303,8 @@ export class DiscordManager {
 					italic: false,
 					bold: false,
 					underline: false,
+					// prevent double escapes
+					escape: false,
 				},
 			),
 			escapeEverything,
