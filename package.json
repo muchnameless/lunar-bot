@@ -112,9 +112,9 @@
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.0.0-dev.20230201"
 	},
-	"packageManager": "yarn@3.3.1",
+	"packageManager": "yarn@3.4.1",
 	"volta": {
 		"node": "19.5.0",
-		"yarn": "3.3.1"
+		"yarn": "3.4.1"
 	}
 }
