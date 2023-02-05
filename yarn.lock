@@ -1077,17 +1077,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.18":
-  version: 18.11.18
-  resolution: "@types/node@npm:18.11.18"
-  checksum: 03f17f9480f8d775c8a72da5ea7e9383db5f6d85aa5fefde90dd953a1449bd5e4ffde376f139da4f3744b4c83942166d2a7603969a6f8ea826edfb16e6e3b49d
+"@types/node@npm:^18.11.19":
+  version: 18.11.19
+  resolution: "@types/node@npm:18.11.19"
+  checksum: d7cd19fcfc59cbdd3f9ba0b4072cb7adc21bd575bd8eb7d7e698975e63564aaa83f03434f32b12331f84f73d0b369d9cbe2371e359d9d7f5c3361f4987f4f7da
   languageName: node
   linkType: hard
 
-"@types/node@patch:@types/node@^18.11.18#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch::locator=lunar-bot%40workspace%3A.":
-  version: 18.11.18
-  resolution: "@types/node@patch:@types/node@npm%3A18.11.18#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch::version=18.11.18&hash=870a8e&locator=lunar-bot%40workspace%3A."
-  checksum: c67840b12a6581772d5445de80b81194de7de02156fe9e5ff3c59bb33fbce870981c40745d50140dafff549314492ad20e305cb605f76ae84e0f1f4b6a4fcdae
+"@types/node@patch:@types/node@^18.11.19#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch::locator=lunar-bot%40workspace%3A.":
+  version: 18.11.19
+  resolution: "@types/node@patch:@types/node@npm%3A18.11.19#./.yarn/patches/@types-node-npm-18.11.2-c7d12dbe39.patch::version=18.11.19&hash=870a8e&locator=lunar-bot%40workspace%3A."
+  checksum: 5e9a36d4d14081538a18a2df6066f39c5feb8b67d167e38768e98671e02ecab18bfbec08b0bf72d1f78be86eefffc88179f0972a919d36bcedb88f1b1f13467b
   languageName: node
   linkType: hard
 
@@ -5138,7 +5138,7 @@ __metadata:
     "@types/common-tags": ^1.8.1
     "@types/cron": ^2.0.0
     "@types/luxon": ^3
-    "@types/node": ^18.11.18
+    "@types/node": ^18.11.19
     "@types/pg": ^8.6.6
     "@types/prettier": ^2.7.2
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#dc7bc5a200f1b0c50776f45c8f5ef852d41dc034"
