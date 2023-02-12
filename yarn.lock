@@ -5175,7 +5175,7 @@ __metadata:
     sort-package-json: ^2.4.1
     ts-prune: ^0.10.3
     tslib: ^2.5.0
-    typescript: ^5.0.0-dev.20230211
+    typescript: ^5.0.0-dev.20230212
     undici: ^5.18.0
     zlib-sync: ^0.1.8
   languageName: unknown
@@ -7784,13 +7784,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.0.0-dev.20230211":
-  version: 5.0.0-dev.20230211
-  resolution: "typescript@npm:5.0.0-dev.20230211"
+"typescript@npm:^5.0.0-dev.20230212":
+  version: 5.0.0-dev.20230212
+  resolution: "typescript@npm:5.0.0-dev.20230212"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 3bdc3dbe94cb76c5b118fc362648d34febf0eaaf47b3c4965e702f11d4606f9f2b2736ea0c20c03a06ef715721d66403ea338bb754110fa5443a57ef77687f3a
+  checksum: d82db8e061044e17e265da553d21f40e7399012d1cc0ef4c758bb49d1fb402d67ee1c571bc07b5ca5c0c08b644b5f8a266c10f9cee22b7e82d7d0aeae5895375
   languageName: node
   linkType: hard
 
@@ -7804,13 +7804,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^5.0.0-dev.20230211#~builtin<compat/typescript>":
-  version: 5.0.0-dev.20230211
-  resolution: "typescript@patch:typescript@npm%3A5.0.0-dev.20230211#~builtin<compat/typescript>::version=5.0.0-dev.20230211&hash=1f5320"
+"typescript@patch:typescript@^5.0.0-dev.20230212#~builtin<compat/typescript>":
+  version: 5.0.0-dev.20230212
+  resolution: "typescript@patch:typescript@npm%3A5.0.0-dev.20230212#~builtin<compat/typescript>::version=5.0.0-dev.20230212&hash=1f5320"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 07144307803ee44347295de6aaa87389e2c30b7cc9cc7ab93f299c84b3b853676c9888206c6031659a62f585ac1690dca85054f4394f0010d501dbe9f16214ac
+  checksum: 4a9f6ea7281b3c76c96d535b50e5058a9a4b65786abd5d31c4e7aab2889002dae21c3f7b168ee6829d0fc245210bff15f0e7a1d6185805c3757e957d4b685634
   languageName: node
   linkType: hard
 
