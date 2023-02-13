@@ -1,5 +1,5 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index adf1facc54244bd760b03a2eb950ceb2d6ba662e..ba28836a8468eb8357a8bc749e3d17d1c22e342f 100644
+index adf1facc54244bd760b03a2eb950ceb2d6ba662e..0a078ac7f7f4268f7a7bec3cf6f3f34c6c56e7c2 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
 @@ -159,6 +159,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -23,7 +23,7 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..ba28836a8468eb8357a8bc749e3d17d1
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
 +    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
@@ -146,7 +146,7 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..ba28836a8468eb8357a8bc749e3d17d1
        }
        case import_v102.GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..8253de38734a7c2d429de6c71d8404fc3d1be133 100644
+index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..2c03291827eb34ae6840f1d8a4cf123f4fc0e604 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
 @@ -145,6 +145,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -170,7 +170,7 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..8253de38734a7c2d429de6c71d8404fc
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
 +    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
@@ -345,7 +345,7 @@ index 9b5fda0d436efd4120357c2859690b1242bcc1ef..580ab8af04e80d14effd03d972b17c31
  declare class WorkerBootstrapper {
      /**
 diff --git a/dist/index.js b/dist/index.js
-index 65343ec427fb98d66055c8cbf9a4bd755f60c000..51d4dd20c34df873da2fbdba8bcc545d199ab906 100644
+index 65343ec427fb98d66055c8cbf9a4bd755f60c000..70d415487765416fc474f5d8d95710d87caf5776 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -477,6 +477,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -369,7 +369,7 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..51d4dd20c34df873da2fbdba8bcc545d
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
 +    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
@@ -492,7 +492,7 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..51d4dd20c34df873da2fbdba8bcc545d
        }
        case import_v102.GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/index.mjs b/dist/index.mjs
-index c5595d18155c1a74f85faeb2057e11aaead5e0a8..2fda4cafabd872792164362f0c474c10e340c5ae 100644
+index c5595d18155c1a74f85faeb2057e11aaead5e0a8..b853b8a969e3d30bf90e9dc5edee961676024a2b 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -444,6 +444,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -516,7 +516,7 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..2fda4cafabd872792164362f0c474c10
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
 +    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
