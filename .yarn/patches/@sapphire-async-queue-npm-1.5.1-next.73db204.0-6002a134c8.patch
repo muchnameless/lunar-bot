@@ -1,0 +1,94 @@
+diff --git a/dist/.tsbuildinfo b/dist/.tsbuildinfo
+new file mode 100644
+index 0000000000000000000000000000000000000000..8ca850e178ec59d513cdb51116fc5496b8043453
+--- /dev/null
+diff --git a/dist/index.global.js b/dist/index.global.js
+index 4d4c4aa78559ec623f20ecfacfa6337c857eb34d..dc5e014c7c6ddf74843507eee270492f9febdb25 100644
+--- a/dist/index.global.js
++++ b/dist/index.global.js
+@@ -25,14 +25,12 @@ var SapphireAsyncQueue = (function (exports) {
+       });
+     }
+     setSignal(signal) {
+-      if (signal.aborted)
+-        return this;
+       this.signal = signal;
+       this.signalListener = () => {
+         const index = this.queue["promises"].indexOf(this);
+         if (index !== -1)
+           this.queue["promises"].splice(index, 1);
+-        this.reject(new Error("Request aborted manually"));
++        this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
+       };
+       this.signal.addEventListener("abort", this.signalListener);
+       return this;
+@@ -101,6 +99,9 @@ var SapphireAsyncQueue = (function (exports) {
+      * ```
+      */
+     wait(options) {
++      if (options?.signal?.aborted) {
++        return Promise.reject(new Error("Request aborted manually", { cause: options.signal.reason }));
++      }
+       const entry = new AsyncQueueEntry(this);
+       if (this.promises.length === 0) {
+         this.promises.push(entry);
+diff --git a/dist/index.js b/dist/index.js
+index 2b62b78df63ad5cf8b71ca546fdcd1c379b9dbd2..c0ec6950c62ebbbd87cc4210ee01018520d8af4b 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -24,14 +24,12 @@ var AsyncQueueEntry = class {
+     });
+   }
+   setSignal(signal) {
+-    if (signal.aborted)
+-      return this;
+     this.signal = signal;
+     this.signalListener = () => {
+       const index = this.queue["promises"].indexOf(this);
+       if (index !== -1)
+         this.queue["promises"].splice(index, 1);
+-      this.reject(new Error("Request aborted manually"));
++      this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
+     };
+     this.signal.addEventListener("abort", this.signalListener);
+     return this;
+@@ -100,6 +98,9 @@ var AsyncQueue = class {
+    * ```
+    */
+   wait(options) {
++    if (options?.signal?.aborted) {
++      return Promise.reject(new Error("Request aborted manually", { cause: options.signal.reason }));
++    }
+     const entry = new AsyncQueueEntry(this);
+     if (this.promises.length === 0) {
+       this.promises.push(entry);
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 9ad93ef9c05b2b9e6916bfda9edc9bc83d52bd61..815a6968d713b1081af29ae927a01ba19eeb0eb8 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -22,14 +22,12 @@ var AsyncQueueEntry = class {
+     });
+   }
+   setSignal(signal) {
+-    if (signal.aborted)
+-      return this;
+     this.signal = signal;
+     this.signalListener = () => {
+       const index = this.queue["promises"].indexOf(this);
+       if (index !== -1)
+         this.queue["promises"].splice(index, 1);
+-      this.reject(new Error("Request aborted manually"));
++      this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
+     };
+     this.signal.addEventListener("abort", this.signalListener);
+     return this;
+@@ -98,6 +96,9 @@ var AsyncQueue = class {
+    * ```
+    */
+   wait(options) {
++    if (options?.signal?.aborted) {
++      return Promise.reject(new Error("Request aborted manually", { cause: options.signal.reason }));
++    }
+     const entry = new AsyncQueueEntry(this);
+     if (this.promises.length === 0) {
+       this.promises.push(entry);
