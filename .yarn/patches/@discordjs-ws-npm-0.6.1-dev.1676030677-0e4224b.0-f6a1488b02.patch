@@ -1,5 +1,5 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a703b7d70 100644
+index adf1facc54244bd760b03a2eb950ceb2d6ba662e..ba28836a8468eb8357a8bc749e3d17d1c22e342f 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
 @@ -159,6 +159,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -18,12 +18,13 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
    sendQueue = new import_async_queue2.AsyncQueue();
    timeouts = new import_collection4.Collection();
    strategy;
-@@ -223,13 +225,16 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -223,13 +225,17 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    if (await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      if (session?.shardCount === this.strategy.options.shardCount) {
@@ -36,7 +37,7 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -278,16 +283,33 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -278,16 +284,37 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      }
    }
    async waitForEvent(event, timeoutDuration) {
@@ -52,15 +53,24 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
 -    if (timeout) {
 -      (0, import_node_timers.clearTimeout)(timeout);
 -      this.timeouts.delete(event);
-+    try {
-+      await (0, import_node_events2.once)(this, event, { signal: controller.signal });
-+      return null;
-+    } catch ({ error }) {
-+      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
-+        throw error;
++    await (0, import_node_events2.once)(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        (0, import_node_timers.clearTimeout)(timeout);
++        this.timeouts.delete(event);
 +      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
 +      if (error instanceof Error && error.name === "AbortError") {
 +        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
 +      }
 +      await this.destroy({
 +        code: 1e3 /* Normal */,
@@ -68,15 +78,10 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
 +        recover: 0 /* Reconnect */
 +      });
 +      return error;
-+    } finally {
-+      if (timeout) {
-+        (0, import_node_timers.clearTimeout)(timeout);
-+        this.timeouts.delete(event);
-+      }
      }
    }
    async send(payload) {
-@@ -296,7 +318,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -296,7 +323,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      }
      if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
        this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
@@ -89,18 +94,19 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
      }
      await this.sendQueue.wait();
      if (--this.sendRateLimitState.remaining <= 0) {
-@@ -347,7 +373,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -347,7 +378,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        op: import_v102.GatewayOpcodes.Identify,
        d
      });
 -    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
-+    if (await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      this.#status = 3 /* Ready */;
    }
    async resume(session) {
-@@ -396,7 +424,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -396,7 +430,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        const zlib = await getZlibSync();
        this.inflate.push(import_node_buffer.Buffer.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
        if (this.inflate.err) {
@@ -111,7 +117,7 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
        }
        if (!flush) {
          return null;
-@@ -484,6 +514,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -484,6 +520,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        case import_v102.GatewayOpcodes.Hello: {
          this.emit("hello" /* Hello */);
          this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
@@ -119,7 +125,7 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
          this.heartbeatInterval = (0, import_node_timers.setInterval)(() => void this.heartbeat(), payload.d.heartbeat_interval);
          break;
        }
-@@ -499,8 +530,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -499,8 +536,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        }
      }
    }
@@ -130,7 +136,7 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -516,7 +547,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -516,7 +553,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          break;
        }
        case import_v102.GatewayCloseCodes.UnknownError: {
@@ -140,7 +146,7 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..af228f655a87e2f487cb2fed029b251a
        }
        case import_v102.GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e5dfb7213 100644
+index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..8253de38734a7c2d429de6c71d8404fc3d1be133 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
 @@ -145,6 +145,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -159,12 +165,13 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
    sendQueue = new AsyncQueue2();
    timeouts = new Collection4();
    strategy;
-@@ -209,13 +211,16 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -209,13 +211,17 @@ var WebSocketShard = class extends AsyncEventEmitter {
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    if (await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      if (session?.shardCount === this.strategy.options.shardCount) {
@@ -177,7 +184,7 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -264,16 +269,33 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -264,16 +270,37 @@ var WebSocketShard = class extends AsyncEventEmitter {
      }
    }
    async waitForEvent(event, timeoutDuration) {
@@ -193,15 +200,24 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
 -    if (timeout) {
 -      clearTimeout(timeout);
 -      this.timeouts.delete(event);
-+    try {
-+      await once2(this, event, { signal: controller.signal });
-+      return null;
-+    } catch ({ error }) {
-+      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
-+        throw error;
++    await once2(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        clearTimeout(timeout);
++        this.timeouts.delete(event);
 +      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
 +      if (error instanceof Error && error.name === "AbortError") {
 +        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
 +      }
 +      await this.destroy({
 +        code: 1e3 /* Normal */,
@@ -209,15 +225,10 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
 +        recover: 0 /* Reconnect */
 +      });
 +      return error;
-+    } finally {
-+      if (timeout) {
-+        clearTimeout(timeout);
-+        this.timeouts.delete(event);
-+      }
      }
    }
    async send(payload) {
-@@ -282,7 +304,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -282,7 +309,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
      }
      if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
        this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
@@ -230,18 +241,19 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
      }
      await this.sendQueue.wait();
      if (--this.sendRateLimitState.remaining <= 0) {
-@@ -333,7 +359,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -333,7 +364,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
        op: GatewayOpcodes2.Identify,
        d
      });
 -    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
-+    if (await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      this.#status = 3 /* Ready */;
    }
    async resume(session) {
-@@ -382,7 +410,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -382,7 +416,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
        const zlib = await getZlibSync();
        this.inflate.push(Buffer2.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
        if (this.inflate.err) {
@@ -252,7 +264,7 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
        }
        if (!flush) {
          return null;
-@@ -470,6 +500,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -470,6 +506,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
        case GatewayOpcodes2.Hello: {
          this.emit("hello" /* Hello */);
          this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
@@ -260,7 +272,7 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
          this.heartbeatInterval = setInterval(() => void this.heartbeat(), payload.d.heartbeat_interval);
          break;
        }
-@@ -485,8 +516,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -485,8 +522,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
        }
      }
    }
@@ -271,7 +283,7 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -502,7 +533,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -502,7 +539,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
          break;
        }
        case GatewayCloseCodes.UnknownError: {
@@ -281,7 +293,7 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..6613c05fafd13671f0180cdb63beba3e
        }
        case GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 9b5fda0d436efd4120357c2859690b1242bcc1ef..ada38883a9b4614ad384b810f7570f8861682def 100644
+index 9b5fda0d436efd4120357c2859690b1242bcc1ef..580ab8af04e80d14effd03d972b17c3161353a64 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -10,6 +10,7 @@ declare enum WebSocketShardEvents {
@@ -310,7 +322,20 @@ index 9b5fda0d436efd4120357c2859690b1242bcc1ef..ada38883a9b4614ad384b810f7570f88
      private readonly sendQueue;
      private readonly timeouts;
      private readonly strategy;
-@@ -567,7 +572,7 @@ interface BootstrapOptions {
+@@ -80,6 +85,12 @@ declare class WebSocketShard extends AsyncEventEmitter<WebSocketShardEventsMap>
+     connect(): Promise<void>;
+     destroy(options?: WebSocketShardDestroyOptions): Promise<void>;
+     private waitForEvent;
++    /**
++     * Does special error handling for waitForEvent calls, depending on the current state of the connection lifecycle
++     * (i.e. whether or not the original connect() call has resolved or if the user has an error listener)
++     * Returns null on success, or an error (unknown type) on failure
++     */
++    private bubbleWaitForEventError;
+     send(payload: GatewaySendPayload): Promise<void>;
+     private identify;
+     private resume;
+@@ -567,7 +578,7 @@ interface BootstrapOptions {
      shardCallback?(shard: WebSocketShard): Awaitable<void>;
  }
  /**
@@ -320,7 +345,7 @@ index 9b5fda0d436efd4120357c2859690b1242bcc1ef..ada38883a9b4614ad384b810f7570f88
  declare class WorkerBootstrapper {
      /**
 diff --git a/dist/index.js b/dist/index.js
-index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9962d1909 100644
+index 65343ec427fb98d66055c8cbf9a4bd755f60c000..51d4dd20c34df873da2fbdba8bcc545d199ab906 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -477,6 +477,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -339,12 +364,13 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
    sendQueue = new import_async_queue2.AsyncQueue();
    timeouts = new import_collection4.Collection();
    strategy;
-@@ -553,13 +555,16 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -553,13 +555,17 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    if (await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      if (session?.shardCount === this.strategy.options.shardCount) {
@@ -357,7 +383,7 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -608,16 +613,33 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -608,16 +614,37 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      }
    }
    async waitForEvent(event, timeoutDuration) {
@@ -373,15 +399,24 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
 -    if (timeout) {
 -      (0, import_node_timers.clearTimeout)(timeout);
 -      this.timeouts.delete(event);
-+    try {
-+      await (0, import_node_events2.once)(this, event, { signal: controller.signal });
-+      return null;
-+    } catch ({ error }) {
-+      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
-+        throw error;
++    await (0, import_node_events2.once)(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        (0, import_node_timers.clearTimeout)(timeout);
++        this.timeouts.delete(event);
 +      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
 +      if (error instanceof Error && error.name === "AbortError") {
 +        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
 +      }
 +      await this.destroy({
 +        code: 1e3 /* Normal */,
@@ -389,15 +424,10 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
 +        recover: 0 /* Reconnect */
 +      });
 +      return error;
-+    } finally {
-+      if (timeout) {
-+        (0, import_node_timers.clearTimeout)(timeout);
-+        this.timeouts.delete(event);
-+      }
      }
    }
    async send(payload) {
-@@ -626,7 +648,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -626,7 +653,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      }
      if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
        this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
@@ -410,18 +440,19 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
      }
      await this.sendQueue.wait();
      if (--this.sendRateLimitState.remaining <= 0) {
-@@ -677,7 +703,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -677,7 +708,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        op: import_v102.GatewayOpcodes.Identify,
        d
      });
 -    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
-+    if (await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      this.#status = 3 /* Ready */;
    }
    async resume(session) {
-@@ -726,7 +754,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -726,7 +760,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        const zlib = await getZlibSync();
        this.inflate.push(import_node_buffer.Buffer.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
        if (this.inflate.err) {
@@ -432,7 +463,7 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
        }
        if (!flush) {
          return null;
-@@ -814,6 +844,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -814,6 +850,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        case import_v102.GatewayOpcodes.Hello: {
          this.emit("hello" /* Hello */);
          this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
@@ -440,7 +471,7 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
          this.heartbeatInterval = (0, import_node_timers.setInterval)(() => void this.heartbeat(), payload.d.heartbeat_interval);
          break;
        }
-@@ -829,8 +860,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -829,8 +866,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        }
      }
    }
@@ -451,7 +482,7 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -846,7 +877,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -846,7 +883,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          break;
        }
        case import_v102.GatewayCloseCodes.UnknownError: {
@@ -461,7 +492,7 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..7ccd1a2a1e3a965dc45a4e9c58a040e9
        }
        case import_v102.GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/index.mjs b/dist/index.mjs
-index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879ea6987af6 100644
+index c5595d18155c1a74f85faeb2057e11aaead5e0a8..2fda4cafabd872792164362f0c474c10e340c5ae 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -444,6 +444,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -480,12 +511,13 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
    sendQueue = new AsyncQueue2();
    timeouts = new Collection4();
    strategy;
-@@ -520,13 +522,16 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -520,13 +522,17 @@ var WebSocketShard = class extends AsyncEventEmitter {
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
 -    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
-+    if (await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      if (session?.shardCount === this.strategy.options.shardCount) {
@@ -498,7 +530,7 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -575,16 +580,33 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -575,16 +581,37 @@ var WebSocketShard = class extends AsyncEventEmitter {
      }
    }
    async waitForEvent(event, timeoutDuration) {
@@ -514,15 +546,24 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
 -    if (timeout) {
 -      clearTimeout(timeout);
 -      this.timeouts.delete(event);
-+    try {
-+      await once2(this, event, { signal: controller.signal });
-+      return null;
-+    } catch ({ error }) {
-+      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
-+        throw error;
++    await once2(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        clearTimeout(timeout);
++        this.timeouts.delete(event);
 +      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
 +      if (error instanceof Error && error.name === "AbortError") {
 +        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
 +      }
 +      await this.destroy({
 +        code: 1e3 /* Normal */,
@@ -530,15 +571,10 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
 +        recover: 0 /* Reconnect */
 +      });
 +      return error;
-+    } finally {
-+      if (timeout) {
-+        clearTimeout(timeout);
-+        this.timeouts.delete(event);
-+      }
      }
    }
    async send(payload) {
-@@ -593,7 +615,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -593,7 +620,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
      }
      if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
        this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
@@ -551,18 +587,19 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
      }
      await this.sendQueue.wait();
      if (--this.sendRateLimitState.remaining <= 0) {
-@@ -644,7 +670,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -644,7 +675,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
        op: GatewayOpcodes2.Identify,
        d
      });
 -    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
-+    if (await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout) !== null) {
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
 +      return;
 +    }
      this.#status = 3 /* Ready */;
    }
    async resume(session) {
-@@ -693,7 +721,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -693,7 +727,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
        const zlib = await getZlibSync();
        this.inflate.push(Buffer2.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
        if (this.inflate.err) {
@@ -573,7 +610,7 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
        }
        if (!flush) {
          return null;
-@@ -781,6 +811,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -781,6 +817,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
        case GatewayOpcodes2.Hello: {
          this.emit("hello" /* Hello */);
          this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
@@ -581,7 +618,7 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
          this.heartbeatInterval = setInterval(() => void this.heartbeat(), payload.d.heartbeat_interval);
          break;
        }
-@@ -796,8 +827,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -796,8 +833,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
        }
      }
    }
@@ -592,7 +629,7 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..5a6b8695db682afa1d7e97eb0df3879e
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -813,7 +844,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -813,7 +850,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
          break;
        }
        case GatewayCloseCodes.UnknownError: {
