@@ -1,0 +1,640 @@
+diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
+index adf1facc54244bd760b03a2eb950ceb2d6ba662e..0a078ac7f7f4268f7a7bec3cf6f3f34c6c56e7c2 100644
+--- a/dist/defaultWorker.js
++++ b/dist/defaultWorker.js
+@@ -159,6 +159,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
+   WebSocketShardEvents2["Closed"] = "closed";
+   WebSocketShardEvents2["Debug"] = "debug";
+   WebSocketShardEvents2["Dispatch"] = "dispatch";
++  WebSocketShardEvents2["Error"] = "error";
+   WebSocketShardEvents2["HeartbeatComplete"] = "heartbeat";
+   WebSocketShardEvents2["Hello"] = "hello";
+   WebSocketShardEvents2["Ready"] = "ready";
+@@ -181,6 +182,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+   heartbeatInterval = null;
+   lastHeartbeatAt = -1;
+   session = null;
++  initialConnectResolved = false;
+   sendQueue = new import_async_queue2.AsyncQueue();
+   timeouts = new import_collection4.Collection();
+   strategy;
+@@ -223,13 +225,17 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     this.connection = connection;
+     this.#status = 1 /* Connecting */;
+     this.sendRateLimitState = getInitialSendRateLimitState();
+-    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     if (session?.shardCount === this.strategy.options.shardCount) {
+       this.session = session;
+       await this.resume(session);
+     } else {
+       await this.identify();
+     }
++    this.initialConnectResolved = true;
+   }
+   async destroy(options = {}) {
+     if (this.#status === 0 /* Idle */) {
+@@ -278,16 +284,37 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     }
+   }
+   async waitForEvent(event, timeoutDuration) {
+-    this.debug([`Waiting for event ${event} for ${timeoutDuration ? `${timeoutDuration}ms` : "indefinitely"}`]);
++    this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
+-    await (0, import_node_events2.once)(this, event, { signal: controller.signal });
+-    if (timeout) {
+-      (0, import_node_timers.clearTimeout)(timeout);
+-      this.timeouts.delete(event);
++    await (0, import_node_events2.once)(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        (0, import_node_timers.clearTimeout)(timeout);
++        this.timeouts.delete(event);
++      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
++      if (error instanceof Error && error.name === "AbortError") {
++        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
++      }
++      await this.destroy({
++        code: 1e3 /* Normal */,
++        reason: "Something timed out",
++        recover: 0 /* Reconnect */
++      });
++      return error;
+     }
+   }
+   async send(payload) {
+@@ -296,7 +323,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     }
+     if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
+       this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
+-      await (0, import_node_events2.once)(this, "ready" /* Ready */);
++      try {
++        await (0, import_node_events2.once)(this, "ready" /* Ready */);
++      } catch {
++        return this.send(payload);
++      }
+     }
+     await this.sendQueue.wait();
+     if (--this.sendRateLimitState.remaining <= 0) {
+@@ -347,7 +378,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       op: import_v102.GatewayOpcodes.Identify,
+       d
+     });
+-    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     this.#status = 3 /* Ready */;
+   }
+   async resume(session) {
+@@ -396,7 +430,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       const zlib = await getZlibSync();
+       this.inflate.push(import_node_buffer.Buffer.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
+       if (this.inflate.err) {
+-        this.emit("error", `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`);
++        this.emit("error" /* Error */, {
++          error: `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`
++        });
+       }
+       if (!flush) {
+         return null;
+@@ -484,6 +520,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       case import_v102.GatewayOpcodes.Hello: {
+         this.emit("hello" /* Hello */);
+         this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
++        await this.heartbeat(true);
+         this.heartbeatInterval = (0, import_node_timers.setInterval)(() => void this.heartbeat(), payload.d.heartbeat_interval);
+         break;
+       }
+@@ -499,8 +536,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       }
+     }
+   }
+-  onError(err) {
+-    this.emit("error", err);
++  onError(error) {
++    this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+     this.emit("closed" /* Closed */, { code });
+@@ -516,7 +553,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+         break;
+       }
+       case import_v102.GatewayCloseCodes.UnknownError: {
+-        this.debug([`An unknown error occured: ${code}`]);
++        this.debug([`An unknown error occurred: ${code}`]);
+         return this.destroy({ code, recover: 1 /* Resume */ });
+       }
+       case import_v102.GatewayCloseCodes.UnknownOpcode: {
+diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
+index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..2c03291827eb34ae6840f1d8a4cf123f4fc0e604 100644
+--- a/dist/defaultWorker.mjs
++++ b/dist/defaultWorker.mjs
+@@ -145,6 +145,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
+   WebSocketShardEvents2["Closed"] = "closed";
+   WebSocketShardEvents2["Debug"] = "debug";
+   WebSocketShardEvents2["Dispatch"] = "dispatch";
++  WebSocketShardEvents2["Error"] = "error";
+   WebSocketShardEvents2["HeartbeatComplete"] = "heartbeat";
+   WebSocketShardEvents2["Hello"] = "hello";
+   WebSocketShardEvents2["Ready"] = "ready";
+@@ -167,6 +168,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+   heartbeatInterval = null;
+   lastHeartbeatAt = -1;
+   session = null;
++  initialConnectResolved = false;
+   sendQueue = new AsyncQueue2();
+   timeouts = new Collection4();
+   strategy;
+@@ -209,13 +211,17 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     this.connection = connection;
+     this.#status = 1 /* Connecting */;
+     this.sendRateLimitState = getInitialSendRateLimitState();
+-    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     if (session?.shardCount === this.strategy.options.shardCount) {
+       this.session = session;
+       await this.resume(session);
+     } else {
+       await this.identify();
+     }
++    this.initialConnectResolved = true;
+   }
+   async destroy(options = {}) {
+     if (this.#status === 0 /* Idle */) {
+@@ -264,16 +270,37 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     }
+   }
+   async waitForEvent(event, timeoutDuration) {
+-    this.debug([`Waiting for event ${event} for ${timeoutDuration ? `${timeoutDuration}ms` : "indefinitely"}`]);
++    this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
+-    await once2(this, event, { signal: controller.signal });
+-    if (timeout) {
+-      clearTimeout(timeout);
+-      this.timeouts.delete(event);
++    await once2(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        clearTimeout(timeout);
++        this.timeouts.delete(event);
++      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
++      if (error instanceof Error && error.name === "AbortError") {
++        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
++      }
++      await this.destroy({
++        code: 1e3 /* Normal */,
++        reason: "Something timed out",
++        recover: 0 /* Reconnect */
++      });
++      return error;
+     }
+   }
+   async send(payload) {
+@@ -282,7 +309,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     }
+     if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
+       this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
+-      await once2(this, "ready" /* Ready */);
++      try {
++        await once2(this, "ready" /* Ready */);
++      } catch {
++        return this.send(payload);
++      }
+     }
+     await this.sendQueue.wait();
+     if (--this.sendRateLimitState.remaining <= 0) {
+@@ -333,7 +364,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       op: GatewayOpcodes2.Identify,
+       d
+     });
+-    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     this.#status = 3 /* Ready */;
+   }
+   async resume(session) {
+@@ -382,7 +416,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       const zlib = await getZlibSync();
+       this.inflate.push(Buffer2.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
+       if (this.inflate.err) {
+-        this.emit("error", `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`);
++        this.emit("error" /* Error */, {
++          error: `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`
++        });
+       }
+       if (!flush) {
+         return null;
+@@ -470,6 +506,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       case GatewayOpcodes2.Hello: {
+         this.emit("hello" /* Hello */);
+         this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
++        await this.heartbeat(true);
+         this.heartbeatInterval = setInterval(() => void this.heartbeat(), payload.d.heartbeat_interval);
+         break;
+       }
+@@ -485,8 +522,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       }
+     }
+   }
+-  onError(err) {
+-    this.emit("error", err);
++  onError(error) {
++    this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+     this.emit("closed" /* Closed */, { code });
+@@ -502,7 +539,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+         break;
+       }
+       case GatewayCloseCodes.UnknownError: {
+-        this.debug([`An unknown error occured: ${code}`]);
++        this.debug([`An unknown error occurred: ${code}`]);
+         return this.destroy({ code, recover: 1 /* Resume */ });
+       }
+       case GatewayCloseCodes.UnknownOpcode: {
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 9b5fda0d436efd4120357c2859690b1242bcc1ef..580ab8af04e80d14effd03d972b17c3161353a64 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -10,6 +10,7 @@ declare enum WebSocketShardEvents {
+     Closed = "closed",
+     Debug = "debug",
+     Dispatch = "dispatch",
++    Error = "error",
+     HeartbeatComplete = "heartbeat",
+     Hello = "hello",
+     Ready = "ready",
+@@ -35,6 +36,9 @@ type WebSocketShardEventsMap = {
+     [WebSocketShardEvents.Dispatch]: [payload: {
+         data: GatewayDispatchPayload;
+     }];
++    [WebSocketShardEvents.Error]: [payload: {
++        error: unknown;
++    }];
+     [WebSocketShardEvents.Hello]: [];
+     [WebSocketShardEvents.Ready]: [payload: {
+         data: GatewayReadyDispatchData;
+@@ -71,6 +75,7 @@ declare class WebSocketShard extends AsyncEventEmitter<WebSocketShardEventsMap>
+     private heartbeatInterval;
+     private lastHeartbeatAt;
+     private session;
++    private initialConnectResolved;
+     private readonly sendQueue;
+     private readonly timeouts;
+     private readonly strategy;
+@@ -80,6 +85,12 @@ declare class WebSocketShard extends AsyncEventEmitter<WebSocketShardEventsMap>
+     connect(): Promise<void>;
+     destroy(options?: WebSocketShardDestroyOptions): Promise<void>;
+     private waitForEvent;
++    /**
++     * Does special error handling for waitForEvent calls, depending on the current state of the connection lifecycle
++     * (i.e. whether or not the original connect() call has resolved or if the user has an error listener)
++     * Returns null on success, or an error (unknown type) on failure
++     */
++    private bubbleWaitForEventError;
+     send(payload: GatewaySendPayload): Promise<void>;
+     private identify;
+     private resume;
+@@ -567,7 +578,7 @@ interface BootstrapOptions {
+     shardCallback?(shard: WebSocketShard): Awaitable<void>;
+ }
+ /**
+- * Utility class for bootstraping a worker thread to be used for sharding
++ * Utility class for bootstrapping a worker thread to be used for sharding
+  */
+ declare class WorkerBootstrapper {
+     /**
+diff --git a/dist/index.js b/dist/index.js
+index 65343ec427fb98d66055c8cbf9a4bd755f60c000..70d415487765416fc474f5d8d95710d87caf5776 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -477,6 +477,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
+   WebSocketShardEvents2["Closed"] = "closed";
+   WebSocketShardEvents2["Debug"] = "debug";
+   WebSocketShardEvents2["Dispatch"] = "dispatch";
++  WebSocketShardEvents2["Error"] = "error";
+   WebSocketShardEvents2["HeartbeatComplete"] = "heartbeat";
+   WebSocketShardEvents2["Hello"] = "hello";
+   WebSocketShardEvents2["Ready"] = "ready";
+@@ -511,6 +512,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+   heartbeatInterval = null;
+   lastHeartbeatAt = -1;
+   session = null;
++  initialConnectResolved = false;
+   sendQueue = new import_async_queue2.AsyncQueue();
+   timeouts = new import_collection4.Collection();
+   strategy;
+@@ -553,13 +555,17 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     this.connection = connection;
+     this.#status = 1 /* Connecting */;
+     this.sendRateLimitState = getInitialSendRateLimitState();
+-    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     if (session?.shardCount === this.strategy.options.shardCount) {
+       this.session = session;
+       await this.resume(session);
+     } else {
+       await this.identify();
+     }
++    this.initialConnectResolved = true;
+   }
+   async destroy(options = {}) {
+     if (this.#status === 0 /* Idle */) {
+@@ -608,16 +614,37 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     }
+   }
+   async waitForEvent(event, timeoutDuration) {
+-    this.debug([`Waiting for event ${event} for ${timeoutDuration ? `${timeoutDuration}ms` : "indefinitely"}`]);
++    this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
+-    await (0, import_node_events2.once)(this, event, { signal: controller.signal });
+-    if (timeout) {
+-      (0, import_node_timers.clearTimeout)(timeout);
+-      this.timeouts.delete(event);
++    await (0, import_node_events2.once)(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        (0, import_node_timers.clearTimeout)(timeout);
++        this.timeouts.delete(event);
++      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
++      if (error instanceof Error && error.name === "AbortError") {
++        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
++      }
++      await this.destroy({
++        code: 1e3 /* Normal */,
++        reason: "Something timed out",
++        recover: 0 /* Reconnect */
++      });
++      return error;
+     }
+   }
+   async send(payload) {
+@@ -626,7 +653,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     }
+     if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
+       this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
+-      await (0, import_node_events2.once)(this, "ready" /* Ready */);
++      try {
++        await (0, import_node_events2.once)(this, "ready" /* Ready */);
++      } catch {
++        return this.send(payload);
++      }
+     }
+     await this.sendQueue.wait();
+     if (--this.sendRateLimitState.remaining <= 0) {
+@@ -677,7 +708,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       op: import_v102.GatewayOpcodes.Identify,
+       d
+     });
+-    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     this.#status = 3 /* Ready */;
+   }
+   async resume(session) {
+@@ -726,7 +760,9 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       const zlib = await getZlibSync();
+       this.inflate.push(import_node_buffer.Buffer.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
+       if (this.inflate.err) {
+-        this.emit("error", `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`);
++        this.emit("error" /* Error */, {
++          error: `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`
++        });
+       }
+       if (!flush) {
+         return null;
+@@ -814,6 +850,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       case import_v102.GatewayOpcodes.Hello: {
+         this.emit("hello" /* Hello */);
+         this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
++        await this.heartbeat(true);
+         this.heartbeatInterval = (0, import_node_timers.setInterval)(() => void this.heartbeat(), payload.d.heartbeat_interval);
+         break;
+       }
+@@ -829,8 +866,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       }
+     }
+   }
+-  onError(err) {
+-    this.emit("error", err);
++  onError(error) {
++    this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+     this.emit("closed" /* Closed */, { code });
+@@ -846,7 +883,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+         break;
+       }
+       case import_v102.GatewayCloseCodes.UnknownError: {
+-        this.debug([`An unknown error occured: ${code}`]);
++        this.debug([`An unknown error occurred: ${code}`]);
+         return this.destroy({ code, recover: 1 /* Resume */ });
+       }
+       case import_v102.GatewayCloseCodes.UnknownOpcode: {
+diff --git a/dist/index.mjs b/dist/index.mjs
+index c5595d18155c1a74f85faeb2057e11aaead5e0a8..b853b8a969e3d30bf90e9dc5edee961676024a2b 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -444,6 +444,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
+   WebSocketShardEvents2["Closed"] = "closed";
+   WebSocketShardEvents2["Debug"] = "debug";
+   WebSocketShardEvents2["Dispatch"] = "dispatch";
++  WebSocketShardEvents2["Error"] = "error";
+   WebSocketShardEvents2["HeartbeatComplete"] = "heartbeat";
+   WebSocketShardEvents2["Hello"] = "hello";
+   WebSocketShardEvents2["Ready"] = "ready";
+@@ -478,6 +479,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+   heartbeatInterval = null;
+   lastHeartbeatAt = -1;
+   session = null;
++  initialConnectResolved = false;
+   sendQueue = new AsyncQueue2();
+   timeouts = new Collection4();
+   strategy;
+@@ -520,13 +522,17 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     this.connection = connection;
+     this.#status = 1 /* Connecting */;
+     this.sendRateLimitState = getInitialSendRateLimitState();
+-    await this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    const waitPromise = this.waitForEvent("hello" /* Hello */, this.strategy.options.helloTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     if (session?.shardCount === this.strategy.options.shardCount) {
+       this.session = session;
+       await this.resume(session);
+     } else {
+       await this.identify();
+     }
++    this.initialConnectResolved = true;
+   }
+   async destroy(options = {}) {
+     if (this.#status === 0 /* Idle */) {
+@@ -575,16 +581,37 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     }
+   }
+   async waitForEvent(event, timeoutDuration) {
+-    this.debug([`Waiting for event ${event} for ${timeoutDuration ? `${timeoutDuration}ms` : "indefinitely"}`]);
++    this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
+-    await once2(this, event, { signal: controller.signal });
+-    if (timeout) {
+-      clearTimeout(timeout);
+-      this.timeouts.delete(event);
++    await once2(this, event, { signal: controller.signal }).finally(() => {
++      if (timeout) {
++        clearTimeout(timeout);
++        this.timeouts.delete(event);
++      }
++    });
++  }
++  async bubbleWaitForEventError(promise) {
++    try {
++      await promise;
++      return null;
++    } catch (error) {
++      if (error instanceof Error && error.name === "AbortError") {
++        this.emit("error" /* Error */, { error });
++      }
++      error = error.error;
++      if (this.listenerCount("error" /* Error */) === 0 || !this.initialConnectResolved) {
++        throw error;
++      }
++      await this.destroy({
++        code: 1e3 /* Normal */,
++        reason: "Something timed out",
++        recover: 0 /* Reconnect */
++      });
++      return error;
+     }
+   }
+   async send(payload) {
+@@ -593,7 +620,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     }
+     if (this.#status !== 3 /* Ready */ && !ImportantGatewayOpcodes.has(payload.op)) {
+       this.debug(["Tried to send a non-crucial payload before the shard was ready, waiting"]);
+-      await once2(this, "ready" /* Ready */);
++      try {
++        await once2(this, "ready" /* Ready */);
++      } catch {
++        return this.send(payload);
++      }
+     }
+     await this.sendQueue.wait();
+     if (--this.sendRateLimitState.remaining <= 0) {
+@@ -644,7 +675,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       op: GatewayOpcodes2.Identify,
+       d
+     });
+-    await this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    const waitPromise = this.waitForEvent("ready" /* Ready */, this.strategy.options.readyTimeout);
++    if (await this.bubbleWaitForEventError(waitPromise) !== null) {
++      return;
++    }
+     this.#status = 3 /* Ready */;
+   }
+   async resume(session) {
+@@ -693,7 +727,9 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       const zlib = await getZlibSync();
+       this.inflate.push(Buffer2.from(decompressable), flush ? zlib.Z_SYNC_FLUSH : zlib.Z_NO_FLUSH);
+       if (this.inflate.err) {
+-        this.emit("error", `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`);
++        this.emit("error" /* Error */, {
++          error: `${this.inflate.err}${this.inflate.msg ? `: ${this.inflate.msg}` : ""}`
++        });
+       }
+       if (!flush) {
+         return null;
+@@ -781,6 +817,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       case GatewayOpcodes2.Hello: {
+         this.emit("hello" /* Hello */);
+         this.debug([`Starting to heartbeat every ${payload.d.heartbeat_interval}ms`]);
++        await this.heartbeat(true);
+         this.heartbeatInterval = setInterval(() => void this.heartbeat(), payload.d.heartbeat_interval);
+         break;
+       }
+@@ -796,8 +833,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       }
+     }
+   }
+-  onError(err) {
+-    this.emit("error", err);
++  onError(error) {
++    this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+     this.emit("closed" /* Closed */, { code });
+@@ -813,7 +850,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+         break;
+       }
+       case GatewayCloseCodes.UnknownError: {
+-        this.debug([`An unknown error occured: ${code}`]);
++        this.debug([`An unknown error occurred: ${code}`]);
+         return this.destroy({ code, recover: 1 /* Resume */ });
+       }
+       case GatewayCloseCodes.UnknownOpcode: {
