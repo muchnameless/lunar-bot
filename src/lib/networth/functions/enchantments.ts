@@ -114,6 +114,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Smite:
 		case Enchantment.Smoldering:
 		case Enchantment.SpikedHook:
+		case Enchantment.Sunder:
 		case Enchantment.Thunderbolt:
 		case Enchantment.Thunderlord:
 		case Enchantment.TitanKiller:

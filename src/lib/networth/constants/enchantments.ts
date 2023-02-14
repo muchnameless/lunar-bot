@@ -105,6 +105,7 @@ export const enum Enchantment {
 	SpikedHook = 'spiked_hook',
 	StrongMana = 'strong_mana',
 	SugarRush = 'sugar_rush',
+	Sunder = 'sunder',
 	Syphon = 'syphon',
 	Tabasco = 'tabasco',
 	Telekinesis = 'telekinesis', // removed
