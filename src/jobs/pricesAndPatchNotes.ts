@@ -187,12 +187,12 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 	await Promise.all(
 		bazaarItems.map(async (data) => {
 			const price =
-				data.quick_status.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
+				data.quick_status?.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
 					? data.quick_status.buyPrice
 					: getBuyPrice(data.buy_summary);
 
 			// ignore items which are not sold
-			if (price === 0) return undefined;
+			if (price === 0) return;
 
 			// enchantments
 			if (data.product_id.startsWith('ENCHANTMENT_')) {
@@ -203,7 +203,7 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 				);
 
 				binAuctions.ensure(itemId, () => []).push(price / count);
-				return undefined;
+				return;
 			}
 
 			// other items
