@@ -1241,7 +1241,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			void this.hypixelGuild?.unmute(this, member.communicationDisabledUntilTimestamp! - Date.now() + seconds(1));
 		}
 
-		// abort if the member is missing the mandatory role (if existant)
+		// abort if the member is missing the mandatory role (if existent)
 		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.MANDATORY_ROLE_ID;
 
 		if (MANDATORY_ROLE_ID && !member.roles.cache.has(MANDATORY_ROLE_ID)) {

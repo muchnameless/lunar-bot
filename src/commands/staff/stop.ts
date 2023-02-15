@@ -7,7 +7,7 @@ import { InteractionUtil } from '#utils';
 export default class StopCommand extends ApplicationCommand {
 	public constructor(context: CommandContext) {
 		super(context, {
-			slash: new SlashCommandBuilder().setDescription('stop the bot. It should restart immediatly'),
+			slash: new SlashCommandBuilder().setDescription('stop the bot. It should restart immediately'),
 			cooldown: 0,
 		});
 	}
