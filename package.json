@@ -57,7 +57,7 @@
 	"dependencies": {
 		"@discordjs/rest": "1.5.1-dev.1676549080-0e4224b.0",
 		"@discordjs/ws": "0.6.1-dev.1676549057-0e4224b.0",
-		"@napi-rs/canvas": "^0.1.34",
+		"@napi-rs/canvas": "^0.1.35",
 		"@sapphire/async-queue": "1.5.1-next.73db204.0",
 		"@sapphire/discord-utilities": "3.0.1-next.73db204.0",
 		"@sapphire/node-utilities": "1.0.1-next.73db204.0",
