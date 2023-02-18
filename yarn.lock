@@ -550,9 +550,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/ws@patch:@discordjs/ws@0.7.0-dev.1676721861-c6f9c50.0#./.yarn/patches/@discordjs-ws-npm-0.7.0-dev.1676678989-c6f9c50.0-778cce5c09.patch::locator=lunar-bot%40workspace%3A.":
+"@discordjs/ws@patch:@discordjs/ws@npm%3A0.7.0-dev.1676721861-c6f9c50.0#./.yarn/patches/@discordjs-ws-npm-0.7.0-dev.1676721861-c6f9c50.0-adb1bdf3b1.patch::locator=lunar-bot%40workspace%3A.":
   version: 0.7.0-dev.1676721861-c6f9c50.0
-  resolution: "@discordjs/ws@patch:@discordjs/ws@npm%3A0.7.0-dev.1676721861-c6f9c50.0#./.yarn/patches/@discordjs-ws-npm-0.7.0-dev.1676678989-c6f9c50.0-778cce5c09.patch::version=0.7.0-dev.1676721861-c6f9c50.0&hash=6d18ca&locator=lunar-bot%40workspace%3A."
+  resolution: "@discordjs/ws@patch:@discordjs/ws@npm%3A0.7.0-dev.1676721861-c6f9c50.0#./.yarn/patches/@discordjs-ws-npm-0.7.0-dev.1676721861-c6f9c50.0-adb1bdf3b1.patch::version=0.7.0-dev.1676721861-c6f9c50.0&hash=dce38e&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@discordjs/collection": ^1.3.0
     "@discordjs/rest": ^1.5.0
@@ -563,7 +563,7 @@ __metadata:
     discord-api-types: ^0.37.35
     tslib: ^2.4.1
     ws: ^8.12.0
-  checksum: c7b1635f65d93e30a999022528260cad18e1dc14218ac76a21a4d6c76e64f707846dfd811e9f42ad07f56f7ac846545c8ee09595384b5063cf8ef996d7cf50d5
+  checksum: 9eedfb3dd84e494475c6d80729a1a1ca27a1dadf911784feeceb09c11ea8b6c7e5594a6d79354f6cb44e1fe2e46b640f4d14b011d5779b360d42cec9f719f375
   languageName: node
   linkType: hard
 
@@ -1504,9 +1504,9 @@ __metadata:
   linkType: hard
 
 "@vladfrangu/async_event_emitter@npm:^2.1.3":
-  version: 2.1.3
-  resolution: "@vladfrangu/async_event_emitter@npm:2.1.3"
-  checksum: 1541b281550b39446f86ea9d4622be0d74c4d3924b42550db11164b409a82010f396b588a87ffe27f72a96a7f92af0190f4c3b57861249a4038515e0d474b3c6
+  version: 2.1.4
+  resolution: "@vladfrangu/async_event_emitter@npm:2.1.4"
+  checksum: 604d228a4fa46c0686d4377c2ca63035aa266382133f351f098d85782df4e451ebba2c528a7d54aa955c7fdb824a642a7ec63d5a85cf46f6cbaea46ea56a0959
   languageName: node
   linkType: hard
 
