@@ -1,5 +1,5 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index adf1facc54244bd760b03a2eb950ceb2d6ba662e..0a078ac7f7f4268f7a7bec3cf6f3f34c6c56e7c2 100644
+index 08c214043112e68af4484d17f9b44cab1c7d94ad..cdc31bd64d62116cb14be6b1e25f0d8e145a1ebb 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
 @@ -159,6 +159,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -136,17 +136,8 @@ index adf1facc54244bd760b03a2eb950ceb2d6ba662e..0a078ac7f7f4268f7a7bec3cf6f3f34c
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -516,7 +553,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-         break;
-       }
-       case import_v102.GatewayCloseCodes.UnknownError: {
--        this.debug([`An unknown error occured: ${code}`]);
-+        this.debug([`An unknown error occurred: ${code}`]);
-         return this.destroy({ code, recover: 1 /* Resume */ });
-       }
-       case import_v102.GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..2c03291827eb34ae6840f1d8a4cf123f4fc0e604 100644
+index c57ad670c0593b83288342b4eb158bdaf0022206..9d2946987ab7ca4ee35ea73fc558b5ffc8dc6b67 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
 @@ -145,6 +145,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -283,17 +274,8 @@ index ea5332108a1a1c6439f3bc394b7b5c24b97364a1..2c03291827eb34ae6840f1d8a4cf123f
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -502,7 +539,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-         break;
-       }
-       case GatewayCloseCodes.UnknownError: {
--        this.debug([`An unknown error occured: ${code}`]);
-+        this.debug([`An unknown error occurred: ${code}`]);
-         return this.destroy({ code, recover: 1 /* Resume */ });
-       }
-       case GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 9b5fda0d436efd4120357c2859690b1242bcc1ef..580ab8af04e80d14effd03d972b17c3161353a64 100644
+index cbf86e2adcc5513f28bee898fa495690e45b7993..580ab8af04e80d14effd03d972b17c3161353a64 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -10,6 +10,7 @@ declare enum WebSocketShardEvents {
@@ -335,17 +317,8 @@ index 9b5fda0d436efd4120357c2859690b1242bcc1ef..580ab8af04e80d14effd03d972b17c31
      send(payload: GatewaySendPayload): Promise<void>;
      private identify;
      private resume;
-@@ -567,7 +578,7 @@ interface BootstrapOptions {
-     shardCallback?(shard: WebSocketShard): Awaitable<void>;
- }
- /**
-- * Utility class for bootstraping a worker thread to be used for sharding
-+ * Utility class for bootstrapping a worker thread to be used for sharding
-  */
- declare class WorkerBootstrapper {
-     /**
 diff --git a/dist/index.js b/dist/index.js
-index 65343ec427fb98d66055c8cbf9a4bd755f60c000..70d415487765416fc474f5d8d95710d87caf5776 100644
+index c951c77b392654e2ef37c56f6689d71b6457f979..c927ff24f3ae670122aa002d2cb8d5ef31667232 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -477,6 +477,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -482,17 +455,8 @@ index 65343ec427fb98d66055c8cbf9a4bd755f60c000..70d415487765416fc474f5d8d95710d8
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -846,7 +883,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-         break;
-       }
-       case import_v102.GatewayCloseCodes.UnknownError: {
--        this.debug([`An unknown error occured: ${code}`]);
-+        this.debug([`An unknown error occurred: ${code}`]);
-         return this.destroy({ code, recover: 1 /* Resume */ });
-       }
-       case import_v102.GatewayCloseCodes.UnknownOpcode: {
 diff --git a/dist/index.mjs b/dist/index.mjs
-index c5595d18155c1a74f85faeb2057e11aaead5e0a8..b853b8a969e3d30bf90e9dc5edee961676024a2b 100644
+index ef81570f901e8a65d24b7d239bcbf7ce24d55883..65e667f5b96f457fd731328b17123d7266f3fcd1 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -444,6 +444,7 @@ var WebSocketShardEvents = /* @__PURE__ */ ((WebSocketShardEvents2) => {
@@ -629,12 +593,3 @@ index c5595d18155c1a74f85faeb2057e11aaead5e0a8..b853b8a969e3d30bf90e9dc5edee9616
    }
    async onClose(code) {
      this.emit("closed" /* Closed */, { code });
-@@ -813,7 +850,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-         break;
-       }
-       case GatewayCloseCodes.UnknownError: {
--        this.debug([`An unknown error occured: ${code}`]);
-+        this.debug([`An unknown error occurred: ${code}`]);
-         return this.destroy({ code, recover: 1 /* Resume */ });
-       }
-       case GatewayCloseCodes.UnknownOpcode: {
