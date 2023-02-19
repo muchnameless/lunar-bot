@@ -5201,7 +5201,7 @@ __metadata:
     lint-staged: ^13.1.2
     luxon: ^3.2.1
     minecraft-data: ^3.28.0
-    minecraft-protocol: 1.40.3
+    minecraft-protocol: 1.41.0
     ms: 3.0.0-canary.1
     pg: ^8.9.0
     pg-hstore: ^2.3.4
@@ -5369,9 +5369,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:1.40.3":
-  version: 1.40.3
-  resolution: "minecraft-protocol@npm:1.40.3"
+"minecraft-protocol@npm:1.41.0":
+  version: 1.41.0
+  resolution: "minecraft-protocol@npm:1.41.0"
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -5391,13 +5391,13 @@ __metadata:
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: ea532e0caa0df561170b0bff2e350aedd86c3ba457ccbe9b76463cfa8110c259f2c2305eede214d3408dde75aa3a406bc9863949343c40ee1a092b1af8058b4d
+  checksum: 78c77c65a533c48483a972a6356935ed36cf488e2d5458274710d815f53ab428cd8700c86d9f75f18a90a0eef8dc5240cc78f70ee0fc9eb31344fb68f0c08e7d
   languageName: node
   linkType: hard
 
-"minecraft-protocol@patch:minecraft-protocol@npm:1.40.3#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
-  version: 1.40.3
-  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.40.3#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.40.3&hash=85fe55&locator=lunar-bot%40workspace%3A."
+"minecraft-protocol@patch:minecraft-protocol@npm:1.41.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.41.0
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.41.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.41.0&hash=85fe55&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -5417,7 +5417,7 @@ __metadata:
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 16014ea26301cba96568a04b9179b2ae5fc08b429e12756103e8b146e041cafb81f6037eab3f0b6e2acf5f301c84f2fdf94ae6c62ce434b91c1d083c452ac24f
+  checksum: a8699c262b23acaed0584e24257d3b76f7fa053033e5a2b04c7d69f5c4774e6f88b6fbcf579cb626579dc5eadf73525a255af45e468673565865a072aaf501bb
   languageName: node
   linkType: hard
 
