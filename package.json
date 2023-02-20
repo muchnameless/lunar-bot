@@ -42,7 +42,7 @@
 		"@discordjs/formatters": "0.1.1-dev.1676894680-9681f34.0",
 		"@discordjs/rest": "patch:@discordjs/rest@1.5.1-dev.1676894678-9681f34.0#./.yarn/patches/@discordjs-rest-npm-1.5.1-dev.1675990786-0e4224b.0-bfbe7a15fd.patch",
 		"@discordjs/util": "0.1.1-dev.1676894690-9681f34.0",
-		"@discordjs/ws": "patch:@discordjs/ws@0.6.1-dev.1676894702-9681f34.0#./.yarn/patches/@discordjs-ws-npm-0.7.0-dev.1676721861-c6f9c50.0-adb1bdf3b1.patch",
+		"@discordjs/ws": "patch:@discordjs/ws@npm%3A0.6.1-dev.1676894702-9681f34.0#./.yarn/patches/@discordjs-ws-npm-0.6.1-dev.1676894702-9681f34.0-f16216e2b4.patch",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.bbba530.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.73db204.0-6002a134c8.patch",
 		"@sapphire/ratelimits": "2.4.6-next.bbba530.0",
 		"@sapphire/shapeshift": "3.8.2-next.26bd59b.0",
