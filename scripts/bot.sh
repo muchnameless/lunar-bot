@@ -19,10 +19,10 @@ else
 
 			echo " --- latest"
 			echo " v"
-			if (running == current) then
-				git log --oneline -1
+			if ($running == $current) then
+				git --no-pager log --oneline -1
 			else
-				git log --oneline $running~1..$current
+				git --no-pager log --oneline $running~1..$current
 			endif
 			echo " ^"
 			echo " --- running"
