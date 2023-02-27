@@ -428,7 +428,7 @@ async function getLeaderboardMessageOptions(
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 
 	if (!isReloadButton) {
-		const cachedEmbeds: APIEmbed[] | null = JSON.parse((await redis.get(CACHE_KEY))!);
+		const cachedEmbeds = JSON.parse((await redis.get(CACHE_KEY))!) as APIEmbed[] | null;
 
 		if (cachedEmbeds) {
 			return {

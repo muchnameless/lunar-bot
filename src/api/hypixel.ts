@@ -7,8 +7,8 @@ import { logger } from '#logger';
 
 export const hypixel = new Client(env.HYPIXEL_KEY, {
 	cache: {
-		async get<T>(key: string): Promise<(DefaultMeta & T) | null> {
-			return JSON.parse((await redis.get(`${RedisKey.Hypixel}:${key}`))!);
+		async get<T>(key: string) {
+			return JSON.parse((await redis.get(`${RedisKey.Hypixel}:${key}`))!) as (DefaultMeta & T) | null;
 		},
 		async set(key, value) {
 			let ttl: number;

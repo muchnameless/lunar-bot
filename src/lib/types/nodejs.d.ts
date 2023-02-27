@@ -20,60 +20,45 @@ declare namespace NodeJS {
 
 interface Array<T> {
 	/**
-	 * Returns the value of the last element in the array where predicate is true, and undefined
-	 * otherwise.
+	 * Determines whether an array includes a certain element, returning true or false as appropriate.
 	 *
-	 * @param predicate - find calls predicate once for each element of the array, in ascending
-	 * order, until it finds one where predicate returns true. If such an element is found, find
-	 * immediately returns that element value. Otherwise, find returns undefined.
-	 * @param thisArg - If provided, it will be used as the this value for each invocation of
-	 * predicate. If it is not provided, undefined is used instead.
+	 * @param searchElement The element to search for.
+	 * @param fromIndex The position in this array at which to begin searching for searchElement.
 	 */
-	findLast<S extends T>(
-		predicate: (this: void, value: T, index: number, obj: T[]) => value is S,
-		thisArg?: any,
-	): S | undefined;
-	findLast(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): T | undefined;
-
-	/**
-	 * Returns the index of the last element in the array where predicate is true, and -1
-	 * otherwise.
-	 *
-	 * @param predicate - find calls predicate once for each element of the array, in ascending
-	 * order, until it finds one where predicate returns true. If such an element is found,
-	 * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-	 * @param thisArg - If provided, it will be used as the this value for each invocation of
-	 * predicate. If it is not provided, undefined is used instead.
-	 */
-	findLastIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number;
+	includes(searchElement: unknown, fromIndex?: number): boolean;
 }
 
 interface ReadonlyArray<T> {
 	/**
-	 * Returns the value of the last element in the array where predicate is true, and undefined
-	 * otherwise.
+	 * Determines whether an array includes a certain element, returning true or false as appropriate.
 	 *
-	 * @param predicate - find calls predicate once for each element of the array, in ascending
-	 * order, until it finds one where predicate returns true. If such an element is found, find
-	 * immediately returns that element value. Otherwise, find returns undefined.
-	 * @param thisArg - If provided, it will be used as the this value for each invocation of
-	 * predicate. If it is not provided, undefined is used instead.
+	 * @param searchElement The element to search for.
+	 * @param fromIndex The position in this array at which to begin searching for searchElement.
 	 */
-	findLast<S extends T>(
-		predicate: (this: void, value: T, index: number, obj: readonly T[]) => value is S,
-		thisArg?: any,
-	): S | undefined;
-	findLast(predicate: (value: T, index: number, obj: readonly T[]) => unknown, thisArg?: any): T | undefined;
+	includes(searchElement: unknown, fromIndex?: number): boolean;
+}
 
+interface Set<T> {
 	/**
-	 * Returns the index of the last element in the array where predicate is true, and -1
-	 * otherwise.
-	 *
-	 * @param predicate - find calls predicate once for each element of the array, in ascending
-	 * order, until it finds one where predicate returns true. If such an element is found,
-	 * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-	 * @param thisArg - If provided, it will be used as the this value for each invocation of
-	 * predicate. If it is not provided, undefined is used instead.
+	 * @returns a boolean indicating whether an element with the specified value exists in the Set or not.
 	 */
-	findLastIndex(predicate: (value: T, index: number, obj: readonly T[]) => unknown, thisArg?: any): number;
+	has(value: unknown): boolean;
+}
+
+interface ReadonlySet<T> {
+	/**
+	 * @returns a boolean indicating whether an element with the specified value exists in the Set or not.
+	 */
+	has(value: unknown): boolean;
+}
+
+interface JSON {
+	/**
+	 * Converts a JavaScript Object Notation (JSON) string into an object.
+	 *
+	 * @param text A valid JSON string.
+	 * @param reviver A function that transforms the results. This function is called for each member of the object.
+	 * If a member contains nested objects, the nested objects are transformed before the parent object is.
+	 */
+	parse(text: string, reviver?: (this: any, key: string, value: any) => any): unknown;
 }

@@ -479,7 +479,7 @@ export class HypixelMessage {
 			time,
 		});
 
-		if (!this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase() as string)) {
+		if (!this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase())) {
 			throw errorMessage;
 		}
 	}

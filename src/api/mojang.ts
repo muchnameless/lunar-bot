@@ -5,8 +5,8 @@ import { MojangClient, type MojangResult } from '#structures/MojangClient.js';
 
 export const mojang = new MojangClient({
 	cache: {
-		async get(key): Promise<MojangResult | null> {
-			return JSON.parse((await redis.get(`${RedisKey.Mojang}:${key}`))!);
+		async get(key) {
+			return JSON.parse((await redis.get(`${RedisKey.Mojang}:${key}`))!) as MojangResult | null;
 		},
 		async set(key, value, isError = false) {
 			let ttl = minutes(5);

@@ -160,7 +160,7 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 	`;
 
 	if (lastUpdatedEntry) {
-		const lastUpdatedEntryParsed: number = JSON.parse(lastUpdatedEntry.value);
+		const lastUpdatedEntryParsed = JSON.parse(lastUpdatedEntry.value) as number;
 
 		let retries = 0;
 
@@ -253,7 +253,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 	`;
 
 	if (lastUpdatedEntry) {
-		const lastUpdatedEntryParsed: number = JSON.parse(lastUpdatedEntry.value);
+		const lastUpdatedEntryParsed = JSON.parse(lastUpdatedEntry.value) as number;
 
 		let retries = 0;
 
@@ -672,13 +672,13 @@ async function fetchForumEntries(ac: AbortController, forum: string) {
 /**
  * updates skyblock patchnotes from hypixel forum rss feeds
  */
-let lastGuid: number = JSON.parse(
+let lastGuid = JSON.parse(
 	(
 		await sql<[{ value: string }]>`
 			SELECT value FROM "Config" WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
 		`
-	)[0]?.value,
-);
+	)[0]?.value ?? 0,
+) as number;
 
 async function updatePatchNotes(ac: AbortController) {
 	// fetch RSS feeds

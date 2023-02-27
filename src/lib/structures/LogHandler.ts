@@ -267,7 +267,7 @@ export class LogHandler {
 				const FILE_PATH = new URL(name, this.logURL);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this._log(JSON.parse(FILE_CONTENT));
+				await this._log(JSON.parse(FILE_CONTENT) as APIEmbed[]);
 				await rm(FILE_PATH);
 			}
 

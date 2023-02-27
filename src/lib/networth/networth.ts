@@ -350,8 +350,8 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		extraAttributes.rarity_upgrades! > 0 &&
 		!extraAttributes.item_tier &&
 		(extraAttributes.enchantments ||
-			ALLOWED_RECOMB_CATEGORIES.has(skyblockItem?.category as any) ||
-			ALLOWED_RECOMB_ITEMS.has(itemId as any))
+			ALLOWED_RECOMB_CATEGORIES.has(skyblockItem?.category) ||
+			ALLOWED_RECOMB_ITEMS.has(itemId))
 	) {
 		price +=
 			getPrice(ItemId.Recombobulator) *
@@ -529,7 +529,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 
 	// candy + skins
 	if (pet.candyUsed) {
-		if (!NON_REDUCED_PETS.has(pet.type as ItemId)) {
+		if (!NON_REDUCED_PETS.has(pet.type)) {
 			price = Math.max(price * PriceModifier.PetWithCandy, price - (level >= 100 ? 5_000_000 : 2_500_000));
 		}
 

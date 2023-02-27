@@ -135,7 +135,7 @@ export const getReforgeStone = (modifier: string, itemId: string) => {
 		case 'undead':
 			return ItemId.PremiumFlesh;
 		case 'warped':
-			if ([ItemId.AspectOfTheEnd, ItemId.AspectOfTheVoid].includes(itemId as any)) {
+			if ([ItemId.AspectOfTheEnd, ItemId.AspectOfTheVoid].includes(itemId)) {
 				return ItemId.WarpedStone; // sword reforge stone
 			}
 

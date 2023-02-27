@@ -7,7 +7,7 @@ import { ImgurClient } from '#structures/ImgurClient.js';
 export const imgur = new ImgurClient(env.IMGUR_CLIENT_ID, {
 	cache: {
 		async get(key) {
-			return JSON.parse((await redis.get(`${RedisKey.Imgur}:${key}`))!) as unknown;
+			return JSON.parse((await redis.get(`${RedisKey.Imgur}:${key}`))!);
 		},
 		async set(key, value) {
 			return redis.psetex(`${RedisKey.Imgur}:${key}`, days(1), JSON.stringify(value));

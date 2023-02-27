@@ -324,7 +324,7 @@ export class MinecraftChatManager extends ChatManager {
 					max: 1,
 				});
 
-				return (JSON.parse(result).server as string | undefined) ?? null;
+				return (JSON.parse(result) as { server?: string }).server ?? null;
 			} catch (error) {
 				logger.error({ err: error, ...this.logInfo }, '[GET SERVER]');
 				return null;

@@ -154,7 +154,7 @@ export const XP_AND_DATA_TYPES = [
 ] as const satisfies readonly string[];
 
 const XP_TYPES_SET = new Set(XP_TYPES);
-export const isXPType = (type: unknown): type is XPTypes => XP_TYPES_SET.has(type as XPTypes);
+export const isXPType = (type: unknown): type is XPTypes => XP_TYPES_SET.has(type);
 
 export type XPTypes = ArrayElementType<typeof XP_TYPES>;
 export type XPAndDataTypes = ArrayElementType<typeof XP_AND_DATA_TYPES>;

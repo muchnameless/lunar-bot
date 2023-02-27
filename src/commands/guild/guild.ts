@@ -300,7 +300,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	public async getMuteTarget(targetInput: string, interaction?: ChatInputCommandInteraction<'cachedOrDM'>) {
-		if (this.GUILD_IDENTIFIER.has(targetInput as any)) {
+		if (this.GUILD_IDENTIFIER.has(targetInput)) {
 			return 'everyone';
 		}
 
@@ -980,7 +980,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 				let target: Player | string | null;
 
-				if (this.GUILD_IDENTIFIER.has(TARGET_INPUT as any)) {
+				if (this.GUILD_IDENTIFIER.has(TARGET_INPUT)) {
 					target = 'everyone';
 				} else {
 					target = InteractionUtil.getPlayer(interaction);
