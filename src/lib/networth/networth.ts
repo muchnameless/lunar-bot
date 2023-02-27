@@ -353,7 +353,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			ALLOWED_RECOMB_CATEGORIES.has(skyblockItem?.category as any) ||
 			ALLOWED_RECOMB_ITEMS.has(itemId as any))
 	) {
-		price += getPrice(ItemId.Recombobulator) * PriceModifier.Recomb;
+		price +=
+			getPrice(ItemId.Recombobulator) *
+			(itemId === ItemId.Bonemerang ? PriceModifier.RecombBonemerang : PriceModifier.Recomb);
 	}
 
 	// gemstones -- https://github.com/HypixelDev/PublicAPI/discussions/549

@@ -35,6 +35,7 @@ export const enum PriceModifier {
 	PetWithCandy = 0.65,
 	PrestigeItem = 1,
 	Recomb = 0.8,
+	RecombBonemerang = 0.4,
 	Reforge = 1,
 	Rune = 0.6,
 	ShensAuction = 0.85,
