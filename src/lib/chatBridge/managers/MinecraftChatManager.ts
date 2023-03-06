@@ -211,6 +211,7 @@ export interface ReadyMinecraftChatManager extends MinecraftChatManager {
 export const enum MinecraftChatManagerState {
 	Ready,
 	Connecting,
+	Reconnecting,
 	Errored,
 }
 
@@ -477,6 +478,8 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param loginDelay delay in ms
 	 */
 	public async reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
+		if ([MinecraftChatManagerState.Reconnecting, MinecraftChatManagerState.Errored].includes(this.state)) return this;
+
 		this.disconnect();
 
 		logger.warn({ ...this.logInfo, loginDelay }, '[CHATBRIDGE RECONNECT]: attempting reconnect after loginDelay');
@@ -495,7 +498,7 @@ export class MinecraftChatManager extends ChatManager {
 	public disconnect(errored = false) {
 		this.clearAbortLoginTimeout();
 
-		this.state = errored ? MinecraftChatManagerState.Errored : MinecraftChatManagerState.Connecting;
+		this.state = errored ? MinecraftChatManagerState.Errored : MinecraftChatManagerState.Reconnecting;
 
 		try {
 			this.bot?.end('disconnect.quitting');
