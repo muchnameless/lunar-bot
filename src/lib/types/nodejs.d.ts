@@ -25,7 +25,8 @@ interface Array<T> {
 	 * @param searchElement The element to search for.
 	 * @param fromIndex The position in this array at which to begin searching for searchElement.
 	 */
-	includes(searchElement: unknown, fromIndex?: number): boolean;
+	includes(searchElement: unknown, fromIndex?: 0): searchElement is T;
+	includes(searchElement: unknown, fromIndex: number): boolean;
 }
 
 interface ReadonlyArray<T> {
@@ -35,21 +36,22 @@ interface ReadonlyArray<T> {
 	 * @param searchElement The element to search for.
 	 * @param fromIndex The position in this array at which to begin searching for searchElement.
 	 */
-	includes(searchElement: unknown, fromIndex?: number): boolean;
+	includes(searchElement: unknown, fromIndex?: 0): searchElement is T;
+	includes(searchElement: unknown, fromIndex: number): boolean;
 }
 
 interface Set<T> {
 	/**
 	 * @returns a boolean indicating whether an element with the specified value exists in the Set or not.
 	 */
-	has(value: unknown): boolean;
+	has(value: unknown): value is T;
 }
 
 interface ReadonlySet<T> {
 	/**
 	 * @returns a boolean indicating whether an element with the specified value exists in the Set or not.
 	 */
-	has(value: unknown): boolean;
+	has(value: unknown): value is T;
 }
 
 interface JSON {
@@ -61,4 +63,8 @@ interface JSON {
 	 * If a member contains nested objects, the nested objects are transformed before the parent object is.
 	 */
 	parse(text: string, reviver?: (this: any, key: string, value: any) => any): unknown;
+}
+
+interface ArrayConstructor {
+	isArray(arg: any): arg is unknown[];
 }

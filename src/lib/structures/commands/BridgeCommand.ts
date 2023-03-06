@@ -59,7 +59,7 @@ export class BridgeCommand extends BaseCommand {
 	 * @param value
 	 */
 	public set usage(value: string | (() => string) | null) {
-		this._usage = typeof value === 'function' || value?.length ? value : null;
+		this._usage = typeof value === 'function' || value ? value : null;
 	}
 
 	/**
@@ -75,7 +75,7 @@ export class BridgeCommand extends BaseCommand {
 	 * whether the command is part of a visible category
 	 */
 	public get visible() {
-		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category!);
+		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category);
 	}
 
 	/**

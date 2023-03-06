@@ -266,7 +266,7 @@ export class ChatBridgeManager {
 	 * @param interaction
 	 */
 	public handleInteractionCreate(interaction: RepliableInteraction) {
-		if (!this.channelIds.has(interaction.channelId!)) return;
+		if (!this.channelIds.has(interaction.channelId)) return;
 
 		if (interaction.isCommand()) this.ownInteractionCache.add(interaction);
 

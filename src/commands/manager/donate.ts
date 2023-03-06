@@ -69,13 +69,13 @@ export default class DonateCommand extends ApplicationCommand {
 				.setTitle('Guild Donations')
 				.addFields({
 					name: `/ah ${collector}`,
-					value: codeBlock(`${player}: ${formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
+					value: codeBlock(`${player}: ${formatNumber(amount)} (manually)${notes ? `\n(${notes})` : ''}`),
 				}),
 		);
 
 		return InteractionUtil.reply(
 			interaction,
-			`registered a donation from \`${player}\` of \`${formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`,
+			`registered a donation from \`${player}\` of \`${formatNumber(amount)}\`${notes ? ` (${notes})` : ''}`,
 		);
 	}
 }

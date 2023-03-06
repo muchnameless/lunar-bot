@@ -631,13 +631,12 @@ export class HypixelGuild extends Model<
 	 * @param player
 	 */
 	public checkMute(player: Player | null) {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-		if (this.mutedPlayers.has(player?.minecraftUuid!)) {
+		if (player && this.mutedPlayers.has(player.minecraftUuid)) {
 			// mute hasn't expired
-			if (Date.now() < this.mutedPlayers.get(player!.minecraftUuid)!) return true;
+			if (Date.now() < this.mutedPlayers.get(player.minecraftUuid)!) return true;
 
 			// mute has expired
-			void this.syncMute(player!, null);
+			void this.syncMute(player, null);
 		}
 
 		return false;

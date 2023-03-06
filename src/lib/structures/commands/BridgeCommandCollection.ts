@@ -27,7 +27,7 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 */
 	public get visibleCategories() {
 		return this.categories
-			.filter((category) => !BridgeCommandCollection.INVISIBLE_CATEGORIES.has(category!))
+			.filter((category) => !BridgeCommandCollection.INVISIBLE_CATEGORIES.has(category))
 			.sort(compareAlphabetically);
 	}
 

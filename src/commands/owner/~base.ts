@@ -46,7 +46,7 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 						Object.entries(env)
 							.filter(([key, value]) => value && /key|password|token|uri/i.test(key))
 							.flatMap(([, value]) => regExpEsc(value!).split(/\s+/))
-							// sort descendingly by length
+							// sort descendingly by length for cases where a value is a substring of another value
 							.sort(({ length: a }, { length: b }) => b - a)
 							.join('|'),
 						'gi',

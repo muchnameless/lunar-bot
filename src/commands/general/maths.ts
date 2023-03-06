@@ -110,72 +110,72 @@ export default class MathsCommand extends DualCommand {
 			return BigDecimal.multiply(x, 1_000);
 		},
 		'°': (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
+			if (x === undefined) throw new Error('`degree` requires one argument');
 			return BigDecimal.multiply(x, BigDecimal.divide(Math.PI, 180, this.precision));
 		},
 		'!': (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+			if (x === undefined) throw new Error('`fac` requires one argument');
 			if (x < 0) return Number.NaN;
 			return this._factorial(x);
 		},
 		fac: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+			if (x === undefined) throw new Error('`fac` requires one argument');
 			if (x < 0) return Number.NaN;
 			return this._factorial(x);
 		},
 		sin: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
+			if (x === undefined) throw new Error('`sin` requires one argument');
 			if (this._isMultipleOfPi(x)) return 0;
 			return Math.sin(x);
 		},
 		cos: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
+			if (x === undefined) throw new Error('`cos` requires one argument');
 			if (this._isMultipleOfPiHalf(x)) return 0;
 			return Math.cos(x);
 		},
 		tan: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
+			if (x === undefined) throw new Error('`tan` requires one argument');
 			if (this._isMultipleOfPi(x)) return 0;
 			if (this._isMultipleOfPiHalf(x)) return Number.NaN;
 			return Math.tan(x);
 		},
 		sqrt: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
+			if (x === undefined) throw new Error('`sqrt` requires one argument');
 			return Math.sqrt(x);
 		},
 		exp: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
+			if (x === undefined) throw new Error('`exp` requires one argument');
 			return Math.exp(x);
 		},
 		ln: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
+			if (x === undefined) throw new Error('`ln` requires one argument');
 			return Math.log(x);
 		},
 		percent: (x?: number) => {
-			if (typeof x === 'undefined') throw new Error('`%` requires one argument');
+			if (x === undefined) throw new Error('`%` requires one argument');
 			return BigDecimal.divide(x, 100, this.precision);
 		},
 	} as const satisfies Operators;
 
 	private readonly binaryOperators = {
 		'^': (a?: number, b?: number) => {
-			if (typeof a === 'undefined') throw new Error('`^` is not a unary operator');
+			if (a === undefined) throw new Error('`^` is not a unary operator');
 			if (a === 0 && b === 0) return Number.NaN;
 			return a ** b!;
 		},
-		'+': (a?: number, b?: number) => (typeof a === 'undefined' ? b! : BigDecimal.add(a, b)),
-		'-': (a?: number, b?: number) => (typeof a === 'undefined' ? BigDecimal.negate(b) : BigDecimal.subtract(a, b)),
+		'+': (a?: number, b?: number) => (a === undefined ? b! : BigDecimal.add(a, b)),
+		'-': (a?: number, b?: number) => (a === undefined ? BigDecimal.negate(b) : BigDecimal.subtract(a, b)),
 		'*': (a?: number, b?: number) => {
-			if (typeof a === 'undefined') throw new Error('`*` is not a unary operator');
+			if (a === undefined) throw new Error('`*` is not a unary operator');
 			return BigDecimal.multiply(a, b!);
 		},
 		'/': (a?: number, b?: number) => {
-			if (typeof a === 'undefined') throw new Error('`/` is not a unary operator');
+			if (a === undefined) throw new Error('`/` is not a unary operator');
 			if (b === 0) return Number.NaN;
 			return BigDecimal.divide(a, b!, this.precision);
 		},
 		log: (a?: number, b?: number) => {
-			if (typeof a === 'undefined') throw new Error('`log` requires two arguments (use `ln` for base e)');
+			if (a === undefined) throw new Error('`log` requires two arguments (use `ln` for base e)');
 			if (a <= 0 || b! <= 0) return Number.NaN;
 			return BigDecimal.divide(Math.log(a), Math.log(b!), this.precision);
 		},

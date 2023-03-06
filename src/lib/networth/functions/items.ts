@@ -74,10 +74,9 @@ export const isVanillaItem = (item: NBTInventoryItem) => {
 			// null items
 			item.tag!.ExtraAttributes!.id.includes(':') ||
 			// BOW, modifier: "rich_bow" instead of "rich"
-			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-			VANILLA_ITEM_IDS.has(item.tag!.ExtraAttributes?.id!) ||
+			VANILLA_ITEM_IDS.has(item.tag!.ExtraAttributes?.id) ||
 			// displayName: "Golden ...", itemId: "GOLD_..."; displayName: "Wooden ...", itemId: "WOOD_..."
-			VANILLA_ITEM_DISPLAY_NAMES.has(getDisplayName(item)!)) &&
+			VANILLA_ITEM_DISPLAY_NAMES.has(getDisplayName(item))) &&
 		// don't filter out items with custom skins
 		!item.tag!.SkullOwner
 	);

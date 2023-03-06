@@ -30,12 +30,12 @@ export default class DonationsCommand extends ApplicationCommand {
 		// construct { donator: amount } object
 		const donators = [...new Set(donations.map(({ from }) => from))];
 		const reducedAmount = Object.fromEntries(donators.map((x) => [x, 0]));
-		const reducedNotes: Record<string, string[]> = Object.fromEntries(donators.map((x) => [x, []]));
+		const reducedNotes = Object.fromEntries(donators.map((x) => [x, [] as string[]]));
 
 		// fill said object
 		for (const { from, amount, notes } of donations) {
 			reducedAmount[from] += amount;
-			if (notes?.length) reducedNotes[from]!.push(notes);
+			if (notes) reducedNotes[from]!.push(notes);
 		}
 
 		// transform and prettify data

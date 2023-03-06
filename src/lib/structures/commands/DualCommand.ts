@@ -63,7 +63,7 @@ export class DualCommand
 	 * @param value
 	 */
 	public set usage(value: string | (() => string) | null) {
-		this._usage = typeof value === 'function' || value?.length ? value : null;
+		this._usage = typeof value === 'function' || value ? value : null;
 	}
 
 	/**

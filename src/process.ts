@@ -45,7 +45,7 @@ async function cleanup() {
 		if (output.status === 'rejected') {
 			logger.fatal(output.reason);
 			hasError = true;
-		} else if (typeof output.value !== 'undefined') {
+		} else if (output.value !== undefined) {
 			logger.info(output.value);
 		}
 	}

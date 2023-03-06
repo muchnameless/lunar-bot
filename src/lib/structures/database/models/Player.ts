@@ -1136,7 +1136,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			// no slayer data found logging
 			if (
-				typeof playerData.slayer_bosses?.zombie?.xp !== 'undefined' &&
+				playerData.slayer_bosses?.zombie?.xp !== undefined &&
 				new Date().getHours() === 0 &&
 				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
@@ -1175,7 +1175,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			// no dungeons data found logging
 			if (
-				typeof playerData.dungeons?.dungeon_types?.catacombs?.experience !== 'undefined' &&
+				playerData.dungeons?.dungeon_types?.catacombs?.experience !== undefined &&
 				new Date().getHours() === 0 &&
 				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {

@@ -251,11 +251,11 @@ export interface MakeContentOptions {
  * @param options
  */
 export function makeContent(text = '', options: MakeContentOptions = {}) {
-	const isCode = typeof options.code !== 'undefined' && options.code !== false;
+	const isCode = options.code !== undefined && options.code !== false;
 	const splitOptions =
 		options.split === true
 			? {}
-			: typeof options.split !== 'undefined' && options.split !== false
+			: options.split !== undefined && options.split !== false
 			? { ...options.split }
 			: undefined;
 
