@@ -121,11 +121,19 @@ const getShensAuctionPrice = (extraAttributes: SkyBlockNBTExtraAttributes) => {
  * @param item
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
-	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
-	if (isVanillaItem(item)) return 0;
-
 	const extraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
 	const itemId = extraAttributes.id;
+	const skyblockItem = skyblockItems.get(itemId);
+
+	// items that are always soulbound
+	if (skyblockItem?.soulbound) {
+		return skyblockItem.npc_sell_price ?? 0;
+	}
+
+	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
+	if (isVanillaItem(item)) {
+		return skyblockItem?.npc_sell_price ?? 0;
+	}
 
 	let price: number;
 
@@ -159,11 +167,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 					CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + count * getPrice(id), 0) ??
 					// shen's auction items
 					getShensAuctionPrice(extraAttributes) ??
+					// npc sell price
+					skyblockItem?.npc_sell_price ??
 					// unknown item
 					(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 	}
-
-	const skyblockItem = skyblockItems.get(itemId);
 
 	// dark auction items
 	if (extraAttributes.winning_bid) {

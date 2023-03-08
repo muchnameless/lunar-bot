@@ -85,7 +85,9 @@ export async function populateSkyBlockItems() {
 			category IS NOT NULL OR
 			dungeon_conversion IS NOT NULL OR
 			gemstone_slots IS NOT NULL OR
+			npc_sell_price IS NOT NULL OR
 			prestige IS NOT NULL OR
+			soulbound IS TRUE OR
 			stars IS NOT NULL
 	`;
 

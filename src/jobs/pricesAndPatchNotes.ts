@@ -529,7 +529,9 @@ export type ParsedSkyBlockItem = {
 		  }[]
 		| null;
 	id: string;
+	npc_sell_price: number | null;
 	prestige: Prestige | null;
+	soulbound: boolean;
 	stars: Record<string, number>[] | null;
 };
 
@@ -583,14 +585,16 @@ async function updateSkyBlockItems(ac: AbortController) {
 	}
 
 	const parsedItems: ParsedSkyBlockItem[] = items.map((item) => ({
-		id: item.id,
+		category: item.category ?? null,
 		dungeon_conversion: item.dungeon_item_conversion_cost
 			? { [`ESSENCE_${item.dungeon_item_conversion_cost.essence_type}`]: item.dungeon_item_conversion_cost.amount }
 			: null,
-		stars: item.upgrade_costs?.map(parseUpgradeCosts) ?? null,
-		category: item.category ?? null,
-		prestige: null,
 		gemstone_slots: item.gemstone_slots?.map(parseGemstoneSlots) ?? null,
+		id: item.id,
+		npc_sell_price: item.npc_sell_price ?? null,
+		prestige: null,
+		soulbound: Boolean(item.soulbound),
+		stars: item.upgrade_costs?.map(parseUpgradeCosts) ?? null,
 	}));
 
 	for (const { id, prestige } of items) {
@@ -613,7 +617,9 @@ async function updateSkyBlockItems(ac: AbortController) {
 			category = excluded.category,
 			dungeon_conversion = excluded.dungeon_conversion,
 			gemstone_slots = excluded.gemstone_slots,
+			npc_sell_price = excluded.npc_sell_price,
 			prestige = excluded.prestige,
+			soulbound = excluded.soulbound,
 			stars = excluded.stars
 	`;
 

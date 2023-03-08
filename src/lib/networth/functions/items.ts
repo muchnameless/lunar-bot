@@ -62,16 +62,26 @@ export const getDisplayName = (item: NBTInventoryItem) => {
  *
  * @param item
  */
-export const isVanillaItem = (item: NBTInventoryItem) =>
+export const isVanillaItem = (item: NBTInventoryItem) => {
 	// higher rarity
-	isCommonItem(item) &&
-	// no lore
-	((item.tag!.display?.Lore?.length ?? 0 <= 1) ||
-		// null items
-		item.tag!.ExtraAttributes!.id.includes(':') ||
-		// BOW, modifier: "rich_bow" instead of "rich"
-		VANILLA_ITEM_IDS.has(item.tag!.ExtraAttributes!.id) ||
-		// displayName: "Golden ...", itemId: "GOLD_..."; displayName: "Wooden ...", itemId: "WOOD_..."
-		VANILLA_ITEM_DISPLAY_NAMES.has(getDisplayName(item))) &&
-	// don't filter out items with custom skins
-	!item.tag!.SkullOwner;
+	if (!isCommonItem(item)) return false;
+
+	const loreCount = item.tag!.display?.Lore?.length ?? 0;
+	const extraAttributesCount = Object.keys(item.tag!.ExtraAttributes!).length;
+
+	// to not filter out items like enchanted books
+	if (extraAttributesCount > 1 && loreCount > 1) return false;
+
+	return (
+		// no lore
+		(loreCount <= 1 ||
+			// null items
+			item.tag!.ExtraAttributes!.id.includes(':') ||
+			// BOW, modifier: "rich_bow" instead of "rich"
+			VANILLA_ITEM_IDS.has(item.tag!.ExtraAttributes?.id) ||
+			// displayName: "Golden ...", itemId: "GOLD_..."; displayName: "Wooden ...", itemId: "WOOD_..."
+			VANILLA_ITEM_DISPLAY_NAMES.has(getDisplayName(item))) &&
+		// don't filter out items with custom skins
+		!item.tag!.SkullOwner
+	);
+};
