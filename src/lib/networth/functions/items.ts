@@ -1,7 +1,5 @@
 import { type NBTInventoryItem } from '@zikeji/hypixel';
 import { ItemRarityColourCode } from '../constants/index.js';
-import { VANILLA_ITEM_DISPLAY_NAMES, VANILLA_ITEM_IDS } from '#constants';
-import { removeMcFormatting } from '#functions';
 
 /**
  * Lore examples
@@ -30,58 +28,9 @@ export const isCommonItem = (item: NBTInventoryItem) => {
 
 		case ItemRarityColourCode.Uncommon:
 			// recombobulated?
-			return Boolean(item.tag!.ExtraAttributes?.rarity_upgrades);
+			return Boolean(item.tag!.ExtraAttributes!.rarity_upgrades);
 
 		default:
 			return false;
 	}
-};
-
-/**
- * returns the display name of a common item, doesn't work (and does not need to work) for multiple colour codes
- *
- * @param item
- */
-export const getDisplayName = (item: NBTInventoryItem) => {
-	let name = item.tag!.display!.Name;
-	if (!name) return null;
-
-	// remove colour code(s)
-	name = removeMcFormatting(name);
-
-	// remove reforge
-	if (item.tag!.ExtraAttributes!.modifier && name.startsWith(item.tag!.ExtraAttributes!.modifier)) {
-		name = name.slice(item.tag!.ExtraAttributes!.modifier.length).trimStart();
-	}
-
-	return name;
-};
-
-/**
- * whether the item is a vanilla mc item and not a custom hypixel skyblock variant
- *
- * @param item
- */
-export const isVanillaItem = (item: NBTInventoryItem) => {
-	// higher rarity
-	if (!isCommonItem(item)) return false;
-
-	const loreCount = item.tag!.display?.Lore?.length ?? 0;
-	const extraAttributesCount = Object.keys(item.tag!.ExtraAttributes!).length;
-
-	// to not filter out items like enchanted books
-	if (extraAttributesCount > 1 && loreCount > 1) return false;
-
-	return (
-		// no lore
-		(loreCount <= 1 ||
-			// null items
-			item.tag!.ExtraAttributes!.id.includes(':') ||
-			// BOW, modifier: "rich_bow" instead of "rich"
-			VANILLA_ITEM_IDS.has(item.tag!.ExtraAttributes?.id) ||
-			// displayName: "Golden ...", itemId: "GOLD_..."; displayName: "Wooden ...", itemId: "WOOD_..."
-			VANILLA_ITEM_DISPLAY_NAMES.has(getDisplayName(item))) &&
-		// don't filter out items with custom skins
-		!item.tag!.SkullOwner
-	);
 };

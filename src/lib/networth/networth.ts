@@ -21,7 +21,7 @@ import {
 	getAppliedEnchantmentModifier,
 	getEnchantment,
 	getReforgeStone,
-	isVanillaItem,
+	isCommonItem,
 	transformItemData,
 } from './functions/index.js';
 import { getPrice, prices, skyblockItems, unknownItemIdWarnings, type SkyBlockItem } from './prices.js';
@@ -131,7 +131,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
-	if (isVanillaItem(item)) {
+	if (!extraAttributes.uuid && isCommonItem(item) && !item.tag!.SkullOwner) {
 		return skyblockItem?.npc_sell_price ?? 0;
 	}
 
