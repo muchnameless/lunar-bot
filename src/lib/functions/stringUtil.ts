@@ -99,21 +99,30 @@ export const cleanFormattedNumber = (string: string) => string.replaceAll('\u{20
 export const replaceSmallLatinCapitalLetters = (string: string) =>
 	Object.entries(SMALL_LATIN_CAPITAL_LETTERS).reduce((acc, [normal, small]) => acc.replaceAll(small, normal), string);
 
+const letterToNumberRegExp = /(?<=[a-z])(?=\d)/;
 /**
  * '30d1193h71585m4295001s' -> ['30d', '1193h', '71585m', '4295001s'] -> 15_476_901_000
  *
  * @param string
  */
 export const stringToMS = (string: string) =>
-	string.split(/(?<=[a-z])(?=\d)/).reduce((acc, cur) => acc + ms(cur as StringValue), 0);
+	string.split(letterToNumberRegExp).reduce((acc, cur) => acc + ms(cur as StringValue), 0);
 
+const mcFormattingRegExp = /§[\da-gk-or]/g;
 /**
  * removes minecraft formatting codes
  *
  * @param string
  */
-export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-or]/g, '');
+export const removeMcFormatting = (string: string) => string.replace(mcFormattingRegExp, '');
 
+const singleBacktickRegExp = /(?<=^|[^`])`(?=[^`]|$)/;
+const asteriskRegExp = /(?=\*)/g;
+const wordWithUnderscoreRegExp = /(\S*)_([^\s_]*)/g;
+const urlStartRegExp = /^https?:\/\/|^www\./i;
+const underscoreRegExp = /(?=_)/g;
+const nonEscapedAsteriskRegExp = /(?<!\\)(?=\*)/g;
+const nonEscapedUnderscoreRegExp = /(?<!\\)(?=_)/g;
 /**
  * escapes '*' and '_' if those are neither within a URL nor a code block or inline code
  *
@@ -127,28 +136,28 @@ export const escapeMarkdown = (string: string, escapeEverything = false) =>
 			if (index % 2 && index !== array.length - 1) return subString;
 
 			return string
-				.split(/(?<=^|[^`])`(?=[^`]|$)/)
+				.split(singleBacktickRegExp)
 				.map((_subString, _index, _array) => {
 					if (_index % 2 && _index !== _array.length - 1) return _subString;
 
 					if (escapeEverything) {
 						return _subString
-							.replace(/(?=\*)/g, '\\') // escape italic 1/2
-							.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+							.replace(asteriskRegExp, '\\') // escape italic 1/2
+							.replace(wordWithUnderscoreRegExp, (match, p1: string, p2: string) => {
 								// escape italic 2/2 & underline
-								if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+								if (urlStartRegExp.test(match)) return match; // don't escape URLs
 								if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
-								return `${p1.replace(/(?=_)/g, '\\')}\\_${p2}`; // escape not already escaped '_'
+								return `${p1.replace(underscoreRegExp, '\\')}\\_${p2}`; // escape not already escaped '_'
 							});
 					}
 
 					return _subString
-						.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
-						.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+						.replace(nonEscapedAsteriskRegExp, '\\') // escape italic 1/2
+						.replace(wordWithUnderscoreRegExp, (match, p1: string, p2: string) => {
 							// escape italic 2/2 & underline
-							if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+							if (urlStartRegExp.test(match)) return match; // don't escape URLs
 							if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
-							return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
+							return `${p1.replace(nonEscapedUnderscoreRegExp, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
 						});
 				})
 				.join('`');
