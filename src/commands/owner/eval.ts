@@ -235,21 +235,26 @@ export default class EvalCommand extends BaseOwnerCommand {
 		try {
 			// wrap input in async IIFE
 			if (isAsync) {
-				const lines = _input.trim().split(';');
+				const lines = _input
+					.trim()
+					.split(';')
+					.map((part) => part.split('}'));
 
 				// insert "return" before the last expression if not already present (since IIFE needs an explicit return, unlike plain eval)
-				for (let index = lines.length - 1; index >= 0; --index) {
-					const trimmed = lines[index]!.trimStart();
+				for (let outer = lines.length - 1; outer >= 0; --outer) {
+					for (let inner = lines.length - 1; inner >= 0; --inner) {
+						const trimmed = lines[outer]![inner]!.trimStart();
 
-					if (!trimmed || ['//', '/*', '}', ')'].some((x) => trimmed.startsWith(x))) continue;
-					if (/^(?:return|const|let|var)\b/.test(trimmed)) break;
+						if (!trimmed || ['//', '/*', '}', ')'].some((x) => trimmed.startsWith(x))) continue;
+						if (/^(?:return|const|let|var)\b/.test(trimmed)) break;
 
-					// preserve whitespace (like newlines) before the last expression
-					lines[index] = lines[index]!.replace(/^\s*/, (match) => `${match}return `);
-					break;
+						// preserve whitespace (like newlines) before the last expression
+						lines[outer]![inner] = lines[outer]![inner]!.replace(/^\s*/, (match) => `${match}return `);
+						break;
+					}
 				}
 
-				input = format(lines.join(';'), EvalCommand.PRETTIER_OPTIONS);
+				input = format(lines.map((part) => part.join('}')).join(';'), EvalCommand.PRETTIER_OPTIONS);
 				toEvaluate = `(async () => { ${input} })()`;
 			} else {
 				input = format(_input.trim(), EvalCommand.PRETTIER_OPTIONS);
