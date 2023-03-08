@@ -241,16 +241,19 @@ export default class EvalCommand extends BaseOwnerCommand {
 					.map((part) => part.split('}'));
 
 				// insert "return" before the last expression if not already present (since IIFE needs an explicit return, unlike plain eval)
-				for (let outer = lines.length - 1; outer >= 0; --outer) {
+				// eslint-disable-next-line no-labels
+				loop: for (let outer = lines.length - 1; outer >= 0; --outer) {
 					for (let inner = lines[outer]!.length - 1; inner >= 0; --inner) {
 						const trimmed = lines[outer]![inner]!.trimStart();
 
 						if (!trimmed || ['//', '/*', '}', ')'].some((x) => trimmed.startsWith(x))) continue;
-						if (/^(?:return|const|let|var)\b/.test(trimmed)) break;
+						// eslint-disable-next-line no-labels
+						if (/^(?:return|const|let|var)\b/.test(trimmed)) break loop;
 
 						// preserve whitespace (like newlines) before the last expression
 						lines[outer]![inner] = lines[outer]![inner]!.replace(/^\s*/, (match) => `${match}return `);
-						break;
+						// eslint-disable-next-line no-labels
+						break loop;
 					}
 				}
 
