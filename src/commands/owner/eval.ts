@@ -242,7 +242,7 @@ export default class EvalCommand extends BaseOwnerCommand {
 
 				// insert "return" before the last expression if not already present (since IIFE needs an explicit return, unlike plain eval)
 				for (let outer = lines.length - 1; outer >= 0; --outer) {
-					for (let inner = lines.length - 1; inner >= 0; --inner) {
+					for (let inner = lines[outer]!.length - 1; inner >= 0; --inner) {
 						const trimmed = lines[outer]![inner]!.trimStart();
 
 						if (!trimmed || ['//', '/*', '}', ')'].some((x) => trimmed.startsWith(x))) continue;
