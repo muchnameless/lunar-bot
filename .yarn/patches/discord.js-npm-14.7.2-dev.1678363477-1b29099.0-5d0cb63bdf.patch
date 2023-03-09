@@ -1516,7 +1516,7 @@ index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf4448
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 2d356b8876db993e6378d783901206cbc1041601..cb2bcc20791f3b220ec10cc7abbcf8cbfb25bfb7 100644
+index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb61711546a76 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -320,10 +320,13 @@ class Message extends Base {
@@ -1659,10 +1659,10 @@ index 2d356b8876db993e6378d783901206cbc1041601..cb2bcc20791f3b220ec10cc7abbcf8cb
  
      return this.client.actions.MessageReactionAdd.handle(
        {
-         user: this.client.user,
--        channel: this.channel,
-+        channel,
-         message: this,
+         [this.client.actions.injectedUser]: this.client.user,
+-        [this.client.actions.injectedChannel]: this.channel,
++        [this.client.actions.injectedChannel]: channel,
+         [this.client.actions.injectedMessage]: this,
          emoji: resolvePartialEmoji(emoji),
        },
 @@ -806,8 +824,9 @@ class Message extends Base {
@@ -1832,7 +1832,7 @@ index 7796ddc99a96d7c431052895c2c0a9d4c23a6790..eb0c680121aed6bde625f7d4da0fac8b
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 80efc3e7cd9fa2d85d620102f86e787665247ebb..746e70b50be1511e55d74e5d9c6cf1e1ac7b0b52 100644
+index f2a6142fb6bcc9bd502b3223d86d0c8fbfdb1413..44d995be859c331548922c71a74b7fbfeeca876f 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -1,6 +1,3 @@
