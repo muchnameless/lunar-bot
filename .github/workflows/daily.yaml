@@ -9,6 +9,9 @@ jobs:
   main-cache-cleanup:
     name: Main cache cleanup
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
 
     steps:
       - name: Checkout repository

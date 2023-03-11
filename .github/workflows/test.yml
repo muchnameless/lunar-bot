@@ -59,10 +59,7 @@ jobs:
         with:
           path: node_modules/
           key: ${{ runner.os }}-dependencies-${{ github.sha }}
-
-      - name: Install dependencies
-        if: steps.restore-dependencies.outputs.cache-hit != 'true'
-        uses: ./.github/actions/yarn-install
+          fail-on-cache-miss: true
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -92,10 +89,7 @@ jobs:
         with:
           path: node_modules/
           key: ${{ runner.os }}-dependencies-${{ github.sha }}
-
-      - name: Install dependencies
-        if: steps.restore-dependencies.outputs.cache-hit != 'true'
-        uses: ./.github/actions/yarn-install
+          fail-on-cache-miss: true
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
