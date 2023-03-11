@@ -134,9 +134,18 @@ export class DiscordChatManager extends ChatManager {
 
 		const player = UserUtil.getPlayer(member.user) ?? (await message.client.players.fetch({ discordId: member.id }));
 
-		return player && !this.BLOCKED_EXPRESSIONS_REGEXP.test(player.ign)
+		return this._getCheckedIgn(player) ?? this._replaceBlockedName(member.displayName);
+	}
+
+	/**
+	 * returns the player's ign if it is known and not blocked
+	 *
+	 * @param player
+	 */
+	private static _getCheckedIgn(player: Player | null) {
+		return player && player.ign !== UNKNOWN_IGN && !this.BLOCKED_EXPRESSIONS_REGEXP.test(player.ign)
 			? player.ign
-			: this._replaceBlockedName(member.displayName);
+			: null;
 	}
 
 	/**
@@ -640,9 +649,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if the player is auto muted
-		if (
-			(player?.infractions ?? Number.NEGATIVE_INFINITY) >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')
-		) {
+		if (player && player.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			return this.handleForwardRejection(message, ForwardRejectionType.PlayerAutoMuted);
 		}
 
@@ -793,20 +800,19 @@ export class DiscordChatManager extends ChatManager {
 				void this.minecraft.chat({
 					content,
 					prefix: `${this.prefix}${
-						player && !DiscordChatManager.BLOCKED_EXPRESSIONS_REGEXP.test(player.ign)
-							? player.ign
-							: DiscordChatManager._replaceBlockedName(
-									(
-										await message.guild?.members
-											.fetch(messageInteraction.user.id)
-											.catch((error) =>
-												logger.error(
-													{ err: error, ...this.logInfo },
-													'[FORWARD TO MINECRAFT]: error fetching messageInteraction member',
-												),
-											)
-									)?.displayName ?? messageInteraction.user.username,
-							  )
+						DiscordChatManager._getCheckedIgn(player) ??
+						DiscordChatManager._replaceBlockedName(
+							(
+								await message.guild?.members
+									.fetch(messageInteraction.user.id)
+									.catch((error) =>
+										logger.error(
+											{ err: error, ...this.logInfo },
+											'[FORWARD TO MINECRAFT]: error fetching messageInteraction member',
+										),
+									)
+							)?.displayName ?? messageInteraction.user.username,
+						)
 					}: `,
 				});
 			}
@@ -825,9 +831,8 @@ export class DiscordChatManager extends ChatManager {
 					  )}: `
 				: // user
 				  `${this.prefix}${
-						player && !DiscordChatManager.BLOCKED_EXPRESSIONS_REGEXP.test(player.ign)
-							? player.ign
-							: DiscordChatManager._replaceBlockedName(message.member?.displayName ?? message.author.username)
+						DiscordChatManager._getCheckedIgn(player) ??
+						DiscordChatManager._replaceBlockedName(message.member?.displayName ?? message.author.username)
 				  }: `,
 			discordMessage: message,
 			signal,
