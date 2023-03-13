@@ -1,5 +1,5 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index dea39203bd2e0869ef2da32f096926168d357b87..6645b79bd9185af283cc311277a93e3713a8a96a 100644
+index 96c3dd0a2263813b8d6d85352a8bd43326afa655..5b143f19f8d3cce9175d7c55e9adbaaaee5ae865 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
 @@ -492,7 +492,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
@@ -11,16 +11,8 @@ index dea39203bd2e0869ef2da32f096926168d357b87..6645b79bd9185af283cc311277a93e37
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -767,6 +767,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-         this.debug([
-           `Starting to heartbeat every ${payload.d.heartbeat_interval}ms`
-         ]);
-+        await this.heartbeat(true);
-         this.heartbeatInterval = (0, import_node_timers.setInterval)(() => void this.heartbeat(), payload.d.heartbeat_interval);
-         break;
-       }
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index 69cdacd40fade0abdf0be766b0ad439b43053839..cbc2e94a4ebe3794e8e693dca69cd59ea9e93028 100644
+index 3f2b9fd1c9070ddee6e8b2b99cf8d342655526f0..95f95e833a6397eaced9d2a404172f749f50eba7 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
 @@ -470,7 +470,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
@@ -32,16 +24,8 @@ index 69cdacd40fade0abdf0be766b0ad439b43053839..cbc2e94a4ebe3794e8e693dca69cd59e
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -745,6 +745,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-         this.debug([
-           `Starting to heartbeat every ${payload.d.heartbeat_interval}ms`
-         ]);
-+        await this.heartbeat(true);
-         this.heartbeatInterval = setInterval(() => void this.heartbeat(), payload.d.heartbeat_interval);
-         break;
-       }
 diff --git a/dist/index.js b/dist/index.js
-index bbef0e7f7f76f655a3af5543793ee6eb93dac674..be03287d05c27468983135d848e8e117a884e1b8 100644
+index bf2febfa70b04c1bb34318605061fd8f9cc41c04..776124c96c54a4549473ab2faffdd629349c5ff0 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -652,7 +652,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
@@ -53,16 +37,8 @@ index bbef0e7f7f76f655a3af5543793ee6eb93dac674..be03287d05c27468983135d848e8e117
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -927,6 +927,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-         this.debug([
-           `Starting to heartbeat every ${payload.d.heartbeat_interval}ms`
-         ]);
-+        await this.heartbeat(true);
-         this.heartbeatInterval = (0, import_node_timers.setInterval)(() => void this.heartbeat(), payload.d.heartbeat_interval);
-         break;
-       }
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 4483d4d03a165878a08dd9ff538b883335f4b582..36895621b628fa6a4fc0d8dd90db6184a8b4c881 100644
+index 564d813d4468221c2bf7a41cc3ae054149ee2ffb..083a0f1ac743d5b6d5efe6d4e72e8eb53e77fb10 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -611,7 +611,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
@@ -74,11 +50,3 @@ index 4483d4d03a165878a08dd9ff538b883335f4b582..36895621b628fa6a4fc0d8dd90db6184
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -886,6 +886,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-         this.debug([
-           `Starting to heartbeat every ${payload.d.heartbeat_interval}ms`
-         ]);
-+        await this.heartbeat(true);
-         this.heartbeatInterval = setInterval(() => void this.heartbeat(), payload.d.heartbeat_interval);
-         break;
-       }
