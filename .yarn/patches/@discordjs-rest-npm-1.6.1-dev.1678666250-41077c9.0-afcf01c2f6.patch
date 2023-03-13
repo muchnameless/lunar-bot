@@ -30,7 +30,7 @@ index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..1c77fc3c39eb0d5bae0ec9e4e54dcfa5
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 0af43c18d0d4d95fa9acc3e47a2897495158c51a..a19c4dd464d800d8923a458dbef23f9611e50419 100644
+index 42e45b3cfea4c38daa8a57033237cd678fab5d48..6139b34fdb9b7420e709da687f9e231a53cdeb0f 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -553,9 +553,9 @@ index 0af43c18d0d4d95fa9acc3e47a2897495158c51a..a19c4dd464d800d8923a458dbef23f96
 +        original: endpoint
 +      };
 +    }
-     const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{16,19})/.exec(endpoint);
+     const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
-     const baseRoute = endpoint.replaceAll(/\d{16,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+     const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
 @@ -1339,6 +1476,7 @@ var version = "[VI]{{inject}}[/VI]";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
@@ -565,7 +565,7 @@ index 0af43c18d0d4d95fa9acc3e47a2897495158c51a..a19c4dd464d800d8923a458dbef23f96
    DefaultRestOptions,
    DefaultUserAgent,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index dd69067c6a8d583408a7195768a1bea137cf6a21..f24cfebe595013131b78d75d8e42120c902dacc0 100644
+index de35a9e869a039185a63fafe44d4bc6bf21e50c4..614e09aa5099c252c07940d697f7000e874a4591 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -69,6 +69,7 @@ var OverwrittenMimeTypes = {
@@ -1048,9 +1048,9 @@ index dd69067c6a8d583408a7195768a1bea137cf6a21..f24cfebe595013131b78d75d8e42120c
 +        original: endpoint
 +      };
 +    }
-     const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{16,19})/.exec(endpoint);
+     const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
-     const baseRoute = endpoint.replaceAll(/\d{16,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+     const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
 @@ -1288,6 +1424,7 @@ export {
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
