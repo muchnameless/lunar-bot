@@ -68,3 +68,18 @@ interface JSON {
 interface ArrayConstructor {
 	isArray(arg: any): arg is unknown[];
 }
+
+interface AbortSignal {
+	/**
+	 * An optional reason specified when the AbortSignal was triggered.
+	 *
+	 * @since v17.2.0
+	 */
+	readonly reason: unknown;
+	/**
+	 * If {@link aborted} is true, throws {@link reason}.
+	 *
+	 * @since v17.3.0
+	 */
+	throwIfAborted(): void;
+}
