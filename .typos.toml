@@ -1,0 +1,7 @@
+[files]
+# auto generated files
+extend-exclude = ["src/lib/chatBridge/constants/*.json"]
+
+[default.extend-identifiers]
+# hypixel API typo
+equippment_contents = "equippment_contents"
