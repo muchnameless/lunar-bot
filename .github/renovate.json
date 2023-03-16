@@ -5,8 +5,7 @@
 		":disableRateLimiting",
 		":semanticCommitTypeAll(chore)",
 		"default:automergeDigest",
-		"helpers:followTypescriptNext",
-		"helpers:pinGitHubActionDigests"
+		"helpers:followTypescriptNext"
 	],
 	"postUpdateOptions": ["yarnDedupeHighest"],
 	"labels": ["dependencies"],
@@ -37,6 +36,10 @@
 				"ignoreUnstable": false
 			}
 		]
+	},
+	"github-actions": {
+		"pinDigests": true,
+		"automerge": true
 	},
 	"lockFileMaintenance": {
 		"enabled": true,
