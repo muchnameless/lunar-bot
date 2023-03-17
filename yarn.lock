@@ -7822,7 +7822,7 @@ __metadata:
 
 "typescript@patch:typescript@^5.1.0-dev.20230316#~builtin<compat/typescript>":
   version: 5.1.0-dev.20230316
-  resolution: "typescript@patch:typescript@npm%3A5.1.0-dev.20230316#~builtin<compat/typescript>::version=5.1.0-dev.20230316&hash=1f5320"
+  resolution: "typescript@patch:typescript@npm%3A5.1.0-dev.20230316#~builtin<compat/typescript>::version=5.1.0-dev.20230316&hash=85af82"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
