@@ -1,10 +1,10 @@
-import { type ParseArgsConfig } from 'node:util';
-import { type Awaitable } from 'discord.js';
+import type { ParseArgsConfig } from 'node:util';
+import type { Awaitable } from 'discord.js';
 import { ApplicationCommand, type ApplicationCommandData } from './ApplicationCommand.js';
-import { type CommandContext } from './BaseCommand.js';
+import type { CommandContext } from './BaseCommand.js';
 import { BaseCommandCollection } from './BaseCommandCollection.js';
-import { type BridgeCommand, type BridgeCommandData } from './BridgeCommand.js';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { BridgeCommand, BridgeCommandData } from './BridgeCommand.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 
 export class DualCommand
 	extends ApplicationCommand

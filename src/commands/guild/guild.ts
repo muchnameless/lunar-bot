@@ -30,7 +30,7 @@ import {
 	unknownIgn,
 	unmute,
 } from '#chatBridge/constants/index.js';
-import { type CommandOptions } from '#chatBridge/managers/MinecraftChatManager.js';
+import type { CommandOptions } from '#chatBridge/managers/MinecraftChatManager.js';
 import { UNKNOWN_IGN } from '#constants';
 import {
 	autocorrect,
@@ -47,7 +47,7 @@ import {
 } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import {
 	ansiOutputOption,
 	forceOption,
@@ -58,8 +58,8 @@ import {
 	requiredPlayerOption,
 	targetOption,
 } from '#structures/commands/commonOptions.js';
-import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
-import { type Player } from '#structures/database/models/Player.js';
+import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { GuildMemberUtil, InteractionUtil, UserUtil } from '#utils';
 
 interface RunModerationOptions {

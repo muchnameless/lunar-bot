@@ -200,9 +200,9 @@
 
 import { EventEmitter } from 'node:events';
 import { setTimeout, clearTimeout } from 'node:timers';
-import { type Awaitable } from 'discord.js';
+import type { Awaitable } from 'discord.js';
 import { ChatBridgeEvent, type ChatBridge } from './ChatBridge.js';
-import { type HypixelMessage } from './HypixelMessage.js';
+import type { HypixelMessage } from './HypixelMessage.js';
 
 /**
  * Filter to be applied to the collector.

@@ -1,5 +1,5 @@
-import { type HypixelUserMessage } from '../../HypixelMessage.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { HypixelUserMessage } from '../../HypixelMessage.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { BridgeCommand } from '#structures/commands/BridgeCommand.js';
 
 export default class MyCommand extends BridgeCommand {

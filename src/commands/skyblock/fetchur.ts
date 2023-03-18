@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, time, TimestampStyles, type ChatInputCommandInteraction } from 'discord.js';
 import { DateTime } from 'luxon';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { InteractionUtil } from '#utils';
 

@@ -1,5 +1,5 @@
-import { type Mutable, type ArrayElementType } from '@sapphire/utilities';
-import { type Snowflake } from 'discord.js';
+import type { Mutable, ArrayElementType } from '@sapphire/utilities';
+import type { Snowflake } from 'discord.js';
 import {
 	COSMETIC_SKILLS,
 	DUNGEON_TYPES,

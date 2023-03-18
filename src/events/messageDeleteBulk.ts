@@ -1,4 +1,4 @@
-import { type ClientEvents, type Events } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 import MessageDeleteEvent from './messageDelete.js';
 
 export default class MessageDeleteBulkEvent extends MessageDeleteEvent {

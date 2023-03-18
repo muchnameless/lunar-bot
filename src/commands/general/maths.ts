@@ -11,12 +11,12 @@ import {
 	type ModalSubmitInteraction,
 } from 'discord.js';
 import BigDecimal from 'js-big-decimal';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { formatNumber, trim } from '#functions';
 import { logger } from '#logger';
 import { Lexer } from '#structures/Lexer.js';
 import { OperatorAssociativity, Parser } from '#structures/Parser.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { InteractionUtil, type ModalRepliableInteraction, type RepliableInteraction } from '#utils';
 

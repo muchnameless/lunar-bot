@@ -3,7 +3,7 @@ import { jaroWinkler } from '@skyra/jaro-winkler';
 import { cleanCodeBlockContent, codeBlock, escapeCodeBlock } from 'discord.js';
 import ms, { type StringValue } from 'ms';
 import { AnsiFormat, SMALL_LATIN_CAPITAL_LETTERS, type AnsiBackground, type AnsiColour } from '#constants';
-import { type Merge } from '#types';
+import type { Merge } from '#types';
 
 type AnsiOptions =
 	| [AnsiBackground, AnsiColour?]

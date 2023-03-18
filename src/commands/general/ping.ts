@@ -2,7 +2,7 @@ import { oneLine } from 'common-tags';
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { seconds } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { InteractionUtil } from '#utils';
 
 export default class PingCommand extends ApplicationCommand {

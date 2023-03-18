@@ -4,7 +4,7 @@ import { EmbedUtil } from './index.js';
 import { redis } from '#api';
 import { hours } from '#functions';
 import { logger } from '#logger';
-import { type Player } from '#structures/database/models/Player.js';
+import type { Player } from '#structures/database/models/Player.js';
 
 export interface SendDMOptions extends MessageCreateOptions {
 	/**

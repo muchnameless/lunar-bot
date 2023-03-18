@@ -1,5 +1,5 @@
 import { GuildMemberLimits } from '@sapphire/discord-utilities';
-import { type ArrayElementType } from '@sapphire/utilities';
+import type { ArrayElementType } from '@sapphire/utilities';
 import { RateLimitError, type Components } from '@zikeji/hypixel';
 import { stripIndents } from 'common-tags';
 import {
@@ -31,9 +31,9 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import { type ModelResolvable } from '../managers/ModelManager.js';
-import { type GuildRank, type HypixelGuild } from './HypixelGuild.js';
-import { type TaxCollector } from './TaxCollector.js';
+import type { ModelResolvable } from '../managers/ModelManager.js';
+import type { GuildRank, HypixelGuild } from './HypixelGuild.js';
+import type { TaxCollector } from './TaxCollector.js';
 import { TransactionType, type Transaction } from './Transaction.js';
 import { getSkyBlockProfiles, hypixel, mojang } from '#api';
 import {
@@ -89,7 +89,7 @@ import {
 	weeks,
 } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 import { toUpperCase } from '#types';
 import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil, type RoleResolvables } from '#utils';
 

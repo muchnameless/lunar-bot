@@ -3,7 +3,7 @@ import { Chart } from 'chart.js/auto';
 import { AttachmentBuilder, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { seconds, upperCaseFirstChar, type LeaderboardXPTypes } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalPlayerOption, xpTypeOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
 

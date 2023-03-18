@@ -1,8 +1,8 @@
-import { type Components } from '@zikeji/hypixel';
-import { type ChatInputCommandInteraction } from 'discord.js';
+import type { Components } from '@zikeji/hypixel';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import BaseSkyBlockCommand from './~base-skyblock-command.js';
 import { getSkyBlockProfiles } from '#api';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, UnicodeEmoji } from '#constants';
 import { formatDecimalNumber, formatPercent, getUuidAndIgn, type WeightData } from '#functions';
 

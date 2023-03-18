@@ -1,5 +1,5 @@
 import { setInterval, clearInterval } from 'node:timers';
-import { type ClientEvents, type Events } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 import { minutes } from '#functions';
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event.js';

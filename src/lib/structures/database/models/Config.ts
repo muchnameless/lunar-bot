@@ -8,7 +8,7 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export class Config extends Model<
 	InferAttributes<Config, { omit: 'parsedValue' }>,

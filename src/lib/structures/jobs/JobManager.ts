@@ -1,5 +1,5 @@
 import { Collection } from 'discord.js';
-import { type Job } from './Job.js';
+import type { Job } from './Job.js';
 
 export class JobManager {
 	public readonly jobs = new Collection<string, Job>();

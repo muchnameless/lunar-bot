@@ -1,6 +1,6 @@
 import { env } from 'node:process';
 import { setInterval } from 'node:timers';
-import { type URL } from 'node:url';
+import type { URL } from 'node:url';
 import {
 	Client,
 	EmbedBuilder,

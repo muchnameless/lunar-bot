@@ -3,11 +3,11 @@ import { oneLine } from 'common-tags';
 import { SlashCommandBuilder, time, type ChatInputCommandInteraction } from 'discord.js';
 import BaseStatsCommand from './~base-stats-command.js';
 import { hypixel } from '#api';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { escapeIgn, formatNumber, getUuidAndIgn, parseSecondsFromObjectId, seconds } from '#functions';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalIgnOption } from '#structures/commands/commonOptions.js';
-import { type Awaited } from '#types';
+import type { Awaited } from '#types';
 
 export type FetchedData = Awaited<ReturnType<PlayerStatsCommand['_fetchData']>>;
 

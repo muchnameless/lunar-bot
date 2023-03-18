@@ -8,7 +8,7 @@ import {
 	type InferCreationAttributes,
 	type NonAttribute,
 } from 'sequelize';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export const enum TransactionType {
 	Donation = 'donation',

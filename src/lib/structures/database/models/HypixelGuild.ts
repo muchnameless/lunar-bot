@@ -25,9 +25,9 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import { type Player } from './Player.js';
+import type { Player } from './Player.js';
 import { hypixel, mojang } from '#api';
-import { type ChatBridge, type MinecraftReadyChatBridge } from '#chatBridge/ChatBridge.js';
+import type { ChatBridge, MinecraftReadyChatBridge } from '#chatBridge/ChatBridge.js';
 import { mute, setRank, unmute, type HypixelMessageType } from '#chatBridge/constants/index.js';
 import { Offset, SKYBLOCK_XP_TYPES, UNKNOWN_IGN, XP_OFFSETS_TIME } from '#constants';
 import {
@@ -44,7 +44,7 @@ import {
 	splitMessage,
 } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 import { ChannelUtil, GuildUtil } from '#utils';
 
 export type GuildRank =

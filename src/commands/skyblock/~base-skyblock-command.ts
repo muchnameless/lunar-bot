@@ -1,7 +1,7 @@
-import { type Components } from '@zikeji/hypixel';
-import { type Awaitable, type ChatInputCommandInteraction, type SlashCommandBuilder } from 'discord.js';
+import type { Components } from '@zikeji/hypixel';
+import type { Awaitable, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getSkyBlockProfiles } from '#api';
-import { type HypixelUserMessage, type ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage, ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES } from '#constants';
 import {
 	autocorrect,
@@ -15,9 +15,9 @@ import {
 	upperCaseFirstChar,
 } from '#functions';
 import { logger } from '#logger';
-import { type ApplicationCommandData, type SlashCommandOption } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
-import { type BridgeCommandData } from '#structures/commands/BridgeCommand.js';
+import type { ApplicationCommandData, SlashCommandOption } from '#structures/commands/ApplicationCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
+import type { BridgeCommandData } from '#structures/commands/BridgeCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import {
 	optionalIgnOption,

@@ -1,4 +1,4 @@
-import { type ClientEvents, type Events } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 import { Event } from '#structures/events/Event.js';
 
 export default class ApplicationCommandPermissionsUpdateEvent extends Event {

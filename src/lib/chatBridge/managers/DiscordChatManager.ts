@@ -21,8 +21,8 @@ import {
 } from 'discord.js';
 import ms from 'ms';
 import { fetch } from 'undici';
-import { type ChatBridge } from '../ChatBridge.js';
-import { type HypixelMessage } from '../HypixelMessage.js';
+import type { ChatBridge } from '../ChatBridge.js';
+import type { HypixelMessage } from '../HypixelMessage.js';
 import { InteractionUserCache } from '../caches/index.js';
 import { PREFIX_BY_TYPE, URL_REGEXP, type HypixelMessageType } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
@@ -37,9 +37,9 @@ import {
 } from '#constants';
 import { assertNever, asyncReplace, days, hours, minutes, seconds } from '#functions';
 import { logger } from '#logger';
-import { type DualCommand } from '#structures/commands/DualCommand.js';
-import { type ChatBridgeChannel } from '#structures/database/models/HypixelGuild.js';
-import { type Player } from '#structures/database/models/Player.js';
+import type { DualCommand } from '#structures/commands/DualCommand.js';
+import type { ChatBridgeChannel } from '#structures/database/models/HypixelGuild.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { WebhookError } from '#structures/errors/WebhookError.js';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
 

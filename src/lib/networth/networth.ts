@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { type Components, type NBTExtraAttributes, type NBTInventoryItem } from '@zikeji/hypixel';
+import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 import { parse, simplify } from 'prismarine-nbt';
 import {
 	ALLOWED_RECOMB_CATEGORIES,

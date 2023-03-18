@@ -9,11 +9,13 @@
 	"rules": {
 		"@typescript-eslint/consistent-type-definitions": 0,
 		"@typescript-eslint/no-base-to-string": 0,
+		"@typescript-eslint/no-import-type-side-effects": 2,
 		// "@typescript-eslint/no-shadow": 2,
 		"@typescript-eslint/no-throw-literal": 0,
 		// "@typescript-eslint/no-unused-vars": 2,
 		"@typescript-eslint/restrict-plus-operands": 0,
 		"curly": [2, "multi-line", "consistent"],
+		"import/no-duplicates": [2, { "prefer-inline": true }],
 		"jsdoc/check-param-names": 0,
 		"logical-assignment-operators": [2, "always", { "enforceForIfStatements": true }],
 		"prefer-named-capture-group": 0,

@@ -1,4 +1,4 @@
-import { type Response } from 'undici';
+import type { Response } from 'undici';
 
 export class FetchError extends Error {
 	public readonly type: string | null;

@@ -1,4 +1,4 @@
-import { type Dir } from 'node:fs';
+import type { Dir } from 'node:fs';
 import { mkdir, opendir, readFile, rm, writeFile } from 'node:fs/promises';
 import { URL } from 'node:url';
 import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
@@ -16,7 +16,7 @@ import {
 import ms from 'ms';
 import { commaListAnd } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 import { ChannelUtil } from '#utils';
 
 type LogInput = APIEmbed | JSONEncodable<APIEmbed> | number | string | null | undefined;

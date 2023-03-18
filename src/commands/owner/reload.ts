@@ -10,8 +10,8 @@ import {
 import { ChatManager } from '#chatBridge/managers/ChatManager.js';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
-import { type CommandType } from '#structures/commands/BaseCommandCollection.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandType } from '#structures/commands/BaseCommandCollection.js';
 import { InteractionUtil } from '#utils';
 
 export default class ReloadCommand extends ApplicationCommand {

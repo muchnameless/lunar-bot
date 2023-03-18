@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 import { Offset } from '#constants';
 import { seconds } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalPlayerOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
 

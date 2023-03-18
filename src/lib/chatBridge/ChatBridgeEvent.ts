@@ -1,4 +1,4 @@
-import { type ChatBridge } from './ChatBridge.js';
+import type { ChatBridge } from './ChatBridge.js';
 import { BaseEvent, type BaseEventContext } from '#structures/events/BaseEvent.js';
 
 export interface ChatBridgeEventContext extends BaseEventContext {

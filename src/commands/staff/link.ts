@@ -10,9 +10,9 @@ import { hypixel, mojang } from '#api';
 import { seconds, validateNumber } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { hypixelGuildOption, requiredIgnOption } from '#structures/commands/commonOptions.js';
-import { type Player } from '#structures/database/models/Player.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { InteractionUtil, UserUtil } from '#utils';
 
 export default class LinkCommand extends ApplicationCommand {

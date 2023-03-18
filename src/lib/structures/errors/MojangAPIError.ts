@@ -1,4 +1,4 @@
-import { type Response } from 'undici';
+import type { Response } from 'undici';
 import { FetchError } from './FetchError.js';
 
 export class MojangAPIError extends FetchError {

@@ -1,7 +1,7 @@
-import { type Snowflake } from 'discord.js';
+import type { Snowflake } from 'discord.js';
 import { BaseCache } from './BaseCache.js';
 import { minutes } from '#functions';
-import { type RepliableInteraction } from '#utils';
+import type { RepliableInteraction } from '#utils';
 
 export class InteractionUserCache extends BaseCache<RepliableInteraction> {
 	protected static override readonly _maxAge = minutes(15);

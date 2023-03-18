@@ -1,15 +1,15 @@
 import { Collection } from 'discord.js';
-import {
-	type Attributes,
-	type CreationAttributes,
-	type FindOptions,
-	type InstanceDestroyOptions,
-	type Model,
-	type ModelStatic,
-	type WhereOptions,
+import type {
+	Attributes,
+	CreationAttributes,
+	FindOptions,
+	InstanceDestroyOptions,
+	Model,
+	ModelStatic,
+	WhereOptions,
 } from 'sequelize';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export type ModelResolvable<M extends Model> = M | string;
 

@@ -43,7 +43,7 @@ import { calculateItemPrice } from '#networth/networth.js';
 import { populateCaches, prices, skyblockItems } from '#networth/prices.js';
 import { jobs } from '#root/jobs/index.js';
 import { IGNORED_ERRORS } from '#root/process.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import {
 	ChannelUtil,
 	EmbedUtil,

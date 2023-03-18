@@ -7,11 +7,11 @@ import {
 	type CommandInteractionOption,
 } from 'discord.js';
 import ms from 'ms';
-import { type ChatBridge } from '#chatBridge/ChatBridge.js';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { ChatBridge } from '#chatBridge/ChatBridge.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { HypixelMessageType } from '#chatBridge/constants/index.js';
 import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '#functions';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { hypixelGuildOption } from '#structures/commands/commonOptions.js';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';

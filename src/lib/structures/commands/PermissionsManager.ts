@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import { assertNever } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 interface CommandPermissions {
 	roles: {

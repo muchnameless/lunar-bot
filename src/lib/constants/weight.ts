@@ -1,6 +1,6 @@
 import { type ArrayElementType, objectKeys } from '@sapphire/utilities';
 import lilyConstants from 'lilyweight/lib/constants.json' assert { type: 'json' };
-import { type DungeonTypes, type SKILLS, type SLAYERS } from './skyblock.js';
+import type { DungeonTypes, SKILLS, SLAYERS } from './skyblock.js';
 
 /**
  * senither

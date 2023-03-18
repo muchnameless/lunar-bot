@@ -9,8 +9,8 @@ import {
 import RE2 from 're2';
 import { formatNumber, sortCache } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
-import { type Config } from '#structures/database/models/Config.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
+import type { Config } from '#structures/database/models/Config.js';
 import { InteractionUtil } from '#utils';
 
 export default class ConfigCommand extends ApplicationCommand {

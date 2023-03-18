@@ -11,10 +11,10 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import { type Player } from './Player.js';
+import type { Player } from './Player.js';
 import { TransactionType } from './Transaction.js';
 import { assertNever } from '#functions';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCreationAttributes<TaxCollector>> {
 	public declare readonly client: NonAttribute<LunarClient>;

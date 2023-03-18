@@ -11,9 +11,9 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { NEVER_MATCHING_REGEXP } from '#constants';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreationAttributes<ChatTrigger>> {
 	public declare readonly client: NonAttribute<LunarClient>;

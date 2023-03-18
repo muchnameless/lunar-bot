@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { type NBTInventoryItem } from '@zikeji/hypixel';
+import type { NBTInventoryItem } from '@zikeji/hypixel';
 import { simplify, parse } from 'prismarine-nbt';
 
 /**

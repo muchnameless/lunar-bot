@@ -1,4 +1,4 @@
-import { type Components } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 import { assertNever, getLilyWeight } from './index.js';
 import {
 	DUNGEON_XP_TOTAL,

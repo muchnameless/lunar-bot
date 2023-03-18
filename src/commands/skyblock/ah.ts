@@ -1,4 +1,4 @@
-import { type Components } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 import { stripIndents } from 'common-tags';
 import {
 	ActionRowBuilder,
@@ -27,7 +27,7 @@ import {
 } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import {
 	optionalIgnOption,
 	skyblockFindProfileOption,

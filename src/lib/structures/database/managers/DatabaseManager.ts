@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers';
 import { objectEntries } from '@sapphire/utilities';
-import { type Components } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 import { stripIndents } from 'common-tags';
 import { CronJob as CronJobConstructor } from 'cron';
 import {
@@ -13,16 +13,16 @@ import {
 	type Message,
 } from 'discord.js';
 import { Model, type Sequelize, type ModelStatic } from 'sequelize';
-import { type db as DbType } from '../index.js';
-import { type ChatTrigger } from '../models/ChatTrigger.js';
-import { type Config } from '../models/Config.js';
-import { type DiscordGuild } from '../models/DiscordGuild.js';
-import { type HypixelGuild } from '../models/HypixelGuild.js';
-import { type HypixelGuildBan } from '../models/HypixelGuildBan.js';
-import { type Player } from '../models/Player.js';
-import { type SkyBlockPatchNote } from '../models/SkyBlockPatchNote.js';
-import { type TaxCollector } from '../models/TaxCollector.js';
-import { type Transaction } from '../models/Transaction.js';
+import type { db as DbType } from '../index.js';
+import type { ChatTrigger } from '../models/ChatTrigger.js';
+import type { Config } from '../models/Config.js';
+import type { DiscordGuild } from '../models/DiscordGuild.js';
+import type { HypixelGuild } from '../models/HypixelGuild.js';
+import type { HypixelGuildBan } from '../models/HypixelGuildBan.js';
+import type { Player } from '../models/Player.js';
+import type { SkyBlockPatchNote } from '../models/SkyBlockPatchNote.js';
+import type { TaxCollector } from '../models/TaxCollector.js';
+import type { Transaction } from '../models/Transaction.js';
 import { ConfigManager } from './ConfigManager.js';
 import { HypixelGuildManager } from './HypixelGuildManager.js';
 import { ModelManager } from './ModelManager.js';
@@ -32,7 +32,7 @@ import { hypixel } from '#api';
 import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, UnicodeEmoji } from '#constants';
 import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber, isFirstMinutesOfHour } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 import { ChannelUtil } from '#utils';
 
 export interface Models {
@@ -131,7 +131,8 @@ export class DatabaseManager {
 		// set default config
 		await Promise.all(
 			objectEntries(DEFAULT_CONFIG).map(
-				([key, value]) => this.modelManagers.config.get(key) === null && this.modelManagers.config.set(key, value),
+				async ([key, value]) =>
+					this.modelManagers.config.get(key) === null && this.modelManagers.config.set(key, value),
 			),
 		);
 

@@ -3,7 +3,7 @@ import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.j
 import { Op } from 'sequelize';
 import { seconds } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { requiredPlayerOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
 

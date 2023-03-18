@@ -1,4 +1,4 @@
-import { type Components } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 import { PET_XP_TOTAL } from '../constants/pets.js';
 import { logger } from '#logger';
 

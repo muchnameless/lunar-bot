@@ -4,7 +4,7 @@ import { Enchantment, ItemId } from './constants/index.js';
 import { sql } from '#db';
 import { minutes } from '#functions';
 import { logger } from '#logger';
-import { type ParsedSkyBlockItem } from '#root/jobs/pricesAndPatchNotes.js';
+import type { ParsedSkyBlockItem } from '#root/jobs/pricesAndPatchNotes.js';
 import { Warnings } from '#structures/Warnings.js';
 
 export type SkyBlockItem = Omit<ParsedSkyBlockItem, 'id'>;

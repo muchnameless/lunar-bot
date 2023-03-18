@@ -1,4 +1,4 @@
-import { type Snowflake } from 'discord.js';
+import type { Snowflake } from 'discord.js';
 import { IGN_DEFAULT } from '#chatBridge/constants/index.js';
 
 /**

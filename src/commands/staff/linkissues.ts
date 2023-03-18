@@ -8,7 +8,7 @@ import {
 } from 'discord.js';
 import { escapeIgn, splitMessage } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { hypixelGuildOption } from '#structures/commands/commonOptions.js';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '#utils';
 

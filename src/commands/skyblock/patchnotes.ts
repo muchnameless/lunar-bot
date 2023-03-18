@@ -1,9 +1,9 @@
 import { hideLinkEmbed, hyperlink, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { sql } from '#db';
 import { seconds } from '#functions';
 import { logger } from '#logger';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { InteractionUtil } from '#utils';
 

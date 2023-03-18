@@ -1,7 +1,7 @@
 import { Collection, type ApplicationCommandManager, type GuildApplicationCommandManager } from 'discord.js';
 import { ApplicationCommand } from './ApplicationCommand.js';
 import { BaseCommandCollection } from './BaseCommandCollection.js';
-import { type DualCommand } from './DualCommand.js';
+import type { DualCommand } from './DualCommand.js';
 
 type SlashCommandType = ApplicationCommand | DualCommand;
 

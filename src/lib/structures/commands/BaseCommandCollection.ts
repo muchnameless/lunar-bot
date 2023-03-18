@@ -1,15 +1,15 @@
 import { dirname, basename } from 'node:path';
-import { type URL } from 'node:url';
+import type { URL } from 'node:url';
 import { findFilesRecursively, findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { Collection } from 'discord.js';
-import { type ApplicationCommand } from './ApplicationCommand.js';
-import { type BaseCommand } from './BaseCommand.js';
-import { type BridgeCommand } from './BridgeCommand.js';
-import { type DualCommand } from './DualCommand.js';
+import type { ApplicationCommand } from './ApplicationCommand.js';
+import type { BaseCommand } from './BaseCommand.js';
+import type { BridgeCommand } from './BridgeCommand.js';
+import type { DualCommand } from './DualCommand.js';
 import { JS_FILE_REGEXP } from '#constants';
 import { autocorrect } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 interface CommandLoadOptions {
 	reload?: boolean;

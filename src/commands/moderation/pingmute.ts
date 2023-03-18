@@ -1,12 +1,12 @@
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { logger } from '#logger';
-import { type ApplicationCommandData } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
-import { type BridgeCommandData } from '#structures/commands/BridgeCommand.js';
+import type { ApplicationCommandData } from '#structures/commands/ApplicationCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
+import type { BridgeCommandData } from '#structures/commands/BridgeCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { requiredPlayerOption } from '#structures/commands/commonOptions.js';
-import { type Player } from '#structures/database/models/Player.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { InteractionUtil } from '#utils';
 
 export default class PingMuteCommand extends DualCommand {

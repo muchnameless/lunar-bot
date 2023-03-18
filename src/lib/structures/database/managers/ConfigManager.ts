@@ -1,6 +1,6 @@
-import { type Config } from '../models/Config.js';
+import type { Config } from '../models/Config.js';
 import { ModelManager } from './ModelManager.js';
-import { type ConfigValues } from '#constants';
+import type { ConfigValues } from '#constants';
 import { Warnings } from '#structures/Warnings.js';
 
 export class ConfigManager extends ModelManager<Config> {

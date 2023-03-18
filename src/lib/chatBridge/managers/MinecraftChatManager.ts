@@ -7,9 +7,9 @@ import { TwemojiRegex } from '@sapphire/discord-utilities';
 import { jaroWinkler } from '@skyra/jaro-winkler';
 import { TimestampStyles, type GuildChannel, type Message, type Snowflake } from 'discord.js';
 import minecraftData from 'minecraft-data';
-import { type Client as MinecraftBot } from 'minecraft-protocol';
+import type { Client as MinecraftBot } from 'minecraft-protocol';
 import ms from 'ms';
-import { type HypixelMessage } from '../HypixelMessage.js';
+import type { HypixelMessage } from '../HypixelMessage.js';
 import {
 	HypixelMessageCollector,
 	HypixelMessageCollectorEvent,
@@ -47,7 +47,7 @@ import {
 	trim,
 } from '#functions';
 import { logger } from '#logger';
-import { type Player } from '#structures/database/models/Player.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { UserUtil } from '#utils';
 
 export interface MinecraftChatOptions {

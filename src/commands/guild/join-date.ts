@@ -1,12 +1,12 @@
 import { bold, SlashCommandBuilder, time, type ChatInputCommandInteraction } from 'discord.js';
 import ms from 'ms';
-import { type ChatBridge } from '#chatBridge/ChatBridge.js';
-import { type HypixelUserMessage, type ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
+import type { ChatBridge } from '#chatBridge/ChatBridge.js';
+import type { HypixelUserMessage, ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { IGN_DEFAULT, logErrors } from '#chatBridge/constants/index.js';
 import { MinecraftChatManager } from '#chatBridge/managers/MinecraftChatManager.js';
 import { escapeIgn, seconds } from '#functions';
 import { logger } from '#logger';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { forceOption, hypixelGuildOption, optionalPlayerOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';

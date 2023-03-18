@@ -3,7 +3,7 @@ import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command.
 import { hypixel } from '#api';
 import { SKILLS, SKILL_ACHIEVEMENTS, SKILL_XP_TOTAL, UnicodeEmoji } from '#constants';
 import { formatDecimalNumber, getSkillLevel, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 
 export default class SkillsCommand extends BaseSkyBlockCommand {
 	public constructor(context: CommandContext) {

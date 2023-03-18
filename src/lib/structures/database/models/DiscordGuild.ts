@@ -1,5 +1,5 @@
-import { type ArrayElementType } from '@sapphire/utilities';
-import { type Snowflake } from 'discord.js';
+import type { ArrayElementType } from '@sapphire/utilities';
+import type { Snowflake } from 'discord.js';
 import {
 	Model,
 	DataTypes,
@@ -22,7 +22,7 @@ import {
 	SLAYER_ROLES,
 	SLAYER_TOTAL_ROLES,
 } from '#constants';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 import { toUpperCase } from '#types';
 
 interface WeightRole {

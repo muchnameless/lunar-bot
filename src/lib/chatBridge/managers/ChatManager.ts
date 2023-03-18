@@ -1,6 +1,6 @@
 import { AsyncQueue } from '@sapphire/async-queue';
-import { type ChatBridge } from '../ChatBridge.js';
-import { type HypixelMessage } from '../HypixelMessage.js';
+import type { ChatBridge } from '../ChatBridge.js';
+import type { HypixelMessage } from '../HypixelMessage.js';
 import {
 	HypixelMessageCollectorEvent,
 	type HypixelMessageCollector,

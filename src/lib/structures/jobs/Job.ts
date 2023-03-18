@@ -1,5 +1,5 @@
 import { basename } from 'node:path';
-import { type URL } from 'node:url';
+import type { URL } from 'node:url';
 import { Worker, type WorkerOptions } from 'node:worker_threads';
 import { logger } from '#logger';
 

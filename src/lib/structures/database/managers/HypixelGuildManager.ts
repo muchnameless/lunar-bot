@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
-import { type GuildResolvable } from 'discord.js';
-import { type FindOptions } from 'sequelize';
-import { type HypixelGuild, type UpdateOptions } from '../models/HypixelGuild.js';
+import type { GuildResolvable } from 'discord.js';
+import type { FindOptions } from 'sequelize';
+import type { HypixelGuild, UpdateOptions } from '../models/HypixelGuild.js';
 import { type ModelResolvable, ModelManager } from './ModelManager.js';
 import { autocorrect, compareAlphabetically } from '#functions';
 import { logger } from '#logger';

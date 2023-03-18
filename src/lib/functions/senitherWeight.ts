@@ -1,5 +1,5 @@
-import { type ArrayElementType } from '@sapphire/utilities';
-import { type Components } from '@zikeji/hypixel';
+import type { ArrayElementType } from '@sapphire/utilities';
+import type { Components } from '@zikeji/hypixel';
 import { getSkillLevel } from './index.js';
 import {
 	DUNGEON_CLASSES,

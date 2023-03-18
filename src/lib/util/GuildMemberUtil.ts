@@ -21,7 +21,7 @@ import {
 } from '#constants';
 import { seconds } from '#functions';
 import { logger } from '#logger';
-import { type Player } from '#structures/database/models/Player.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { toUpperCase } from '#types';
 
 export class GuildMemberUtil extends null {
