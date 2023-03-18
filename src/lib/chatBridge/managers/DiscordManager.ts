@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import ms, { type StringValue } from 'ms';
 import { Op } from 'sequelize';
-import { type ChatBridge } from '../ChatBridge.js';
+import type { ChatBridge } from '../ChatBridge.js';
 import {
 	EMOJI_NAME_REGEXP,
 	EMOJI_NAME_TO_UNICODE,

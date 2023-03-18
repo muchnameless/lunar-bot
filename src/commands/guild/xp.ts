@@ -20,7 +20,7 @@ import {
 } from '#constants';
 import { formatDecimalNumber, formatNumber, getDefaultOffset, seconds, upperCaseFirstChar } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalPlayerOption, pageOption, offsetOption } from '#structures/commands/commonOptions.js';
 import { EmbedUtil, InteractionUtil } from '#utils';
 

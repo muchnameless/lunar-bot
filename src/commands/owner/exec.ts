@@ -16,7 +16,7 @@ import {
 } from 'discord.js';
 import BaseOwnerCommand from './~base.js';
 import { logger } from '#logger';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { type RepliableInteraction, InteractionUtil } from '#utils';
 
 const pExec = promisify(exec);

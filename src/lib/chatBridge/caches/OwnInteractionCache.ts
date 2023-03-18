@@ -1,4 +1,4 @@
-import { type CommandInteraction, type Snowflake } from 'discord.js';
+import type { CommandInteraction, Snowflake } from 'discord.js';
 import { BaseCache } from './BaseCache.js';
 import { minutes } from '#functions';
 

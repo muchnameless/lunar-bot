@@ -1,9 +1,9 @@
 import { URL } from 'node:url';
-import { type LevelWithSilent } from 'pino';
+import type { LevelWithSilent } from 'pino';
 import { assertNever } from '#functions';
 import { logger } from '#logger';
 import { populateSkyBlockItems, prices } from '#networth/prices.js';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 import { Job } from '#structures/jobs/Job.js';
 import { JobManager } from '#structures/jobs/JobManager.js';
 

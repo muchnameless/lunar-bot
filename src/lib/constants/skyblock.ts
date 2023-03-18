@@ -1,4 +1,4 @@
-import { type ArrayElementType } from '@sapphire/utilities';
+import type { ArrayElementType } from '@sapphire/utilities';
 import { days, hours, toTotal } from '#functions';
 
 /**

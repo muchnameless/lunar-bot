@@ -1,4 +1,4 @@
-import { type Components } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 import LilyWeight from 'lilyweight';
 import { getSkillLevel, type WeightData } from './index.js';
 import { LILY_SKILL_NAMES, LILY_SKILL_NAMES_API, SLAYERS } from '#constants';

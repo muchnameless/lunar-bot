@@ -1,5 +1,5 @@
 import { type BaseEventContext, BaseEvent } from './BaseEvent.js';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export interface EventContext extends BaseEventContext {
 	emitter: LunarClient;

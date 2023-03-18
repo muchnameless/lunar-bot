@@ -1,4 +1,4 @@
-import { type ArrayElementType } from '@sapphire/utilities';
+import type { ArrayElementType } from '@sapphire/utilities';
 import { stripIndent, oneLine } from 'common-tags';
 import {
 	ActionRowBuilder,
@@ -47,10 +47,10 @@ import {
 	type SkillTypes,
 	type SLAYERS,
 } from '#constants';
-import { type LunarClient } from '#structures/LunarClient.js';
-import { type ConfigManager } from '#structures/database/managers/ConfigManager.js';
-import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
-import { type Player } from '#structures/database/models/Player.js';
+import type { LunarClient } from '#structures/LunarClient.js';
+import type { ConfigManager } from '#structures/database/managers/ConfigManager.js';
+import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { InteractionUtil, UserUtil, type RepliableInteraction } from '#utils';
 
 export type LeaderboardXPTypes =

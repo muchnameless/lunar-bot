@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { Collection } from 'discord.js';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export class CronJobManager {
 	public declare readonly client: LunarClient;

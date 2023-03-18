@@ -1,10 +1,10 @@
-import { type Collection } from 'discord.js';
+import type { Collection } from 'discord.js';
 import ms from 'ms';
-import { type HypixelUserMessage } from '../../HypixelMessage.js';
+import type { HypixelUserMessage } from '../../HypixelMessage.js';
 import { commaListOr, seconds } from '#functions';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { BridgeCommand } from '#structures/commands/BridgeCommand.js';
-import { type DualCommand } from '#structures/commands/DualCommand.js';
+import type { DualCommand } from '#structures/commands/DualCommand.js';
 
 export default class HelpBridgeCommand extends BridgeCommand {
 	public constructor(context: CommandContext) {

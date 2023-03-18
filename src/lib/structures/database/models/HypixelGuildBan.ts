@@ -8,7 +8,7 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 
 export class HypixelGuildBan extends Model<InferAttributes<HypixelGuildBan>, InferCreationAttributes<HypixelGuildBan>> {
 	public declare readonly client: NonAttribute<LunarClient>;

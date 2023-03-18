@@ -1,5 +1,5 @@
 import { env } from 'node:process';
-import { type ClientEvents, type Events } from 'discord.js';
+import type { ClientEvents, Events } from 'discord.js';
 import { logger } from '#logger';
 import { Event } from '#structures/events/Event.js';
 

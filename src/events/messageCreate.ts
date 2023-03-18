@@ -1,4 +1,4 @@
-import { type ClientEvents, type Events, type Message } from 'discord.js';
+import type { ClientEvents, Events, Message } from 'discord.js';
 import { UnicodeEmoji } from '#constants';
 import { Event } from '#structures/events/Event.js';
 import { MessageUtil, UserUtil } from '#utils';

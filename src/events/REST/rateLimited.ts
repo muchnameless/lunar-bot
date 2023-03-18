@@ -1,4 +1,4 @@
-import { type RestEvents, type RESTEvents } from 'discord.js';
+import type { RestEvents, RESTEvents } from 'discord.js';
 import ms from 'ms';
 import { logger } from '#logger';
 import { RESTEvent } from '#structures/events/RESTEvent.js';

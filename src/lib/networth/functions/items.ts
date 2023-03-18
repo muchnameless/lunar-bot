@@ -1,4 +1,4 @@
-import { type NBTInventoryItem } from '@zikeji/hypixel';
+import type { NBTInventoryItem } from '@zikeji/hypixel';
 import { ItemRarityColourCode } from '../constants/index.js';
 
 /**

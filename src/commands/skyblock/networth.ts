@@ -4,13 +4,13 @@ import BaseSkyBlockCommand, {
 	type BaseSkyBlockSlashData,
 	type FetchedData,
 } from './~base-skyblock-command.js';
-import { type HypixelUserMessage, type ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage, ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES, UnicodeEmoji } from '#constants';
 import { autocorrect, formatError, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
 import { logger } from '#logger';
 import { getNetworth } from '#networth/networth.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
-import { type BridgeCommandData } from '#structures/commands/BridgeCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
+import type { BridgeCommandData } from '#structures/commands/BridgeCommand.js';
 import {
 	includeAuctionsOption,
 	includeAuctionsOptionName,

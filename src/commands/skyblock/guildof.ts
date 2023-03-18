@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { hypixel, mojang } from '#api';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { escapeIgn, formatError, seconds } from '#functions';
 import { logger } from '#logger';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { requiredIgnOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';

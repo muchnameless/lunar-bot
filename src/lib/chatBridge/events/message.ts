@@ -14,7 +14,7 @@ import {
 } from '../constants/index.js';
 import { getSkyBlockProfiles, mojang } from '#api';
 import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
-import { type HypixelMessage, type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { ErrorCode, UnicodeEmoji } from '#constants';
 import { assertNever, commaListOr, formatError, getLilyWeight, stringToMS, type WeightData } from '#functions';
 import { logger } from '#logger';

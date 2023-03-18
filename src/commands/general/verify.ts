@@ -1,11 +1,11 @@
-import { type Components } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 import { SlashCommandBuilder, userMention, type ChatInputCommandInteraction } from 'discord.js';
 import { Op } from 'sequelize';
 import { hypixel, mojang } from '#api';
 import { formatError } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { requiredIgnOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil, UserUtil } from '#utils';
 

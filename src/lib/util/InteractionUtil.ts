@@ -48,8 +48,8 @@ import {
 	type SplitOptions,
 } from '#functions';
 import { logger } from '#logger';
-import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
-import { type Player } from '#structures/database/models/Player.js';
+import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import type { Player } from '#structures/database/models/Player.js';
 
 interface InteractionData {
 	autoDeferTimeout: NodeJS.Timeout | null;

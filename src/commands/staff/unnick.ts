@@ -9,7 +9,7 @@ import {
 import { UNKNOWN_IGN } from '#constants';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { GuildMemberUtil, InteractionUtil } from '#utils';
 
 export default class UnnickCommand extends ApplicationCommand {

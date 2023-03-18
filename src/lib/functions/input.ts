@@ -1,4 +1,4 @@
-import { type Interaction } from 'discord.js';
+import type { Interaction } from 'discord.js';
 import { mojang } from '#api';
 import { HypixelMessage, type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { UserUtil } from '#utils';

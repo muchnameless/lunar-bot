@@ -1,9 +1,9 @@
-import { type EventEmitter } from 'node:events';
+import type { EventEmitter } from 'node:events';
 import { basename } from 'node:path';
-import { type URL } from 'node:url';
+import type { URL } from 'node:url';
 import { findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { Collection } from 'discord.js';
-import { type BaseEvent } from './BaseEvent.js';
+import type { BaseEvent } from './BaseEvent.js';
 import { JS_FILE_REGEXP } from '#constants';
 import { logger } from '#logger';
 

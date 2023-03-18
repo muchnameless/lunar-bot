@@ -1,4 +1,4 @@
-import { type Response } from 'undici';
+import type { Response } from 'undici';
 
 /**
  * consumes the response body to help with gc

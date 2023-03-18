@@ -14,7 +14,7 @@ import { STATS_URL_BASE } from '#constants';
 import { buildPaginationActionRow, escapeIgn } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { pageOption, requiredIgnOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
 

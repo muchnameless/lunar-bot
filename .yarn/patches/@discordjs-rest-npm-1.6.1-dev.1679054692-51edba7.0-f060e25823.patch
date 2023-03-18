@@ -1,7 +1,16 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..1c77fc3c39eb0d5bae0ec9e4e54dcfa5a7b573e7 100644
+index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..de0c68e18e20f63fc9f274444e86533bd41b7dcd 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
+@@ -26,7 +26,7 @@ declare const DefaultRestOptions: {
+ /**
+  * The events that the REST manager emits
+  */
+-declare const enum RESTEvents {
++declare enum RESTEvents {
+     Debug = "restDebug",
+     HandlerSweep = "handlerSweep",
+     HashSweep = "hashSweep",
 @@ -43,6 +43,7 @@ type ImageSize = (typeof ALLOWED_SIZES)[number];
  declare const OverwrittenMimeTypes: {
      readonly 'image/apng': "image/png";
@@ -10,6 +19,15 @@ index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..1c77fc3c39eb0d5bae0ec9e4e54dcfa5
  
  /**
   * The options used for image URLs
+@@ -632,7 +633,7 @@ interface RequestHeaders {
+ /**
+  * Possible API methods to be used when doing requests
+  */
+-declare const enum RequestMethod {
++declare enum RequestMethod {
+     Delete = "DELETE",
+     Get = "GET",
+     Patch = "PATCH",
 @@ -752,6 +753,12 @@ declare class RequestManager extends EventEmitter {
       * Stops the request handler sweeping interval
       */
@@ -30,7 +48,7 @@ index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..1c77fc3c39eb0d5bae0ec9e4e54dcfa5
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 42e45b3cfea4c38daa8a57033237cd678fab5d48..6139b34fdb9b7420e709da687f9e231a53cdeb0f 100644
+index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618feac205862 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -542,7 +560,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..6139b34fdb9b7420e709da687f9e231a
    }
    /**
    * Generates route data for an endpoint:method
-@@ -1187,6 +1317,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1187,11 +1317,18 @@ var RequestManager = class extends import_node_events.EventEmitter {
    * @internal
    */
    static generateRouteData(endpoint, method) {
@@ -556,6 +574,12 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..6139b34fdb9b7420e709da687f9e231a
      const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
      const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+     let exceptions = "";
+-    if (method === "DELETE" && baseRoute === "/channels/:id/messages/:id") {
++    if (method === RequestMethod.Delete && baseRoute === "/channels/:id/messages/:id") {
+       const id = /\d{17,19}$/.exec(endpoint)[0];
+       const timestamp = import_snowflake.DiscordSnowflake.timestampFrom(id);
+       if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
 @@ -1339,6 +1476,7 @@ var version = "[VI]{{inject}}[/VI]";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
@@ -565,7 +589,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..6139b34fdb9b7420e709da687f9e231a
    DefaultRestOptions,
    DefaultUserAgent,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index de35a9e869a039185a63fafe44d4bc6bf21e50c4..614e09aa5099c252c07940d697f7000e874a4591 100644
+index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94390a66b8 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -69,6 +69,7 @@ var OverwrittenMimeTypes = {
@@ -1037,7 +1061,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..614e09aa5099c252c07940d697f7000e
    * Generates route data for an endpoint:method
    *
    * @param endpoint - The raw endpoint to generalize
-@@ -1137,6 +1266,13 @@ var RequestManager = class extends EventEmitter {
+@@ -1137,11 +1266,18 @@ var RequestManager = class extends EventEmitter {
    * @internal
    */
    static generateRouteData(endpoint, method) {
@@ -1051,6 +1075,12 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..614e09aa5099c252c07940d697f7000e
      const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
      const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+     let exceptions = "";
+-    if (method === "DELETE" && baseRoute === "/channels/:id/messages/:id") {
++    if (method === RequestMethod.Delete && baseRoute === "/channels/:id/messages/:id") {
+       const id = /\d{17,19}$/.exec(endpoint)[0];
+       const timestamp = DiscordSnowflake.timestampFrom(id);
+       if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
 @@ -1288,6 +1424,7 @@ export {
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,

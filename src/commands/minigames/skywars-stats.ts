@@ -3,7 +3,7 @@ import { oneLine } from 'common-tags';
 import { SlashCommandBuilder } from 'discord.js';
 import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
 import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '#functions';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 
 interface SkyWarsStats {

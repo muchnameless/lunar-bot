@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events';
 import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { parentPort } from 'node:worker_threads';
-import { type ArrayElementType } from '@sapphire/utilities';
+import type { ArrayElementType } from '@sapphire/utilities';
 import { Client, type Components } from '@zikeji/hypixel';
 import { CronJob } from 'cron';
 import { Collection } from 'discord.js';
@@ -11,7 +11,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { Agent, fetch, setGlobalDispatcher } from 'undici';
 import { JobType } from './index.js';
 import { logger } from '#logger';
-import { type Enchantment } from '#networth/constants/enchantments.js';
+import type { Enchantment } from '#networth/constants/enchantments.js';
 import { ItemId } from '#networth/constants/itemId.js';
 import { ItemRarity } from '#networth/constants/itemRarity.js';
 import { getEnchantment } from '#networth/functions/enchantments.js'; // separate imports to not import unused files in the worker
@@ -414,7 +414,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 	};
 
 	const processAuctions = async (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
-		Promise.all(_auctions.map((auction) => auction.bin && processAuction(auction, auction.starting_bid)));
+		Promise.all(_auctions.map(async (auction) => auction.bin && processAuction(auction, auction.starting_bid)));
 
 	let retries = 0;
 

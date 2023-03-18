@@ -1,9 +1,9 @@
-import { type ParseArgsConfig } from 'node:util';
-import { type Awaitable } from 'discord.js';
+import type { ParseArgsConfig } from 'node:util';
+import type { Awaitable } from 'discord.js';
 import { BaseCommand, type CommandContext, type CommandData } from './BaseCommand.js';
 import { BaseCommandCollection } from './BaseCommandCollection.js';
-import { type BridgeCommandCollection } from './BridgeCommandCollection.js';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { BridgeCommandCollection } from './BridgeCommandCollection.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 
 export interface BridgeCommandData extends CommandData {
 	aliases?: string[];

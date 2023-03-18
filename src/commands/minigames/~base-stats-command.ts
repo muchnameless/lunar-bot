@@ -1,10 +1,10 @@
-import { type ChatInputCommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import { hypixel } from '#api';
-import { type HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { formatDecimalNumber, formatError, getUuidAndIgn } from '#functions';
 import { logger } from '#logger';
 import { DualCommand } from '#structures/commands/DualCommand.js';
-import { type Awaited } from '#types';
+import type { Awaited } from '#types';
 import { InteractionUtil } from '#utils';
 
 export type FetchedData = Awaited<ReturnType<BaseStatsCommand['_fetchData']>>;

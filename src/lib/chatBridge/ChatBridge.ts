@@ -1,10 +1,10 @@
 import { EventEmitter, once } from 'node:events';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
-import { type Awaitable, type Message as DiscordMessage, type MessageCreateOptions } from 'discord.js';
-import { type Client as MinecraftBot } from 'minecraft-protocol';
-import { type ChatBridgeManager } from './ChatBridgeManager.js';
-import { type HypixelMessage } from './HypixelMessage.js';
+import type { Awaitable, Message as DiscordMessage, MessageCreateOptions } from 'discord.js';
+import type { Client as MinecraftBot } from 'minecraft-protocol';
+import type { ChatBridgeManager } from './ChatBridgeManager.js';
+import type { HypixelMessage } from './HypixelMessage.js';
 import { CHAT_METHOD_BY_TYPE, HypixelMessageType } from './constants/index.js';
 import { ForwardRejectionType } from './managers/DiscordChatManager.js';
 import { DiscordManager, type ReadyDiscordManager } from './managers/DiscordManager.js';
@@ -16,9 +16,9 @@ import {
 } from './managers/MinecraftChatManager.js';
 import { minutes, seconds } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
-import { type HypixelGuild } from '#structures/database/models/HypixelGuild.js';
-import { type Player } from '#structures/database/models/Player.js';
+import type { LunarClient } from '#structures/LunarClient.js';
+import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
+import type { Player } from '#structures/database/models/Player.js';
 import { EventCollection } from '#structures/events/EventCollection.js';
 
 export interface BroadcastOptions {

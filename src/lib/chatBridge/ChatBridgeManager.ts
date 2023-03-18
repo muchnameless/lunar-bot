@@ -1,7 +1,7 @@
 import { once } from 'node:events';
 import { env } from 'node:process';
 import { setInterval } from 'node:timers';
-import { type URL } from 'node:url';
+import type { URL } from 'node:url';
 import { stripIndents } from 'common-tags';
 import { InteractionType, MessageFlags, type Message, type Snowflake } from 'discord.js';
 import { ChatBridge, ChatBridgeEvent } from './ChatBridge.js';
@@ -11,7 +11,7 @@ import { DiscordChatManager } from './managers/DiscordChatManager.js';
 import { UnicodeEmoji } from '#constants';
 import { minutes } from '#functions';
 import { logger } from '#logger';
-import { type LunarClient } from '#structures/LunarClient.js';
+import type { LunarClient } from '#structures/LunarClient.js';
 import { BridgeCommandCollection } from '#structures/commands/BridgeCommandCollection.js';
 import { type RepliableInteraction, MessageUtil } from '#utils';
 

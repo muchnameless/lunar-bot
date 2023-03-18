@@ -1,4 +1,4 @@
-import { type Interaction, type Guild, type Snowflake } from 'discord.js';
+import type { Interaction, Guild, Snowflake } from 'discord.js';
 import { commaListOr } from '#functions';
 import { InteractionUtil } from '#utils';
 

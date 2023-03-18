@@ -9,7 +9,6 @@
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"importHelpers": true,
-		"importsNotUsedAsValues": "remove",
 		"incremental": true,
 		"lib": ["esnext"],
 		"module": "esnext",
@@ -22,11 +21,11 @@
 		"noUnusedParameters": false,
 		"removeComments": true,
 		"resolveJsonModule": true,
-		"skipLibCheck": true,
 		"skipDefaultLibCheck": true,
+		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
 		"target": "esnext",
-		"useDefineForClassFields": true
+		"verbatimModuleSyntax": true
 	}
 }

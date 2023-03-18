@@ -20,7 +20,7 @@ import ms from 'ms';
 import { hypixel, imgur, mojang } from '#api';
 import { buildDeleteButton, escapeIgn, formatNumber, seconds, trim } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
-import { type CommandContext } from '#structures/commands/BaseCommand.js';
+import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { InteractionUtil } from '#utils';
 
 export default class DebugCommand extends ApplicationCommand {
