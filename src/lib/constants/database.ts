@@ -21,6 +21,16 @@ export const HYPIXEL_UPDATE_INTERVAL = 5;
  */
 export const MOJANG_UPDATE_INTERVAL = 10;
 
+export const enum Offset {
+	CompetitionEnd = 'CompetitionEnd',
+	CompetitionStart = 'CompetitionStart',
+	Current = 'current',
+	Day = 'day',
+	Mayor = 'OffsetMayor',
+	Month = 'OffsetMonth',
+	Week = 'OffsetWeek',
+}
+
 // generate default config
 export const DEFAULT_CONFIG = {
 	AUTO_GUILD_RANKS: true,
@@ -37,7 +47,6 @@ export const DEFAULT_CONFIG = {
 	COMPETITION_SCHEDULED: false,
 	COMPETITION_START_TIME: Number.POSITIVE_INFINITY,
 	CURRENT_COMPETITION: 'lily-weight',
-	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	DEFAULT_XP_OFFSET: Offset.Week,
 	ELEMENTS_PER_PAGE: 10,
 	EMBED_BLUE: 0x34_98_db,
@@ -95,16 +104,6 @@ type Loosen<T> = {
 };
 
 export type ConfigValues = Loosen<Mutable<typeof DEFAULT_CONFIG>>;
-
-export const enum Offset {
-	CompetitionEnd = 'CompetitionEnd',
-	CompetitionStart = 'CompetitionStart',
-	Current = 'current',
-	Day = 'day',
-	Mayor = 'OffsetMayor',
-	Month = 'OffsetMonth',
-	Week = 'OffsetWeek',
-}
 
 export const XP_OFFSETS = [
 	Offset.CompetitionEnd,

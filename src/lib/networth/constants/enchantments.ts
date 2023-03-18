@@ -1,29 +1,5 @@
 import { ItemId } from './index.js';
 
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/**
- * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/src/constants/misc.js#L96
- */
-export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
-	[ItemId.Bonemerang]: new Set([
-		//
-		Enchantment.Overload,
-		Enchantment.Power,
-		Enchantment.UltimateSoulEater,
-	]),
-	[ItemId.DeathBow]: new Set([
-		//
-		Enchantment.Overload,
-		Enchantment.Power,
-		Enchantment.UltimateSoulEater,
-	]),
-	[ItemId.PromisingShovel]: new Set([
-		//
-		Enchantment.Efficiency,
-	]),
-} as const; // satisfies Partial<Record<ItemId, Set<Enchantment>>>; // TODO: breaks networth:180
-/* eslint-enable @typescript-eslint/no-use-before-define */
-
 export const enum Enchantment {
 	Angler = 'angler',
 	AquaAffinity = 'aqua_affinity',
@@ -148,3 +124,25 @@ export const enum Enchantment {
 	Venomous = 'venomous',
 	Vicious = 'vicious',
 }
+
+/**
+ * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/src/constants/misc.js#L96
+ */
+export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
+	[ItemId.Bonemerang]: new Set([
+		//
+		Enchantment.Overload,
+		Enchantment.Power,
+		Enchantment.UltimateSoulEater,
+	]),
+	[ItemId.DeathBow]: new Set([
+		//
+		Enchantment.Overload,
+		Enchantment.Power,
+		Enchantment.UltimateSoulEater,
+	]),
+	[ItemId.PromisingShovel]: new Set([
+		//
+		Enchantment.Efficiency,
+	]),
+} as const satisfies Partial<Record<ItemId, Set<Enchantment>>>;
