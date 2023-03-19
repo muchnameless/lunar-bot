@@ -1,0 +1,52 @@
+diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
+index 7121706791cb31041409470ebb682febbd23d8c5..acbd77d5c7bc2ea981403f85cd8f736225783607 100644
+--- a/dist/defaultWorker.js
++++ b/dist/defaultWorker.js
+@@ -497,7 +497,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       `Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`
+     ]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
+diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
+index ef7ad88a5cec6493776ef592258c881311ce2578..bd4b4f536f0918e2a224f0a7db25ae9a0592c616 100644
+--- a/dist/defaultWorker.mjs
++++ b/dist/defaultWorker.mjs
+@@ -475,7 +475,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       `Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`
+     ]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
+diff --git a/dist/index.js b/dist/index.js
+index a7cdfec17c6d9689048b83128a42181058ea4508..c5bde38265c391127d7df9038c54adcac19b4e6f 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -657,7 +657,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       `Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`
+     ]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? (0, import_node_timers.setTimeout)(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
+diff --git a/dist/index.mjs b/dist/index.mjs
+index e50d3e135aa803126055efd04461fd81200b49ec..8f594913f5115e2ebe649e6df7cc9f3966638a37 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -616,7 +616,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       `Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`
+     ]);
+     const controller = new AbortController();
+-    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration).unref() : null;
++    const timeout = timeoutDuration ? setTimeout(() => controller.abort(), timeoutDuration) : null;
+     if (timeout) {
+       this.timeouts.set(event, timeout);
+     }
