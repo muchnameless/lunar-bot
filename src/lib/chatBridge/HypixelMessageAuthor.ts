@@ -2,8 +2,8 @@ import type { GuildMember } from 'discord.js';
 import type { ChatBridge } from './ChatBridge.js';
 import type { MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 import { mojang } from '#api';
+import type { Player } from '#db/models/Player.js';
 import { logger } from '#logger';
-import type { Player } from '#structures/database/models/Player.js';
 
 type AuthorData = {
 	guildRank?: string | null;

@@ -11,11 +11,11 @@ import type { DiscordChatManager } from './managers/DiscordChatManager.js';
 import type { MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 import { mojang } from '#api';
 import { AnsiColour, AnsiFormat, NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
+import type { Player } from '#db/models/Player.js';
 import { ansiTag, minutes, uuidToBustURL } from '#functions';
 import { logger } from '#logger';
 import type { BridgeCommand } from '#structures/commands/BridgeCommand.js';
 import type { DualCommand } from '#structures/commands/DualCommand.js';
-import type { Player } from '#structures/database/models/Player.js';
 import { MessageUtil } from '#utils';
 
 export type ParseArgsConfigOptions = NonNullable<ParseArgsConfig['options']>;

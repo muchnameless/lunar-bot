@@ -1,7 +1,7 @@
 import { Collection, type Snowflake } from 'discord.js';
 import type { BaseCommandCollection, CommandType } from './BaseCommandCollection.js';
+import type { HypixelGuild } from '#db/models/HypixelGuild.js';
 import type { LunarClient } from '#structures/LunarClient.js';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
 
 export interface CommandContext {
 	category: string | null;

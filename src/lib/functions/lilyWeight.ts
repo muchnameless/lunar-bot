@@ -1,7 +1,8 @@
 import type { Components } from '@zikeji/hypixel';
 import LilyWeight from 'lilyweight';
-import { getSkillLevel, type WeightData } from './index.js';
 import { LILY_SKILL_NAMES, LILY_SKILL_NAMES_API, SLAYERS } from '#constants';
+import type { WeightData } from '#functions/senitherWeight.js';
+import { getSkillLevel } from '#functions/skyblock.js';
 
 export const { getWeightRaw: getLilyWeightRaw } = LilyWeight;
 

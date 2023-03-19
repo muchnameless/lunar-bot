@@ -11,6 +11,8 @@ import {
 	type Snowflake,
 } from 'discord.js';
 import { ChatBridgeManager } from '#chatBridge/ChatBridgeManager.js';
+import { db } from '#db';
+import { DatabaseManager } from '#db/managers/DatabaseManager.js';
 import { hours, safePromiseAll } from '#functions';
 import { logger } from '#logger';
 import { exitProcess } from '#root/process.js';
@@ -18,8 +20,6 @@ import { CronJobManager } from '#structures/CronJobManager.js';
 import { LogHandler } from '#structures/LogHandler.js';
 import { ApplicationCommandCollection } from '#structures/commands/ApplicationCommandCollection.js';
 import { PermissionsManager } from '#structures/commands/PermissionsManager.js';
-import { db } from '#structures/database/index.js';
-import { DatabaseManager } from '#structures/database/managers/DatabaseManager.js';
 import { EventCollection } from '#structures/events/EventCollection.js';
 import { GuildUtil, UserUtil } from '#utils';
 

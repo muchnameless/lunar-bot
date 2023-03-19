@@ -1,10 +1,10 @@
 import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import { DiscordAPIError, RESTJSONErrorCodes, type Message, type MessageCreateOptions, type User } from 'discord.js';
-import { EmbedUtil } from './index.js';
 import { redis } from '#api';
+import type { Player } from '#db/models/Player.js';
 import { hours } from '#functions';
 import { logger } from '#logger';
-import type { Player } from '#structures/database/models/Player.js';
+import { EmbedUtil } from '#utils/EmbedUtil.js';
 
 export interface SendDMOptions extends MessageCreateOptions {
 	/**

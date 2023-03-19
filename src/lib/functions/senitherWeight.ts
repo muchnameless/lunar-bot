@@ -1,6 +1,5 @@
 import type { ArrayElementType } from '@sapphire/utilities';
 import type { Components } from '@zikeji/hypixel';
-import { getSkillLevel } from './index.js';
 import {
 	DUNGEON_CLASSES,
 	DUNGEON_EXPONENTS,
@@ -16,6 +15,7 @@ import {
 	SLAYERS,
 	type DungeonTypes,
 } from '#constants';
+import { getSkillLevel } from '#functions/skyblock.js';
 
 export type WeightData = ReturnType<typeof getSenitherWeight>;
 

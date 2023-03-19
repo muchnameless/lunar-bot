@@ -15,9 +15,11 @@ import {
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
-import { ChannelUtil, EmbedUtil, UserUtil, type SendOptions } from './index.js';
 import { commaListAnd, minutes } from '#functions';
 import { logger } from '#logger';
+import { ChannelUtil, type SendOptions } from '#utils/ChannelUtil.js';
+import { EmbedUtil } from '#utils/EmbedUtil.js';
+import { UserUtil } from '#utils/UserUtil.js';
 
 interface ReplyMessage extends Message {
 	reference: NonNullable<Message['reference']> & {
@@ -255,6 +257,7 @@ export class MessageUtil extends null {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		try {
+			// eslint-disable-next-line @typescript-eslint/return-await
 			return await ChannelUtil.send(message.channel, {
 				..._options,
 				reply: {

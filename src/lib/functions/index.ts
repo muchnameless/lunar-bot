@@ -1,6 +1,3 @@
-// on top cause circular
-export * from './time.js';
-
 export * from './array.js';
 export * from './components.js';
 export * from './error.js';
@@ -15,5 +12,6 @@ export * from './senitherWeight.js';
 export * from './skyblock.js';
 export * from './stringUtil.js';
 export * from './stringValidators.js';
+export * from './time.js';
 export * from './types.js';
 export * from './util.js';

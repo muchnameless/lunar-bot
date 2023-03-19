@@ -1,5 +1,6 @@
 import type { ArrayElementType } from '@sapphire/utilities';
-import { days, hours, toTotal } from '#functions';
+import { toTotal } from '#functions/array.js';
+import { days, hours } from '#functions/time.js';
 
 /**
  * misc

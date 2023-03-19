@@ -8,8 +8,8 @@ import {
 	SKILLS,
 	SKYBLOCK_YEAR_0,
 	SLAYERS,
-} from './index.js';
-import { minutes, seconds, weeks } from '#functions';
+} from '#constants/skyblock.js';
+import { minutes, seconds, weeks } from '#functions/time.js';
 
 /**
  * CronJob interval in minutes for Hypixel API updates

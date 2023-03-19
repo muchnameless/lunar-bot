@@ -11,9 +11,11 @@ import {
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
-import { GuildUtil, UserUtil, EmbedUtil } from './index.js';
 import { commaListAnd } from '#functions';
 import { logger } from '#logger';
+import { EmbedUtil } from '#utils/EmbedUtil.js';
+import { GuildUtil } from '#utils/GuildUtil.js';
+import { UserUtil } from '#utils/UserUtil.js';
 
 export interface SendOptions extends MessageCreateOptions {
 	rejectOnError?: boolean;

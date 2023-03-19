@@ -8,7 +8,6 @@ import {
 	type Role,
 	type PartialGuildMember,
 } from 'discord.js';
-import { GuildUtil, UserUtil, type RoleCollection, type RoleResolvables, type SendDMOptions } from './index.js';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
@@ -19,10 +18,12 @@ import {
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
 } from '#constants';
+import type { Player } from '#db/models/Player.js';
 import { seconds } from '#functions';
 import { logger } from '#logger';
-import type { Player } from '#structures/database/models/Player.js';
 import { toUpperCase } from '#types';
+import { GuildUtil, type RoleCollection, type RoleResolvables } from '#utils/GuildUtil.js';
+import { UserUtil, type SendDMOptions } from '#utils/UserUtil.js';
 
 export class GuildMemberUtil extends null {
 	/**

@@ -40,8 +40,8 @@ import {
 import { BaseCommand, type CommandContext, type CommandData } from './BaseCommand.js';
 import { ephemeralOption } from './commonOptions.js';
 import { CustomIdKey } from '#constants';
+import type { HypixelGuild } from '#db/models/HypixelGuild.js';
 import { logger } from '#logger';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
 import { missingPermissionsError } from '#structures/errors/MissingPermissionsError.js';
 import { InteractionUtil } from '#utils';
 

@@ -1,4 +1,5 @@
-import { ItemCategory, ItemId } from './index.js';
+import { ItemCategory } from './itemCategory.js';
+import { ItemId } from './itemId.js';
 
 export const ALLOWED_RECOMB_CATEGORIES = new Set([
 	ItemCategory.Accessory,

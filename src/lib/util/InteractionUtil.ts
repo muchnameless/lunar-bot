@@ -35,8 +35,9 @@ import {
 	type ModalBuilder,
 	type TextBasedChannel,
 } from 'discord.js';
-import { ChannelUtil, MessageUtil, UserUtil, type SendDMOptions } from './index.js';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '#constants';
+import type { HypixelGuild } from '#db/models/HypixelGuild.js';
+import type { Player } from '#db/models/Player.js';
 import {
 	assertNever,
 	buildVisibilityButton,
@@ -48,8 +49,9 @@ import {
 	type SplitOptions,
 } from '#functions';
 import { logger } from '#logger';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
-import type { Player } from '#structures/database/models/Player.js';
+import { ChannelUtil } from '#utils/ChannelUtil.js';
+import { MessageUtil } from '#utils/MessageUtil.js';
+import { UserUtil, type SendDMOptions } from '#utils/UserUtil.js';
 
 interface InteractionData {
 	autoDeferTimeout: NodeJS.Timeout | null;
@@ -1072,6 +1074,7 @@ export class InteractionUtil extends null {
 		if (interaction.ephemeral) return null;
 
 		try {
+			// eslint-disable-next-line @typescript-eslint/return-await
 			return await MessageUtil.react(await interaction.fetchReply(), ...emojis);
 		} catch (error) {
 			return logger.error({ err: error, ...this.logInfo(interaction), data: emojis }, '[INTERACTION REACT]');

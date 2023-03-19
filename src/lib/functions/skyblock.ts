@@ -1,5 +1,4 @@
 import type { Components } from '@zikeji/hypixel';
-import { assertNever, getLilyWeight } from './index.js';
 import {
 	DUNGEON_XP_TOTAL,
 	FindProfileStrategy,
@@ -12,6 +11,8 @@ import {
 	type DungeonTypes,
 	type SkillTypes,
 } from '#constants';
+import { getLilyWeight } from '#functions/lilyWeight.js';
+import { assertNever } from '#functions/types.js';
 
 /**
  * returns the true and progression level for the provided skill type

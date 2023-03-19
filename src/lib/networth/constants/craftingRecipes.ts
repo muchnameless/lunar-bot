@@ -1,4 +1,4 @@
-import { ItemId } from './index.js';
+import { ItemId } from './itemId.js';
 
 type CraftingRecipe = Partial<Record<ItemId, number>>;
 

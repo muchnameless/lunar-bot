@@ -35,11 +35,11 @@ import {
 	UnicodeEmoji,
 	UNKNOWN_IGN,
 } from '#constants';
+import type { ChatBridgeChannel } from '#db/models/HypixelGuild.js';
+import type { Player } from '#db/models/Player.js';
 import { assertNever, asyncReplace, days, hours, minutes, seconds } from '#functions';
 import { logger } from '#logger';
 import type { DualCommand } from '#structures/commands/DualCommand.js';
-import type { ChatBridgeChannel } from '#structures/database/models/HypixelGuild.js';
-import type { Player } from '#structures/database/models/Player.js';
 import { WebhookError } from '#structures/errors/WebhookError.js';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
 

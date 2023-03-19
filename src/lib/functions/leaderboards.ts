@@ -19,16 +19,6 @@ import {
 	type StringSelectMenuInteraction,
 	type User,
 } from 'discord.js';
-import {
-	assertNever,
-	buildPaginationActionRow,
-	days,
-	formatDecimalNumber,
-	formatNumber,
-	minutes,
-	seconds,
-	upperCaseFirstChar,
-} from './index.js';
 import { redis } from '#api';
 import {
 	GUILD_ID_ALL,
@@ -47,10 +37,15 @@ import {
 	type SkillTypes,
 	type SLAYERS,
 } from '#constants';
+import type { ConfigManager } from '#db/managers/ConfigManager.js';
+import type { HypixelGuild } from '#db/models/HypixelGuild.js';
+import type { Player } from '#db/models/Player.js';
+import { buildPaginationActionRow } from '#functions/components.js';
+import { formatDecimalNumber, formatNumber } from '#functions/numberUtil.js';
+import { upperCaseFirstChar } from '#functions/stringUtil.js';
+import { days, minutes, seconds } from '#functions/time.js';
+import { assertNever } from '#functions/types.js';
 import type { LunarClient } from '#structures/LunarClient.js';
-import type { ConfigManager } from '#structures/database/managers/ConfigManager.js';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
-import type { Player } from '#structures/database/models/Player.js';
 import { InteractionUtil, UserUtil, type RepliableInteraction } from '#utils';
 
 export type LeaderboardXPTypes =

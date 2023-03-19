@@ -2,7 +2,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { AutoCompleteLimits } from '@sapphire/discord-utilities';
 import type { PickByValue } from '@sapphire/utilities';
 import type { Awaitable, Collection } from 'discord.js';
-import { jaroWinklerSimilarity } from './index.js';
+import { jaroWinklerSimilarity } from '#functions/stringUtil.js';
 import { logger } from '#logger';
 
 interface AutocorrectResult<T> {

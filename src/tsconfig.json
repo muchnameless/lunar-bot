@@ -7,16 +7,21 @@
 		"baseUrl": ".",
 		"paths": {
 			"#api": ["api/index.ts"],
+			"#api/*": ["api/*"],
 			"#chatBridge/*": ["lib/chatBridge/*"],
 			"#chatBridge/constants": ["lib/chatBridge/constants/index.ts"],
 			"#constants": ["lib/constants/index.ts"],
+			"#constants/*": ["lib/constants/*"],
 			"#db": ["lib/structures/database/index.ts"],
+			"#db/*": ["lib/structures/database/*"],
 			"#functions": ["lib/functions/index.ts"],
+			"#functions/*": ["lib/functions/*"],
 			"#logger": ["logger.ts"],
 			"#networth/*": ["lib/networth/*"],
 			"#structures/*": ["lib/structures/*"],
 			"#types": ["lib/types/util.ts"],
 			"#utils": ["lib/util/index.ts"],
+			"#utils/*": ["lib/util/*"],
 			"#root/*": ["*"]
 		}
 	},

@@ -11,13 +11,13 @@ import {
 	type TextChannel,
 } from 'discord.js';
 import { Op } from 'sequelize';
+import { TransactionType } from '#db/models/Transaction.js';
 import { escapeIgn, formatNumber, safePromiseAll, validateNumber } from '#functions';
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { hypixelGuildOption, optionalPlayerOption, requiredPlayerOption } from '#structures/commands/commonOptions.js';
-import { TransactionType } from '#structures/database/models/Transaction.js';
 import { ChannelUtil, InteractionUtil } from '#utils';
 
 export default class TaxCommand extends ApplicationCommand {

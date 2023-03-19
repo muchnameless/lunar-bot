@@ -1,4 +1,4 @@
-import { redis } from './index.js';
+import { redis } from '#api/redis.js';
 import { RedisKey } from '#constants';
 import { days, hours, minutes } from '#functions';
 import { MojangClient, type MojangResult } from '#structures/MojangClient.js';

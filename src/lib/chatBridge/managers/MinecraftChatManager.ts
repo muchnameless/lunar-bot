@@ -37,6 +37,7 @@ import {
 import { ChatManager } from './ChatManager.js';
 import { ForwardRejectionType } from './DiscordChatManager.js';
 import { MC_CLIENT_VERSION } from '#constants';
+import type { Player } from '#db/models/Player.js';
 import {
 	asyncReplace,
 	cleanFormattedNumber,
@@ -47,7 +48,6 @@ import {
 	trim,
 } from '#functions';
 import { logger } from '#logger';
-import type { Player } from '#structures/database/models/Player.js';
 import { UserUtil } from '#utils';
 
 export interface MinecraftChatOptions {

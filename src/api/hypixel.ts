@@ -1,6 +1,6 @@
 import { env } from 'node:process';
 import { Client, type DefaultMeta } from '@zikeji/hypixel';
-import { redis } from './index.js';
+import { redis } from '#api/redis.js';
 import { RedisKey } from '#constants';
 import { days, minutes, seconds } from '#functions';
 import { logger } from '#logger';

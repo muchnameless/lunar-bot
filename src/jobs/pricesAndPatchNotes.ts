@@ -10,6 +10,7 @@ import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
 import { Agent, fetch, setGlobalDispatcher } from 'undici';
 import { JobType } from './index.js';
+import { sql } from '#db/sql.js';
 import { logger } from '#logger';
 import type { Enchantment } from '#networth/constants/enchantments.js';
 import { ItemId } from '#networth/constants/itemId.js';
@@ -18,7 +19,6 @@ import { getEnchantment } from '#networth/functions/enchantments.js'; // separat
 import { transformItemData } from '#networth/functions/nbt.js';
 import { calculatePetSkillLevel } from '#networth/functions/pets.js';
 import { consumeBody } from '#root/lib/functions/fetch.js';
-import { sql } from '#structures/database/sql.js';
 import { FetchError } from '#structures/errors/FetchError.js';
 
 setGlobalDispatcher(new Agent({ connect: { timeout: 30_000 } }));

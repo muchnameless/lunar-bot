@@ -1,4 +1,4 @@
-import { ItemId } from './index.js';
+import { ItemId } from './itemId.js';
 
 export const ATTRIBUTES_BASE = {
 	[ItemId.GlowstoneGauntlet]: ItemId.GlowstoneGauntlet,

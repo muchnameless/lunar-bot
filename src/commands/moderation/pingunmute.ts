@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
 import PingMute from './pingmute.js';
+import type { Player } from '#db/models/Player.js';
 import { logger } from '#logger';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { requiredPlayerOption } from '#structures/commands/commonOptions.js';
-import type { Player } from '#structures/database/models/Player.js';
 
 export default class PingUnmuteCommand extends PingMute {
 	public constructor(context: CommandContext) {

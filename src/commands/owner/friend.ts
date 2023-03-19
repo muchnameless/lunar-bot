@@ -1,9 +1,9 @@
 import { codeBlock, SlashCommandBuilder, type ButtonInteraction, type ChatInputCommandInteraction } from 'discord.js';
+import type { HypixelGuild } from '#db/models/HypixelGuild.js';
 import { buildPaginationActionRow } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { hypixelGuildOption, pageOption } from '#structures/commands/commonOptions.js';
-import type { HypixelGuild } from '#structures/database/models/HypixelGuild.js';
 import { InteractionUtil } from '#utils';
 
 export default class FriendCommand extends ApplicationCommand {

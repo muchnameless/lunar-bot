@@ -1,11 +1,11 @@
 import { stripIndent } from 'common-tags';
 import { codeBlock, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { mojang } from '#api';
+import { TransactionType } from '#db/models/Transaction.js';
 import { formatNumber } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
-import { TransactionType } from '#structures/database/models/Transaction.js';
 import { EmbedUtil, InteractionUtil } from '#utils';
 
 export default class DonationsCommand extends ApplicationCommand {

@@ -1,9 +1,9 @@
 import { codeBlock, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { TransactionType } from '#db/models/Transaction.js';
 import { formatNumber, removeNumberFormatting, safePromiseAll, validateNumber } from '#functions';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { requiredPlayerOption } from '#structures/commands/commonOptions.js';
-import { TransactionType } from '#structures/database/models/Transaction.js';
 import { InteractionUtil } from '#utils';
 
 export default class DonateCommand extends ApplicationCommand {

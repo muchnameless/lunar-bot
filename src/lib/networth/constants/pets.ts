@@ -1,4 +1,5 @@
-import { ItemRarity, ItemId } from './index.js';
+import { ItemId } from './itemId.js';
+import { ItemRarity } from './itemRarity.js';
 import { toTotal } from '#root/lib/functions/array.js';
 
 /**

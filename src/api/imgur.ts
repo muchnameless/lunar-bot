@@ -1,5 +1,5 @@
 import { env } from 'node:process';
-import { redis } from './index.js';
+import { redis } from '#api/redis.js';
 import { RedisKey } from '#constants';
 import { days } from '#functions';
 import { ImgurClient } from '#structures/ImgurClient.js';
