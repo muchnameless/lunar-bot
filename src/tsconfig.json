@@ -14,15 +14,16 @@
 			"#constants/*": ["lib/constants/*"],
 			"#db": ["lib/structures/database/index.ts"],
 			"#db/*": ["lib/structures/database/*"],
+			"#decorators": ["lib/decorators/index.js"],
 			"#functions": ["lib/functions/index.ts"],
 			"#functions/*": ["lib/functions/*"],
 			"#logger": ["logger.ts"],
 			"#networth/*": ["lib/networth/*"],
+			"#root/*": ["*"],
 			"#structures/*": ["lib/structures/*"],
 			"#types": ["lib/types/util.ts"],
 			"#utils": ["lib/util/index.ts"],
-			"#utils/*": ["lib/util/*"],
-			"#root/*": ["*"]
+			"#utils/*": ["lib/util/*"]
 		}
 	},
 	"exclude": ["./tsconfig.json"]

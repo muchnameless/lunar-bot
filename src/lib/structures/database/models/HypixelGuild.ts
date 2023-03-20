@@ -30,6 +30,7 @@ import { hypixel, mojang } from '#api';
 import type { ChatBridge, MinecraftReadyChatBridge } from '#chatBridge/ChatBridge.js';
 import { mute, setRank, unmute, type HypixelMessageType } from '#chatBridge/constants/index.js';
 import { Offset, SKYBLOCK_XP_TYPES, UNKNOWN_IGN, XP_OFFSETS_TIME } from '#constants';
+import { noConcurrency } from '#decorators';
 import {
 	cleanFormattedNumber,
 	compareAlphabetically,
@@ -165,16 +166,6 @@ export class HypixelGuild extends Model<
 	public declare kickCooldown: CreationOptional<number>;
 
 	public declare lastKickAt: CreationOptional<Date>;
-
-	/**
-	 * guild ranks sync
-	 */
-	private _syncRanksPromise: NonAttribute<Promise<this> | null> = null;
-
-	/**
-	 * guild data update
-	 */
-	private _updateDataPromise: NonAttribute<Promise<this> | null> = null;
 
 	/**
 	 * guild players
@@ -703,22 +694,8 @@ export class HypixelGuild extends Model<
 	 *
 	 * @param options
 	 */
-	public async updateData(options?: UpdateOptions) {
-		if (this._updateDataPromise) return this._updateDataPromise;
-
-		try {
-			return await (this._updateDataPromise = this.#updateData(options));
-		} finally {
-			this._updateDataPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within updateData
-	 *
-	 * @internal
-	 */
-	async #updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
+	@noConcurrency
+	public async updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
 		try {
 			const { guild } = await hypixel.guild.id(this.guildId, { force: true });
 
@@ -1095,24 +1072,8 @@ export class HypixelGuild extends Model<
 	/**
 	 * syncs guild ranks with the weight leaderboard
 	 */
+	@noConcurrency
 	public async syncRanks() {
-		if (!this.client.config.get('AUTO_GUILD_RANKS') || !this.syncRanksEnabled) return this;
-
-		if (this._syncRanksPromise) return this._syncRanksPromise;
-
-		try {
-			return await (this._syncRanksPromise = this.#syncRanks());
-		} finally {
-			this._syncRanksPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within syncRanks
-	 *
-	 * @internal
-	 */
-	async #syncRanks() {
 		try {
 			const nonStaffWithWeight: PlayerWithWeight[] = [];
 

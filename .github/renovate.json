@@ -1,12 +1,6 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": [
-		"config:base",
-		":disableRateLimiting",
-		":semanticCommitTypeAll(chore)",
-		"default:automergeDigest",
-		"helpers:followTypescriptNext"
-	],
+	"extends": ["config:base", ":disableRateLimiting", ":semanticCommitTypeAll(chore)", "default:automergeDigest"],
 	"postUpdateOptions": ["yarnDedupeHighest"],
 	"labels": ["dependencies"],
 	"npm": {
