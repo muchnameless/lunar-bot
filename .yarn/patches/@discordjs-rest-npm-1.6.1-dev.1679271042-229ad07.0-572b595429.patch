@@ -1,16 +1,7 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..de0c68e18e20f63fc9f274444e86533bd41b7dcd 100644
+index 5b25f414148a792e1dba153947c2cd4a24ec866d..de0c68e18e20f63fc9f274444e86533bd41b7dcd 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
-@@ -26,7 +26,7 @@ declare const DefaultRestOptions: {
- /**
-  * The events that the REST manager emits
-  */
--declare const enum RESTEvents {
-+declare enum RESTEvents {
-     Debug = "restDebug",
-     HandlerSweep = "handlerSweep",
-     HashSweep = "hashSweep",
 @@ -43,6 +43,7 @@ type ImageSize = (typeof ALLOWED_SIZES)[number];
  declare const OverwrittenMimeTypes: {
      readonly 'image/apng': "image/png";
@@ -19,15 +10,6 @@ index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..de0c68e18e20f63fc9f274444e86533b
  
  /**
   * The options used for image URLs
-@@ -632,7 +633,7 @@ interface RequestHeaders {
- /**
-  * Possible API methods to be used when doing requests
-  */
--declare const enum RequestMethod {
-+declare enum RequestMethod {
-     Delete = "DELETE",
-     Get = "GET",
-     Patch = "PATCH",
 @@ -752,6 +753,12 @@ declare class RequestManager extends EventEmitter {
       * Stops the request handler sweeping interval
       */
@@ -48,7 +30,7 @@ index f3ea4790d3b55669ec0dfdda8844ab3897b8d0b8..de0c68e18e20f63fc9f274444e86533b
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618feac205862 100644
+index 9af97a82054a02d3ee88152af52f02b83eff96f9..183b4cc09d6063ef6b65765c42098e5a008db269 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -59,7 +41,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
    CDN: () => CDN,
    DefaultRestOptions: () => DefaultRestOptions,
    DefaultUserAgent: () => DefaultUserAgent,
-@@ -119,6 +120,7 @@ var OverwrittenMimeTypes = {
+@@ -102,6 +103,7 @@ var OverwrittenMimeTypes = {
    // https://github.com/discordjs/discord.js/issues/8557
    "image/apng": "image/png"
  };
@@ -67,7 +49,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
  
  // src/lib/CDN.ts
  var CDN = class {
-@@ -456,16 +458,15 @@ __name(RateLimitError, "RateLimitError");
+@@ -431,16 +433,15 @@ __name(RateLimitError, "RateLimitError");
  // src/lib/RequestManager.ts
  var import_node_buffer2 = require("buffer");
  var import_node_events = require("events");
@@ -87,7 +69,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
  var import_undici3 = require("undici");
  
  // src/lib/utils/utils.ts
-@@ -582,10 +583,141 @@ function shouldRetry(error) {
+@@ -552,10 +553,147 @@ function shouldRetry(error) {
    return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
  }
  __name(shouldRetry, "shouldRetry");
@@ -105,40 +87,47 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 +// src/lib/handlers/BurstHandler.ts
 +var BurstHandler = class {
 +  /**
-+  * @param manager - The request manager
-+  * @param hash - The hash that this RequestHandler handles
-+  * @param majorParameter - The major parameter for this handler
-+  */
++   * @param manager - The request manager
++   * @param hash - The hash that this RequestHandler handles
++   * @param majorParameter - The major parameter for this handler
++   */
 +  constructor(manager, hash, majorParameter) {
 +    this.manager = manager;
 +    this.hash = hash;
 +    this.majorParameter = majorParameter;
-+    this.inactive = false;
 +    this.id = `${hash}:${majorParameter}`;
 +  }
 +  /**
-+  * Emits a debug message
-+  *
-+  * @param message - The message to debug
-+  */
++   * {@inheritdoc IHandler.id}
++   */
++  id;
++  /**
++   * {@inheritDoc IHandler.inactive}
++   */
++  inactive = false;
++  /**
++   * Emits a debug message
++   *
++   * @param message - The message to debug
++   */
 +  debug(message) {
-+    this.manager.emit(RESTEvents.Debug, `[REST ${this.id}] ${message}`);
++    this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
 +  }
 +  /**
-+  * {@inheritDoc IHandler.queueRequest}
-+  */
++   * {@inheritDoc IHandler.queueRequest}
++   */
 +  async queueRequest(routeId, url, options, requestData) {
 +    return this.runRequest(routeId, url, options, requestData);
 +  }
 +  /**
-+  * The method that actually makes the request to the api, and updates info about the bucket accordingly
-+  *
-+  * @param routeId - The generalized api route with literal ids for major parameters
-+  * @param url - The fully resolved url to make the request to
-+  * @param options - The fetch options needed to make the request
-+  * @param requestData - Extra data from the user's request needed for errors and additional processing
-+  * @param retries - The number of retries this request has already attempted (recursion)
-+  */
++   * The method that actually makes the request to the api, and updates info about the bucket accordingly
++   *
++   * @param routeId - The generalized api route with literal ids for major parameters
++   * @param url - The fully resolved url to make the request to
++   * @param options - The fetch options needed to make the request
++   * @param requestData - Extra data from the user's request needed for errors and additional processing
++   * @param retries - The number of retries this request has already attempted (recursion)
++   */
 +  async runRequest(routeId, url, options, requestData, retries = 0) {
 +    const method = options.method ?? "get";
 +    const controller = new AbortController();
@@ -152,10 +141,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 +    }
 +    let res;
 +    try {
-+      res = await (0, import_undici3.request)(url, {
-+        ...options,
-+        signal: controller.signal
-+      });
++      res = await (0, import_undici3.request)(url, { ...options, signal: controller.signal });
 +    } catch (error) {
 +      if (!(error instanceof Error))
 +        throw error;
@@ -188,18 +174,20 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 +        majorParameter: this.majorParameter,
 +        global: isGlobal
 +      });
-+      this.debug([
-+        "Encountered unexpected 429 rate limit",
-+        `  Global         : ${isGlobal}`,
-+        `  Method         : ${method}`,
-+        `  URL            : ${url}`,
-+        `  Bucket         : ${routeId.bucketRoute}`,
-+        `  Major parameter: ${routeId.majorParameter}`,
-+        `  Hash           : ${this.hash}`,
-+        `  Limit          : ${Number.POSITIVE_INFINITY}`,
-+        `  Retry After    : ${retryAfter}ms`,
-+        `  Sublimit       : None`
-+      ].join("\n"));
++      this.debug(
++        [
++          "Encountered unexpected 429 rate limit",
++          `  Global         : ${isGlobal}`,
++          `  Method         : ${method}`,
++          `  URL            : ${url}`,
++          `  Bucket         : ${routeId.bucketRoute}`,
++          `  Major parameter: ${routeId.majorParameter}`,
++          `  Hash           : ${this.hash}`,
++          `  Limit          : ${Number.POSITIVE_INFINITY}`,
++          `  Retry After    : ${retryAfter}ms`,
++          `  Sublimit       : None`
++        ].join("\n")
++      );
 +      await (0, import_promises.setTimeout)(retryAfter);
 +      return this.runRequest(routeId, url, options, requestData, retries);
 +    } else if (status >= 500 && status < 600) {
@@ -228,20 +216,20 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 +var import_promises2 = require("timers/promises");
 +var import_async_queue = require("@sapphire/async-queue");
 +var import_undici4 = require("undici");
- var QueueType;
- (function(QueueType2) {
-   QueueType2[QueueType2["Standard"] = 0] = "Standard";
-@@ -670,21 +802,9 @@ var SequentialHandler = class {
-   * @param time - The amount of time to delay all requests for
-   */
+ var SequentialHandler = class {
+   /**
+    * @param manager - The request manager
+@@ -644,21 +782,9 @@ var SequentialHandler = class {
+    * @param time - The amount of time to delay all requests for
+    */
    async globalDelayFor(time) {
 -    await (0, import_promises.setTimeout)(time);
 +    await (0, import_promises2.setTimeout)(time);
      this.manager.globalDelay = null;
    }
 -  /*
--  * Determines whether the request should be queued or whether a RateLimitError should be thrown
--  */
+-   * Determines whether the request should be queued or whether a RateLimitError should be thrown
+-   */
 -  async onRateLimit(rateLimitData) {
 -    const { options } = this.manager;
 -    if (!options.rejectOnRateLimit)
@@ -252,9 +240,9 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 -    }
 -  }
    /**
-   * {@inheritDoc IHandler.queueRequest}
-   */
-@@ -747,7 +867,7 @@ var SequentialHandler = class {
+    * {@inheritDoc IHandler.queueRequest}
+    */
+@@ -719,7 +845,7 @@ var SequentialHandler = class {
        } else {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
@@ -263,16 +251,16 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
        }
        const rateLimitData = {
          timeToReset: timeout2,
-@@ -760,7 +880,7 @@ var SequentialHandler = class {
+@@ -732,7 +858,7 @@ var SequentialHandler = class {
          global: isGlobal
        };
-       this.manager.emit(RESTEvents.RateLimited, rateLimitData);
+       this.manager.emit("rateLimited" /* RateLimited */, rateLimitData);
 -      await this.onRateLimit(rateLimitData);
 +      await onRateLimit(this.manager, rateLimitData);
        if (isGlobal) {
          this.debug(`Global rate limit hit, blocking all requests for ${timeout2}ms`);
        } else {
-@@ -775,7 +895,7 @@ var SequentialHandler = class {
+@@ -747,7 +873,7 @@ var SequentialHandler = class {
      this.manager.globalRemaining--;
      const method = options.method ?? "get";
      const controller = new AbortController();
@@ -281,16 +269,13 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
      if (requestData.signal) {
        const signal = requestData.signal;
        if (signal.aborted)
-@@ -785,7 +905,7 @@ var SequentialHandler = class {
+@@ -757,16 +883,16 @@ var SequentialHandler = class {
      }
      let res;
      try {
--      res = await (0, import_undici3.request)(url, {
-+      res = await (0, import_undici4.request)(url, {
-         ...options,
-         signal: controller.signal
-       });
-@@ -793,11 +913,11 @@ var SequentialHandler = class {
+-      res = await (0, import_undici3.request)(url, { ...options, signal: controller.signal });
++      res = await (0, import_undici4.request)(url, { ...options, signal: controller.signal });
+     } catch (error) {
        if (!(error instanceof Error))
          throw error;
        if (shouldRetry(error) && retries !== this.manager.options.retries) {
@@ -302,9 +287,9 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 -      (0, import_node_timers.clearTimeout)(timeout);
 +      (0, import_node_timers2.clearTimeout)(timeout);
      }
-     if (this.manager.listenerCount(RESTEvents.Response)) {
-       this.manager.emit(RESTEvents.Response, {
-@@ -849,18 +969,7 @@ var SequentialHandler = class {
+     if (this.manager.listenerCount("response" /* Response */)) {
+       this.manager.emit(
+@@ -813,18 +939,7 @@ var SequentialHandler = class {
        }
      }
      if (status === 401 || status === 403 || status === 429) {
@@ -315,7 +300,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 -      invalidCount++;
 -      const emitInvalid = this.manager.options.invalidRequestWarningInterval > 0 && invalidCount % this.manager.options.invalidRequestWarningInterval === 0;
 -      if (emitInvalid) {
--        this.manager.emit(RESTEvents.InvalidRequestWarning, {
+-        this.manager.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
 -          count: invalidCount,
 -          remainingTime: invalidCountResetTime - Date.now()
 -        });
@@ -324,7 +309,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
      }
      if (status >= 200 && status < 300) {
        return res;
-@@ -875,7 +984,7 @@ var SequentialHandler = class {
+@@ -839,7 +954,7 @@ var SequentialHandler = class {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
        }
@@ -333,7 +318,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
          timeToReset: timeout2,
          limit: limit2,
          method,
-@@ -906,7 +1015,7 @@ var SequentialHandler = class {
+@@ -872,7 +987,7 @@ var SequentialHandler = class {
          }
          this.#sublimitPromise?.resolve();
          this.#sublimitPromise = null;
@@ -341,8 +326,8 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 +        await (0, import_promises2.setTimeout)(sublimitTimeout);
          let resolve;
          const promise = new Promise((res2) => resolve = res2);
-         this.#sublimitPromise = {
-@@ -921,7 +1030,7 @@ var SequentialHandler = class {
+         this.#sublimitPromise = { promise, resolve };
+@@ -884,7 +999,7 @@ var SequentialHandler = class {
        return this.runRequest(routeId, url, options, requestData, retries);
      } else if (status >= 500 && status < 600) {
        if (retries !== this.manager.options.retries) {
@@ -351,16 +336,16 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
        }
        throw new HTTPError(status, method, url, requestData);
      } else {
-@@ -948,6 +1057,8 @@ var RequestMethod;
-   RequestMethod2["Post"] = "POST";
+@@ -911,6 +1026,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Put"] = "PUT";
- })(RequestMethod || (RequestMethod = {}));
+   return RequestMethod2;
+ })(RequestMethod || {});
 +var invalidCount = 0;
 +var invalidCountResetTime = null;
  var RequestManager = class extends import_node_events.EventEmitter {
    /**
-   * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
-@@ -990,7 +1101,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+@@ -957,7 +1074,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
      }, "validateMaxInterval");
      if (this.options.hashSweepInterval !== 0 && this.options.hashSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.hashSweepInterval);
@@ -369,10 +354,10 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
          const sweptHashes = new import_collection.Collection();
          const currentDate = Date.now();
          this.hashes.sweep((val, key) => {
-@@ -1004,11 +1115,11 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -971,11 +1088,11 @@ var RequestManager = class extends import_node_events.EventEmitter {
            return shouldSweep;
          });
-         this.emit(RESTEvents.HashSweep, sweptHashes);
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
 -      }, this.options.hashSweepInterval).unref();
 +      }, this.options.hashSweepInterval);
      }
@@ -383,19 +368,19 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
          const sweptHandlers = new import_collection.Collection();
          this.handlers.sweep((val, key) => {
            const { inactive } = val;
-@@ -1019,7 +1130,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -986,7 +1103,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
            return inactive;
          });
-         this.emit(RESTEvents.HandlerSweep, sweptHandlers);
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
 -      }, this.options.handlerSweepInterval).unref();
 +      }, this.options.handlerSweepInterval);
      }
    }
    /**
-@@ -1046,19 +1157,19 @@ var RequestManager = class extends import_node_events.EventEmitter {
-   * @param request - All the information needed to make a request
-   * @returns The response from the api request
-   */
+@@ -1013,19 +1130,19 @@ var RequestManager = class extends import_node_events.EventEmitter {
+    * @param request - All the information needed to make a request
+    * @returns The response from the api request
+    */
 -  async queueRequest(request2) {
 -    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
 -    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
@@ -421,19 +406,19 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
      });
    }
    /**
-@@ -1069,7 +1180,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
-   * @internal
-   */
+@@ -1036,7 +1153,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+    * @internal
+    */
    createHandler(hash, majorParameter) {
 -    const queue = new SequentialHandler(this, hash, majorParameter);
 +    const queue = majorParameter === BurstHandlerMajorIdKey ? new BurstHandler(this, hash, majorParameter) : new SequentialHandler(this, hash, majorParameter);
      this.handlers.set(queue.id, queue);
      return queue;
    }
-@@ -1078,11 +1189,11 @@ var RequestManager = class extends import_node_events.EventEmitter {
-   *
-   * @param request - The request data
-   */
+@@ -1045,11 +1162,11 @@ var RequestManager = class extends import_node_events.EventEmitter {
+    *
+    * @param request - The request data
+    */
 -  async resolveRequest(request2) {
 +  async resolveRequest(request3) {
      const { options } = this;
@@ -445,7 +430,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
        if (resolvedQuery !== "") {
          query = `?${resolvedQuery}`;
        }
-@@ -1091,21 +1202,21 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1058,21 +1175,21 @@ var RequestManager = class extends import_node_events.EventEmitter {
        ...this.options.headers,
        "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
      };
@@ -475,8 +460,8 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
          const fileKey = file.key ?? `files[${index}]`;
          if (import_node_buffer2.Buffer.isBuffer(file.data)) {
            const { fileTypeFromBuffer } = await getFileType();
-@@ -1129,21 +1240,21 @@ var RequestManager = class extends import_node_events.EventEmitter {
-           }), file.name);
+@@ -1088,46 +1205,65 @@ var RequestManager = class extends import_node_events.EventEmitter {
+           formData.append(fileKey, new import_node_buffer2.Blob([`${file.data}`], { type: file.contentType }), file.name);
          }
        }
 -      if (request2.body != null) {
@@ -502,19 +487,14 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
        } else {
 -        finalBody = JSON.stringify(request2.body);
 +        finalBody = JSON.stringify(request3.body);
-         additionalHeaders = {
-           "Content-Type": "application/json"
-         };
-@@ -1152,16 +1263,16 @@ var RequestManager = class extends import_node_events.EventEmitter {
+         additionalHeaders = { "Content-Type": "application/json" };
+       }
+     }
      finalBody = await resolveBody(finalBody);
      const fetchOptions = {
-       headers: {
--        ...request2.headers,
-+        ...request3.headers,
-         ...additionalHeaders,
-         ...headers
-       },
+-      headers: { ...request2.headers, ...additionalHeaders, ...headers },
 -      method: request2.method.toUpperCase()
++      headers: { ...request3.headers, ...additionalHeaders, ...headers },
 +      method: request3.method.toUpperCase()
      };
      if (finalBody !== void 0) {
@@ -522,28 +502,27 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
      }
 -    fetchOptions.dispatcher = request2.dispatcher ?? this.agent ?? void 0;
 +    fetchOptions.dispatcher = request3.dispatcher ?? this.agent ?? void 0;
-     return {
-       url,
-       fetchOptions
-@@ -1171,13 +1282,32 @@ var RequestManager = class extends import_node_events.EventEmitter {
-   * Stops the hash sweeping interval
-   */
+     return { url, fetchOptions };
+   }
+   /**
+    * Stops the hash sweeping interval
+    */
    clearHashSweeper() {
 -    (0, import_node_timers2.clearInterval)(this.hashTimer);
 +    (0, import_node_timers3.clearInterval)(this.hashTimer);
    }
    /**
-   * Stops the request handler sweeping interval
-   */
+    * Stops the request handler sweeping interval
+    */
    clearHandlerSweeper() {
 -    (0, import_node_timers2.clearInterval)(this.handlerTimer);
 +    (0, import_node_timers3.clearInterval)(this.handlerTimer);
 +  }
 +  /**
-+  * Increment the invalid request count and emit warning if necessary
-+  *
-+  * @internal
-+  */
++   * Increment the invalid request count and emit warning if necessary
++   *
++   * @internal
++   */
 +  incrementInvalidCount() {
 +    if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
 +      invalidCountResetTime = Date.now() + 1e3 * 60 * 10;
@@ -552,17 +531,17 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
 +    invalidCount++;
 +    const emitInvalid = this.options.invalidRequestWarningInterval > 0 && invalidCount % this.options.invalidRequestWarningInterval === 0;
 +    if (emitInvalid) {
-+      this.emit(RESTEvents.InvalidRequestWarning, {
++      this.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
 +        count: invalidCount,
 +        remainingTime: invalidCountResetTime - Date.now()
 +      });
 +    }
    }
    /**
-   * Generates route data for an endpoint:method
-@@ -1187,11 +1317,18 @@ var RequestManager = class extends import_node_events.EventEmitter {
-   * @internal
-   */
+    * Generates route data for an endpoint:method
+@@ -1137,6 +1273,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
+    * @internal
+    */
    static generateRouteData(endpoint, method) {
 +    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
 +      return {
@@ -574,13 +553,7 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
      const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
      const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
-     let exceptions = "";
--    if (method === "DELETE" && baseRoute === "/channels/:id/messages/:id") {
-+    if (method === RequestMethod.Delete && baseRoute === "/channels/:id/messages/:id") {
-       const id = /\d{17,19}$/.exec(endpoint)[0];
-       const timestamp = import_snowflake.DiscordSnowflake.timestampFrom(id);
-       if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
-@@ -1339,6 +1476,7 @@ var version = "[VI]{{inject}}[/VI]";
+@@ -1271,6 +1414,7 @@ var version = "1.6.1-dev.1679271042-229ad07.0";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -589,10 +562,10 @@ index 42e45b3cfea4c38daa8a57033237cd678fab5d48..096e6c487f5a7639ca309b25286618fe
    DefaultRestOptions,
    DefaultUserAgent,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94390a66b8 100644
+index 0c814a9b0109f0eaf39c42b2f9539983880b42b5..beab0e3f3c77768f029c9bcfce4aec6199d3b88e 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -69,6 +69,7 @@ var OverwrittenMimeTypes = {
+@@ -52,6 +52,7 @@ var OverwrittenMimeTypes = {
    // https://github.com/discordjs/discord.js/issues/8557
    "image/apng": "image/png"
  };
@@ -600,7 +573,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
  
  // src/lib/CDN.ts
  var CDN = class {
-@@ -412,10 +413,9 @@ import { lazy } from "@discordjs/util";
+@@ -387,10 +388,9 @@ import { lazy } from "@discordjs/util";
  import { DiscordSnowflake } from "@sapphire/snowflake";
  import { FormData as FormData2 } from "undici";
  
@@ -612,7 +585,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
  import { request } from "undici";
  
  // src/lib/utils/utils.ts
-@@ -532,10 +532,141 @@ function shouldRetry(error) {
+@@ -502,10 +502,147 @@ function shouldRetry(error) {
    return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
  }
  __name(shouldRetry, "shouldRetry");
@@ -630,40 +603,47 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 +// src/lib/handlers/BurstHandler.ts
 +var BurstHandler = class {
 +  /**
-+  * @param manager - The request manager
-+  * @param hash - The hash that this RequestHandler handles
-+  * @param majorParameter - The major parameter for this handler
-+  */
++   * @param manager - The request manager
++   * @param hash - The hash that this RequestHandler handles
++   * @param majorParameter - The major parameter for this handler
++   */
 +  constructor(manager, hash, majorParameter) {
 +    this.manager = manager;
 +    this.hash = hash;
 +    this.majorParameter = majorParameter;
-+    this.inactive = false;
 +    this.id = `${hash}:${majorParameter}`;
 +  }
 +  /**
-+  * Emits a debug message
-+  *
-+  * @param message - The message to debug
-+  */
++   * {@inheritdoc IHandler.id}
++   */
++  id;
++  /**
++   * {@inheritDoc IHandler.inactive}
++   */
++  inactive = false;
++  /**
++   * Emits a debug message
++   *
++   * @param message - The message to debug
++   */
 +  debug(message) {
-+    this.manager.emit(RESTEvents.Debug, `[REST ${this.id}] ${message}`);
++    this.manager.emit("restDebug" /* Debug */, `[REST ${this.id}] ${message}`);
 +  }
 +  /**
-+  * {@inheritDoc IHandler.queueRequest}
-+  */
++   * {@inheritDoc IHandler.queueRequest}
++   */
 +  async queueRequest(routeId, url, options, requestData) {
 +    return this.runRequest(routeId, url, options, requestData);
 +  }
 +  /**
-+  * The method that actually makes the request to the api, and updates info about the bucket accordingly
-+  *
-+  * @param routeId - The generalized api route with literal ids for major parameters
-+  * @param url - The fully resolved url to make the request to
-+  * @param options - The fetch options needed to make the request
-+  * @param requestData - Extra data from the user's request needed for errors and additional processing
-+  * @param retries - The number of retries this request has already attempted (recursion)
-+  */
++   * The method that actually makes the request to the api, and updates info about the bucket accordingly
++   *
++   * @param routeId - The generalized api route with literal ids for major parameters
++   * @param url - The fully resolved url to make the request to
++   * @param options - The fetch options needed to make the request
++   * @param requestData - Extra data from the user's request needed for errors and additional processing
++   * @param retries - The number of retries this request has already attempted (recursion)
++   */
 +  async runRequest(routeId, url, options, requestData, retries = 0) {
 +    const method = options.method ?? "get";
 +    const controller = new AbortController();
@@ -677,10 +657,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 +    }
 +    let res;
 +    try {
-+      res = await request(url, {
-+        ...options,
-+        signal: controller.signal
-+      });
++      res = await request(url, { ...options, signal: controller.signal });
 +    } catch (error) {
 +      if (!(error instanceof Error))
 +        throw error;
@@ -713,18 +690,20 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 +        majorParameter: this.majorParameter,
 +        global: isGlobal
 +      });
-+      this.debug([
-+        "Encountered unexpected 429 rate limit",
-+        `  Global         : ${isGlobal}`,
-+        `  Method         : ${method}`,
-+        `  URL            : ${url}`,
-+        `  Bucket         : ${routeId.bucketRoute}`,
-+        `  Major parameter: ${routeId.majorParameter}`,
-+        `  Hash           : ${this.hash}`,
-+        `  Limit          : ${Number.POSITIVE_INFINITY}`,
-+        `  Retry After    : ${retryAfter}ms`,
-+        `  Sublimit       : None`
-+      ].join("\n"));
++      this.debug(
++        [
++          "Encountered unexpected 429 rate limit",
++          `  Global         : ${isGlobal}`,
++          `  Method         : ${method}`,
++          `  URL            : ${url}`,
++          `  Bucket         : ${routeId.bucketRoute}`,
++          `  Major parameter: ${routeId.majorParameter}`,
++          `  Hash           : ${this.hash}`,
++          `  Limit          : ${Number.POSITIVE_INFINITY}`,
++          `  Retry After    : ${retryAfter}ms`,
++          `  Sublimit       : None`
++        ].join("\n")
++      );
 +      await sleep(retryAfter);
 +      return this.runRequest(routeId, url, options, requestData, retries);
 +    } else if (status >= 500 && status < 600) {
@@ -753,20 +732,20 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 +import { setTimeout as sleep2 } from "node:timers/promises";
 +import { AsyncQueue } from "@sapphire/async-queue";
 +import { request as request2 } from "undici";
- var QueueType;
- (function(QueueType2) {
-   QueueType2[QueueType2["Standard"] = 0] = "Standard";
-@@ -620,21 +751,9 @@ var SequentialHandler = class {
-   * @param time - The amount of time to delay all requests for
-   */
+ var SequentialHandler = class {
+   /**
+    * @param manager - The request manager
+@@ -594,21 +731,9 @@ var SequentialHandler = class {
+    * @param time - The amount of time to delay all requests for
+    */
    async globalDelayFor(time) {
 -    await sleep(time);
 +    await sleep2(time);
      this.manager.globalDelay = null;
    }
 -  /*
--  * Determines whether the request should be queued or whether a RateLimitError should be thrown
--  */
+-   * Determines whether the request should be queued or whether a RateLimitError should be thrown
+-   */
 -  async onRateLimit(rateLimitData) {
 -    const { options } = this.manager;
 -    if (!options.rejectOnRateLimit)
@@ -777,9 +756,9 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 -    }
 -  }
    /**
-   * {@inheritDoc IHandler.queueRequest}
-   */
-@@ -697,7 +816,7 @@ var SequentialHandler = class {
+    * {@inheritDoc IHandler.queueRequest}
+    */
+@@ -669,7 +794,7 @@ var SequentialHandler = class {
        } else {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
@@ -788,16 +767,16 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
        }
        const rateLimitData = {
          timeToReset: timeout2,
-@@ -710,7 +829,7 @@ var SequentialHandler = class {
+@@ -682,7 +807,7 @@ var SequentialHandler = class {
          global: isGlobal
        };
-       this.manager.emit(RESTEvents.RateLimited, rateLimitData);
+       this.manager.emit("rateLimited" /* RateLimited */, rateLimitData);
 -      await this.onRateLimit(rateLimitData);
 +      await onRateLimit(this.manager, rateLimitData);
        if (isGlobal) {
          this.debug(`Global rate limit hit, blocking all requests for ${timeout2}ms`);
        } else {
-@@ -725,7 +844,7 @@ var SequentialHandler = class {
+@@ -697,7 +822,7 @@ var SequentialHandler = class {
      this.manager.globalRemaining--;
      const method = options.method ?? "get";
      const controller = new AbortController();
@@ -806,16 +785,13 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
      if (requestData.signal) {
        const signal = requestData.signal;
        if (signal.aborted)
-@@ -735,7 +854,7 @@ var SequentialHandler = class {
+@@ -707,16 +832,16 @@ var SequentialHandler = class {
      }
      let res;
      try {
--      res = await request(url, {
-+      res = await request2(url, {
-         ...options,
-         signal: controller.signal
-       });
-@@ -743,11 +862,11 @@ var SequentialHandler = class {
+-      res = await request(url, { ...options, signal: controller.signal });
++      res = await request2(url, { ...options, signal: controller.signal });
+     } catch (error) {
        if (!(error instanceof Error))
          throw error;
        if (shouldRetry(error) && retries !== this.manager.options.retries) {
@@ -827,9 +803,9 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 -      clearTimeout(timeout);
 +      clearTimeout2(timeout);
      }
-     if (this.manager.listenerCount(RESTEvents.Response)) {
-       this.manager.emit(RESTEvents.Response, {
-@@ -799,18 +918,7 @@ var SequentialHandler = class {
+     if (this.manager.listenerCount("response" /* Response */)) {
+       this.manager.emit(
+@@ -763,18 +888,7 @@ var SequentialHandler = class {
        }
      }
      if (status === 401 || status === 403 || status === 429) {
@@ -840,7 +816,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 -      invalidCount++;
 -      const emitInvalid = this.manager.options.invalidRequestWarningInterval > 0 && invalidCount % this.manager.options.invalidRequestWarningInterval === 0;
 -      if (emitInvalid) {
--        this.manager.emit(RESTEvents.InvalidRequestWarning, {
+-        this.manager.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
 -          count: invalidCount,
 -          remainingTime: invalidCountResetTime - Date.now()
 -        });
@@ -849,7 +825,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
      }
      if (status >= 200 && status < 300) {
        return res;
-@@ -825,7 +933,7 @@ var SequentialHandler = class {
+@@ -789,7 +903,7 @@ var SequentialHandler = class {
          limit2 = this.limit;
          timeout2 = this.timeToReset;
        }
@@ -858,7 +834,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
          timeToReset: timeout2,
          limit: limit2,
          method,
-@@ -856,7 +964,7 @@ var SequentialHandler = class {
+@@ -822,7 +936,7 @@ var SequentialHandler = class {
          }
          this.#sublimitPromise?.resolve();
          this.#sublimitPromise = null;
@@ -866,8 +842,8 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 +        await sleep2(sublimitTimeout);
          let resolve;
          const promise = new Promise((res2) => resolve = res2);
-         this.#sublimitPromise = {
-@@ -871,7 +979,7 @@ var SequentialHandler = class {
+         this.#sublimitPromise = { promise, resolve };
+@@ -834,7 +948,7 @@ var SequentialHandler = class {
        return this.runRequest(routeId, url, options, requestData, retries);
      } else if (status >= 500 && status < 600) {
        if (retries !== this.manager.options.retries) {
@@ -876,37 +852,37 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
        }
        throw new HTTPError(status, method, url, requestData);
      } else {
-@@ -898,6 +1006,8 @@ var RequestMethod;
-   RequestMethod2["Post"] = "POST";
+@@ -861,6 +975,8 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Put"] = "PUT";
- })(RequestMethod || (RequestMethod = {}));
+   return RequestMethod2;
+ })(RequestMethod || {});
 +var invalidCount = 0;
 +var invalidCountResetTime = null;
  var RequestManager = class extends EventEmitter {
    /**
-   * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
-@@ -954,7 +1064,7 @@ var RequestManager = class extends EventEmitter {
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+@@ -921,7 +1037,7 @@ var RequestManager = class extends EventEmitter {
            return shouldSweep;
          });
-         this.emit(RESTEvents.HashSweep, sweptHashes);
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
 -      }, this.options.hashSweepInterval).unref();
 +      }, this.options.hashSweepInterval);
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -969,7 +1079,7 @@ var RequestManager = class extends EventEmitter {
+@@ -936,7 +1052,7 @@ var RequestManager = class extends EventEmitter {
            return inactive;
          });
-         this.emit(RESTEvents.HandlerSweep, sweptHandlers);
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
 -      }, this.options.handlerSweepInterval).unref();
 +      }, this.options.handlerSweepInterval);
      }
    }
    /**
-@@ -996,19 +1106,19 @@ var RequestManager = class extends EventEmitter {
-   * @param request - All the information needed to make a request
-   * @returns The response from the api request
-   */
+@@ -963,19 +1079,19 @@ var RequestManager = class extends EventEmitter {
+    * @param request - All the information needed to make a request
+    * @returns The response from the api request
+    */
 -  async queueRequest(request2) {
 -    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
 -    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
@@ -932,19 +908,19 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
      });
    }
    /**
-@@ -1019,7 +1129,7 @@ var RequestManager = class extends EventEmitter {
-   * @internal
-   */
+@@ -986,7 +1102,7 @@ var RequestManager = class extends EventEmitter {
+    * @internal
+    */
    createHandler(hash, majorParameter) {
 -    const queue = new SequentialHandler(this, hash, majorParameter);
 +    const queue = majorParameter === BurstHandlerMajorIdKey ? new BurstHandler(this, hash, majorParameter) : new SequentialHandler(this, hash, majorParameter);
      this.handlers.set(queue.id, queue);
      return queue;
    }
-@@ -1028,11 +1138,11 @@ var RequestManager = class extends EventEmitter {
-   *
-   * @param request - The request data
-   */
+@@ -995,11 +1111,11 @@ var RequestManager = class extends EventEmitter {
+    *
+    * @param request - The request data
+    */
 -  async resolveRequest(request2) {
 +  async resolveRequest(request3) {
      const { options } = this;
@@ -956,7 +932,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
        if (resolvedQuery !== "") {
          query = `?${resolvedQuery}`;
        }
-@@ -1041,21 +1151,21 @@ var RequestManager = class extends EventEmitter {
+@@ -1008,21 +1124,21 @@ var RequestManager = class extends EventEmitter {
        ...this.options.headers,
        "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
      };
@@ -985,8 +961,8 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
          const fileKey = file.key ?? `files[${index}]`;
          if (Buffer3.isBuffer(file.data)) {
            const { fileTypeFromBuffer } = await getFileType();
-@@ -1079,21 +1189,21 @@ var RequestManager = class extends EventEmitter {
-           }), file.name);
+@@ -1038,33 +1154,33 @@ var RequestManager = class extends EventEmitter {
+           formData.append(fileKey, new Blob2([`${file.data}`], { type: file.contentType }), file.name);
          }
        }
 -      if (request2.body != null) {
@@ -1012,19 +988,14 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
        } else {
 -        finalBody = JSON.stringify(request2.body);
 +        finalBody = JSON.stringify(request3.body);
-         additionalHeaders = {
-           "Content-Type": "application/json"
-         };
-@@ -1102,16 +1212,16 @@ var RequestManager = class extends EventEmitter {
+         additionalHeaders = { "Content-Type": "application/json" };
+       }
+     }
      finalBody = await resolveBody(finalBody);
      const fetchOptions = {
-       headers: {
--        ...request2.headers,
-+        ...request3.headers,
-         ...additionalHeaders,
-         ...headers
-       },
+-      headers: { ...request2.headers, ...additionalHeaders, ...headers },
 -      method: request2.method.toUpperCase()
++      headers: { ...request3.headers, ...additionalHeaders, ...headers },
 +      method: request3.method.toUpperCase()
      };
      if (finalBody !== void 0) {
@@ -1032,17 +1003,18 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
      }
 -    fetchOptions.dispatcher = request2.dispatcher ?? this.agent ?? void 0;
 +    fetchOptions.dispatcher = request3.dispatcher ?? this.agent ?? void 0;
-     return {
-       url,
-       fetchOptions
-@@ -1130,6 +1240,25 @@ var RequestManager = class extends EventEmitter {
-     clearInterval(this.handlerTimer);
+     return { url, fetchOptions };
    }
    /**
-+  * Increment the invalid request count and emit warning if necessary
-+  *
-+  * @internal
-+  */
+@@ -1079,6 +1195,25 @@ var RequestManager = class extends EventEmitter {
+   clearHandlerSweeper() {
+     clearInterval(this.handlerTimer);
+   }
++  /**
++   * Increment the invalid request count and emit warning if necessary
++   *
++   * @internal
++   */
 +  incrementInvalidCount() {
 +    if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
 +      invalidCountResetTime = Date.now() + 1e3 * 60 * 10;
@@ -1051,19 +1023,18 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
 +    invalidCount++;
 +    const emitInvalid = this.options.invalidRequestWarningInterval > 0 && invalidCount % this.options.invalidRequestWarningInterval === 0;
 +    if (emitInvalid) {
-+      this.emit(RESTEvents.InvalidRequestWarning, {
++      this.emit("invalidRequestWarning" /* InvalidRequestWarning */, {
 +        count: invalidCount,
 +        remainingTime: invalidCountResetTime - Date.now()
 +      });
 +    }
 +  }
-+  /**
-   * Generates route data for an endpoint:method
-   *
-   * @param endpoint - The raw endpoint to generalize
-@@ -1137,11 +1266,18 @@ var RequestManager = class extends EventEmitter {
-   * @internal
-   */
+   /**
+    * Generates route data for an endpoint:method
+    *
+@@ -1087,6 +1222,13 @@ var RequestManager = class extends EventEmitter {
+    * @internal
+    */
    static generateRouteData(endpoint, method) {
 +    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
 +      return {
@@ -1075,13 +1046,7 @@ index de35a9e869a039185a63fafe44d4bc6bf21e50c4..a407d46ec06ad98dbd2264b93ece2e94
      const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
      const majorId = majorIdMatch?.[1] ?? "global";
      const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
-     let exceptions = "";
--    if (method === "DELETE" && baseRoute === "/channels/:id/messages/:id") {
-+    if (method === RequestMethod.Delete && baseRoute === "/channels/:id/messages/:id") {
-       const id = /\d{17,19}$/.exec(endpoint)[0];
-       const timestamp = DiscordSnowflake.timestampFrom(id);
-       if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
-@@ -1288,6 +1424,7 @@ export {
+@@ -1220,6 +1362,7 @@ export {
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
