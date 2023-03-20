@@ -1,7 +1,16 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index 02e36741caa5eaef7733b528549e85e281bdf388..a399a72c510b42715343e65a76b2d7039327428e 100644
+index 02e36741caa5eaef7733b528549e85e281bdf388..c2e6a9b5d19169050cc80ecd30bc5635b0d2829a 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
+@@ -422,7 +422,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     if (this.connection) {
+       this.connection.removeAllListeners("message");
+       this.connection.removeAllListeners("close");
+-      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN || this.connection.readyState === import_ws.WebSocket.CONNECTING;
++      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN;
+       this.debug([
+         "Connection status during destroy",
+         `Needs closing: ${shouldClose}`,
 @@ -445,7 +445,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -11,10 +20,45 @@ index 02e36741caa5eaef7733b528549e85e281bdf388..a399a72c510b42715343e65a76b2d703
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
+@@ -474,7 +474,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       }
+       await this.destroy({
+         code: 1e3 /* Normal */,
+-        reason: "Something timed out",
++        reason: "Something timed out or went wrong while waiting for an event",
+         recover: 0 /* Reconnect */
+       });
+       return { ok: false, error };
+@@ -516,6 +516,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     this.connection.send(JSON.stringify(payload));
+   }
+   async identify() {
++    this.debug(["Waiting for identify throttle"]);
++    await this.strategy.waitForIdentify();
+     this.debug([
+       "Identifying",
+       `shard id: ${this.id.toString()}`,
+@@ -523,7 +525,6 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       `intents: ${this.strategy.options.intents}`,
+       `compression: ${this.inflate ? "zlib-stream" : this.useIdentifyCompress ? "identify" : "none"}`
+     ]);
+-    await this.strategy.waitForIdentify();
+     const d = {
+       token: this.strategy.options.token,
+       properties: this.strategy.options.identifyProperties,
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index 05b1eca22ae059f12455eeb9fbce7d5ace122e92..693de2e7aab740b0458b70f23e105cb7c537972b 100644
+index 05b1eca22ae059f12455eeb9fbce7d5ace122e92..1d5ab672dc188150fc8fa1e28c300b03483afaef 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
+@@ -404,7 +404,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     if (this.connection) {
+       this.connection.removeAllListeners("message");
+       this.connection.removeAllListeners("close");
+-      const shouldClose = this.connection.readyState === WebSocket.OPEN || this.connection.readyState === WebSocket.CONNECTING;
++      const shouldClose = this.connection.readyState === WebSocket.OPEN;
+       this.debug([
+         "Connection status during destroy",
+         `Needs closing: ${shouldClose}`,
 @@ -427,7 +427,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -24,10 +68,45 @@ index 05b1eca22ae059f12455eeb9fbce7d5ace122e92..693de2e7aab740b0458b70f23e105cb7
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
+@@ -456,7 +456,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       }
+       await this.destroy({
+         code: 1e3 /* Normal */,
+-        reason: "Something timed out",
++        reason: "Something timed out or went wrong while waiting for an event",
+         recover: 0 /* Reconnect */
+       });
+       return { ok: false, error };
+@@ -498,6 +498,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     this.connection.send(JSON.stringify(payload));
+   }
+   async identify() {
++    this.debug(["Waiting for identify throttle"]);
++    await this.strategy.waitForIdentify();
+     this.debug([
+       "Identifying",
+       `shard id: ${this.id.toString()}`,
+@@ -505,7 +507,6 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       `intents: ${this.strategy.options.intents}`,
+       `compression: ${this.inflate ? "zlib-stream" : this.useIdentifyCompress ? "identify" : "none"}`
+     ]);
+-    await this.strategy.waitForIdentify();
+     const d = {
+       token: this.strategy.options.token,
+       properties: this.strategy.options.identifyProperties,
 diff --git a/dist/index.js b/dist/index.js
-index 8bd4c73b8936390c2a16defd6de061398159a1ad..0af01237f25ec0940949203273f848b49120db0b 100644
+index 8bd4c73b8936390c2a16defd6de061398159a1ad..51be1bcc4f2d4c8f6fbd4092b0d5411e52d55487 100644
 --- a/dist/index.js
 +++ b/dist/index.js
+@@ -624,7 +624,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     if (this.connection) {
+       this.connection.removeAllListeners("message");
+       this.connection.removeAllListeners("close");
+-      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN || this.connection.readyState === import_ws.WebSocket.CONNECTING;
++      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN;
+       this.debug([
+         "Connection status during destroy",
+         `Needs closing: ${shouldClose}`,
 @@ -647,7 +647,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -37,10 +116,45 @@ index 8bd4c73b8936390c2a16defd6de061398159a1ad..0af01237f25ec0940949203273f848b4
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
+@@ -676,7 +676,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       }
+       await this.destroy({
+         code: 1e3 /* Normal */,
+-        reason: "Something timed out",
++        reason: "Something timed out or went wrong while waiting for an event",
+         recover: 0 /* Reconnect */
+       });
+       return { ok: false, error };
+@@ -718,6 +718,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     this.connection.send(JSON.stringify(payload));
+   }
+   async identify() {
++    this.debug(["Waiting for identify throttle"]);
++    await this.strategy.waitForIdentify();
+     this.debug([
+       "Identifying",
+       `shard id: ${this.id.toString()}`,
+@@ -725,7 +727,6 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+       `intents: ${this.strategy.options.intents}`,
+       `compression: ${this.inflate ? "zlib-stream" : this.useIdentifyCompress ? "identify" : "none"}`
+     ]);
+-    await this.strategy.waitForIdentify();
+     const d = {
+       token: this.strategy.options.token,
+       properties: this.strategy.options.identifyProperties,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 32f5ecb495fc22bace27b3195e10953a9aa7438a..3ebafcc283827a6b448c5826c5a9346401c69488 100644
+index 32f5ecb495fc22bace27b3195e10953a9aa7438a..ba4973a59acfcfedc5e89aad5d06bbcf47efaf56 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
+@@ -587,7 +587,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     if (this.connection) {
+       this.connection.removeAllListeners("message");
+       this.connection.removeAllListeners("close");
+-      const shouldClose = this.connection.readyState === WebSocket.OPEN || this.connection.readyState === WebSocket.CONNECTING;
++      const shouldClose = this.connection.readyState === WebSocket.OPEN;
+       this.debug([
+         "Connection status during destroy",
+         `Needs closing: ${shouldClose}`,
 @@ -610,7 +610,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -50,3 +164,29 @@ index 32f5ecb495fc22bace27b3195e10953a9aa7438a..3ebafcc283827a6b448c5826c5a93464
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
+@@ -639,7 +639,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       }
+       await this.destroy({
+         code: 1e3 /* Normal */,
+-        reason: "Something timed out",
++        reason: "Something timed out or went wrong while waiting for an event",
+         recover: 0 /* Reconnect */
+       });
+       return { ok: false, error };
+@@ -681,6 +681,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     this.connection.send(JSON.stringify(payload));
+   }
+   async identify() {
++    this.debug(["Waiting for identify throttle"]);
++    await this.strategy.waitForIdentify();
+     this.debug([
+       "Identifying",
+       `shard id: ${this.id.toString()}`,
+@@ -688,7 +690,6 @@ var WebSocketShard = class extends AsyncEventEmitter {
+       `intents: ${this.strategy.options.intents}`,
+       `compression: ${this.inflate ? "zlib-stream" : this.useIdentifyCompress ? "identify" : "none"}`
+     ]);
+-    await this.strategy.waitForIdentify();
+     const d = {
+       token: this.strategy.options.token,
+       properties: this.strategy.options.identifyProperties,
