@@ -8,6 +8,7 @@
 	"ignorePatterns": ["node_modules/", "dist/", "tests/"],
 	"rules": {
 		"@typescript-eslint/consistent-type-definitions": "off",
+		"@typescript-eslint/consistent-type-imports": ["error", { "fixStyle": "inline-type-imports" }],
 		"@typescript-eslint/no-base-to-string": "off",
 		"@typescript-eslint/no-import-type-side-effects": "error",
 		// "@typescript-eslint/no-shadow": "error",

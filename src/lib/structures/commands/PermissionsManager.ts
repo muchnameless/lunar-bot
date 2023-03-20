@@ -7,6 +7,7 @@ import {
 	type GuildMember,
 	type Snowflake,
 } from 'discord.js';
+import { noConcurrency } from '#decorators';
 import { assertNever } from '#functions';
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
@@ -30,8 +31,6 @@ export class PermissionsManager {
 
 	private _ready = false;
 
-	private _initPromise: Promise<this> | null = null;
-
 	public constructor(client: LunarClient) {
 		Object.defineProperty(this, 'client', { value: client });
 	}
@@ -39,20 +38,8 @@ export class PermissionsManager {
 	/**
 	 * populates the cache with the current permissions
 	 */
+	@noConcurrency
 	public async init() {
-		if (this._initPromise) return this._initPromise;
-
-		try {
-			return await (this._initPromise = this.#init());
-		} finally {
-			this._initPromise = null;
-		}
-	}
-
-	/**
-	 * @internal
-	 */
-	async #init() {
 		try {
 			for (const guild of this.client.guilds.cache.values()) {
 				const permissions = await guild.commands.permissions.fetch();

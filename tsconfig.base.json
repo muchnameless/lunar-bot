@@ -4,9 +4,7 @@
 		"allowSyntheticDefaultImports": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
-		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
-		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"importHelpers": true,
 		"incremental": true,
@@ -25,7 +23,8 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"target": "esnext",
+		"target": "ES2022",
+		// "target": "ESNext",
 		"verbatimModuleSyntax": false
 	}
 }

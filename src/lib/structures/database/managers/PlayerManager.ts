@@ -5,9 +5,9 @@ import { codeBlock, Collection, EmbedBuilder, embedLength, type APIEmbed, type J
 import { Op, type Attributes, type CreationAttributes, type FindOptions } from 'sequelize';
 import type { HypixelGuild } from '../models/HypixelGuild.js';
 import type {
+	PlayerUpdateOptions,
 	Player,
 	PlayerInGuild,
-	PlayerUpdateOptions,
 	ResetXpOptions,
 	TransferXpOptions,
 } from '../models/Player.js';
@@ -21,6 +21,7 @@ import {
 	Offset,
 	XP_OFFSETS_TIME,
 } from '#constants';
+import { noConcurrency } from '#decorators';
 import {
 	autocorrect,
 	compareAlphabetically,
@@ -38,21 +39,6 @@ export class PlayerManager extends ModelManager<Player> {
 	 * number of max concurrent requests to the Mojang API
 	 */
 	private readonly _updateIgnBatchSize = 10;
-
-	/**
-	 * player db xp update
-	 */
-	private _updateXpPromise: Promise<this> | null = null;
-
-	/**
-	 * player db ign update
-	 */
-	private _updateIgnPromise: Promise<this> | null = null;
-
-	/**
-	 * player db main SkyBlock profile update
-	 */
-	private _updateMainProfilesPromise: Promise<this> | null = null;
 
 	/**
 	 * get players from all guilds (no bridgers or errors)
@@ -248,22 +234,8 @@ export class PlayerManager extends ModelManager<Player> {
 	 *
 	 * @param options
 	 */
+	@noConcurrency
 	public async updateXp(options?: PlayerUpdateOptions) {
-		if (this._updateXpPromise) return this._updateXpPromise;
-
-		try {
-			return await (this._updateXpPromise = this.#updateXp(options));
-		} finally {
-			this._updateXpPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within updateXp
-	 *
-	 * @internal
-	 */
-	async #updateXp(options?: PlayerUpdateOptions) {
 		try {
 			// the hypixel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
@@ -295,22 +267,8 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * updates all IGNs and logs changes via the log handler
 	 */
+	@noConcurrency
 	public async updateIgns() {
-		if (this._updateIgnPromise) return this._updateIgnPromise;
-
-		try {
-			return await (this._updateIgnPromise = this.#updateIgns());
-		} finally {
-			this._updateIgnPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within updateIgns
-	 *
-	 * @internal
-	 */
-	async #updateIgns() {
 		// the hypixel api encountered an error before
 		if (this.client.config.get('MOJANG_API_ERROR')) {
 			// reset error every full hour
@@ -434,22 +392,8 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * checks all players if their current main profile is still valid
 	 */
+	@noConcurrency
 	public async updateMainProfiles() {
-		if (this._updateMainProfilesPromise) return this._updateMainProfilesPromise;
-
-		try {
-			return await (this._updateMainProfilesPromise = this.#updateMainProfiles());
-		} finally {
-			this._updateMainProfilesPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within updateMainProfiles
-	 *
-	 * @internal
-	 */
-	async #updateMainProfiles() {
 		// the hypixel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour

@@ -1,19 +1,15 @@
 import { CronJob } from 'cron';
 import type { GuildResolvable } from 'discord.js';
 import type { FindOptions } from 'sequelize';
-import type { HypixelGuild, UpdateOptions } from '../models/HypixelGuild.js';
+import type { UpdateOptions, HypixelGuild } from '../models/HypixelGuild.js';
 import { type ModelResolvable, ModelManager } from './ModelManager.js';
+import { noConcurrency } from '#decorators';
 import { autocorrect, compareAlphabetically } from '#functions';
 import { logger } from '#logger';
 
 export type HypixelGuildResolvable = ModelResolvable<HypixelGuild>;
 
 export class HypixelGuildManager extends ModelManager<HypixelGuild> {
-	/**
-	 * hypixel guild db data update
-	 */
-	private _updateDataPromise: Promise<this> | null = null;
-
 	/**
 	 * `NameOne`|`NameTwo`|`NameThree`
 	 */
@@ -60,22 +56,8 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 *
 	 * @param options
 	 */
-	public async updateData({ syncRanks = true, rejectOnAPIError = true }: UpdateOptions = {}) {
-		if (this._updateDataPromise) return this._updateDataPromise;
-
-		try {
-			return await (this._updateDataPromise = this.#updateData({ syncRanks, rejectOnAPIError }));
-		} finally {
-			this._updateDataPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within updateData
-	 *
-	 * @internal
-	 */
-	async #updateData(options: UpdateOptions) {
+	@noConcurrency
+	public async updateData(options?: UpdateOptions) {
 		try {
 			if (this.client.config.get('HYPIXEL_API_ERROR')) {
 				logger.warn('[GUILDS UPDATE]: auto updates disabled');

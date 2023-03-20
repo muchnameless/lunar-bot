@@ -37,6 +37,7 @@ import {
 } from '#constants';
 import type { ChatBridgeChannel } from '#db/models/HypixelGuild.js';
 import type { Player } from '#db/models/Player.js';
+import { noConcurrency } from '#decorators';
 import { assertNever, asyncReplace, days, hours, minutes, seconds } from '#functions';
 import { logger } from '#logger';
 import type { DualCommand } from '#structures/commands/DualCommand.js';
@@ -73,11 +74,6 @@ export const enum ForwardRejectionType {
 }
 
 export class DiscordChatManager extends ChatManager {
-	/**
-	 * webhook fetching/creating & caching
-	 */
-	private _fetchOrCreateWebhookPromise: Promise<this> | null = null;
-
 	/**
 	 * hypixel message type
 	 */
@@ -238,33 +234,14 @@ export class DiscordChatManager extends ChatManager {
 	 * initialise the discord chat manager
 	 */
 	public async init() {
-		return this._fetchOrCreateWebhook();
+		return this.fetchOrCreateWebhook();
 	}
 
 	/**
 	 * fetches or creates the webhook for the channel
 	 */
-	private async _fetchOrCreateWebhook() {
-		if (this.webhook) {
-			this.ready = true;
-			return this;
-		}
-
-		if (this._fetchOrCreateWebhookPromise) return this._fetchOrCreateWebhookPromise;
-
-		try {
-			return await (this._fetchOrCreateWebhookPromise = this.#fetchOrCreateWebhook());
-		} finally {
-			this._fetchOrCreateWebhookPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within _fetchOrCreateWebhook
-	 *
-	 * @internal
-	 */
-	async #fetchOrCreateWebhook() {
+	@noConcurrency
+	private async fetchOrCreateWebhook() {
 		if (!this.hypixelGuild) {
 			logger.warn(this.logInfo, '[CHATBRIDGE]: no guild to fetch webhook');
 			return this;
@@ -559,7 +536,7 @@ export class DiscordChatManager extends ChatManager {
 		try {
 			// fetch / create webhook if non existent
 			if (!this.isReady()) {
-				await this._fetchOrCreateWebhook();
+				await this.fetchOrCreateWebhook();
 
 				if (!this.isReady()) throw new Error('[SEND VIA WEBHOOK]: ChatBridge not ready');
 			}
@@ -573,7 +550,7 @@ export class DiscordChatManager extends ChatManager {
 
 				// try to obtain another webhook
 				this._setWebhook(null);
-				await this._fetchOrCreateWebhook();
+				await this.fetchOrCreateWebhook();
 
 				// resend
 				return this.#sendViaWebhook(options);

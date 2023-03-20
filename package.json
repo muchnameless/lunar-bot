@@ -14,15 +14,16 @@
 		"#constants/*": "./dist/lib/constants/*",
 		"#db": "./dist/lib/structures/database/index.js",
 		"#db/*": "./dist/lib/structures/database/*",
+		"#decorators": "./dist/lib/decorators/index.js",
 		"#functions": "./dist/lib/functions/index.js",
 		"#functions/*": "./dist/lib/functions/*",
 		"#logger": "./dist/logger.js",
 		"#networth/*": "./dist/lib/networth/*",
+		"#root/*": "./dist/*",
 		"#structures/*": "./dist/lib/structures/*",
 		"#types": "./dist/lib/types/util.js",
 		"#utils": "./dist/lib/util/index.js",
-		"#utils/*": "./dist/lib/util/*",
-		"#root/*": "./dist/*"
+		"#utils/*": "./dist/lib/util/*"
 	},
 	"main": "dist/index.js",
 	"scripts": {
@@ -116,7 +117,7 @@
 		"pretty-quick": "^3.1.3",
 		"sort-package-json": "^2.4.1",
 		"ts-prune": "^0.10.3",
-		"typescript": "^5.1.0-dev.20230320"
+		"typescript": "^5.0.2"
 	},
 	"packageManager": "yarn@3.5.0",
 	"volta": {

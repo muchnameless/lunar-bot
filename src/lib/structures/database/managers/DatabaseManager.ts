@@ -30,6 +30,7 @@ import { PlayerManager } from './PlayerManager.js';
 import { TaxCollectorManager } from './TaxCollectorManager.js';
 import { hypixel } from '#api';
 import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, UnicodeEmoji } from '#constants';
+import { noConcurrency } from '#decorators';
 import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber, isFirstMinutesOfHour } from '#functions';
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
@@ -71,11 +72,6 @@ export class DatabaseManager {
 	 * Sequelize instance
 	 */
 	public readonly sequelize: Sequelize;
-
-	/**
-	 * db data update
-	 */
-	private _updateDataPromise: Promise<this> | null = null;
 
 	public constructor(client: LunarClient, db: typeof DbType) {
 		Object.defineProperty(this, 'client', { value: client });
@@ -413,22 +409,8 @@ export class DatabaseManager {
 	/**
 	 * updates the player database and the corresponding tax message
 	 */
+	@noConcurrency
 	public async updateData() {
-		if (this._updateDataPromise) return this._updateDataPromise;
-
-		try {
-			return await (this._updateDataPromise = this.#updateData());
-		} finally {
-			this._updateDataPromise = null;
-		}
-	}
-
-	/**
-	 * should only ever be called from within updateData
-	 *
-	 * @internal
-	 */
-	async #updateData() {
 		try {
 			const { config, players, hypixelGuilds } = this.modelManagers;
 
