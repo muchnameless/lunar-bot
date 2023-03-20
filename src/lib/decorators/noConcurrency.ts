@@ -1,3 +1,6 @@
+/**
+ * multiple calls to this method will result in only one call and will resolve with the result of it
+ */
 export function noConcurrency<This, Args extends any[], Return>(
 	target: (this: This, ...args: Args) => Promise<Return>,
 	context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Promise<Return>>,

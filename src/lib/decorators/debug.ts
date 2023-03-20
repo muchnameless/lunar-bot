@@ -1,6 +1,9 @@
 import { SnowflakeUtil } from 'discord.js';
 import { logger } from '#logger';
 
+/**
+ * adds debug logging to method calls
+ */
 export function debug<This, Args extends any[], Return>(
 	target: (this: This, ...args: Args) => Return,
 	context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>,
