@@ -18,7 +18,7 @@ import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMess
 import { ErrorCode, UnicodeEmoji } from '#constants';
 import { assertNever, commaListOr, formatError, getLilyWeight, stringToMS, type WeightData } from '#functions';
 import { logger } from '#logger';
-import type MathsCommand from '#root/commands/general/maths';
+import type MathsCommand from '#root/commands/general/maths.js';
 import { ChannelUtil, GuildMemberUtil, MessageUtil } from '#utils';
 
 const blockedRegExp = new RegExp(

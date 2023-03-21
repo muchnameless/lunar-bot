@@ -1,6 +1,6 @@
 import { ItemId } from './itemId.js';
 import { ItemRarity } from './itemRarity.js';
-import { toTotal } from '#root/lib/functions/array.js';
+import { toTotal } from '#functions/array.js';
 
 /**
  * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/generators/petGenerator.js#L79

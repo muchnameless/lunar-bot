@@ -37,7 +37,7 @@ import {
 	sortCache,
 } from '#functions';
 import { logger } from '#logger';
-import type LeaderboardCommand from '#root/commands/guild/leaderboard';
+import type LeaderboardCommand from '#root/commands/guild/leaderboard.js';
 import { Event } from '#structures/events/Event.js';
 import { GuildMemberUtil, InteractionUtil, MessageUtil, type RepliableInteraction } from '#utils';
 

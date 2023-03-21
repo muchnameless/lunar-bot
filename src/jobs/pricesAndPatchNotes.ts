@@ -11,6 +11,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { Agent, fetch, setGlobalDispatcher } from 'undici';
 import { JobType } from './index.js';
 import { sql } from '#db/sql.js';
+import { consumeBody } from '#functions/fetch.js';
 import { logger } from '#logger';
 import type { Enchantment } from '#networth/constants/enchantments.js';
 import { ItemId } from '#networth/constants/itemId.js';
@@ -18,7 +19,6 @@ import { ItemRarity } from '#networth/constants/itemRarity.js';
 import { getEnchantment } from '#networth/functions/enchantments.js'; // separate imports to not import unused files in the worker
 import { transformItemData } from '#networth/functions/nbt.js';
 import { calculatePetSkillLevel } from '#networth/functions/pets.js';
-import { consumeBody } from '#root/lib/functions/fetch.js';
 import { FetchError } from '#structures/errors/FetchError.js';
 
 setGlobalDispatcher(new Agent({ connect: { timeout: 30_000 } }));
