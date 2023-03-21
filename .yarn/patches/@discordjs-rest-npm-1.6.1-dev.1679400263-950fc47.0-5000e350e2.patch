@@ -196,7 +196,7 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..f487b7c2653b8dba494b077570889b2b
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..56ca54241564ab05f36dea46cd9f893450e662d9 100644
+index d771d180f0c0d2b7e307a87d7594221cfba6d035..c4c89c2b26c2be4a2e1cc9fb45caae967eb45d20 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -654,18 +654,22 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..56ca54241564ab05f36dea46cd9f8934
    /**
     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
     * performed by this manager.
-@@ -941,8 +1065,10 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -941,12 +1065,14 @@ var RequestManager = class extends import_node_events.EventEmitter {
    hashTimer;
    handlerTimer;
    options;
--  constructor(options) {
 +  cdn;
-+  constructor(options = {}) {
+   constructor(options) {
      super();
-+    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
      this.options = { ...DefaultRestOptions, ...options };
      this.options.offset = Math.max(0, this.options.offset);
++    this.cdn = new CDN(this.options.cdn);
      this.globalRemaining = this.options.globalRequestsPerSecond;
+-    this.agent = options.agent ?? null;
++    this.agent = options?.agent ?? null;
+     this.setupSweepers();
+   }
+   setupSweepers() {
 @@ -971,7 +1097,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
            return shouldSweep;
          });
@@ -895,7 +899,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..56ca54241564ab05f36dea46cd9f8934
    }
  };
  __name(REST, "REST");
-@@ -1271,6 +1350,7 @@ var version = "1.6.1-dev.1679357368-950fc47.0";
+@@ -1271,6 +1350,7 @@ var version = "1.6.1-dev.1679400263-950fc47.0";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -903,7 +907,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..56ca54241564ab05f36dea46cd9f8934
    CDN,
    DefaultRestOptions,
    DefaultUserAgent,
-@@ -1280,7 +1360,6 @@ var version = "1.6.1-dev.1679357368-950fc47.0";
+@@ -1280,7 +1360,6 @@ var version = "1.6.1-dev.1679400263-950fc47.0";
    REST,
    RESTEvents,
    RateLimitError,
@@ -912,7 +916,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..56ca54241564ab05f36dea46cd9f8934
    makeURLSearchParams,
    parseResponse,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 5164a2271bc06295f4b240155d40a0d8dd33ade3..5df067da8de3985f77e02c8d016d5675d21d891e 100644
+index 0496e99dc9523ce270a812bbb1a43a7f3e60c16f..893846b0f0b91fa70f78ea616cfc4e4e43a1647f 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -52,6 +52,7 @@ var OverwrittenMimeTypes = {
@@ -1354,18 +1358,22 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..5df067da8de3985f77e02c8d016d5675
    /**
     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
     * performed by this manager.
-@@ -891,8 +1015,10 @@ var RequestManager = class extends EventEmitter {
+@@ -891,12 +1015,14 @@ var RequestManager = class extends EventEmitter {
    hashTimer;
    handlerTimer;
    options;
--  constructor(options) {
 +  cdn;
-+  constructor(options = {}) {
+   constructor(options) {
      super();
-+    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
      this.options = { ...DefaultRestOptions, ...options };
      this.options.offset = Math.max(0, this.options.offset);
++    this.cdn = new CDN(this.options.cdn);
      this.globalRemaining = this.options.globalRequestsPerSecond;
+-    this.agent = options.agent ?? null;
++    this.agent = options?.agent ?? null;
+     this.setupSweepers();
+   }
+   setupSweepers() {
 @@ -921,7 +1047,7 @@ var RequestManager = class extends EventEmitter {
            return shouldSweep;
          });
