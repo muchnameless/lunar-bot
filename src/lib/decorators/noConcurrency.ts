@@ -5,10 +5,13 @@ export function noConcurrency<This, Args extends any[], Return>(
 	target: (this: This, ...args: Args) => Promise<Return>,
 	context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Promise<Return>>,
 ) {
-	const methodName = String(context.name);
-	const promiseName = Symbol(`noConcurrency:${methodName}Promise`);
+	const promiseName = Symbol.for(`noConcurrency:${String(context.name)}`);
 
 	context.addInitializer(function init(this: any) {
+		if (promiseName in this) {
+			throw new TypeError(`property ${String(promiseName)} is already in use`);
+		}
+
 		this[promiseName] = null;
 	});
 
