@@ -6,7 +6,7 @@ export function noConcurrency<This, Args extends any[], Return>(
 	context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Promise<Return>>,
 ) {
 	const methodName = String(context.name);
-	const promiseName = Symbol(`singleCall:${methodName}Promise`);
+	const promiseName = Symbol(`noConcurrency:${methodName}Promise`);
 
 	context.addInitializer(function init(this: any) {
 		this[promiseName] = null;
