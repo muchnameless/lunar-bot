@@ -1,5 +1,5 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 5b25f414148a792e1dba153947c2cd4a24ec866d..df1b188cbc7bbf430d9b78c6c52378db43821e77 100644
+index 5b25f414148a792e1dba153947c2cd4a24ec866d..f487b7c2653b8dba494b077570889b2bb84c7667 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -43,6 +43,7 @@ type ImageSize = (typeof ALLOWED_SIZES)[number];
@@ -121,7 +121,21 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..df1b188cbc7bbf430d9b78c6c52378db
      private setupSweepers;
      /**
       * Sets the default agent to use for requests performed by this manager
-@@ -752,6 +678,53 @@ declare class RequestManager extends EventEmitter {
+@@ -723,13 +649,6 @@ declare class RequestManager extends EventEmitter {
+      * @param token - The authorization token to use
+      */
+     setToken(token: string): this;
+-    /**
+-     * Queues a request to be sent
+-     *
+-     * @param request - All the information needed to make a request
+-     * @returns The response from the api request
+-     */
+-    queueRequest(request: InternalRequest): Promise<Dispatcher.ResponseData>;
+     /**
+      * Creates a new rate limit handler from a hash, based on the hash and the major parameter
+      *
+@@ -752,6 +671,53 @@ declare class RequestManager extends EventEmitter {
       * Stops the request handler sweeping interval
       */
      clearHandlerSweeper(): void;
@@ -175,14 +189,14 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..df1b188cbc7bbf430d9b78c6c52378db
      /**
       * Generates route data for an endpoint:method
       *
-@@ -867,4 +840,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
+@@ -867,4 +833,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
   */
  declare const version: string;
  
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c84c3faa03 100644
+index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..56ca54241564ab05f36dea46cd9f893450e662d9 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -670,16 +684,35 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
      }
    }
    /**
-@@ -1014,7 +1140,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
-    * @returns The response from the api request
-    */
-   async queueRequest(request2) {
+@@ -1007,27 +1133,6 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     this.#token = token;
+     return this;
+   }
+-  /**
+-   * Queues a request to be sent
+-   *
+-   * @param request - All the information needed to make a request
+-   * @returns The response from the api request
+-   */
+-  async queueRequest(request2) {
 -    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
-+    const routeId = REST.generateRouteData(request2.fullRoute, request2.method);
-     const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
-       value: `Global(${request2.method}:${routeId.bucketRoute})`,
-       lastAccess: -1
-@@ -1036,7 +1162,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+-    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+-      value: `Global(${request2.method}:${routeId.bucketRoute})`,
+-      lastAccess: -1
+-    };
+-    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
+-    const { url, fetchOptions } = await this.resolveRequest(request2);
+-    return handler.queueRequest(routeId, url, fetchOptions, {
+-      body: request2.body,
+-      files: request2.files,
+-      auth: request2.auth !== false,
+-      signal: request2.signal
+-    });
+-  }
+   /**
+    * Creates a new rate limit handler from a hash, based on the hash and the major parameter
+    *
+@@ -1036,7 +1141,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
     * @internal
     */
    createHandler(hash, majorParameter) {
@@ -688,7 +721,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
      this.handlers.set(queue.id, queue);
      return queue;
    }
-@@ -1129,83 +1255,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1129,83 +1234,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
    clearHandlerSweeper() {
      (0, import_node_timers2.clearInterval)(this.handlerTimer);
    }
@@ -773,7 +806,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1214,7 +1270,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1214,7 +1249,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -782,7 +815,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1223,7 +1279,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1223,7 +1258,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -791,7 +824,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1232,7 +1288,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1232,7 +1267,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -800,7 +833,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1241,7 +1297,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1241,7 +1276,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -809,12 +842,24 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1259,7 +1315,39 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1259,7 +1294,51 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param options - Request options
     */
    async raw(options) {
 -    return this.requestManager.queueRequest(options);
-+    return this.queueRequest(options);
++    const routeId = REST.generateRouteData(options.fullRoute, options.method);
++    const hash = this.hashes.get(`${options.method}:${routeId.bucketRoute}`) ?? {
++      value: `Global(${options.method}:${routeId.bucketRoute})`,
++      lastAccess: -1
++    };
++    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
++    const { url, fetchOptions } = await this.resolveRequest(options);
++    return handler.queueRequest(routeId, url, fetchOptions, {
++      body: options.body,
++      files: options.files,
++      auth: options.auth !== false,
++      signal: options.signal
++    });
 +  }
 +  /**
 +   * Generates route data for an endpoint:method
@@ -850,7 +895,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
    }
  };
  __name(REST, "REST");
-@@ -1271,6 +1359,7 @@ var version = "1.6.1-dev.1679357368-950fc47.0";
+@@ -1271,6 +1350,7 @@ var version = "1.6.1-dev.1679357368-950fc47.0";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -858,7 +903,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
    CDN,
    DefaultRestOptions,
    DefaultUserAgent,
-@@ -1280,7 +1369,6 @@ var version = "1.6.1-dev.1679357368-950fc47.0";
+@@ -1280,7 +1360,6 @@ var version = "1.6.1-dev.1679357368-950fc47.0";
    REST,
    RESTEvents,
    RateLimitError,
@@ -867,7 +912,7 @@ index 9eeada8deeb405284e0d7ad83ceded8032a6dcc9..9c8d3881647b4782c0136ff11398b6c8
    makeURLSearchParams,
    parseResponse,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fadd9e2777 100644
+index 5164a2271bc06295f4b240155d40a0d8dd33ade3..5df067da8de3985f77e02c8d016d5675d21d891e 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -52,6 +52,7 @@ var OverwrittenMimeTypes = {
@@ -1339,16 +1384,35 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
      }
    }
    /**
-@@ -964,7 +1090,7 @@ var RequestManager = class extends EventEmitter {
-    * @returns The response from the api request
-    */
-   async queueRequest(request2) {
+@@ -957,27 +1083,6 @@ var RequestManager = class extends EventEmitter {
+     this.#token = token;
+     return this;
+   }
+-  /**
+-   * Queues a request to be sent
+-   *
+-   * @param request - All the information needed to make a request
+-   * @returns The response from the api request
+-   */
+-  async queueRequest(request2) {
 -    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
-+    const routeId = REST.generateRouteData(request2.fullRoute, request2.method);
-     const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
-       value: `Global(${request2.method}:${routeId.bucketRoute})`,
-       lastAccess: -1
-@@ -986,7 +1112,7 @@ var RequestManager = class extends EventEmitter {
+-    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+-      value: `Global(${request2.method}:${routeId.bucketRoute})`,
+-      lastAccess: -1
+-    };
+-    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
+-    const { url, fetchOptions } = await this.resolveRequest(request2);
+-    return handler.queueRequest(routeId, url, fetchOptions, {
+-      body: request2.body,
+-      files: request2.files,
+-      auth: request2.auth !== false,
+-      signal: request2.signal
+-    });
+-  }
+   /**
+    * Creates a new rate limit handler from a hash, based on the hash and the major parameter
+    *
+@@ -986,7 +1091,7 @@ var RequestManager = class extends EventEmitter {
     * @internal
     */
    createHandler(hash, majorParameter) {
@@ -1357,7 +1421,7 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
      this.handlers.set(queue.id, queue);
      return queue;
    }
-@@ -1079,83 +1205,13 @@ var RequestManager = class extends EventEmitter {
+@@ -1079,83 +1184,13 @@ var RequestManager = class extends EventEmitter {
    clearHandlerSweeper() {
      clearInterval(this.handlerTimer);
    }
@@ -1442,7 +1506,7 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1164,7 +1220,7 @@ var REST = class extends EventEmitter2 {
+@@ -1164,7 +1199,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1451,7 +1515,7 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1173,7 +1229,7 @@ var REST = class extends EventEmitter2 {
+@@ -1173,7 +1208,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1460,7 +1524,7 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1182,7 +1238,7 @@ var REST = class extends EventEmitter2 {
+@@ -1182,7 +1217,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1469,7 +1533,7 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1191,7 +1247,7 @@ var REST = class extends EventEmitter2 {
+@@ -1191,7 +1226,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1478,12 +1542,24 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1209,7 +1265,39 @@ var REST = class extends EventEmitter2 {
+@@ -1209,7 +1244,51 @@ var REST = class extends EventEmitter2 {
     * @param options - Request options
     */
    async raw(options) {
 -    return this.requestManager.queueRequest(options);
-+    return this.queueRequest(options);
++    const routeId = REST.generateRouteData(options.fullRoute, options.method);
++    const hash = this.hashes.get(`${options.method}:${routeId.bucketRoute}`) ?? {
++      value: `Global(${options.method}:${routeId.bucketRoute})`,
++      lastAccess: -1
++    };
++    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
++    const { url, fetchOptions } = await this.resolveRequest(options);
++    return handler.queueRequest(routeId, url, fetchOptions, {
++      body: options.body,
++      files: options.files,
++      auth: options.auth !== false,
++      signal: options.signal
++    });
 +  }
 +  /**
 +   * Generates route data for an endpoint:method
@@ -1519,7 +1595,7 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
    }
  };
  __name(REST, "REST");
-@@ -1220,6 +1308,7 @@ export {
+@@ -1220,6 +1299,7 @@ export {
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -1527,7 +1603,7 @@ index 5164a2271bc06295f4b240155d40a0d8dd33ade3..820dfdfeb733ad1c4b6af31394b588fa
    CDN,
    DefaultRestOptions,
    DefaultUserAgent,
-@@ -1229,7 +1318,6 @@ export {
+@@ -1229,7 +1309,6 @@ export {
    REST,
    RESTEvents,
    RateLimitError,
