@@ -1,16 +1,7 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index 02e36741caa5eaef7733b528549e85e281bdf388..c2e6a9b5d19169050cc80ecd30bc5635b0d2829a 100644
+index 7f67f6ec8984e116f2f5c8a556e75402590396e1..31cb9df0f7213fb0286d35770fe69f37c5913656 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
-@@ -422,7 +422,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-     if (this.connection) {
-       this.connection.removeAllListeners("message");
-       this.connection.removeAllListeners("close");
--      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN || this.connection.readyState === import_ws.WebSocket.CONNECTING;
-+      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN;
-       this.debug([
-         "Connection status during destroy",
-         `Needs closing: ${shouldClose}`,
 @@ -445,7 +445,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -20,15 +11,6 @@ index 02e36741caa5eaef7733b528549e85e281bdf388..c2e6a9b5d19169050cc80ecd30bc5635
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -474,7 +474,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-       }
-       await this.destroy({
-         code: 1e3 /* Normal */,
--        reason: "Something timed out",
-+        reason: "Something timed out or went wrong while waiting for an event",
-         recover: 0 /* Reconnect */
-       });
-       return { ok: false, error };
 @@ -516,6 +516,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      this.connection.send(JSON.stringify(payload));
    }
@@ -47,18 +29,9 @@ index 02e36741caa5eaef7733b528549e85e281bdf388..c2e6a9b5d19169050cc80ecd30bc5635
        token: this.strategy.options.token,
        properties: this.strategy.options.identifyProperties,
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index 05b1eca22ae059f12455eeb9fbce7d5ace122e92..1d5ab672dc188150fc8fa1e28c300b03483afaef 100644
+index 59aeecf8ffd25e147ae6a1f08b5bd52d7f4ef550..7b4762ccf2393c12ac2203948e21dd370811ef94 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
-@@ -404,7 +404,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-     if (this.connection) {
-       this.connection.removeAllListeners("message");
-       this.connection.removeAllListeners("close");
--      const shouldClose = this.connection.readyState === WebSocket.OPEN || this.connection.readyState === WebSocket.CONNECTING;
-+      const shouldClose = this.connection.readyState === WebSocket.OPEN;
-       this.debug([
-         "Connection status during destroy",
-         `Needs closing: ${shouldClose}`,
 @@ -427,7 +427,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -68,15 +41,6 @@ index 05b1eca22ae059f12455eeb9fbce7d5ace122e92..1d5ab672dc188150fc8fa1e28c300b03
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -456,7 +456,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-       }
-       await this.destroy({
-         code: 1e3 /* Normal */,
--        reason: "Something timed out",
-+        reason: "Something timed out or went wrong while waiting for an event",
-         recover: 0 /* Reconnect */
-       });
-       return { ok: false, error };
 @@ -498,6 +498,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
      this.connection.send(JSON.stringify(payload));
    }
@@ -95,18 +59,9 @@ index 05b1eca22ae059f12455eeb9fbce7d5ace122e92..1d5ab672dc188150fc8fa1e28c300b03
        token: this.strategy.options.token,
        properties: this.strategy.options.identifyProperties,
 diff --git a/dist/index.js b/dist/index.js
-index 8bd4c73b8936390c2a16defd6de061398159a1ad..51be1bcc4f2d4c8f6fbd4092b0d5411e52d55487 100644
+index 0ce68ed40fc71c5a99aafd24266a2bf3e7b5280a..dc6b32a25dacf918dc91c9e51d2d861c2dbe7a57 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -624,7 +624,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-     if (this.connection) {
-       this.connection.removeAllListeners("message");
-       this.connection.removeAllListeners("close");
--      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN || this.connection.readyState === import_ws.WebSocket.CONNECTING;
-+      const shouldClose = this.connection.readyState === import_ws.WebSocket.OPEN;
-       this.debug([
-         "Connection status during destroy",
-         `Needs closing: ${shouldClose}`,
 @@ -647,7 +647,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -116,15 +71,6 @@ index 8bd4c73b8936390c2a16defd6de061398159a1ad..51be1bcc4f2d4c8f6fbd4092b0d5411e
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -676,7 +676,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
-       }
-       await this.destroy({
-         code: 1e3 /* Normal */,
--        reason: "Something timed out",
-+        reason: "Something timed out or went wrong while waiting for an event",
-         recover: 0 /* Reconnect */
-       });
-       return { ok: false, error };
 @@ -718,6 +718,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      this.connection.send(JSON.stringify(payload));
    }
@@ -143,18 +89,9 @@ index 8bd4c73b8936390c2a16defd6de061398159a1ad..51be1bcc4f2d4c8f6fbd4092b0d5411e
        token: this.strategy.options.token,
        properties: this.strategy.options.identifyProperties,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 32f5ecb495fc22bace27b3195e10953a9aa7438a..ba4973a59acfcfedc5e89aad5d06bbcf47efaf56 100644
+index fca14d975d47becefff4f007f88067c293a13e2e..7e5884d4d3e2c9f22b14ef0a5eb1865656e47d26 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -587,7 +587,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-     if (this.connection) {
-       this.connection.removeAllListeners("message");
-       this.connection.removeAllListeners("close");
--      const shouldClose = this.connection.readyState === WebSocket.OPEN || this.connection.readyState === WebSocket.CONNECTING;
-+      const shouldClose = this.connection.readyState === WebSocket.OPEN;
-       this.debug([
-         "Connection status during destroy",
-         `Needs closing: ${shouldClose}`,
 @@ -610,7 +610,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
    async waitForEvent(event, timeoutDuration) {
      this.debug([`Waiting for event ${event} ${timeoutDuration ? `for ${timeoutDuration}ms` : "indefinitely"}`]);
@@ -164,15 +101,6 @@ index 32f5ecb495fc22bace27b3195e10953a9aa7438a..ba4973a59acfcfedc5e89aad5d06bbcf
      if (timeout) {
        this.timeouts.set(event, timeout);
      }
-@@ -639,7 +639,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
-       }
-       await this.destroy({
-         code: 1e3 /* Normal */,
--        reason: "Something timed out",
-+        reason: "Something timed out or went wrong while waiting for an event",
-         recover: 0 /* Reconnect */
-       });
-       return { ok: false, error };
 @@ -681,6 +681,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
      this.connection.send(JSON.stringify(payload));
    }
