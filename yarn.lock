@@ -1063,13 +1063,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cron@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@types/cron@npm:2.0.0"
+"@types/cron@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@types/cron@npm:2.0.1"
   dependencies:
     "@types/luxon": "*"
     "@types/node": "*"
-  checksum: 392d2cfca51504140397533c30be8facd2196251074eb26ee09232a7e983144ff1d8364cd64922ed22d142686a4724934a70672fc8353b441fea729ac0ed0611
+  checksum: 4268c784750a1373036b4de95cd1f35ab4fa5227c1639302eedb25a35900d7805271e33b557ad7ccccd6d1829944963df25cd0d9d0d603abf3bcdf148b69ea5d
   languageName: node
   linkType: hard
 
@@ -5139,7 +5139,7 @@ __metadata:
     "@sapphire/utilities": 3.11.1-next.47cd124.0
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
-    "@types/cron": ^2.0.0
+    "@types/cron": ^2.0.1
     "@types/luxon": ^3.2.0
     "@types/node": ^18.15.5
     "@types/pg": ^8.6.6
