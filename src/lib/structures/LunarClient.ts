@@ -20,7 +20,9 @@ import { CronJobManager } from '#structures/CronJobManager.js';
 import { LogHandler } from '#structures/LogHandler.js';
 import { ApplicationCommandCollection } from '#structures/commands/ApplicationCommandCollection.js';
 import { PermissionsManager } from '#structures/commands/PermissionsManager.js';
+import type { DiscordJSEvent } from '#structures/events/DiscordJSEvent';
 import { EventCollection } from '#structures/events/EventCollection.js';
+import type { RESTEvent } from '#structures/events/RESTEvent';
 import { GuildUtil, UserUtil } from '#utils';
 
 interface DirURLs {
@@ -45,7 +47,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 
 	public override readonly commands: ApplicationCommandCollection;
 
-	public override readonly events: EventCollection;
+	public override readonly events: EventCollection<DiscordJSEvent | RESTEvent>;
 
 	public override readonly log: LogHandler['log'];
 

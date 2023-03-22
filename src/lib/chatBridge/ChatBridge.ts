@@ -3,6 +3,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
 import type { Awaitable, Message as DiscordMessage, MessageCreateOptions } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
+import type { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
 import type { ChatBridgeManager } from '#chatBridge/ChatBridgeManager.js';
 import type { HypixelMessage } from '#chatBridge/HypixelMessage.js';
 import { CHAT_METHOD_BY_TYPE, HypixelMessageType } from '#chatBridge/constants/index.js';
@@ -102,11 +103,10 @@ export class ChatBridge extends EventEmitter {
 	/**
 	 * ChatBridge events
 	 */
-	private readonly events = new EventCollection(this, new URL('events', import.meta.url));
+	private readonly events = new EventCollection<ChatBridgeEvent>(this, new URL('events', import.meta.url));
 
 	public constructor(client: LunarClient, manager: ChatBridgeManager, mcAccount: number) {
 		super({ captureRejections: true });
-
 		Object.defineProperty(this, 'client', { value: client });
 
 		this.manager = manager;

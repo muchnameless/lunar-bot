@@ -17,7 +17,7 @@ interface EventLoadOptions {
 	reload?: boolean;
 }
 
-export class EventCollection extends Collection<string, BaseEvent> {
+export class EventCollection<T extends BaseEvent> extends Collection<string, T> {
 	/**
 	 * NodeJS EventEmitter
 	 */
@@ -28,7 +28,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	 */
 	public readonly dirURL: URL;
 
-	public constructor(emitter: EventEmitter, dirURL: URL, entries?: readonly [string, BaseEvent][]) {
+	public constructor(emitter: EventEmitter, dirURL: URL, entries?: readonly [string, T][]) {
 		super(entries);
 
 		this.emitter = emitter;
@@ -54,15 +54,13 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	public async loadFromFile(file: string, { reload = false, force = false }: EventLoadOptions = {}) {
 		const filePath = reload ? `${file}?update=${Date.now()}` : file;
 
-		const Event = (await import(filePath)).default as typeof BaseEvent;
+		const Event = (await import(filePath)).default as T;
 		// @ts-expect-error abstract class
-		const event = new Event(this.emitter);
+		const event: T = new Event(this.emitter);
 
 		this.set(event.name, event);
 
-		event.load(force);
-
-		return event;
+		return event.load(force);
 	}
 
 	/**

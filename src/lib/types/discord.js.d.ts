@@ -12,7 +12,9 @@ import type { CronJobManager } from '#structures/CronJobManager.js';
 import type { LogHandler } from '#structures/LogHandler.js';
 import type { ApplicationCommandCollection } from '#structures/commands/ApplicationCommandCollection.js';
 import type { PermissionsManager } from '#structures/commands/PermissionsManager.js';
+import type { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import type { EventCollection } from '#structures/events/EventCollection.js';
+import type { RESTEvent } from '#structures/events/RESTEvent.js';
 
 declare module 'discord.js' {
 	interface Client {
@@ -26,7 +28,7 @@ declare module 'discord.js' {
 		readonly discordGuilds: ModelManager<DiscordGuild>;
 		dmOwner(options: MessageCreateOptions | string): Promise<Message<boolean> | null>;
 
-		readonly events: EventCollection;
+		readonly events: EventCollection<DiscordJSEvent | RESTEvent>;
 		fetchAllMembers(): Promise<void>;
 		readonly hypixelGuilds: HypixelGuildManager;
 		readonly log: LogHandler['log'];
