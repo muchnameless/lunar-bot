@@ -112,6 +112,7 @@ const client = new LunarClient({
 		// don't await channel name and topic edits
 		rejectOnRateLimit: ({ method, route, timeToReset }) =>
 			method === RequestMethod.Patch && route === Routes.channel(':id') && timeToReset > seconds(30),
+		invalidRequestWarningInterval: 1,
 	},
 	jsonTransformer: (x) => x,
 });

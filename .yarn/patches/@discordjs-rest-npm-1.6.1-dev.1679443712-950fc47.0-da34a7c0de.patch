@@ -196,7 +196,7 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..f487b7c2653b8dba494b077570889b2b
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index d771d180f0c0d2b7e307a87d7594221cfba6d035..c4c89c2b26c2be4a2e1cc9fb45caae967eb45d20 100644
+index 61140577dea04111fc0cd8819ab0bc2ca1538b42..e29876626c547204794efd0bb2f03a8bddad7d38 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -679,7 +679,13 @@ index d771d180f0c0d2b7e307a87d7594221cfba6d035..c4c89c2b26c2be4a2e1cc9fb45caae96
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -986,7 +1112,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -981,12 +1107,12 @@ var RequestManager = class extends import_node_events.EventEmitter {
+           const { inactive } = val;
+           if (inactive) {
+             sweptHandlers.set(key, val);
++            this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
+           }
+-          this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
            return inactive;
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
@@ -899,7 +905,7 @@ index d771d180f0c0d2b7e307a87d7594221cfba6d035..c4c89c2b26c2be4a2e1cc9fb45caae96
    }
  };
  __name(REST, "REST");
-@@ -1271,6 +1350,7 @@ var version = "1.6.1-dev.1679400263-950fc47.0";
+@@ -1271,6 +1350,7 @@ var version = "1.6.1-dev.1679443712-950fc47.0";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -907,7 +913,7 @@ index d771d180f0c0d2b7e307a87d7594221cfba6d035..c4c89c2b26c2be4a2e1cc9fb45caae96
    CDN,
    DefaultRestOptions,
    DefaultUserAgent,
-@@ -1280,7 +1360,6 @@ var version = "1.6.1-dev.1679400263-950fc47.0";
+@@ -1280,7 +1360,6 @@ var version = "1.6.1-dev.1679443712-950fc47.0";
    REST,
    RESTEvents,
    RateLimitError,
@@ -916,7 +922,7 @@ index d771d180f0c0d2b7e307a87d7594221cfba6d035..c4c89c2b26c2be4a2e1cc9fb45caae96
    makeURLSearchParams,
    parseResponse,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 0496e99dc9523ce270a812bbb1a43a7f3e60c16f..893846b0f0b91fa70f78ea616cfc4e4e43a1647f 100644
+index 035dfc3934f6a7dbb8847b37c7c482688a0f0105..b0915d5f5d88aac20d544f899f30cf260969711b 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -52,6 +52,7 @@ var OverwrittenMimeTypes = {
@@ -1383,7 +1389,13 @@ index 0496e99dc9523ce270a812bbb1a43a7f3e60c16f..893846b0f0b91fa70f78ea616cfc4e4e
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -936,7 +1062,7 @@ var RequestManager = class extends EventEmitter {
+@@ -931,12 +1057,12 @@ var RequestManager = class extends EventEmitter {
+           const { inactive } = val;
+           if (inactive) {
+             sweptHandlers.set(key, val);
++            this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
+           }
+-          this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
            return inactive;
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
