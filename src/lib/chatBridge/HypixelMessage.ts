@@ -61,7 +61,7 @@ export class HypixelMessage {
 	/**
 	 * the chat bridge that instantiated the message
 	 */
-	public readonly chatBridge: ChatBridge;
+	public declare readonly chatBridge: ChatBridge;
 
 	/**
 	 * the prismarine-parsed message
@@ -118,7 +118,8 @@ export class HypixelMessage {
 	 * @param packet
 	 */
 	public constructor(chatBridge: ChatBridge, { content, type }: ChatPacket) {
-		this.chatBridge = chatBridge;
+		Object.defineProperty(this, 'chatBridge', { value: chatBridge });
+
 		this.prismarineMessage = PrismarineMessage.fromNotch(content);
 		this.position = type;
 		this.rawContent = this.prismarineMessage.toString().trim();

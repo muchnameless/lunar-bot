@@ -256,7 +256,7 @@ export class HypixelMessageCollector extends EventEmitter {
 	/**
 	 * The chatBridge that instantiated this Collector
 	 */
-	public readonly chatBridge: ChatBridge;
+	public declare readonly chatBridge: ChatBridge;
 
 	/**
 	 * The options of this collector
@@ -297,8 +297,8 @@ export class HypixelMessageCollector extends EventEmitter {
 
 	public constructor(chatBridge: ChatBridge, options: HypixelMessageCollectorOptions = {}) {
 		super();
+		Object.defineProperty(this, 'chatBridge', { value: chatBridge });
 
-		this.chatBridge = chatBridge;
 		this.options = options;
 
 		this.filter = options.filter ?? (() => true);

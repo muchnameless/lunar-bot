@@ -13,7 +13,7 @@ type AwaitMessagesOptions = HypixelMessageCollectorOptions & {
 };
 
 export abstract class ChatManager {
-	public readonly chatBridge: ChatBridge;
+	public declare readonly chatBridge: ChatBridge;
 
 	/**
 	 * chat queue
@@ -21,7 +21,7 @@ export abstract class ChatManager {
 	public readonly queue = new AsyncQueue();
 
 	public constructor(chatBridge: ChatBridge) {
-		this.chatBridge = chatBridge;
+		Object.defineProperty(this, 'chatBridge', { value: chatBridge });
 	}
 
 	/**

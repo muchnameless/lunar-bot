@@ -12,7 +12,7 @@ type AuthorData = {
 };
 
 export class HypixelMessageAuthor {
-	public readonly chatBridge: ChatBridge;
+	public declare readonly chatBridge: ChatBridge;
 
 	public readonly ign: string;
 
@@ -33,7 +33,8 @@ export class HypixelMessageAuthor {
 	 * @param data
 	 */
 	public constructor(chatBridge: ChatBridge, { ign, guildRank, uuid }: AuthorData) {
-		this.chatBridge = chatBridge;
+		Object.defineProperty(this, 'chatBridge', { value: chatBridge });
+
 		this.ign = ign;
 		this.guildRank = guildRank ?? null;
 		this.player = uuid

@@ -37,14 +37,14 @@ export interface ReadyDiscordManager extends DiscordManager {
 }
 
 export class DiscordManager {
-	public readonly chatBridge: ChatBridge;
+	public declare readonly chatBridge: ChatBridge;
 
 	public readonly channelsByIds = new Collection<string, DiscordChatManager>();
 
 	public readonly channelsByType = new Collection<string, DiscordChatManager>();
 
 	public constructor(chatBridge: ChatBridge) {
-		this.chatBridge = chatBridge;
+		Object.defineProperty(this, 'chatBridge', { value: chatBridge });
 	}
 
 	public get client() {
