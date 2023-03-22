@@ -29,7 +29,7 @@ const blockedRegExp = new RegExp(
 	'su',
 );
 
-export default class MessageChatBridgeEvent extends ChatBridgeEvent {
+export default class extends ChatBridgeEvent {
 	public override readonly name = ChatBridgeEvents.Message;
 
 	/**

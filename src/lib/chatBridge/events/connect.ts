@@ -1,5 +1,5 @@
 import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
-import { ChatBridgeEvent as BaseChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
+import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
 import { logger } from '#logger';
 
 const limboRegExp = new RegExp(
@@ -14,7 +14,7 @@ const limboRegExp = new RegExp(
 		.join('|'),
 );
 
-export default class ConnectChatBridgeEvent extends BaseChatBridgeEvent {
+export default class extends ChatBridgeEvent {
 	public override readonly name = ChatBridgeEvents.Connect;
 
 	/**

@@ -4,7 +4,7 @@ import { logger } from '#logger';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { EmbedUtil, GuildMemberUtil } from '#utils';
 
-export default class GuildMemberRemoveEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.GuildMemberRemove;
 
 	/**

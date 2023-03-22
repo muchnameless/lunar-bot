@@ -6,12 +6,11 @@ import type { LunarClient } from '#structures/LunarClient.js';
 export abstract class RESTEvent extends BaseEvent {
 	public abstract override readonly name: RESTEvents;
 
-	@nonEnumerable
-	public readonly client: LunarClient<boolean>;
+	public declare readonly client: LunarClient<boolean>;
 
 	public constructor(client: LunarClient<true>) {
 		super();
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
 	}
 
 	public override get emitter() {

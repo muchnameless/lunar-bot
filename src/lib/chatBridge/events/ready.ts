@@ -3,7 +3,7 @@ import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
 import { MinecraftChatManagerState } from '#chatBridge/managers/MinecraftChatManager.js';
 import { logger } from '#logger';
 
-export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
+export default class extends ChatBridgeEvent {
 	public override readonly name = ChatBridgeEvents.Ready;
 
 	/**

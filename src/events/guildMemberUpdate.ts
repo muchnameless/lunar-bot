@@ -3,7 +3,7 @@ import { EmbedBuilder, Events, type ClientEvents } from 'discord.js';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildMemberUtil } from '#utils';
 
-export default class GuildMemberUpdateEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.GuildMemberUpdate;
 
 	/**

@@ -3,7 +3,7 @@ import { UnicodeEmoji } from '#constants';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { MessageUtil, UserUtil } from '#utils';
 
-export default class MessageCreateEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.MessageCreate;
 
 	/**

@@ -41,7 +41,7 @@ import type LeaderboardCommand from '#root/commands/guild/leaderboard.js';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildMemberUtil, InteractionUtil, MessageUtil, type RepliableInteraction } from '#utils';
 
-export default class InteractionCreateEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.InteractionCreate;
 
 	private _visibilityButtonMessages = new Set<Snowflake>();

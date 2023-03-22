@@ -5,7 +5,7 @@ import { logger } from '#logger';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildUtil } from '#utils';
 
-export default class GuildUnavailableEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.GuildUnavailable;
 
 	private readonly _intervals = new Map<Snowflake, NodeJS.Timeout>();

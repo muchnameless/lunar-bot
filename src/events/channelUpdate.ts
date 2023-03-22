@@ -3,7 +3,7 @@ import { HypixelMessageType, slowMode } from '#chatBridge/constants/index.js';
 import { logger } from '#logger';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class ChannelUpdateEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.ChannelUpdate;
 
 	/**

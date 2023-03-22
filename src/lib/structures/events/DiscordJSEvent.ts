@@ -6,12 +6,11 @@ import type { LunarClient } from '#structures/LunarClient.js';
 export abstract class DiscordJSEvent extends BaseEvent {
 	public abstract override readonly name: Events;
 
-	@nonEnumerable
-	public readonly client: LunarClient<true>;
+	public declare readonly client: LunarClient<true>;
 
 	public constructor(client: LunarClient<true>) {
 		super();
-		this.client = client;
+		Object.defineProperty(this, 'client', { value: client });
 	}
 
 	public override get emitter() {

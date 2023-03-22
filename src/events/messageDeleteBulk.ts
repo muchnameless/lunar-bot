@@ -1,7 +1,7 @@
 import { Events, type ClientEvents } from 'discord.js';
 import MessageDeleteEvent from './messageDelete.js';
 
-export default class MessageDeleteBulkEvent extends MessageDeleteEvent {
+export default class extends MessageDeleteEvent {
 	// @ts-expect-error override
 	public override readonly name = Events.MessageBulkDelete;
 

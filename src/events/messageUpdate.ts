@@ -4,7 +4,7 @@ import { logger } from '#logger';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { UserUtil } from '#utils';
 
-export default class MessageUpdateEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.MessageUpdate;
 
 	/**

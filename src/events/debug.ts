@@ -3,7 +3,7 @@ import { Events, type ClientEvents } from 'discord.js';
 import { logger } from '#logger';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class DebugEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.Debug;
 
 	public override readonly enabled = env.NODE_ENV === 'development';

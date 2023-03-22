@@ -3,7 +3,7 @@ import { logger } from '#logger';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildUtil } from '#utils';
 
-export default class GuildMemberAvailableEvent extends DiscordJSEvent {
+export default class extends DiscordJSEvent {
 	public override readonly name = Events.GuildMemberAvailable;
 
 	/**

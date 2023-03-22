@@ -1,17 +1,15 @@
 import type { Awaitable } from 'discord.js';
 import type { ChatBridge, ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
-import { nonEnumerable } from '#decorators';
 import { BaseEvent } from '#structures/events/BaseEvent.js';
 
 export abstract class ChatBridgeEvent extends BaseEvent {
 	public abstract override readonly name: ChatBridgeEvents;
 
-	@nonEnumerable
-	public readonly chatBridge: ChatBridge;
+	public declare readonly chatBridge: ChatBridge;
 
 	public constructor(chatBridge: ChatBridge) {
 		super();
-		this.chatBridge = chatBridge;
+		Object.defineProperty(this, 'chatBridge', { value: chatBridge });
 	}
 
 	public get emitter() {

@@ -3,7 +3,7 @@ import ms from 'ms';
 import { logger } from '#logger';
 import { RESTEvent } from '#structures/events/RESTEvent.js';
 
-export default class RateLimitedEvent extends RESTEvent {
+export default class extends RESTEvent {
 	public override readonly name = RESTEvents.RateLimited;
 
 	/**
