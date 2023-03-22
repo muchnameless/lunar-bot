@@ -1,4 +1,4 @@
-import { ChatBridgeEvent, type ChatBridge } from '../ChatBridge.js';
+import { ChatBridgeEvents, type ChatBridge } from '../ChatBridge.js';
 import { DEFAULT_SETTINGS } from '../constants/index.js';
 import { logger } from '#logger';
 
@@ -19,5 +19,5 @@ export default async function run(this: ChatBridge) {
 	// send settings to server
 	this.bot.write('settings', DEFAULT_SETTINGS);
 
-	this.emit(ChatBridgeEvent.Connect);
+	this.emit(ChatBridgeEvents.Connect);
 }

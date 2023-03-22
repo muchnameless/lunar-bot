@@ -1,5 +1,4 @@
 import type { EventEmitter } from 'node:events';
-import { basename } from 'node:path';
 import type { URL } from 'node:url';
 import { findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { Collection } from 'discord.js';
@@ -53,16 +52,13 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	 * @param options.reload - whether to reload the imported file
 	 */
 	public async loadFromFile(file: string, { reload = false, force = false }: EventLoadOptions = {}) {
-		const name = basename(file, '.js');
 		const filePath = reload ? `${file}?update=${Date.now()}` : file;
 
 		const Event = (await import(filePath)).default as typeof BaseEvent;
-		const event = new Event({
-			emitter: this.emitter,
-			name,
-		});
+		// @ts-expect-error abstract class
+		const event = new Event(this.emitter);
 
-		this.set(name, event);
+		this.set(event.name, event);
 
 		event.load(force);
 

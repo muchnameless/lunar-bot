@@ -1,9 +1,11 @@
-import { ChannelType, type ClientEvents, type Events } from 'discord.js';
+import { ChannelType, Events, type ClientEvents } from 'discord.js';
 import { HypixelMessageType, slowMode } from '#chatBridge/constants/index.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class ChannelUpdateEvent extends Event {
+export default class ChannelUpdateEvent extends DiscordJSEvent {
+	public override readonly name = Events.ChannelUpdate;
+
 	/**
 	 * event listener callback
 	 *

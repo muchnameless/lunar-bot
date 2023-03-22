@@ -1,5 +1,9 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
+import { getSkyBlockProfiles, mojang } from '#api';
+import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
+import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
+import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import {
 	demoteSuccess,
 	HypixelMessageType,
@@ -11,10 +15,7 @@ import {
 	promoteSuccess,
 	slowModeChange,
 	unmuteSuccess,
-} from '../constants/index.js';
-import { getSkyBlockProfiles, mojang } from '#api';
-import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
-import type { HypixelMessage, HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
+} from '#chatBridge/constants/index.js';
 import { ErrorCode, UnicodeEmoji } from '#constants';
 import { assertNever, commaListOr, formatError, getLilyWeight, stringToMS, type WeightData } from '#functions';
 import { logger } from '#logger';
@@ -29,6 +30,8 @@ const blockedRegExp = new RegExp(
 );
 
 export default class MessageChatBridgeEvent extends ChatBridgeEvent {
+	public override readonly name = ChatBridgeEvents.Message;
+
 	/**
 	 * parse server message content
 	 *

@@ -1,8 +1,11 @@
-import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
-import { MinecraftChatManagerState } from '../managers/MinecraftChatManager.js';
+import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
+import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
+import { MinecraftChatManagerState } from '#chatBridge/managers/MinecraftChatManager.js';
 import { logger } from '#logger';
 
 export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
+	public override readonly name = ChatBridgeEvents.Ready;
+
 	/**
 	 * event listener callback
 	 */

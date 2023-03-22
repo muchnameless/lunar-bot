@@ -4,7 +4,7 @@ import { setInterval } from 'node:timers';
 import type { URL } from 'node:url';
 import { stripIndents } from 'common-tags';
 import { InteractionType, MessageFlags, type Message, type Snowflake } from 'discord.js';
-import { ChatBridge, ChatBridgeEvent } from './ChatBridge.js';
+import { ChatBridge, ChatBridgeEvents } from './ChatBridge.js';
 import { AbortControllerCache, OtherBotInteractionCache, OwnInteractionCache } from './caches/index.js';
 import { DELETED_MESSAGE_REASON } from './constants/index.js';
 import { DiscordChatManager } from './managers/DiscordChatManager.js';
@@ -123,7 +123,7 @@ export class ChatBridgeManager {
 			const chatBridge = this.cache[indexOrForce]!;
 
 			await chatBridge.connect(force);
-			await once(chatBridge, ChatBridgeEvent.Ready);
+			await once(chatBridge, ChatBridgeEvents.Ready);
 
 			return this;
 		}
@@ -132,7 +132,7 @@ export class ChatBridgeManager {
 		await Promise.all(
 			this.cache.map(async (chatBridge) => {
 				await chatBridge.connect(indexOrForce);
-				return once(chatBridge, ChatBridgeEvent.Ready);
+				return once(chatBridge, ChatBridgeEvents.Ready);
 			}),
 		);
 

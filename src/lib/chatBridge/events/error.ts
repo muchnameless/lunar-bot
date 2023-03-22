@@ -1,7 +1,10 @@
-import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
+import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
 import { logger } from '#logger';
 
 export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
+	public override readonly name = ChatBridgeEvents.Error;
+
 	/**
 	 * event listener callback
 	 *

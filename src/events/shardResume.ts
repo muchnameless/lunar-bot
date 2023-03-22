@@ -1,8 +1,10 @@
-import type { ClientEvents, Events } from 'discord.js';
+import { Events, type ClientEvents } from 'discord.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class ShardResumeEvent extends Event {
+export default class ShardResumeEvent extends DiscordJSEvent {
+	public override readonly name = Events.ShardResume;
+
 	/**
 	 * event listener callback
 	 *

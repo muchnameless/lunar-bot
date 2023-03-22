@@ -1,9 +1,11 @@
-import type { ClientEvents, Events, Message } from 'discord.js';
+import { Events, type ClientEvents, type Message } from 'discord.js';
 import { UnicodeEmoji } from '#constants';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class MessageReactionAddEvent extends Event {
+export default class MessageReactionAddEvent extends DiscordJSEvent {
+	public override readonly name = Events.MessageReactionAdd;
+
 	/**
 	 * event listener callback
 	 *

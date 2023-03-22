@@ -1,16 +1,21 @@
-import type { ChatBridge } from './ChatBridge.js';
-import { BaseEvent, type BaseEventContext } from '#structures/events/BaseEvent.js';
+import type { Awaitable } from 'discord.js';
+import type { ChatBridge, ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
+import { nonEnumerable } from '#decorators';
+import { BaseEvent } from '#structures/events/BaseEvent.js';
 
-export interface ChatBridgeEventContext extends BaseEventContext {
-	emitter: ChatBridge;
-}
-export class ChatBridgeEvent extends BaseEvent {
+export abstract class ChatBridgeEvent extends BaseEvent {
+	public abstract override readonly name: ChatBridgeEvents;
+
+	@nonEnumerable
 	public readonly chatBridge: ChatBridge;
 
-	public constructor(context: ChatBridgeEventContext) {
-		super(context);
+	public constructor(chatBridge: ChatBridge) {
+		super();
+		this.chatBridge = chatBridge;
+	}
 
-		this.chatBridge = context.emitter;
+	public get emitter() {
+		return this.chatBridge;
 	}
 
 	public get client() {
@@ -20,4 +25,6 @@ export class ChatBridgeEvent extends BaseEvent {
 	public get config() {
 		return this.client.config;
 	}
+
+	public abstract override run(...args: unknown[]): Awaitable<void>;
 }

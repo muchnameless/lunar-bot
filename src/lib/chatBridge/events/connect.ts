@@ -1,5 +1,5 @@
-import { ChatBridgeEvent } from '../ChatBridge.js';
-import { ChatBridgeEvent as BaseChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
+import { ChatBridgeEvent as BaseChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
 import { logger } from '#logger';
 
 const limboRegExp = new RegExp(
@@ -15,6 +15,8 @@ const limboRegExp = new RegExp(
 );
 
 export default class ConnectChatBridgeEvent extends BaseChatBridgeEvent {
+	public override readonly name = ChatBridgeEvents.Connect;
+
 	/**
 	 * event listener callback
 	 */
@@ -50,7 +52,7 @@ export default class ConnectChatBridgeEvent extends BaseChatBridgeEvent {
 		} while (--counter);
 
 		// bot is in limbo -> won't change servers anymore -> ready to send messages
-		this.chatBridge.emit(ChatBridgeEvent.Ready);
+		this.chatBridge.emit(ChatBridgeEvents.Ready);
 
 		// link chatBridge to the bot account's guild
 		void this.chatBridge.link();

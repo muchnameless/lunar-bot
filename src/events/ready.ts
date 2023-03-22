@@ -1,10 +1,13 @@
+import { Events } from 'discord.js';
 import { HYPIXEL_UPDATE_INTERVAL } from '#constants';
 import { minutes, retry, safePromiseAll } from '#functions';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { UserUtil } from '#utils';
 
-export default class ReadyEvent extends Event {
+export default class ReadyEvent extends DiscordJSEvent {
+	public override readonly name = Events.ClientReady;
+
 	public override readonly once = true;
 
 	private async _connectChatBridges() {

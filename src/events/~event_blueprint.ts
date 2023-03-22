@@ -1,6 +1,9 @@
-import { Event } from '#structures/events/Event.js';
+import type { Events } from 'discord.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class MyEvent extends Event {
+export default class MyEvent extends DiscordJSEvent {
+	public override readonly name = '' as Events;
+
 	/**
 	 * event listener callback
 	 */

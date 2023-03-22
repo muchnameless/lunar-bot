@@ -3,17 +3,17 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
 import type { Awaitable, Message as DiscordMessage, MessageCreateOptions } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
-import type { ChatBridgeManager } from './ChatBridgeManager.js';
-import type { HypixelMessage } from './HypixelMessage.js';
-import { CHAT_METHOD_BY_TYPE, HypixelMessageType } from './constants/index.js';
-import { ForwardRejectionType } from './managers/DiscordChatManager.js';
-import { DiscordManager, type ReadyDiscordManager } from './managers/DiscordManager.js';
+import type { ChatBridgeManager } from '#chatBridge/ChatBridgeManager.js';
+import type { HypixelMessage } from '#chatBridge/HypixelMessage.js';
+import { CHAT_METHOD_BY_TYPE, HypixelMessageType } from '#chatBridge/constants/index.js';
+import { ForwardRejectionType } from '#chatBridge/managers/DiscordChatManager.js';
+import { DiscordManager, type ReadyDiscordManager } from '#chatBridge/managers/DiscordManager.js';
 import {
 	MinecraftChatManager,
 	MinecraftChatManagerState,
 	type MinecraftChatOptions,
 	type ReadyMinecraftChatManager,
-} from './managers/MinecraftChatManager.js';
+} from '#chatBridge/managers/MinecraftChatManager.js';
 import type { HypixelGuild } from '#db/models/HypixelGuild.js';
 import type { Player } from '#db/models/Player.js';
 import { minutes, seconds } from '#functions';
@@ -30,7 +30,7 @@ export interface BroadcastOptions {
 
 export type BroadcastResult = [boolean, DiscordMessage | null];
 
-export const enum ChatBridgeEvent {
+export const enum ChatBridgeEvents {
 	Connect = 'connect',
 	Disconnect = 'disconnect',
 	Error = 'error',
@@ -40,10 +40,10 @@ export const enum ChatBridgeEvent {
 }
 
 export interface ChatBridge {
-	on(event: ChatBridgeEvent.Connect | ChatBridgeEvent.Ready, listener: () => Awaitable<void>): this;
-	on(event: ChatBridgeEvent.Disconnect, listener: (reason?: string) => Awaitable<void>): this;
-	on(event: ChatBridgeEvent.Error, listener: (error: Error) => Awaitable<void>): this;
-	on(event: ChatBridgeEvent.Message, listener: (hypixelMessage: HypixelMessage) => Awaitable<void>): this;
+	on(event: ChatBridgeEvents.Connect | ChatBridgeEvents.Ready, listener: () => Awaitable<void>): this;
+	on(event: ChatBridgeEvents.Disconnect, listener: (reason?: string) => Awaitable<void>): this;
+	on(event: ChatBridgeEvents.Error, listener: (error: Error) => Awaitable<void>): this;
+	on(event: ChatBridgeEvents.Message, listener: (hypixelMessage: HypixelMessage) => Awaitable<void>): this;
 }
 
 export interface MinecraftReadyChatBridge extends ChatBridge {
@@ -200,7 +200,7 @@ export class ChatBridge extends EventEmitter {
 	 */
 	public async link(guildName: string | null = null): Promise<this> {
 		if (!this.isMinecraftReady()) {
-			await once(this, ChatBridgeEvent.Ready);
+			await once(this, ChatBridgeEvents.Ready);
 		}
 
 		try {
@@ -241,7 +241,7 @@ export class ChatBridge extends EventEmitter {
 			hypixelGuild.chatBridge = this;
 			this.hypixelGuild = hypixelGuild;
 
-			this.emit(ChatBridgeEvent.Linked);
+			this.emit(ChatBridgeEvents.Linked);
 
 			logger.info(this.logInfo, '[CHATBRIDGE]: linked');
 
@@ -329,7 +329,7 @@ export class ChatBridge extends EventEmitter {
 
 			// not linked yet
 			try {
-				await once(this, ChatBridgeEvent.Linked, { signal: AbortSignal.timeout(minutes(1)) });
+				await once(this, ChatBridgeEvents.Linked, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {
 				logger.error({ err: error, ...this.logInfo }, '[HANDLE DISCORD MESSAGE]: not linked');
 				return this.handleError(message);
@@ -343,7 +343,7 @@ export class ChatBridge extends EventEmitter {
 			}
 
 			try {
-				await once(this, ChatBridgeEvent.Ready, { signal: AbortSignal.timeout(minutes(1)) });
+				await once(this, ChatBridgeEvents.Ready, { signal: AbortSignal.timeout(minutes(1)) });
 			} catch (error) {
 				logger.error({ err: error, ...this.logInfo }, '[HANDLE DISCORD MESSAGE]: minecraft not ready');
 				return this.handleError(message);

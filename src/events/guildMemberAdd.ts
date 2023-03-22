@@ -1,10 +1,12 @@
 import { stripIndents } from 'common-tags';
-import { EmbedBuilder, type ClientEvents, type Events } from 'discord.js';
+import { EmbedBuilder, Events, type ClientEvents } from 'discord.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildMemberUtil } from '#utils';
 
-export default class GuildMemberAddEvent extends Event {
+export default class GuildMemberAddEvent extends DiscordJSEvent {
+	public override readonly name = Events.GuildMemberAdd;
+
 	/**
 	 * event listener callback
 	 *

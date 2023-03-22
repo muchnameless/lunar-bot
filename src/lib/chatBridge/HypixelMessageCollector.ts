@@ -201,7 +201,7 @@
 import { EventEmitter } from 'node:events';
 import { setTimeout, clearTimeout } from 'node:timers';
 import type { Awaitable } from 'discord.js';
-import { ChatBridgeEvent, type ChatBridge } from './ChatBridge.js';
+import { ChatBridgeEvents, type ChatBridge } from './ChatBridge.js';
 import type { HypixelMessage } from './HypixelMessage.js';
 
 /**
@@ -307,12 +307,12 @@ export class HypixelMessageCollector extends EventEmitter {
 		}
 
 		this.chatBridge.incrementMaxListeners();
-		this.chatBridge.on(ChatBridgeEvent.Message, this._handleCollect);
-		this.chatBridge.once(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
+		this.chatBridge.on(ChatBridgeEvents.Message, this._handleCollect);
+		this.chatBridge.once(ChatBridgeEvents.Disconnect, this._handleBotDisconnection);
 
 		this.once(HypixelMessageCollectorEvent.End, () => {
-			this.chatBridge.off(ChatBridgeEvent.Message, this._handleCollect);
-			this.chatBridge.off(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
+			this.chatBridge.off(ChatBridgeEvents.Message, this._handleCollect);
+			this.chatBridge.off(ChatBridgeEvents.Disconnect, this._handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
 		});
 

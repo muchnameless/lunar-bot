@@ -1,8 +1,11 @@
+import { Events } from 'discord.js';
 import { logger } from '#logger';
 import { exitProcess } from '#root/process.js';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class InvalidatedEvent extends Event {
+export default class InvalidatedEvent extends DiscordJSEvent {
+	public override readonly name = Events.Invalidated;
+
 	/**
 	 * event listener callback
 	 */

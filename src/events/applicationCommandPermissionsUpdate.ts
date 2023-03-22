@@ -1,7 +1,9 @@
-import type { ClientEvents, Events } from 'discord.js';
-import { Event } from '#structures/events/Event.js';
+import { Events, type ClientEvents } from 'discord.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class ApplicationCommandPermissionsUpdateEvent extends Event {
+export default class ApplicationCommandPermissionsUpdateEvent extends DiscordJSEvent {
+	public override readonly name = Events.ApplicationCommandPermissionsUpdate;
+
 	/**
 	 * event listener callback
 	 *

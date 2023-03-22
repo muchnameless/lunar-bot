@@ -1,7 +1,9 @@
-import type { ClientEvents, Events } from 'discord.js';
-import { Event } from '#structures/events/Event.js';
+import { Events, type ClientEvents } from 'discord.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
-export default class MessageDeleteEvent extends Event {
+export default class MessageDeleteEvent extends DiscordJSEvent {
+	public override readonly name = Events.MessageDelete;
+
 	/**
 	 * @param message
 	 */

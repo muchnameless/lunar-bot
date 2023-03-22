@@ -2,27 +2,14 @@ import type { EventEmitter } from 'node:events';
 import type { Awaitable } from 'discord.js';
 import { bound } from '#decorators';
 
-export interface BaseEventContext {
-	emitter: EventEmitter;
-	name: string;
-}
+export abstract class BaseEvent {
+	public abstract readonly emitter: EventEmitter;
 
-export class BaseEvent {
-	public emitter: EventEmitter;
-
-	public readonly name: string;
+	public abstract readonly name: string;
 
 	public readonly once: boolean = false;
 
 	public readonly enabled: boolean = true;
-
-	/**
-	 * @param context
-	 */
-	public constructor({ emitter, name }: BaseEventContext) {
-		this.emitter = emitter;
-		this.name = name;
-	}
 
 	/**
 	 * add the event listener

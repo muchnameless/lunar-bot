@@ -1,8 +1,10 @@
-import type { ClientEvents, Events } from 'discord.js';
-import { Event } from '#structures/events/Event.js';
+import { Events, type ClientEvents } from 'discord.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { UserUtil } from '#utils';
 
-export default class UserUpdateEvent extends Event {
+export default class UserUpdateEvent extends DiscordJSEvent {
+	public override readonly name = Events.UserUpdate;
+
 	/**
 	 * event listener callback
 	 *

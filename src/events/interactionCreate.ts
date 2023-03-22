@@ -5,6 +5,7 @@ import {
 	ApplicationCommandType,
 	ChannelType,
 	ComponentType,
+	Events,
 	InteractionType,
 	PermissionFlagsBits,
 	userMention,
@@ -16,7 +17,6 @@ import {
 	type ChannelSelectMenuInteraction,
 	type ChatInputCommandInteraction,
 	type ClientEvents,
-	type Events,
 	type JSONEncodable,
 	type MentionableSelectMenuInteraction,
 	type MessageActionRowComponentBuilder,
@@ -38,10 +38,12 @@ import {
 } from '#functions';
 import { logger } from '#logger';
 import type LeaderboardCommand from '#root/commands/guild/leaderboard.js';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildMemberUtil, InteractionUtil, MessageUtil, type RepliableInteraction } from '#utils';
 
-export default class InteractionCreateEvent extends Event {
+export default class InteractionCreateEvent extends DiscordJSEvent {
+	public override readonly name = Events.InteractionCreate;
+
 	private _visibilityButtonMessages = new Set<Snowflake>();
 
 	/**

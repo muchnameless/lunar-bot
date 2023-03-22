@@ -1,9 +1,11 @@
-import type { ClientEvents, Events } from 'discord.js';
+import { Events, type ClientEvents } from 'discord.js';
 import { logger } from '#logger';
-import { Event } from '#structures/events/Event.js';
+import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildUtil } from '#utils';
 
-export default class GuildDeleteEvent extends Event {
+export default class GuildDeleteEvent extends DiscordJSEvent {
+	public override readonly name = Events.GuildDelete;
+
 	/**
 	 * event listener callback
 	 *
