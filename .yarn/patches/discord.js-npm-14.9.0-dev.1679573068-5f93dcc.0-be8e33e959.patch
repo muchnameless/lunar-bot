@@ -1482,7 +1482,7 @@ index f3bf22dcb496dc563aef7e5a987024ee7eb3767e..efddf66a7d5107c29224496f132c3abe
  
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
-index f6d10d1f3e2f77578fe2c35efc4f85ff61837012..fd3bf85b03d6722936717778f81066755819b23a 100644
+index f56b5e342c4d308346cdc869b93993dcbd3cd9e9..94ca701dc9045d9f82ef2dca67b85d117b999d1c 100644
 --- a/src/structures/GuildMember.js
 +++ b/src/structures/GuildMember.js
 @@ -259,8 +259,9 @@ class GuildMember extends Base {
@@ -1554,7 +1554,7 @@ index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf4448
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb61711546a76 100644
+index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500442f68f2 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -320,10 +320,13 @@ class Message extends Base {
@@ -1575,27 +1575,37 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
      }
  
      if ('flags' in data) {
-@@ -601,11 +604,16 @@ class Message extends Base {
+@@ -601,19 +604,23 @@ class Message extends Base {
     * @readonly
     */
    get editable() {
 -    const precheck = Boolean(this.author.id === this.client.user.id && (!this.guild || this.channel?.viewable));
 +    const { channel } = this;
-+    const precheck = Boolean(
+ 
+     // Regardless of permissions thread messages cannot be edited if
+     // the thread is archived or the thread is locked and the bot does not have permission to manage threads.
+-    if (this.channel?.isThread()) {
+-      if (this.channel.archived) return false;
+-      if (this.channel.locked) {
+-        const permissions = this.permissionsFor(this.client.user);
++    if (channel?.isThread()) {
++      if (channel.archived) return false;
++      if (channel.locked) {
++        const permissions = channel.permissionsFor(this.client.user);
+         if (!permissions?.has(PermissionFlagsBits.ManageThreads, true)) return false;
+       }
+     }
+ 
+-    return precheck;
++    return Boolean(
 +      this.author.id === this.client.user.id &&
 +        !this.flags.has(MessageFlags.Ephemeral) &&
 +        (!this.guildId || channel?.viewable),
 +    );
-     // Regardless of permissions thread messages cannot be edited if
-     // the thread is locked.
--    if (this.channel?.isThread()) {
--      return precheck && !this.channel.locked;
-+    if (channel?.isThread()) {
-+      return precheck && !channel.locked;
-     }
-     return precheck;
    }
-@@ -618,15 +626,19 @@ class Message extends Base {
+ 
+   /**
+@@ -624,15 +631,19 @@ class Message extends Base {
    get deletable() {
      if (!DeletableMessageTypes.includes(this.type)) return false;
  
@@ -1618,7 +1628,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
      if (!permissions) return false;
      // This flag allows deleting even if timed out
      if (permissions.has(PermissionFlagsBits.Administrator, false)) return true;
-@@ -665,7 +677,8 @@ class Message extends Base {
+@@ -671,7 +682,8 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
@@ -1628,7 +1638,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
            (channel?.viewable &&
              channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
      );
-@@ -696,7 +709,7 @@ class Message extends Base {
+@@ -702,7 +714,7 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildAnnouncement &&
@@ -1637,7 +1647,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
          this.type === MessageType.Default &&
          channel.viewable &&
          channel.permissionsFor(this.client.user)?.has(bitfield, false),
-@@ -714,8 +727,9 @@ class Message extends Base {
+@@ -720,8 +732,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -1649,7 +1659,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
    }
  
    /**
-@@ -730,8 +744,9 @@ class Message extends Base {
+@@ -736,8 +749,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -1661,7 +1671,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
    }
  
    /**
-@@ -745,8 +760,9 @@ class Message extends Base {
+@@ -751,8 +765,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -1673,7 +1683,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
      return this;
    }
  
-@@ -761,8 +777,9 @@ class Message extends Base {
+@@ -767,8 +782,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -1685,7 +1695,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
      return this;
    }
  
-@@ -782,13 +799,14 @@ class Message extends Base {
+@@ -788,13 +804,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -1703,7 +1713,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
          [this.client.actions.injectedMessage]: this,
          emoji: resolvePartialEmoji(emoji),
        },
-@@ -806,8 +824,9 @@ class Message extends Base {
+@@ -812,8 +829,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -1715,7 +1725,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
      return this;
    }
  
-@@ -830,7 +849,8 @@ class Message extends Base {
+@@ -836,7 +854,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -1725,7 +1735,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -843,7 +863,7 @@ class Message extends Base {
+@@ -849,7 +868,7 @@ class Message extends Base {
          },
        });
      }
@@ -1734,7 +1744,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
    }
  
    /**
-@@ -863,12 +883,13 @@ class Message extends Base {
+@@ -869,12 +888,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -1751,7 +1761,7 @@ index 407ede4f3fd86b7890669570dd64ce4fb036ff1b..47b00d5fb411afcea3921da2c09eb617
    }
  
    /**
-@@ -877,8 +898,9 @@ class Message extends Base {
+@@ -883,8 +903,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -1897,7 +1907,7 @@ index 7796ddc99a96d7c431052895c2c0a9d4c23a6790..eb0c680121aed6bde625f7d4da0fac8b
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91826b7eba 100644
+index f78620bae886e920fd444b978a855760808ec31a..38a762e7dbfa0e5eaaaed335f30982c6b9a65924 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -1,6 +1,3 @@
@@ -2162,7 +2172,7 @@ index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91
  
    public send(data: unknown, important?: boolean): void;
  
-@@ -3500,16 +3487,23 @@ export enum DiscordjsErrorCodes {
+@@ -3501,16 +3488,23 @@ export enum DiscordjsErrorCodes {
    TokenMissing = 'TokenMissing',
    ApplicationCommandPermissionsTokenMissing = 'ApplicationCommandPermissionsTokenMissing',
  
@@ -2186,7 +2196,7 @@ index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91
    DisallowedIntents = 'DisallowedIntents',
    ShardingNoShards = 'ShardingNoShards',
    ShardingInProcess = 'ShardingInProcess',
-@@ -3747,7 +3741,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -3748,7 +3742,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -2195,7 +2205,7 @@ index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -4273,11 +4267,6 @@ export interface BaseApplicationCommandData {
+@@ -4278,11 +4272,6 @@ export interface BaseApplicationCommandData {
    nsfw?: boolean;
  }
  
@@ -2207,7 +2217,7 @@ index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -4856,10 +4845,11 @@ export interface ClientUserEditOptions {
+@@ -4861,10 +4850,11 @@ export interface ClientUserEditOptions {
  }
  
  export interface CloseEvent {
@@ -2220,7 +2230,7 @@ index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91
  }
  
  export type CollectorFilter<T extends unknown[]> = (...args: T) => boolean | Promise<boolean>;
-@@ -5809,14 +5799,7 @@ export interface BaseMessageOptions {
+@@ -5817,14 +5807,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
@@ -2236,7 +2246,7 @@ index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91
    components?: (
      | JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>
      | ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
-@@ -6311,6 +6294,7 @@ export interface WebSocketOptions {
+@@ -6321,6 +6304,7 @@ export interface WebSocketOptions {
    compress?: boolean;
    properties?: WebSocketProperties;
    version?: number;
@@ -2244,7 +2254,7 @@ index 7059ba0f849fcf0512db41a9a1396f879fd712df..fcd010babaf97bc475ab61834024cc91
  }
  
  export interface WebSocketProperties {
-@@ -6394,3 +6378,4 @@ export * from '@discordjs/builders';
+@@ -6404,3 +6388,4 @@ export * from '@discordjs/builders';
  export * from '@discordjs/formatters';
  export * from '@discordjs/rest';
  export * from '@discordjs/util';
