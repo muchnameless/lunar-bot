@@ -1,5 +1,5 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 5b25f414148a792e1dba153947c2cd4a24ec866d..f487b7c2653b8dba494b077570889b2bb84c7667 100644
+index 5b25f414148a792e1dba153947c2cd4a24ec866d..d627f646147dc32fa4c8d239f7da486bdbb646ee 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -43,6 +43,7 @@ type ImageSize = (typeof ALLOWED_SIZES)[number];
@@ -111,17 +111,18 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..f487b7c2653b8dba494b077570889b2b
      #private;
      /**
       * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
-@@ -709,7 +634,8 @@ declare class RequestManager extends EventEmitter {
+@@ -709,7 +634,9 @@ declare class RequestManager extends EventEmitter {
      private hashTimer;
      private handlerTimer;
      readonly options: RESTOptions;
 -    constructor(options: Partial<RESTOptions>);
 +    readonly cdn: CDN;
++    readonly userAgent: string;
 +    constructor(options?: Partial<RESTOptions>);
      private setupSweepers;
      /**
       * Sets the default agent to use for requests performed by this manager
-@@ -723,13 +649,6 @@ declare class RequestManager extends EventEmitter {
+@@ -723,13 +650,6 @@ declare class RequestManager extends EventEmitter {
       * @param token - The authorization token to use
       */
      setToken(token: string): this;
@@ -135,7 +136,7 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..f487b7c2653b8dba494b077570889b2b
      /**
       * Creates a new rate limit handler from a hash, based on the hash and the major parameter
       *
-@@ -752,6 +671,53 @@ declare class RequestManager extends EventEmitter {
+@@ -752,6 +672,53 @@ declare class RequestManager extends EventEmitter {
       * Stops the request handler sweeping interval
       */
      clearHandlerSweeper(): void;
@@ -189,14 +190,14 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..f487b7c2653b8dba494b077570889b2b
      /**
       * Generates route data for an endpoint:method
       *
-@@ -867,4 +833,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
+@@ -867,4 +834,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
   */
  declare const version: string;
  
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26584eaeb9 100644
+index 636001cf3ce775be69cb2d52ad20e04cfa3189b6..701d76193c446210457969094b1e5d81b5a7cf64 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -654,15 +655,17 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
    /**
     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
     * performed by this manager.
-@@ -941,12 +1065,14 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -941,12 +1065,16 @@ var RequestManager = class extends import_node_events.EventEmitter {
    hashTimer;
    handlerTimer;
    options;
 +  cdn;
++  userAgent;
    constructor(options) {
      super();
      this.options = { ...DefaultRestOptions, ...options };
      this.options.offset = Math.max(0, this.options.offset);
++    this.userAgent = `${DefaultUserAgent} ${this.options.userAgentAppendix}`.trimEnd();
 +    this.cdn = new CDN(this.options.cdn);
      this.globalRemaining = this.options.globalRequestsPerSecond;
 -    this.agent = options.agent ?? null;
@@ -670,7 +673,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -971,7 +1097,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -971,7 +1099,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
            return shouldSweep;
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
@@ -679,7 +682,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -981,12 +1107,12 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -981,12 +1109,12 @@ var RequestManager = class extends import_node_events.EventEmitter {
            const { inactive } = val;
            if (inactive) {
              sweptHandlers.set(key, val);
@@ -694,7 +697,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      }
    }
    /**
-@@ -1007,27 +1133,6 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1007,27 +1135,6 @@ var RequestManager = class extends import_node_events.EventEmitter {
      this.#token = token;
      return this;
    }
@@ -722,7 +725,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
    /**
     * Creates a new rate limit handler from a hash, based on the hash and the major parameter
     *
-@@ -1036,7 +1141,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1036,7 +1143,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
     * @internal
     */
    createHandler(hash, majorParameter) {
@@ -731,7 +734,16 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      this.handlers.set(queue.id, queue);
      return queue;
    }
-@@ -1129,83 +1234,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1056,7 +1163,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+@@ -1129,83 +1236,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
    clearHandlerSweeper() {
      (0, import_node_timers2.clearInterval)(this.handlerTimer);
    }
@@ -816,7 +828,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1214,7 +1249,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1214,7 +1251,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -825,7 +837,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1223,7 +1258,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1223,7 +1260,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -834,7 +846,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1232,7 +1267,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1232,7 +1269,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -843,7 +855,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1241,7 +1276,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1241,7 +1278,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -852,7 +864,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1259,7 +1294,51 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1259,7 +1296,51 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param options - Request options
     */
    async raw(options) {
@@ -905,7 +917,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
    }
  };
  __name(REST, "REST");
-@@ -1271,6 +1350,7 @@ var version = "1.7.0-dev.1679573056-5f93dcc.0";
+@@ -1271,6 +1352,7 @@ var version = "1.6.1-dev.1679659480-5fcd0e4.0";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -913,7 +925,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
    CDN,
    DefaultRestOptions,
    DefaultUserAgent,
-@@ -1280,7 +1360,6 @@ var version = "1.7.0-dev.1679573056-5f93dcc.0";
+@@ -1280,7 +1362,6 @@ var version = "1.6.1-dev.1679659480-5fcd0e4.0";
    REST,
    RESTEvents,
    RateLimitError,
@@ -922,7 +934,7 @@ index 8d3c41be0dad9496b81c6039b261a3405188d571..7fe079b024523f2acb1528f48b4f8f26
    makeURLSearchParams,
    parseResponse,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704f9901281 100644
+index a28a1b2e5825b55ff84808f9145560695477d022..766af669080b015751e9a226c2507f78e30604cb 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -52,6 +52,7 @@ var OverwrittenMimeTypes = {
@@ -1364,15 +1376,17 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
    /**
     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
     * performed by this manager.
-@@ -891,12 +1015,14 @@ var RequestManager = class extends EventEmitter {
+@@ -891,12 +1015,16 @@ var RequestManager = class extends EventEmitter {
    hashTimer;
    handlerTimer;
    options;
 +  cdn;
++  userAgent;
    constructor(options) {
      super();
      this.options = { ...DefaultRestOptions, ...options };
      this.options.offset = Math.max(0, this.options.offset);
++    this.userAgent = `${DefaultUserAgent} ${this.options.userAgentAppendix}`.trimEnd();
 +    this.cdn = new CDN(this.options.cdn);
      this.globalRemaining = this.options.globalRequestsPerSecond;
 -    this.agent = options.agent ?? null;
@@ -1380,7 +1394,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -921,7 +1047,7 @@ var RequestManager = class extends EventEmitter {
+@@ -921,7 +1049,7 @@ var RequestManager = class extends EventEmitter {
            return shouldSweep;
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
@@ -1389,7 +1403,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -931,12 +1057,12 @@ var RequestManager = class extends EventEmitter {
+@@ -931,12 +1059,12 @@ var RequestManager = class extends EventEmitter {
            const { inactive } = val;
            if (inactive) {
              sweptHandlers.set(key, val);
@@ -1404,7 +1418,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      }
    }
    /**
-@@ -957,27 +1083,6 @@ var RequestManager = class extends EventEmitter {
+@@ -957,27 +1085,6 @@ var RequestManager = class extends EventEmitter {
      this.#token = token;
      return this;
    }
@@ -1432,7 +1446,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
    /**
     * Creates a new rate limit handler from a hash, based on the hash and the major parameter
     *
-@@ -986,7 +1091,7 @@ var RequestManager = class extends EventEmitter {
+@@ -986,7 +1093,7 @@ var RequestManager = class extends EventEmitter {
     * @internal
     */
    createHandler(hash, majorParameter) {
@@ -1441,7 +1455,16 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      this.handlers.set(queue.id, queue);
      return queue;
    }
-@@ -1079,83 +1184,13 @@ var RequestManager = class extends EventEmitter {
+@@ -1006,7 +1113,7 @@ var RequestManager = class extends EventEmitter {
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+@@ -1079,83 +1186,13 @@ var RequestManager = class extends EventEmitter {
    clearHandlerSweeper() {
      clearInterval(this.handlerTimer);
    }
@@ -1526,7 +1549,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1164,7 +1199,7 @@ var REST = class extends EventEmitter2 {
+@@ -1164,7 +1201,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1535,7 +1558,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1173,7 +1208,7 @@ var REST = class extends EventEmitter2 {
+@@ -1173,7 +1210,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1544,7 +1567,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1182,7 +1217,7 @@ var REST = class extends EventEmitter2 {
+@@ -1182,7 +1219,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1553,7 +1576,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1191,7 +1226,7 @@ var REST = class extends EventEmitter2 {
+@@ -1191,7 +1228,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1562,7 +1585,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1209,7 +1244,51 @@ var REST = class extends EventEmitter2 {
+@@ -1209,7 +1246,51 @@ var REST = class extends EventEmitter2 {
     * @param options - Request options
     */
    async raw(options) {
@@ -1615,7 +1638,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
    }
  };
  __name(REST, "REST");
-@@ -1220,6 +1299,7 @@ export {
+@@ -1220,6 +1301,7 @@ export {
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -1623,7 +1646,7 @@ index b1ff2210e4b3365358afc8c2a6b292b0f7077025..3d4f3b6311b95b9b012261af8d89e704
    CDN,
    DefaultRestOptions,
    DefaultUserAgent,
-@@ -1229,7 +1309,6 @@ export {
+@@ -1229,7 +1311,6 @@ export {
    REST,
    RESTEvents,
    RateLimitError,
