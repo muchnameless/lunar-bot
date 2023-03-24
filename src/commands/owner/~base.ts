@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { env } from 'node:process';
 import { inspect } from 'node:util';
-import { EmbedLimits, TextInputLimits } from '@sapphire/discord-utilities';
+import { EmbedLimits, MessageLimits, TextInputLimits } from '@sapphire/discord-utilities';
 import { regExpEsc } from '@sapphire/utilities';
 import {
 	ActionRowBuilder,
@@ -23,11 +23,6 @@ import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import { InteractionUtil, type RepliableInteraction } from '#utils';
 
 export default class BaseOwnerCommand extends ApplicationCommand {
-	/**
-	 * slightly less than 8 MB
-	 */
-	protected static readonly MAX_FILE_SIZE = 8_387_600;
-
 	/**
 	 * replaces the client's token in 'text' and escapes `
 	 *
@@ -68,9 +63,11 @@ export default class BaseOwnerCommand extends ApplicationCommand {
 		// uploading files might take some time
 		void InteractionUtil.defer(interaction);
 
+		const maxUploadSize = MessageLimits.MaximumUploadSizeInGuild[interaction.guild?.premiumTier ?? 0];
+
 		return [
-			new AttachmentBuilder()
-				.setFile(Buffer.from(content).subarray(0, BaseOwnerCommand.MAX_FILE_SIZE))
+			new AttachmentBuilder() //
+				.setFile(Buffer.from(content).subarray(0, maxUploadSize))
 				.setName('result.js'),
 		];
 	}
