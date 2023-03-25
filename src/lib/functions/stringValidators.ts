@@ -1,4 +1,3 @@
-import type { Snowflake } from 'discord.js';
 import { IGN_DEFAULT } from '#chatBridge/constants/index.js';
 
 const numberRegExp = /^\d+$/;
@@ -16,8 +15,7 @@ const discordTagRegExp = /^.{2,32}#\d{4}$/s;
  *
  * @param string
  */
-export const validateDiscordTag = (string: string | null): string is `${string}#${number}` =>
-	string !== null && discordTagRegExp.test(string);
+export const validateDiscordTag = (string: string): string is `${string}#${number}` => discordTagRegExp.test(string);
 
 const discordIdRegExp = /^\d{17,20}$/;
 /**
@@ -25,7 +23,7 @@ const discordIdRegExp = /^\d{17,20}$/;
  *
  * @param string
  */
-export const validateDiscordId = (string: unknown): string is Snowflake => discordIdRegExp.test(string as string);
+export const validateDiscordId = (string: string): string is `${bigint}` => discordIdRegExp.test(string);
 
 const ignRegExp = new RegExp(`^${IGN_DEFAULT}$`);
 /**
@@ -33,7 +31,7 @@ const ignRegExp = new RegExp(`^${IGN_DEFAULT}$`);
  *
  * @param string
  */
-export const validateMinecraftIgn = (string: string | null) => string !== null && ignRegExp.test(string);
+export const validateMinecraftIgn = (string: string) => ignRegExp.test(string);
 
 const minecraftUuidRegExp = /^[\da-f]{8}-?(?:[\da-f]{4}-?){3}[\da-f]{12}$/i;
 /**
@@ -41,5 +39,4 @@ const minecraftUuidRegExp = /^[\da-f]{8}-?(?:[\da-f]{4}-?){3}[\da-f]{12}$/i;
  *
  * @param string
  */
-export const validateMinecraftUuid = (string: string | null): string is string =>
-	string !== null && minecraftUuidRegExp.test(string);
+export const validateMinecraftUuid = (string: string) => minecraftUuidRegExp.test(string);

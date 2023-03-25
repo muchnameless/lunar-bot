@@ -836,7 +836,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 */
 	public async fetchDiscordMember(guildResolvable?: GuildResolvable | null) {
 		if (this._discordMember) return this._discordMember;
-		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
+		if (!this.inDiscord || this.discordId === null || !validateDiscordId(this.discordId)) return null;
 
 		try {
 			let guild: Guild | null | undefined;
