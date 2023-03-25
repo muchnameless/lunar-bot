@@ -190,8 +190,9 @@ export default class BaseSkyBlockCommand extends DualCommand {
 			values: { profile, latest },
 			positionals: [IGN, PROFILE_NAME_INPUT],
 		} = hypixelMessage.commandData.parseArgs<typeof baseParseArgsOptions>();
+		const profileNameInput = profile ?? PROFILE_NAME_INPUT;
 
-		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(NON_LETTER_REGEXP, '');
+		let profileName = profileNameInput?.replace(NON_LETTER_REGEXP, '');
 		if (profileName) {
 			let similarity: number;
 
@@ -201,7 +202,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 				try {
 					await hypixelMessage.awaitConfirmation({
 						question: `'${upperCaseFirstChar(
-							PROFILE_NAME_INPUT!,
+							profileNameInput!,
 						)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
 						time: seconds(30),
 					});

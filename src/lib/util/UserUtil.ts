@@ -39,7 +39,7 @@ export class UserUtil extends null {
 	 * @param user
 	 */
 	public static getPlayer(user?: User | null) {
-		const player = this.PLAYER_CACHE.get(user!) ?? null;
+		const player = (user && this.PLAYER_CACHE.get(user)) ?? null;
 		if (player || !user) return player;
 
 		return this.setPlayer(user, user.client.players.getById(user.id) ?? user.client.players.getById(user.tag));
@@ -111,8 +111,8 @@ export class UserUtil extends null {
 			}
 		}
 
-		if ((_options.content?.length ?? 0) > MessageLimits.MaximumLength) {
-			const MESSAGE = `content length ${_options.content!.length} > ${MessageLimits.MaximumLength}`;
+		if (_options.content && _options.content.length > MessageLimits.MaximumLength) {
+			const MESSAGE = `content length ${_options.content.length} > ${MessageLimits.MaximumLength}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ user: this.logInfo(user), data: _options }, `[USER SEND DM]: ${MESSAGE}`);

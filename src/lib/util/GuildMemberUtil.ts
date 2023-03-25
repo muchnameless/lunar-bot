@@ -252,12 +252,16 @@ export class GuildMemberUtil extends null {
 			return member;
 		}
 
-		const DURATION = duration === null ? null : Math.min(duration, ModerationLimits.MaximumTimeoutDuration);
+		const DURATION = duration && Math.min(duration, ModerationLimits.MaximumTimeoutDuration);
 
-		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - DURATION!) < seconds(1)) {
+		if (
+			member.communicationDisabledUntilTimestamp &&
+			DURATION &&
+			Math.abs(member.communicationDisabledUntilTimestamp - Date.now() - DURATION) < seconds(1)
+		) {
 			logger.debug(
 				{ member: this.logInfo(member), data: { duration, reason } },
-				'[GUILDMEMBER TIMEOUT]: is already in (similar) timeout',
+				'[GUILDMEMBER TIMEOUT]: is already in a (similar) timeout',
 			);
 			return member;
 		}

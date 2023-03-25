@@ -99,8 +99,9 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 			values: { profile, latest, auctions },
 			positionals: [IGN, PROFILE_NAME_INPUT],
 		} = hypixelMessage.commandData.parseArgs<typeof baseParseArgsOptions & typeof parseArgsOptions>();
+		const profileNameInput = profile ?? PROFILE_NAME_INPUT;
 
-		let profileName = (profile ?? PROFILE_NAME_INPUT)?.replace(NON_LETTER_REGEXP, '');
+		let profileName = profileNameInput?.replace(NON_LETTER_REGEXP, '');
 		if (profileName) {
 			let similarity: number;
 
@@ -110,7 +111,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 				try {
 					await hypixelMessage.awaitConfirmation({
 						question: `'${upperCaseFirstChar(
-							PROFILE_NAME_INPUT!,
+							profileNameInput!,
 						)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
 						time: seconds(30),
 					});

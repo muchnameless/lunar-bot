@@ -94,3 +94,15 @@ export const randomPadding = () => PADDING_CHUNKS[Math.trunc(Math.random() * PAD
 export const WHITESPACE_ONLY_REGEXP = /^[\s\u{2800}]*$/u;
 
 export const DELETED_MESSAGE_REASON = Symbol('ChatBridge:deletedMessage');
+
+export const LIMBO_REGEXP = new RegExp(
+	[
+		/A kick occurred in your connection, so you have been routed to limbo!/,
+		/Illegal characters in chat/,
+		/You were spawned in Limbo\./,
+		/\/limbo for more information\./,
+		/{"server":"limbo"}/,
+	]
+		.map(({ source }) => `^${source}$`)
+		.join('|'),
+);

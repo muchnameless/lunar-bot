@@ -20,7 +20,7 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 	 */
 	protected override async _generateReply({ ign, uuid, profile }: FetchedData) {
 		const member = profile.members[uuid]!;
-		const reply: string[] = [null!];
+		const reply = ['']; // first element will be replaced later
 
 		let totalXp = 0;
 		let totalLevel = 0;

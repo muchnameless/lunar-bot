@@ -260,7 +260,7 @@ export class DiscordChatManager extends ChatManager {
 
 			const webhooks = await channel.fetchWebhooks();
 
-			let webhook = webhooks.find((wh) => wh.isIncoming() && wh.owner?.id === this.client.user!.id) ?? null;
+			let webhook = webhooks.find((wh) => wh.isIncoming() && wh.owner?.id === this.client.user.id) ?? null;
 
 			if (!webhook) {
 				if (webhooks.size >= MAX_WEBHOOKS_PER_CHANNEL) {
@@ -269,7 +269,7 @@ export class DiscordChatManager extends ChatManager {
 
 				webhook = await channel.createWebhook({
 					name: `${this.hypixelGuild} Chat Bridge`,
-					avatar: (channel.guild.members.me ?? this.client.user!).displayAvatarURL(),
+					avatar: (channel.guild.members.me ?? this.client.user).displayAvatarURL(),
 					reason: 'no Webhooks in Chat Bridge Channel found',
 				});
 
@@ -701,7 +701,7 @@ export class DiscordChatManager extends ChatManager {
 		if (message.attachments.size) {
 			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
 				for (const { contentType, url, size, name } of message.attachments.values()) {
-					if (size > MAX_IMAGE_UPLOAD_SIZE || !ALLOWED_MIMES_REGEX.test(contentType!)) {
+					if (size > MAX_IMAGE_UPLOAD_SIZE || contentType === null || !ALLOWED_MIMES_REGEX.test(contentType)) {
 						contentParts.push(DiscordChatManager._getAttachmentName(name, contentType));
 						continue;
 					}

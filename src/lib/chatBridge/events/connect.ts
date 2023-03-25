@@ -2,18 +2,6 @@ import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
 import { ChatBridgeEvent } from '#chatBridge/ChatBridgeEvent.js';
 import { logger } from '#logger';
 
-const limboRegExp = new RegExp(
-	[
-		/A kick occurred in your connection, so you have been routed to limbo!/,
-		/Illegal characters in chat/,
-		/You were spawned in Limbo\./,
-		/\/limbo for more information\./,
-		/{"server":"limbo"}/,
-	]
-		.map(({ source }) => `^${source}$`)
-		.join('|'),
-);
-
 export default class extends ChatBridgeEvent {
 	public override readonly name = ChatBridgeEvents.Connect;
 
@@ -26,23 +14,7 @@ export default class extends ChatBridgeEvent {
 
 		do {
 			try {
-				// this special string is forbidden and cannot be send as a command, has to be a normal message (not even /ac works)
-				const message = '§';
-				const timestamp = Date.now();
-
-				this.chatBridge.bot!.write('chat_message', {
-					message,
-					timestamp,
-					salt: 0,
-					signature: this.chatBridge.bot!.signMessage(message, BigInt(timestamp)),
-				});
-
-				await this.chatBridge.minecraft.command({
-					command: 'locraw',
-					responseRegExp: limboRegExp,
-					rejectOnTimeout: true,
-					max: 1,
-				});
+				await this.chatBridge.minecraft.sendToLimbo();
 
 				logger.debug(this.chatBridge.logInfo, '[CHATBRIDGE CONNECT]: sent to limbo');
 				break;

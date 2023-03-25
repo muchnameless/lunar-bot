@@ -44,10 +44,10 @@ export default class DonateCommand extends ApplicationCommand {
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');
 		const TEXT_INPUT = interaction.options.getString('notes');
 
-		let amount: number | string | undefined = removeNumberFormatting(AMOUNT_OR_TEXT);
+		let amount: number | string | null = AMOUNT_OR_TEXT === null ? null : removeNumberFormatting(AMOUNT_OR_TEXT);
 		let notes: string | null;
 
-		if (validateNumber(amount!)) {
+		if (validateNumber(amount)) {
 			amount = Number(amount);
 			notes = TEXT_INPUT;
 		} else {

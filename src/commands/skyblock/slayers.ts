@@ -19,7 +19,7 @@ export default class SlayersCommand extends BaseSkyBlockCommand {
 	 */
 	protected override _generateReply({ ign, uuid, profile }: FetchedData) {
 		const member = profile.members[uuid]!;
-		const reply: string[] = [null!];
+		const reply = ['']; // first element will be replaced later
 
 		let totalXp = 0;
 

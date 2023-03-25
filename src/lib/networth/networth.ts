@@ -46,7 +46,7 @@ async function parseItems(base64: string) {
 		if (item.tag.ExtraAttributes.id.endsWith('_BACKPACK') || item.tag.ExtraAttributes.id.endsWith('_BAG')) {
 			const items = item.tag.ExtraAttributes[
 				Object.keys(item.tag.ExtraAttributes).find((key) => key.endsWith('_data'))!
-			] as number[];
+			] as number[] | undefined;
 
 			if (!Array.isArray(items)) continue;
 
@@ -101,7 +101,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
  * @param extraAttributes
  */
 const getShensAuctionPrice = (extraAttributes: SkyBlockNBTExtraAttributes) => {
-	if (!extraAttributes.price) return null;
+	if (!extraAttributes.price?.length) return null;
 
 	// price is an array of [0, price] for some reason
 	const paid = extraAttributes.price[1]!;
@@ -355,7 +355,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// recombed
 	if (
-		extraAttributes.rarity_upgrades! > 0 &&
+		extraAttributes.rarity_upgrades &&
 		!extraAttributes.item_tier &&
 		(extraAttributes.enchantments ||
 			ALLOWED_RECOMB_CATEGORIES.has(skyblockItem?.category) ||

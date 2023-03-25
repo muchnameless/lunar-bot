@@ -124,8 +124,7 @@ export class MessageUtil extends null {
 	 */
 	private static async _reactSingle(message: Message, emojiIdentifier: EmojiIdentifierResolvable) {
 		const emoji = resolvePartialEmoji(emojiIdentifier);
-		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-		const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
+		const reaction = message.reactions.cache.get(emoji?.id ?? (emoji?.name as string));
 
 		return reaction?.me
 			? reaction // reaction from bot already exists
@@ -337,8 +336,8 @@ export class MessageUtil extends null {
 			requiredChannelPermissions |= PermissionFlagsBits.ManageMessages; // removing attachments requires MANAGE_MESSAGES
 		}
 
-		if ((_options.content?.length ?? 0) > MessageLimits.MaximumLength) {
-			const MESSAGE = `content length ${_options.content!.length} > ${MessageLimits.MaximumLength}`;
+		if (_options.content && _options.content.length > MessageLimits.MaximumLength) {
+			const MESSAGE = `content length ${_options.content.length} > ${MessageLimits.MaximumLength}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ ...this.logInfo(message), data: _options }, `[MESSAGE EDIT]: ${MESSAGE}`);

@@ -419,26 +419,14 @@ export class PlayerManager extends ModelManager<Player> {
 				const result = await player.fetchMainProfile();
 				if (!result) continue;
 
-				const { hypixelGuild } = player;
-
-				if (!log.has(hypixelGuild)) {
-					log.set(hypixelGuild, [`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`]);
-					continue;
-				}
-
-				log.get(hypixelGuild)!.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
+				log
+					.ensure(player.hypixelGuild, () => [])
+					.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
 			} catch (error) {
 				if (typeof error === 'string') {
 					logger.error(player.logInfo, `[UPDATE MAIN PROFILE]: ${error}`);
 
-					const { hypixelGuild } = player;
-
-					if (!log.has(hypixelGuild)) {
-						log.set(hypixelGuild, [`-\u00A0${player}: ${error}`]);
-						continue;
-					}
-
-					log.get(hypixelGuild)!.push(`-\u00A0${player}: ${error}`);
+					log.ensure(player.hypixelGuild, () => []).push(`-\u00A0${player}: ${error}`);
 				} else {
 					logger.error({ err: error, ...player.logInfo }, '[UPDATE MAIN PROFILE]');
 				}

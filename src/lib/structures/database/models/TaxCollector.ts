@@ -66,8 +66,8 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 		return this.client.players.cache.get(this.minecraftUuid) ?? null;
 	}
 
-	public get ign(): NonAttribute<string | null> {
-		return this.player?.ign ?? null;
+	public get ign(): NonAttribute<string> {
+		return this.player?.ign ?? this.minecraftUuid;
 	}
 
 	public get logInfo(): NonAttribute<Record<string, unknown>> {

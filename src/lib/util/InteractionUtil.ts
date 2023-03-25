@@ -662,7 +662,8 @@ export class InteractionUtil extends null {
 			}
 
 			// initial reply
-			clearTimeout(cached.autoDeferTimeout!);
+			if (cached.autoDeferTimeout) clearTimeout(cached.autoDeferTimeout);
+
 			return await interaction.reply(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
@@ -771,7 +772,7 @@ export class InteractionUtil extends null {
 			return Reflect.construct(InteractionResponse, [interaction, interaction.message.interaction?.id]);
 		}
 
-		clearTimeout(cached.autoDeferTimeout!);
+		if (cached.autoDeferTimeout) clearTimeout(cached.autoDeferTimeout);
 
 		try {
 			return await (cached.deferUpdatePromise = interaction.deferUpdate(options));
@@ -821,7 +822,8 @@ export class InteractionUtil extends null {
 			if (interaction.deferred) return await interaction.editReply(_options);
 
 			// initial reply
-			clearTimeout(cached.autoDeferTimeout!);
+			if (cached.autoDeferTimeout) clearTimeout(cached.autoDeferTimeout);
+
 			return await interaction.update(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
@@ -880,7 +882,7 @@ export class InteractionUtil extends null {
 			throw new Error('[INTERACTION SHOW MODAL]: interaction already acknowledged');
 		}
 
-		clearTimeout(cached.autoDeferTimeout!);
+		if (cached.autoDeferTimeout) clearTimeout(cached.autoDeferTimeout);
 
 		return interaction.showModal(modal);
 	}

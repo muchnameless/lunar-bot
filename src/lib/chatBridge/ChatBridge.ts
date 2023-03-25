@@ -68,7 +68,7 @@ export class ChatBridge extends EventEmitter {
 	/**
 	 * client that instantiated the chat bridge
 	 */
-	public declare readonly client: LunarClient;
+	public declare readonly client: LunarClient<true>;
 
 	/**
 	 * manager that instantiated the chat bridge

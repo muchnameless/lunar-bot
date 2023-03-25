@@ -19,7 +19,7 @@ export class ChatBridgeManager {
 	/**
 	 * the client that instantiated the ChatBridgeArray
 	 */
-	public declare readonly client: LunarClient;
+	public declare readonly client: LunarClient<true>;
 
 	/**
 	 * minecraft command collection
@@ -204,7 +204,7 @@ export class ChatBridgeManager {
 
 			if (errorReaction?.me) {
 				errorReaction.users
-					.remove(this.client.user!)
+					.remove(this.client.user)
 					.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MESSAGE]'));
 			}
 		} else {
@@ -271,7 +271,7 @@ export class ChatBridgeManager {
 		if (interaction.isCommand()) this.ownInteractionCache.add(interaction);
 
 		for (const chatBridge of this.cache) {
-			chatBridge.discord.channelsByIds.get(interaction.channelId!)?.interactionUserCache.add(interaction);
+			chatBridge.discord.channelsByIds.get(interaction.channelId)?.interactionUserCache.add(interaction);
 		}
 	}
 

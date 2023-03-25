@@ -297,6 +297,7 @@ export class ApplicationCommand extends BaseCommand {
 		let member: GuildMember;
 
 		if (IS_IN_LINKED_GUILD) {
+			// interaction.guildId is not null -> member is present
 			member = interaction.member!;
 		} else {
 			const { discordGuild } = hypixelGuild;

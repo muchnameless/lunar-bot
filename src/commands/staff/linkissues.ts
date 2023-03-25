@@ -105,8 +105,8 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		const linkedAndNotInDiscord: IssueInfo[] = [];
 
 		// db entries with issues
-		const [unlinkedGuildPlayers, linkedPlayers] = hypixelGuild.players.partition(({ discordId }) =>
-			/\D/.test(discordId!),
+		const [unlinkedGuildPlayers, linkedPlayers] = hypixelGuild.players.partition(
+			({ discordId }) => discordId === null || /\D/.test(discordId),
 		);
 		const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(({ inDiscord }) => !inDiscord);
 		const UNLINKED_AMOUNT = unlinkedGuildPlayers.size;

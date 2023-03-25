@@ -22,7 +22,7 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 
 	public declare response: string;
 
-	public declare cooldown: number | null;
+	public declare cooldown: number;
 
 	public declare chatTypes: string[];
 
@@ -58,7 +58,8 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 				},
 				cooldown: {
 					type: DataTypes.INTEGER,
-					allowNull: true,
+					allowNull: false,
+					defaultValue: 0,
 				},
 				chatTypes: {
 					type: DataTypes.ARRAY(DataTypes.TEXT),
@@ -102,13 +103,13 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 		if (this.timestamps) {
 			if (
 				this.timestamps.has(hypixelMessage.author.ign) &&
-				Date.now() < this.timestamps.get(hypixelMessage.author.ign)! + this.cooldown!
+				Date.now() < this.timestamps.get(hypixelMessage.author.ign)! + this.cooldown
 			) {
 				return null;
 			}
 
 			this.timestamps.set(hypixelMessage.author.ign, Date.now());
-			setTimeout(() => this.timestamps!.delete(hypixelMessage.author.ign), this.cooldown!);
+			setTimeout(() => this.timestamps!.delete(hypixelMessage.author.ign), this.cooldown);
 		}
 
 		return hypixelMessage.reply(

@@ -58,7 +58,7 @@ export type GuildRank =
 			roleId: null;
 	  };
 
-interface AutomatedGuildRank {
+export interface AutomatedGuildRank {
 	currentWeightReq: number;
 	name: string;
 	positionReq: number;
@@ -480,8 +480,12 @@ export class HypixelGuild extends Model<
 	 */
 	public async mute(target: Player | 'everyone', duration: number) {
 		// prevent circular calls when syncing
-		if (Math.abs(this.mutedPlayers.get((target as Player).minecraftUuid)! - Date.now() - duration) < seconds(1)) {
-			return null;
+		if (target !== 'everyone') {
+			const mutedPlayer = this.mutedPlayers.get(target.minecraftUuid);
+
+			if (mutedPlayer && Math.abs(mutedPlayer - Date.now() - duration) < seconds(1)) {
+				return null;
+			}
 		}
 
 		try {
@@ -774,6 +778,7 @@ export class HypixelGuild extends Model<
 			// add / remove player db entries
 			await safePromiseAll([
 				...membersJoined.map(async ({ uuid: minecraftUuid }) => {
+					// player is always defined after the if block below, though ts doesn't know that in the setTimeout scopes
 					let player = this.client.players.cache.get(minecraftUuid)!;
 					let created = false;
 
@@ -918,7 +923,7 @@ export class HypixelGuild extends Model<
 									player.resetXp({ offsetToReset: Offset.Week }),
 								config.get(XP_OFFSETS_TIME[Offset.Month]) >= XP_LAST_UPDATED_AT &&
 									player.resetXp({ offsetToReset: Offset.Month }),
-								...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }, () =>
+								...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }, async () =>
 									player.resetXp({ offsetToReset: Offset.Day }),
 								),
 							]);
@@ -974,7 +979,10 @@ export class HypixelGuild extends Model<
 					continue;
 				}
 
-				void this.syncMute(player, NOW < (hypixelGuildMember.mutedTill ?? 0) ? hypixelGuildMember.mutedTill! : null);
+				void this.syncMute(
+					player,
+					hypixelGuildMember.mutedTill && NOW < hypixelGuildMember.mutedTill ? hypixelGuildMember.mutedTill : null,
+				);
 				void player.syncWithGuildData(hypixelGuildMember, this);
 			}
 

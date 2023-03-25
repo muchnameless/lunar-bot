@@ -28,6 +28,7 @@ import {
 	HIDE_LINK_EMBED_REGEXP,
 	HypixelMessageType,
 	INVISIBLE_CHARACTER_REGEXP,
+	LIMBO_REGEXP,
 	MAYBE_URL_REGEXP,
 	MULTIPLE_BACKSLASH_REGEXP,
 	randomPadding,
@@ -418,12 +419,37 @@ export class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
+	 * forcibly sends the bot to limbo by sending a forbidden character in chat
+	 * rejects if the bot is not in limbo after the default command response timeout
+	 */
+	public async sendToLimbo() {
+		// this special string is forbidden and cannot be send as a command, has to be a normal message (not even /ac works)
+		const message = '§';
+		const timestamp = Date.now();
+
+		this.bot?.write('chat_message', {
+			message,
+			timestamp,
+			salt: 0,
+			signature: this.bot.signMessage(message, BigInt(timestamp)),
+		});
+
+		return this.command({
+			command: 'locraw',
+			responseRegExp: LIMBO_REGEXP,
+			rejectOnTimeout: true,
+			max: 1,
+		});
+	}
+
+	/**
 	 * clears and nullifies the abort login timeout
 	 */
 	public clearAbortLoginTimeout() {
-		clearTimeout(this._abortLoginTimeout!);
-
-		this._abortLoginTimeout = null;
+		if (this._abortLoginTimeout) {
+			clearTimeout(this._abortLoginTimeout);
+			this._abortLoginTimeout = null;
+		}
 	}
 
 	/**
@@ -432,7 +458,7 @@ export class MinecraftChatManager extends ChatManager {
 	 * @param timeout
 	 */
 	public scheduleAbortLoginTimeout(timeout = minutes(1)) {
-		clearTimeout(this._abortLoginTimeout!);
+		this.clearAbortLoginTimeout();
 
 		this._abortLoginTimeout = setTimeout(() => {
 			logger.warn({ ...this.logInfo, timeout }, '[CHATBRIDGE ABORT LOGIN]: triggered -> reconnecting');
@@ -530,6 +556,7 @@ export class MinecraftChatManager extends ChatManager {
 		if (!this._collecting) return;
 
 		// message from the bot including the content that's being waited for
+		// this._contentFilter is not null because this._collecting is true
 		if (hypixelMessage.me && hypixelMessage.content.includes(this._contentFilter!)) {
 			this._resolveAndReset(hypixelMessage);
 			return;
@@ -933,6 +960,7 @@ export class MinecraftChatManager extends ChatManager {
 				await this.queue.wait({ signal });
 			} catch (error) {
 				logger.error({ err: error, ...this.logInfo }, '[CHATBRIDGE CHAT]');
+				// queue.wait can only reject if a signal is passed
 				return signal!.reason === DELETED_MESSAGE_REASON; // do not try to react with :x: if the message was deleted
 			}
 

@@ -55,12 +55,13 @@ export const commaListAnd = (list: string[]) => andListFormatter.format(list);
  */
 export const escapeIgn = (string: string | null) => string?.replaceAll('_', '\\_') ?? '';
 
+const discordUserOrMemberMentionRegExp = /(?<=^(?:<@!?)?)\d{17,20}(?=>?$)/;
 /**
  * extracts user IDs from @mentions
  *
  * @param string to analyze
  */
-export const getIdFromString = (string: string) => /(?<=^(?:<@!?)?)\d{17,20}(?=>?$)/.exec(string)?.[0] ?? null;
+export const getIdFromString = (string: string) => discordUserOrMemberMentionRegExp.exec(string)?.[0] ?? null;
 
 /**
  * aBc -> Abc
@@ -69,12 +70,13 @@ export const getIdFromString = (string: string) => /(?<=^(?:<@!?)?)\d{17,20}(?=>
  */
 export const upperCaseFirstChar = (string: string) => `${string[0]!.toUpperCase()}${string.slice(1).toLowerCase()}`;
 
+const numberDelimiterRegExp = /[,._]/g;
 /**
  * removes ',', '.' and '_' from the input string
  *
  * @param string input
  */
-export const removeNumberFormatting = (string: string | null) => string?.replace(/[,._]/g, '');
+export const removeNumberFormatting = (string: string) => string.replace(numberDelimiterRegExp, '');
 
 /**
  * trims a string to a certain length

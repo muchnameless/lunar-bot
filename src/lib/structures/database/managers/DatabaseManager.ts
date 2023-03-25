@@ -178,7 +178,7 @@ export class DatabaseManager {
 		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
 		const TAX_AMOUNT = config.get('TAX_AMOUNT');
 		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS');
-		const availableAuctionsLog: { auctions: number | string; ign: string | null }[] = [];
+		const availableAuctionsLog: { auctions: number | string; ign: string }[] = [];
 		const dbPromises: Promise<APIEmbedField | undefined>[] = [];
 
 		let apiError = false;
@@ -305,7 +305,7 @@ export class DatabaseManager {
 		return availableAuctionsLog
 			.sort(({ ign: a }, { ign: b }) => compareAlphabetically(a, b)) // alphabetically
 			.sort(({ auctions: a }, { auctions: b }) => Number(b) - Number(a)) // number of auctions
-			.map(({ ign, auctions }) => `\u200B > ${ansi(ign!, AnsiColour.Red)}: ${ansi(auctions, AnsiColour.Cyan)}`);
+			.map(({ ign, auctions }) => `\u200B > ${ansi(ign, AnsiColour.Red)}: ${ansi(auctions, AnsiColour.Cyan)}`);
 	}
 
 	/**
@@ -325,7 +325,7 @@ export class DatabaseManager {
 			stripIndents`
 				Collectors: ${ansi('/ah', AnsiFormat.Bold, AnsiColour.Red)} ${commaListOr(
 				taxCollectors.activeCollectors
-					.map(({ ign }) => ansi(ign!, AnsiFormat.Bold, AnsiColour.Red))
+					.map(({ ign }) => ansi(ign, AnsiFormat.Bold, AnsiColour.Red))
 					.sort(compareAlphabetically),
 			)}
 				Amount: ${ansi(formatNumber(config.get('TAX_AMOUNT')), AnsiFormat.Bold, AnsiColour.Cyan)}

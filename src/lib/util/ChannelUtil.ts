@@ -183,8 +183,8 @@ export class ChannelUtil extends null {
 		// guild -> requires permission
 		let requiredChannelPermissions = this.BASE_SEND_PERMISSIONS;
 
-		if ((_options.content?.length ?? 0) > MessageLimits.MaximumLength) {
-			const MESSAGE = `content length ${_options.content!.length} > ${MessageLimits.MaximumLength}`;
+		if (_options.content && _options.content.length > MessageLimits.MaximumLength) {
+			const MESSAGE = `content length ${_options.content.length} > ${MessageLimits.MaximumLength}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);

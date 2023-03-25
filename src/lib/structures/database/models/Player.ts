@@ -32,7 +32,7 @@ import {
 	type Sequelize,
 } from 'sequelize';
 import type { ModelResolvable } from '../managers/ModelManager.js';
-import type { GuildRank, HypixelGuild } from './HypixelGuild.js';
+import type { AutomatedGuildRank, GuildRank, HypixelGuild } from './HypixelGuild.js';
 import type { TaxCollector } from './TaxCollector.js';
 import { TransactionType, type Transaction } from './Transaction.js';
 import { getSkyBlockProfiles, hypixel, mojang } from '#api';
@@ -1068,6 +1068,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		try {
 			if (!this.mainProfileId) await this.fetchMainProfile(); // detect main profile if it is unknown
+			// fetchMainProfile throws if it can't find a profile id so this.mainProfileId is always not null at this point
 
 			// hypixel API call
 			const playerData = (await hypixel.skyblock.profile(this.mainProfileId!)).profile?.members?.[this.minecraftUuid];
@@ -1235,10 +1236,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		if (!member) return this; // no linked available discord member to update
 
 		// timeout expires before the next update
-		const TIMEOUT_LEFT = (member.communicationDisabledUntilTimestamp ?? 0) - Date.now();
+		if (member.communicationDisabledUntilTimestamp) {
+			const TIMEOUT_LEFT = member.communicationDisabledUntilTimestamp - Date.now();
 
-		if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= minutes(2 * HYPIXEL_UPDATE_INTERVAL)) {
-			void this.hypixelGuild?.unmute(this, member.communicationDisabledUntilTimestamp! - Date.now() + seconds(1));
+			if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= minutes(2 * HYPIXEL_UPDATE_INTERVAL)) {
+				void this.hypixelGuild?.unmute(this, TIMEOUT_LEFT + seconds(1));
+			}
 		}
 
 		// abort if the member is missing the mandatory role (if existent)
@@ -1294,11 +1297,11 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 					hypixelGuild.checkStaff(this) && hypixelGuild.syncRanksEnabled
 						? hypixelGuild.ranks
 								// filter out non-automated ranks
-								.filter(({ currentWeightReq }) => currentWeightReq !== null)
+								.filter((guildRank): guildRank is AutomatedGuildRank => guildRank.currentWeightReq !== null)
 								// sort descendingly by weight req
-								.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
+								.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b - a)
 								// find first rank that the player is eligible for
-								.find(({ currentWeightReq }) => weight >= currentWeightReq!)?.priority
+								.find(({ currentWeightReq }) => weight >= currentWeightReq)?.priority
 						: this.guildRankPriority;
 
 				for (const { roleId, priority } of hypixelGuild.ranks) {
@@ -1966,14 +1969,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * determines the player's main profile (profile with the most weight)
 	 */
 	public async fetchMainProfile() {
-		let profiles = null;
-
-		try {
-			profiles = await getSkyBlockProfiles(this.minecraftUuid);
-		} catch (error) {
-			logger.error({ err: error, ...this.logInfo }, '[FETCH MAIN PROFILE]');
-			return null;
-		}
+		const profiles = await getSkyBlockProfiles(this.minecraftUuid);
 
 		const mainProfile = findSkyBlockProfile(profiles, this.minecraftUuid, FindProfileStrategy.MaxWeight);
 

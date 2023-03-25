@@ -259,29 +259,41 @@ export class ImgurClient {
 	 */
 	private getRateLimitHeaders(headers: Headers) {
 		// get server time
-		const serverTime = Date.parse(headers.get('date')!);
 		const now = Date.now();
+		const serverTime = Date.parse(headers.get('date')!) || now;
 
 		for (const { manager, rateLimit, remainingKey, resetKey, limitKey } of this.rateLimitManagers) {
-			const remaining = Number.parseInt(headers.get(remainingKey)!, 10);
-			if (remaining < rateLimit.remaining) {
-				rateLimit.remaining = remaining;
+			const remainingHeader = headers.get(remainingKey);
+			if (remainingHeader) {
+				const remaining = Number.parseInt(remainingHeader, 10);
+
+				if (remaining < rateLimit.remaining) {
+					rateLimit.remaining = remaining;
+				}
 			}
 
-			const reset =
-				resetKey === 'x-post-rate-limit-reset'
-					? // time left in seconds
-					  seconds(Number.parseInt(headers.get(resetKey)!, 10)) + (serverTime || now)
-					: // timestamp in seconds
-					  seconds(Number.parseInt(headers.get(resetKey)!, 10));
-			if (reset > now) {
-				rateLimit.expires = reset;
+			const resetHeader = headers.get(resetKey);
+			if (resetHeader) {
+				const reset =
+					resetKey === 'x-post-rate-limit-reset'
+						? // time left in seconds
+						  seconds(Number.parseInt(resetHeader, 10)) + serverTime
+						: // timestamp in seconds
+						  seconds(Number.parseInt(resetHeader, 10));
+
+				if (reset > now) {
+					rateLimit.expires = reset;
+				}
 			}
 
-			const limit = Number.parseInt(headers.get(limitKey)!, 10);
-			if (limit) {
-				// @ts-expect-error readonly
-				manager.limit = limit;
+			const limitHeader = headers.get(limitKey);
+			if (limitHeader) {
+				const limit = Number.parseInt(limitHeader, 10);
+
+				if (limit) {
+					// @ts-expect-error readonly
+					manager.limit = limit;
+				}
 			}
 		}
 	}

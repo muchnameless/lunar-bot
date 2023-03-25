@@ -19,8 +19,10 @@ export default class extends DiscordJSEvent {
 		const discordGuild = this.client.discordGuilds.cache.get(newMember.guild.id);
 		if (!discordGuild) return;
 
-		const player = GuildMemberUtil.getPlayer(newMember)!;
-		const hypixelGuild = player?.hypixelGuild;
+		const player = GuildMemberUtil.getPlayer(newMember);
+		if (!player) return;
+
+		const hypixelGuild = player.hypixelGuild;
 
 		// member is not from the hypixel guild's discord guild
 		if (hypixelGuild?.discordId !== newMember.guild.id) return;
