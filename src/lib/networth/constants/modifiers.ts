@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-duplicate-enum-values, @typescript-eslint/prefer-literal-enum-member */
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 /**
  * multiplicative price modifier for the applied item
  *
- * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/generators/itemGenerator.js#L79
- * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/src/constants/misc.js#L87
+ * https://github.com/Altpapier/SkyHelper-Networth/blob/master/constants/applicationWorth.js
  */
 export const enum PriceModifier {
 	AppliedEnchantment20 = 0.2,
@@ -23,11 +22,11 @@ export const enum PriceModifier {
 	FumingPotatoBook = 0.6,
 	Gemstone = 1,
 	GemstoneChamber = 0.9,
-	GemstoneSlots = GemstoneChamber,
+	GemstoneSlots = 0.6,
 	HotPotatoBook = 1,
 	ItemSkin = 0.9,
 	JalapenoBook = 0.7,
-	ManaDisintegrator = 0.7,
+	ManaDisintegrator = 0.8,
 	NecronBladeScroll = 1,
 	PetItem = 1,
 	PetSkinNoCandy = 0.9,
@@ -39,11 +38,11 @@ export const enum PriceModifier {
 	Reforge = 1,
 	Rune = 0.6,
 	ShensAuction = 0.85,
-	Silex = 0.7,
+	Silex = 0.75,
 	TalismanEnrichment = 0.5,
 	ThunderInABottle = 0.8,
 	TransmissionTuner = 0.7,
 	WinningBid = 1,
 	WoodSingularity = 0.5,
 }
-/* eslint-enable @typescript-eslint/no-duplicate-enum-values, @typescript-eslint/prefer-literal-enum-member */
+/* eslint-enable @typescript-eslint/no-duplicate-enum-values */
