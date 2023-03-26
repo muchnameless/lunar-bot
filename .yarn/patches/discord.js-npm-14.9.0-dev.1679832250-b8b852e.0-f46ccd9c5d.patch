@@ -1,5 +1,5 @@
 diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
-index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d3d05acbc 100644
+index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9bd249080 100644
 --- a/src/client/websocket/WebSocketManager.js
 +++ b/src/client/websocket/WebSocketManager.js
 @@ -1,10 +1,16 @@
@@ -14,14 +14,28 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
 +const {
 +  WebSocketManager: WSWebSocketManager,
 +  WebSocketShardEvents: WSWebSocketShardEvents,
-+  CloseCodes,
 +  CompressionMethod,
++  CloseCodes,
 +} = require('@discordjs/ws');
 +const { GatewayCloseCodes, GatewayDispatchEvents } = require('discord-api-types/v10');
  const WebSocketShard = require('./WebSocketShard');
  const PacketHandlers = require('./handlers');
  const { DiscordjsError, ErrorCodes } = require('../../errors');
-@@ -22,15 +28,17 @@ const BeforeReadyWhitelist = [
+@@ -12,6 +18,13 @@ const Events = require('../../util/Events');
+ const Status = require('../../util/Status');
+ const WebSocketShardEvents = require('../../util/WebSocketShardEvents');
+ 
++let zlib;
++
++try {
++  require('zlib-sync');
++  zlib = true;
++} catch {} // eslint-disable-line no-empty
++
+ const BeforeReadyWhitelist = [
+   GatewayDispatchEvents.Ready,
+   GatewayDispatchEvents.Resumed,
+@@ -22,15 +35,17 @@ const BeforeReadyWhitelist = [
    GatewayDispatchEvents.GuildMemberRemove,
  ];
  
@@ -47,7 +61,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
  
  /**
   * The WebSocket manager for this client.
-@@ -56,27 +64,12 @@ class WebSocketManager extends EventEmitter {
+@@ -56,27 +71,12 @@ class WebSocketManager extends EventEmitter {
       */
      this.gateway = null;
  
@@ -75,7 +89,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
      /**
       * An array of queued events before this WebSocketManager became ready
       * @type {Object[]}
-@@ -99,11 +92,16 @@ class WebSocketManager extends EventEmitter {
+@@ -99,11 +99,16 @@ class WebSocketManager extends EventEmitter {
      this.destroyed = false;
  
      /**
@@ -95,7 +109,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
    }
  
    /**
-@@ -119,11 +117,14 @@ class WebSocketManager extends EventEmitter {
+@@ -119,11 +124,14 @@ class WebSocketManager extends EventEmitter {
    /**
     * Emits a debug message.
     * @param {string} message The debug message
@@ -113,7 +127,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
    }
  
    /**
-@@ -132,11 +133,37 @@ class WebSocketManager extends EventEmitter {
+@@ -132,11 +140,37 @@ class WebSocketManager extends EventEmitter {
     */
    async connect() {
      const invalidToken = new DiscordjsError(ErrorCodes.TokenInvalid);
@@ -132,11 +146,11 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
 +        shardIds: shards === 'auto' ? null : shards,
 +        shardCount: shards === 'auto' ? null : shardCount,
 +        initialPresence: ws.presence,
-+        compression: CompressionMethod.ZlibStream,
 +        retrieveSessionInfo: shardId => this.shards.get(shardId).sessionInfo,
 +        updateSessionInfo: (shardId, sessionInfo) => {
 +          this.shards.get(shardId).sessionInfo = sessionInfo;
 +        },
++        compression: zlib ? CompressionMethod.ZlibStream : null,
 +      };
 +      if (ws.buildStrategy) wsOptions.buildStrategy = ws.buildStrategy;
 +      this._ws = new WSWebSocketManager(wsOptions);
@@ -152,18 +166,12 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
        throw error.status === 401 ? invalidToken : error;
      });
  
-@@ -152,156 +179,129 @@ class WebSocketManager extends EventEmitter {
+@@ -152,156 +186,129 @@ class WebSocketManager extends EventEmitter {
  
      this.gateway = `${gatewayURL}/`;
  
 -    let { shards } = this.client.options;
-+    this.totalShards = this.client.options.shardCount = await this._ws.getShardCount();
-+    this.client.options.shards = await this._ws.getShardIds();
-+    for (const id of this.client.options.shards) {
-+      if (!this.shards.has(id)) {
-+        const shard = new WebSocketShard(this, id);
-+        this.shards.set(id, shard);
- 
+-
 -    if (shards === 'auto') {
 -      this.debug(`Using the recommended shard count provided by Discord: ${recommendedShards}`);
 -      this.totalShards = this.client.options.shardCount = recommendedShards;
@@ -189,7 +197,13 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
 -    const [shard] = this.shardQueue;
 -
 -    this.shardQueue.delete(shard);
--
++    this.totalShards = this.client.options.shardCount = await this._ws.getShardCount();
++    this.client.options.shards = await this._ws.getShardIds();
++    for (const id of this.client.options.shards) {
++      if (!this.shards.has(id)) {
++        const shard = new WebSocketShard(this, id);
++        this.shards.set(id, shard);
+ 
 -    if (!shard.eventsAttached) {
 -      shard.on(WebSocketShardEvents.AllReady, unavailableGuilds => {
 -        /**
@@ -226,7 +240,8 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
 -          // These event codes cannot be resumed
 -          shard.sessionId = null;
 -        }
--
++          this.client.emit(Events.ShardReady, shard.id, unavailableGuilds);
+ 
 -        /**
 -         * Emitted when a shard is attempting to reconnect or re-identify.
 -         * @event Client#shardReconnecting
@@ -239,8 +254,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
 -        if (shard.sessionId) this.debug(`Session id is present, attempting an immediate reconnect...`, shard);
 -        this.reconnect();
 -      });
-+          this.client.emit(Events.ShardReady, shard.id, unavailableGuilds);
- 
+-
 -      shard.on(WebSocketShardEvents.InvalidSession, () => {
 -        this.client.emit(Events.ShardReconnecting, shard.id);
 -      });
@@ -413,7 +427,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
    }
  
    /**
-@@ -310,7 +310,7 @@ class WebSocketManager extends EventEmitter {
+@@ -310,7 +317,7 @@ class WebSocketManager extends EventEmitter {
     * @private
     */
    broadcast(packet) {
@@ -422,7 +436,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
    }
  
    /**
-@@ -322,8 +322,7 @@ class WebSocketManager extends EventEmitter {
+@@ -322,8 +329,7 @@ class WebSocketManager extends EventEmitter {
      // TODO: Make a util for getting a stack
      this.debug(`Manager was destroyed. Called by:\n${new Error().stack}`);
      this.destroyed = true;
@@ -432,7 +446,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..bb18776930fa52e819704ba471ee352d
    }
  
    /**
-@@ -345,7 +344,7 @@ class WebSocketManager extends EventEmitter {
+@@ -345,7 +351,7 @@ class WebSocketManager extends EventEmitter {
        const item = this.packetQueue.shift();
        setImmediate(() => {
          this.handlePacket(item.packet, item.shard);
@@ -1867,7 +1881,7 @@ index 65f411744035becfe8c760bad46898d9d2abc91b..1f2edae08f380b31eaeee5fb0c89d0d4
    }
  
 diff --git a/src/util/Options.js b/src/util/Options.js
-index f6106f3bc5cf344d79480e5e6c875890074f7b94..4a2582ada6624f7819e93b2abfdb3c2cd219f7f5 100644
+index f6106f3bc5cf344d79480e5e6c875890074f7b94..655ee3e9daa9a720df0fa4818f7af1343d90f288 100644
 --- a/src/util/Options.js
 +++ b/src/util/Options.js
 @@ -64,6 +64,8 @@ const { toSnakeCase } = require('./Transformers');
@@ -1879,7 +1893,15 @@ index f6106f3bc5cf344d79480e5e6c875890074f7b94..4a2582ada6624f7819e93b2abfdb3c2c
   */
  
  /**
-@@ -188,3 +190,13 @@ module.exports = Options;
+@@ -86,7 +88,6 @@ class Options extends null {
+       sweepers: this.DefaultSweeperSettings,
+       ws: {
+         large_threshold: 50,
+-        compress: false,
+         properties: {
+           os: process.platform,
+           browser: 'discord.js',
+@@ -188,3 +189,13 @@ module.exports = Options;
   * @external RESTOptions
   * @see {@link https://discord.js.org/#/docs/rest/main/typedef/RESTOptions}
   */
@@ -1907,7 +1929,7 @@ index 7796ddc99a96d7c431052895c2c0a9d4c23a6790..eb0c680121aed6bde625f7d4da0fac8b
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index f78620bae886e920fd444b978a855760808ec31a..38a762e7dbfa0e5eaaaed335f30982c6b9a65924 100644
+index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5b66adf38 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -1,6 +1,3 @@
@@ -2246,15 +2268,18 @@ index f78620bae886e920fd444b978a855760808ec31a..38a762e7dbfa0e5eaaaed335f30982c6
    components?: (
      | JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>
      | ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
-@@ -6321,6 +6304,7 @@ export interface WebSocketOptions {
-   compress?: boolean;
+@@ -6318,9 +6301,9 @@ export interface WebhookMessageCreateOptions extends Omit<MessageCreateOptions,
+ 
+ export interface WebSocketOptions {
+   large_threshold?: number;
+-  compress?: boolean;
    properties?: WebSocketProperties;
    version?: number;
 +  buildStrategy?(manager: WSWebSocketManager): IShardingStrategy;
  }
  
  export interface WebSocketProperties {
-@@ -6404,3 +6388,4 @@ export * from '@discordjs/builders';
+@@ -6404,3 +6387,4 @@ export * from '@discordjs/builders';
  export * from '@discordjs/formatters';
  export * from '@discordjs/rest';
  export * from '@discordjs/util';

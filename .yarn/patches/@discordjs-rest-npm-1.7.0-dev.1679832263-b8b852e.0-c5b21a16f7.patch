@@ -197,7 +197,7 @@ index 5b25f414148a792e1dba153947c2cd4a24ec866d..d627f646147dc32fa4c8d239f7da486b
 -export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 +export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
 diff --git a/dist/index.js b/dist/index.js
-index 636001cf3ce775be69cb2d52ad20e04cfa3189b6..701d76193c446210457969094b1e5d81b5a7cf64 100644
+index 9f5715e15eb11b96b144e4e505f70edb0fe6898f..61b92dd8a0a40ccc7f5e0f3bd1673b5353627eff 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -34,6 +34,7 @@ __export(src_exports, {
@@ -743,6 +743,15 @@ index 636001cf3ce775be69cb2d52ad20e04cfa3189b6..701d76193c446210457969094b1e5d81
      };
      if (request2.auth !== false) {
        if (!this.#token) {
+@@ -1069,7 +1176,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new import_undici4.FormData();
+       for (const [index, file] of request2.files.entries()) {
 @@ -1129,83 +1236,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
    clearHandlerSweeper() {
      (0, import_node_timers2.clearInterval)(this.handlerTimer);
@@ -917,7 +926,7 @@ index 636001cf3ce775be69cb2d52ad20e04cfa3189b6..701d76193c446210457969094b1e5d81
    }
  };
  __name(REST, "REST");
-@@ -1271,6 +1352,7 @@ var version = "1.6.1-dev.1679659480-5fcd0e4.0";
+@@ -1271,6 +1352,7 @@ var version = "1.7.0-dev.1679832263-b8b852e.0";
    ALLOWED_EXTENSIONS,
    ALLOWED_SIZES,
    ALLOWED_STICKER_EXTENSIONS,
@@ -925,7 +934,7 @@ index 636001cf3ce775be69cb2d52ad20e04cfa3189b6..701d76193c446210457969094b1e5d81
    CDN,
    DefaultRestOptions,
    DefaultUserAgent,
-@@ -1280,7 +1362,6 @@ var version = "1.6.1-dev.1679659480-5fcd0e4.0";
+@@ -1280,7 +1362,6 @@ var version = "1.7.0-dev.1679832263-b8b852e.0";
    REST,
    RESTEvents,
    RateLimitError,
@@ -934,7 +943,7 @@ index 636001cf3ce775be69cb2d52ad20e04cfa3189b6..701d76193c446210457969094b1e5d81
    makeURLSearchParams,
    parseResponse,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index a28a1b2e5825b55ff84808f9145560695477d022..766af669080b015751e9a226c2507f78e30604cb 100644
+index fc7e49ba678481f547c33f10d93c551114f78864..a24f1a697fb13cd3dc47fcb887bc64d262e0659a 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -52,6 +52,7 @@ var OverwrittenMimeTypes = {
@@ -1464,6 +1473,15 @@ index a28a1b2e5825b55ff84808f9145560695477d022..766af669080b015751e9a226c2507f78
      };
      if (request2.auth !== false) {
        if (!this.#token) {
+@@ -1019,7 +1126,7 @@ var RequestManager = class extends EventEmitter {
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new FormData2();
+       for (const [index, file] of request2.files.entries()) {
 @@ -1079,83 +1186,13 @@ var RequestManager = class extends EventEmitter {
    clearHandlerSweeper() {
      clearInterval(this.handlerTimer);
