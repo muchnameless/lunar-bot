@@ -149,8 +149,8 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
 /**
  * fetches and processes bazaar products
  */
-async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac: AbortController) {
-	let { lastUpdated, products } = await hypixel.skyblock.bazaar({ signal: ac.signal });
+async function updateBazaarPrices(binAuctions: Collection<string, number[]>, signal: AbortSignal) {
+	let { lastUpdated, products } = await hypixel.skyblock.bazaar({ signal });
 
 	// check if API data is updated
 	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
@@ -177,7 +177,7 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 			await sleep(5_000);
 
 			// refetch bazaar products
-			({ lastUpdated, products } = await hypixel.skyblock.bazaar({ signal: ac.signal }));
+			({ lastUpdated, products } = await hypixel.skyblock.bazaar({ signal }));
 		}
 	}
 
@@ -230,12 +230,12 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, ac:
 /**
  * fetches and processes all auction pages
  */
-async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac: AbortController) {
+async function updateAuctionPrices(binAuctions: Collection<string, number[]>, signal: AbortSignal) {
 	/**
 	 * fetches all auction pages
 	 */
 	// fetch first auction page
-	let { success, lastUpdated, totalPages, auctions } = await hypixel.skyblock.auctions.page(0, { signal: ac.signal });
+	let { success, lastUpdated, totalPages, auctions } = await hypixel.skyblock.auctions.page(0, { signal });
 
 	let endedAuctions = 0;
 
@@ -283,7 +283,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 			await sleep(5_000);
 
 			// fetch first auction page
-			({ success, lastUpdated, totalPages, auctions } = await hypixel.skyblock.auctions.page(0, { signal: ac.signal }));
+			({ success, lastUpdated, totalPages, auctions } = await hypixel.skyblock.auctions.page(0, { signal }));
 
 			// abort on error
 			if (!success) {
@@ -419,9 +419,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 	let retries = 0;
 
 	const fetchAndProcessAuctions = async (page: number): Promise<unknown> => {
-		const { auctions: _auctions, lastUpdated: _lastUpdated } = await hypixel.skyblock.auctions.page(page, {
-			signal: ac.signal,
-		});
+		const { auctions: _auctions, lastUpdated: _lastUpdated } = await hypixel.skyblock.auctions.page(page, { signal });
 
 		if (_lastUpdated < lastUpdated) {
 			if (++retries <= MAX_RETRIES) {
@@ -454,7 +452,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 	};
 
 	const fetchAndProcessEndedAuctions = async () => {
-		const { auctions: _auctions } = await hypixel.skyblock.auctionsEnded({ signal: ac.signal });
+		const { auctions: _auctions } = await hypixel.skyblock.auctionsEnded({ signal });
 
 		endedAuctions = _auctions.length;
 		return Promise.all(_auctions.map(async (auction) => processAuction(auction, auction.price)));
@@ -489,14 +487,14 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, ac
 /**
  * update auction and bazaar prices
  *
- * @param ac
+ * @param signal
  */
-async function updatePrices(ac: AbortController) {
+async function updatePrices(signal: AbortSignal) {
 	const binAuctions = new Collection<string, number[]>();
 
 	const [{ endedAuctions, totalPages }, bazaarItems] = await Promise.all([
-		updateAuctionPrices(binAuctions, ac),
-		updateBazaarPrices(binAuctions, ac),
+		updateAuctionPrices(binAuctions, signal),
+		updateBazaarPrices(binAuctions, signal),
 	]);
 
 	// remove auctioned items that are available in the bazaar
@@ -575,10 +573,10 @@ const parseGemstoneSlots = (
 /**
  * update skyblock items
  *
- * @param ac
+ * @param signal
  */
-async function updateSkyBlockItems(ac: AbortController) {
-	const { success, items } = await hypixel.resources.skyblock.items({ signal: ac.signal });
+async function updateSkyBlockItems(signal: AbortSignal) {
+	const { success, items } = await hypixel.resources.skyblock.items({ signal });
 
 	if (!success) {
 		return logger.error({ success }, '[UPDATE SKYBLOCK ITEMS]');
@@ -664,10 +662,8 @@ const xmlParser = new XMLParser({ ignoreDeclaration: true });
  *
  * @param forum
  */
-async function fetchForumEntries(ac: AbortController, forum: string) {
-	const res = await fetch(`https://hypixel.net/forums/${forum}/index.rss`, {
-		signal: ac.signal,
-	});
+async function fetchForumEntries(signal: AbortSignal, forum: string) {
+	const res = await fetch(`https://hypixel.net/forums/${forum}/index.rss`, { signal });
 
 	if (res.status === 200) return (xmlParser.parse(await res.text()) as HypixelForumResponse).rss.channel.item;
 
@@ -686,11 +682,11 @@ let lastGuid = JSON.parse(
 	)[0]?.value ?? 0,
 ) as number;
 
-async function updatePatchNotes(ac: AbortController) {
+async function updatePatchNotes(signal: AbortSignal) {
 	// fetch RSS feeds
 	const [skyblockPatchnotes, newsAndAnnouncements] = await Promise.all([
-		fetchForumEntries(ac, 'skyblock-patch-notes.158'),
-		fetchForumEntries(ac, 'news-and-announcements.4'),
+		fetchForumEntries(signal, 'skyblock-patch-notes.158'),
+		fetchForumEntries(signal, 'news-and-announcements.4'),
 	]);
 
 	// add skyblock related posts from news and announcements
@@ -754,12 +750,10 @@ async function updatePatchNotes(ac: AbortController) {
  */
 parentPort?.on('message', async (message) => {
 	if (message === updateSkyBlockItems.name) {
-		const ac = new AbortController();
-		const timeout = setTimeout(() => ac.abort(), 60_000);
+		const signal = AbortSignal.timeout(60_000);
 
 		try {
-			await updateSkyBlockItems(ac);
-			clearTimeout(timeout);
+			await updateSkyBlockItems(signal);
 		} catch (error) {
 			logger.error(error, '[ON MESSAGE]');
 		}
@@ -780,12 +774,13 @@ async function runJobs() {
 	logger.debug('[WORKER]: running jobs');
 
 	ac = new AbortController();
+	const { signal } = ac;
 
-	const jobs = [updatePrices(ac), updatePatchNotes(ac)];
+	const jobs = [updatePrices(signal), updatePatchNotes(signal)];
 
 	// every full hour
 	if (new Date().getMinutes() === 0) {
-		jobs.push(updateSkyBlockItems(ac));
+		jobs.push(updateSkyBlockItems(signal));
 	}
 
 	for (const res of await Promise.allSettled(jobs)) {
