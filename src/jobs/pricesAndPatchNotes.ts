@@ -1,6 +1,5 @@
 /* eslint-disable id-length */
 import { EventEmitter } from 'node:events';
-import { clearTimeout, setTimeout } from 'node:timers';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { parentPort } from 'node:worker_threads';
 import type { ArrayElementType } from '@sapphire/utilities';

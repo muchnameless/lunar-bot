@@ -543,7 +543,7 @@ export class InteractionUtil extends null {
 			return logger.warn({ ...this.logInfo(interaction), data: options }, '[INTERACTION DEFER REPLY]: already replied');
 		}
 
-		clearTimeout(cached.autoDeferTimeout!);
+		if (cached.autoDeferTimeout) clearTimeout(cached.autoDeferTimeout);
 
 		try {
 			return await (cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options }));

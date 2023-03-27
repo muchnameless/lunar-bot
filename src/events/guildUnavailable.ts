@@ -8,7 +8,7 @@ import { GuildUtil } from '#utils';
 export default class extends DiscordJSEvent {
 	public override readonly name = Events.GuildUnavailable;
 
-	private readonly _intervals = new Map<Snowflake, NodeJS.Timeout>();
+	private readonly _intervals = new Map<Snowflake, NodeJS.Timer>();
 
 	/**
 	 * event listener callback
@@ -30,7 +30,11 @@ export default class extends DiscordJSEvent {
 
 		// refetch members
 		const oldInterval = this._intervals.get(guild.id);
-		if (oldInterval) clearInterval(oldInterval);
+
+		if (oldInterval) {
+			oldInterval.refresh();
+			return;
+		}
 
 		const interval = setInterval(async () => {
 			try {
