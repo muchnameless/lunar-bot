@@ -551,9 +551,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/ws@patch:@discordjs/ws@0.8.0-dev.1679918669-b8b852e.0#./.yarn/patches/@discordjs-ws-npm-0.8.0-dev.1679573053-5f93dcc.0-9c46838eb1.patch::locator=lunar-bot%40workspace%3A.":
+"@discordjs/ws@patch:@discordjs/ws@npm%3A0.8.0-dev.1679918669-b8b852e.0#./.yarn/patches/@discordjs-ws-npm-0.8.0-dev.1679918669-b8b852e.0-b48449b4eb.patch::locator=lunar-bot%40workspace%3A.":
   version: 0.8.0-dev.1679918669-b8b852e.0
-  resolution: "@discordjs/ws@patch:@discordjs/ws@npm%3A0.8.0-dev.1679918669-b8b852e.0#./.yarn/patches/@discordjs-ws-npm-0.8.0-dev.1679573053-5f93dcc.0-9c46838eb1.patch::version=0.8.0-dev.1679918669-b8b852e.0&hash=22e430&locator=lunar-bot%40workspace%3A."
+  resolution: "@discordjs/ws@patch:@discordjs/ws@npm%3A0.8.0-dev.1679918669-b8b852e.0#./.yarn/patches/@discordjs-ws-npm-0.8.0-dev.1679918669-b8b852e.0-b48449b4eb.patch::version=0.8.0-dev.1679918669-b8b852e.0&hash=a1482b&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@discordjs/collection": ^1.4.0
     "@discordjs/rest": ^1.6.0
@@ -564,7 +564,7 @@ __metadata:
     discord-api-types: ^0.37.37
     tslib: ^2.5.0
     ws: ^8.13.0
-  checksum: f32a16e6a63ce1e3b15042d625799018d0d819af3249a02d40e6c811cd97fd874ac4f498672fc70818149df5e83cba58ff691891cdb81e567b9e6a69007bfabb
+  checksum: 21881a29bcf6c87cfa1e958ebef139da9b047e2cca57122edd2492f450ed0adc807ab5111afe98874d42a0d66ac078e726ed2405ab48a5b54c5a89cae0b159d4
   languageName: node
   linkType: hard
 
