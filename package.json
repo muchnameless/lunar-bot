@@ -99,7 +99,7 @@
 		"zlib-sync": "^0.1.8"
 	},
 	"devDependencies": {
-		"@commitlint/cli": "^17.5.0",
+		"@commitlint/cli": "^17.5.1",
 		"@commitlint/config-angular": "^17.4.4",
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^2.0.1",
