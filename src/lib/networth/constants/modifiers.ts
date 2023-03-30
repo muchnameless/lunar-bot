@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
+import { Enchantment } from './enchantments.js';
+
 /**
  * multiplicative price modifier for the applied item
  *
- * https://github.com/Altpapier/SkyHelper-Networth/blob/master/constants/applicationWorth.js
+ * @see https://github.com/Altpapier/SkyHelper-Networth/blob/master/constants/applicationWorth.js
  */
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 export const enum PriceModifier {
-	AppliedEnchantment20 = 0.2,
-	AppliedEnchantment35 = 0.35,
-	AppliedEnchantment65 = 0.65,
 	AppliedEnchantmentDefault = 0.85,
 	ArtOfPeace = 0.8,
 	ArtOfWar = 0.6,
@@ -46,3 +45,12 @@ export const enum PriceModifier {
 	WoodSingularity = 0.5,
 }
 /* eslint-enable @typescript-eslint/no-duplicate-enum-values */
+
+export const ENCHANTMENT_MODIFIERS = {
+	[Enchantment.BigBrain]: 0.35,
+	[Enchantment.CounterStrike]: 0.2,
+	[Enchantment.Overload]: 0.35,
+	[Enchantment.UltimateFatalTempo]: 0.65,
+	[Enchantment.UltimateInferno]: 0.35,
+	[Enchantment.UltimateSoulEater]: 0.35,
+} as const satisfies Partial<Record<Enchantment, number>>;

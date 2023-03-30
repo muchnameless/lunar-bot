@@ -6,6 +6,7 @@ import {
 	ALLOWED_RECOMB_ITEMS,
 	ATTRIBUTES_BASE,
 	CRAFTING_RECIPES,
+	ENCHANTMENT_MODIFIERS,
 	Enchantment,
 	ITEM_SPECIFIC_IGNORED_ENCHANTS,
 	ItemCategory,
@@ -13,23 +14,18 @@ import {
 	MASTER_STARS,
 	NON_REDUCED_PETS,
 	PriceModifier,
+	REFORGE_TO_STONE,
 	SKYBLOCK_INVENTORIES,
 	THUNDER_CHARGES,
 } from './constants/index.js';
-import {
-	calculatePetSkillLevel,
-	getAppliedEnchantmentModifier,
-	getEnchantment,
-	getReforgeStone,
-	isCommonItem,
-	transformItemData,
-} from './functions/index.js';
+import { calculatePetSkillLevel, getEnchantment, isCommonItem, transformItemData } from './functions/index.js';
 import { getPrice, prices, skyblockItems, unknownItemIdWarnings, type SkyBlockItem } from './prices.js';
 import { hypixel } from '#api';
 import { logger } from '#logger';
 import { Warnings } from '#structures/Warnings.js';
 
 const unknownStarredItemWarnings = new Warnings<string>();
+const unknownReforgeModifierWarnings = new Warnings<string>();
 
 /**
  * parse base64 item_data strings and calculate item prices
@@ -219,7 +215,9 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 			// applied enchantments are worth less
 			if (itemId !== ItemId.EnchantedBook) {
-				enchantmentPrice *= getAppliedEnchantmentModifier(enchantment);
+				enchantmentPrice *=
+					ENCHANTMENT_MODIFIERS[enchantment as keyof typeof ENCHANTMENT_MODIFIERS] ??
+					PriceModifier.AppliedEnchantmentDefault;
 			}
 
 			price += enchantmentPrice;
@@ -439,10 +437,19 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		price += extraAttributes.tuned_transmission * getPrice(ItemId.TransmissionTuner) * PriceModifier.TransmissionTuner;
 	}
 
-	// reforge
+	// reforge modifiers
 	if (extraAttributes.modifier && skyblockItem?.category !== ItemCategory.Accessory) {
-		const reforgeStone = getReforgeStone(extraAttributes.modifier, itemId);
-		if (reforgeStone) price += getPrice(reforgeStone) * PriceModifier.Reforge;
+		const reforgeStone = REFORGE_TO_STONE[extraAttributes.modifier as keyof typeof REFORGE_TO_STONE];
+
+		if (reforgeStone) {
+			price += getPrice(reforgeStone) * PriceModifier.Reforge;
+		} else {
+			unknownReforgeModifierWarnings.emit(
+				extraAttributes.modifier,
+				{ modifier: extraAttributes.modifier, itemId },
+				'[GET PRICE]: unknown reforge modifier',
+			);
+		}
 	}
 
 	// scrolls (Necron's Blade)

@@ -25,26 +25,6 @@ const CAMPFIRE_TALISMAN_GOD = {
 
 const BRONZE_MEDAL = (count = 1) => ({} as const);
 const SILVER_MEDAL = (count = 1) => ({} as const);
-const GOLD_MEDAL = (count = 1) =>
-	({
-		[ItemId.Coins]: count * 800_000,
-	} as const satisfies CraftingRecipe);
-
-const THEORETICAL_HOE = {
-	...GOLD_MEDAL(),
-	[ItemId.JacobsTicket]: 32,
-} as const satisfies CraftingRecipe;
-const UPGRADED_HOE_1 = {
-	...THEORETICAL_HOE,
-} as const satisfies CraftingRecipe;
-const UPGRADED_HOE_2 = {
-	...UPGRADED_HOE_1,
-	[ItemId.JacobsTicket]: UPGRADED_HOE_1[ItemId.JacobsTicket] + 4 * 16,
-} as const satisfies CraftingRecipe;
-const UPGRADED_HOE_3 = {
-	...UPGRADED_HOE_2,
-	[ItemId.JacobsTicket]: UPGRADED_HOE_2[ItemId.JacobsTicket] + 4 * 64,
-} as const satisfies CraftingRecipe;
 
 /**
  * SkyBlock item crafting recipes, holds an array of { id, count } for each item
@@ -130,83 +110,6 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 		[ItemId.CampfireTalisman28]: CAMPFIRE_TALISMAN_GOD,
 		[ItemId.CampfireTalisman29]: CAMPFIRE_TALISMAN_GOD,
 
-		// https://hypixel-skyblock.fandom.com/wiki/Mathematical_Hoe_Blueprint
-		[ItemId.TheoreticalHoe]: THEORETICAL_HOE,
-
-		// carrot
-		[ItemId.GaussCarrotHoe1]: {
-			...UPGRADED_HOE_1,
-			[ItemId.Carrot]: 8 * 64,
-		},
-		[ItemId.GaussCarrotHoe2]: {
-			...UPGRADED_HOE_2,
-			[ItemId.Carrot]: 8 * 64 + 4 * 64 * (5 * 32),
-		},
-		[ItemId.GaussCarrotHoe3]: {
-			...UPGRADED_HOE_3,
-			[ItemId.Carrot]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (4 * 32 * (5 * 32) + 32),
-			[ItemId.GoldIngot]: 4 * 64 * 32 * (8 / 9),
-		},
-
-		// nether warts
-		[ItemId.NewtonNetherWartsHoe1]: {
-			...UPGRADED_HOE_1,
-			[ItemId.NetherWart]: 8 * 64,
-		},
-		[ItemId.NewtonNetherWartsHoe2]: {
-			...UPGRADED_HOE_2,
-			[ItemId.NetherWart]: 8 * 64 + 4 * 64 * (5 * 32),
-		},
-		[ItemId.NewtonNetherWartsHoe3]: {
-			...UPGRADED_HOE_3,
-			[ItemId.NetherWart]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (5 * 32) * (5 * 32),
-		},
-
-		// potato
-		[ItemId.PythagoreanPotatoHoe1]: {
-			...UPGRADED_HOE_1,
-			[ItemId.Potato]: 8 * 64,
-		},
-		[ItemId.PythagoreanPotatoHoe2]: {
-			...UPGRADED_HOE_2,
-			[ItemId.Potato]: 8 * 64 + 4 * 64 * (5 * 32),
-		},
-		[ItemId.PythagoreanPotatoHoe3]: {
-			...UPGRADED_HOE_3,
-			[ItemId.Potato]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (5 * 32) * (5 * 32),
-		},
-
-		// sugar cane
-		[ItemId.TuringSugarCaneHoe1]: {
-			...UPGRADED_HOE_1,
-			[ItemId.SugarCane]: 8 * 64,
-		},
-		[ItemId.TuringSugarCaneHoe2]: {
-			...UPGRADED_HOE_2,
-			[ItemId.SugarCane]: 8 * 64 + 4 * 64 * (5 * 32),
-		},
-		[ItemId.TuringSugarCaneHoe3]: {
-			...UPGRADED_HOE_3,
-			[ItemId.SugarCane]: 8 * 64 + 4 * 64 * (5 * 32) + 4 * 64 * (5 * 32) * (5 * 32),
-		},
-
-		// wheat
-		[ItemId.EuclidsWheatHoe1]: {
-			...UPGRADED_HOE_1,
-			[ItemId.Wheat]: 8 * 64,
-		},
-		[ItemId.EuclidsWheatHoe2]: {
-			...UPGRADED_HOE_2,
-			[ItemId.Wheat]: 8 * 64 + 4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK),
-		},
-		[ItemId.EuclidsWheatHoe3]: {
-			...UPGRADED_HOE_3,
-			[ItemId.Wheat]:
-				8 * 64 +
-				4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK) +
-				4 * 64 * ITEMS_PER_BLOCK * (16 * ITEMS_PER_BLOCK) * (16 * ITEMS_PER_BLOCK),
-		},
-
 		// https://hypixel-skyblock.fandom.com/wiki/Anita
 		[ItemId.InfinidirtWand]: {
 			[ItemId.JacobsTicket]: 1,
@@ -214,14 +117,6 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 		[ItemId.Prismapump]: {
 			...BRONZE_MEDAL(),
 			[ItemId.JacobsTicket]: 2 / 4,
-		},
-		[ItemId.HoeOfGreatTilling]: {
-			...BRONZE_MEDAL(),
-			[ItemId.JacobsTicket]: 5,
-		},
-		[ItemId.HoeOfGreaterTilling]: {
-			...SILVER_MEDAL(),
-			[ItemId.JacobsTicket]: 10,
 		},
 		[ItemId.BasketOfSeeds]: {
 			...SILVER_MEDAL(2),
@@ -231,11 +126,6 @@ export const CRAFTING_RECIPES = Object.fromEntries(
 			...SILVER_MEDAL(2),
 			[ItemId.JacobsTicket]: 30,
 		},
-		[ItemId.CocoChopper]: THEORETICAL_HOE,
-		[ItemId.MelonDicer]: THEORETICAL_HOE,
-		[ItemId.PumpkinDicer]: THEORETICAL_HOE,
-		[ItemId.FungiCutter]: THEORETICAL_HOE,
-		[ItemId.CactusKnife]: THEORETICAL_HOE,
 
 		// https://hypixel-skyblock.fandom.com/wiki/Arrows
 		[ItemId.FlintArrow]: {
