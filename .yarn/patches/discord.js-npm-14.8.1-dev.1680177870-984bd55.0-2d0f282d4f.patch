@@ -1,10 +1,10 @@
 diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
-index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9bd249080 100644
+index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..959039d9b3ed6cd5ca69912c190f44088aa874f4 100644
 --- a/src/client/websocket/WebSocketManager.js
 +++ b/src/client/websocket/WebSocketManager.js
 @@ -1,10 +1,16 @@
  'use strict';
- 
+
  const EventEmitter = require('node:events');
 +const process = require('node:process');
  const { setImmediate } = require('node:timers');
@@ -24,8 +24,8 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 @@ -12,6 +18,13 @@ const Events = require('../../util/Events');
  const Status = require('../../util/Status');
  const WebSocketShardEvents = require('../../util/WebSocketShardEvents');
- 
-+let zlib;
+
++let zlib = false;
 +
 +try {
 +  require('zlib-sync');
@@ -38,7 +38,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 @@ -22,15 +35,17 @@ const BeforeReadyWhitelist = [
    GatewayDispatchEvents.GuildMemberRemove,
  ];
- 
+
 -const unrecoverableErrorCodeMap = {
 -  [GatewayCloseCodes.AuthenticationFailed]: ErrorCodes.TokenInvalid,
 -  [GatewayCloseCodes.InvalidShard]: ErrorCodes.ShardingInvalid,
@@ -47,7 +47,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 -  [GatewayCloseCodes.DisallowedIntents]: ErrorCodes.DisallowedIntents,
 -};
 +const WaitingForGuildEvents = [GatewayDispatchEvents.GuildCreate, GatewayDispatchEvents.GuildDelete];
- 
+
 -const UNRESUMABLE_CLOSE_CODES = [1000, GatewayCloseCodes.AlreadyAuthenticated, GatewayCloseCodes.InvalidSeq];
 +const UNRESUMABLE_CLOSE_CODES = [
 +  CloseCodes.Normal,
@@ -58,13 +58,13 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 +const reasonIsDeprecated = 'the reason property is deprecated, use the code property to determine the reason';
 +let deprecationEmittedForInvalidSessionEvent = false;
 +let deprecationEmittedForDestroyedEvent = false;
- 
+
  /**
   * The WebSocket manager for this client.
 @@ -56,27 +71,12 @@ class WebSocketManager extends EventEmitter {
       */
      this.gateway = null;
- 
+
 -    /**
 -     * The amount of shards this manager handles
 -     * @private
@@ -77,7 +77,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
       * @type {Collection<number, WebSocketShard>}
       */
      this.shards = new Collection();
- 
+
 -    /**
 -     * An array of shards to be connected or that need to reconnect
 -     * @type {Set<WebSocketShard>}
@@ -91,7 +91,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
       * @type {Object[]}
 @@ -99,11 +99,16 @@ class WebSocketManager extends EventEmitter {
      this.destroyed = false;
- 
+
      /**
 -     * If this manager is currently reconnecting one or multiple shards
 -     * @type {boolean}
@@ -107,7 +107,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 -    this.reconnecting = false;
 +    this._ws = null;
    }
- 
+
    /**
 @@ -119,11 +124,14 @@ class WebSocketManager extends EventEmitter {
    /**
@@ -125,7 +125,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 +      `[WS => ${typeof shardId === 'number' ? `Shard ${shardId}` : 'Manager'}] ${message}`,
 +    );
    }
- 
+
    /**
 @@ -132,11 +140,37 @@ class WebSocketManager extends EventEmitter {
     */
@@ -165,11 +165,11 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 +    } = await this._ws.fetchGatewayInformation().catch(error => {
        throw error.status === 401 ? invalidToken : error;
      });
- 
-@@ -152,156 +186,129 @@ class WebSocketManager extends EventEmitter {
- 
+
+@@ -152,156 +186,130 @@ class WebSocketManager extends EventEmitter {
+
      this.gateway = `${gatewayURL}/`;
- 
+
 -    let { shards } = this.client.options;
 -
 -    if (shards === 'auto') {
@@ -197,13 +197,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 -    const [shard] = this.shardQueue;
 -
 -    this.shardQueue.delete(shard);
-+    this.totalShards = this.client.options.shardCount = await this._ws.getShardCount();
-+    this.client.options.shards = await this._ws.getShardIds();
-+    for (const id of this.client.options.shards) {
-+      if (!this.shards.has(id)) {
-+        const shard = new WebSocketShard(this, id);
-+        this.shards.set(id, shard);
- 
+-
 -    if (!shard.eventsAttached) {
 -      shard.on(WebSocketShardEvents.AllReady, unavailableGuilds => {
 -        /**
@@ -217,7 +211,14 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 -        if (!this.shardQueue.size) this.reconnecting = false;
 -        this.checkShardsReady();
 -      });
--
++    this.client.options.shardCount = await this._ws.getShardCount();
++    this.client.options.shards = await this._ws.getShardIds();
++    this.totalShards = this.client.options.shards.length;
++    for (const id of this.client.options.shards) {
++      if (!this.shards.has(id)) {
++        const shard = new WebSocketShard(this, id);
++        this.shards.set(id, shard);
+
 -      shard.on(WebSocketShardEvents.Close, event => {
 -        if (event.code === 1_000 ? this.destroyed : event.code in unrecoverableErrorCodeMap) {
 +        shard.on(WebSocketShardEvents.AllReady, unavailableGuilds => {
@@ -235,13 +236,13 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 -          this.debug(GatewayCloseCodes[event.code], shard);
 -          return;
 -        }
--
++          this.client.emit(Events.ShardReady, shard.id, unavailableGuilds);
+
 -        if (UNRESUMABLE_CLOSE_CODES.includes(event.code)) {
 -          // These event codes cannot be resumed
 -          shard.sessionId = null;
 -        }
-+          this.client.emit(Events.ShardReady, shard.id, unavailableGuilds);
- 
+-
 -        /**
 -         * Emitted when a shard is attempting to reconnect or re-identify.
 -         * @event Client#shardReconnecting
@@ -268,12 +269,12 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 +        shard.status = Status.Connecting;
 +      }
 +    }
- 
+
 -        this.shardQueue.add(shard);
 -        this.reconnect();
 -      });
 +    await this._ws.connect();
- 
+
 -      shard.eventsAttached = true;
 -    }
 +    this.shards.forEach(shard => {
@@ -282,7 +283,7 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 +          'The WebSocketShard#invalidSession event is deprecated and will never emit.',
 +          'DeprecationWarning',
 +        );
- 
+
 -    this.shards.set(shard.id, shard);
 -
 -    try {
@@ -310,13 +311,13 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 +          'The WebSocketShard#destroyed event is deprecated and will never emit.',
 +          'DeprecationWarning',
 +        );
- 
+
 -    return true;
 +        deprecationEmittedForDestroyedEvent = true;
 +      }
 +    });
    }
- 
+
    /**
 -   * Handles reconnects for this manager.
 +   * Attaches event handlers to the internal WebSocketShardManager from `@discordjs/ws`.
@@ -425,18 +426,18 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 +      this.client.emit(Events.ShardError, err, err.shardId);
 +    });
    }
- 
+
    /**
-@@ -310,7 +317,7 @@ class WebSocketManager extends EventEmitter {
+@@ -310,7 +318,7 @@ class WebSocketManager extends EventEmitter {
     * @private
     */
    broadcast(packet) {
 -    for (const shard of this.shards.values()) shard.send(packet);
 +    for (const shardId of this.shards.keys()) this._ws.send(shardId, packet);
    }
- 
+
    /**
-@@ -322,8 +329,7 @@ class WebSocketManager extends EventEmitter {
+@@ -322,8 +330,7 @@ class WebSocketManager extends EventEmitter {
      // TODO: Make a util for getting a stack
      this.debug(`Manager was destroyed. Called by:\n${new Error().stack}`);
      this.destroyed = true;
@@ -444,16 +445,16 @@ index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..2c72cb4706870c1d80382dcad06002b9
 -    for (const shard of this.shards.values()) shard.destroy({ closeCode: 1_000, reset: true, emit: false, log: false });
 +    this._ws.destroy({ code: CloseCodes.Normal });
    }
- 
+
    /**
-@@ -345,7 +351,7 @@ class WebSocketManager extends EventEmitter {
+@@ -345,7 +352,7 @@ class WebSocketManager extends EventEmitter {
        const item = this.packetQueue.shift();
        setImmediate(() => {
          this.handlePacket(item.packet, item.shard);
 -      }).unref();
 +      });
      }
- 
+
      if (packet && PacketHandlers[packet.t]) {
 diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
 index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe3e087ec9 100644
@@ -461,7 +462,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 +++ b/src/client/websocket/WebSocketShard.js
 @@ -1,22 +1,12 @@
  'use strict';
- 
+
  const EventEmitter = require('node:events');
 -const { setTimeout, setInterval, clearTimeout, clearInterval } = require('node:timers');
 -const { GatewayDispatchEvents, GatewayIntentBits, GatewayOpcodes } = require('discord-api-types/v10');
@@ -472,7 +473,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 +const { GatewayIntentBits } = require('discord-api-types/v10');
  const Status = require('../../util/Status');
  const WebSocketShardEvents = require('../../util/WebSocketShardEvents');
- 
+
 -const STATUS_KEYS = Object.keys(Status);
 -const CONNECTION_STATE = Object.keys(WebSocket.WebSocket);
 -
@@ -488,7 +489,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 @@ -43,13 +33,6 @@ class WebSocketShard extends EventEmitter {
       */
      this.status = Status.Idle;
- 
+
 -    /**
 -     * The current sequence of the shard
 -     * @type {number}
@@ -502,7 +503,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 @@ -57,20 +40,6 @@ class WebSocketShard extends EventEmitter {
       */
      this.closeSequence = 0;
- 
+
 -    /**
 -     * The current session id of the shard
 -     * @type {?string}
@@ -523,7 +524,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 @@ -83,81 +52,6 @@ class WebSocketShard extends EventEmitter {
       */
      this.lastPingTimestamp = -1;
- 
+
 -    /**
 -     * If we received a heartbeat ack back. Used to identify zombie connections
 -     * @type {boolean}
@@ -604,7 +605,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
       * @name WebSocketShard#expectedGuilds
 @@ -175,12 +69,17 @@ class WebSocketShard extends EventEmitter {
      Object.defineProperty(this, 'readyTimeout', { value: null, writable: true });
- 
+
      /**
 -     * Time when the WebSocket connection was opened
 -     * @name WebSocketShard#connectedAt
@@ -622,7 +623,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 -    Object.defineProperty(this, 'connectedAt', { value: 0, writable: true });
 +    Object.defineProperty(this, 'sessionInfo', { value: null, writable: true });
    }
- 
+
    /**
 @@ -189,161 +88,7 @@ class WebSocketShard extends EventEmitter {
     * @private
@@ -785,12 +786,12 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 -    this.manager.client.emit(Events.ShardError, error, this.id);
 +    this.manager.debug(message, this.id);
    }
- 
+
    /**
 @@ -351,43 +96,11 @@ class WebSocketShard extends EventEmitter {
     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent}
     */
- 
+
 -  /**
 -   * @external ErrorEvent
 -   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent}
@@ -834,7 +835,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
      event = {
 @@ -410,93 +123,35 @@ class WebSocketShard extends EventEmitter {
    }
- 
+
    /**
 -   * Called whenever a packet is received.
 +   * Called when the shard receives the READY payload.
@@ -847,7 +848,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
        this.debug(`Received broken packet: '${packet}'.`);
        return;
      }
- 
+
 -    switch (packet.t) {
 -      case GatewayDispatchEvents.Ready:
 -        /**
@@ -884,12 +885,12 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 +     * @event WebSocketShard#ready
 +     */
 +    this.emit(WebSocketShardEvents.Ready);
- 
+
 -    if (packet.s > this.sequence) this.sequence = packet.s;
 +    this.expectedGuilds = new Set(packet.guilds.map(d => d.id));
 +    this.status = Status.WaitingForGuilds;
 +  }
- 
+
 -    switch (packet.op) {
 -      case GatewayOpcodes.Hello:
 -        this.setHelloTimeout(-1);
@@ -943,15 +944,15 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 +    this.expectedGuilds.delete(guildId);
 +    this.checkReady();
    }
- 
+
    /**
 @@ -543,197 +198,12 @@ class WebSocketShard extends EventEmitter {
          );
- 
+
          this.readyTimeout = null;
 -
          this.status = Status.Ready;
- 
+
          this.emit(WebSocketShardEvents.AllReady, this.expectedGuilds);
        },
        hasGuildsIntent ? waitGuildTimeout : 0,
@@ -1142,7 +1143,7 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 -    this.send({ op: GatewayOpcodes.Resume, d }, true);
 +    );
    }
- 
+
    /**
 @@ -743,161 +213,16 @@ class WebSocketShard extends EventEmitter {
     * Do not use this method if you don't know what you're doing.</warn>
@@ -1311,14 +1312,14 @@ index c41b656360a7cb4efbb3a67c562fd3ae3f30d35a..df5e7765ba11cb71ab1b3366eb2153fe
 +    this.manager._ws.send(this.id, data);
    }
  }
- 
+
 diff --git a/src/client/websocket/handlers/RESUMED.js b/src/client/websocket/handlers/RESUMED.js
 index 39824bc9242d9bdff8aabf7607b117e7b71602c0..27ed7ddc5df31c657c371466c4649f62ae1963e3 100644
 --- a/src/client/websocket/handlers/RESUMED.js
 +++ b/src/client/websocket/handlers/RESUMED.js
 @@ -3,7 +3,7 @@
  const Events = require('../../../util/Events');
- 
+
  module.exports = (client, packet, shard) => {
 -  const replayed = shard.sequence - shard.closeSequence;
 +  const replayed = shard.sessionInfo.sequence - shard.closeSequence;
@@ -1330,11 +1331,11 @@ index 3f074a1dad066a25bb13772506fa58d7daf51f53..6f256c556f2ab2f747cd6e224aa99c35
 --- a/src/errors/ErrorCodes.js
 +++ b/src/errors/ErrorCodes.js
 @@ -275,7 +275,6 @@ const keys = [
- 
+
    'InteractionAlreadyReplied',
    'InteractionNotReplied',
 -  'InteractionEphemeralReplied',
- 
+
    'CommandInteractionOptionNotFound',
    'CommandInteractionOptionType',
 diff --git a/src/errors/Messages.js b/src/errors/Messages.js
@@ -1342,11 +1343,11 @@ index 1b79ec030023ce6411d607e7ccfd431fe6c1de55..adf2a1be495f20853a5a3e01e39b583b
 --- a/src/errors/Messages.js
 +++ b/src/errors/Messages.js
 @@ -136,7 +136,6 @@ const Messages = {
- 
+
    [DjsErrorCodes.InteractionAlreadyReplied]: 'The reply to this interaction has already been sent or deferred.',
    [DjsErrorCodes.InteractionNotReplied]: 'The reply to this interaction has not been sent or deferred.',
 -  [DjsErrorCodes.InteractionEphemeralReplied]: 'Ephemeral responses cannot be deleted.',
- 
+
    [DjsErrorCodes.CommandInteractionOptionNotFound]: name => `Required option "${name}" not found.`,
    [DjsErrorCodes.CommandInteractionOptionType]: (name, type, expected) =>
 diff --git a/src/index.js b/src/index.js
@@ -1356,7 +1357,7 @@ index d5a585f67468a1fdc4b4f360356dbcb36e319ccd..c7c530ced537a2c646e7034ba37fba2f
 @@ -204,11 +204,10 @@ exports.WidgetMember = require('./structures/WidgetMember');
  exports.WelcomeChannel = require('./structures/WelcomeChannel');
  exports.WelcomeScreen = require('./structures/WelcomeScreen');
- 
+
 -exports.WebSocket = require('./WebSocket');
 -
  // External
@@ -1398,11 +1399,11 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1
 +++ b/src/structures/AttachmentBuilder.js
 @@ -1,16 +1,16 @@
  'use strict';
- 
+
 -const { basename, flatten } = require('../util/Util');
 +const { isJSONEncodable } = require('@discordjs/builders');
 +const { basename } = require('../util/Util');
- 
+
  /**
   * Represents an attachment builder
   */
@@ -1430,7 +1431,7 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1
 -    this.description = data.description;
 +    this.description = description;
    }
- 
+
    /**
 @@ -82,11 +82,11 @@ class AttachmentBuilder {
     * @readonly
@@ -1439,12 +1440,12 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1
 -    return basename(this.name).startsWith('SPOILER_');
 +    return this.name ? basename(this.name).startsWith('SPOILER_') : false;
    }
- 
+
    toJSON() {
 -    return flatten(this);
 +    return { ...this };
    }
- 
+
    /**
 @@ -95,10 +95,10 @@ class AttachmentBuilder {
     * @returns {AttachmentBuilder}
@@ -1460,13 +1461,13 @@ index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1
 +    return new this(other);
    }
  }
- 
+
 diff --git a/src/structures/Embed.js b/src/structures/Embed.js
 index dd68120d955b53019d973f03057740d52f814fe0..5436e854c18807335adef1613b8da974b6de3acc 100644
 --- a/src/structures/Embed.js
 +++ b/src/structures/Embed.js
 @@ -18,11 +18,11 @@ class Embed {
- 
+
    /**
     * An array of fields of this embed.
 -   * @type {Array<APIEmbedField>}
@@ -1477,7 +1478,7 @@ index dd68120d955b53019d973f03057740d52f814fe0..5436e854c18807335adef1613b8da974
 -    return this.data.fields ?? [];
 +    return this.data.fields ?? null;
    }
- 
+
    /**
 diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
 index f3bf22dcb496dc563aef7e5a987024ee7eb3767e..efddf66a7d5107c29224496f132c3abe8f6e787a 100644
@@ -1493,7 +1494,7 @@ index f3bf22dcb496dc563aef7e5a987024ee7eb3767e..efddf66a7d5107c29224496f132c3abe
 +    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
 +    return !this.managed && me.permissions.has(PermissionFlagsBits.ManageEmojisAndStickers);
    }
- 
+
    /**
 diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
 index f56b5e342c4d308346cdc869b93993dcbd3cd9e9..94ca701dc9045d9f82ef2dca67b85d117b999d1c 100644
@@ -1509,7 +1510,7 @@ index f56b5e342c4d308346cdc869b93993dcbd3cd9e9..94ca701dc9045d9f82ef2dca67b85d11
 +    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
 +    return me.roles.highest.comparePositionTo(this.roles.highest) > 0;
    }
- 
+
    /**
 @@ -269,7 +270,6 @@ class GuildMember extends Base {
     * @readonly
@@ -1518,7 +1519,7 @@ index f56b5e342c4d308346cdc869b93993dcbd3cd9e9..94ca701dc9045d9f82ef2dca67b85d11
 -    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers);
    }
- 
+
 @@ -279,7 +279,6 @@ class GuildMember extends Base {
     * @readonly
     */
@@ -1526,7 +1527,7 @@ index f56b5e342c4d308346cdc869b93993dcbd3cd9e9..94ca701dc9045d9f82ef2dca67b85d11
 -    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
      return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.BanMembers);
    }
- 
+
 @@ -292,7 +291,7 @@ class GuildMember extends Base {
      return (
        !this.permissions.has(PermissionFlagsBits.Administrator) &&
@@ -1535,7 +1536,7 @@ index f56b5e342c4d308346cdc869b93993dcbd3cd9e9..94ca701dc9045d9f82ef2dca67b85d11
 +      this.guild.members.me.permissions.has(PermissionFlagsBits.ModerateMembers)
      );
    }
- 
+
 diff --git a/src/structures/GuildTemplate.js b/src/structures/GuildTemplate.js
 index c1e219b5e2a0685deb3d46ba5b421cab2393b863..6f71745b51397fbad827916f14c25e4620f79077 100644
 --- a/src/structures/GuildTemplate.js
@@ -1543,12 +1544,12 @@ index c1e219b5e2a0685deb3d46ba5b421cab2393b863..6f71745b51397fbad827916f14c25e46
 @@ -149,7 +149,7 @@ class GuildTemplate extends Base {
        client.incrementMaxListeners();
        client.on(Events.GuildCreate, handleGuild);
- 
+
 -      const timeout = setTimeout(() => resolveGuild(client.guilds._add(data)), 10_000).unref();
 +      const timeout = setTimeout(() => resolveGuild(client.guilds._add(data)), 10_000);
      });
    }
- 
+
 diff --git a/src/structures/Invite.js b/src/structures/Invite.js
 index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf44489054c089 100644
 --- a/src/structures/Invite.js
@@ -1566,7 +1567,7 @@ index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf4448
 +        me.permissions.has(PermissionFlagsBits.ManageGuild),
      );
    }
- 
+
 diff --git a/src/structures/Message.js b/src/structures/Message.js
 index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500442f68f2 100644
 --- a/src/structures/Message.js
@@ -1574,7 +1575,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 @@ -320,10 +320,13 @@ class Message extends Base {
        this.client.channels._add(data.thread, this.guild);
      }
- 
+
 -    if (this.member && data.member) {
 -      this.member._patch(data.member);
 -    } else if (data.member && this.guild && this.author) {
@@ -1587,7 +1588,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +        this.guild?.members._add(Object.assign(data.member, { user: this.author }));
 +      }
      }
- 
+
      if ('flags' in data) {
 @@ -601,19 +604,23 @@ class Message extends Base {
     * @readonly
@@ -1595,7 +1596,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
    get editable() {
 -    const precheck = Boolean(this.author.id === this.client.user.id && (!this.guild || this.channel?.viewable));
 +    const { channel } = this;
- 
+
      // Regardless of permissions thread messages cannot be edited if
      // the thread is archived or the thread is locked and the bot does not have permission to manage threads.
 -    if (this.channel?.isThread()) {
@@ -1609,7 +1610,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
          if (!permissions?.has(PermissionFlagsBits.ManageThreads, true)) return false;
        }
      }
- 
+
 -    return precheck;
 +    return Boolean(
 +      this.author.id === this.client.user.id &&
@@ -1617,12 +1618,12 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +        (!this.guildId || channel?.viewable),
 +    );
    }
- 
+
    /**
 @@ -624,15 +631,19 @@ class Message extends Base {
    get deletable() {
      if (!DeletableMessageTypes.includes(this.type)) return false;
- 
+
 -    if (!this.guild) {
 +    if (this.flags.has(MessageFlags.Ephemeral)) {
 +      return false;
@@ -1636,7 +1637,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    if (!channel?.viewable) {
        return false;
      }
- 
+
 -    const permissions = this.channel?.permissionsFor(this.client.user);
 +    const permissions = channel?.permissionsFor(this.client.user);
      if (!permissions) return false;
@@ -1671,7 +1672,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    return channel.messages.edit(this, options);
    }
- 
+
    /**
 @@ -736,8 +749,9 @@ class Message extends Base {
     * }
@@ -1683,7 +1684,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    return channel.messages.crosspost(this.id);
    }
- 
+
    /**
 @@ -751,8 +765,9 @@ class Message extends Base {
     *   .catch(console.error)
@@ -1696,7 +1697,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    await channel.messages.pin(this.id, reason);
      return this;
    }
- 
+
 @@ -767,8 +782,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
@@ -1708,7 +1709,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    await channel.messages.unpin(this.id, reason);
      return this;
    }
- 
+
 @@ -788,13 +804,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
@@ -1718,7 +1719,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    const { channel } = this;
 +    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
 +    await channel.messages.react(this.id, emoji);
- 
+
      return this.client.actions.MessageReactionAdd.handle(
        {
          [this.client.actions.injectedUser]: this.client.user,
@@ -1738,7 +1739,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    await channel.messages.delete(this.id);
      return this;
    }
- 
+
 @@ -836,7 +854,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
@@ -1747,7 +1748,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    const { channel } = this;
 +    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
      let data;
- 
+
      if (options instanceof MessagePayload) {
 @@ -849,7 +868,7 @@ class Message extends Base {
          },
@@ -1756,7 +1757,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 -    return this.channel.send(data);
 +    return channel.send(data);
    }
- 
+
    /**
 @@ -869,12 +888,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
@@ -1773,7 +1774,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 -    return this.channel.threads.create({ ...options, startMessage: this });
 +    return channel.threads.create({ ...options, startMessage: this });
    }
- 
+
    /**
 @@ -883,8 +903,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
@@ -1785,7 +1786,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 +    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
 +    return channel.messages.fetch({ message: this.id, force });
    }
- 
+
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
 index 6bcac122a235dc4c94455d8d7daeb47ec97613f2..ca95bb71f9bffadefda92a84537b548fd5329c07 100644
@@ -1802,12 +1803,12 @@ index 6bcac122a235dc4c94455d8d7daeb47ec97613f2..ca95bb71f9bffadefda92a84537b548f
 @@ -134,7 +133,9 @@ class MessagePayload {
        }
      }
- 
+
 -    const components = this.options.components?.map(c => (isJSONEncodable(c) ? c : new ActionRowBuilder(c)).toJSON());
 +    const components = this.options.components?.map(c =>
 +      isJSONEncodable(c) ? c.toJSON() : this.target.client.options.jsonTransformer(c),
 +    );
- 
+
      let username;
      let avatarURL;
 @@ -219,9 +220,9 @@ class MessagePayload {
@@ -1816,12 +1817,12 @@ index 6bcac122a235dc4c94455d8d7daeb47ec97613f2..ca95bb71f9bffadefda92a84537b548f
    async resolveFiles() {
 -    if (this.files) return this;
 +    if (this.files || !this.options.files) return this;
- 
+
 -    this.files = await Promise.all(this.options.files?.map(file => this.constructor.resolveFile(file)) ?? []);
 +    this.files = await Promise.all(this.options.files.map(file => this.constructor.resolveFile(file)));
      return this;
    }
- 
+
 diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
 index 8e67b21d2e6f225f11aa02d90849eac6d0f6f392..220b4314659b8397d8546991c884f5b9ac2aaeca 100644
 --- a/src/structures/ModalSubmitFields.js
@@ -1840,7 +1841,7 @@ index 8e67b21d2e6f225f11aa02d90849eac6d0f6f392..220b4314659b8397d8546991c884f5b9
 +    return this.getField(customId, ComponentType.SelectMenu).values;
 +  }
  }
- 
+
  module.exports = ModalSubmitFields;
 diff --git a/src/structures/interfaces/Collector.js b/src/structures/interfaces/Collector.js
 index 65f411744035becfe8c760bad46898d9d2abc91b..1f2edae08f380b31eaeee5fb0c89d0d4c718c14c 100644
@@ -1849,12 +1850,12 @@ index 65f411744035becfe8c760bad46898d9d2abc91b..1f2edae08f380b31eaeee5fb0c89d0d4
 @@ -93,8 +93,8 @@ class Collector extends EventEmitter {
      this.handleCollect = this.handleCollect.bind(this);
      this.handleDispose = this.handleDispose.bind(this);
- 
+
 -    if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time).unref();
 -    if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle).unref();
 +    if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time);
 +    if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle);
- 
+
      /**
       * The timestamp at which this collector last collected an item
 @@ -135,7 +135,7 @@ class Collector extends EventEmitter {
@@ -1879,7 +1880,7 @@ index 65f411744035becfe8c760bad46898d9d2abc91b..1f2edae08f380b31eaeee5fb0c89d0d4
 +      this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
      }
    }
- 
+
 diff --git a/src/util/Options.js b/src/util/Options.js
 index f6106f3bc5cf344d79480e5e6c875890074f7b94..655ee3e9daa9a720df0fa4818f7af1343d90f288 100644
 --- a/src/util/Options.js
@@ -1891,7 +1892,7 @@ index f6106f3bc5cf344d79480e5e6c875890074f7b94..655ee3e9daa9a720df0fa4818f7af134
 + * @property {Function} [buildStrategy] Builds the strategy to use for sharding;
 + * example: `(manager) => new WorkerShardingStrategy(manager, { shardsPerWorker: 2 })`
   */
- 
+
  /**
 @@ -86,7 +88,6 @@ class Options extends null {
        sweepers: this.DefaultSweeperSettings,
@@ -1927,7 +1928,7 @@ index 7796ddc99a96d7c431052895c2c0a9d4c23a6790..eb0c680121aed6bde625f7d4da0fac8b
 +    }, opts.interval * 1_000);
    }
  }
- 
+
 diff --git a/typings/index.d.ts b/typings/index.d.ts
 index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5b66adf38 100644
 --- a/typings/index.d.ts
@@ -1959,7 +1960,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
 +  | RoleSelectMenuComponent
 +  | MentionableSelectMenuComponent
 +  | ChannelSelectMenuComponent;
- 
+
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
 @@ -684,6 +688,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
@@ -1982,10 +1983,10 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
 @@ -1696,7 +1701,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
- 
+
 -export type CacheType = 'cached' | 'raw' | undefined;
 +export type CacheType = 'cached' | 'raw' | 'DM' | 'cachedOrDM' | undefined;
- 
+
  export type CacheTypeReducer<
    State extends CacheType,
 @@ -1704,12 +1709,18 @@ export type CacheTypeReducer<
@@ -2005,7 +2006,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
 +  : [State] extends ['cachedOrDM']
 +  ? CachedOrDMType
    : Fallback;
- 
+
  export type Interaction<Cached extends CacheType = CacheType> =
 @@ -1736,7 +1747,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
@@ -2019,7 +2020,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    public get createdAt(): Date;
 @@ -1990,16 +2002,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
  }
- 
+
  export class AttachmentBuilder {
 -  public constructor(attachment: BufferResolvable | Stream, data?: AttachmentData);
 +  public constructor(data?: Partial<AttachmentPayload>);
@@ -2036,7 +2037,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
 +  public toJSON(): AttachmentPayload;
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
- 
+
 @@ -2041,6 +2053,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent,
      Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
@@ -2048,7 +2049,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
 @@ -2209,12 +2222,17 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
- 
+
 +export interface SelectMenuModalData extends BaseModalData {
 +  type: ComponentType.SelectMenu;
 +  values: string[];
@@ -2058,10 +2059,10 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    type: ComponentType.ActionRow;
    components: ModalData[];
  }
- 
+
 -export type ModalData = TextInputModalData | ActionRowModalData;
 +export type ModalData = ActionRowModalData | TextInputModalData | SelectMenuModalData;
- 
+
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
 @@ -2223,6 +2241,7 @@ export class ModalSubmitFields {
@@ -2070,7 +2071,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    public getTextInputValue(customId: string): string;
 +  public getSelectMenuValues(customId: string): string[];
  }
- 
+
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
 @@ -2498,6 +2517,7 @@ export class StringSelectMenuInteraction<
      StringSelectMenuComponent,
@@ -2113,7 +2114,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    >;
    public componentType: ComponentType.ChannelSelect;
 @@ -3294,11 +3318,8 @@ export class WebhookClient extends WebhookMixin(BaseClient) {
- 
+
  export class WebSocketManager extends EventEmitter {
    private constructor(client: Client);
 -  private totalShards: number | string;
@@ -2121,13 +2122,13 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    private readonly packetQueue: unknown[];
    private destroyed: boolean;
 -  private reconnecting: boolean;
- 
+
    public readonly client: Client;
    public gateway: string | null;
 @@ -3309,10 +3330,8 @@ export class WebSocketManager extends EventEmitter {
    public on(event: GatewayDispatchEvents, listener: (data: any, shardId: number) => void): this;
    public once(event: GatewayDispatchEvents, listener: (data: any, shardId: number) => void): this;
- 
+
 -  private debug(message: string, shard?: WebSocketShard): void;
 +  private debug(message: string, shardId?: number): void;
    private connect(): Promise<void>;
@@ -2137,7 +2138,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    private destroy(): void;
    private handlePacket(packet?: unknown, shard?: WebSocketShard): boolean;
 @@ -3331,26 +3350,11 @@ export interface WebSocketShardEventTypes {
- 
+
  export class WebSocketShard extends EventEmitter {
    private constructor(manager: WebSocketManager, id: number);
 -  private sequence: number;
@@ -2161,12 +2162,12 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    private readyTimeout: NodeJS.Timeout | null;
 -  private closeEmitted: boolean;
 -  private wsCloseTimeout: NodeJS.Timeout | null;
- 
+
    public manager: WebSocketManager;
    public id: number;
 @@ -3358,27 +3362,10 @@ export class WebSocketShard extends EventEmitter {
    public ping: number;
- 
+
    private debug(message: string): void;
 -  private connect(): Promise<void>;
 -  private onOpen(): void;
@@ -2191,13 +2192,13 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    private emitClose(event?: CloseEvent): void;
 -  private _cleanupConnection(): void;
 -  private _emitDestroyed(): void;
- 
+
    public send(data: unknown, important?: boolean): void;
- 
+
 @@ -3501,16 +3488,23 @@ export enum DiscordjsErrorCodes {
    TokenMissing = 'TokenMissing',
    ApplicationCommandPermissionsTokenMissing = 'ApplicationCommandPermissionsTokenMissing',
- 
+
 +  /** @deprecated */
    WSCloseRequested = 'WSCloseRequested',
 +  /** @deprecated */
@@ -2205,9 +2206,9 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
 +  /** @deprecated */
    WSNotOpen = 'WSNotOpen',
    ManagerDestroyed = 'ManagerDestroyed',
- 
+
    BitFieldInvalid = 'BitFieldInvalid',
- 
+
 +  /** @deprecated */
    ShardingInvalid = 'ShardingInvalid',
 +  /** @deprecated */
@@ -2230,18 +2231,18 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
 @@ -4278,11 +4272,6 @@ export interface BaseApplicationCommandData {
    nsfw?: boolean;
  }
- 
+
 -export interface AttachmentData {
 -  name?: string;
 -  description?: string;
 -}
 -
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
- 
+
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
 @@ -4861,10 +4850,11 @@ export interface ClientUserEditOptions {
  }
- 
+
  export interface CloseEvent {
 +  /** @deprecated */
    wasClean: boolean;
@@ -2250,7 +2251,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    reason: string;
 -  target: WebSocket;
  }
- 
+
  export type CollectorFilter<T extends unknown[]> = (...args: T) => boolean | Promise<boolean>;
 @@ -5817,14 +5807,7 @@ export interface BaseMessageOptions {
    content?: string;
@@ -2269,7 +2270,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
      | JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>
      | ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
 @@ -6318,9 +6301,9 @@ export interface WebhookMessageCreateOptions extends Omit<MessageCreateOptions,
- 
+
  export interface WebSocketOptions {
    large_threshold?: number;
 -  compress?: boolean;
@@ -2277,7 +2278,7 @@ index f78620bae886e920fd444b978a855760808ec31a..0136dc1502ff0c97615d40e58689b5c5
    version?: number;
 +  buildStrategy?(manager: WSWebSocketManager): IShardingStrategy;
  }
- 
+
  export interface WebSocketProperties {
 @@ -6404,3 +6387,4 @@ export * from '@discordjs/builders';
  export * from '@discordjs/formatters';
