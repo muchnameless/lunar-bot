@@ -3,7 +3,7 @@ import { ItemRarity } from './itemRarity.js';
 import { toTotal } from '#functions/array.js';
 
 /**
- * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/generators/petGenerator.js#L79
+ * @see https://github.com/Altpapier/SkyHelper-Networth/blob/master/constants/pets.js#L17
  */
 export const NON_REDUCED_PETS = new Set([
 	//

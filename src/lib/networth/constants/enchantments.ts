@@ -19,6 +19,7 @@ export const enum Enchantment {
 	Critical = 'critical',
 	Cubism = 'cubism',
 	Cultivating = 'cultivating',
+	Dedication = 'dedication',
 	Delicate = 'delicate',
 	DepthStrider = 'depth_strider',
 	DivineGift = 'divine_gift',
@@ -39,6 +40,7 @@ export const enum Enchantment {
 	Frail = 'frail',
 	FrostWalker = 'frost_walker',
 	GiantKiller = 'giant_killer',
+	GreenThumb = 'green_thumb',
 	Growth = 'growth',
 	HardenedMana = 'hardened_mana',
 	Harvesting = 'harvesting',
@@ -126,7 +128,7 @@ export const enum Enchantment {
 }
 
 /**
- * https://github.com/Altpapier/SkyHelperAPI/blob/master/constants/maro_networth/src/constants/misc.js#L96
+ * @see https://github.com/Altpapier/SkyHelper-Networth/blob/master/constants/applicationWorth.js#L35
  */
 export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
 	[ItemId.Bonemerang]: new Set([

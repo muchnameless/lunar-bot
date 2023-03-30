@@ -50,6 +50,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 
 		// combinable 1->3
 		case Enchantment.Chance:
+		case Enchantment.Dedication:
 		case Enchantment.DepthStrider:
 		case Enchantment.DivineGift:
 		case Enchantment.Experience:
@@ -92,6 +93,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.FireProtection:
 		case Enchantment.Frail:
 		case Enchantment.GiantKiller:
+		case Enchantment.GreenThumb:
 		case Enchantment.Growth:
 		case Enchantment.Harvesting:
 		case Enchantment.Lethality:
