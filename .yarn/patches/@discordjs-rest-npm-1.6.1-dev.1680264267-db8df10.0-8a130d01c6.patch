@@ -1,0 +1,956 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 60f14f5372ed94fc52031f68d3ef68ea3d88e839..d627f646147dc32fa4c8d239f7da486bdbb646ee 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -462,82 +462,6 @@ interface RestEvents {
+     restDebug: [info: string];
+ }
+ type RequestOptions = Exclude<Parameters<typeof request>[1], undefined>;
+-interface REST {
+-    emit: (<K extends keyof RestEvents>(event: K, ...args: RestEvents[K]) => boolean) & (<S extends string | symbol>(event: Exclude<S, keyof RestEvents>, ...args: any[]) => boolean);
+-    off: (<K extends keyof RestEvents>(event: K, listener: (...args: RestEvents[K]) => void) => this) & (<S extends string | symbol>(event: Exclude<S, keyof RestEvents>, listener: (...args: any[]) => void) => this);
+-    on: (<K extends keyof RestEvents>(event: K, listener: (...args: RestEvents[K]) => void) => this) & (<S extends string | symbol>(event: Exclude<S, keyof RestEvents>, listener: (...args: any[]) => void) => this);
+-    once: (<K extends keyof RestEvents>(event: K, listener: (...args: RestEvents[K]) => void) => this) & (<S extends string | symbol>(event: Exclude<S, keyof RestEvents>, listener: (...args: any[]) => void) => this);
+-    removeAllListeners: (<K extends keyof RestEvents>(event?: K) => this) & (<S extends string | symbol>(event?: Exclude<S, keyof RestEvents>) => this);
+-}
+-declare class REST extends EventEmitter {
+-    readonly cdn: CDN;
+-    readonly requestManager: RequestManager;
+-    constructor(options?: Partial<RESTOptions>);
+-    /**
+-     * Gets the agent set for this instance
+-     */
+-    getAgent(): Dispatcher | null;
+-    /**
+-     * Sets the default agent to use for requests performed by this instance
+-     *
+-     * @param agent - Sets the agent to use
+-     */
+-    setAgent(agent: Dispatcher): this;
+-    /**
+-     * Sets the authorization token that should be used for requests
+-     *
+-     * @param token - The authorization token to use
+-     */
+-    setToken(token: string): this;
+-    /**
+-     * Runs a get request from the api
+-     *
+-     * @param fullRoute - The full route to query
+-     * @param options - Optional request options
+-     */
+-    get(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
+-    /**
+-     * Runs a delete request from the api
+-     *
+-     * @param fullRoute - The full route to query
+-     * @param options - Optional request options
+-     */
+-    delete(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
+-    /**
+-     * Runs a post request from the api
+-     *
+-     * @param fullRoute - The full route to query
+-     * @param options - Optional request options
+-     */
+-    post(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
+-    /**
+-     * Runs a put request from the api
+-     *
+-     * @param fullRoute - The full route to query
+-     * @param options - Optional request options
+-     */
+-    put(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
+-    /**
+-     * Runs a patch request from the api
+-     *
+-     * @param fullRoute - The full route to query
+-     * @param options - Optional request options
+-     */
+-    patch(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
+-    /**
+-     * Runs a request from the api
+-     *
+-     * @param options - Request options
+-     */
+-    request(options: InternalRequest): Promise<unknown>;
+-    /**
+-     * Runs a request from the API, yielding the raw Response object
+-     *
+-     * @param options - Request options
+-     */
+-    raw(options: InternalRequest): Promise<Dispatcher.ResponseData>;
+-}
+-
+ /**
+  * Represents a file to be added to the request
+  */
+@@ -670,7 +594,7 @@ interface HashData {
+     lastAccess: number;
+     value: string;
+ }
+-interface RequestManager {
++interface REST {
+     emit: (<K extends keyof RestEvents>(event: K, ...args: RestEvents[K]) => boolean) & (<S extends string | symbol>(event: Exclude<S, keyof RestEvents>, ...args: any[]) => boolean);
+     off: (<K extends keyof RestEvents>(event: K, listener: (...args: RestEvents[K]) => void) => this) & (<S extends string | symbol>(event: Exclude<S, keyof RestEvents>, listener: (...args: any[]) => void) => this);
+     on: (<K extends keyof RestEvents>(event: K, listener: (...args: RestEvents[K]) => void) => this) & (<S extends string | symbol>(event: Exclude<S, keyof RestEvents>, listener: (...args: any[]) => void) => this);
+@@ -680,7 +604,7 @@ interface RequestManager {
+ /**
+  * Represents the class that manages handlers for endpoints
+  */
+-declare class RequestManager extends EventEmitter {
++declare class REST extends EventEmitter {
+     #private;
+     /**
+      * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+@@ -710,7 +634,9 @@ declare class RequestManager extends EventEmitter {
+     private hashTimer;
+     private handlerTimer;
+     readonly options: RESTOptions;
+-    constructor(options: Partial<RESTOptions>);
++    readonly cdn: CDN;
++    readonly userAgent: string;
++    constructor(options?: Partial<RESTOptions>);
+     private setupSweepers;
+     /**
+      * Sets the default agent to use for requests performed by this manager
+@@ -724,13 +650,6 @@ declare class RequestManager extends EventEmitter {
+      * @param token - The authorization token to use
+      */
+     setToken(token: string): this;
+-    /**
+-     * Queues a request to be sent
+-     *
+-     * @param request - All the information needed to make a request
+-     * @returns The response from the api request
+-     */
+-    queueRequest(request: InternalRequest): Promise<Dispatcher.ResponseData>;
+     /**
+      * Creates a new rate limit handler from a hash, based on the hash and the major parameter
+      *
+@@ -753,6 +672,53 @@ declare class RequestManager extends EventEmitter {
+      * Stops the request handler sweeping interval
+      */
+     clearHandlerSweeper(): void;
++    /**
++     * Runs a get request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    get(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a delete request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    delete(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a post request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    post(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a put request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    put(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a patch request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    patch(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a request from the api
++     *
++     * @param options - Request options
++     */
++    request(options: InternalRequest): Promise<unknown>;
++    /**
++     * Runs a request from the API, yielding the raw Response object
++     *
++     * @param options - Request options
++     */
++    raw(options: InternalRequest): Promise<Dispatcher.ResponseData>;
+     /**
+      * Generates route data for an endpoint:method
+      *
+@@ -868,4 +834,4 @@ declare function parseResponse(res: Dispatcher.ResponseData): Promise<unknown>;
+  */
+ declare const version: string;
+ 
+-export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestManager, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, APIRequest, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DiscordAPIError, DiscordErrorData, HTTPError, HandlerRequestData, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, InvalidRequestWarningData, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RateLimitQueueFilter, RawFile, RequestBody, RequestData, RequestHeaders, RequestMethod, RequestOptions, RestEvents, RouteData, RouteLike, StickerExtension, makeURLSearchParams, parseResponse, version };
+diff --git a/dist/index.js b/dist/index.js
+index 393064d9ea306b8a474431d2270c24183c189dcd..7b5f02a730575db3d5a80917d84b36ec63966c26 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -44,7 +44,6 @@ __export(src_exports, {
+   REST: () => REST,
+   RESTEvents: () => RESTEvents,
+   RateLimitError: () => RateLimitError,
+-  RequestManager: () => RequestManager,
+   RequestMethod: () => RequestMethod,
+   makeURLSearchParams: () => makeURLSearchParams,
+   parseResponse: () => parseResponse,
+@@ -430,7 +429,7 @@ var RateLimitError = class extends Error {
+ };
+ __name(RateLimitError, "RateLimitError");
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ var import_node_buffer2 = require("buffer");
+ var import_node_events = require("events");
+ var import_node_timers2 = require("timers");
+@@ -584,7 +583,7 @@ function incrementInvalidCount(manager) {
+ __name(incrementInvalidCount, "incrementInvalidCount");
+ async function makeNetworkRequest(manager, routeId, url, options, requestData, retries) {
+   const controller = new AbortController();
+-  const timeout = (0, import_node_timers.setTimeout)(() => controller.abort(), manager.options.timeout).unref();
++  const timeout = (0, import_node_timers.setTimeout)(() => controller.abort(), manager.options.timeout);
+   if (requestData.signal) {
+     const signal = requestData.signal;
+     if (signal.aborted)
+@@ -609,7 +608,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -687,10 +686,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.statusCode;
+     let retryAfter = 0;
+@@ -733,7 +732,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -900,7 +899,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -921,10 +920,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.statusCode;
+     let retryAfter = 0;
+@@ -1018,7 +1017,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1026,7 +1025,7 @@ var SequentialHandler = class {
+ };
+ __name(SequentialHandler, "SequentialHandler");
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ var getFileType = (0, import_util.lazy)(async () => import("file-type"));
+ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+   RequestMethod2["Delete"] = "DELETE";
+@@ -1036,7 +1035,7 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+   RequestMethod2["Put"] = "PUT";
+   return RequestMethod2;
+ })(RequestMethod || {});
+-var RequestManager = class extends import_node_events.EventEmitter {
++var REST = class extends import_node_events.EventEmitter {
+   /**
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+    * performed by this manager.
+@@ -1066,12 +1065,16 @@ var RequestManager = class extends import_node_events.EventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
++  cdn;
++  userAgent;
+   constructor(options) {
+     super();
+     this.options = { ...DefaultRestOptions, ...options };
+     this.options.offset = Math.max(0, this.options.offset);
++    this.userAgent = `${DefaultUserAgent} ${this.options.userAgentAppendix}`.trimEnd();
++    this.cdn = new CDN(this.options.cdn);
+     this.globalRemaining = this.options.globalRequestsPerSecond;
+-    this.agent = options.agent ?? null;
++    this.agent = options?.agent ?? null;
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1096,7 +1099,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+           return shouldSweep;
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+-      }, this.options.hashSweepInterval).unref();
++      }, this.options.hashSweepInterval);
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1106,12 +1109,12 @@ var RequestManager = class extends import_node_events.EventEmitter {
+           const { inactive } = val;
+           if (inactive) {
+             sweptHandlers.set(key, val);
++            this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
+           }
+-          this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
+           return inactive;
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+-      }, this.options.handlerSweepInterval).unref();
++      }, this.options.handlerSweepInterval);
+     }
+   }
+   /**
+@@ -1132,27 +1135,6 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     this.#token = token;
+     return this;
+   }
+-  /**
+-   * Queues a request to be sent
+-   *
+-   * @param request - All the information needed to make a request
+-   * @returns The response from the api request
+-   */
+-  async queueRequest(request2) {
+-    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
+-    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+-      value: `Global(${request2.method}:${routeId.bucketRoute})`,
+-      lastAccess: -1
+-    };
+-    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
+-    const { url, fetchOptions } = await this.resolveRequest(request2);
+-    return handler.queueRequest(routeId, url, fetchOptions, {
+-      body: request2.body,
+-      files: request2.files,
+-      auth: request2.auth !== false,
+-      signal: request2.signal
+-    });
+-  }
+   /**
+    * Creates a new rate limit handler from a hash, based on the hash and the major parameter
+    *
+@@ -1181,7 +1163,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+@@ -1194,7 +1176,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new import_undici4.FormData();
+       for (const [index, file] of request2.files.entries()) {
+@@ -1254,90 +1236,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
+   clearHandlerSweeper() {
+     (0, import_node_timers2.clearInterval)(this.handlerTimer);
+   }
+-  /**
+-   * Generates route data for an endpoint:method
+-   *
+-   * @param endpoint - The raw endpoint to generalize
+-   * @param method - The HTTP method this endpoint is called without
+-   * @internal
+-   */
+-  static generateRouteData(endpoint, method) {
+-    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
+-      return {
+-        majorParameter: BurstHandlerMajorIdKey,
+-        bucketRoute: "/interactions/:id/:token/callback",
+-        original: endpoint
+-      };
+-    }
+-    const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
+-    const majorId = majorIdMatch?.[1] ?? "global";
+-    const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+-    let exceptions = "";
+-    if (method === "DELETE" /* Delete */ && baseRoute === "/channels/:id/messages/:id") {
+-      const id = /\d{17,19}$/.exec(endpoint)[0];
+-      const timestamp = import_snowflake.DiscordSnowflake.timestampFrom(id);
+-      if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
+-        exceptions += "/Delete Old Message";
+-      }
+-    }
+-    return {
+-      majorParameter: majorId,
+-      bucketRoute: baseRoute + exceptions,
+-      original: endpoint
+-    };
+-  }
+-};
+-__name(RequestManager, "RequestManager");
+-
+-// src/lib/REST.ts
+-var import_node_events2 = require("events");
+-var REST = class extends import_node_events2.EventEmitter {
+-  cdn;
+-  requestManager;
+-  constructor(options = {}) {
+-    super();
+-    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+-    this.requestManager = new RequestManager(options).on("restDebug" /* Debug */, this.emit.bind(this, "restDebug" /* Debug */)).on("rateLimited" /* RateLimited */, this.emit.bind(this, "rateLimited" /* RateLimited */)).on("invalidRequestWarning" /* InvalidRequestWarning */, this.emit.bind(this, "invalidRequestWarning" /* InvalidRequestWarning */)).on("hashSweep" /* HashSweep */, this.emit.bind(this, "hashSweep" /* HashSweep */));
+-    this.on("newListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.on(name, listener);
+-    });
+-    this.on("removeListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.off(name, listener);
+-    });
+-  }
+-  /**
+-   * Gets the agent set for this instance
+-   */
+-  getAgent() {
+-    return this.requestManager.agent;
+-  }
+-  /**
+-   * Sets the default agent to use for requests performed by this instance
+-   *
+-   * @param agent - Sets the agent to use
+-   */
+-  setAgent(agent) {
+-    this.requestManager.setAgent(agent);
+-    return this;
+-  }
+-  /**
+-   * Sets the authorization token that should be used for requests
+-   *
+-   * @param token - The authorization token to use
+-   */
+-  setToken(token) {
+-    this.requestManager.setToken(token);
+-    return this;
+-  }
+   /**
+    * Runs a get request from the api
+    *
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1346,7 +1251,7 @@ var REST = class extends import_node_events2.EventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1355,7 +1260,7 @@ var REST = class extends import_node_events2.EventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1364,7 +1269,7 @@ var REST = class extends import_node_events2.EventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1373,7 +1278,7 @@ var REST = class extends import_node_events2.EventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+@@ -1391,7 +1296,51 @@ var REST = class extends import_node_events2.EventEmitter {
+    * @param options - Request options
+    */
+   async raw(options) {
+-    return this.requestManager.queueRequest(options);
++    const routeId = REST.generateRouteData(options.fullRoute, options.method);
++    const hash = this.hashes.get(`${options.method}:${routeId.bucketRoute}`) ?? {
++      value: `Global(${options.method}:${routeId.bucketRoute})`,
++      lastAccess: -1
++    };
++    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
++    const { url, fetchOptions } = await this.resolveRequest(options);
++    return handler.queueRequest(routeId, url, fetchOptions, {
++      body: options.body,
++      files: options.files,
++      auth: options.auth !== false,
++      signal: options.signal
++    });
++  }
++  /**
++   * Generates route data for an endpoint:method
++   *
++   * @param endpoint - The raw endpoint to generalize
++   * @param method - The HTTP method this endpoint is called without
++   * @internal
++   */
++  static generateRouteData(endpoint, method) {
++    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
++      return {
++        majorParameter: BurstHandlerMajorIdKey,
++        bucketRoute: "/interactions/:id/:token/callback",
++        original: endpoint
++      };
++    }
++    const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
++    const majorId = majorIdMatch?.[1] ?? "global";
++    const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
++    let exceptions = "";
++    if (method === "DELETE" /* Delete */ && baseRoute === "/channels/:id/messages/:id") {
++      const id = /\d{17,19}$/.exec(endpoint)[0];
++      const timestamp = import_snowflake.DiscordSnowflake.timestampFrom(id);
++      if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
++        exceptions += "/Delete Old Message";
++      }
++    }
++    return {
++      majorParameter: majorId,
++      bucketRoute: baseRoute + exceptions,
++      original: endpoint
++    };
+   }
+ };
+ __name(REST, "REST");
+@@ -1413,7 +1362,6 @@ var version = "1.6.1-dev.1680264267-db8df10.0";
+   REST,
+   RESTEvents,
+   RateLimitError,
+-  RequestManager,
+   RequestMethod,
+   makeURLSearchParams,
+   parseResponse,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 30ae6491d056a845acb1c4480d75d7aebec7581b..677aabd152e4334cb03706b1902e271c7a6a4980 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -379,7 +379,7 @@ var RateLimitError = class extends Error {
+ };
+ __name(RateLimitError, "RateLimitError");
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ import { Blob as Blob2, Buffer as Buffer3 } from "node:buffer";
+ import { EventEmitter } from "node:events";
+ import { setInterval, clearInterval } from "node:timers";
+@@ -533,7 +533,7 @@ function incrementInvalidCount(manager) {
+ __name(incrementInvalidCount, "incrementInvalidCount");
+ async function makeNetworkRequest(manager, routeId, url, options, requestData, retries) {
+   const controller = new AbortController();
+-  const timeout = setTimeout(() => controller.abort(), manager.options.timeout).unref();
++  const timeout = setTimeout(() => controller.abort(), manager.options.timeout);
+   if (requestData.signal) {
+     const signal = requestData.signal;
+     if (signal.aborted)
+@@ -558,7 +558,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -636,10 +636,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.statusCode;
+     let retryAfter = 0;
+@@ -682,7 +682,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -849,7 +849,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -870,10 +870,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.statusCode;
+     let retryAfter = 0;
+@@ -967,7 +967,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -975,7 +975,7 @@ var SequentialHandler = class {
+ };
+ __name(SequentialHandler, "SequentialHandler");
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ var getFileType = lazy(async () => import("file-type"));
+ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+   RequestMethod2["Delete"] = "DELETE";
+@@ -985,7 +985,7 @@ var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+   RequestMethod2["Put"] = "PUT";
+   return RequestMethod2;
+ })(RequestMethod || {});
+-var RequestManager = class extends EventEmitter {
++var REST = class extends EventEmitter {
+   /**
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+    * performed by this manager.
+@@ -1015,12 +1015,16 @@ var RequestManager = class extends EventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
++  cdn;
++  userAgent;
+   constructor(options) {
+     super();
+     this.options = { ...DefaultRestOptions, ...options };
+     this.options.offset = Math.max(0, this.options.offset);
++    this.userAgent = `${DefaultUserAgent} ${this.options.userAgentAppendix}`.trimEnd();
++    this.cdn = new CDN(this.options.cdn);
+     this.globalRemaining = this.options.globalRequestsPerSecond;
+-    this.agent = options.agent ?? null;
++    this.agent = options?.agent ?? null;
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1045,7 +1049,7 @@ var RequestManager = class extends EventEmitter {
+           return shouldSweep;
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+-      }, this.options.hashSweepInterval).unref();
++      }, this.options.hashSweepInterval);
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1055,12 +1059,12 @@ var RequestManager = class extends EventEmitter {
+           const { inactive } = val;
+           if (inactive) {
+             sweptHandlers.set(key, val);
++            this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
+           }
+-          this.emit("restDebug" /* Debug */, `Handler ${val.id} for ${key} swept due to being inactive`);
+           return inactive;
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+-      }, this.options.handlerSweepInterval).unref();
++      }, this.options.handlerSweepInterval);
+     }
+   }
+   /**
+@@ -1081,27 +1085,6 @@ var RequestManager = class extends EventEmitter {
+     this.#token = token;
+     return this;
+   }
+-  /**
+-   * Queues a request to be sent
+-   *
+-   * @param request - All the information needed to make a request
+-   * @returns The response from the api request
+-   */
+-  async queueRequest(request2) {
+-    const routeId = RequestManager.generateRouteData(request2.fullRoute, request2.method);
+-    const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+-      value: `Global(${request2.method}:${routeId.bucketRoute})`,
+-      lastAccess: -1
+-    };
+-    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
+-    const { url, fetchOptions } = await this.resolveRequest(request2);
+-    return handler.queueRequest(routeId, url, fetchOptions, {
+-      body: request2.body,
+-      files: request2.files,
+-      auth: request2.auth !== false,
+-      signal: request2.signal
+-    });
+-  }
+   /**
+    * Creates a new rate limit handler from a hash, based on the hash and the major parameter
+    *
+@@ -1130,7 +1113,7 @@ var RequestManager = class extends EventEmitter {
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+@@ -1143,7 +1126,7 @@ var RequestManager = class extends EventEmitter {
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new FormData2();
+       for (const [index, file] of request2.files.entries()) {
+@@ -1203,90 +1186,13 @@ var RequestManager = class extends EventEmitter {
+   clearHandlerSweeper() {
+     clearInterval(this.handlerTimer);
+   }
+-  /**
+-   * Generates route data for an endpoint:method
+-   *
+-   * @param endpoint - The raw endpoint to generalize
+-   * @param method - The HTTP method this endpoint is called without
+-   * @internal
+-   */
+-  static generateRouteData(endpoint, method) {
+-    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
+-      return {
+-        majorParameter: BurstHandlerMajorIdKey,
+-        bucketRoute: "/interactions/:id/:token/callback",
+-        original: endpoint
+-      };
+-    }
+-    const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
+-    const majorId = majorIdMatch?.[1] ?? "global";
+-    const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
+-    let exceptions = "";
+-    if (method === "DELETE" /* Delete */ && baseRoute === "/channels/:id/messages/:id") {
+-      const id = /\d{17,19}$/.exec(endpoint)[0];
+-      const timestamp = DiscordSnowflake.timestampFrom(id);
+-      if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
+-        exceptions += "/Delete Old Message";
+-      }
+-    }
+-    return {
+-      majorParameter: majorId,
+-      bucketRoute: baseRoute + exceptions,
+-      original: endpoint
+-    };
+-  }
+-};
+-__name(RequestManager, "RequestManager");
+-
+-// src/lib/REST.ts
+-import { EventEmitter as EventEmitter2 } from "node:events";
+-var REST = class extends EventEmitter2 {
+-  cdn;
+-  requestManager;
+-  constructor(options = {}) {
+-    super();
+-    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+-    this.requestManager = new RequestManager(options).on("restDebug" /* Debug */, this.emit.bind(this, "restDebug" /* Debug */)).on("rateLimited" /* RateLimited */, this.emit.bind(this, "rateLimited" /* RateLimited */)).on("invalidRequestWarning" /* InvalidRequestWarning */, this.emit.bind(this, "invalidRequestWarning" /* InvalidRequestWarning */)).on("hashSweep" /* HashSweep */, this.emit.bind(this, "hashSweep" /* HashSweep */));
+-    this.on("newListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.on(name, listener);
+-    });
+-    this.on("removeListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.off(name, listener);
+-    });
+-  }
+-  /**
+-   * Gets the agent set for this instance
+-   */
+-  getAgent() {
+-    return this.requestManager.agent;
+-  }
+-  /**
+-   * Sets the default agent to use for requests performed by this instance
+-   *
+-   * @param agent - Sets the agent to use
+-   */
+-  setAgent(agent) {
+-    this.requestManager.setAgent(agent);
+-    return this;
+-  }
+-  /**
+-   * Sets the authorization token that should be used for requests
+-   *
+-   * @param token - The authorization token to use
+-   */
+-  setToken(token) {
+-    this.requestManager.setToken(token);
+-    return this;
+-  }
+   /**
+    * Runs a get request from the api
+    *
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1295,7 +1201,7 @@ var REST = class extends EventEmitter2 {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1304,7 +1210,7 @@ var REST = class extends EventEmitter2 {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1313,7 +1219,7 @@ var REST = class extends EventEmitter2 {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1322,7 +1228,7 @@ var REST = class extends EventEmitter2 {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+@@ -1340,7 +1246,51 @@ var REST = class extends EventEmitter2 {
+    * @param options - Request options
+    */
+   async raw(options) {
+-    return this.requestManager.queueRequest(options);
++    const routeId = REST.generateRouteData(options.fullRoute, options.method);
++    const hash = this.hashes.get(`${options.method}:${routeId.bucketRoute}`) ?? {
++      value: `Global(${options.method}:${routeId.bucketRoute})`,
++      lastAccess: -1
++    };
++    const handler = this.handlers.get(`${hash.value}:${routeId.majorParameter}`) ?? this.createHandler(hash.value, routeId.majorParameter);
++    const { url, fetchOptions } = await this.resolveRequest(options);
++    return handler.queueRequest(routeId, url, fetchOptions, {
++      body: options.body,
++      files: options.files,
++      auth: options.auth !== false,
++      signal: options.signal
++    });
++  }
++  /**
++   * Generates route data for an endpoint:method
++   *
++   * @param endpoint - The raw endpoint to generalize
++   * @param method - The HTTP method this endpoint is called without
++   * @internal
++   */
++  static generateRouteData(endpoint, method) {
++    if (endpoint.startsWith("/interactions/") && endpoint.endsWith("/callback")) {
++      return {
++        majorParameter: BurstHandlerMajorIdKey,
++        bucketRoute: "/interactions/:id/:token/callback",
++        original: endpoint
++      };
++    }
++    const majorIdMatch = /^\/(?:channels|guilds|webhooks)\/(\d{17,19})/.exec(endpoint);
++    const majorId = majorIdMatch?.[1] ?? "global";
++    const baseRoute = endpoint.replaceAll(/\d{17,19}/g, ":id").replace(/\/reactions\/(.*)/, "/reactions/:reaction");
++    let exceptions = "";
++    if (method === "DELETE" /* Delete */ && baseRoute === "/channels/:id/messages/:id") {
++      const id = /\d{17,19}$/.exec(endpoint)[0];
++      const timestamp = DiscordSnowflake.timestampFrom(id);
++      if (Date.now() - timestamp > 1e3 * 60 * 60 * 24 * 14) {
++        exceptions += "/Delete Old Message";
++      }
++    }
++    return {
++      majorParameter: majorId,
++      bucketRoute: baseRoute + exceptions,
++      original: endpoint
++    };
+   }
+ };
+ __name(REST, "REST");
+@@ -1361,7 +1311,6 @@ export {
+   REST,
+   RESTEvents,
+   RateLimitError,
+-  RequestManager,
+   RequestMethod,
+   makeURLSearchParams,
+   parseResponse,
