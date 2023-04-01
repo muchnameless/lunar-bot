@@ -186,9 +186,11 @@ async function updateBazaarPrices(binAuctions: Collection<string, number[]>, sig
 	await Promise.all(
 		bazaarItems.map(async (data) => {
 			const price =
-				data.quick_status?.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
+				data.quick_status &&
+				data.quick_status.buyPrice < 2_147_483_647 &&
+				data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
 					? data.quick_status.buyPrice
-					: getBuyPrice(data.buy_summary);
+					: data.buy_summary.length && getBuyPrice(data.buy_summary);
 
 			// ignore items which are not sold
 			if (price === 0) return;
