@@ -62,41 +62,12 @@ async function parseItems(base64: string) {
 	return networth;
 }
 
-type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
-	Partial<{
-		ability_scroll: string[];
-		artOfPeaceApplied: number;
-		art_of_war_count: number;
-		drill_part_engine: string;
-		drill_part_fuel_tank: string;
-		drill_part_upgrade_module: string;
-		dye_item: string;
-		ethermerge: number;
-		farming_for_dummies_count: number;
-		gems: Record<string, string | { quality: string; uuid: string }> & { unlocked_slots?: string[] };
-		gemstone_slots: number;
-		jalapeno_count: number;
-		mana_disintegrator_count: number;
-		model: string;
-		modifier: string;
-		new_years_cake: number;
-		price: number[];
-		skin: string;
-		stats_book: number;
-		talisman_enrichment: string;
-		thunder_charge: number;
-		tuned_transmission: number;
-		upgrade_level: number;
-		winning_bid: number;
-		wood_singularity_count: number;
-	}>;
-
 /**
  * https://hypixel-skyblock.fandom.com/wiki/Shen%27s_Auction
  *
  * @param extraAttributes
  */
-const getShensAuctionPrice = (extraAttributes: SkyBlockNBTExtraAttributes) => {
+const getShensAuctionPrice = (extraAttributes: NBTExtraAttributes) => {
 	if (!extraAttributes.price?.length) return null;
 
 	// price is an array of [0, price] for some reason
@@ -117,7 +88,7 @@ const getShensAuctionPrice = (extraAttributes: SkyBlockNBTExtraAttributes) => {
  * @param item
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
-	const extraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
+	const extraAttributes = item.tag!.ExtraAttributes!;
 	const itemId = extraAttributes.id;
 	const skyblockItem = skyblockItems.get(itemId);
 
