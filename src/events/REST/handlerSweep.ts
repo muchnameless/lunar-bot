@@ -14,6 +14,14 @@ export default class extends RESTEvent {
 	 * @param sweptHandlers
 	 */
 	public override run(sweptHandlers: RestEvents[RESTEvents.HandlerSweep][0]) {
-		logger.debug({ sweptHandlers: Object.fromEntries(sweptHandlers.entries()) }, '[REST HANDLER SWEEP]');
+		logger.debug(
+			{
+				sweptHandlers: sweptHandlers.map(
+					// @ts-expect-error manager does not exist on IHandler
+					({ manager, ...data }) => data,
+				),
+			},
+			'[REST HANDLER SWEEP]',
+		);
 	}
 }
