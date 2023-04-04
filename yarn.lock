@@ -1089,10 +1089,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:*, @types/luxon@npm:^3.2.2":
-  version: 3.2.2
-  resolution: "@types/luxon@npm:3.2.2"
-  checksum: aa9955b85091bd5e1d7128e9fae4cd6d0b3ba0e17f887cde559c848a6ab2f726024c3514e30a3b86648f7bf031376bca6e957e17fe4f0578af2ba084f98967bd
+"@types/luxon@npm:*, @types/luxon@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@types/luxon@npm:3.3.0"
+  checksum: f7e3a89fc3ca404fbc3ea538653ed6860bc28f570a8c4d6d24449b89b9b553b7d6ad6cc94a9e129c5b8c9a2b97f0c365b3017f811e59c4a859a9c219a1c918e0
   languageName: node
   linkType: hard
 
@@ -5069,7 +5069,7 @@ __metadata:
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^2.0.1
-    "@types/luxon": ^3.2.2
+    "@types/luxon": ^3.3.0
     "@types/node": ^18.15.11
     "@types/pg": ^8.6.6
     "@types/prettier": ^2.7.2
