@@ -551,9 +551,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/ws@patch:@discordjs/ws@0.8.1-dev.1680955486-1b9d07f.0#./.yarn/patches/@discordjs-ws-npm-0.8.0-dev.1679918669-b8b852e.0-b48449b4eb.patch::locator=lunar-bot%40workspace%3A.":
+"@discordjs/ws@patch:@discordjs/ws@npm%3A0.8.1-dev.1680955486-1b9d07f.0#./.yarn/patches/@discordjs-ws-npm-0.8.1-dev.1680955486-1b9d07f.0-1a4ddb3c67.patch::locator=lunar-bot%40workspace%3A.":
   version: 0.8.1-dev.1680955486-1b9d07f.0
-  resolution: "@discordjs/ws@patch:@discordjs/ws@npm%3A0.8.1-dev.1680955486-1b9d07f.0#./.yarn/patches/@discordjs-ws-npm-0.8.0-dev.1679918669-b8b852e.0-b48449b4eb.patch::version=0.8.1-dev.1680955486-1b9d07f.0&hash=a1482b&locator=lunar-bot%40workspace%3A."
+  resolution: "@discordjs/ws@patch:@discordjs/ws@npm%3A0.8.1-dev.1680955486-1b9d07f.0#./.yarn/patches/@discordjs-ws-npm-0.8.1-dev.1680955486-1b9d07f.0-1a4ddb3c67.patch::version=0.8.1-dev.1680955486-1b9d07f.0&hash=a50dee&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@discordjs/collection": ^1.5.0
     "@discordjs/rest": ^1.7.0
@@ -564,7 +564,7 @@ __metadata:
     discord-api-types: ^0.37.37
     tslib: ^2.5.0
     ws: ^8.13.0
-  checksum: aa874aa3e9f5748f2858ff1782d323c8d61009b0f2af552f0c283ac3ac186c57566b8282851c941e6648a878a13b72e0d206f1eaa83562ffdda253900c81c0e6
+  checksum: 7b3b820127e00c530e47e59703fb78585e1359b59cfbc8690255e89957c5d49120e37f70c4d2bf7b78d759812faa426b992f328496c5b04c38c249d23971e312
   languageName: node
   linkType: hard
 
@@ -1418,9 +1418,9 @@ __metadata:
   linkType: hard
 
 "@vladfrangu/async_event_emitter@npm:^2.1.4":
-  version: 2.1.4
-  resolution: "@vladfrangu/async_event_emitter@npm:2.1.4"
-  checksum: 604d228a4fa46c0686d4377c2ca63035aa266382133f351f098d85782df4e451ebba2c528a7d54aa955c7fdb824a642a7ec63d5a85cf46f6cbaea46ea56a0959
+  version: 2.2.1
+  resolution: "@vladfrangu/async_event_emitter@npm:2.2.1"
+  checksum: d56c6c9dc0588f5632e5d6ed373fcbcdf5fe6de6cf51dadea86899701fcf53631f41f7473b1f5d9da300bbca20ab9cd192c5c436bb77ce9df9aa60ff59a7b0f2
   languageName: node
   linkType: hard
 

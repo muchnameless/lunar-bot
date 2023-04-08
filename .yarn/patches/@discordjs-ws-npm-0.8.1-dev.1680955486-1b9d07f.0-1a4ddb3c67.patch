@@ -1,21 +1,31 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea85731ed4553 100644
+index 885892691d4549b37cd3704cf03185d3e3a5184a..a6db93c217aeeaf81a41c1232f197dc8b07b0b15 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
-@@ -333,11 +333,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -287,7 +287,6 @@ var DefaultWebSocketManagerOptions = {
+       store.delete(shardId);
+     }
+   },
+-  handshakeTimeout: 3e4,
+   helloTimeout: 6e4,
+   readyTimeout: 15e3
+ };
+@@ -333,11 +332,12 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
    initialHeartbeatTimeoutController = null;
    heartbeatInterval = null;
    lastHeartbeatAt = -1;
 -  session = null;
    // Indicates whether the shard has already resolved its original connect() call
    initialConnectResolved = false;
++  // Indicates if we failed to connect to the ws url (ECONNREFUSED/ECONNRESET)
++  failedToConnectDueToNetworkError = false;
    sendQueue = new import_async_queue2.AsyncQueue();
 -  timeouts = new import_collection5.Collection();
 +  timeoutAbortControllers = new import_collection5.Collection();
    strategy;
    id;
    #status = 0 /* Idle */;
-@@ -350,6 +349,12 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -350,6 +350,12 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      this.id = id;
    }
    async connect() {
@@ -28,7 +38,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
      if (this.#status !== 0 /* Idle */) {
        throw new Error("Tried to connect a shard that wasn't idle");
      }
-@@ -370,7 +375,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -370,27 +376,23 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          );
        }
      }
@@ -36,8 +46,9 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
 +    const session = await this.strategy.retrieveSessionInfo(this.id);
      const url = `${session?.resumeURL ?? this.strategy.options.gatewayInformation.url}?${params.toString()}`;
      this.debug([`Connecting to ${url}`]);
-     const connection = new import_ws.WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
-@@ -378,19 +383,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+-    const connection = new import_ws.WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
++    const connection = new import_ws.WebSocket(url).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
+     connection.binaryType = "arraybuffer";
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
@@ -58,7 +69,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -415,8 +416,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -415,8 +417,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        this.initialHeartbeatTimeoutController = null;
      }
      this.lastHeartbeatAt = -1;
@@ -72,7 +83,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
        await this.strategy.updateSessionInfo(this.id, null);
      }
      if (this.connection) {
-@@ -439,46 +443,36 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -439,46 +444,36 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      }
      this.#status = 0 /* Idle */;
      if (options.recover !== void 0) {
@@ -139,7 +150,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
      }
    }
    async send(payload) {
-@@ -543,12 +537,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -543,12 +538,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        op: import_v102.GatewayOpcodes.Identify,
        d
      });
@@ -159,7 +170,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
      this.#status = 2 /* Resuming */;
      this.replayedEvents = 0;
      return this.send({
-@@ -564,9 +561,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -564,9 +562,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      if (!this.isAck && !requested) {
        return this.destroy({ reason: "Zombie connection", recover: 1 /* Resume */ });
      }
@@ -171,7 +182,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
      });
      this.lastHeartbeatAt = Date.now();
      this.isAck = false;
-@@ -627,14 +625,14 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -627,14 +626,14 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          switch (payload.t) {
            case import_v102.GatewayDispatchEvents.Ready: {
              this.#status = 3 /* Ready */;
@@ -188,7 +199,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
              this.emit("ready" /* Ready */, { data: payload.d });
              break;
            }
-@@ -648,9 +646,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -648,9 +647,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
              break;
            }
          }
@@ -207,7 +218,7 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
          }
          this.emit("dispatch" /* Dispatch */, { data: payload });
          break;
-@@ -667,10 +671,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -667,10 +672,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          break;
        }
        case import_v102.GatewayOpcodes.InvalidSession: {
@@ -219,24 +230,71 @@ index 8d1a9ebad96d14b1053f830cccf34db837a00496..271c6fe6d44b6249b5441f0d59fea857
          if (payload.d && session) {
            await this.resume(session);
          } else {
+@@ -714,6 +717,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     }
+   }
+   onError(error) {
++    if ("code" in error && ["ECONNRESET", "ECONNREFUSED"].includes(error.code)) {
++      this.debug(["Failed to connect to the gateway URL specified"]);
++      this.failedToConnectDueToNetworkError = true;
++      return;
++    }
+     this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+@@ -780,8 +788,13 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+         throw new Error("Used disallowed intents");
+       }
+       default: {
+-        this.debug([`The gateway closed with an unexpected code ${code}, attempting to resume.`]);
+-        return this.destroy({ code, recover: 1 /* Resume */ });
++        this.debug([
++          `The gateway closed with an unexpected code ${code}, attempting to ${this.failedToConnectDueToNetworkError ? "reconnect" : "resume"}.`
++        ]);
++        return this.destroy({
++          code,
++          recover: this.failedToConnectDueToNetworkError ? 0 /* Reconnect */ : 1 /* Resume */
++        });
+       }
+     }
+   }
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a066896735b05b2e 100644
+index fa7541aa7c5e5a0d8d66b45b58e1f750fdf6e9c6..278163ef3e389e452a573d95487b56febc9aca50 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
-@@ -315,11 +315,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -121,7 +121,7 @@ __name(WorkerContextFetchingStrategy, "WorkerContextFetchingStrategy");
+ // src/ws/WebSocketShard.ts
+ import { Buffer as Buffer2 } from "node:buffer";
+ import { once as once2 } from "node:events";
+-import { setTimeout, clearInterval, clearTimeout, setInterval } from "node:timers";
++import { clearInterval, clearTimeout, setInterval, setTimeout } from "node:timers";
+ import { setTimeout as sleep2 } from "node:timers/promises";
+ import { URLSearchParams } from "node:url";
+ import { TextDecoder } from "node:util";
+@@ -269,7 +269,6 @@ var DefaultWebSocketManagerOptions = {
+       store.delete(shardId);
+     }
+   },
+-  handshakeTimeout: 3e4,
+   helloTimeout: 6e4,
+   readyTimeout: 15e3
+ };
+@@ -315,11 +314,12 @@ var WebSocketShard = class extends AsyncEventEmitter {
    initialHeartbeatTimeoutController = null;
    heartbeatInterval = null;
    lastHeartbeatAt = -1;
 -  session = null;
    // Indicates whether the shard has already resolved its original connect() call
    initialConnectResolved = false;
++  // Indicates if we failed to connect to the ws url (ECONNREFUSED/ECONNRESET)
++  failedToConnectDueToNetworkError = false;
    sendQueue = new AsyncQueue2();
 -  timeouts = new Collection5();
 +  timeoutAbortControllers = new Collection5();
    strategy;
    id;
    #status = 0 /* Idle */;
-@@ -332,6 +331,12 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -332,6 +332,12 @@ var WebSocketShard = class extends AsyncEventEmitter {
      this.id = id;
    }
    async connect() {
@@ -249,7 +307,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
      if (this.#status !== 0 /* Idle */) {
        throw new Error("Tried to connect a shard that wasn't idle");
      }
-@@ -352,7 +357,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -352,27 +358,23 @@ var WebSocketShard = class extends AsyncEventEmitter {
          );
        }
      }
@@ -257,8 +315,9 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
 +    const session = await this.strategy.retrieveSessionInfo(this.id);
      const url = `${session?.resumeURL ?? this.strategy.options.gatewayInformation.url}?${params.toString()}`;
      this.debug([`Connecting to ${url}`]);
-     const connection = new WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
-@@ -360,19 +365,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
+-    const connection = new WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
++    const connection = new WebSocket(url).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
+     connection.binaryType = "arraybuffer";
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
@@ -279,7 +338,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -397,8 +398,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -397,8 +399,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
        this.initialHeartbeatTimeoutController = null;
      }
      this.lastHeartbeatAt = -1;
@@ -293,7 +352,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
        await this.strategy.updateSessionInfo(this.id, null);
      }
      if (this.connection) {
-@@ -421,46 +425,36 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -421,46 +426,36 @@ var WebSocketShard = class extends AsyncEventEmitter {
      }
      this.#status = 0 /* Idle */;
      if (options.recover !== void 0) {
@@ -360,7 +419,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
      }
    }
    async send(payload) {
-@@ -525,12 +519,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -525,12 +520,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
        op: GatewayOpcodes2.Identify,
        d
      });
@@ -380,7 +439,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
      this.#status = 2 /* Resuming */;
      this.replayedEvents = 0;
      return this.send({
-@@ -546,9 +543,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -546,9 +544,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
      if (!this.isAck && !requested) {
        return this.destroy({ reason: "Zombie connection", recover: 1 /* Resume */ });
      }
@@ -392,7 +451,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
      });
      this.lastHeartbeatAt = Date.now();
      this.isAck = false;
-@@ -609,14 +607,14 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -609,14 +608,14 @@ var WebSocketShard = class extends AsyncEventEmitter {
          switch (payload.t) {
            case GatewayDispatchEvents.Ready: {
              this.#status = 3 /* Ready */;
@@ -409,7 +468,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
              this.emit("ready" /* Ready */, { data: payload.d });
              break;
            }
-@@ -630,9 +628,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -630,9 +629,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
              break;
            }
          }
@@ -428,7 +487,7 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
          }
          this.emit("dispatch" /* Dispatch */, { data: payload });
          break;
-@@ -649,10 +653,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -649,10 +654,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
          break;
        }
        case GatewayOpcodes2.InvalidSession: {
@@ -440,16 +499,45 @@ index 72be1983ec6ebb562e67dea35489d086cad4e696..21cd364b627e5dc028879fd6a0668967
          if (payload.d && session) {
            await this.resume(session);
          } else {
+@@ -696,6 +699,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     }
+   }
+   onError(error) {
++    if ("code" in error && ["ECONNRESET", "ECONNREFUSED"].includes(error.code)) {
++      this.debug(["Failed to connect to the gateway URL specified"]);
++      this.failedToConnectDueToNetworkError = true;
++      return;
++    }
+     this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+@@ -762,8 +770,13 @@ var WebSocketShard = class extends AsyncEventEmitter {
+         throw new Error("Used disallowed intents");
+       }
+       default: {
+-        this.debug([`The gateway closed with an unexpected code ${code}, attempting to resume.`]);
+-        return this.destroy({ code, recover: 1 /* Resume */ });
++        this.debug([
++          `The gateway closed with an unexpected code ${code}, attempting to ${this.failedToConnectDueToNetworkError ? "reconnect" : "resume"}.`
++        ]);
++        return this.destroy({
++          code,
++          recover: this.failedToConnectDueToNetworkError ? 0 /* Reconnect */ : 1 /* Resume */
++        });
+       }
+     }
+   }
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 7329474005b987f0a4f78a8a5948fa9412a911f1..7e0e9f65199386555356db39f1785cd45f2f9990 100644
+index 7329474005b987f0a4f78a8a5948fa9412a911f1..2f5205903c2e4aa65e59b86512d54e0eee7e6110 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
-@@ -75,22 +75,17 @@ declare class WebSocketShard extends AsyncEventEmitter<WebSocketShardEventsMap>
+@@ -75,22 +75,18 @@ declare class WebSocketShard extends AsyncEventEmitter<WebSocketShardEventsMap>
      private initialHeartbeatTimeoutController;
      private heartbeatInterval;
      private lastHeartbeatAt;
 -    private session;
      private initialConnectResolved;
++    private failedToConnectDueToNetworkError;
      private readonly sendQueue;
 -    private readonly timeouts;
 +    private readonly timeoutAbortControllers;
@@ -469,24 +557,53 @@ index 7329474005b987f0a4f78a8a5948fa9412a911f1..7e0e9f65199386555356db39f1785cd4
      send(payload: GatewaySendPayload): Promise<void>;
      private identify;
      private resume;
+@@ -189,7 +185,6 @@ declare const DefaultWebSocketManagerOptions: {
+     readonly compression: null;
+     readonly retrieveSessionInfo: (shardId: number) => SessionInfo | null;
+     readonly updateSessionInfo: (shardId: number, info: SessionInfo | null) => void;
+-    readonly handshakeTimeout: 30000;
+     readonly helloTimeout: 60000;
+     readonly readyTimeout: 15000;
+ };
+@@ -275,10 +270,6 @@ interface OptionalWebSocketManagerOptions {
+      * @defaultValue `'json'`
+      */
+     encoding: Encoding;
+-    /**
+-     * How long to wait for a shard to connect before giving up
+-     */
+-    handshakeTimeout: number | null;
+     /**
+      * How long to wait for a shard's HELLO packet before giving up
+      */
 diff --git a/dist/index.js b/dist/index.js
-index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a38dc8d1c6 100644
+index ddebbdf044aa9ddda71f062aff478c45ece4dec1..6aab2358ec44b1bc095d11adc819512786d49908 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -535,11 +535,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -477,7 +477,6 @@ var DefaultWebSocketManagerOptions = {
+       store.delete(shardId);
+     }
+   },
+-  handshakeTimeout: 3e4,
+   helloTimeout: 6e4,
+   readyTimeout: 15e3
+ };
+@@ -535,11 +534,12 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
    initialHeartbeatTimeoutController = null;
    heartbeatInterval = null;
    lastHeartbeatAt = -1;
 -  session = null;
    // Indicates whether the shard has already resolved its original connect() call
    initialConnectResolved = false;
++  // Indicates if we failed to connect to the ws url (ECONNREFUSED/ECONNRESET)
++  failedToConnectDueToNetworkError = false;
    sendQueue = new import_async_queue2.AsyncQueue();
 -  timeouts = new import_collection4.Collection();
 +  timeoutAbortControllers = new import_collection4.Collection();
    strategy;
    id;
    #status = 0 /* Idle */;
-@@ -552,6 +551,12 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -552,6 +552,12 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      this.id = id;
    }
    async connect() {
@@ -499,7 +616,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
      if (this.#status !== 0 /* Idle */) {
        throw new Error("Tried to connect a shard that wasn't idle");
      }
-@@ -572,7 +577,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -572,27 +578,23 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          );
        }
      }
@@ -507,8 +624,9 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
 +    const session = await this.strategy.retrieveSessionInfo(this.id);
      const url = `${session?.resumeURL ?? this.strategy.options.gatewayInformation.url}?${params.toString()}`;
      this.debug([`Connecting to ${url}`]);
-     const connection = new import_ws.WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
-@@ -580,19 +585,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+-    const connection = new import_ws.WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
++    const connection = new import_ws.WebSocket(url).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
+     connection.binaryType = "arraybuffer";
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
@@ -529,7 +647,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -617,8 +618,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -617,8 +619,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        this.initialHeartbeatTimeoutController = null;
      }
      this.lastHeartbeatAt = -1;
@@ -543,7 +661,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
        await this.strategy.updateSessionInfo(this.id, null);
      }
      if (this.connection) {
-@@ -641,46 +645,36 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -641,46 +646,36 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      }
      this.#status = 0 /* Idle */;
      if (options.recover !== void 0) {
@@ -610,7 +728,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
      }
    }
    async send(payload) {
-@@ -745,12 +739,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -745,12 +740,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
        op: import_v102.GatewayOpcodes.Identify,
        d
      });
@@ -630,7 +748,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
      this.#status = 2 /* Resuming */;
      this.replayedEvents = 0;
      return this.send({
-@@ -766,9 +763,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -766,9 +764,10 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
      if (!this.isAck && !requested) {
        return this.destroy({ reason: "Zombie connection", recover: 1 /* Resume */ });
      }
@@ -642,7 +760,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
      });
      this.lastHeartbeatAt = Date.now();
      this.isAck = false;
-@@ -829,14 +827,14 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -829,14 +828,14 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          switch (payload.t) {
            case import_v102.GatewayDispatchEvents.Ready: {
              this.#status = 3 /* Ready */;
@@ -659,7 +777,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
              this.emit("ready" /* Ready */, { data: payload.d });
              break;
            }
-@@ -850,9 +848,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -850,9 +849,15 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
              break;
            }
          }
@@ -678,7 +796,7 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
          }
          this.emit("dispatch" /* Dispatch */, { data: payload });
          break;
-@@ -869,10 +873,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+@@ -869,10 +874,8 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
          break;
        }
        case import_v102.GatewayOpcodes.InvalidSession: {
@@ -690,24 +808,71 @@ index eea0f76dc0e7337beb905477e3f409ae59b0c505..651f9b3a803ef461d7cbcb220a7b74a3
          if (payload.d && session) {
            await this.resume(session);
          } else {
+@@ -916,6 +919,11 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+     }
+   }
+   onError(error) {
++    if ("code" in error && ["ECONNRESET", "ECONNREFUSED"].includes(error.code)) {
++      this.debug(["Failed to connect to the gateway URL specified"]);
++      this.failedToConnectDueToNetworkError = true;
++      return;
++    }
+     this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+@@ -982,8 +990,13 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
+         throw new Error("Used disallowed intents");
+       }
+       default: {
+-        this.debug([`The gateway closed with an unexpected code ${code}, attempting to resume.`]);
+-        return this.destroy({ code, recover: 1 /* Resume */ });
++        this.debug([
++          `The gateway closed with an unexpected code ${code}, attempting to ${this.failedToConnectDueToNetworkError ? "reconnect" : "resume"}.`
++        ]);
++        return this.destroy({
++          code,
++          recover: this.failedToConnectDueToNetworkError ? 0 /* Reconnect */ : 1 /* Resume */
++        });
+       }
+     }
+   }
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed574e96ff5f 100644
+index 879b726a03ff7cd045cc60c3b6f0028542d5e2fb..1280c1b1fa19159a3907d0bc4cf17dfece22b5ee 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -498,11 +498,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -383,7 +383,7 @@ import { Collection as Collection5 } from "@discordjs/collection";
+ // src/ws/WebSocketShard.ts
+ import { Buffer as Buffer2 } from "node:buffer";
+ import { once as once2 } from "node:events";
+-import { setTimeout, clearInterval, clearTimeout, setInterval } from "node:timers";
++import { clearInterval, clearTimeout, setInterval, setTimeout } from "node:timers";
+ import { setTimeout as sleep2 } from "node:timers/promises";
+ import { URLSearchParams } from "node:url";
+ import { TextDecoder } from "node:util";
+@@ -440,7 +440,6 @@ var DefaultWebSocketManagerOptions = {
+       store.delete(shardId);
+     }
+   },
+-  handshakeTimeout: 3e4,
+   helloTimeout: 6e4,
+   readyTimeout: 15e3
+ };
+@@ -498,11 +497,12 @@ var WebSocketShard = class extends AsyncEventEmitter {
    initialHeartbeatTimeoutController = null;
    heartbeatInterval = null;
    lastHeartbeatAt = -1;
 -  session = null;
    // Indicates whether the shard has already resolved its original connect() call
    initialConnectResolved = false;
++  // Indicates if we failed to connect to the ws url (ECONNREFUSED/ECONNRESET)
++  failedToConnectDueToNetworkError = false;
    sendQueue = new AsyncQueue2();
 -  timeouts = new Collection4();
 +  timeoutAbortControllers = new Collection4();
    strategy;
    id;
    #status = 0 /* Idle */;
-@@ -515,6 +514,12 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -515,6 +515,12 @@ var WebSocketShard = class extends AsyncEventEmitter {
      this.id = id;
    }
    async connect() {
@@ -720,7 +885,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
      if (this.#status !== 0 /* Idle */) {
        throw new Error("Tried to connect a shard that wasn't idle");
      }
-@@ -535,7 +540,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -535,27 +541,23 @@ var WebSocketShard = class extends AsyncEventEmitter {
          );
        }
      }
@@ -728,8 +893,9 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
 +    const session = await this.strategy.retrieveSessionInfo(this.id);
      const url = `${session?.resumeURL ?? this.strategy.options.gatewayInformation.url}?${params.toString()}`;
      this.debug([`Connecting to ${url}`]);
-     const connection = new WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
-@@ -543,19 +548,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
+-    const connection = new WebSocket(url, { handshakeTimeout: this.strategy.options.handshakeTimeout ?? void 0 }).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
++    const connection = new WebSocket(url).on("message", this.onMessage.bind(this)).on("error", this.onError.bind(this)).on("close", this.onClose.bind(this));
+     connection.binaryType = "arraybuffer";
      this.connection = connection;
      this.#status = 1 /* Connecting */;
      this.sendRateLimitState = getInitialSendRateLimitState();
@@ -750,7 +916,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
    }
    async destroy(options = {}) {
      if (this.#status === 0 /* Idle */) {
-@@ -580,8 +581,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -580,8 +582,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
        this.initialHeartbeatTimeoutController = null;
      }
      this.lastHeartbeatAt = -1;
@@ -764,7 +930,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
        await this.strategy.updateSessionInfo(this.id, null);
      }
      if (this.connection) {
-@@ -604,46 +608,36 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -604,46 +609,36 @@ var WebSocketShard = class extends AsyncEventEmitter {
      }
      this.#status = 0 /* Idle */;
      if (options.recover !== void 0) {
@@ -831,7 +997,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
      }
    }
    async send(payload) {
-@@ -708,12 +702,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -708,12 +703,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
        op: GatewayOpcodes2.Identify,
        d
      });
@@ -851,7 +1017,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
      this.#status = 2 /* Resuming */;
      this.replayedEvents = 0;
      return this.send({
-@@ -729,9 +726,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -729,9 +727,10 @@ var WebSocketShard = class extends AsyncEventEmitter {
      if (!this.isAck && !requested) {
        return this.destroy({ reason: "Zombie connection", recover: 1 /* Resume */ });
      }
@@ -863,7 +1029,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
      });
      this.lastHeartbeatAt = Date.now();
      this.isAck = false;
-@@ -792,14 +790,14 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -792,14 +791,14 @@ var WebSocketShard = class extends AsyncEventEmitter {
          switch (payload.t) {
            case GatewayDispatchEvents.Ready: {
              this.#status = 3 /* Ready */;
@@ -880,7 +1046,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
              this.emit("ready" /* Ready */, { data: payload.d });
              break;
            }
-@@ -813,9 +811,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -813,9 +812,15 @@ var WebSocketShard = class extends AsyncEventEmitter {
              break;
            }
          }
@@ -899,7 +1065,7 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
          }
          this.emit("dispatch" /* Dispatch */, { data: payload });
          break;
-@@ -832,10 +836,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
+@@ -832,10 +837,8 @@ var WebSocketShard = class extends AsyncEventEmitter {
          break;
        }
        case GatewayOpcodes2.InvalidSession: {
@@ -911,3 +1077,31 @@ index 73622645cbdb838d5c0729640d04cc15e37e390d..5f7168bd4c6e1cf318336313b59bed57
          if (payload.d && session) {
            await this.resume(session);
          } else {
+@@ -879,6 +882,11 @@ var WebSocketShard = class extends AsyncEventEmitter {
+     }
+   }
+   onError(error) {
++    if ("code" in error && ["ECONNRESET", "ECONNREFUSED"].includes(error.code)) {
++      this.debug(["Failed to connect to the gateway URL specified"]);
++      this.failedToConnectDueToNetworkError = true;
++      return;
++    }
+     this.emit("error" /* Error */, { error });
+   }
+   async onClose(code) {
+@@ -945,8 +953,13 @@ var WebSocketShard = class extends AsyncEventEmitter {
+         throw new Error("Used disallowed intents");
+       }
+       default: {
+-        this.debug([`The gateway closed with an unexpected code ${code}, attempting to resume.`]);
+-        return this.destroy({ code, recover: 1 /* Resume */ });
++        this.debug([
++          `The gateway closed with an unexpected code ${code}, attempting to ${this.failedToConnectDueToNetworkError ? "reconnect" : "resume"}.`
++        ]);
++        return this.destroy({
++          code,
++          recover: this.failedToConnectDueToNetworkError ? 0 /* Reconnect */ : 1 /* Resume */
++        });
+       }
+     }
+   }
