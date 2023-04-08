@@ -108,7 +108,7 @@
 		"@types/prettier": "^2.7.2",
 		"env-cmd": "^10.1.0",
 		"eslint": "^8.38.0",
-		"eslint-config-neon": "^0.1.41",
+		"eslint-config-neon": "^0.1.42",
 		"husky": "^8.0.3",
 		"ley": "^0.8.1",
 		"lint-staged": "^13.2.1",
