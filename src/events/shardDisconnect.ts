@@ -1,6 +1,5 @@
 import { Events, type ClientEvents } from 'discord.js';
 import { logger } from '#logger';
-import { exitProcess } from '#root/process.js';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 
 export default class extends DiscordJSEvent {
@@ -17,7 +16,5 @@ export default class extends DiscordJSEvent {
 		shardId: ClientEvents[Events.ShardDisconnect][1],
 	) {
 		logger.error({ closeEvent, shardId }, '[SHARD DISCONNECT]');
-
-		void exitProcess(-1);
 	}
 }
