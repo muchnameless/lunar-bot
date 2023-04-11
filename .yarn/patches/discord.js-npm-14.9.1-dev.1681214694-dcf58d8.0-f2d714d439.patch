@@ -1394,7 +1394,7 @@ index a4cf09b5d07e31f0dc60ebe8a01eed85928ff2d4..32c591cdf457f9beb5ed910f29f5ef64
        this.client.on(Events.GuildMembersChunk, handler);
      });
 diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
-index e2e7cf5179cd1250aedf0d7cf51b044daecab703..350b88a0dec297aad9637cf1c3ebe8e1350d92fc 100644
+index 6c638108d8439042b9b1cb4a4bdb55275bd399d7..29f9fc9b5b75c9bcd6babcdc4ebd1a03bd7239f7 100644
 --- a/src/structures/AttachmentBuilder.js
 +++ b/src/structures/AttachmentBuilder.js
 @@ -1,16 +1,16 @@
@@ -1789,7 +1789,7 @@ index f3f13a6fd6d6abc4ae2f93828e6f7c8ef64b0127..1ec821c4e6992242c0523756c1b00500
 
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 372c1cf4b375499dd6a1a7175c219111f8a05272..a6a08d9027fdcf34119051824f9613ee08c39c8b 100644
+index a2681afc8cfb6c6b1997447a328788cdb7a02c12..a050403c5be1e266e777201abe6621874376fea3 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -4,7 +4,6 @@ const { Buffer } = require('node:buffer');
@@ -1882,7 +1882,7 @@ index 65f411744035becfe8c760bad46898d9d2abc91b..1f2edae08f380b31eaeee5fb0c89d0d4
    }
 
 diff --git a/src/util/Options.js b/src/util/Options.js
-index 0602c3d3abd619f294c31dfdc08cf399a7d8e155..7410ea196a16bc12d76d8c9637958729e4404199 100644
+index 77638259c2ce27b9b9748d0822d89120b6327b69..63058f41d07faddf2c3dca7b901748b64f4f22bd 100644
 --- a/src/util/Options.js
 +++ b/src/util/Options.js
 @@ -65,6 +65,8 @@ const { version } = require('../../package.json');
@@ -1904,7 +1904,7 @@ index 0602c3d3abd619f294c31dfdc08cf399a7d8e155..7410ea196a16bc12d76d8c9637958729
            browser: 'discord.js',
 @@ -200,3 +201,13 @@ module.exports = Options;
   * @external RESTOptions
-  * @see {@link https://discord.js.org/docs/packages/rest/main/RESTOptions:Interface}
+  * @see {@link https://discord.js.org/docs/packages/rest/stable/RESTOptions:Interface}
   */
 +
 +/**
@@ -1917,7 +1917,7 @@ index 0602c3d3abd619f294c31dfdc08cf399a7d8e155..7410ea196a16bc12d76d8c9637958729
 + * @see {@link https://discord.js.org/#/docs/ws/main/typedef/IShardingStrategy}
 + */
 diff --git a/src/util/Sweepers.js b/src/util/Sweepers.js
-index 79ca54d44a974d1238b90e6ba24302a2558ba18b..e29076b1cad5bf19c54b8cc6e79da02f7abd8222 100644
+index 6eb2dc65d0e2ea20eae7947d0f7997d1554417a6..2d1eda589838605022acbd6b42c77b2d767f3f71 100644
 --- a/src/util/Sweepers.js
 +++ b/src/util/Sweepers.js
 @@ -460,7 +460,7 @@ class Sweepers {
