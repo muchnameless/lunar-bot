@@ -69,13 +69,8 @@ interface ArrayConstructor {
 	isArray(arg: any): arg is unknown[];
 }
 
+// TODO: remove if added to @types/node
 interface AbortSignal {
-	/**
-	 * An optional reason specified when the AbortSignal was triggered.
-	 *
-	 * @since v17.2.0
-	 */
-	readonly reason: unknown;
 	/**
 	 * If {@link aborted} is true, throws {@link reason}.
 	 *
