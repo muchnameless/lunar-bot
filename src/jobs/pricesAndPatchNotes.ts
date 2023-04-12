@@ -771,20 +771,20 @@ parentPort?.on('message', async (message) => {
 			return;
 		}
 
-		case 'togglePatchNoteUpdates':
+		case 'togglePatchNoteUpdate':
 			enablePatchNoteUpdate = !enablePatchNoteUpdate;
 			await sql`
 				INSERT INTO "Config" (
 					key,
 					value
 				) VALUES (
-					'PATCHNOTE_UPDATE_ENABLED'
+					'PATCHNOTE_UPDATE_ENABLED',
 					${JSON.stringify(enablePatchNoteUpdate)}
 				)
 				ON CONFLICT (key) DO
 				UPDATE SET value = excluded.value
 			`;
-			logger.info({ enablePatchNoteUpdates: enablePatchNoteUpdate }, '[ON MESSAGE]');
+			logger.info({ enablePatchNoteUpdate }, '[ON MESSAGE]');
 			return;
 
 		default:
