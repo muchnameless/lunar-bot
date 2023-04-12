@@ -1,3 +1,4 @@
+import { inspect } from 'node:util';
 import { SnowflakeUtil } from 'discord.js';
 import { logger } from '#logger';
 
@@ -20,7 +21,7 @@ export function debug<This, Args extends any[], Return>(
 		try {
 			const returnValue = target.call(this, ...args);
 
-			logger.debug({ ...log, returnValue }, 'success');
+			logger.debug({ ...log, returnValue: inspect(returnValue) }, 'success');
 
 			return returnValue;
 		} catch (error) {
