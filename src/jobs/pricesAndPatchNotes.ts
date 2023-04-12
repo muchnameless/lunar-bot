@@ -746,18 +746,49 @@ async function updatePatchNotes(signal: AbortSignal) {
 	logger.debug({ guid: lastGuid }, '[UPDATE PATCH NOTES]: new forum entry');
 }
 
+let enablePatchNoteUpdate = JSON.parse(
+	(
+		await sql<[{ value: string }]>`
+			SELECT value FROM "Config" WHERE key = 'PATCHNOTE_UPDATE_ENABLED'
+		`
+	)[0]?.value ?? true,
+);
+
 /**
  * manual jobs
  */
 parentPort?.on('message', async (message) => {
-	if (message === updateSkyBlockItems.name) {
-		const signal = AbortSignal.timeout(60_000);
+	switch (message) {
+		case updateSkyBlockItems.name: {
+			const signal = AbortSignal.timeout(60_000);
 
-		try {
-			await updateSkyBlockItems(signal);
-		} catch (error) {
-			logger.error(error, '[ON MESSAGE]');
+			try {
+				await updateSkyBlockItems(signal);
+			} catch (error) {
+				logger.error(error, '[ON MESSAGE]');
+			}
+
+			return;
 		}
+
+		case 'togglePatchNoteUpdates':
+			enablePatchNoteUpdate = !enablePatchNoteUpdate;
+			await sql`
+				INSERT INTO "Config" (
+					key,
+					value
+				) VALUES (
+					'PATCHNOTE_UPDATE_ENABLED'
+					${JSON.stringify(enablePatchNoteUpdate)}
+				)
+				ON CONFLICT (key) DO
+				UPDATE SET value = excluded.value
+			`;
+			logger.info({ enablePatchNoteUpdates: enablePatchNoteUpdate }, '[ON MESSAGE]');
+			return;
+
+		default:
+			logger.warn({ message }, '[ON MESSAGE]: unknown message');
 	}
 });
 
@@ -777,7 +808,11 @@ async function runJobs() {
 	ac = new AbortController();
 	const { signal } = ac;
 
-	const jobs = [updatePrices(signal), updatePatchNotes(signal)];
+	const jobs: Promise<unknown>[] = [updatePrices(signal)];
+
+	if (enablePatchNoteUpdate) {
+		jobs.push(updatePatchNotes(signal));
+	}
 
 	// every full hour
 	if (new Date().getMinutes() === 0) {
