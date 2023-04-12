@@ -8,7 +8,7 @@ export function debug<This, Args extends any[], Return>(
 	target: (this: This, ...args: Args) => Return,
 	context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>,
 ) {
-	function replacementMethod(this: This, ...args: Args): Return {
+	function debugReplacementMethod(this: This, ...args: Args): Return {
 		const log = {
 			args,
 			snowflake: SnowflakeUtil.generate(),
@@ -18,11 +18,17 @@ export function debug<This, Args extends any[], Return>(
 		logger.debug(log, 'calling');
 
 		try {
-			return target.call(this, ...args);
-		} finally {
-			logger.debug(log, 'exiting');
+			const returnValue = target.call(this, ...args);
+
+			logger.debug({ ...log, returnValue }, 'success');
+
+			return returnValue;
+		} catch (error) {
+			logger.debug({ ...log, error }, 'error');
+
+			throw error;
 		}
 	}
 
-	return replacementMethod;
+	return debugReplacementMethod;
 }

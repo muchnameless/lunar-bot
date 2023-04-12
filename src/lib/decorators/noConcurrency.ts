@@ -15,7 +15,7 @@ export function noConcurrency<This, Args extends any[], Return>(
 		this[promiseName] = null;
 	});
 
-	async function replacementMethod(
+	async function noConcurrencyReplacementMethod(
 		this: This & { [promiseName]: Promise<Return> | null },
 		...args: Args
 	): Promise<Return> {
@@ -28,5 +28,5 @@ export function noConcurrency<This, Args extends any[], Return>(
 		}
 	}
 
-	return replacementMethod;
+	return noConcurrencyReplacementMethod;
 }
