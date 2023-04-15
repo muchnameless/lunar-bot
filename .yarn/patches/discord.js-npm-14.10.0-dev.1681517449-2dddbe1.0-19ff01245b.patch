@@ -1,3 +1,18 @@
+diff --git a/src/client/BaseClient.js b/src/client/BaseClient.js
+index 65e19c25309b65099287fd53aa0db7f27bdf576f..d153aa183a2403b159984fa5923653fcc9c9295c 100644
+--- a/src/client/BaseClient.js
++++ b/src/client/BaseClient.js
+@@ -42,8 +42,8 @@ class BaseClient extends EventEmitter {
+    * @returns {void}
+    */
+   destroy() {
+-    this.rest.requestManager.clearHashSweeper();
+-    this.rest.requestManager.clearHandlerSweeper();
++    this.rest.clearHashSweeper();
++    this.rest.clearHandlerSweeper();
+   }
+
+   /**
 diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
 index f96cdf12e5affd4fd0582ebb8cffbe5f55169172..959039d9b3ed6cd5ca69912c190f44088aa874f4 100644
 --- a/src/client/websocket/WebSocketManager.js
