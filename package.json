@@ -55,7 +55,7 @@
 		"@sapphire/snowflake": "3.4.3-next.2f4a3e87.0",
 		"@sapphire/timer-manager": "1.0.1-next.2f4a3e87.0",
 		"discord-api-types": "0.37.36-next.0d47c69.1677334692",
-		"discord.js": "patch:discord.js@14.10.0-dev.1681517449-2dddbe1.0#./.yarn/patches/discord.js-npm-14.9.1-dev.1681214694-dcf58d8.0-f2d714d439.patch",
+		"discord.js": "patch:discord.js@npm%3A14.10.0-dev.1681517449-2dddbe1.0#./.yarn/patches/discord.js-npm-14.10.0-dev.1681517449-2dddbe1.0-19ff01245b.patch",
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.41.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
 	"dependencies": {
