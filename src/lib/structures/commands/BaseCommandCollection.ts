@@ -89,6 +89,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 		const filePath = reload ? `${file}?update=${Date.now()}` : file;
 
 		const Command = (await import(filePath)).default as typeof BaseCommand;
+		// @ts-expect-error abstract class
 		const command: BaseCommand = new Command({
 			client: this.client,
 			collection: this,

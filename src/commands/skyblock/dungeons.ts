@@ -41,9 +41,13 @@ export default class DungeonsCommand extends BaseSkyBlockCommand {
 		return {
 			ign,
 			profile,
-			reply: `${catacombsLvl} (${shortenNumber(XP_TILL_NEXT)} ${
-				trueLevel < LEVEL_CAP.catacombs ? 'XP till next' : 'Overflow XP'
-			}) | ${formatDecimalNumber(CLASS_AVERAGE)} Class Average | ${formatNumber(SECRETS_FOUND)} Secrets found`,
+			reply: [
+				`${catacombsLvl} (${shortenNumber(XP_TILL_NEXT)} ${
+					trueLevel < LEVEL_CAP.catacombs ? 'XP till next' : 'Overflow XP'
+				})`,
+				`${formatDecimalNumber(CLASS_AVERAGE)} Class Average`,
+				`${formatNumber(SECRETS_FOUND)} Secrets found`,
+			],
 		};
 	}
 }

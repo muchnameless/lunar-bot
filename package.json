@@ -17,6 +17,7 @@
 		"#decorators": "./dist/lib/decorators/index.js",
 		"#functions": "./dist/lib/functions/index.js",
 		"#functions/*": "./dist/lib/functions/*",
+		"#lib/*": "./dist/lib/*",
 		"#logger": "./dist/logger.js",
 		"#networth/*": "./dist/lib/networth/*",
 		"#root/*": "./dist/*",

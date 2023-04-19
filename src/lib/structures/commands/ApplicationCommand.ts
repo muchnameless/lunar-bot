@@ -74,7 +74,7 @@ export interface ApplicationCommandData extends CommandData {
 	user?: ContextMenuCommandBuilder;
 }
 
-export class ApplicationCommand extends BaseCommand {
+export abstract class ApplicationCommand extends BaseCommand {
 	public slash: RESTPostAPIChatInputApplicationCommandsJSONBody | null = null;
 
 	public message: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;

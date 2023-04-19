@@ -1,12 +1,13 @@
 import { getBedwarsLevelInfo } from '@zikeji/hypixel';
-import { oneLine } from 'common-tags';
 import { SlashCommandBuilder } from 'discord.js';
 import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
-import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '#functions';
+import { formatDecimalNumber, formatNumber, seconds } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 
 export default class BedWarsStatsCommand extends BaseStatsCommand {
+	protected readonly statsType = 'BedWars';
+
 	public constructor(context: CommandContext) {
 		super(
 			context,
@@ -28,8 +29,8 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 	 *
 	 * @param data
 	 */
-	protected override _generateReply({ ign, playerData }: FetchedData) {
-		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;
+	protected override _generateReply({ ign, player }: FetchedData) {
+		if (!player.stats?.Bedwars) return this.noStats(ign);
 
 		const {
 			wins_bedwars = 0,
@@ -39,23 +40,24 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			final_deaths_bedwars = 0,
 			winstreak = 0,
 			beds_broken_bedwars = 0,
-		} = playerData.stats.Bedwars;
+		} = player.stats.Bedwars;
 
-		if (wins_bedwars + losses_bedwars === 0) return `\`${ign}\` has no BedWars stats`;
+		if (wins_bedwars + losses_bedwars === 0) return this.noStats(ign);
 
-		return oneLine`
-			${escapeIgn(ign)}:
-			BedWars:
-			level: ${formatNumber(getBedwarsLevelInfo(playerData).level)},
-			wins: ${formatNumber(wins_bedwars)},
-			losses: ${formatNumber(losses_bedwars)},
-			win rate: ${formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))},
-			games played: ${formatNumber(games_played_bedwars)},
-			final kills: ${formatNumber(final_kills_bedwars)},
-			final deaths: ${formatNumber(final_deaths_bedwars)},
-			overall fkdr: ${this.calculateKD(final_kills_bedwars, final_deaths_bedwars) ?? '-/-'},
-			win streak: ${formatNumber(winstreak)},
-			beds broken: ${formatNumber(beds_broken_bedwars)}
-		`;
+		return {
+			ign,
+			reply: [
+				`level: ${formatNumber(getBedwarsLevelInfo(player).level)}`,
+				`wins: ${formatNumber(wins_bedwars)}`,
+				`losses: ${formatNumber(losses_bedwars)}`,
+				`win rate: ${formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))}`,
+				`games played: ${formatNumber(games_played_bedwars)}`,
+				`final kills: ${formatNumber(final_kills_bedwars)}`,
+				`final deaths: ${formatNumber(final_deaths_bedwars)}`,
+				`overall fkdr: ${this.calculateKD(final_kills_bedwars, final_deaths_bedwars) ?? '-/-'}`,
+				`win streak: ${formatNumber(winstreak)}`,
+				`beds broken: ${formatNumber(beds_broken_bedwars)}`,
+			],
+		};
 	}
 }

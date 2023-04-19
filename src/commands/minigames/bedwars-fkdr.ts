@@ -1,10 +1,12 @@
 import { SlashCommandBuilder } from 'discord.js';
 import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
-import { escapeIgn, seconds } from '#functions';
+import { seconds } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 
 export default class BedWarsFkdrCommand extends BaseStatsCommand {
+	protected readonly statsType = 'BedWars';
+
 	public constructor(context: CommandContext) {
 		super(
 			context,
@@ -26,33 +28,30 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 	 *
 	 * @param data
 	 */
-	protected override _generateReply({ ign, playerData }: FetchedData) {
-		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;
+	protected override _generateReply({ ign, player: { stats } }: FetchedData) {
+		if (!stats?.Bedwars) return this.noStats(ign);
 
-		try {
-			const kds = (
-				[
-					{ name: 'Overall', key: '' },
-					{ name: 'Solo', key: 'eight_one_' },
-					{ name: 'Doubles', key: 'eight_two_' },
-					{ name: '3s', key: 'four_three_' },
-					{ name: '4s', key: 'four_four_' },
-				] as const satisfies readonly { key: string; name: string }[]
-			)
-				.map(({ name, key }) => ({
-					name,
-					kd: this.calculateKD(
-						playerData.stats.Bedwars![`${key}final_kills_bedwars`] as number,
-						playerData.stats.Bedwars![`${key}final_deaths_bedwars`] as number,
-					),
-				}))
-				.filter(({ kd }) => kd);
+		const kds: string[] = [];
 
-			if (!kds.length) return `\`${ign}\` has no BedWars stats`;
-
-			return `${escapeIgn(ign)}: BedWars: ${kds.map(({ name, kd }) => `${name}: ${kd}`).join(', ')}`;
-		} catch {
-			return `\`${ign}\` has no BedWars stats`;
+		for (const { name, key } of [
+			{ name: 'Overall', key: '' },
+			{ name: 'Solo', key: 'eight_one_' },
+			{ name: 'Doubles', key: 'eight_two_' },
+			{ name: '3s', key: 'four_three_' },
+			{ name: '4s', key: 'four_four_' },
+		] as const) {
+			const kd = this.calculateKD(
+				stats.Bedwars![`${key}final_kills_bedwars`] as number,
+				stats.Bedwars![`${key}final_deaths_bedwars`] as number,
+			);
+			if (kd) kds.push(`${name}: ${kd}`);
 		}
+
+		if (!kds.length) return this.noStats(ign);
+
+		return {
+			ign,
+			reply: kds,
+		};
 	}
 }

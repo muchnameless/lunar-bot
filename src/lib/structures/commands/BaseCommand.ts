@@ -27,7 +27,7 @@ export interface CommandData {
 
 type RequiredRoles = (hypixelGuild: HypixelGuild) => Snowflake[];
 
-export class BaseCommand {
+export abstract class BaseCommand {
 	public declare readonly client: LunarClient<true>;
 
 	public readonly collection: BaseCommandCollection;

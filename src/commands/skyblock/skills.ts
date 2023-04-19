@@ -56,6 +56,6 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 
 		reply[0] = `${formatDecimalNumber(totalLevel / SKILLS.length)} Skill Average (${shortenNumber(totalXp)} Total XP)`;
 
-		return { ign, profile, reply: reply.join(' | ') };
+		return { ign, profile, reply };
 	}
 }

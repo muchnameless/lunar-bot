@@ -1,7 +1,8 @@
+import type { Components } from '@zikeji/hypixel';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { hypixel } from '#api';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { formatDecimalNumber, formatError, getUuidAndIgn } from '#functions';
+import { escapeIgn, formatDecimalNumber, formatError, getUuidAndIgn } from '#functions';
 import { logger } from '#logger';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import type { Awaited } from '#types';
@@ -9,7 +10,34 @@ import { InteractionUtil } from '#utils';
 
 export type FetchedData = Awaited<ReturnType<BaseStatsCommand['_fetchData']>>;
 
-export default class BaseStatsCommand extends DualCommand {
+interface ReplyData {
+	ign: string;
+	reply: string[];
+}
+
+export default abstract class BaseStatsCommand extends DualCommand {
+	protected abstract readonly statsType: string;
+
+	protected static readonly REPLY_SEPARATOR = ', ';
+
+	/**
+	 * @param ign
+	 */
+	protected noStats(ign: string) {
+		return `\`${ign}\` has no ${this.statsType} stats`;
+	}
+
+	/**
+	 * @param player
+	 * @param ign
+	 */
+	protected assertPlayer(
+		player: Components.Schemas.NullablePlayer,
+		ign: string,
+	): asserts player is Components.Schemas.Player {
+		if (!player?._id) throw `\`${ign}\` never joined hypixel`;
+	}
+
 	/**
 	 * @param ctx
 	 * @param ignOrUuid
@@ -19,10 +47,13 @@ export default class BaseStatsCommand extends DualCommand {
 		ignOrUuid?: string | null,
 	) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
+		const { player } = await hypixel.player.uuid(uuid);
+
+		this.assertPlayer(player, ign);
 
 		return {
 			ign,
-			playerData: (await hypixel.player.uuid(uuid)).player,
+			player,
 		};
 	}
 
@@ -32,7 +63,17 @@ export default class BaseStatsCommand extends DualCommand {
 	 */
 	protected calculateKD(kills?: number | string | null, deaths?: number | string | null) {
 		if (typeof kills !== 'number' || typeof deaths !== 'number') return null;
-		return formatDecimalNumber(Math.trunc((Number(kills) / Math.max(Number(deaths), 1)) * 100) / 100);
+
+		return formatDecimalNumber(Math.trunc((kills / Math.max(deaths, 1)) * 100) / 100);
+	}
+
+	/**
+	 * @param data
+	 */
+	protected finaliseReply(data: ReplyData | string) {
+		if (typeof data === 'string') return data;
+
+		return `${escapeIgn(data.ign)}: ${this.statsType}: ${data.reply.join(BaseStatsCommand.REPLY_SEPARATOR)}`;
 	}
 
 	/**
@@ -40,9 +81,7 @@ export default class BaseStatsCommand extends DualCommand {
 	 *
 	 * @param data
 	 */
-	protected _generateReply(data: FetchedData): string {
-		throw new Error('not implemented');
-	}
+	protected abstract _generateReply(data: FetchedData): ReplyData | string;
 
 	/**
 	 * execute the command
@@ -53,7 +92,9 @@ export default class BaseStatsCommand extends DualCommand {
 		try {
 			return InteractionUtil.reply(
 				interaction,
-				this._generateReply(await this._fetchData(interaction, interaction.options.getString('ign'))),
+				this.finaliseReply(
+					this._generateReply(await this._fetchData(interaction, interaction.options.getString('ign'))),
+				),
 			);
 		} catch (error) {
 			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
@@ -69,7 +110,9 @@ export default class BaseStatsCommand extends DualCommand {
 	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
 		try {
 			return hypixelMessage.reply(
-				this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0])),
+				this.finaliseReply(
+					this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0])),
+				),
 			);
 		} catch (error) {
 			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });

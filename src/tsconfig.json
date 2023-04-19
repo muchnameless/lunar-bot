@@ -17,6 +17,7 @@
 			"#decorators": ["lib/decorators/index.js"],
 			"#functions": ["lib/functions/index.ts"],
 			"#functions/*": ["lib/functions/*"],
+			"#lib/*": ["lib/*"],
 			"#logger": ["logger.ts"],
 			"#networth/*": ["lib/networth/*"],
 			"#root/*": ["*"],

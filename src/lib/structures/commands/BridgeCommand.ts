@@ -14,7 +14,7 @@ export interface BridgeCommandData extends CommandData {
 	usage?: string | (() => string);
 }
 
-export class BridgeCommand extends BaseCommand {
+export abstract class BridgeCommand extends BaseCommand {
 	private _usage: string | (() => string) | null = null;
 
 	public readonly description: string | null;

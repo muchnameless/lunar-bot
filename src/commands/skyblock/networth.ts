@@ -59,7 +59,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 		if (!bankingAPIEnabled) reply.push(`${UnicodeEmoji.X} Banking API disabled`);
 		if (!inventoryAPIEnabled) reply.push(`${UnicodeEmoji.X} Inventory API disabled`);
 
-		return { ign, profile, reply: reply.join(' | ') };
+		return { ign, profile, reply };
 	}
 
 	/**
@@ -71,7 +71,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 		try {
 			return InteractionUtil.reply(
 				interaction,
-				this._finalizeReply(
+				this._finaliseReply(
 					await this._generateReply(
 						await this._fetchData(
 							interaction,
@@ -123,7 +123,7 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 
 		try {
 			return hypixelMessage.reply(
-				this._finalizeReply(
+				this._finaliseReply(
 					await this._generateReply(
 						await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
 						auctions ?? false,

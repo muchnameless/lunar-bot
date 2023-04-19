@@ -45,10 +45,12 @@ export const baseParseArgsOptions = {
 interface ReplyData {
 	ign: string;
 	profile: NonNullable<Components.Schemas.SkyBlockProfileCuteName>;
-	reply: string;
+	reply: string[];
 }
 
-export default class BaseSkyBlockCommand extends DualCommand {
+export default abstract class BaseSkyBlockCommand extends DualCommand {
+	protected static readonly REPLY_SEPARATOR = ' | ';
+
 	public constructor(
 		context: CommandContext,
 		{ additionalOptions, ...slashData }: BaseSkyBlockSlashData,
@@ -141,17 +143,17 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 *
 	 * @param data
 	 */
-	protected _generateReply(data: FetchedData): Awaitable<ReplyData> {
-		throw new Error('not implemented');
-	}
+	protected abstract _generateReply(data: FetchedData): Awaitable<ReplyData>;
 
 	/**
 	 * adds ign, profile and game mode indicators to the reply
 	 *
 	 * @param data
 	 */
-	protected _finalizeReply({ ign, profile, reply }: ReplyData): string {
-		return `${escapeIgn(ign)} (${formatSkyBlockProfileName(profile)}): ${reply}`;
+	protected _finaliseReply({ ign, profile, reply }: ReplyData): string {
+		return `${escapeIgn(ign)} (${formatSkyBlockProfileName(profile)}): ${reply.join(
+			BaseSkyBlockCommand.REPLY_SEPARATOR,
+		)}`;
 	}
 
 	/**
@@ -163,7 +165,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 		try {
 			return InteractionUtil.reply(
 				interaction,
-				this._finalizeReply(
+				this._finaliseReply(
 					await this._generateReply(
 						await this._fetchData(
 							interaction,
@@ -214,7 +216,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 
 		try {
 			return hypixelMessage.reply(
-				this._finalizeReply(
+				this._finaliseReply(
 					await this._generateReply(
 						await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
 					),

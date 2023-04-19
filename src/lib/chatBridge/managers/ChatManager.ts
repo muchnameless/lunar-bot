@@ -103,9 +103,7 @@ export abstract class ChatManager {
 		});
 	}
 
-	public createMessageCollector(options: unknown): unknown {
-		throw new Error('Method not implemented.');
-	}
+	public abstract createMessageCollector(options: unknown): unknown;
 }
 
 await ChatManager.reloadFilter('blockedExpressions.js', 'BLOCKED_EXPRESSIONS_REGEXP');

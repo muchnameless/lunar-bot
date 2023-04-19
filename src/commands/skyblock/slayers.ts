@@ -33,6 +33,6 @@ export default class SlayersCommand extends BaseSkyBlockCommand {
 
 		reply[0] = `${shortenNumber(totalXp)} Slayer XP`;
 
-		return { ign, profile, reply: reply.join(' | ') };
+		return { ign, profile, reply };
 	}
 }

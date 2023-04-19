@@ -55,6 +55,6 @@ export default class CoopNetworthCommand extends NetworthCommand {
 			reply.push(`${UnicodeEmoji.X} ${inventoryAPIDisabled}/${memberUuids.length} Inventory APIs disabled`);
 		}
 
-		return { ign: `${ign}'s Co-op`, profile, reply: reply.join(' | ') };
+		return { ign: `${ign}'s Co-op`, profile, reply };
 	}
 }

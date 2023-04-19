@@ -22,7 +22,7 @@ import { buildDeleteButton, buildPinButton, splitForEmbedFields, trim } from '#f
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import { InteractionUtil, type RepliableInteraction } from '#utils';
 
-export default class BaseOwnerCommand extends ApplicationCommand {
+export default abstract class BaseOwnerCommand extends ApplicationCommand {
 	/**
 	 * replaces the client's token in 'text' and escapes `
 	 *

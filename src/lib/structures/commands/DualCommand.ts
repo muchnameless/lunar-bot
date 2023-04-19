@@ -6,7 +6,7 @@ import { BaseCommandCollection } from './BaseCommandCollection.js';
 import type { BridgeCommand, BridgeCommandData } from './BridgeCommand.js';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 
-export class DualCommand
+export abstract class DualCommand
 	extends ApplicationCommand
 	implements Omit<BridgeCommand, 'clearCooldowns' | 'collection' | 'commandId' | 'load' | 'unload'>
 {
