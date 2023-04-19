@@ -31,7 +31,7 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 	protected override _generateReply({ ign, player: { stats } }: FetchedData) {
 		if (!stats?.Bedwars) return this.noStats(ign);
 
-		const kds: string[] = [];
+		const reply: string[] = [];
 
 		for (const { name, key } of [
 			{ name: 'Overall', key: '' },
@@ -41,17 +41,17 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 			{ name: '4s', key: 'four_four_' },
 		] as const) {
 			const kd = this.calculateKD(
-				stats.Bedwars![`${key}final_kills_bedwars`] as number,
-				stats.Bedwars![`${key}final_deaths_bedwars`] as number,
+				stats.Bedwars[`${key}final_kills_bedwars`] as number,
+				stats.Bedwars[`${key}final_deaths_bedwars`] as number,
 			);
-			if (kd) kds.push(`${name}: ${kd}`);
+			if (kd) reply.push(`${name}: ${kd}`);
 		}
 
-		if (!kds.length) return this.noStats(ign);
+		if (!reply.length) return this.noStats(ign);
 
 		return {
 			ign,
-			reply: kds,
+			reply,
 		};
 	}
 }

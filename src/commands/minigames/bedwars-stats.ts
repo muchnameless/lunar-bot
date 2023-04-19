@@ -32,32 +32,36 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 	protected override _generateReply({ ign, player }: FetchedData) {
 		if (!player.stats?.Bedwars) return this.noStats(ign);
 
-		const {
-			wins_bedwars = 0,
-			losses_bedwars = 0,
-			games_played_bedwars = 0,
-			final_kills_bedwars = 0,
-			final_deaths_bedwars = 0,
-			winstreak = 0,
-			beds_broken_bedwars = 0,
-		} = player.stats.Bedwars;
+		try {
+			const {
+				wins_bedwars = 0,
+				losses_bedwars = 0,
+				games_played_bedwars = 0,
+				final_kills_bedwars = 0,
+				final_deaths_bedwars = 0,
+				winstreak = 0,
+				beds_broken_bedwars = 0,
+			} = player.stats.Bedwars;
 
-		if (wins_bedwars + losses_bedwars === 0) return this.noStats(ign);
+			if (wins_bedwars + losses_bedwars === 0) return this.noStats(ign);
 
-		return {
-			ign,
-			reply: [
-				`level: ${formatNumber(getBedwarsLevelInfo(player).level)}`,
-				`wins: ${formatNumber(wins_bedwars)}`,
-				`losses: ${formatNumber(losses_bedwars)}`,
-				`win rate: ${formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))}`,
-				`games played: ${formatNumber(games_played_bedwars)}`,
-				`final kills: ${formatNumber(final_kills_bedwars)}`,
-				`final deaths: ${formatNumber(final_deaths_bedwars)}`,
-				`overall fkdr: ${this.calculateKD(final_kills_bedwars, final_deaths_bedwars) ?? '-/-'}`,
-				`win streak: ${formatNumber(winstreak)}`,
-				`beds broken: ${formatNumber(beds_broken_bedwars)}`,
-			],
-		};
+			return {
+				ign,
+				reply: [
+					`level: ${formatNumber(getBedwarsLevelInfo(player).level)}`,
+					`wins: ${formatNumber(wins_bedwars)}`,
+					`losses: ${formatNumber(losses_bedwars)}`,
+					`win rate: ${formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))}`,
+					`games played: ${formatNumber(games_played_bedwars)}`,
+					`final kills: ${formatNumber(final_kills_bedwars)}`,
+					`final deaths: ${formatNumber(final_deaths_bedwars)}`,
+					`overall fkdr: ${this.calculateKD(final_kills_bedwars, final_deaths_bedwars) ?? '-/-'}`,
+					`win streak: ${formatNumber(winstreak)}`,
+					`beds broken: ${formatNumber(beds_broken_bedwars)}`,
+				],
+			};
+		} catch {
+			return this.noStats(ign);
+		}
 	}
 }
