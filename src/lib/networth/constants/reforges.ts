@@ -17,7 +17,7 @@ export const REFORGE_TO_STONE = {
 	bustling: ItemId.SkyMartBrochure,
 	candied: ItemId.CandyCorn,
 	chomp: ItemId.KuudraMandible,
-	coldfused: ItemId.EntropySuppressor,
+	coldfusion: ItemId.EntropySuppressor,
 	cubic: ItemId.MoltenCube,
 	dirty: ItemId.DirtBottle,
 	earthy: ItemId.LargeWalnut,
