@@ -462,7 +462,7 @@ export class MinecraftChatManager extends ChatManager {
 
 		this._abortLoginTimeout = setTimeout(() => {
 			logger.warn({ ...this.logInfo, timeout }, '[CHATBRIDGE ABORT LOGIN]: triggered -> reconnecting');
-			this.reconnect(0).catch((error) =>
+			this.reconnect({ loginDelay: 0 }).catch((error) =>
 				logger.error({ err: error, ...this.logInfo, timeout }, '[CHATBRIDGE ABORT LOGIN]'),
 			);
 		}, timeout);
@@ -501,17 +501,22 @@ export class MinecraftChatManager extends ChatManager {
 	/**
 	 * reconnects the bot, exponential login delay up to 10 min
 	 *
-	 * @param loginDelay delay in ms
+	 * @param options
 	 */
-	public async reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
-		if ([MinecraftChatManagerState.Reconnecting, MinecraftChatManagerState.Errored].includes(this.state)) return this;
+	public async reconnect({
+		loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10)),
+		force = false,
+	} = {}) {
+		if (!force && [MinecraftChatManagerState.Reconnecting, MinecraftChatManagerState.Errored].includes(this.state)) {
+			return this;
+		}
 
 		this.disconnect();
 
 		logger.warn({ ...this.logInfo, loginDelay }, '[CHATBRIDGE RECONNECT]: attempting reconnect after loginDelay');
 
 		await sleep(loginDelay);
-		await this.connect();
+		await this.connect(force);
 
 		return this;
 	}
