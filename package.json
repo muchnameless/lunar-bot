@@ -104,7 +104,7 @@
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^2.0.1",
 		"@types/luxon": "^3.3.0",
-		"@types/node": "^18.16.0",
+		"@types/node": "^18.16.1",
 		"@types/pg": "^8.6.6",
 		"@types/prettier": "^2.7.2",
 		"env-cmd": "^10.1.0",
