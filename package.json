@@ -82,7 +82,7 @@
 		"js-big-decimal": "^1.4.1",
 		"lilyweight": "^2.7.0",
 		"luxon": "^3.3.0",
-		"minecraft-data": "^3.31.0",
+		"minecraft-data": "^3.33.0",
 		"minecraft-protocol": "1.41.2",
 		"ms": "3.0.0-canary.1",
 		"pg": "^8.10.0",
