@@ -1,0 +1,781 @@
+diff --git a/src/client/BaseClient.js b/src/client/BaseClient.js
+index 91c6afac367794bf9a1378be7661d6123053c7ab..631748c925068a9421b511bc1bb9b7216d36caad 100644
+--- a/src/client/BaseClient.js
++++ b/src/client/BaseClient.js
+@@ -44,8 +44,8 @@ class BaseClient extends EventEmitter {
+    * @returns {void}
+    */
+   destroy() {
+-    this.rest.requestManager.clearHashSweeper();
+-    this.rest.requestManager.clearHandlerSweeper();
++    this.rest.clearHashSweeper();
++    this.rest.clearHandlerSweeper();
+   }
+
+   /**
+diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
+index 7bd72f185d0dda687603e225666eccc941b2b0eb..88f95ef00d7ca3dd0aeeddd4dc6342dcf8a5e4a0 100644
+--- a/src/client/websocket/WebSocketManager.js
++++ b/src/client/websocket/WebSocketManager.js
+@@ -346,7 +346,7 @@ class WebSocketManager extends EventEmitter {
+       const item = this.packetQueue.shift();
+       setImmediate(() => {
+         this.handlePacket(item.packet, item.shard);
+-      }).unref();
++      });
+     }
+
+     if (packet && PacketHandlers[packet.t]) {
+diff --git a/src/client/websocket/WebSocketShard.js b/src/client/websocket/WebSocketShard.js
+index babca23f20fc0b6081b8b61c2f47ce758aafb624..b9b292dcb55e1d2deccbbebbbfb693fcba462865 100644
+--- a/src/client/websocket/WebSocketShard.js
++++ b/src/client/websocket/WebSocketShard.js
+@@ -204,7 +204,7 @@ class WebSocketShard extends EventEmitter {
+         this.emit(WebSocketShardEvents.AllReady, this.expectedGuilds);
+       },
+       hasGuildsIntent ? waitGuildTimeout : 0,
+-    ).unref();
++    );
+   }
+
+   /**
+diff --git a/src/managers/GuildManager.js b/src/managers/GuildManager.js
+index 1d2d4ba967724319fca7e47e063ee9474e83e923..7e56936a4af06a5748f06cb34a9f4bea0a75e591 100644
+--- a/src/managers/GuildManager.js
++++ b/src/managers/GuildManager.js
+@@ -235,7 +235,7 @@ class GuildManager extends CachedManager {
+           this.client.removeListener(Events.GuildCreate, handleGuild);
+           this.client.decrementMaxListeners();
+           resolve(this.client.guilds._add(data));
+-        }, 10_000).unref();
++        }, 10_000);
+       })
+     );
+   }
+diff --git a/src/managers/GuildMemberManager.js b/src/managers/GuildMemberManager.js
+index a4cf09b5d07e31f0dc60ebe8a01eed85928ff2d4..32c591cdf457f9beb5ed910f29f5ef64975fa4c9 100644
+--- a/src/managers/GuildMemberManager.js
++++ b/src/managers/GuildMemberManager.js
+@@ -265,7 +265,7 @@ class GuildMemberManager extends CachedManager {
+         this.client.removeListener(Events.GuildMembersChunk, handler);
+         this.client.decrementMaxListeners();
+         reject(new DiscordjsError(ErrorCodes.GuildMembersTimeout));
+-      }, time).unref();
++      }, time);
+       this.client.incrementMaxListeners();
+       this.client.on(Events.GuildMembersChunk, handler);
+     });
+diff --git a/src/structures/AttachmentBuilder.js b/src/structures/AttachmentBuilder.js
+index 6c638108d8439042b9b1cb4a4bdb55275bd399d7..29f9fc9b5b75c9bcd6babcdc4ebd1a03bd7239f7 100644
+--- a/src/structures/AttachmentBuilder.js
++++ b/src/structures/AttachmentBuilder.js
+@@ -1,16 +1,16 @@
+ 'use strict';
+
+-const { basename, flatten } = require('../util/Util');
++const { isJSONEncodable } = require('@discordjs/builders');
++const { basename } = require('../util/Util');
+
+ /**
+  * Represents an attachment builder
+  */
+ class AttachmentBuilder {
+   /**
+-   * @param {BufferResolvable|Stream} attachment The file
+-   * @param {AttachmentData} [data] Extra data
++   * @param {AttachmentPayload} [payload] Attachment and extra data
+    */
+-  constructor(attachment, data = {}) {
++  constructor({ attachment, name, description } = {}) {
+     /**
+      * The file associated with this attachment.
+      * @type {BufferResolvable|Stream}
+@@ -20,12 +20,12 @@ class AttachmentBuilder {
+      * The name of this attachment
+      * @type {?string}
+      */
+-    this.name = data.name;
++    this.name = name;
+     /**
+      * The description of the attachment
+      * @type {?string}
+      */
+-    this.description = data.description;
++    this.description = description;
+   }
+
+   /**
+@@ -82,11 +82,11 @@ class AttachmentBuilder {
+    * @readonly
+    */
+   get spoiler() {
+-    return basename(this.name).startsWith('SPOILER_');
++    return this.name ? basename(this.name).startsWith('SPOILER_') : false;
+   }
+
+   toJSON() {
+-    return flatten(this);
++    return { ...this };
+   }
+
+   /**
+@@ -95,10 +95,10 @@ class AttachmentBuilder {
+    * @returns {AttachmentBuilder}
+    */
+   static from(other) {
+-    return new AttachmentBuilder(other.attachment, {
+-      name: other.name,
+-      description: other.description,
+-    });
++    if (isJSONEncodable(other)) {
++      return new this(other.toJSON());
++    }
++    return new this(other);
+   }
+ }
+
+diff --git a/src/structures/Embed.js b/src/structures/Embed.js
+index dd68120d955b53019d973f03057740d52f814fe0..5436e854c18807335adef1613b8da974b6de3acc 100644
+--- a/src/structures/Embed.js
++++ b/src/structures/Embed.js
+@@ -18,11 +18,11 @@ class Embed {
+
+   /**
+    * An array of fields of this embed.
+-   * @type {Array<APIEmbedField>}
++   * @type {?Array<APIEmbedField>}
+    * @readonly
+    */
+   get fields() {
+-    return this.data.fields ?? [];
++    return this.data.fields ?? null;
+   }
+
+   /**
+diff --git a/src/structures/GuildEmoji.js b/src/structures/GuildEmoji.js
+index 0035a36e01978fedb2b30f51eceeb6a2def5588f..3f554ebe4a24ddfe2d641b3bba1673347a759fba 100644
+--- a/src/structures/GuildEmoji.js
++++ b/src/structures/GuildEmoji.js
+@@ -55,8 +55,9 @@ class GuildEmoji extends BaseGuildEmoji {
+    * @readonly
+    */
+   get deletable() {
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
+-    return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits.ManageGuildExpressions);
++    const { me } = this.guild.members;
++    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
++    return !this.managed && me.permissions.has(PermissionFlagsBits.ManageGuildExpressions);
+   }
+
+   /**
+diff --git a/src/structures/GuildMember.js b/src/structures/GuildMember.js
+index 7c2aec177895a3837619ed06e6ea06d75fed30dd..140ec4573cb417d6b2eaf7e87e6f43875a12ee34 100644
+--- a/src/structures/GuildMember.js
++++ b/src/structures/GuildMember.js
+@@ -264,8 +264,9 @@ class GuildMember extends Base {
+     if (this.user.id === this.guild.ownerId) return false;
+     if (this.user.id === this.client.user.id) return false;
+     if (this.client.user.id === this.guild.ownerId) return true;
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
+-    return this.guild.members.me.roles.highest.comparePositionTo(this.roles.highest) > 0;
++    const { me } = this.guild.members;
++    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
++    return me.roles.highest.comparePositionTo(this.roles.highest) > 0;
+   }
+
+   /**
+@@ -274,7 +275,6 @@ class GuildMember extends Base {
+    * @readonly
+    */
+   get kickable() {
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
+     return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers);
+   }
+
+@@ -284,7 +284,6 @@ class GuildMember extends Base {
+    * @readonly
+    */
+   get bannable() {
+-    if (!this.guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
+     return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits.BanMembers);
+   }
+
+@@ -297,7 +296,7 @@ class GuildMember extends Base {
+     return (
+       !this.permissions.has(PermissionFlagsBits.Administrator) &&
+       this.manageable &&
+-      (this.guild.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers) ?? false)
++      this.guild.members.me.permissions.has(PermissionFlagsBits.ModerateMembers)
+     );
+   }
+
+diff --git a/src/structures/GuildTemplate.js b/src/structures/GuildTemplate.js
+index c1e219b5e2a0685deb3d46ba5b421cab2393b863..6f71745b51397fbad827916f14c25e4620f79077 100644
+--- a/src/structures/GuildTemplate.js
++++ b/src/structures/GuildTemplate.js
+@@ -149,7 +149,7 @@ class GuildTemplate extends Base {
+       client.incrementMaxListeners();
+       client.on(Events.GuildCreate, handleGuild);
+
+-      const timeout = setTimeout(() => resolveGuild(client.guilds._add(data)), 10_000).unref();
++      const timeout = setTimeout(() => resolveGuild(client.guilds._add(data)), 10_000);
+     });
+   }
+
+diff --git a/src/structures/Invite.js b/src/structures/Invite.js
+index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf44489054c089 100644
+--- a/src/structures/Invite.js
++++ b/src/structures/Invite.js
+@@ -234,10 +234,11 @@ class Invite extends Base {
+   get deletable() {
+     const guild = this.guild;
+     if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
+-    if (!guild.members.me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
++    const { me } = guild.members;
++    if (!me) throw new DiscordjsError(ErrorCodes.GuildUncachedMe);
+     return Boolean(
+       this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits.ManageChannels, false) ||
+-        guild.members.me.permissions.has(PermissionFlagsBits.ManageGuild),
++        me.permissions.has(PermissionFlagsBits.ManageGuild),
+     );
+   }
+
+diff --git a/src/structures/Message.js b/src/structures/Message.js
+index c82c177ab14633081570a5c389e9ffc872614ddb..16fca6d143398d3ce0b785c6b95a46424a5af42d 100644
+--- a/src/structures/Message.js
++++ b/src/structures/Message.js
+@@ -320,10 +320,13 @@ class Message extends Base {
+       this.client.channels._add(data.thread, this.guild);
+     }
+
+-    if (this.member && data.member) {
+-      this.member._patch(data.member);
+-    } else if (data.member && this.guild && this.author) {
+-      this.guild.members._add(Object.assign(data.member, { user: this.author }));
++    if (data.member) {
++      const { member } = this;
++      if (member) {
++        member._patch(data.member);
++      } else if (this.author) {
++        this.guild?.members._add(Object.assign(data.member, { user: this.author }));
++      }
+     }
+
+     if ('flags' in data) {
+@@ -601,19 +604,23 @@ class Message extends Base {
+    * @readonly
+    */
+   get editable() {
+-    const precheck = Boolean(this.author.id === this.client.user.id && (!this.guild || this.channel?.viewable));
++    const { channel } = this;
+
+     // Regardless of permissions thread messages cannot be edited if
+     // the thread is archived or the thread is locked and the bot does not have permission to manage threads.
+-    if (this.channel?.isThread()) {
+-      if (this.channel.archived) return false;
+-      if (this.channel.locked) {
+-        const permissions = this.channel.permissionsFor(this.client.user);
++    if (channel?.isThread()) {
++      if (channel.archived) return false;
++      if (channel.locked) {
++        const permissions = channel.permissionsFor(this.client.user);
+         if (!permissions?.has(PermissionFlagsBits.ManageThreads, true)) return false;
+       }
+     }
+
+-    return precheck;
++    return Boolean(
++      this.author.id === this.client.user.id &&
++        !this.flags.has(MessageFlags.Ephemeral) &&
++        (!this.guildId || channel?.viewable),
++    );
+   }
+
+   /**
+@@ -624,15 +631,19 @@ class Message extends Base {
+   get deletable() {
+     if (!DeletableMessageTypes.includes(this.type)) return false;
+
+-    if (!this.guild) {
++    if (this.flags.has(MessageFlags.Ephemeral)) {
++      return false;
++    }
++    if (!this.guildId) {
+       return this.author.id === this.client.user.id;
+     }
+     // DMChannel does not have viewable property, so check viewable after proved that message is on a guild.
+-    if (!this.channel?.viewable) {
++    const { channel } = this;
++    if (!channel?.viewable) {
+       return false;
+     }
+
+-    const permissions = this.channel?.permissionsFor(this.client.user);
++    const permissions = channel?.permissionsFor(this.client.user);
+     if (!permissions) return false;
+     // This flag allows deleting even if timed out
+     if (permissions.has(PermissionFlagsBits.Administrator, false)) return true;
+@@ -671,7 +682,8 @@ class Message extends Base {
+     const { channel } = this;
+     return Boolean(
+       !this.system &&
+-        (!this.guild ||
++        !this.flags.has(MessageFlags.Ephemeral) &&
++        (!this.guildId ||
+           (channel?.viewable &&
+             channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
+     );
+@@ -702,7 +714,7 @@ class Message extends Base {
+     const { channel } = this;
+     return Boolean(
+       channel?.type === ChannelType.GuildAnnouncement &&
+-        !this.flags.has(MessageFlags.Crossposted) &&
++        !this.flags.any(MessageFlags.Crossposted | MessageFlags.Ephemeral) &&
+         this.type === MessageType.Default &&
+         channel.viewable &&
+         channel.permissionsFor(this.client.user)?.has(bitfield, false),
+@@ -720,8 +732,9 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   edit(options) {
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
+-    return this.channel.messages.edit(this, options);
++    const { channel } = this;
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
++    return channel.messages.edit(this, options);
+   }
+
+   /**
+@@ -736,8 +749,9 @@ class Message extends Base {
+    * }
+    */
+   crosspost() {
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
+-    return this.channel.messages.crosspost(this.id);
++    const { channel } = this;
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
++    return channel.messages.crosspost(this.id);
+   }
+
+   /**
+@@ -751,8 +765,9 @@ class Message extends Base {
+    *   .catch(console.error)
+    */
+   async pin(reason) {
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.pin(this.id, reason);
++    const { channel } = this;
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
++    await channel.messages.pin(this.id, reason);
+     return this;
+   }
+
+@@ -767,8 +782,9 @@ class Message extends Base {
+    *   .catch(console.error)
+    */
+   async unpin(reason) {
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.unpin(this.id, reason);
++    const { channel } = this;
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
++    await channel.messages.unpin(this.id, reason);
+     return this;
+   }
+
+@@ -788,13 +804,14 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   async react(emoji) {
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.react(this.id, emoji);
++    const { channel } = this;
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
++    await channel.messages.react(this.id, emoji);
+
+     return this.client.actions.MessageReactionAdd.handle(
+       {
+         [this.client.actions.injectedUser]: this.client.user,
+-        [this.client.actions.injectedChannel]: this.channel,
++        [this.client.actions.injectedChannel]: channel,
+         [this.client.actions.injectedMessage]: this,
+         emoji: resolvePartialEmoji(emoji),
+       },
+@@ -812,8 +829,9 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   async delete() {
+-    if (!this.channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
+-    await this.channel.messages.delete(this.id);
++    const { channel } = this;
++    if (!channel) throw new DiscordjsError(ErrorCodes.ChannelNotCached);
++    await channel.messages.delete(this.id);
+     return this;
+   }
+
+@@ -835,7 +853,8 @@ class Message extends Base {
+    *   .catch(console.error);
+    */
+   reply(options) {
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
++    const { channel } = this;
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
+     let data;
+
+     if (options instanceof MessagePayload) {
+@@ -848,7 +867,7 @@ class Message extends Base {
+         },
+       });
+     }
+-    return this.channel.send(data);
++    return channel.send(data);
+   }
+
+   /**
+@@ -868,12 +887,13 @@ class Message extends Base {
+    * @returns {Promise<ThreadChannel>}
+    */
+   startThread(options = {}) {
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
+-    if (![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(this.channel.type)) {
++    const { channel } = this;
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
++    if (![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(channel.type)) {
+       return Promise.reject(new DiscordjsError(ErrorCodes.MessageThreadParent));
+     }
+     if (this.hasThread) return Promise.reject(new DiscordjsError(ErrorCodes.MessageExistingThread));
+-    return this.channel.threads.create({ ...options, startMessage: this });
++    return channel.threads.create({ ...options, startMessage: this });
+   }
+
+   /**
+@@ -882,8 +902,9 @@ class Message extends Base {
+    * @returns {Promise<Message>}
+    */
+   fetch(force = true) {
+-    if (!this.channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
+-    return this.channel.messages.fetch({ message: this.id, force });
++    const { channel } = this;
++    if (!channel) return Promise.reject(new DiscordjsError(ErrorCodes.ChannelNotCached));
++    return channel.messages.fetch({ message: this.id, force });
+   }
+
+   /**
+diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
+index e23730906c8e0de13e49ee00e90fef2a0d50ce65..25878d15b76f29877c0f5c7f471d409ed2881788 100644
+--- a/src/structures/MessagePayload.js
++++ b/src/structures/MessagePayload.js
+@@ -3,7 +3,6 @@
+ const { Buffer } = require('node:buffer');
+ const { lazy, isJSONEncodable } = require('@discordjs/util');
+ const { MessageFlags } = require('discord-api-types/v10');
+-const ActionRowBuilder = require('./ActionRowBuilder');
+ const { DiscordjsRangeError, ErrorCodes } = require('../errors');
+ const DataResolver = require('../util/DataResolver');
+ const MessageFlagsBitField = require('../util/MessageFlagsBitField');
+@@ -133,7 +132,9 @@ class MessagePayload {
+       }
+     }
+
+-    const components = this.options.components?.map(c => (isJSONEncodable(c) ? c : new ActionRowBuilder(c)).toJSON());
++    const components = this.options.components?.map(c =>
++      isJSONEncodable(c) ? c.toJSON() : this.target.client.options.jsonTransformer(c),
++    );
+
+     let username;
+     let avatarURL;
+@@ -218,9 +219,9 @@ class MessagePayload {
+    * @returns {Promise<MessagePayload>}
+    */
+   async resolveFiles() {
+-    if (this.files) return this;
++    if (this.files || !this.options.files) return this;
+
+-    this.files = await Promise.all(this.options.files?.map(file => this.constructor.resolveFile(file)) ?? []);
++    this.files = await Promise.all(this.options.files.map(file => this.constructor.resolveFile(file)));
+     return this;
+   }
+
+diff --git a/src/structures/ModalSubmitFields.js b/src/structures/ModalSubmitFields.js
+index 8e67b21d2e6f225f11aa02d90849eac6d0f6f392..220b4314659b8397d8546991c884f5b9ac2aaeca 100644
+--- a/src/structures/ModalSubmitFields.js
++++ b/src/structures/ModalSubmitFields.js
+@@ -50,6 +50,15 @@ class ModalSubmitFields {
+   getTextInputValue(customId) {
+     return this.getField(customId, ComponentType.TextInput).value;
+   }
++
++  /**
++   * Gets the values of a select menu component given a custom id
++   * @param {string} customId The custom id for the select menu component
++   * @returns {string[]}
++   */
++  getSelectMenuValues(customId) {
++    return this.getField(customId, ComponentType.SelectMenu).values;
++  }
+ }
+
+ module.exports = ModalSubmitFields;
+diff --git a/src/structures/interfaces/Collector.js b/src/structures/interfaces/Collector.js
+index 65f411744035becfe8c760bad46898d9d2abc91b..1f2edae08f380b31eaeee5fb0c89d0d4c718c14c 100644
+--- a/src/structures/interfaces/Collector.js
++++ b/src/structures/interfaces/Collector.js
+@@ -93,8 +93,8 @@ class Collector extends EventEmitter {
+     this.handleCollect = this.handleCollect.bind(this);
+     this.handleDispose = this.handleDispose.bind(this);
+
+-    if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time).unref();
+-    if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle).unref();
++    if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time);
++    if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle);
+
+     /**
+      * The timestamp at which this collector last collected an item
+@@ -135,7 +135,7 @@ class Collector extends EventEmitter {
+         this.lastCollectedTimestamp = Date.now();
+         if (this._idletimeout) {
+           clearTimeout(this._idletimeout);
+-          this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle).unref();
++          this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
+         }
+       } else {
+         /**
+@@ -247,11 +247,11 @@ class Collector extends EventEmitter {
+   resetTimer({ time, idle } = {}) {
+     if (this._timeout) {
+       clearTimeout(this._timeout);
+-      this._timeout = setTimeout(() => this.stop('time'), time ?? this.options.time).unref();
++      this._timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
+     }
+     if (this._idletimeout) {
+       clearTimeout(this._idletimeout);
+-      this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle).unref();
++      this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
+     }
+   }
+
+diff --git a/src/util/Sweepers.js b/src/util/Sweepers.js
+index 6eb2dc65d0e2ea20eae7947d0f7997d1554417a6..2d1eda589838605022acbd6b42c77b2d767f3f71 100644
+--- a/src/util/Sweepers.js
++++ b/src/util/Sweepers.js
+@@ -460,7 +460,7 @@ class Sweepers {
+       if (sweepFn === null) return;
+       if (typeof sweepFn !== 'function') throw new DiscordjsTypeError(ErrorCodes.SweepFilterReturn);
+       this[sweepKey](sweepFn);
+-    }, opts.interval * 1_000).unref();
++    }, opts.interval * 1_000);
+   }
+ }
+
+diff --git a/typings/index.d.ts b/typings/index.d.ts
+index 06c2a7b0f5e0dc2ea8a3d539d5e116573e986ef5..3fb3be78d6f8054c387a4c3d6dbbae5727cc2be9 100644
+--- a/typings/index.d.ts
++++ b/typings/index.d.ts
+@@ -1,6 +1,3 @@
+-// DOM types required for undici
+-/// <reference lib="dom" />
+-
+ import {
+   ActionRowBuilder as BuilderActionRow,
+   MessageActionRowComponentBuilder,
+@@ -309,7 +306,13 @@ export type MessageActionRowComponent =
+   | RoleSelectMenuComponent
+   | MentionableSelectMenuComponent
+   | ChannelSelectMenuComponent;
+-export type ModalActionRowComponent = TextInputComponent;
++export type ModalActionRowComponent =
++  | TextInputComponent
++  | StringSelectMenuComponent
++  | UserSelectMenuComponent
++  | RoleSelectMenuComponent
++  | MentionableSelectMenuComponent
++  | ChannelSelectMenuComponent;
+
+ export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
+   APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
+@@ -686,6 +689,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
+     ButtonComponent,
+     APIButtonComponent,
+     ButtonComponent | APIButtonComponent,
++    ButtonComponent | APIButtonComponent,
+     ButtonComponent | APIButtonComponent
+   >;
+   public inGuild(): this is ButtonInteraction<'raw' | 'cached'>;
+@@ -853,7 +857,7 @@ export class EmbedBuilder extends BuildersEmbed {
+ export class Embed {
+   private constructor(data: APIEmbed);
+   public readonly data: Readonly<APIEmbed>;
+-  public get fields(): APIEmbedField[];
++  public get fields(): APIEmbedField[] | null;
+   public get footer(): EmbedFooterData | null;
+   public get title(): string | null;
+   public get description(): string | null;
+@@ -1703,7 +1707,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+   public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
+ }
+
+-export type CacheType = 'cached' | 'raw' | undefined;
++export type CacheType = 'cached' | 'raw' | 'DM' | 'cachedOrDM' | undefined;
+
+ export type CacheTypeReducer<
+   State extends CacheType,
+@@ -1711,12 +1715,18 @@ export type CacheTypeReducer<
+   RawType = CachedType,
+   PresentType = CachedType | RawType,
+   Fallback = PresentType | null,
++  DMType = null,
++  CachedOrDMType = CachedType | DMType,
+ > = [State] extends ['cached']
+   ? CachedType
+   : [State] extends ['raw']
+   ? RawType
+   : [State] extends ['raw' | 'cached']
+   ? PresentType
++  : [State] extends ['DM']
++  ? DMType
++  : [State] extends ['cachedOrDM']
++  ? CachedOrDMType
+   : Fallback;
+
+ export type Interaction<Cached extends CacheType = CacheType> =
+@@ -1743,7 +1753,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+     GuildTextBasedChannel | null,
+     GuildTextBasedChannel | null,
+     GuildTextBasedChannel | null,
+-    TextBasedChannel | null
++    TextBasedChannel | null,
++    DMChannel | null
+   >;
+   public channelId: Snowflake | null;
+   public get createdAt(): Date;
+@@ -1997,16 +2008,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+ }
+
+ export class AttachmentBuilder {
+-  public constructor(attachment: BufferResolvable | Stream, data?: AttachmentData);
++  public constructor(data?: Partial<AttachmentPayload>);
+   public attachment: BufferResolvable | Stream;
+   public description: string | null;
+   public name: string | null;
+   public get spoiler(): boolean;
+   public setDescription(description: string): this;
+-  public setFile(attachment: BufferResolvable | Stream, name?: string): this;
++  public setFile(attachment: BufferResolvable | Stream): this;
+   public setName(name: string): this;
+   public setSpoiler(spoiler?: boolean): this;
+-  public toJSON(): unknown;
++  public toJSON(): AttachmentPayload;
+   public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
+ }
+
+@@ -2050,6 +2061,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+     MessageActionRowComponent,
+     Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
+     MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
++    MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
+     MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
+   >;
+   public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
+@@ -2218,12 +2230,17 @@ export interface TextInputModalData extends BaseModalData {
+   value: string;
+ }
+
++export interface SelectMenuModalData extends BaseModalData {
++  type: ComponentType.SelectMenu;
++  values: string[];
++}
++
+ export interface ActionRowModalData {
+   type: ComponentType.ActionRow;
+   components: ModalData[];
+ }
+
+-export type ModalData = TextInputModalData | ActionRowModalData;
++export type ModalData = ActionRowModalData | TextInputModalData | SelectMenuModalData;
+
+ export class ModalSubmitFields {
+   constructor(components: ModalActionRowComponent[][]);
+@@ -2232,6 +2249,7 @@ export class ModalSubmitFields {
+   public getField<T extends ComponentType>(customId: string, type: T): { type: T } & ModalData;
+   public getField(customId: string, type?: ComponentType): ModalData;
+   public getTextInputValue(customId: string): string;
++  public getSelectMenuValues(customId: string): string[];
+ }
+
+ export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
+@@ -2508,6 +2526,7 @@ export class StringSelectMenuInteraction<
+     StringSelectMenuComponent,
+     APIStringSelectComponent,
+     StringSelectMenuComponent | APIStringSelectComponent,
++    StringSelectMenuComponent | APIStringSelectComponent,
+     StringSelectMenuComponent | APIStringSelectComponent
+   >;
+   public componentType: ComponentType.StringSelect;
+@@ -2531,6 +2550,7 @@ export class UserSelectMenuInteraction<
+     UserSelectMenuComponent,
+     APIUserSelectComponent,
+     UserSelectMenuComponent | APIUserSelectComponent,
++    UserSelectMenuComponent | APIUserSelectComponent,
+     UserSelectMenuComponent | APIUserSelectComponent
+   >;
+   public componentType: ComponentType.UserSelect;
+@@ -2554,6 +2574,7 @@ export class RoleSelectMenuInteraction<
+     RoleSelectMenuComponent,
+     APIRoleSelectComponent,
+     RoleSelectMenuComponent | APIRoleSelectComponent,
++    RoleSelectMenuComponent | APIRoleSelectComponent,
+     RoleSelectMenuComponent | APIRoleSelectComponent
+   >;
+   public componentType: ComponentType.RoleSelect;
+@@ -2573,6 +2594,7 @@ export class MentionableSelectMenuInteraction<
+     MentionableSelectMenuComponent,
+     APIMentionableSelectComponent,
+     MentionableSelectMenuComponent | APIMentionableSelectComponent,
++    MentionableSelectMenuComponent | APIMentionableSelectComponent,
+     MentionableSelectMenuComponent | APIMentionableSelectComponent
+   >;
+   public componentType: ComponentType.MentionableSelect;
+@@ -2597,6 +2619,7 @@ export class ChannelSelectMenuInteraction<
+     ChannelSelectMenuComponent,
+     APIChannelSelectComponent,
+     ChannelSelectMenuComponent | APIChannelSelectComponent,
++    ChannelSelectMenuComponent | APIChannelSelectComponent,
+     ChannelSelectMenuComponent | APIChannelSelectComponent
+   >;
+   public componentType: ComponentType.ChannelSelect;
+@@ -3732,7 +3755,7 @@ export class ApplicationCommandPermissionsManager<
+     },
+   ): Promise<boolean>;
+   public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
+-  public fetch(options: BaseOptions): Promise<Collection<Snowflake, ApplicationCommandPermissions[]>>;
++  public fetch(options?: BaseOptions): Promise<Collection<Snowflake, ApplicationCommandPermissions[]>>;
+   public remove(
+     options:
+       | (FetchSingleOptions & {
+@@ -4262,11 +4285,6 @@ export interface BaseApplicationCommandData {
+   nsfw?: boolean;
+ }
+
+-export interface AttachmentData {
+-  name?: string;
+-  description?: string;
+-}
+-
+ export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
+
+ export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
+@@ -5802,14 +5820,7 @@ export interface BaseMessageOptions {
+   content?: string;
+   embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
+   allowedMentions?: MessageMentionOptions;
+-  files?: (
+-    | BufferResolvable
+-    | Stream
+-    | JSONEncodable<APIAttachment>
+-    | Attachment
+-    | AttachmentBuilder
+-    | AttachmentPayload
+-  )[];
++  files?: (BufferResolvable | Stream | AttachmentPayload | JSONEncodable<AttachmentPayload>)[];
+   components?: (
+     | JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>
+     | ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
