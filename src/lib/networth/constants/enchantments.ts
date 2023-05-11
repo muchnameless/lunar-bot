@@ -127,24 +127,30 @@ export const enum Enchantment {
 	Vicious = 'vicious',
 }
 
+const BOWS = new Set([
+	//
+	Enchantment.Overload,
+	Enchantment.Power,
+	Enchantment.UltimateSoulEater,
+]);
+
+const GARDENING = new Set([
+	//
+	Enchantment.Replenish,
+]);
+
 /**
  * @see https://github.com/Altpapier/SkyHelper-Networth/blob/master/constants/applicationWorth.js#L35
  */
 export const ITEM_SPECIFIC_IGNORED_ENCHANTS = {
-	[ItemId.Bonemerang]: new Set([
-		//
-		Enchantment.Overload,
-		Enchantment.Power,
-		Enchantment.UltimateSoulEater,
-	]),
-	[ItemId.DeathBow]: new Set([
-		//
-		Enchantment.Overload,
-		Enchantment.Power,
-		Enchantment.UltimateSoulEater,
-	]),
+	[ItemId.Bonemerang]: BOWS,
+	[ItemId.DeathBow]: BOWS,
 	[ItemId.PromisingShovel]: new Set([
 		//
 		Enchantment.Efficiency,
 	]),
+	[ItemId.GardeningAxe]: GARDENING,
+	[ItemId.GardeningHoe]: GARDENING,
+	[ItemId.AdvancedGardeningAxe]: GARDENING,
+	[ItemId.AdvancedGardeningHoe]: GARDENING,
 } as const satisfies Partial<Record<ItemId, Set<Enchantment>>>;
