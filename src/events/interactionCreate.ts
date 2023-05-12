@@ -628,7 +628,7 @@ export default class extends DiscordJSEvent {
 							? error
 							: error instanceof MojangAPIError || error instanceof GenericHTTPError
 							? formatAPIError(error)
-							: `an unexpected error occurred while executing the command: ${error}`,
+							: `an unexpected error occurred: ${error}`,
 					ephemeral: true,
 					allowedMentions: { parse: [], repliedUser: true },
 				});

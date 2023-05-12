@@ -771,7 +771,7 @@ export default class extends ChatBridgeEvent {
 					return void hypixelMessage.author.send(error.message);
 				}
 
-				void hypixelMessage.author.send(`an unexpected error occurred: ${error.message}`);
+				void hypixelMessage.author.send(`an unexpected error occurred: ${error}`);
 			}
 		}
 	}
