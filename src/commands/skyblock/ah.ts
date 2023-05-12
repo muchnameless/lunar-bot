@@ -17,7 +17,6 @@ import { getSkyBlockProfiles, hypixel } from '#api';
 import { PROFILE_EMOJIS, STATS_URL_BASE, type FindProfileStrategy } from '#constants';
 import {
 	findSkyBlockProfile,
-	formatError,
 	formatSkyBlockProfileName,
 	getUuidAndIgn,
 	seconds,
@@ -81,77 +80,13 @@ export default class AhCommand extends ApplicationCommand {
 				url: `${STATS_URL_BASE}${ign}/${PROFILE_NAME.split(' ', 1)[0]}`,
 			});
 
-		try {
-			const auctions = (await hypixel.skyblock.auction.profile(profileId)).auctions
-				.filter(({ claimed }) => !claimed)
-				.sort(({ end: a }, { end: b }) => a - b);
+		const auctions = (await hypixel.skyblock.auction.profile(profileId)).auctions
+			.filter(({ claimed }) => !claimed)
+			.sort(({ end: a }, { end: b }) => a - b);
 
-			if (!auctions.length) {
-				return {
-					embeds: [embed.setDescription('no unclaimed auctions')],
-					components: [
-						new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-							new StringSelectMenuBuilder()
-								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
-								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
-								.addOptions(profiles),
-						),
-					],
-				};
-			}
-
-			let totalCoins = 0;
-			let totalUnclaimedCoins = 0;
-			let endedAuctions = 0;
-
-			for (const {
-				highest_bid_amount,
-				starting_bid,
-				bids,
-				end,
-				item_name,
-				tier,
-				bin,
-				item_lore,
-				auctioneer,
-			} of auctions) {
-				embed.addFields({
-					name: `${item_name}${
-						item_name.startsWith('[Lvl ')
-							? ` - ${upperCaseFirstChar(tier)}`
-							: item_name === 'Enchanted Book'
-							? (() => {
-									const matched = item_lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
-									if (matched) return ` - ${matched}`;
-									return '';
-							  })()
-							: ''
-					}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
-					value: `${
-						bin
-							? `BIN: ${shortenNumber(starting_bid)}`
-							: bids.length
-							? ((totalCoins += highest_bid_amount), `Highest Bid: ${shortenNumber(highest_bid_amount)}`)
-							: `Starting Bid: ${shortenNumber(starting_bid)}`
-					} • ${
-						end < Date.now()
-							? highest_bid_amount
-								? (++endedAuctions, (totalUnclaimedCoins += highest_bid_amount), 'sold')
-								: 'expired'
-							: 'ends'
-					} ${time(seconds.fromMilliseconds(end), TimestampStyles.RelativeTime)}`,
-				});
-			}
-
-			totalCoins += totalUnclaimedCoins;
-
+		if (!auctions.length) {
 			return {
-				embeds: [
-					embed.setDescription(stripIndents`
-						unclaimed: ${shortenNumber(totalUnclaimedCoins)} coins from ${endedAuctions} auctions
-						total: ${shortenNumber(totalCoins)} coins from ${auctions.length} auctions
-					`),
-				],
+				embeds: [embed.setDescription('no unclaimed auctions')],
 				components: [
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
@@ -161,17 +96,69 @@ export default class AhCommand extends ApplicationCommand {
 					),
 				],
 			};
-		} catch (error) {
-			logger.error(error, '[AH CMD]');
-
-			return {
-				embeds: [
-					embed //
-						.setColor(this.config.get('EMBED_RED'))
-						.setDescription(formatError(error)),
-				],
-			};
 		}
+
+		let totalCoins = 0;
+		let totalUnclaimedCoins = 0;
+		let endedAuctions = 0;
+
+		for (const {
+			highest_bid_amount,
+			starting_bid,
+			bids,
+			end,
+			item_name,
+			tier,
+			bin,
+			item_lore,
+			auctioneer,
+		} of auctions) {
+			embed.addFields({
+				name: `${item_name}${
+					item_name.startsWith('[Lvl ')
+						? ` - ${upperCaseFirstChar(tier)}`
+						: item_name === 'Enchanted Book'
+						? (() => {
+								const matched = item_lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
+								if (matched) return ` - ${matched}`;
+								return '';
+						  })()
+						: ''
+				}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
+				value: `${
+					bin
+						? `BIN: ${shortenNumber(starting_bid)}`
+						: bids.length
+						? ((totalCoins += highest_bid_amount), `Highest Bid: ${shortenNumber(highest_bid_amount)}`)
+						: `Starting Bid: ${shortenNumber(starting_bid)}`
+				} • ${
+					end < Date.now()
+						? highest_bid_amount
+							? (++endedAuctions, (totalUnclaimedCoins += highest_bid_amount), 'sold')
+							: 'expired'
+						: 'ends'
+				} ${time(seconds.fromMilliseconds(end), TimestampStyles.RelativeTime)}`,
+			});
+		}
+
+		totalCoins += totalUnclaimedCoins;
+
+		return {
+			embeds: [
+				embed.setDescription(stripIndents`
+						unclaimed: ${shortenNumber(totalUnclaimedCoins)} coins from ${endedAuctions} auctions
+						total: ${shortenNumber(totalCoins)} coins from ${auctions.length} auctions
+					`),
+			],
+			components: [
+				new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+					new StringSelectMenuBuilder()
+						.setCustomId(this._generateCustomId({ uuid, ign, userId }))
+						.setPlaceholder(`Profile: ${PROFILE_NAME}`)
+						.addOptions(profiles),
+				),
+			],
+		};
 	}
 
 	/**
@@ -253,68 +240,63 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		try {
-			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
-			const profiles = await getSkyBlockProfiles(uuid);
-			const embed = this.client.defaultEmbed;
+		const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
+		const profiles = await getSkyBlockProfiles(uuid);
+		const embed = this.client.defaultEmbed;
 
-			if (!profiles?.length) return this._handleNoProfiles(interaction, embed, ign, uuid);
+		if (!profiles?.length) return this._handleNoProfiles(interaction, embed, ign, uuid);
 
-			const PROFILE_NAME_INPUT = interaction.options.getString('profile');
+		const PROFILE_NAME_INPUT = interaction.options.getString('profile');
 
-			let profileId: string | undefined;
-			let profileName: string;
+		let profileId: string | undefined;
+		let profileName: string;
 
-			if (PROFILE_NAME_INPUT) {
-				profileName = PROFILE_NAME_INPUT;
-				profileId = profiles.find(({ cute_name }) => cute_name === PROFILE_NAME_INPUT)?.profile_id;
+		if (PROFILE_NAME_INPUT) {
+			profileName = PROFILE_NAME_INPUT;
+			profileId = profiles.find(({ cute_name }) => cute_name === PROFILE_NAME_INPUT)?.profile_id;
 
-				if (!profileId) {
-					return InteractionUtil.reply(interaction, {
-						embeds: [
-							embed
-								.setAuthor({
-									name: ign,
-									iconURL: uuidToBustURL(uuid),
-									url: `${STATS_URL_BASE}${ign}`,
-								})
-								.setDescription(`no SkyBlock profile named \`${profileName}\``),
-						],
-						components: [
-							new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-								new StringSelectMenuBuilder()
-									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
-									.setPlaceholder(`Profile: ${profileName} (invalid)`)
-									.addOptions(this._generateProfileOptions(profiles)),
-							),
-						],
-					});
-				}
-			} else {
-				const mainProfile = findSkyBlockProfile(
-					profiles,
-					uuid,
-					interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
-				);
-
-				if (!mainProfile) return this._handleNoProfiles(interaction, embed, ign, uuid);
-
-				({ profile_id: profileId, cute_name: profileName } = mainProfile);
+			if (!profileId) {
+				return InteractionUtil.reply(interaction, {
+					embeds: [
+						embed
+							.setAuthor({
+								name: ign,
+								iconURL: uuidToBustURL(uuid),
+								url: `${STATS_URL_BASE}${ign}`,
+							})
+							.setDescription(`no SkyBlock profile named \`${profileName}\``),
+					],
+					components: [
+						new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+							new StringSelectMenuBuilder()
+								.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
+								.setPlaceholder(`Profile: ${profileName} (invalid)`)
+								.addOptions(this._generateProfileOptions(profiles)),
+						),
+					],
+				});
 			}
-
-			return InteractionUtil.reply(
-				interaction,
-				await this._generateReply({
-					ign,
-					uuid,
-					profileId,
-					profiles: this._generateProfileOptions(profiles),
-					userId: interaction.user.id,
-				}),
+		} else {
+			const mainProfile = findSkyBlockProfile(
+				profiles,
+				uuid,
+				interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
 			);
-		} catch (error) {
-			logger.error(error, '[AH CMD]');
-			return InteractionUtil.reply(interaction, formatError(error));
+
+			if (!mainProfile) return this._handleNoProfiles(interaction, embed, ign, uuid);
+
+			({ profile_id: profileId, cute_name: profileName } = mainProfile);
 		}
+
+		return InteractionUtil.reply(
+			interaction,
+			await this._generateReply({
+				ign,
+				uuid,
+				profileId,
+				profiles: this._generateProfileOptions(profiles),
+				userId: interaction.user.id,
+			}),
+		);
 	}
 }

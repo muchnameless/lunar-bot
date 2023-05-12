@@ -2,8 +2,7 @@ import type { Components } from '@zikeji/hypixel';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { hypixel } from '#api';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { escapeIgn, formatDecimalNumber, formatError, getUuidAndIgn } from '#functions';
-import { logger } from '#logger';
+import { escapeIgn, formatDecimalNumber, getUuidAndIgn } from '#functions';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import type { Awaited } from '#types';
 import { InteractionUtil } from '#utils';
@@ -89,17 +88,10 @@ export default abstract class BaseStatsCommand extends DualCommand {
 	 * @param interaction
 	 */
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		try {
-			return InteractionUtil.reply(
-				interaction,
-				this.finaliseReply(
-					this._generateReply(await this._fetchData(interaction, interaction.options.getString('ign'))),
-				),
-			);
-		} catch (error) {
-			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return InteractionUtil.reply(interaction, formatError(error));
-		}
+		return InteractionUtil.reply(
+			interaction,
+			this.finaliseReply(this._generateReply(await this._fetchData(interaction, interaction.options.getString('ign')))),
+		);
 	}
 
 	/**
@@ -108,15 +100,10 @@ export default abstract class BaseStatsCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	public override async minecraftRun(hypixelMessage: HypixelUserMessage) {
-		try {
-			return hypixelMessage.reply(
-				this.finaliseReply(
-					this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0])),
-				),
-			);
-		} catch (error) {
-			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return hypixelMessage.reply(formatError(error));
-		}
+		return hypixelMessage.reply(
+			this.finaliseReply(
+				this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0])),
+			),
+		);
 	}
 }

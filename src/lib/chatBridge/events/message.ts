@@ -1,4 +1,5 @@
 import { setTimeout } from 'node:timers';
+import { GenericHTTPError } from '@zikeji/hypixel';
 import ms from 'ms';
 import { getSkyBlockProfiles, mojang } from '#api';
 import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
@@ -17,7 +18,8 @@ import {
 	unmuteSuccess,
 } from '#chatBridge/constants/index.js';
 import { ErrorCode, UnicodeEmoji } from '#constants';
-import { assertNever, commaListOr, formatError, getLilyWeight, stringToMS, type WeightData } from '#functions';
+import { assertNever, commaListOr, formatAPIError, getLilyWeight, stringToMS, type WeightData } from '#functions';
+import { MojangAPIError } from '#lib/structures/errors/MojangAPIError.js';
 import { logger } from '#logger';
 import type MathsCommand from '#root/commands/general/maths.js';
 import { ChannelUtil, GuildMemberUtil, MessageUtil } from '#utils';
@@ -670,7 +672,7 @@ export default class extends ChatBridgeEvent {
 					await this.client.permissions.assert(hypixelGuild.discordId, commandId, member);
 				} catch (error) {
 					logger.error(error);
-					void hypixelMessage.author.send(formatError(error));
+					void hypixelMessage.author.send(`${error}`);
 					return;
 				}
 			}
@@ -747,6 +749,10 @@ export default class extends ChatBridgeEvent {
 			// user facing errors
 			if (typeof error === 'string') {
 				return void hypixelMessage.author.send(error);
+			}
+
+			if (error instanceof MojangAPIError || error instanceof GenericHTTPError) {
+				return void hypixelMessage.author.send(formatAPIError(error));
 			}
 
 			if (error instanceof Error) {

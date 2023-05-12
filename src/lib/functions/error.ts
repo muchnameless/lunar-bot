@@ -10,4 +10,4 @@ export const isAbortError = (error: unknown): error is Error => error instanceof
  *
  * @param error
  */
-export const formatError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/s, '');
+export const formatAPIError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/s, '');

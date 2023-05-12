@@ -1,8 +1,6 @@
-import type { Components } from '@zikeji/hypixel';
 import { SlashCommandBuilder, userMention, type ChatInputCommandInteraction } from 'discord.js';
 import { Op } from 'sequelize';
 import { hypixel, mojang } from '#api';
-import { formatError } from '#functions';
 import { logger } from '#logger';
 import { ApplicationCommand } from '#structures/commands/ApplicationCommand.js';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
@@ -47,19 +45,9 @@ export default class VerifyCommand extends ApplicationCommand {
 			return InteractionUtil.reply(interaction, 'you are already linked with this discord account');
 		}
 
-		let uuid: string;
-		let ign: string;
-		let hypixelPlayer: Components.Schemas.NullablePlayer;
-
 		// API requests
-		try {
-			({ uuid, ign } = await mojang.ignOrUuid(IGN));
-
-			({ player: hypixelPlayer } = await hypixel.player.uuid(uuid));
-		} catch (error) {
-			logger.error(error, '[VERIFY CMD]');
-			return InteractionUtil.reply(interaction, formatError(error));
-		}
+		const { uuid, ign } = await mojang.ignOrUuid(IGN);
+		const { player: hypixelPlayer } = await hypixel.player.uuid(uuid);
 
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 

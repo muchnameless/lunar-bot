@@ -1,5 +1,6 @@
 import { setTimeout } from 'node:timers';
 import { ApplicationCommandOptionLimits } from '@sapphire/discord-utilities';
+import { GenericHTTPError } from '@zikeji/hypixel';
 import {
 	ActionRowBuilder,
 	ApplicationCommandType,
@@ -32,10 +33,12 @@ import ms from 'ms';
 import { CustomIdKey, GUILD_ID_ALL } from '#constants';
 import {
 	assertNever,
+	formatAPIError,
 	handleLeaderboardButtonInteraction,
 	handleLeaderboardSelectMenuInteraction,
 	sortCache,
 } from '#functions';
+import { MojangAPIError } from '#lib/structures/errors/MojangAPIError.js';
 import { logger } from '#logger';
 import type LeaderboardCommand from '#root/commands/guild/leaderboard.js';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
@@ -620,18 +623,24 @@ export default class extends DiscordJSEvent {
 			if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
 				// reply with error
 				return void InteractionUtil.reply(interaction, {
-					content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
+					content:
+						typeof error === 'string'
+							? error
+							: error instanceof MojangAPIError || error instanceof GenericHTTPError
+							? formatAPIError(error)
+							: `an unexpected error occurred while executing the command: ${error}`,
 					ephemeral: true,
 					allowedMentions: { parse: [], repliedUser: true },
 				});
 			}
 
 			// autocomplete -> send empty choices
-			if (interaction.responded) return;
-			try {
-				await interaction.respond([]);
-			} catch (_error) {
-				logger.error({ err: _error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
+			if (!interaction.responded) {
+				try {
+					await interaction.respond([]);
+				} catch (_error) {
+					logger.error({ err: _error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
+				}
 			}
 		}
 	}

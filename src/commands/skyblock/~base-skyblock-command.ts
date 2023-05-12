@@ -8,7 +8,6 @@ import {
 	commaListOr,
 	escapeIgn,
 	findSkyBlockProfile,
-	formatError,
 	formatSkyBlockProfileName,
 	getUuidAndIgn,
 	seconds,
@@ -162,24 +161,19 @@ export default abstract class BaseSkyBlockCommand extends DualCommand {
 	 * @param interaction
 	 */
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		try {
-			return InteractionUtil.reply(
-				interaction,
-				this._finaliseReply(
-					await this._generateReply(
-						await this._fetchData(
-							interaction,
-							interaction.options.getString('ign'),
-							interaction.options.getString('profile'),
-							interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
-						),
+		return InteractionUtil.reply(
+			interaction,
+			this._finaliseReply(
+				await this._generateReply(
+					await this._fetchData(
+						interaction,
+						interaction.options.getString('ign'),
+						interaction.options.getString('profile'),
+						interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
 					),
 				),
-			);
-		} catch (error) {
-			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return InteractionUtil.reply(interaction, formatError(error));
-		}
+			),
+		);
 	}
 
 	/**
@@ -214,17 +208,12 @@ export default abstract class BaseSkyBlockCommand extends DualCommand {
 			}
 		}
 
-		try {
-			return hypixelMessage.reply(
-				this._finaliseReply(
-					await this._generateReply(
-						await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
-					),
+		return hypixelMessage.reply(
+			this._finaliseReply(
+				await this._generateReply(
+					await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
 				),
-			);
-		} catch (error) {
-			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return hypixelMessage.reply(formatError(error));
-		}
+			),
+		);
 	}
 }

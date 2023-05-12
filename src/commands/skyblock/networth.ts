@@ -6,7 +6,7 @@ import BaseSkyBlockCommand, {
 } from './~base-skyblock-command.js';
 import type { HypixelUserMessage, ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES, UnicodeEmoji } from '#constants';
-import { autocorrect, formatError, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
+import { autocorrect, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
 import { logger } from '#logger';
 import { getNetworth } from '#networth/networth.js';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
@@ -68,25 +68,20 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 	 * @param interaction
 	 */
 	public override async chatInputRun(interaction: ChatInputCommandInteraction<'cachedOrDM'>) {
-		try {
-			return InteractionUtil.reply(
-				interaction,
-				this._finaliseReply(
-					await this._generateReply(
-						await this._fetchData(
-							interaction,
-							interaction.options.getString('ign'),
-							interaction.options.getString('profile'),
-							interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
-						),
-						interaction.options.getBoolean(includeAuctionsOptionName) ?? false,
+		return InteractionUtil.reply(
+			interaction,
+			this._finaliseReply(
+				await this._generateReply(
+					await this._fetchData(
+						interaction,
+						interaction.options.getString('ign'),
+						interaction.options.getString('profile'),
+						interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
 					),
+					interaction.options.getBoolean(includeAuctionsOptionName) ?? false,
 				),
-			);
-		} catch (error) {
-			logger.error(error, '[NETWORTH CMD]');
-			return InteractionUtil.reply(interaction, formatError(error));
-		}
+			),
+		);
 	}
 
 	/**
@@ -121,18 +116,13 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 			}
 		}
 
-		try {
-			return hypixelMessage.reply(
-				this._finaliseReply(
-					await this._generateReply(
-						await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
-						auctions ?? false,
-					),
+		return hypixelMessage.reply(
+			this._finaliseReply(
+				await this._generateReply(
+					await this._fetchData(hypixelMessage, IGN, profileName, latest ? FindProfileStrategy.LastActive : null),
+					auctions ?? false,
 				),
-			);
-		} catch (error) {
-			logger.error(error, '[NETWORTH CMD]');
-			return hypixelMessage.reply(formatError(error));
-		}
+			),
+		);
 	}
 }

@@ -1,8 +1,7 @@
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import { hypixel, mojang } from '#api';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
-import { escapeIgn, formatError, seconds } from '#functions';
-import { logger } from '#logger';
+import { escapeIgn, seconds } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { requiredIgnOption } from '#structures/commands/commonOptions.js';
@@ -32,20 +31,12 @@ export default class GuildOfCommand extends DualCommand {
 	 * @param ignOrUuid
 	 */
 	private async _generateReply(ignOrUuid: string) {
-		try {
-			const { uuid, ign } = await mojang.ignOrUuid(ignOrUuid);
-			const { guild } = await hypixel.guild.player(uuid);
+		const { uuid, ign } = await mojang.ignOrUuid(ignOrUuid);
+		const { guild } = await hypixel.guild.player(uuid);
 
-			if (!guild) return `${ign}: no guild`;
+		if (!guild) return `${escapeIgn(ign)}: no guild`;
 
-			return `${escapeIgn(ign)}: ${guild.name}${guild.tag ? ` [${guild.tag}]` : ''} ${
-				guild.members.length
-			}/125 members`;
-		} catch (error) {
-			logger.error(error, '[GUILD OF CMD]');
-
-			return formatError(error);
-		}
+		return `${escapeIgn(ign)}: ${guild.name}${guild.tag ? ` [${guild.tag}]` : ''} ${guild.members.length}/125 members`;
 	}
 
 	/**
