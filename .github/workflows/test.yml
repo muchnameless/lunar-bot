@@ -26,7 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Volta
-        uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
+        uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
       - name: Install dependencies
         uses: ./.github/actions/yarn-install
@@ -51,7 +51,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Volta
-        uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
+        uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
       - name: Restore dependencies
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
@@ -81,7 +81,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Volta
-        uses: volta-cli/action@25888009cd70dbe17a140f1c56d93f8c09f7bcef # v4
+        uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
       - name: Restore dependencies
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
