@@ -39,6 +39,7 @@ import { ChatManager } from './ChatManager.js';
 import { ForwardRejectionType } from './DiscordChatManager.js';
 import { MC_CLIENT_VERSION } from '#constants';
 import type { Player } from '#db/models/Player.js';
+import { noConcurrency } from '#decorators';
 import {
 	asyncReplace,
 	cleanFormattedNumber,
@@ -473,6 +474,7 @@ export class MinecraftChatManager extends ChatManager {
 	 *
 	 * @param force whether to connect even if the bot encountered a critical error previously
 	 */
+	@noConcurrency
 	public async connect(force = false) {
 		if (!force && this.state === MinecraftChatManagerState.Errored) {
 			throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
@@ -503,11 +505,13 @@ export class MinecraftChatManager extends ChatManager {
 	 *
 	 * @param options
 	 */
+	@noConcurrency
 	public async reconnect({
-		loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10)),
 		force = false,
+		loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10)),
 	} = {}) {
-		if (!force && [MinecraftChatManagerState.Reconnecting, MinecraftChatManagerState.Errored].includes(this.state)) {
+		if (!force && this.state !== MinecraftChatManagerState.Errored) {
+			logger.warn({ ...this.logInfo, loginDelay }, '[CHATBRIDGE RECONNECT]: errored');
 			return this;
 		}
 

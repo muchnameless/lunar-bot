@@ -16,7 +16,7 @@ export default class extends ChatBridgeEvent {
 		if (error instanceof Error) {
 			// handle login errors
 			if (error.message.startsWith('Failed to obtain profile data')) {
-				void this.chatBridge.minecraft.reconnect({ force: true });
+				void this.chatBridge.minecraft.reconnect();
 			} else if (error.message.startsWith('Invalid credentials')) {
 				this.chatBridge.minecraft.disconnect(true);
 
