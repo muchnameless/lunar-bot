@@ -510,7 +510,7 @@ export class MinecraftChatManager extends ChatManager {
 		force = false,
 		loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10)),
 	} = {}) {
-		if (!force && this.state !== MinecraftChatManagerState.Errored) {
+		if (!force && this.state === MinecraftChatManagerState.Errored) {
 			logger.warn({ ...this.logInfo, loginDelay }, '[CHATBRIDGE RECONNECT]: errored');
 			return this;
 		}
