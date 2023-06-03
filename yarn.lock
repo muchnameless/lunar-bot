@@ -5713,7 +5713,7 @@ __metadata:
     lint-staged: ^13.2.2
     luxon: ^3.3.0
     minecraft-data: ^3.34.0
-    minecraft-protocol: 1.41.2
+    minecraft-protocol: 1.42.0
     ms: 3.0.0-canary.1
     pg: ^8.11.0
     pg-hstore: ^2.3.4
@@ -6353,7 +6353,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^3.0.0, minecraft-data@npm:^3.21.0, minecraft-data@npm:^3.34.0":
+"minecraft-data@npm:^3.0.0, minecraft-data@npm:^3.34.0":
   version: 3.34.0
   resolution: "minecraft-data@npm:3.34.0"
   checksum: e763713d4c656fce7f41f3e546691177bd00f95668264dd2d9e6be4f893e2338f802f9c72f7124c3b2bfda88c4351c0968e7e72dc9b48e03bb938a6e2fa3ff6d
@@ -6367,9 +6367,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:1.41.2":
-  version: 1.41.2
-  resolution: "minecraft-protocol@npm:1.41.2"
+"minecraft-protocol@npm:1.42.0":
+  version: 1.42.0
+  resolution: "minecraft-protocol@npm:1.42.0"
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -6378,7 +6378,7 @@ __metadata:
     endian-toggle: ^0.0.0
     lodash.get: ^4.1.2
     lodash.merge: ^4.3.0
-    minecraft-data: ^3.21.0
+    minecraft-data: ^3.34.0
     minecraft-folder-path: ^1.2.0
     node-fetch: ^2.6.1
     node-rsa: ^0.4.2
@@ -6389,13 +6389,13 @@ __metadata:
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 43a9cb3faf54c4846743f9c7129e4cf0ee197db803a89a917632972ecc8426aae5790173c235409fa9c82126018fe3839c0c920d61fbf354969776d65db9b795
+  checksum: 89aca5a6aca4ab404a4249cabca85fe888f0c59103b41cbe9ca90e67767c035a94b6993168e941c6fd9daf9934a0f6a7b2078e9ee924766545634af57383279b
   languageName: node
   linkType: hard
 
-"minecraft-protocol@patch:minecraft-protocol@npm:1.41.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
-  version: 1.41.2
-  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.41.2#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.41.2&hash=85fe55&locator=lunar-bot%40workspace%3A."
+"minecraft-protocol@patch:minecraft-protocol@npm:1.42.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.42.0
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.42.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch::version=1.42.0&hash=85fe55&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/readable-stream": ^2.3.13
     aes-js: ^3.1.2
@@ -6404,7 +6404,7 @@ __metadata:
     endian-toggle: ^0.0.0
     lodash.get: ^4.1.2
     lodash.merge: ^4.3.0
-    minecraft-data: ^3.21.0
+    minecraft-data: ^3.34.0
     minecraft-folder-path: ^1.2.0
     node-fetch: ^2.6.1
     node-rsa: ^0.4.2
@@ -6415,7 +6415,7 @@ __metadata:
     readable-stream: ^4.1.0
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 0d198b1a8f8a10eb3a16f0ed555982ad662dd9f42fe5c8d97996069cfaf7368a3abe97206528565562901e3ed06597d947c4115cff9d4be999ed73e4f2a34658
+  checksum: 5fc65cf2e4ee4eeb5f2d2db78b71edbfcc5e6e3c2fa13a9335f49c727cd7ffdd3b8d832c132b339a72b8d2b416bdece80e304a1566ecbde889f3c70f25d708b5
   languageName: node
   linkType: hard
 
