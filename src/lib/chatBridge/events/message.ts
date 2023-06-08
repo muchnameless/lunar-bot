@@ -752,7 +752,7 @@ export default class extends ChatBridgeEvent {
 			}
 
 			if (error instanceof MojangAPIError || error instanceof GenericHTTPError) {
-				return void hypixelMessage.author.send(formatAPIError(error));
+				return void hypixelMessage.reply(formatAPIError(error));
 			}
 
 			if (error instanceof Error) {
