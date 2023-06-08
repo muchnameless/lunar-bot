@@ -6,6 +6,7 @@ import {
 	ButtonStyle,
 	codeBlock,
 	EmbedBuilder,
+	hyperlink,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 	time,
@@ -325,9 +326,10 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 		});
 
 		return InteractionUtil.reply(interaction, {
-			content: `leaderboard timed out, use ${`[${UnicodeEmoji.Reload}](${
-				(interaction.message as Message).url
-			})`} to refresh the data`,
+			content: `leaderboard timed out, use ${hyperlink(
+				UnicodeEmoji.Reload,
+				interaction.message.url,
+			)} to refresh the data`,
 			ephemeral: true,
 		});
 	}
@@ -653,7 +655,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 					{ padding: temp2 },
 				)}`;
 			totalStats = oneLine`
-				${formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight!, 0) / playerData.length)} 
+				${formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight!, 0) / playerData.length)}
 				[${formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length)}]
 			`;
 			break;
