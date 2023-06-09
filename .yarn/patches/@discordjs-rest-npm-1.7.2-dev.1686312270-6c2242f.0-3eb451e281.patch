@@ -1,9 +1,9 @@
-diff --git a/dist/CDN-e02926e8.d.ts b/dist/CDN-e02926e8.d.ts
+diff --git a/dist/CDN-71b60987.d.ts b/dist/CDN-71b60987.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..17264ef1ef45814f13f94ca944fd721d5bc35dfa
+index 0000000000000000000000000000000000000000..4409db1b647d26d69b592ec7f79d6eb7f6513488
 --- /dev/null
-+++ b/dist/CDN-e02926e8.d.ts
-@@ -0,0 +1,747 @@
++++ b/dist/CDN-71b60987.d.ts
+@@ -0,0 +1,750 @@
 +import { Buffer } from 'node:buffer';
 +import { EventEmitter } from 'node:events';
 +import { Readable } from 'node:stream';
@@ -190,7 +190,7 @@ index 0000000000000000000000000000000000000000..17264ef1ef45814f13f94ca944fd721d
 +    /**
 +     * The cdn path
 +     *
-+     * @defaultValue 'https://cdn.discordapp.com'
++     * @defaultValue `'https://cdn.discordapp.com'`
 +     */
 +    cdn: string;
 +    /**
@@ -639,11 +639,14 @@ index 0000000000000000000000000000000000000000..17264ef1ef45814f13f94ca944fd721d
 +     */
 +    channelIcon(channelId: string, iconHash: string, options?: Readonly<BaseImageURLOptions>): string;
 +    /**
-+     * Generates the default avatar URL for a discriminator.
++     * Generates a default avatar URL
 +     *
-+     * @param discriminator - The discriminator modulo 5
++     * @param index - The default avatar index
++     * @remarks
++     * To calculate the index for a user do `(userId >> 22) % 6`,
++     * or `discriminator % 5` if they're using the legacy username system.
 +     */
-+    defaultAvatar(discriminator: number): string;
++    defaultAvatar(index: number): string;
 +    /**
 +     * Generates a discovery splash URL for a guild's discovery splash.
 +     *
@@ -752,15 +755,16 @@ index 0000000000000000000000000000000000000000..17264ef1ef45814f13f94ca944fd721d
 +
 +export { APIRequest as A, BaseImageURLOptions as B, CDN as C, DefaultUserAgent as D, HandlerRequestData as H, InternalRequest as I, MakeURLOptions as M, OverwrittenMimeTypes as O, RawFile as R, StickerExtension as S, RateLimitData as a, ResponseLike as b, ImageURLOptions as c, RequestData as d, RequestHeaders as e, RequestMethod as f, RouteLike as g, RouteData as h, HashData as i, RESTOptions as j, RateLimitQueueFilter as k, InvalidRequestWarningData as l, RestEvents as m, REST as n, DefaultUserAgentAppendix as o, DefaultRestOptions as p, RESTEvents as q, ALLOWED_EXTENSIONS as r, ALLOWED_STICKER_EXTENSIONS as s, ALLOWED_SIZES as t, ImageExtension as u, ImageSize as v, BurstHandlerMajorIdKey as w };
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index bbca49b0e712f3daa64d82105031684e15192410..f4d69103fe84040072f34845e75e8e4be5b565bf 100644
+index 1ec2dccdb3648d86c93b36a91f4d0e1dc9085166..48af4a317fcb20ec3ea902c1ba81e587aedab272 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
-@@ -1,12 +1,12 @@
--import { R as RawFile, I as InternalRequest, a as RateLimitData, b as ResponseLike } from './CDN-f8818ced.js';
--export { s as ALLOWED_EXTENSIONS, u as ALLOWED_SIZES, t as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, x as BurstHandlerMajorIdKey, C as CDN, q as DefaultRestOptions, D as DefaultUserAgent, p as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, v as ImageExtension, w as ImageSize, c as ImageURLOptions, m as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, o as REST, r as RESTEvents, k as RESTOptions, l as RateLimitQueueFilter, d as RequestData, e as RequestHeaders, j as RequestManager, f as RequestMethod, n as RestEvents, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-f8818ced.js';
-+import { R as RawFile, I as InternalRequest, a as RateLimitData, b as ResponseLike } from './CDN-e02926e8.js';
-+export { r as ALLOWED_EXTENSIONS, t as ALLOWED_SIZES, s as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, w as BurstHandlerMajorIdKey, C as CDN, p as DefaultRestOptions, D as DefaultUserAgent, o as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, u as ImageExtension, v as ImageSize, c as ImageURLOptions, l as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, n as REST, q as RESTEvents, j as RESTOptions, k as RateLimitQueueFilter, d as RequestData, e as RequestHeaders, f as RequestMethod, m as RestEvents, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-e02926e8.js';
+@@ -1,13 +1,13 @@
+-import { R as RawFile, I as InternalRequest, a as RateLimitData, b as ResponseLike } from './CDN-5391fe24.js';
+-export { s as ALLOWED_EXTENSIONS, u as ALLOWED_SIZES, t as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, x as BurstHandlerMajorIdKey, C as CDN, q as DefaultRestOptions, D as DefaultUserAgent, p as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, v as ImageExtension, w as ImageSize, c as ImageURLOptions, m as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, o as REST, r as RESTEvents, k as RESTOptions, l as RateLimitQueueFilter, d as RequestData, e as RequestHeaders, j as RequestManager, f as RequestMethod, n as RestEvents, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-5391fe24.js';
++import { R as RawFile, I as InternalRequest, a as RateLimitData, b as ResponseLike } from './CDN-71b60987.js';
++export { r as ALLOWED_EXTENSIONS, t as ALLOWED_SIZES, s as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, w as BurstHandlerMajorIdKey, C as CDN, p as DefaultRestOptions, D as DefaultUserAgent, o as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, u as ImageExtension, v as ImageSize, c as ImageURLOptions, l as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, n as REST, q as RESTEvents, j as RESTOptions, k as RateLimitQueueFilter, d as RequestData, e as RequestHeaders, f as RequestMethod, m as RestEvents, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-71b60987.js';
  import { URLSearchParams } from 'node:url';
+ import { Snowflake } from 'discord-api-types/v10';
 +import 'node:buffer';
  import 'node:events';
  import 'node:stream';
@@ -772,7 +776,7 @@ index bbca49b0e712f3daa64d82105031684e15192410..f4d69103fe84040072f34845e75e8e4b
  interface DiscordErrorFieldInformation {
      code: string;
 diff --git a/dist/index.js b/dist/index.js
-index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa6279340305 100644
+index a9f1666c77ebf0c904ff869dc277882421f54345..5a45f61e89883842d6f9dc74b93de4cbf5a3b272 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -128,7 +128,6 @@ __export(src_exports, {
@@ -781,9 +785,9 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
    RateLimitError: () => RateLimitError,
 -  RequestManager: () => RequestManager,
    RequestMethod: () => RequestMethod,
+   calculateUserDefaultAvatarIndex: () => calculateUserDefaultAvatarIndex,
    makeURLSearchParams: () => makeURLSearchParams,
-   parseResponse: () => parseResponse,
-@@ -522,7 +521,7 @@ var RateLimitError = class extends Error {
+@@ -526,7 +525,7 @@ var RateLimitError = class extends Error {
  };
  __name(RateLimitError, "RateLimitError");
  
@@ -792,7 +796,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
  init_cjs_shims();
  var import_node_buffer2 = require("buffer");
  var import_node_events = require("events");
-@@ -631,7 +630,7 @@ function incrementInvalidCount(manager) {
+@@ -639,7 +638,7 @@ function incrementInvalidCount(manager) {
  __name(incrementInvalidCount, "incrementInvalidCount");
  async function makeNetworkRequest(manager, routeId, url, options, requestData, retries) {
    const controller = new AbortController();
@@ -801,7 +805,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
    if (requestData.signal) {
      if (requestData.signal.aborted)
        controller.abort();
-@@ -655,7 +654,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+@@ -663,7 +662,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
      manager.emit(
        "response" /* Response */,
        {
@@ -810,7 +814,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
          path: routeId.original,
          route: routeId.bucketRoute,
          options,
-@@ -733,10 +732,10 @@ var BurstHandler = class {
+@@ -741,10 +740,10 @@ var BurstHandler = class {
     * @param retries - The number of retries this request has already attempted (recursion)
     */
    async runRequest(routeId, url, options, requestData, retries = 0) {
@@ -823,7 +827,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -779,7 +778,7 @@ var BurstHandler = class {
+@@ -787,7 +786,7 @@ var BurstHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -832,7 +836,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
        }
        return handled;
      }
-@@ -947,7 +946,7 @@ var SequentialHandler = class {
+@@ -955,7 +954,7 @@ var SequentialHandler = class {
        const rateLimitData = {
          timeToReset: timeout,
          limit: limit2,
@@ -841,7 +845,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
          hash: this.hash,
          url,
          route: routeId.bucketRoute,
-@@ -968,10 +967,10 @@ var SequentialHandler = class {
+@@ -976,10 +975,10 @@ var SequentialHandler = class {
        this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
      }
      this.manager.globalRemaining--;
@@ -854,7 +858,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -1065,7 +1064,7 @@ var SequentialHandler = class {
+@@ -1073,7 +1072,7 @@ var SequentialHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -863,7 +867,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
        }
        return handled;
      }
-@@ -1073,17 +1072,18 @@ var SequentialHandler = class {
+@@ -1081,17 +1080,18 @@ var SequentialHandler = class {
  };
  __name(SequentialHandler, "SequentialHandler");
  
@@ -884,7 +888,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
    /**
     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
     * performed by this manager.
-@@ -1113,12 +1113,16 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1121,12 +1121,16 @@ var RequestManager = class extends import_node_events.EventEmitter {
    hashTimer;
    handlerTimer;
    options;
@@ -902,7 +906,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -1143,7 +1147,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1151,7 +1155,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
            return shouldSweep;
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
@@ -911,7 +915,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -1153,12 +1157,12 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1161,12 +1165,12 @@ var RequestManager = class extends import_node_events.EventEmitter {
            const { inactive } = val;
            if (inactive) {
              sweptHandlers.set(key, val);
@@ -926,7 +930,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      }
    }
    /**
-@@ -1179,27 +1183,6 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1187,27 +1191,6 @@ var RequestManager = class extends import_node_events.EventEmitter {
      this.#token = token;
      return this;
    }
@@ -954,7 +958,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
    /**
     * Creates a new rate limit handler from a hash, based on the hash and the major parameter
     *
-@@ -1228,7 +1211,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1236,7 +1219,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
      }
      const headers = {
        ...this.options.headers,
@@ -963,7 +967,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      };
      if (request2.auth !== false) {
        if (!this.#token) {
-@@ -1241,7 +1224,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1249,7 +1232,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
      }
      const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
      let finalBody;
@@ -972,7 +976,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      if (request2.files?.length) {
        const formData = new FormData();
        for (const [index, file] of request2.files.entries()) {
-@@ -1281,7 +1264,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1289,7 +1272,7 @@ var RequestManager = class extends import_node_events.EventEmitter {
      const method = request2.method.toUpperCase();
      const fetchOptions = {
        // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
@@ -981,7 +985,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
        headers: { ...request2.headers, ...additionalHeaders, ...headers },
        method,
        // Prioritize setting an agent per request, use the agent for this instance otherwise.
-@@ -1301,91 +1284,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
+@@ -1309,91 +1292,13 @@ var RequestManager = class extends import_node_events.EventEmitter {
    clearHandlerSweeper() {
      (0, import_node_timers2.clearInterval)(this.handlerTimer);
    }
@@ -1074,7 +1078,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1394,7 +1299,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1402,7 +1307,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1083,7 +1087,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1403,7 +1308,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1411,7 +1316,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1092,7 +1096,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1412,7 +1317,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1420,7 +1325,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1101,7 +1105,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1421,7 +1326,7 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1429,7 +1334,7 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1110,7 +1114,7 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1439,7 +1344,51 @@ var REST = class extends import_node_events2.EventEmitter {
+@@ -1447,7 +1352,51 @@ var REST = class extends import_node_events2.EventEmitter {
     * @param options - Request options
     */
    async raw(options) {
@@ -1163,19 +1167,19 @@ index a0b9320d334efe36aedded19981cb87808939da1..36687065f1c188b5191dfaa89962fa62
    }
  };
  __name(REST, "REST");
-@@ -1462,7 +1411,6 @@ var version = "1.7.2-dev.1683504576-5b8d535.0";
+@@ -1470,7 +1419,6 @@ var version = "1.7.2-dev.1686312270-6c2242f.0";
    REST,
    RESTEvents,
    RateLimitError,
 -  RequestManager,
    RequestMethod,
+   calculateUserDefaultAvatarIndex,
    makeURLSearchParams,
-   parseResponse,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f825b32f4 100644
+index fe49e6414afef5e4f7afab0e6cc9ec90ad669676..773893cc25c0efe3adbcd84a8376b7598b594662 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -478,7 +478,7 @@ var RateLimitError = class extends Error {
+@@ -481,7 +481,7 @@ var RateLimitError = class extends Error {
  };
  __name(RateLimitError, "RateLimitError");
  
@@ -1184,7 +1188,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
  init_esm_shims();
  import { Blob as Blob2, Buffer as Buffer3 } from "node:buffer";
  import { EventEmitter } from "node:events";
-@@ -587,7 +587,7 @@ function incrementInvalidCount(manager) {
+@@ -594,7 +594,7 @@ function incrementInvalidCount(manager) {
  __name(incrementInvalidCount, "incrementInvalidCount");
  async function makeNetworkRequest(manager, routeId, url, options, requestData, retries) {
    const controller = new AbortController();
@@ -1193,7 +1197,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
    if (requestData.signal) {
      if (requestData.signal.aborted)
        controller.abort();
-@@ -611,7 +611,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+@@ -618,7 +618,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
      manager.emit(
        "response" /* Response */,
        {
@@ -1202,7 +1206,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
          path: routeId.original,
          route: routeId.bucketRoute,
          options,
-@@ -689,10 +689,10 @@ var BurstHandler = class {
+@@ -696,10 +696,10 @@ var BurstHandler = class {
     * @param retries - The number of retries this request has already attempted (recursion)
     */
    async runRequest(routeId, url, options, requestData, retries = 0) {
@@ -1215,7 +1219,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -735,7 +735,7 @@ var BurstHandler = class {
+@@ -742,7 +742,7 @@ var BurstHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -1224,7 +1228,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
        }
        return handled;
      }
-@@ -903,7 +903,7 @@ var SequentialHandler = class {
+@@ -910,7 +910,7 @@ var SequentialHandler = class {
        const rateLimitData = {
          timeToReset: timeout,
          limit: limit2,
@@ -1233,7 +1237,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
          hash: this.hash,
          url,
          route: routeId.bucketRoute,
-@@ -924,10 +924,10 @@ var SequentialHandler = class {
+@@ -931,10 +931,10 @@ var SequentialHandler = class {
        this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
      }
      this.manager.globalRemaining--;
@@ -1246,7 +1250,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -1021,7 +1021,7 @@ var SequentialHandler = class {
+@@ -1028,7 +1028,7 @@ var SequentialHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -1255,7 +1259,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
        }
        return handled;
      }
-@@ -1029,17 +1029,18 @@ var SequentialHandler = class {
+@@ -1036,17 +1036,18 @@ var SequentialHandler = class {
  };
  __name(SequentialHandler, "SequentialHandler");
  
@@ -1276,7 +1280,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
    /**
     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
     * performed by this manager.
-@@ -1069,12 +1070,16 @@ var RequestManager = class extends EventEmitter {
+@@ -1076,12 +1077,16 @@ var RequestManager = class extends EventEmitter {
    hashTimer;
    handlerTimer;
    options;
@@ -1294,7 +1298,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -1099,7 +1104,7 @@ var RequestManager = class extends EventEmitter {
+@@ -1106,7 +1111,7 @@ var RequestManager = class extends EventEmitter {
            return shouldSweep;
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
@@ -1303,7 +1307,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -1109,12 +1114,12 @@ var RequestManager = class extends EventEmitter {
+@@ -1116,12 +1121,12 @@ var RequestManager = class extends EventEmitter {
            const { inactive } = val;
            if (inactive) {
              sweptHandlers.set(key, val);
@@ -1318,7 +1322,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      }
    }
    /**
-@@ -1135,27 +1140,6 @@ var RequestManager = class extends EventEmitter {
+@@ -1142,27 +1147,6 @@ var RequestManager = class extends EventEmitter {
      this.#token = token;
      return this;
    }
@@ -1346,7 +1350,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
    /**
     * Creates a new rate limit handler from a hash, based on the hash and the major parameter
     *
-@@ -1184,7 +1168,7 @@ var RequestManager = class extends EventEmitter {
+@@ -1191,7 +1175,7 @@ var RequestManager = class extends EventEmitter {
      }
      const headers = {
        ...this.options.headers,
@@ -1355,7 +1359,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      };
      if (request2.auth !== false) {
        if (!this.#token) {
-@@ -1197,7 +1181,7 @@ var RequestManager = class extends EventEmitter {
+@@ -1204,7 +1188,7 @@ var RequestManager = class extends EventEmitter {
      }
      const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
      let finalBody;
@@ -1364,7 +1368,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      if (request2.files?.length) {
        const formData = new FormData();
        for (const [index, file] of request2.files.entries()) {
-@@ -1237,7 +1221,7 @@ var RequestManager = class extends EventEmitter {
+@@ -1244,7 +1228,7 @@ var RequestManager = class extends EventEmitter {
      const method = request2.method.toUpperCase();
      const fetchOptions = {
        // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
@@ -1373,7 +1377,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
        headers: { ...request2.headers, ...additionalHeaders, ...headers },
        method,
        // Prioritize setting an agent per request, use the agent for this instance otherwise.
-@@ -1257,91 +1241,13 @@ var RequestManager = class extends EventEmitter {
+@@ -1264,91 +1248,13 @@ var RequestManager = class extends EventEmitter {
    clearHandlerSweeper() {
      clearInterval(this.handlerTimer);
    }
@@ -1466,7 +1470,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1350,7 +1256,7 @@ var REST = class extends EventEmitter2 {
+@@ -1357,7 +1263,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1475,7 +1479,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1359,7 +1265,7 @@ var REST = class extends EventEmitter2 {
+@@ -1366,7 +1272,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1484,7 +1488,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1368,7 +1274,7 @@ var REST = class extends EventEmitter2 {
+@@ -1375,7 +1281,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1493,7 +1497,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1377,7 +1283,7 @@ var REST = class extends EventEmitter2 {
+@@ -1384,7 +1290,7 @@ var REST = class extends EventEmitter2 {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -1502,7 +1506,7 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1395,7 +1301,51 @@ var REST = class extends EventEmitter2 {
+@@ -1402,7 +1308,51 @@ var REST = class extends EventEmitter2 {
     * @param options - Request options
     */
    async raw(options) {
@@ -1555,22 +1559,22 @@ index 1f3c6fa449194509488a958b37ba57fdc9bdc30f..5df87a152fbfcd4f5391ad7233f8d73f
    }
  };
  __name(REST, "REST");
-@@ -1417,7 +1367,6 @@ export {
+@@ -1424,7 +1374,6 @@ export {
    REST,
    RESTEvents,
    RateLimitError,
 -  RequestManager,
    RequestMethod,
+   calculateUserDefaultAvatarIndex,
    makeURLSearchParams,
-   parseResponse,
 diff --git a/dist/strategies/undiciRequest.d.ts b/dist/strategies/undiciRequest.d.ts
-index f84480c8ad20923f89f699e8f3bea2dc1ad95f18..2d1ab73b4b0d6f5177e71376e7e7d783b7cefc49 100644
+index 93720b4b1ea2a57e25e2755a8760e828037cac34..fce9e4b388f0e8340bcf9bbde5e6b33cc6fcf8bd 100644
 --- a/dist/strategies/undiciRequest.d.ts
 +++ b/dist/strategies/undiciRequest.d.ts
 @@ -1,11 +1,11 @@
  import { request, RequestInit } from 'undici';
--import { b as ResponseLike } from '../CDN-f8818ced.js';
-+import { b as ResponseLike } from '../CDN-e02926e8.js';
+-import { b as ResponseLike } from '../CDN-5391fe24.js';
++import { b as ResponseLike } from '../CDN-71b60987.js';
 +import 'node:buffer';
  import 'node:events';
  import 'node:stream';
