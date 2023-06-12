@@ -71,7 +71,7 @@
 		"@sapphire/type": "^2.2.5-next",
 		"@sapphire/utilities": "3.12.1-next.3dc3cfc3.0",
 		"@skyra/jaro-winkler": "^1.1.0",
-		"@zikeji/hypixel": "github:muchnameless/node-hypixel#375c9c2a661858a03bf54f038d6d52daeb1c5806",
+		"@zikeji/hypixel": "https://github.com/muchnameless/node-hypixel#375c9c2a661858a03bf54f038d6d52daeb1c5806",
 		"bufferutil": "^4.0.7",
 		"chart.js": "^4.3.0",
 		"common-tags": "^1.8.2",

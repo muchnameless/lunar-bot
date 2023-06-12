@@ -1590,7 +1590,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zikeji/hypixel@github:muchnameless/node-hypixel#375c9c2a661858a03bf54f038d6d52daeb1c5806":
+"@zikeji/hypixel@https://github.com/muchnameless/node-hypixel#375c9c2a661858a03bf54f038d6d52daeb1c5806":
   version: 3.1.1
   resolution: "@zikeji/hypixel@https://github.com/muchnameless/node-hypixel.git#commit=375c9c2a661858a03bf54f038d6d52daeb1c5806"
   dependencies:
@@ -5697,7 +5697,7 @@ __metadata:
     "@types/node": ^20.1.0
     "@types/pg": ^8.10.2
     "@types/prettier": ^2.7.3
-    "@zikeji/hypixel": "github:muchnameless/node-hypixel#375c9c2a661858a03bf54f038d6d52daeb1c5806"
+    "@zikeji/hypixel": "https://github.com/muchnameless/node-hypixel#375c9c2a661858a03bf54f038d6d52daeb1c5806"
     bufferutil: ^4.0.7
     chart.js: ^4.3.0
     common-tags: ^1.8.2
