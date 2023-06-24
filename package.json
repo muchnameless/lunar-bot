@@ -57,7 +57,7 @@
 		"@sapphire/timer-manager": "1.0.1-next.9cc8bd0d.0",
 		"discord-api-types": "0.37.36-next.0d47c69.1677334692",
 		"discord.js": "patch:discord.js@14.11.1-dev.1687608259-75d91b5.0#./.yarn/patches/discord.js-npm-14.11.1-dev.1686787797-b61e4fb.0-6fd26a8490.patch",
-		"minecraft-protocol": "patch:minecraft-protocol@npm:1.42.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
+		"minecraft-protocol": "patch:minecraft-protocol@npm:1.43.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
 	"dependencies": {
 		"@discordjs/rest": "1.7.2-dev.1687608258-75d91b5.0",
@@ -83,7 +83,7 @@
 		"lilyweight": "^2.7.0",
 		"luxon": "^3.3.0",
 		"minecraft-data": "^3.37.0",
-		"minecraft-protocol": "1.42.0",
+		"minecraft-protocol": "1.43.0",
 		"ms": "3.0.0-canary.1",
 		"pg": "^8.11.0",
 		"pg-hstore": "^2.3.4",
