@@ -320,7 +320,7 @@ export class ChatBridge extends EventEmitter {
 	 * @param signal
 	 * @returns true if the ChatBridge handled the message, false otherwise
 	 */
-	public async handleDiscordMessage(message: DiscordMessage, signal: AbortSignal) {
+	public async handleDiscordMessage(message: DiscordMessage, signal: AbortSignal): Promise<boolean> {
 		if (!this.hypixelGuild?.chatBridgeEnabled) {
 			// linked but not enabled
 			if (this.hypixelGuild || this.minecraft.state === MinecraftChatManagerState.Errored) {
