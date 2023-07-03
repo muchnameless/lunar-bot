@@ -514,7 +514,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 	}
 
 	// candy + skins
-	if (pet.candyUsed) {
+	if (pet.candyUsed && pet.exp - pet.candyUsed * 1_000_000 < maxXP) {
 		if (!NON_REDUCED_PETS.has(pet.type)) {
 			price = Math.max(price * PriceModifier.PetWithCandy, price - (level >= 100 ? 5_000_000 : 2_500_000));
 		}

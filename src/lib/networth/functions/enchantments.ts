@@ -109,6 +109,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Prosecute:
 		case Enchantment.Prosperity:
 		case Enchantment.Protection:
+		case Enchantment.Reflection:
 		case Enchantment.Rejuvenate:
 		case Enchantment.Respite:
 		case Enchantment.Sharpness:
@@ -147,12 +148,15 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 
 		// combinable 3->5
 		case Enchantment.BigBrain:
+		case Enchantment.Quantum:
 		case Enchantment.Vicious:
 			if (level <= 5) return { itemId: `ENCHANTMENT_${enchantment}_3`, count: 2 ** (level - 3) };
 			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 };
 
 		// combinable 4->5
 		case Enchantment.Cayenne:
+		case Enchantment.Transylvanian:
+		case Enchantment.UltimateTheOne:
 			if (level <= 5) return { itemId: `ENCHANTMENT_${enchantment}_4`, count: 2 ** (level - 4) };
 			return { itemId: `ENCHANTMENT_${enchantment}_${level}`, count: 1 };
 
