@@ -257,10 +257,10 @@ export default class EvalCommand extends BaseOwnerCommand {
 					}
 				}
 
-				input = format(lines.map((part) => part.join('}')).join(';'), EvalCommand.PRETTIER_OPTIONS);
+				input = await format(lines.map((part) => part.join('}')).join(';'), EvalCommand.PRETTIER_OPTIONS);
 				toEvaluate = `(async () => { ${input} })()`;
 			} else {
-				input = format(_input.trim(), EvalCommand.PRETTIER_OPTIONS);
+				input = await format(_input.trim(), EvalCommand.PRETTIER_OPTIONS);
 				toEvaluate = input;
 			}
 		} catch (error) {

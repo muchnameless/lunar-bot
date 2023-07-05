@@ -459,8 +459,8 @@ async function getLeaderboardMessageOptions(
 				const player = playerData[index]!;
 				playerList += `\n${stripIndent`
 					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${UnicodeEmoji.VarY}` : ''}${
-					player.isStaff ? ' [STAFF]' : ''
-				}
+						player.isStaff ? ' [STAFF]' : ''
+					}
 						 > ${getEntry(player)}`}`; // needs to be in one line or entries are separated by a newline
 			} else {
 				playerList += '\n\u200B\n\u200B';
@@ -803,8 +803,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			Current weight requirement: ${formatNumber(weightReq!)}
 			Guild average: ${totalStats}
 			Below reqs: ${playerData.filter(({ totalWeight }) => totalWeight! < weightReq!).length} / ${
-			hypixelGuild.players.size
-		} members
+				hypixelGuild.players.size
+			} members
 
 			"activity weight" - gained [total] weight - guild xp
 		`;
@@ -822,8 +822,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			'ada',
 			stripIndent`
 				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${
-				IS_COMPETITION_LB && playerRequesting.paid ? ` ${UnicodeEmoji.VarY}` : ''
-			}
+					IS_COMPETITION_LB && playerRequesting.paid ? ` ${UnicodeEmoji.VarY}` : ''
+				}
 					 > ${getEntry(playerRequesting)}
 			`,
 		);
@@ -840,8 +840,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 						3,
 						'0',
 					)} : ${playerRequestingConverted.ign}${
-					IS_COMPETITION_LB && playerRequesting.paid ? ` ${UnicodeEmoji.VarY}` : ''
-				}
+						IS_COMPETITION_LB && playerRequesting.paid ? ` ${UnicodeEmoji.VarY}` : ''
+					}
 						 > ${getEntry(playerRequestingConverted)}
 				`,
 			);

@@ -142,10 +142,10 @@ export class DiscordManager {
 							case '!': {
 								const TO_SEARCH = match.groups!.name!.toLowerCase();
 								const memberOrUser =
+									// members
 									this.chatBridge.hypixelGuild?.discordGuild?.members.cache.find(
 										({ displayName }) => displayName.toLowerCase() === TO_SEARCH,
-									) ?? // members
-									this.client.users.cache.find(({ username }) => username.toLowerCase() === TO_SEARCH); // users
+									) ?? this.client.users.cache.find(({ username }) => username.toLowerCase() === TO_SEARCH); // users
 
 								return memberOrUser?.toString() ?? match[0]!;
 							}

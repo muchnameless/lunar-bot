@@ -324,16 +324,16 @@ export class DatabaseManager {
 			'ansi',
 			stripIndents`
 				Collectors: ${ansi('/ah', AnsiFormat.Bold, AnsiColour.Red)} ${commaListOr(
-				taxCollectors.activeCollectors
-					.map(({ ign }) => ansi(ign, AnsiFormat.Bold, AnsiColour.Red))
-					.sort(compareAlphabetically),
-			)}
+					taxCollectors.activeCollectors
+						.map(({ ign }) => ansi(ign, AnsiFormat.Bold, AnsiColour.Red))
+						.sort(compareAlphabetically),
+				)}
 				Amount: ${ansi(formatNumber(config.get('TAX_AMOUNT')), AnsiFormat.Bold, AnsiColour.Cyan)}
 				Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${ansi(item, AnsiFormat.Bold, AnsiColour.Blue)}'`)}
 				Paid: ${ansi(PAID_COUNT, AnsiColour.Cyan)} / ${ansi(PLAYER_COUNT, AnsiColour.Cyan)} | ${ansi(
-				Math.round((PAID_COUNT / PLAYER_COUNT) * 100),
-				AnsiColour.Cyan,
-			)} % | collected amount: ${ansi(TOTAL_COINS, AnsiColour.Cyan)} $
+					Math.round((PAID_COUNT / PLAYER_COUNT) * 100),
+					AnsiColour.Cyan,
+				)} % | collected amount: ${ansi(TOTAL_COINS, AnsiColour.Cyan)} $
 				Available auctions:
 				${availableAuctionsLog?.join('\n') ?? '\u200B -'}
 			`,

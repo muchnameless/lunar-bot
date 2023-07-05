@@ -23,8 +23,8 @@ const CAMPFIRE_TALISMAN_GOD = {
 	[ItemId.JungleWood]: 240_000,
 } as const satisfies CraftingRecipe;
 
-const BRONZE_MEDAL = (count = 1) => ({} as const);
-const SILVER_MEDAL = (count = 1) => ({} as const);
+const BRONZE_MEDAL = (count = 1) => ({}) as const;
+const SILVER_MEDAL = (count = 1) => ({}) as const;
 
 /**
  * SkyBlock item crafting recipes, holds an array of { id, count } for each item
