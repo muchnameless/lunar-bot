@@ -83,10 +83,10 @@ export default class XpCommand extends ApplicationCommand {
 				value: stripIndents`
 						${codeBlock('Skills')}
 							Average skill level: ${bold(formatDecimalNumber(skillAverage))} [${bold(formatDecimalNumber(trueAverage))}] - ${bold(
-					'Δ',
-				)}: ${bold(formatDecimalNumber(skillAverage - skillAverageOffset))} [${bold(
-					formatDecimalNumber(trueAverage - trueAverageOffset),
-				)}]`,
+								'Δ',
+							)}: ${bold(formatDecimalNumber(skillAverage - skillAverageOffset))} [${bold(
+								formatDecimalNumber(trueAverage - trueAverageOffset),
+							)}]`,
 			});
 
 		// skills
@@ -133,8 +133,8 @@ export default class XpCommand extends ApplicationCommand {
 			value: stripIndents`
 				${codeBlock('Slayer')}
 				Total slayer xp: ${bold(formatNumber(TOTAL_SLAYER_XP))} - ${bold('Δ')}: ${bold(
-				formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)),
-			)}`,
+					formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)),
+				)}`,
 			inline: false,
 		});
 
@@ -200,11 +200,11 @@ export default class XpCommand extends ApplicationCommand {
 				name: 'Lily Weight',
 				value: stripIndents`
 					${bold('Total')}: ${formatDecimalNumber(totalWeight)} [ ${formatDecimalNumber(weight)} + ${formatDecimalNumber(
-					overflow,
-				)} ]
+						overflow,
+					)} ]
 					${bold('Δ:')} ${formatDecimalNumber(totalWeight - totalWeightOffset)} [ ${formatDecimalNumber(
-					weight - weightOffset,
-				)} + ${formatDecimalNumber(overflow - overflowOffset)} ]
+						weight - weightOffset,
+					)} + ${formatDecimalNumber(overflow - overflowOffset)} ]
 				`,
 				inline: true,
 			},

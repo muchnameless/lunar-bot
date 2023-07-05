@@ -89,8 +89,8 @@ export default class DebugCommand extends ApplicationCommand {
 							value: stripIndents`
 								Guilds: ${formatNumber(guilds.cache.size)}
 								Channels: ${formatNumber(channels.cache.size)} (${formatNumber(
-								channels.cache.filter((channel) => channel.isThread() || channel.type === ChannelType.DM).size,
-							)} temporary)
+									channels.cache.filter((channel) => channel.isThread() || channel.type === ChannelType.DM).size,
+								)} temporary)
 								${channels.cache
 									.filter((channel): channel is DMChannel => channel.type === ChannelType.DM)
 									.map(
