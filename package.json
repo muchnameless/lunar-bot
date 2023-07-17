@@ -33,7 +33,7 @@
 		"db": "env-cmd node dist/scripts/dbInit.js --alter | pino-pretty",
 		"deploy:commands": "env-cmd node dist/scripts/deploy.js | pino-pretty",
 		"dev": "yarn build; yarn start:dev",
-		"format": "prettier --cache --write . && eslint src --ext ts --fix --cache",
+		"format": "prettier --cache --write . && eslint src --ext ts --cache --fix",
 		"lint": "eslint src --ext ts --cache",
 		"migrate": "env-cmd ley",
 		"prepare": "husky install",
@@ -114,7 +114,6 @@
 		"ley": "^0.8.1",
 		"lint-staged": "^13.2.3",
 		"pino-pretty": "^10.0.1",
-		"pretty-quick": "^3.1.3",
 		"sort-package-json": "^2.5.1",
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.1.6"
