@@ -1,7 +1,7 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { EmbedLimits } from '@sapphire/discord-utilities';
 import { CronJob } from 'cron';
-import { codeBlock, Collection, EmbedBuilder, embedLength, type APIEmbed, type JSONEncodable } from 'discord.js';
+import { codeBlock, Collection, EmbedBuilder, type APIEmbed, type JSONEncodable } from 'discord.js';
 import { Op, type Attributes, type CreationAttributes, type FindOptions } from 'sequelize';
 import type { HypixelGuild } from '../models/HypixelGuild.js';
 import type {
@@ -364,7 +364,7 @@ export class PlayerManager extends ModelManager<Player> {
 			});
 
 			let embed = createEmbed(guildName, playerCount, ignChanges.length);
-			let currentLength = embedLength(embed.data);
+			let currentLength = embed.length;
 
 			while (logParts.length) {
 				const name = `${'new ign'.padEnd(150, '\u00A0')}\u200B`;
@@ -379,7 +379,7 @@ export class PlayerManager extends ModelManager<Player> {
 				} else {
 					embed = createEmbed(guildName, playerCount, ignChanges.length);
 					embed.addFields({ name, value });
-					currentLength = embedLength(embed.data);
+					currentLength = embed.length;
 				}
 			}
 		}
@@ -468,7 +468,7 @@ export class PlayerManager extends ModelManager<Player> {
 			});
 
 			let embed = createEmbed(guild, mainProfileUpdate.length);
-			let currentLength = embedLength(embed.data);
+			let currentLength = embed.length;
 
 			while (logParts.length) {
 				const name = `${'main profile update'.padEnd(150, '\u00A0')}\u200B`;
@@ -483,7 +483,7 @@ export class PlayerManager extends ModelManager<Player> {
 				} else {
 					embed = createEmbed(guild, mainProfileUpdate.length);
 					embed.addFields({ name, value });
-					currentLength = embedLength(embed.data);
+					currentLength = embed.length;
 				}
 			}
 		}

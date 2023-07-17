@@ -5,7 +5,6 @@ import {
 	bold,
 	codeBlock,
 	EmbedBuilder,
-	embedLength,
 	type APIEmbed,
 	type Collection,
 	type Guild,
@@ -1013,7 +1012,7 @@ export class HypixelGuild extends Model<
 			};
 
 			let embed = createEmbed();
-			let currentLength = embedLength(embed.data);
+			let currentLength = embed.length;
 
 			for (let index = 0; index < EMBED_COUNT; ++index) {
 				let joinedLogElement = joinedLog[index] ?? '';
@@ -1055,7 +1054,7 @@ export class HypixelGuild extends Model<
 				} else {
 					embed = createEmbed();
 					embed.addFields(newFields);
-					currentLength = embedLength(embed.data);
+					currentLength = embed.length;
 				}
 			}
 
