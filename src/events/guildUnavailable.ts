@@ -1,6 +1,4 @@
-import { setInterval, clearInterval } from 'node:timers';
 import { Events, type ClientEvents, type Snowflake } from 'discord.js';
-import { minutes } from '#functions';
 import { logger } from '#logger';
 import { DiscordJSEvent } from '#structures/events/DiscordJSEvent.js';
 import { GuildUtil } from '#utils';
@@ -27,24 +25,5 @@ export default class extends DiscordJSEvent {
 				void player.setDiscordMember(null, false);
 			}
 		}
-
-		// refetch members
-		const oldInterval = this._intervals.get(guild.id);
-
-		if (oldInterval) {
-			oldInterval.refresh();
-			return;
-		}
-
-		const interval = setInterval(async () => {
-			try {
-				await GuildUtil.fetchAllMembers(guild);
-				clearInterval(interval);
-			} catch (error) {
-				logger.error({ err: error, ...GuildUtil.logInfo(guild) }, '[GUILD UNAVAILABLE]');
-			}
-		}, minutes(5));
-
-		this._intervals.set(guild.id, interval);
 	}
 }

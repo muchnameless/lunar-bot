@@ -16,7 +16,5 @@ export default class extends DiscordJSEvent {
 		unavailableGuilds?: ClientEvents[Events.ShardReady][1],
 	) {
 		logger.info({ unavailableGuilds, shardId }, '[SHARD READY]');
-
-		void this.client.fetchAllMembers();
 	}
 }

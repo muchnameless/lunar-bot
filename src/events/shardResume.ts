@@ -16,7 +16,5 @@ export default class extends DiscordJSEvent {
 		replayedEvents: ClientEvents[Events.ShardResume][1],
 	) {
 		logger.info({ replayedEvents, shardId }, '[SHARD RESUME]');
-
-		void this.client.fetchAllMembers();
 	}
 }

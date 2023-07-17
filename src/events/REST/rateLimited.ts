@@ -19,7 +19,7 @@ export default class extends RESTEvent {
 		// adding and removing single reactions are 1/250ms, so get rate limited each time
 		if (
 			rateLimitInfo.route.endsWith(':reaction') &&
-			rateLimitInfo.timeToReset <= 250 + this.client.rest.options.offset
+			rateLimitInfo.timeToReset <= 250 + this.client.rest.requestManager.options.offset
 		) {
 			return;
 		}

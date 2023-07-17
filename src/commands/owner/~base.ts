@@ -8,7 +8,6 @@ import {
 	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	embedLength,
 	TextInputBuilder,
 	TextInputStyle,
 	type AttachmentPayload,
@@ -151,7 +150,7 @@ export default abstract class BaseOwnerCommand extends ApplicationCommand {
 		const cleanedOutput = this._cleanOutput(output);
 
 		let files: JSONEncodable<AttachmentPayload>[] | undefined;
-		let length = embedLength(responseEmbed.data) + '\u200B'.length + (footerField?.length ?? 0);
+		let length = responseEmbed.length + '\u200B'.length + (footerField?.length ?? 0);
 
 		// add output fields till embed character limit is reached
 		for (const [index, value] of splitForEmbedFields(cleanedOutput, code).entries()) {
@@ -199,7 +198,7 @@ export default abstract class BaseOwnerCommand extends ApplicationCommand {
 		const CLEANED_OUTPUT = this._cleanOutput(inspect(error, { depth: Number.POSITIVE_INFINITY }));
 
 		let files: JSONEncodable<AttachmentPayload>[] | undefined;
-		let length = embedLength(responseEmbed.data) + '\u200B'.length + (footerField?.length ?? 0);
+		let length = responseEmbed.length + '\u200B'.length + (footerField?.length ?? 0);
 
 		for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
 			const name = index ? '\u200B' : 'Error';
