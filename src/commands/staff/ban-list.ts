@@ -83,7 +83,7 @@ export default class BanListCommand extends ApplicationCommand {
 					const { ign } = await mojang.uuid(minecraftUuid);
 
 					return stripIndents`
-						${bold(hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${minecraftUuid}`))}
+						${bold(hyperlink(ign, `${STATS_URL_BASE}${minecraftUuid}`))}
 						${reason}
 					`;
 				} catch (error) {
@@ -213,7 +213,7 @@ export default class BanListCommand extends ApplicationCommand {
 							.setColor(this.config.get('EMBED_RED'))
 							.setDescription(
 								stripIndents`
-								${bold(hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is on the ban list for
+								${bold(hyperlink(ign, `${STATS_URL_BASE}${uuid}`))} is on the ban list for
 								${existingBan.reason}
 							`,
 							)

@@ -69,7 +69,6 @@ import {
 	type XPOffsets,
 } from '#constants';
 import {
-	escapeIgn,
 	findSkyBlockProfile,
 	getLilyWeightRaw,
 	getSenitherDungeonWeight,
@@ -936,7 +935,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * returns a string with the ign and guild name
 	 */
 	public get info(): NonAttribute<string> {
-		return `${hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}` as const; // •
+		return `${hyperlink(this.ign, this.url)} | ${this.guildName}` as const; // •
 	}
 
 	/**
