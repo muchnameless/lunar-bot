@@ -1,0 +1,2824 @@
+diff --git a/dist/index.d.mts b/dist/index.d.mts
+index ba3a73fe92f87b1712d2b187009808001f409354..7453152a79a9f2ddb1d7f8de669f21939825a808 100644
+--- a/dist/index.d.mts
++++ b/dist/index.d.mts
+@@ -1,12 +1,271 @@
+-import { a as RawFile, I as InternalRequest, b as RateLimitData, R as ResponseLike } from './CDN-03f06673.js';
+-export { t as ALLOWED_EXTENSIONS, v as ALLOWED_SIZES, u as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, y as BurstHandlerMajorIdKey, C as CDN, r as DefaultRestOptions, D as DefaultUserAgent, q as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, w as ImageExtension, x as ImageSize, c as ImageURLOptions, m as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, p as REST, s as RESTEvents, k as RESTOptions, l as RateLimitQueueFilter, d as RequestData, e as RequestHeaders, j as RequestManager, f as RequestMethod, n as RestEvents, o as RestEventsMap, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-03f06673.js';
++import { R as ResponseLike, a as RawFile, I as InternalRequest, b as RateLimitData, c as RestEventsMap, H as HashData, d as IHandler, e as RESTOptions, f as RouteLike, g as RequestData } from './types-095b5d51.js';
++export { A as APIRequest, m as HandlerRequestData, j as InvalidRequestWarningData, i as RateLimitQueueFilter, k as RequestHeaders, l as RequestMethod, h as RestEvents, n as RouteData } from './types-095b5d51.js';
+ import * as url from 'url';
+ import { Snowflake } from 'discord-api-types/v10';
+-import 'undici';
++import * as undici from 'undici';
++import { Dispatcher } from 'undici';
++import { Collection } from '@discordjs/collection';
++import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
+ import 'node:stream';
+ import 'node:stream/web';
+-import '@discordjs/collection';
+-import '@vladfrangu/async_event_emitter';
++
++declare const DefaultUserAgent: `DiscordBot (https://discord.js.org, ${string})`;
++/**
++ * The default string to append onto the user agent.
++ */
++declare const DefaultUserAgentAppendix: string;
++declare const DefaultRestOptions: {
++    readonly agent: null;
++    readonly api: "https://discord.com/api";
++    readonly authPrefix: "Bot";
++    readonly cdn: "https://cdn.discordapp.com";
++    readonly headers: {};
++    readonly invalidRequestWarningInterval: 0;
++    readonly globalRequestsPerSecond: 50;
++    readonly offset: 50;
++    readonly rejectOnRateLimit: null;
++    readonly retries: 3;
++    readonly timeout: 15000;
++    readonly userAgentAppendix: string;
++    readonly version: "10";
++    readonly hashSweepInterval: 14400000;
++    readonly hashLifetime: 86400000;
++    readonly handlerSweepInterval: 3600000;
++    readonly makeRequest: (url: string, init: undici.RequestInit) => Promise<ResponseLike>;
++};
++/**
++ * The events that the REST manager emits
++ */
++declare enum RESTEvents {
++    Debug = "restDebug",
++    HandlerSweep = "handlerSweep",
++    HashSweep = "hashSweep",
++    InvalidRequestWarning = "invalidRequestWarning",
++    RateLimited = "rateLimited",
++    Response = "response"
++}
++declare const ALLOWED_EXTENSIONS: readonly ["webp", "png", "jpg", "jpeg", "gif"];
++declare const ALLOWED_STICKER_EXTENSIONS: readonly ["png", "json", "gif"];
++declare const ALLOWED_SIZES: readonly [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
++type ImageExtension = (typeof ALLOWED_EXTENSIONS)[number];
++type StickerExtension = (typeof ALLOWED_STICKER_EXTENSIONS)[number];
++type ImageSize = (typeof ALLOWED_SIZES)[number];
++declare const OverwrittenMimeTypes: {
++    readonly 'image/apng': "image/png";
++};
++declare const BurstHandlerMajorIdKey = "burst";
++
++/**
++ * The options used for image URLs
++ */
++interface BaseImageURLOptions {
++    /**
++     * The extension to use for the image URL
++     *
++     * @defaultValue `'webp'`
++     */
++    extension?: ImageExtension;
++    /**
++     * The size specified in the image URL
++     */
++    size?: ImageSize;
++}
++/**
++ * The options used for image URLs with animated content
++ */
++interface ImageURLOptions extends BaseImageURLOptions {
++    /**
++     * Whether or not to prefer the static version of an image asset.
++     */
++    forceStatic?: boolean;
++}
++/**
++ * The options to use when making a CDN URL
++ */
++interface MakeURLOptions {
++    /**
++     * The allowed extensions that can be used
++     */
++    allowedExtensions?: readonly string[];
++    /**
++     * The extension to use for the image URL
++     *
++     * @defaultValue `'webp'`
++     */
++    extension?: string | undefined;
++    /**
++     * The size specified in the image URL
++     */
++    size?: ImageSize;
++}
++/**
++ * The CDN link builder
++ */
++declare class CDN {
++    private readonly base;
++    constructor(base?: string);
++    /**
++     * Generates an app asset URL for a client's asset.
++     *
++     * @param clientId - The client id that has the asset
++     * @param assetHash - The hash provided by Discord for this asset
++     * @param options - Optional options for the asset
++     */
++    appAsset(clientId: string, assetHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates an app icon URL for a client's icon.
++     *
++     * @param clientId - The client id that has the icon
++     * @param iconHash - The hash provided by Discord for this icon
++     * @param options - Optional options for the icon
++     */
++    appIcon(clientId: string, iconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates an avatar URL, e.g. for a user or a webhook.
++     *
++     * @param id - The id that has the icon
++     * @param avatarHash - The hash provided by Discord for this avatar
++     * @param options - Optional options for the avatar
++     */
++    avatar(id: string, avatarHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates a user avatar decoration URL.
++     *
++     * @param userId - The id of the user
++     * @param userAvatarDecoration - The hash provided by Discord for this avatar decoration
++     * @param options - Optional options for the avatar decoration
++     */
++    avatarDecoration(userId: string, userAvatarDecoration: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a banner URL, e.g. for a user or a guild.
++     *
++     * @param id - The id that has the banner splash
++     * @param bannerHash - The hash provided by Discord for this banner
++     * @param options - Optional options for the banner
++     */
++    banner(id: string, bannerHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates an icon URL for a channel, e.g. a group DM.
++     *
++     * @param channelId - The channel id that has the icon
++     * @param iconHash - The hash provided by Discord for this channel
++     * @param options - Optional options for the icon
++     */
++    channelIcon(channelId: string, iconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a default avatar URL
++     *
++     * @param index - The default avatar index
++     * @remarks
++     * To calculate the index for a user do `(userId >> 22) % 6`,
++     * or `discriminator % 5` if they're using the legacy username system.
++     */
++    defaultAvatar(index: number): string;
++    /**
++     * Generates a discovery splash URL for a guild's discovery splash.
++     *
++     * @param guildId - The guild id that has the discovery splash
++     * @param splashHash - The hash provided by Discord for this splash
++     * @param options - Optional options for the splash
++     */
++    discoverySplash(guildId: string, splashHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates an emoji's URL for an emoji.
++     *
++     * @param emojiId - The emoji id
++     * @param extension - The extension of the emoji
++     */
++    emoji(emojiId: string, extension?: ImageExtension): string;
++    /**
++     * Generates a guild member avatar URL.
++     *
++     * @param guildId - The id of the guild
++     * @param userId - The id of the user
++     * @param avatarHash - The hash provided by Discord for this avatar
++     * @param options - Optional options for the avatar
++     */
++    guildMemberAvatar(guildId: string, userId: string, avatarHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates a guild member banner URL.
++     *
++     * @param guildId - The id of the guild
++     * @param userId - The id of the user
++     * @param bannerHash - The hash provided by Discord for this banner
++     * @param options - Optional options for the banner
++     */
++    guildMemberBanner(guildId: string, userId: string, bannerHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates an icon URL, e.g. for a guild.
++     *
++     * @param id - The id that has the icon splash
++     * @param iconHash - The hash provided by Discord for this icon
++     * @param options - Optional options for the icon
++     */
++    icon(id: string, iconHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates a URL for the icon of a role
++     *
++     * @param roleId - The id of the role that has the icon
++     * @param roleIconHash - The hash provided by Discord for this role icon
++     * @param options - Optional options for the role icon
++     */
++    roleIcon(roleId: string, roleIconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a guild invite splash URL for a guild's invite splash.
++     *
++     * @param guildId - The guild id that has the invite splash
++     * @param splashHash - The hash provided by Discord for this splash
++     * @param options - Optional options for the splash
++     */
++    splash(guildId: string, splashHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a sticker URL.
++     *
++     * @param stickerId - The sticker id
++     * @param extension - The extension of the sticker
++     * @privateRemarks
++     * Stickers cannot have a `.webp` extension, so we default to a `.png`
++     */
++    sticker(stickerId: string, extension?: StickerExtension): string;
++    /**
++     * Generates a sticker pack banner URL.
++     *
++     * @param bannerId - The banner id
++     * @param options - Optional options for the banner
++     */
++    stickerPackBanner(bannerId: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a team icon URL for a team's icon.
++     *
++     * @param teamId - The team id that has the icon
++     * @param iconHash - The hash provided by Discord for this icon
++     * @param options - Optional options for the icon
++     */
++    teamIcon(teamId: string, iconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a cover image for a guild scheduled event.
++     *
++     * @param scheduledEventId - The scheduled event id
++     * @param coverHash - The hash provided by discord for this cover image
++     * @param options - Optional options for the cover image
++     */
++    guildScheduledEventCover(scheduledEventId: string, coverHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Constructs the URL for the resource, checking whether or not `hash` starts with `a_` if `dynamic` is set to `true`.
++     *
++     * @param route - The base cdn route
++     * @param hash - The hash provided by Discord for this icon
++     * @param options - Optional options for the link
++     */
++    private dynamicMakeURL;
++    /**
++     * Constructs the URL for the resource
++     *
++     * @param route - The base cdn route
++     * @param options - The extension/size options for the link
++     */
++    private makeURL;
++}
+ 
+ interface DiscordErrorFieldInformation {
+     code: string;
+@@ -93,6 +352,135 @@ declare class RateLimitError extends Error implements RateLimitData {
+     get name(): string;
+ }
+ 
++/**
++ * Represents the class that manages handlers for endpoints
++ */
++declare class REST extends AsyncEventEmitter<RestEventsMap> {
++    #private;
++    /**
++     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
++     * performed by this manager.
++     */
++    agent: Dispatcher | null;
++    readonly cdn: CDN;
++    /**
++     * The number of requests remaining in the global bucket
++     */
++    globalRemaining: number;
++    /**
++     * The promise used to wait out the global rate limit
++     */
++    globalDelay: Promise<void> | null;
++    /**
++     * The timestamp at which the global bucket resets
++     */
++    globalReset: number;
++    /**
++     * API bucket hashes that are cached from provided routes
++     */
++    readonly hashes: Collection<string, HashData>;
++    /**
++     * Request handlers created from the bucket hash and the major parameters
++     */
++    readonly handlers: Collection<string, IHandler>;
++    private hashTimer;
++    private handlerTimer;
++    readonly options: RESTOptions;
++    readonly userAgent: string;
++    constructor(options?: Partial<RESTOptions>);
++    private setupSweepers;
++    /**
++     * Runs a get request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    get(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a delete request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    delete(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a post request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    post(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a put request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    put(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a patch request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    patch(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a request from the api
++     *
++     * @param options - Request options
++     */
++    request(options: InternalRequest): Promise<unknown>;
++    /**
++     * Sets the default agent to use for requests performed by this manager
++     *
++     * @param agent - The agent to use
++     */
++    setAgent(agent: Dispatcher): this;
++    /**
++     * Sets the authorization token that should be used for requests
++     *
++     * @param token - The authorization token to use
++     */
++    setToken(token: string): this;
++    /**
++     * Queues a request to be sent
++     *
++     * @param request - All the information needed to make a request
++     * @returns The response from the api request
++     */
++    queueRequest(request: InternalRequest): Promise<ResponseLike>;
++    /**
++     * Creates a new rate limit handler from a hash, based on the hash and the major parameter
++     *
++     * @param hash - The hash for the route
++     * @param majorParameter - The major parameter for this handler
++     * @internal
++     */
++    private createHandler;
++    /**
++     * Formats the request data to a usable format for fetch
++     *
++     * @param request - The request data
++     */
++    private resolveRequest;
++    /**
++     * Stops the hash sweeping interval
++     */
++    clearHashSweeper(): void;
++    /**
++     * Stops the request handler sweeping interval
++     */
++    clearHandlerSweeper(): void;
++    /**
++     * Generates route data for an endpoint:method
++     *
++     * @param endpoint - The raw endpoint to generalize
++     * @param method - The HTTP method this endpoint is called without
++     * @internal
++     */
++    private static generateRouteData;
++}
++
+ /**
+  * Creates and populates an URLSearchParams instance from an object, stripping
+  * out null and undefined values, while also coercing non-strings to strings.
+@@ -120,4 +508,4 @@ declare function calculateUserDefaultAvatarIndex(userId: Snowflake): number;
+  */
+ declare const version: string;
+ 
+-export { DiscordAPIError, DiscordErrorData, HTTPError, InternalRequest, OAuthErrorData, RateLimitData, RateLimitError, RawFile, RequestBody, ResponseLike, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RawFile, RequestBody, RequestData, ResponseLike, RestEventsMap, RouteLike, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index ba3a73fe92f87b1712d2b187009808001f409354..7453152a79a9f2ddb1d7f8de669f21939825a808 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -1,12 +1,271 @@
+-import { a as RawFile, I as InternalRequest, b as RateLimitData, R as ResponseLike } from './CDN-03f06673.js';
+-export { t as ALLOWED_EXTENSIONS, v as ALLOWED_SIZES, u as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, y as BurstHandlerMajorIdKey, C as CDN, r as DefaultRestOptions, D as DefaultUserAgent, q as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, w as ImageExtension, x as ImageSize, c as ImageURLOptions, m as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, p as REST, s as RESTEvents, k as RESTOptions, l as RateLimitQueueFilter, d as RequestData, e as RequestHeaders, j as RequestManager, f as RequestMethod, n as RestEvents, o as RestEventsMap, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-03f06673.js';
++import { R as ResponseLike, a as RawFile, I as InternalRequest, b as RateLimitData, c as RestEventsMap, H as HashData, d as IHandler, e as RESTOptions, f as RouteLike, g as RequestData } from './types-095b5d51.js';
++export { A as APIRequest, m as HandlerRequestData, j as InvalidRequestWarningData, i as RateLimitQueueFilter, k as RequestHeaders, l as RequestMethod, h as RestEvents, n as RouteData } from './types-095b5d51.js';
+ import * as url from 'url';
+ import { Snowflake } from 'discord-api-types/v10';
+-import 'undici';
++import * as undici from 'undici';
++import { Dispatcher } from 'undici';
++import { Collection } from '@discordjs/collection';
++import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
+ import 'node:stream';
+ import 'node:stream/web';
+-import '@discordjs/collection';
+-import '@vladfrangu/async_event_emitter';
++
++declare const DefaultUserAgent: `DiscordBot (https://discord.js.org, ${string})`;
++/**
++ * The default string to append onto the user agent.
++ */
++declare const DefaultUserAgentAppendix: string;
++declare const DefaultRestOptions: {
++    readonly agent: null;
++    readonly api: "https://discord.com/api";
++    readonly authPrefix: "Bot";
++    readonly cdn: "https://cdn.discordapp.com";
++    readonly headers: {};
++    readonly invalidRequestWarningInterval: 0;
++    readonly globalRequestsPerSecond: 50;
++    readonly offset: 50;
++    readonly rejectOnRateLimit: null;
++    readonly retries: 3;
++    readonly timeout: 15000;
++    readonly userAgentAppendix: string;
++    readonly version: "10";
++    readonly hashSweepInterval: 14400000;
++    readonly hashLifetime: 86400000;
++    readonly handlerSweepInterval: 3600000;
++    readonly makeRequest: (url: string, init: undici.RequestInit) => Promise<ResponseLike>;
++};
++/**
++ * The events that the REST manager emits
++ */
++declare enum RESTEvents {
++    Debug = "restDebug",
++    HandlerSweep = "handlerSweep",
++    HashSweep = "hashSweep",
++    InvalidRequestWarning = "invalidRequestWarning",
++    RateLimited = "rateLimited",
++    Response = "response"
++}
++declare const ALLOWED_EXTENSIONS: readonly ["webp", "png", "jpg", "jpeg", "gif"];
++declare const ALLOWED_STICKER_EXTENSIONS: readonly ["png", "json", "gif"];
++declare const ALLOWED_SIZES: readonly [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
++type ImageExtension = (typeof ALLOWED_EXTENSIONS)[number];
++type StickerExtension = (typeof ALLOWED_STICKER_EXTENSIONS)[number];
++type ImageSize = (typeof ALLOWED_SIZES)[number];
++declare const OverwrittenMimeTypes: {
++    readonly 'image/apng': "image/png";
++};
++declare const BurstHandlerMajorIdKey = "burst";
++
++/**
++ * The options used for image URLs
++ */
++interface BaseImageURLOptions {
++    /**
++     * The extension to use for the image URL
++     *
++     * @defaultValue `'webp'`
++     */
++    extension?: ImageExtension;
++    /**
++     * The size specified in the image URL
++     */
++    size?: ImageSize;
++}
++/**
++ * The options used for image URLs with animated content
++ */
++interface ImageURLOptions extends BaseImageURLOptions {
++    /**
++     * Whether or not to prefer the static version of an image asset.
++     */
++    forceStatic?: boolean;
++}
++/**
++ * The options to use when making a CDN URL
++ */
++interface MakeURLOptions {
++    /**
++     * The allowed extensions that can be used
++     */
++    allowedExtensions?: readonly string[];
++    /**
++     * The extension to use for the image URL
++     *
++     * @defaultValue `'webp'`
++     */
++    extension?: string | undefined;
++    /**
++     * The size specified in the image URL
++     */
++    size?: ImageSize;
++}
++/**
++ * The CDN link builder
++ */
++declare class CDN {
++    private readonly base;
++    constructor(base?: string);
++    /**
++     * Generates an app asset URL for a client's asset.
++     *
++     * @param clientId - The client id that has the asset
++     * @param assetHash - The hash provided by Discord for this asset
++     * @param options - Optional options for the asset
++     */
++    appAsset(clientId: string, assetHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates an app icon URL for a client's icon.
++     *
++     * @param clientId - The client id that has the icon
++     * @param iconHash - The hash provided by Discord for this icon
++     * @param options - Optional options for the icon
++     */
++    appIcon(clientId: string, iconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates an avatar URL, e.g. for a user or a webhook.
++     *
++     * @param id - The id that has the icon
++     * @param avatarHash - The hash provided by Discord for this avatar
++     * @param options - Optional options for the avatar
++     */
++    avatar(id: string, avatarHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates a user avatar decoration URL.
++     *
++     * @param userId - The id of the user
++     * @param userAvatarDecoration - The hash provided by Discord for this avatar decoration
++     * @param options - Optional options for the avatar decoration
++     */
++    avatarDecoration(userId: string, userAvatarDecoration: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a banner URL, e.g. for a user or a guild.
++     *
++     * @param id - The id that has the banner splash
++     * @param bannerHash - The hash provided by Discord for this banner
++     * @param options - Optional options for the banner
++     */
++    banner(id: string, bannerHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates an icon URL for a channel, e.g. a group DM.
++     *
++     * @param channelId - The channel id that has the icon
++     * @param iconHash - The hash provided by Discord for this channel
++     * @param options - Optional options for the icon
++     */
++    channelIcon(channelId: string, iconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a default avatar URL
++     *
++     * @param index - The default avatar index
++     * @remarks
++     * To calculate the index for a user do `(userId >> 22) % 6`,
++     * or `discriminator % 5` if they're using the legacy username system.
++     */
++    defaultAvatar(index: number): string;
++    /**
++     * Generates a discovery splash URL for a guild's discovery splash.
++     *
++     * @param guildId - The guild id that has the discovery splash
++     * @param splashHash - The hash provided by Discord for this splash
++     * @param options - Optional options for the splash
++     */
++    discoverySplash(guildId: string, splashHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates an emoji's URL for an emoji.
++     *
++     * @param emojiId - The emoji id
++     * @param extension - The extension of the emoji
++     */
++    emoji(emojiId: string, extension?: ImageExtension): string;
++    /**
++     * Generates a guild member avatar URL.
++     *
++     * @param guildId - The id of the guild
++     * @param userId - The id of the user
++     * @param avatarHash - The hash provided by Discord for this avatar
++     * @param options - Optional options for the avatar
++     */
++    guildMemberAvatar(guildId: string, userId: string, avatarHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates a guild member banner URL.
++     *
++     * @param guildId - The id of the guild
++     * @param userId - The id of the user
++     * @param bannerHash - The hash provided by Discord for this banner
++     * @param options - Optional options for the banner
++     */
++    guildMemberBanner(guildId: string, userId: string, bannerHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates an icon URL, e.g. for a guild.
++     *
++     * @param id - The id that has the icon splash
++     * @param iconHash - The hash provided by Discord for this icon
++     * @param options - Optional options for the icon
++     */
++    icon(id: string, iconHash: string, options?: Readonly<ImageURLOptions>): string;
++    /**
++     * Generates a URL for the icon of a role
++     *
++     * @param roleId - The id of the role that has the icon
++     * @param roleIconHash - The hash provided by Discord for this role icon
++     * @param options - Optional options for the role icon
++     */
++    roleIcon(roleId: string, roleIconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a guild invite splash URL for a guild's invite splash.
++     *
++     * @param guildId - The guild id that has the invite splash
++     * @param splashHash - The hash provided by Discord for this splash
++     * @param options - Optional options for the splash
++     */
++    splash(guildId: string, splashHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a sticker URL.
++     *
++     * @param stickerId - The sticker id
++     * @param extension - The extension of the sticker
++     * @privateRemarks
++     * Stickers cannot have a `.webp` extension, so we default to a `.png`
++     */
++    sticker(stickerId: string, extension?: StickerExtension): string;
++    /**
++     * Generates a sticker pack banner URL.
++     *
++     * @param bannerId - The banner id
++     * @param options - Optional options for the banner
++     */
++    stickerPackBanner(bannerId: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a team icon URL for a team's icon.
++     *
++     * @param teamId - The team id that has the icon
++     * @param iconHash - The hash provided by Discord for this icon
++     * @param options - Optional options for the icon
++     */
++    teamIcon(teamId: string, iconHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Generates a cover image for a guild scheduled event.
++     *
++     * @param scheduledEventId - The scheduled event id
++     * @param coverHash - The hash provided by discord for this cover image
++     * @param options - Optional options for the cover image
++     */
++    guildScheduledEventCover(scheduledEventId: string, coverHash: string, options?: Readonly<BaseImageURLOptions>): string;
++    /**
++     * Constructs the URL for the resource, checking whether or not `hash` starts with `a_` if `dynamic` is set to `true`.
++     *
++     * @param route - The base cdn route
++     * @param hash - The hash provided by Discord for this icon
++     * @param options - Optional options for the link
++     */
++    private dynamicMakeURL;
++    /**
++     * Constructs the URL for the resource
++     *
++     * @param route - The base cdn route
++     * @param options - The extension/size options for the link
++     */
++    private makeURL;
++}
+ 
+ interface DiscordErrorFieldInformation {
+     code: string;
+@@ -93,6 +352,135 @@ declare class RateLimitError extends Error implements RateLimitData {
+     get name(): string;
+ }
+ 
++/**
++ * Represents the class that manages handlers for endpoints
++ */
++declare class REST extends AsyncEventEmitter<RestEventsMap> {
++    #private;
++    /**
++     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
++     * performed by this manager.
++     */
++    agent: Dispatcher | null;
++    readonly cdn: CDN;
++    /**
++     * The number of requests remaining in the global bucket
++     */
++    globalRemaining: number;
++    /**
++     * The promise used to wait out the global rate limit
++     */
++    globalDelay: Promise<void> | null;
++    /**
++     * The timestamp at which the global bucket resets
++     */
++    globalReset: number;
++    /**
++     * API bucket hashes that are cached from provided routes
++     */
++    readonly hashes: Collection<string, HashData>;
++    /**
++     * Request handlers created from the bucket hash and the major parameters
++     */
++    readonly handlers: Collection<string, IHandler>;
++    private hashTimer;
++    private handlerTimer;
++    readonly options: RESTOptions;
++    readonly userAgent: string;
++    constructor(options?: Partial<RESTOptions>);
++    private setupSweepers;
++    /**
++     * Runs a get request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    get(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a delete request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    delete(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a post request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    post(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a put request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    put(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a patch request from the api
++     *
++     * @param fullRoute - The full route to query
++     * @param options - Optional request options
++     */
++    patch(fullRoute: RouteLike, options?: RequestData): Promise<unknown>;
++    /**
++     * Runs a request from the api
++     *
++     * @param options - Request options
++     */
++    request(options: InternalRequest): Promise<unknown>;
++    /**
++     * Sets the default agent to use for requests performed by this manager
++     *
++     * @param agent - The agent to use
++     */
++    setAgent(agent: Dispatcher): this;
++    /**
++     * Sets the authorization token that should be used for requests
++     *
++     * @param token - The authorization token to use
++     */
++    setToken(token: string): this;
++    /**
++     * Queues a request to be sent
++     *
++     * @param request - All the information needed to make a request
++     * @returns The response from the api request
++     */
++    queueRequest(request: InternalRequest): Promise<ResponseLike>;
++    /**
++     * Creates a new rate limit handler from a hash, based on the hash and the major parameter
++     *
++     * @param hash - The hash for the route
++     * @param majorParameter - The major parameter for this handler
++     * @internal
++     */
++    private createHandler;
++    /**
++     * Formats the request data to a usable format for fetch
++     *
++     * @param request - The request data
++     */
++    private resolveRequest;
++    /**
++     * Stops the hash sweeping interval
++     */
++    clearHashSweeper(): void;
++    /**
++     * Stops the request handler sweeping interval
++     */
++    clearHandlerSweeper(): void;
++    /**
++     * Generates route data for an endpoint:method
++     *
++     * @param endpoint - The raw endpoint to generalize
++     * @param method - The HTTP method this endpoint is called without
++     * @internal
++     */
++    private static generateRouteData;
++}
++
+ /**
+  * Creates and populates an URLSearchParams instance from an object, stripping
+  * out null and undefined values, while also coercing non-strings to strings.
+@@ -120,4 +508,4 @@ declare function calculateUserDefaultAvatarIndex(userId: Snowflake): number;
+  */
+ declare const version: string;
+ 
+-export { DiscordAPIError, DiscordErrorData, HTTPError, InternalRequest, OAuthErrorData, RateLimitData, RateLimitError, RawFile, RequestBody, ResponseLike, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RawFile, RequestBody, RequestData, ResponseLike, RestEventsMap, RouteLike, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
+diff --git a/dist/index.js b/dist/index.js
+index d58dc704ec21762149490c3831111f7f85f0c63a..baba0a116276303f7c374afb50905d2d72da4ca1 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -35,8 +35,7 @@ __export(src_exports, {
+   REST: () => REST,
+   RESTEvents: () => RESTEvents,
+   RateLimitError: () => RateLimitError,
+-  RequestManager: () => RequestManager,
+-  RequestMethod: () => RequestMethod,
++  RequestMethod: () => RequestMethod2,
+   calculateUserDefaultAvatarIndex: () => calculateUserDefaultAvatarIndex,
+   makeURLSearchParams: () => makeURLSearchParams,
+   parseResponse: () => parseResponse,
+@@ -81,7 +80,7 @@ async function makeRequest(url, init) {
+     get bodyUsed() {
+       return res.body.bodyUsed;
+     },
+-    headers: new Headers(res.headers),
++    headers: new import_undici.Headers(res.headers),
+     status: res.statusCode,
+     statusText: import_node_http.STATUS_CODES[res.statusCode],
+     ok: res.statusCode >= 200 && res.statusCode < 300
+@@ -512,12 +511,23 @@ var RateLimitError = class _RateLimitError extends Error {
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ var import_collection = require("@discordjs/collection");
+ var import_snowflake = require("@sapphire/snowflake");
+ var import_async_event_emitter = require("@vladfrangu/async_event_emitter");
+ var import_magic_bytes = require("magic-bytes.js");
+ 
++// src/lib/utils/types.ts
++var RequestMethod2 = /* @__PURE__ */ ((RequestMethod3) => {
++  RequestMethod3["Delete"] = "DELETE";
++  RequestMethod3["Get"] = "GET";
++  RequestMethod3["Head"] = "HEAD";
++  RequestMethod3["Patch"] = "PATCH";
++  RequestMethod3["Post"] = "POST";
++  RequestMethod3["Put"] = "PUT";
++  return RequestMethod3;
++})(RequestMethod2 || {});
++
+ // src/lib/utils/utils.ts
+ function serializeSearchParam(value) {
+   switch (typeof value) {
+@@ -647,7 +657,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -728,10 +738,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -774,7 +784,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -942,7 +952,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? RequestMethod.Get,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -963,10 +973,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1060,31 +1070,24 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-var RequestManager = class _RequestManager extends import_async_event_emitter.AsyncEventEmitter {
++// src/lib/REST.ts
++var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+   static {
+-    __name(this, "RequestManager");
++    __name(this, "REST");
+   }
+   /**
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+    * performed by this manager.
+    */
+   agent = null;
++  cdn;
+   /**
+    * The number of requests remaining in the global bucket
+    */
+@@ -1109,12 +1112,15 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+   hashTimer;
+   handlerTimer;
+   options;
+-  constructor(options) {
++  userAgent;
++  constructor(options = {}) {
+     super();
++    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.options = { ...DefaultRestOptions, ...options };
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = this.options.globalRequestsPerSecond;
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1140,7 +1146,6 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1156,9 +1161,62 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
++  /**
++   * Runs a get request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async get(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
++  }
++  /**
++   * Runs a delete request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async delete(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
++  }
++  /**
++   * Runs a post request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async post(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
++  }
++  /**
++   * Runs a put request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async put(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
++  }
++  /**
++   * Runs a patch request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async patch(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
++  }
++  /**
++   * Runs a request from the api
++   *
++   * @param options - Request options
++   */
++  async request(options) {
++    const response = await this.queueRequest(options);
++    return parseResponse(response);
++  }
+   /**
+    * Sets the default agent to use for requests performed by this manager
+    *
+@@ -1184,7 +1242,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+    * @returns The response from the api request
+    */
+   async queueRequest(request2) {
+-    const routeId = _RequestManager.generateRouteData(request2.fullRoute, request2.method);
++    const routeId = _REST.generateRouteData(request2.fullRoute, request2.method);
+     const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+       value: `Global(${request2.method}:${routeId.bucketRoute})`,
+       lastAccess: -1
+@@ -1226,7 +1284,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+@@ -1239,7 +1297,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request2.files.entries()) {
+@@ -1278,7 +1336,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+     const method = request2.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request2.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1332,115 +1390,6 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+   }
+ };
+ 
+-// src/lib/REST.ts
+-var import_async_event_emitter2 = require("@vladfrangu/async_event_emitter");
+-var REST = class extends import_async_event_emitter2.AsyncEventEmitter {
+-  static {
+-    __name(this, "REST");
+-  }
+-  cdn;
+-  requestManager;
+-  constructor(options = {}) {
+-    super();
+-    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+-    this.requestManager = new RequestManager(options).on("restDebug" /* Debug */, this.emit.bind(this, "restDebug" /* Debug */)).on("rateLimited" /* RateLimited */, this.emit.bind(this, "rateLimited" /* RateLimited */)).on("invalidRequestWarning" /* InvalidRequestWarning */, this.emit.bind(this, "invalidRequestWarning" /* InvalidRequestWarning */)).on("hashSweep" /* HashSweep */, this.emit.bind(this, "hashSweep" /* HashSweep */));
+-    this.on("newListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.on(name, listener);
+-    });
+-    this.on("removeListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.off(name, listener);
+-    });
+-  }
+-  /**
+-   * Gets the agent set for this instance
+-   */
+-  getAgent() {
+-    return this.requestManager.agent;
+-  }
+-  /**
+-   * Sets the default agent to use for requests performed by this instance
+-   *
+-   * @param agent - Sets the agent to use
+-   */
+-  setAgent(agent) {
+-    this.requestManager.setAgent(agent);
+-    return this;
+-  }
+-  /**
+-   * Sets the authorization token that should be used for requests
+-   *
+-   * @param token - The authorization token to use
+-   */
+-  setToken(token) {
+-    this.requestManager.setToken(token);
+-    return this;
+-  }
+-  /**
+-   * Runs a get request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async get(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+-  }
+-  /**
+-   * Runs a delete request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async delete(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+-  }
+-  /**
+-   * Runs a post request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async post(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+-  }
+-  /**
+-   * Runs a put request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async put(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+-  }
+-  /**
+-   * Runs a patch request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async patch(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+-  }
+-  /**
+-   * Runs a request from the api
+-   *
+-   * @param options - Request options
+-   */
+-  async request(options) {
+-    const response = await this.raw(options);
+-    return parseResponse(response);
+-  }
+-  /**
+-   * Runs a request from the API, yielding the raw Response object
+-   *
+-   * @param options - Request options
+-   */
+-  async raw(options) {
+-    return this.requestManager.queueRequest(options);
+-  }
+-};
+-
+ // src/shared.ts
+ var version = "1.7.2-dev.1689600762-afa9879.0";
+ 
+@@ -1462,7 +1411,6 @@ setDefaultStrategy((0, import_util2.shouldUseGlobalFetchAndWebSocket)() ? fetch
+   REST,
+   RESTEvents,
+   RateLimitError,
+-  RequestManager,
+   RequestMethod,
+   calculateUserDefaultAvatarIndex,
+   makeURLSearchParams,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 97db27da5ab43d64a15bfcf8ffd868872b3f0931..74852960e4e6c2b892c18ecf69608588da8d6071 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -19,7 +19,7 @@ __name(getDefaultStrategy, "getDefaultStrategy");
+ import { STATUS_CODES } from "node:http";
+ import { URLSearchParams as URLSearchParams2 } from "node:url";
+ import { types } from "node:util";
+-import { request } from "undici";
++import { request, Headers } from "undici";
+ async function makeRequest(url, init) {
+   const options = {
+     ...init,
+@@ -471,12 +471,23 @@ var RateLimitError = class _RateLimitError extends Error {
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ import { Collection } from "@discordjs/collection";
+ import { DiscordSnowflake } from "@sapphire/snowflake";
+ import { AsyncEventEmitter } from "@vladfrangu/async_event_emitter";
+ import { filetypeinfo } from "magic-bytes.js";
+ 
++// src/lib/utils/types.ts
++var RequestMethod2 = /* @__PURE__ */ ((RequestMethod3) => {
++  RequestMethod3["Delete"] = "DELETE";
++  RequestMethod3["Get"] = "GET";
++  RequestMethod3["Head"] = "HEAD";
++  RequestMethod3["Patch"] = "PATCH";
++  RequestMethod3["Post"] = "POST";
++  RequestMethod3["Put"] = "PUT";
++  return RequestMethod3;
++})(RequestMethod2 || {});
++
+ // src/lib/utils/utils.ts
+ function serializeSearchParam(value) {
+   switch (typeof value) {
+@@ -606,7 +617,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -687,10 +698,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -733,7 +744,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -901,7 +912,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? RequestMethod.Get,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -922,10 +933,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1019,31 +1030,24 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-var RequestManager = class _RequestManager extends AsyncEventEmitter {
++// src/lib/REST.ts
++var REST = class _REST extends AsyncEventEmitter {
+   static {
+-    __name(this, "RequestManager");
++    __name(this, "REST");
+   }
+   /**
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+    * performed by this manager.
+    */
+   agent = null;
++  cdn;
+   /**
+    * The number of requests remaining in the global bucket
+    */
+@@ -1068,12 +1072,15 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
+-  constructor(options) {
++  userAgent;
++  constructor(options = {}) {
+     super();
++    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.options = { ...DefaultRestOptions, ...options };
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = this.options.globalRequestsPerSecond;
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1099,7 +1106,6 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1115,9 +1121,62 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
++  /**
++   * Runs a get request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async get(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
++  }
++  /**
++   * Runs a delete request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async delete(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
++  }
++  /**
++   * Runs a post request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async post(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
++  }
++  /**
++   * Runs a put request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async put(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
++  }
++  /**
++   * Runs a patch request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async patch(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
++  }
++  /**
++   * Runs a request from the api
++   *
++   * @param options - Request options
++   */
++  async request(options) {
++    const response = await this.queueRequest(options);
++    return parseResponse(response);
++  }
+   /**
+    * Sets the default agent to use for requests performed by this manager
+    *
+@@ -1143,7 +1202,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+    * @returns The response from the api request
+    */
+   async queueRequest(request2) {
+-    const routeId = _RequestManager.generateRouteData(request2.fullRoute, request2.method);
++    const routeId = _REST.generateRouteData(request2.fullRoute, request2.method);
+     const hash = this.hashes.get(`${request2.method}:${routeId.bucketRoute}`) ?? {
+       value: `Global(${request2.method}:${routeId.bucketRoute})`,
+       lastAccess: -1
+@@ -1185,7 +1244,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+@@ -1198,7 +1257,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request2.files.entries()) {
+@@ -1237,7 +1296,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+     const method = request2.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request2.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1291,115 +1350,6 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+   }
+ };
+ 
+-// src/lib/REST.ts
+-import { AsyncEventEmitter as AsyncEventEmitter2 } from "@vladfrangu/async_event_emitter";
+-var REST = class extends AsyncEventEmitter2 {
+-  static {
+-    __name(this, "REST");
+-  }
+-  cdn;
+-  requestManager;
+-  constructor(options = {}) {
+-    super();
+-    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+-    this.requestManager = new RequestManager(options).on("restDebug" /* Debug */, this.emit.bind(this, "restDebug" /* Debug */)).on("rateLimited" /* RateLimited */, this.emit.bind(this, "rateLimited" /* RateLimited */)).on("invalidRequestWarning" /* InvalidRequestWarning */, this.emit.bind(this, "invalidRequestWarning" /* InvalidRequestWarning */)).on("hashSweep" /* HashSweep */, this.emit.bind(this, "hashSweep" /* HashSweep */));
+-    this.on("newListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.on(name, listener);
+-    });
+-    this.on("removeListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.off(name, listener);
+-    });
+-  }
+-  /**
+-   * Gets the agent set for this instance
+-   */
+-  getAgent() {
+-    return this.requestManager.agent;
+-  }
+-  /**
+-   * Sets the default agent to use for requests performed by this instance
+-   *
+-   * @param agent - Sets the agent to use
+-   */
+-  setAgent(agent) {
+-    this.requestManager.setAgent(agent);
+-    return this;
+-  }
+-  /**
+-   * Sets the authorization token that should be used for requests
+-   *
+-   * @param token - The authorization token to use
+-   */
+-  setToken(token) {
+-    this.requestManager.setToken(token);
+-    return this;
+-  }
+-  /**
+-   * Runs a get request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async get(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+-  }
+-  /**
+-   * Runs a delete request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async delete(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+-  }
+-  /**
+-   * Runs a post request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async post(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+-  }
+-  /**
+-   * Runs a put request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async put(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+-  }
+-  /**
+-   * Runs a patch request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async patch(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+-  }
+-  /**
+-   * Runs a request from the api
+-   *
+-   * @param options - Request options
+-   */
+-  async request(options) {
+-    const response = await this.raw(options);
+-    return parseResponse(response);
+-  }
+-  /**
+-   * Runs a request from the API, yielding the raw Response object
+-   *
+-   * @param options - Request options
+-   */
+-  async raw(options) {
+-    return this.requestManager.queueRequest(options);
+-  }
+-};
+-
+ // src/shared.ts
+ var version = "1.7.2-dev.1689600762-afa9879.0";
+ 
+@@ -1420,8 +1370,7 @@ export {
+   REST,
+   RESTEvents,
+   RateLimitError,
+-  RequestManager,
+-  RequestMethod,
++  RequestMethod2 as RequestMethod,
+   calculateUserDefaultAvatarIndex,
+   makeURLSearchParams,
+   parseResponse,
+diff --git a/dist/strategies/undiciRequest.d.mts b/dist/strategies/undiciRequest.d.mts
+index b12b72afb96edb598c7c4b8e7981b58a47be228d..8001b73ad42763850fa942fb348e8ebc59790de4 100644
+--- a/dist/strategies/undiciRequest.d.mts
++++ b/dist/strategies/undiciRequest.d.mts
+@@ -1,9 +1,8 @@
+ import { request, RequestInit } from 'undici';
+-import { R as ResponseLike } from '../CDN-03f06673.js';
++import { R as ResponseLike } from '../types-095b5d51.js';
+ import 'node:stream';
+ import 'node:stream/web';
+ import '@discordjs/collection';
+-import '@vladfrangu/async_event_emitter';
+ 
+ type RequestOptions = Exclude<Parameters<typeof request>[1], undefined>;
+ declare function makeRequest(url: string, init: RequestInit): Promise<ResponseLike>;
+diff --git a/dist/strategies/undiciRequest.d.ts b/dist/strategies/undiciRequest.d.ts
+index b12b72afb96edb598c7c4b8e7981b58a47be228d..8001b73ad42763850fa942fb348e8ebc59790de4 100644
+--- a/dist/strategies/undiciRequest.d.ts
++++ b/dist/strategies/undiciRequest.d.ts
+@@ -1,9 +1,8 @@
+ import { request, RequestInit } from 'undici';
+-import { R as ResponseLike } from '../CDN-03f06673.js';
++import { R as ResponseLike } from '../types-095b5d51.js';
+ import 'node:stream';
+ import 'node:stream/web';
+ import '@discordjs/collection';
+-import '@vladfrangu/async_event_emitter';
+ 
+ type RequestOptions = Exclude<Parameters<typeof request>[1], undefined>;
+ declare function makeRequest(url: string, init: RequestInit): Promise<ResponseLike>;
+diff --git a/dist/strategies/undiciRequest.js b/dist/strategies/undiciRequest.js
+index 3d750502df41bfae6f90df094b2043d7cfeee757..640fe1ddb5b5a203deb7474c29fbc69090c5baf7 100644
+--- a/dist/strategies/undiciRequest.js
++++ b/dist/strategies/undiciRequest.js
+@@ -49,7 +49,7 @@ async function makeRequest(url, init) {
+     get bodyUsed() {
+       return res.body.bodyUsed;
+     },
+-    headers: new Headers(res.headers),
++    headers: new import_undici.Headers(res.headers),
+     status: res.statusCode,
+     statusText: import_node_http.STATUS_CODES[res.statusCode],
+     ok: res.statusCode >= 200 && res.statusCode < 300
+diff --git a/dist/strategies/undiciRequest.mjs b/dist/strategies/undiciRequest.mjs
+index b43879efbc08ae9e7da5b2bdccfa20fddabd20a0..0e6ce0a202b9c193a38614a715fbeb4c3414958a 100644
+--- a/dist/strategies/undiciRequest.mjs
++++ b/dist/strategies/undiciRequest.mjs
+@@ -5,7 +5,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
+ import { STATUS_CODES } from "node:http";
+ import { URLSearchParams } from "node:url";
+ import { types } from "node:util";
+-import { request } from "undici";
++import { request, Headers } from "undici";
+ async function makeRequest(url, init) {
+   const options = {
+     ...init,
+diff --git a/dist/types-095b5d51.d.ts b/dist/types-095b5d51.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..3fc62f4fbb44e0e53f0c1d4ea56fe3e6cbedd6f7
+--- /dev/null
++++ b/dist/types-095b5d51.d.ts
+@@ -0,0 +1,366 @@
++import { Readable } from 'node:stream';
++import { ReadableStream } from 'node:stream/web';
++import { Collection } from '@discordjs/collection';
++import { RequestInit, Dispatcher, Response, BodyInit, Agent } from 'undici';
++
++interface IHandler {
++    /**
++     * The unique id of the handler
++     */
++    readonly id: string;
++    /**
++     * If the bucket is currently inactive (no pending requests)
++     */
++    get inactive(): boolean;
++    /**
++     * Queues a request to be sent
++     *
++     * @param routeId - The generalized api route with literal ids for major parameters
++     * @param url - The url to do the request on
++     * @param options - All the information needed to make a request
++     * @param requestData - Extra data from the user's request needed for errors and additional processing
++     */
++    queueRequest(routeId: RouteData, url: string, options: RequestInit, requestData: HandlerRequestData): Promise<ResponseLike>;
++}
++
++interface RestEvents {
++    handlerSweep: [sweptHandlers: Collection<string, IHandler>];
++    hashSweep: [sweptHashes: Collection<string, HashData>];
++    invalidRequestWarning: [invalidRequestInfo: InvalidRequestWarningData];
++    rateLimited: [rateLimitInfo: RateLimitData];
++    response: [request: APIRequest, response: ResponseLike];
++    restDebug: [info: string];
++}
++type RestEventsMap = {
++    [K in keyof RestEvents]: RestEvents[K];
++};
++/**
++ * Options to be passed when creating the REST instance
++ */
++interface RESTOptions {
++    /**
++     * The agent to set globally
++     */
++    agent: Dispatcher | null;
++    /**
++     * The base api path, without version
++     *
++     * @defaultValue `'https://discord.com/api'`
++     */
++    api: string;
++    /**
++     * The authorization prefix to use for requests, useful if you want to use
++     * bearer tokens
++     *
++     * @defaultValue `'Bot'`
++     */
++    authPrefix: 'Bearer' | 'Bot';
++    /**
++     * The cdn path
++     *
++     * @defaultValue `'https://cdn.discordapp.com'`
++     */
++    cdn: string;
++    /**
++     * How many requests to allow sending per second (Infinity for unlimited, 50 for the standard global limit used by Discord)
++     *
++     * @defaultValue `50`
++     */
++    globalRequestsPerSecond: number;
++    /**
++     * The amount of time in milliseconds that passes between each hash sweep. (defaults to 1h)
++     *
++     * @defaultValue `3_600_000`
++     */
++    handlerSweepInterval: number;
++    /**
++     * The maximum amount of time a hash can exist in milliseconds without being hit with a request (defaults to 24h)
++     *
++     * @defaultValue `86_400_000`
++     */
++    hashLifetime: number;
++    /**
++     * The amount of time in milliseconds that passes between each hash sweep. (defaults to 4h)
++     *
++     * @defaultValue `14_400_000`
++     */
++    hashSweepInterval: number;
++    /**
++     * Additional headers to send for all API requests
++     *
++     * @defaultValue `{}`
++     */
++    headers: Record<string, string>;
++    /**
++     * The number of invalid REST requests (those that return 401, 403, or 429) in a 10 minute window between emitted warnings (0 for no warnings).
++     * That is, if set to 500, warnings will be emitted at invalid request number 500, 1000, 1500, and so on.
++     *
++     * @defaultValue `0`
++     */
++    invalidRequestWarningInterval: number;
++    /**
++     * The method called to perform the actual HTTP request given a url and web `fetch` options
++     * For example, to use global fetch, simply provide `makeRequest: fetch`
++     *
++     * @defaultValue `undici.request`
++     */
++    makeRequest(url: string, init: RequestInit): Promise<ResponseLike>;
++    /**
++     * The extra offset to add to rate limits in milliseconds
++     *
++     * @defaultValue `50`
++     */
++    offset: number;
++    /**
++     * Determines how rate limiting and pre-emptive throttling should be handled.
++     * When an array of strings, each element is treated as a prefix for the request route
++     * (e.g. `/channels` to match any route starting with `/channels` such as `/channels/:id/messages`)
++     * for which to throw {@link RateLimitError}s. All other request routes will be queued normally
++     *
++     * @defaultValue `null`
++     */
++    rejectOnRateLimit: RateLimitQueueFilter | string[] | null;
++    /**
++     * The number of retries for errors with the 500 code, or errors
++     * that timeout
++     *
++     * @defaultValue `3`
++     */
++    retries: number;
++    /**
++     * The time to wait in milliseconds before a request is aborted
++     *
++     * @defaultValue `15_000`
++     */
++    timeout: number;
++    /**
++     * Extra information to add to the user agent
++     *
++     * @defaultValue DefaultUserAgentAppendix
++     */
++    userAgentAppendix: string;
++    /**
++     * The version of the API to use
++     *
++     * @defaultValue `'10'`
++     */
++    version: string;
++}
++/**
++ * Data emitted on `RESTEvents.RateLimited`
++ */
++interface RateLimitData {
++    /**
++     * Whether the rate limit that was reached was the global limit
++     */
++    global: boolean;
++    /**
++     * The bucket hash for this request
++     */
++    hash: string;
++    /**
++     * The amount of requests we can perform before locking requests
++     */
++    limit: number;
++    /**
++     * The major parameter of the route
++     *
++     * For example, in `/channels/x`, this will be `x`.
++     * If there is no major parameter (e.g: `/bot/gateway`) this will be `global`.
++     */
++    majorParameter: string;
++    /**
++     * The HTTP method being performed
++     */
++    method: string;
++    /**
++     * The route being hit in this request
++     */
++    route: string;
++    /**
++     * The time, in milliseconds, until the request-lock is reset
++     */
++    timeToReset: number;
++    /**
++     * The full URL for this request
++     */
++    url: string;
++}
++/**
++ * A function that determines whether the rate limit hit should throw an Error
++ */
++type RateLimitQueueFilter = (rateLimitData: RateLimitData) => Promise<boolean> | boolean;
++interface APIRequest {
++    /**
++     * The data that was used to form the body of this request
++     */
++    data: HandlerRequestData;
++    /**
++     * The HTTP method used in this request
++     */
++    method: string;
++    /**
++     * Additional HTTP options for this request
++     */
++    options: RequestInit;
++    /**
++     * The full path used to make the request
++     */
++    path: RouteLike;
++    /**
++     * The number of times this request has been attempted
++     */
++    retries: number;
++    /**
++     * The API route identifying the ratelimit for this request
++     */
++    route: string;
++}
++interface ResponseLike extends Pick<Response, 'arrayBuffer' | 'bodyUsed' | 'headers' | 'json' | 'ok' | 'status' | 'statusText' | 'text'> {
++    body: Readable | ReadableStream | null;
++}
++interface InvalidRequestWarningData {
++    /**
++     * Number of invalid requests that have been made in the window
++     */
++    count: number;
++    /**
++     * Time in milliseconds remaining before the count resets
++     */
++    remainingTime: number;
++}
++/**
++ * Represents a file to be added to the request
++ */
++interface RawFile {
++    /**
++     * Content-Type of the file
++     */
++    contentType?: string;
++    /**
++     * The actual data for the file
++     */
++    data: Buffer | Uint8Array | boolean | number | string;
++    /**
++     * An explicit key to use for key of the formdata field for this file.
++     * When not provided, the index of the file in the files array is used in the form `files[${index}]`.
++     * If you wish to alter the placeholder snowflake, you must provide this property in the same form (`files[${placeholder}]`)
++     */
++    key?: string;
++    /**
++     * The name of the file
++     */
++    name: string;
++}
++/**
++ * Represents possible data to be given to an endpoint
++ */
++interface RequestData {
++    /**
++     * Whether to append JSON data to form data instead of `payload_json` when sending files
++     */
++    appendToFormData?: boolean;
++    /**
++     * If this request needs the `Authorization` header
++     *
++     * @defaultValue `true`
++     */
++    auth?: boolean;
++    /**
++     * The authorization prefix to use for this request, useful if you use this with bearer tokens
++     *
++     * @defaultValue `'Bot'`
++     */
++    authPrefix?: 'Bearer' | 'Bot';
++    /**
++     * The body to send to this request.
++     * If providing as BodyInit, set `passThroughBody: true`
++     */
++    body?: BodyInit | unknown;
++    /**
++     * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} to use for the request.
++     */
++    dispatcher?: Agent;
++    /**
++     * Files to be attached to this request
++     */
++    files?: RawFile[] | undefined;
++    /**
++     * Additional headers to add to this request
++     */
++    headers?: Record<string, string>;
++    /**
++     * Whether to pass-through the body property directly to `fetch()`.
++     * <warn>This only applies when files is NOT present</warn>
++     */
++    passThroughBody?: boolean;
++    /**
++     * Query string parameters to append to the called endpoint
++     */
++    query?: URLSearchParams;
++    /**
++     * Reason to show in the audit logs
++     */
++    reason?: string | undefined;
++    /**
++     * The signal to abort the queue entry or the REST call, where applicable
++     */
++    signal?: AbortSignal | undefined;
++    /**
++     * If this request should be versioned
++     *
++     * @defaultValue `true`
++     */
++    versioned?: boolean;
++}
++/**
++ * Possible headers for an API call
++ */
++interface RequestHeaders {
++    Authorization?: string;
++    'User-Agent': string;
++    'X-Audit-Log-Reason'?: string;
++}
++/**
++ * Possible API methods to be used when doing requests
++ */
++declare enum RequestMethod {
++    Delete = "DELETE",
++    Get = "GET",
++    Head = "HEAD",
++    Patch = "PATCH",
++    Post = "POST",
++    Put = "PUT"
++}
++type RouteLike = `/${string}`;
++/**
++ * Internal request options
++ *
++ * @internal
++ */
++interface InternalRequest extends RequestData {
++    fullRoute: RouteLike;
++    method: RequestMethod;
++}
++type HandlerRequestData = Pick<InternalRequest, 'auth' | 'body' | 'files' | 'signal'>;
++/**
++ * Parsed route data for an endpoint
++ *
++ * @internal
++ */
++interface RouteData {
++    bucketRoute: string;
++    majorParameter: string;
++    original: RouteLike;
++}
++/**
++ * Represents a hash and its associated fields
++ *
++ * @internal
++ */
++interface HashData {
++    lastAccess: number;
++    value: string;
++}
++
++export { APIRequest as A, HashData as H, InternalRequest as I, ResponseLike as R, RawFile as a, RateLimitData as b, RestEventsMap as c, IHandler as d, RESTOptions as e, RouteLike as f, RequestData as g, RestEvents as h, RateLimitQueueFilter as i, InvalidRequestWarningData as j, RequestHeaders as k, RequestMethod as l, HandlerRequestData as m, RouteData as n };
+diff --git a/dist/web.d.mts b/dist/web.d.mts
+index 60c0f675b0aa28bb627a53dd2993a30c90e68d07..e5a36eb434333520119c199ff4c46085841dddb8 100644
+--- a/dist/web.d.mts
++++ b/dist/web.d.mts
+@@ -1,9 +1,9 @@
+-export { DiscordAPIError, DiscordErrorData, HTTPError, OAuthErrorData, RateLimitError, RequestBody, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.mjs';
+-export { t as ALLOWED_EXTENSIONS, v as ALLOWED_SIZES, u as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, y as BurstHandlerMajorIdKey, C as CDN, r as DefaultRestOptions, D as DefaultUserAgent, q as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, w as ImageExtension, x as ImageSize, c as ImageURLOptions, I as InternalRequest, m as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, p as REST, s as RESTEvents, k as RESTOptions, b as RateLimitData, l as RateLimitQueueFilter, a as RawFile, d as RequestData, e as RequestHeaders, j as RequestManager, f as RequestMethod, R as ResponseLike, n as RestEvents, o as RestEventsMap, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-03f06673.js';
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, ImageExtension, ImageSize, ImageURLOptions, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RateLimitError, RequestBody, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.mjs';
++export { A as APIRequest, m as HandlerRequestData, H as HashData, I as InternalRequest, j as InvalidRequestWarningData, e as RESTOptions, b as RateLimitData, i as RateLimitQueueFilter, a as RawFile, g as RequestData, k as RequestHeaders, l as RequestMethod, R as ResponseLike, h as RestEvents, c as RestEventsMap, n as RouteData, f as RouteLike } from './types-095b5d51.js';
+ import 'url';
+ import 'discord-api-types/v10';
+ import 'undici';
+-import 'node:stream';
+-import 'node:stream/web';
+ import '@discordjs/collection';
+ import '@vladfrangu/async_event_emitter';
++import 'node:stream';
++import 'node:stream/web';
+diff --git a/dist/web.d.ts b/dist/web.d.ts
+index 9911324a0027a37bf1698e7418f9f60968b9ca1e..e9397066b08195662b24b74d62161a44cedddb84 100644
+--- a/dist/web.d.ts
++++ b/dist/web.d.ts
+@@ -1,9 +1,9 @@
+-export { DiscordAPIError, DiscordErrorData, HTTPError, OAuthErrorData, RateLimitError, RequestBody, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.js';
+-export { t as ALLOWED_EXTENSIONS, v as ALLOWED_SIZES, u as ALLOWED_STICKER_EXTENSIONS, A as APIRequest, B as BaseImageURLOptions, y as BurstHandlerMajorIdKey, C as CDN, r as DefaultRestOptions, D as DefaultUserAgent, q as DefaultUserAgentAppendix, H as HandlerRequestData, i as HashData, w as ImageExtension, x as ImageSize, c as ImageURLOptions, I as InternalRequest, m as InvalidRequestWarningData, M as MakeURLOptions, O as OverwrittenMimeTypes, p as REST, s as RESTEvents, k as RESTOptions, b as RateLimitData, l as RateLimitQueueFilter, a as RawFile, d as RequestData, e as RequestHeaders, j as RequestManager, f as RequestMethod, R as ResponseLike, n as RestEvents, o as RestEventsMap, h as RouteData, g as RouteLike, S as StickerExtension } from './CDN-03f06673.js';
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, ImageExtension, ImageSize, ImageURLOptions, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RateLimitError, RequestBody, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.js';
++export { A as APIRequest, m as HandlerRequestData, H as HashData, I as InternalRequest, j as InvalidRequestWarningData, e as RESTOptions, b as RateLimitData, i as RateLimitQueueFilter, a as RawFile, g as RequestData, k as RequestHeaders, l as RequestMethod, R as ResponseLike, h as RestEvents, c as RestEventsMap, n as RouteData, f as RouteLike } from './types-095b5d51.js';
+ import 'url';
+ import 'discord-api-types/v10';
+ import 'undici';
+-import 'node:stream';
+-import 'node:stream/web';
+ import '@discordjs/collection';
+ import '@vladfrangu/async_event_emitter';
++import 'node:stream';
++import 'node:stream/web';
+diff --git a/dist/web.js b/dist/web.js
+index d288a273b9faf0e142ca2fae463bda3c7c9dec08..affc052cd72a878b977e1d261643d9639b623e7f 100644
+--- a/dist/web.js
++++ b/dist/web.js
+@@ -35,8 +35,7 @@ __export(web_exports, {
+   REST: () => REST,
+   RESTEvents: () => RESTEvents,
+   RateLimitError: () => RateLimitError,
+-  RequestManager: () => RequestManager,
+-  RequestMethod: () => RequestMethod,
++  RequestMethod: () => RequestMethod2,
+   calculateUserDefaultAvatarIndex: () => calculateUserDefaultAvatarIndex,
+   makeURLSearchParams: () => makeURLSearchParams,
+   parseResponse: () => parseResponse,
+@@ -448,12 +447,23 @@ var RateLimitError = class _RateLimitError extends Error {
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ var import_collection = require("@discordjs/collection");
+ var import_snowflake = require("@sapphire/snowflake");
+ var import_async_event_emitter = require("@vladfrangu/async_event_emitter");
+ var import_magic_bytes = require("magic-bytes.js");
+ 
++// src/lib/utils/types.ts
++var RequestMethod2 = /* @__PURE__ */ ((RequestMethod3) => {
++  RequestMethod3["Delete"] = "DELETE";
++  RequestMethod3["Get"] = "GET";
++  RequestMethod3["Head"] = "HEAD";
++  RequestMethod3["Patch"] = "PATCH";
++  RequestMethod3["Post"] = "POST";
++  RequestMethod3["Put"] = "PUT";
++  return RequestMethod3;
++})(RequestMethod2 || {});
++
+ // src/lib/utils/utils.ts
+ function serializeSearchParam(value) {
+   switch (typeof value) {
+@@ -583,7 +593,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -664,10 +674,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -710,7 +720,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -878,7 +888,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? RequestMethod.Get,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -899,10 +909,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -996,31 +1006,24 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-var RequestManager = class _RequestManager extends import_async_event_emitter.AsyncEventEmitter {
++// src/lib/REST.ts
++var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+   static {
+-    __name(this, "RequestManager");
++    __name(this, "REST");
+   }
+   /**
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+    * performed by this manager.
+    */
+   agent = null;
++  cdn;
+   /**
+    * The number of requests remaining in the global bucket
+    */
+@@ -1045,12 +1048,15 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+   hashTimer;
+   handlerTimer;
+   options;
+-  constructor(options) {
++  userAgent;
++  constructor(options = {}) {
+     super();
++    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.options = { ...DefaultRestOptions, ...options };
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = this.options.globalRequestsPerSecond;
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1076,7 +1082,6 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1092,9 +1097,62 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
++  /**
++   * Runs a get request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async get(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
++  }
++  /**
++   * Runs a delete request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async delete(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
++  }
++  /**
++   * Runs a post request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async post(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
++  }
++  /**
++   * Runs a put request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async put(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
++  }
++  /**
++   * Runs a patch request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async patch(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
++  }
++  /**
++   * Runs a request from the api
++   *
++   * @param options - Request options
++   */
++  async request(options) {
++    const response = await this.queueRequest(options);
++    return parseResponse(response);
++  }
+   /**
+    * Sets the default agent to use for requests performed by this manager
+    *
+@@ -1120,7 +1178,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+    * @returns The response from the api request
+    */
+   async queueRequest(request) {
+-    const routeId = _RequestManager.generateRouteData(request.fullRoute, request.method);
++    const routeId = _REST.generateRouteData(request.fullRoute, request.method);
+     const hash = this.hashes.get(`${request.method}:${routeId.bucketRoute}`) ?? {
+       value: `Global(${request.method}:${routeId.bucketRoute})`,
+       lastAccess: -1
+@@ -1162,7 +1220,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request.auth !== false) {
+       if (!this.#token) {
+@@ -1175,7 +1233,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+     }
+     const url = `${options.api}${request.versioned === false ? "" : `/v${options.version}`}${request.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request.files.entries()) {
+@@ -1214,7 +1272,7 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+     const method = request.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1268,115 +1326,6 @@ var RequestManager = class _RequestManager extends import_async_event_emitter.As
+   }
+ };
+ 
+-// src/lib/REST.ts
+-var import_async_event_emitter2 = require("@vladfrangu/async_event_emitter");
+-var REST = class extends import_async_event_emitter2.AsyncEventEmitter {
+-  static {
+-    __name(this, "REST");
+-  }
+-  cdn;
+-  requestManager;
+-  constructor(options = {}) {
+-    super();
+-    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+-    this.requestManager = new RequestManager(options).on("restDebug" /* Debug */, this.emit.bind(this, "restDebug" /* Debug */)).on("rateLimited" /* RateLimited */, this.emit.bind(this, "rateLimited" /* RateLimited */)).on("invalidRequestWarning" /* InvalidRequestWarning */, this.emit.bind(this, "invalidRequestWarning" /* InvalidRequestWarning */)).on("hashSweep" /* HashSweep */, this.emit.bind(this, "hashSweep" /* HashSweep */));
+-    this.on("newListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.on(name, listener);
+-    });
+-    this.on("removeListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.off(name, listener);
+-    });
+-  }
+-  /**
+-   * Gets the agent set for this instance
+-   */
+-  getAgent() {
+-    return this.requestManager.agent;
+-  }
+-  /**
+-   * Sets the default agent to use for requests performed by this instance
+-   *
+-   * @param agent - Sets the agent to use
+-   */
+-  setAgent(agent) {
+-    this.requestManager.setAgent(agent);
+-    return this;
+-  }
+-  /**
+-   * Sets the authorization token that should be used for requests
+-   *
+-   * @param token - The authorization token to use
+-   */
+-  setToken(token) {
+-    this.requestManager.setToken(token);
+-    return this;
+-  }
+-  /**
+-   * Runs a get request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async get(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+-  }
+-  /**
+-   * Runs a delete request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async delete(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+-  }
+-  /**
+-   * Runs a post request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async post(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+-  }
+-  /**
+-   * Runs a put request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async put(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+-  }
+-  /**
+-   * Runs a patch request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async patch(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+-  }
+-  /**
+-   * Runs a request from the api
+-   *
+-   * @param options - Request options
+-   */
+-  async request(options) {
+-    const response = await this.raw(options);
+-    return parseResponse(response);
+-  }
+-  /**
+-   * Runs a request from the API, yielding the raw Response object
+-   *
+-   * @param options - Request options
+-   */
+-  async raw(options) {
+-    return this.requestManager.queueRequest(options);
+-  }
+-};
+-
+ // src/shared.ts
+ var version = "1.7.2-dev.1689600762-afa9879.0";
+ 
+@@ -1398,7 +1347,6 @@ setDefaultStrategy(fetch);
+   REST,
+   RESTEvents,
+   RateLimitError,
+-  RequestManager,
+   RequestMethod,
+   calculateUserDefaultAvatarIndex,
+   makeURLSearchParams,
+diff --git a/dist/web.mjs b/dist/web.mjs
+index e1b054864751ea794d9478518d8b5e5137a4960b..760bf22e13e3516e52f810d7b518b22b3eb58071 100644
+--- a/dist/web.mjs
++++ b/dist/web.mjs
+@@ -405,12 +405,23 @@ var RateLimitError = class _RateLimitError extends Error {
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
++// src/lib/REST.ts
+ import { Collection } from "@discordjs/collection";
+ import { DiscordSnowflake } from "@sapphire/snowflake";
+ import { AsyncEventEmitter } from "@vladfrangu/async_event_emitter";
+ import { filetypeinfo } from "magic-bytes.js";
+ 
++// src/lib/utils/types.ts
++var RequestMethod2 = /* @__PURE__ */ ((RequestMethod3) => {
++  RequestMethod3["Delete"] = "DELETE";
++  RequestMethod3["Get"] = "GET";
++  RequestMethod3["Head"] = "HEAD";
++  RequestMethod3["Patch"] = "PATCH";
++  RequestMethod3["Post"] = "POST";
++  RequestMethod3["Put"] = "PUT";
++  return RequestMethod3;
++})(RequestMethod2 || {});
++
+ // src/lib/utils/utils.ts
+ function serializeSearchParam(value) {
+   switch (typeof value) {
+@@ -540,7 +551,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -621,10 +632,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -667,7 +678,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -835,7 +846,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? RequestMethod.Get,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -856,10 +867,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? RequestMethod.Get;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -953,31 +964,24 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+   }
+ };
+ 
+-// src/lib/RequestManager.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-var RequestManager = class _RequestManager extends AsyncEventEmitter {
++// src/lib/REST.ts
++var REST = class _REST extends AsyncEventEmitter {
+   static {
+-    __name(this, "RequestManager");
++    __name(this, "REST");
+   }
+   /**
+    * The {@link https://undici.nodejs.org/#/docs/api/Agent | Agent} for all requests
+    * performed by this manager.
+    */
+   agent = null;
++  cdn;
+   /**
+    * The number of requests remaining in the global bucket
+    */
+@@ -1002,12 +1006,15 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
+-  constructor(options) {
++  userAgent;
++  constructor(options = {}) {
+     super();
++    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.options = { ...DefaultRestOptions, ...options };
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = this.options.globalRequestsPerSecond;
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1033,7 +1040,6 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1049,9 +1055,62 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
++  /**
++   * Runs a get request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async get(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
++  }
++  /**
++   * Runs a delete request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async delete(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
++  }
++  /**
++   * Runs a post request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async post(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
++  }
++  /**
++   * Runs a put request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async put(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
++  }
++  /**
++   * Runs a patch request from the api
++   *
++   * @param fullRoute - The full route to query
++   * @param options - Optional request options
++   */
++  async patch(fullRoute, options) {
++    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
++  }
++  /**
++   * Runs a request from the api
++   *
++   * @param options - Request options
++   */
++  async request(options) {
++    const response = await this.queueRequest(options);
++    return parseResponse(response);
++  }
+   /**
+    * Sets the default agent to use for requests performed by this manager
+    *
+@@ -1077,7 +1136,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+    * @returns The response from the api request
+    */
+   async queueRequest(request) {
+-    const routeId = _RequestManager.generateRouteData(request.fullRoute, request.method);
++    const routeId = _REST.generateRouteData(request.fullRoute, request.method);
+     const hash = this.hashes.get(`${request.method}:${routeId.bucketRoute}`) ?? {
+       value: `Global(${request.method}:${routeId.bucketRoute})`,
+       lastAccess: -1
+@@ -1119,7 +1178,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+     }
+     const headers = {
+       ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      "User-Agent": this.userAgent
+     };
+     if (request.auth !== false) {
+       if (!this.#token) {
+@@ -1132,7 +1191,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+     }
+     const url = `${options.api}${request.versioned === false ? "" : `/v${options.version}`}${request.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request.files.entries()) {
+@@ -1171,7 +1230,7 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+     const method = request.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1225,115 +1284,6 @@ var RequestManager = class _RequestManager extends AsyncEventEmitter {
+   }
+ };
+ 
+-// src/lib/REST.ts
+-import { AsyncEventEmitter as AsyncEventEmitter2 } from "@vladfrangu/async_event_emitter";
+-var REST = class extends AsyncEventEmitter2 {
+-  static {
+-    __name(this, "REST");
+-  }
+-  cdn;
+-  requestManager;
+-  constructor(options = {}) {
+-    super();
+-    this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+-    this.requestManager = new RequestManager(options).on("restDebug" /* Debug */, this.emit.bind(this, "restDebug" /* Debug */)).on("rateLimited" /* RateLimited */, this.emit.bind(this, "rateLimited" /* RateLimited */)).on("invalidRequestWarning" /* InvalidRequestWarning */, this.emit.bind(this, "invalidRequestWarning" /* InvalidRequestWarning */)).on("hashSweep" /* HashSweep */, this.emit.bind(this, "hashSweep" /* HashSweep */));
+-    this.on("newListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.on(name, listener);
+-    });
+-    this.on("removeListener", (name, listener) => {
+-      if (name === "response" /* Response */)
+-        this.requestManager.off(name, listener);
+-    });
+-  }
+-  /**
+-   * Gets the agent set for this instance
+-   */
+-  getAgent() {
+-    return this.requestManager.agent;
+-  }
+-  /**
+-   * Sets the default agent to use for requests performed by this instance
+-   *
+-   * @param agent - Sets the agent to use
+-   */
+-  setAgent(agent) {
+-    this.requestManager.setAgent(agent);
+-    return this;
+-  }
+-  /**
+-   * Sets the authorization token that should be used for requests
+-   *
+-   * @param token - The authorization token to use
+-   */
+-  setToken(token) {
+-    this.requestManager.setToken(token);
+-    return this;
+-  }
+-  /**
+-   * Runs a get request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async get(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+-  }
+-  /**
+-   * Runs a delete request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async delete(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+-  }
+-  /**
+-   * Runs a post request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async post(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+-  }
+-  /**
+-   * Runs a put request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async put(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+-  }
+-  /**
+-   * Runs a patch request from the api
+-   *
+-   * @param fullRoute - The full route to query
+-   * @param options - Optional request options
+-   */
+-  async patch(fullRoute, options = {}) {
+-    return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+-  }
+-  /**
+-   * Runs a request from the api
+-   *
+-   * @param options - Request options
+-   */
+-  async request(options) {
+-    const response = await this.raw(options);
+-    return parseResponse(response);
+-  }
+-  /**
+-   * Runs a request from the API, yielding the raw Response object
+-   *
+-   * @param options - Request options
+-   */
+-  async raw(options) {
+-    return this.requestManager.queueRequest(options);
+-  }
+-};
+-
+ // src/shared.ts
+ var version = "1.7.2-dev.1689600762-afa9879.0";
+ 
+@@ -1354,8 +1304,7 @@ export {
+   REST,
+   RESTEvents,
+   RateLimitError,
+-  RequestManager,
+-  RequestMethod,
++  RequestMethod2 as RequestMethod,
+   calculateUserDefaultAvatarIndex,
+   makeURLSearchParams,
+   parseResponse,
