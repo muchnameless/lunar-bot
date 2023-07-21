@@ -989,12 +989,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/discord-utilities@npm:3.0.4-next.cf444df3.0":
-  version: 3.0.4-next.cf444df3.0
-  resolution: "@sapphire/discord-utilities@npm:3.0.4-next.cf444df3.0"
+"@sapphire/discord-utilities@npm:3.0.5-next.93d64d92.0":
+  version: 3.0.5-next.93d64d92.0
+  resolution: "@sapphire/discord-utilities@npm:3.0.5-next.93d64d92.0"
   dependencies:
-    discord-api-types: ^0.37.47
-  checksum: ffa809d60d276dc7168017b048e64ed9cbf3844255a9677e278eba7e0c9b7aec1b835e4f7c37443a9174cb6d80c5b6970bdbb989f8c90dbbfe46dd8fe01ed82e
+    discord-api-types: ^0.37.50
+  checksum: f27cbe9ea6c607b8f494fc55a62bd5dc4dba3bce79c09db0a15b6ebed2ee2ed2e80cd87e3aab210a697c47e4cb9f75a8cb1d63080cebbcfa58caca6905b2a75b
   languageName: node
   linkType: hard
 
@@ -1049,10 +1049,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/utilities@npm:3.12.1-next.cf444df3.0":
-  version: 3.12.1-next.cf444df3.0
-  resolution: "@sapphire/utilities@npm:3.12.1-next.cf444df3.0"
-  checksum: 6910103f60d452f91a2950cc7a2c1dc8bd2ed7a35b5f7490019ce5a11422a6a8cab95f12f9bffcf1543a61a286ec684274d1e4bad1d0ceb47c940ca64ecd7dec
+"@sapphire/utilities@npm:3.13.1-next.93d64d92.0":
+  version: 3.13.1-next.93d64d92.0
+  resolution: "@sapphire/utilities@npm:3.13.1-next.93d64d92.0"
+  checksum: f99d98fd3262ebd2dbbcada88bf421584b532597df0ebe30a6cc01558022d02a1f1a26a9ea1ab4356639b1dad8f8a502cbdfde6c320d5da1a6ddde49e95dbc2f
   languageName: node
   linkType: hard
 
@@ -5541,12 +5541,12 @@ __metadata:
     "@discordjs/ws": 0.8.4-dev.1689600801-afa9879.0
     "@napi-rs/canvas": ^0.1.41
     "@sapphire/async-queue": 1.5.1-next.cf444df3.0
-    "@sapphire/discord-utilities": 3.0.4-next.cf444df3.0
+    "@sapphire/discord-utilities": 3.0.5-next.93d64d92.0
     "@sapphire/node-utilities": 1.0.1-next.cf444df3.0
     "@sapphire/ratelimits": 2.4.7-next.cf444df3.0
     "@sapphire/stopwatch": 1.5.1-next.cf444df3.0
     "@sapphire/type": ^2.2.5-next
-    "@sapphire/utilities": 3.12.1-next.cf444df3.0
+    "@sapphire/utilities": 3.13.1-next.93d64d92.0
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^2.0.1
