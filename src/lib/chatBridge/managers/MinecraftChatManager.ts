@@ -776,7 +776,6 @@ export class MinecraftChatManager extends ChatManager {
 			.replace(
 				// hideLinkEmbed markdown
 				HIDE_LINK_EMBED_REGEXP,
-				// @ts-expect-error @types/node
 				(match, p1: string) => (URL.canParse(p1) ? p1 : match),
 			)
 			.replace(MAYBE_URL_REGEXP, (match) =>

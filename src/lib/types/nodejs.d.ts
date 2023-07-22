@@ -68,13 +68,3 @@ interface JSON {
 interface ArrayConstructor {
 	isArray(arg: any): arg is unknown[];
 }
-
-// TODO: remove if added to @types/node
-interface AbortSignal {
-	/**
-	 * If {@link aborted} is true, throws {@link reason}.
-	 *
-	 * @since v17.3.0
-	 */
-	throwIfAborted(): void;
-}
