@@ -94,7 +94,7 @@
 		"prismarine-nbt": "^2.2.1",
 		"re2": "^1.19.1",
 		"sequelize": "^6.32.1",
-		"tslib": "^2.6.0",
+		"tslib": "^2.6.1",
 		"undici": "^5.22.1",
 		"zlib-sync": "^0.1.8"
 	},
