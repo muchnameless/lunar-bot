@@ -1135,16 +1135,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cron@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@types/cron@npm:2.0.1"
-  dependencies:
-    "@types/luxon": "*"
-    "@types/node": "*"
-  checksum: 4268c784750a1373036b4de95cd1f35ab4fa5227c1639302eedb25a35900d7805271e33b557ad7ccccd6d1829944963df25cd0d9d0d603abf3bcdf148b69ea5d
-  languageName: node
-  linkType: hard
-
 "@types/debug@npm:^4.0.0, @types/debug@npm:^4.1.8":
   version: 4.1.8
   resolution: "@types/debug@npm:4.1.8"
@@ -1193,7 +1183,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:*, @types/luxon@npm:^3.3.1":
+"@types/luxon@npm:^3.3.1":
   version: 3.3.1
   resolution: "@types/luxon@npm:3.3.1"
   checksum: da8f6158edacae1430f3eca5f4ab4891200ffb34aa521ef6bae407a3c50b3854907098bc4535fb2a66a2779738f3c6c48fdfd86f01117a6f4844b18536cdb7c0
@@ -5545,7 +5535,6 @@ __metadata:
     "@sapphire/utilities": 3.13.1-next.93d64d92.0
     "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
-    "@types/cron": ^2.0.1
     "@types/luxon": ^3.3.1
     "@types/node": ^20.4.4
     "@types/pg": ^8.10.2
