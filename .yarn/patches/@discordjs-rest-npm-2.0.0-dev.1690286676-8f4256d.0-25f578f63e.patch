@@ -1,0 +1,508 @@
+diff --git a/dist/index.js b/dist/index.js
+index e171169fc3aca747e780b65d4981173192460726..e8e6b39d364bae40f933178b791f55719cc52ec5 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -658,7 +658,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -739,10 +739,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -785,7 +785,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -953,7 +953,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -974,10 +974,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1071,7 +1071,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1145,7 +1145,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1161,7 +1160,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1170,7 +1168,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1179,7 +1177,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1188,7 +1186,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1197,7 +1195,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1206,7 +1204,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+diff --git a/dist/index.mjs b/dist/index.mjs
+index d08b3ffed4466616809e07003369e33f5d10716b..bb222800d41ff36b3155cd6635d3fe488f8d043d 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -618,7 +618,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -699,10 +699,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -745,7 +745,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -913,7 +913,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -934,10 +934,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1031,7 +1031,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1105,7 +1105,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1121,7 +1120,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1130,7 +1128,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1139,7 +1137,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1148,7 +1146,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1157,7 +1155,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1166,7 +1164,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+diff --git a/dist/web.js b/dist/web.js
+index 22a71227345d4c3b28cb39dfce45bfcecb0fafb5..6185d6a90343b92befdb0be27cfccfd9534a617e 100644
+--- a/dist/web.js
++++ b/dist/web.js
+@@ -592,7 +592,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -673,10 +673,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -719,7 +719,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -887,7 +887,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -908,10 +908,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1005,7 +1005,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1079,7 +1079,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1095,7 +1094,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1104,7 +1102,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1113,7 +1111,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1122,7 +1120,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1131,7 +1129,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1140,7 +1138,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+diff --git a/dist/web.mjs b/dist/web.mjs
+index 250ab16d23bbf483d67975d3185ffaf17b8a61cc..eeb864ae64562e138eb8b866016c588de3f507f7 100644
+--- a/dist/web.mjs
++++ b/dist/web.mjs
+@@ -550,7 +550,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -631,10 +631,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -677,7 +677,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -845,7 +845,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -866,10 +866,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -963,7 +963,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1037,7 +1037,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1053,7 +1052,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1062,7 +1060,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1071,7 +1069,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1080,7 +1078,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1089,7 +1087,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1098,7 +1096,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
