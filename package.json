@@ -113,7 +113,7 @@
 		"husky": "^8.0.3",
 		"ley": "^0.8.1",
 		"lint-staged": "^13.2.3",
-		"pino-pretty": "^10.1.0",
+		"pino-pretty": "^10.2.0",
 		"sort-package-json": "^2.5.1",
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.1.6"
