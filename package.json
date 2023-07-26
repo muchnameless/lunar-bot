@@ -52,7 +52,7 @@
 		"@discordjs/ws": "patch:@discordjs/ws@1.0.0-dev.1690330229-8f4256d.0#./.yarn/patches/@discordjs-ws-npm-1.0.0-dev.1690286666-8f4256d.0-f7e6898fb6.patch",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.cf444df3.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.73db204.0-6002a134c8.patch",
 		"@sapphire/ratelimits": "2.4.7-next.cf444df3.0",
-		"@sapphire/shapeshift": "3.9.3-next.e0b03d4.0",
+		"@sapphire/shapeshift": "3.9.3-next.e22a741.0",
 		"@sapphire/snowflake": "3.5.2-next.cf444df3.0",
 		"@sapphire/timer-manager": "1.0.1-next.cf444df3.0",
 		"discord-api-types": "0.37.36-next.0d47c69.1677334692",
