@@ -87,7 +87,7 @@
 		"ms": "3.0.0-canary.1",
 		"pg": "^8.11.1",
 		"pg-hstore": "^2.3.4",
-		"pino": "^8.14.1",
+		"pino": "^8.14.2",
 		"postgres": "3.3.5",
 		"prettier": "^3.0.0",
 		"prismarine-chat": "^1.8.0",
