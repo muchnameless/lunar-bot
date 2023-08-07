@@ -1,7 +1,5 @@
 #!/bin/tcsh -f
 
-set curdir = `pwd`
-
 cd ~/lunar-bot
 
 echo "pulling from git"
@@ -26,6 +24,6 @@ endif
 echo ""
 echo "done"
 
-cd $curdir
+cd $OLDPWD
 
 if ($outdated == 0) exit 1

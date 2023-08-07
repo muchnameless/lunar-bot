@@ -9,14 +9,6 @@ const numberRegExp = /^\d+$/;
 export const validateNumber = (string: string | null): string is `${number}` =>
 	string !== null && numberRegExp.test(string);
 
-const discordTagRegExp = /^.{2,32}#\d{4}$/s;
-/**
- * checks if the string can be a discord tag
- *
- * @param string
- */
-export const validateDiscordTag = (string: string): string is `${string}#${number}` => discordTagRegExp.test(string);
-
 const discordIdRegExp = /^\d{17,20}$/;
 /**
  * checks if the string can be a discord ID

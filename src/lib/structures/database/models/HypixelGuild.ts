@@ -42,6 +42,7 @@ import {
 	safePromiseAll,
 	seconds,
 	splitMessage,
+	validateDiscordId,
 } from '#functions';
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
@@ -869,9 +870,9 @@ export class HypixelGuild extends Model<
 
 									player.inDiscord = false;
 									joinedLog.push(
-										player.discordId!.includes('#')
-											? `-\u00A0${player}: unknown discord tag ${player.discordId}`
-											: `-\u00A0${player}: unknown discord ID ${player.discordId}`,
+										player.discordId && validateDiscordId(player.discordId)
+											? `-\u00A0${player}: unknown discord ID ${player.discordId}`
+											: `-\u00A0${player}: unknown discord user ${player.discordId}`,
 									);
 
 									hasError = true;

@@ -1,3 +1,4 @@
+import { TextChannelLimits } from '@sapphire/discord-utilities';
 import {
 	codeBlock,
 	PermissionFlagsBits,
@@ -437,7 +438,7 @@ export default class TaxCommand extends ApplicationCommand {
 
 								const pinnedMessages = await channel.messages.fetchPinned();
 
-								if (pinnedMessages.size >= 50) await pinnedMessages.last()!.unpin();
+								if (pinnedMessages.size >= TextChannelLimits.MaximumMessagePins) await pinnedMessages.last()!.unpin();
 
 								logger.info('[TAX CMD]: unpinned old tax embed');
 

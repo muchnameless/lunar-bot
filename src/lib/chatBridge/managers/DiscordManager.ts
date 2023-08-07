@@ -25,7 +25,13 @@ import {
 } from '../constants/index.js';
 import { DiscordChatManager, type ReadyDiscordChatManager } from './DiscordChatManager.js';
 import { NON_LETTER_REGEXP } from '#constants';
-import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '#functions';
+import {
+	asyncReplace,
+	autocorrect,
+	escapeMarkdown,
+	replaceSmallLatinCapitalLetters,
+	validateDiscordId,
+} from '#functions';
 import { logger } from '#logger';
 
 export type DiscordChatManagerResolvable = DiscordChatManager | HypixelMessageType | Snowflake;
@@ -170,7 +176,7 @@ export class DiscordManager {
 									(await this.client.players.fetch({ ign: { [Op.iLike]: TO_SEARCH } }));
 
 								// player can be pinged
-								if (player?.inDiscord || (player?.discordId && !player.discordId.includes('#'))) {
+								if (player?.inDiscord || (player?.discordId && validateDiscordId(player.discordId))) {
 									return userMention(player.discordId!);
 								}
 

@@ -1027,7 +1027,7 @@ export class MinecraftChatManager extends ChatManager {
 				signedPreview: false,
 			});
 		} catch (error) {
-			logger.error({ err: error, ...this.logInfo }, '[_SEND TO CHAT]: bot.write error');
+			logger.error({ err: error, ...this.logInfo }, '[SEND TO CHAT]: bot.write error');
 			void this._handleForwardRejection(discordMessage, ForwardRejectionType.Error);
 
 			this._resetFilter();
