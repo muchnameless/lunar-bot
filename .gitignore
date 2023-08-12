@@ -1,6 +1,7 @@
 # Packages and development
 node_modules/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Build artifacts
 dist/

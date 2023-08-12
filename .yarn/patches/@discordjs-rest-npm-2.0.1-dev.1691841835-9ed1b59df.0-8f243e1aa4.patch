@@ -23,7 +23,7 @@ index 2417e2eedbbda6fa9d4a2b145dc8d4a76e211db3..2bd7c4065df586ff9cf8c28218752a68
      private setupSweepers;
      /**
 diff --git a/dist/index.js b/dist/index.js
-index e171169fc3aca747e780b65d4981173192460726..c2655068a5d4147cd40b46be010096cc2458479f 100644
+index e964b320d494072261d5c6195943025b0d919570..f83543e7bceb321eb5aa5639f4b1e1c8186a9338 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -523,6 +523,7 @@ var import_magic_bytes = require("magic-bytes.js");
@@ -209,7 +209,7 @@ index e171169fc3aca747e780b65d4981173192460726..c2655068a5d4147cd40b46be010096cc
        method,
        // Prioritize setting an agent per request, use the agent for this instance otherwise.
 diff --git a/dist/index.mjs b/dist/index.mjs
-index d08b3ffed4466616809e07003369e33f5d10716b..e20b8611797f1f4e7fa2e85d11fed830dff46090 100644
+index 24efa47698db9dd26584ca57a914b6f9366129f8..b0dbb1a9f0367701405354eb846726c2c89f7b84 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -483,6 +483,7 @@ import { filetypeinfo } from "magic-bytes.js";
@@ -407,7 +407,7 @@ index 16c9e8b606d5ceeabe931d62f4809f077a8ce146..e3d968a0a0c49e3083ac2807c1ac0547
      Post = "POST",
      Put = "PUT"
 diff --git a/dist/web.js b/dist/web.js
-index 22a71227345d4c3b28cb39dfce45bfcecb0fafb5..72fd87211c64c114ff54e52f88207148cdc9eaa0 100644
+index 1c9554f6bd7c4cff4d4a4c26149cc5a655e6912c..6fbd80a48f6d698de92675ba0ae31672f3c0e72e 100644
 --- a/dist/web.js
 +++ b/dist/web.js
 @@ -457,6 +457,7 @@ var import_magic_bytes = require("magic-bytes.js");
@@ -593,7 +593,7 @@ index 22a71227345d4c3b28cb39dfce45bfcecb0fafb5..72fd87211c64c114ff54e52f88207148
        method,
        // Prioritize setting an agent per request, use the agent for this instance otherwise.
 diff --git a/dist/web.mjs b/dist/web.mjs
-index 250ab16d23bbf483d67975d3185ffaf17b8a61cc..d3bb476a6d7b511233bb956858205ac46ffc1d95 100644
+index 5498024d528dd3843d80caee40e8e38dcc7a38fa..0ab39735146a913d136da24d96090ab8184feb36 100644
 --- a/dist/web.mjs
 +++ b/dist/web.mjs
 @@ -415,6 +415,7 @@ import { filetypeinfo } from "magic-bytes.js";
