@@ -47,9 +47,9 @@
 		"@discordjs/builders": "2.0.0-dev.1690416616-8f4256d.0",
 		"@discordjs/collection": "2.0.0-dev.1690416583-8f4256d.0",
 		"@discordjs/formatters": "1.0.0-dev.1690416583-8f4256d.0",
-		"@discordjs/rest": "patch:@discordjs/rest@2.0.1-dev.1691755443-b3c85d34a.0#./.yarn/patches/@discordjs-rest-npm-2.0.0-dev.1690286676-8f4256d.0-25f578f63e.patch",
-		"@discordjs/util": "1.0.1-dev.1691755479-b3c85d34a.0",
-		"@discordjs/ws": "patch:@discordjs/ws@1.0.1-dev.1691755483-b3c85d34a.0#./.yarn/patches/@discordjs-ws-npm-1.0.0-dev.1690286666-8f4256d.0-f7e6898fb6.patch",
+		"@discordjs/rest": "patch:@discordjs/rest@2.0.1-dev.1691798952-b3c85d34a.0#./.yarn/patches/@discordjs-rest-npm-2.0.0-dev.1690286676-8f4256d.0-25f578f63e.patch",
+		"@discordjs/util": "1.0.1-dev.1691798927-b3c85d34a.0",
+		"@discordjs/ws": "patch:@discordjs/ws@1.0.1-dev.1691798924-b3c85d34a.0#./.yarn/patches/@discordjs-ws-npm-1.0.0-dev.1690286666-8f4256d.0-f7e6898fb6.patch",
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.1-next.e57a4fdd.0#./.yarn/patches/@sapphire-async-queue-npm-1.5.1-next.73db204.0-6002a134c8.patch",
 		"@sapphire/ratelimits": "2.4.7-next.e57a4fdd.0",
 		"@sapphire/shapeshift": "3.9.3-next.f8e4e0c.0",
@@ -60,8 +60,8 @@
 		"minecraft-protocol": "patch:minecraft-protocol@npm:1.44.0#.yarn/patches/minecraft-protocol-npm-1.36.0-42ba3c97ef.patch"
 	},
 	"dependencies": {
-		"@discordjs/rest": "2.0.1-dev.1691755443-b3c85d34a.0",
-		"@discordjs/ws": "1.0.1-dev.1691755483-b3c85d34a.0",
+		"@discordjs/rest": "2.0.1-dev.1691798952-b3c85d34a.0",
+		"@discordjs/ws": "1.0.1-dev.1691798924-b3c85d34a.0",
 		"@napi-rs/canvas": "^0.1.41",
 		"@sapphire/async-queue": "1.5.1-next.e57a4fdd.0",
 		"@sapphire/discord-utilities": "3.1.1-next.54e717f3.0",
