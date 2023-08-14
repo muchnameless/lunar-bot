@@ -5546,7 +5546,7 @@ __metadata:
     pino-pretty: ^10.2.0
     postgres: 3.3.5
     prettier: ^3.0.1
-    prismarine-chat: ^1.8.0
+    prismarine-chat: ^1.9.0
     prismarine-nbt: ^2.2.1
     re2: ^1.20.1
     sequelize: ^6.32.1
@@ -7348,15 +7348,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-chat@npm:^1.8.0":
-  version: 1.8.0
-  resolution: "prismarine-chat@npm:1.8.0"
+"prismarine-chat@npm:^1.9.0":
+  version: 1.9.0
+  resolution: "prismarine-chat@npm:1.9.0"
   dependencies:
     mojangson: ^2.0.1
     prismarine-item: ^1.10.0
     prismarine-nbt: ^2.0.0
     prismarine-registry: ^1.4.0
-  checksum: 8a0c7e86abae0e33069406b67b7340d75f5a6152a31d6da52bc27d90ff9afbb7b08140596a67fc0b9e14b859c83ad974b7c4530f5837c9a390739cce95244f78
+  checksum: 2ec8d779c5478826a8c443ca8d9e7a00315a6597c2f1ed1c86af8f99989ea9edbff27a7ac2bb998fabd318ff663f52318e51c7393b60cc2006bbf6d28d9e548a
   languageName: node
   linkType: hard
 
