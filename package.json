@@ -75,7 +75,7 @@
 		"bufferutil": "^4.0.7",
 		"chart.js": "^4.3.3",
 		"common-tags": "^1.8.2",
-		"cron": "^2.4.0",
+		"cron": "^2.4.1",
 		"discord.js": "14.13.0-dev.1691971783-188877c50.0",
 		"fast-xml-parser": "^4.2.7",
 		"ioredis": "^5.3.2",
