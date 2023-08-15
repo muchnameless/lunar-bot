@@ -1,6 +1,6 @@
 [files]
 # auto generated files
-extend-exclude = ["src/lib/chatBridge/constants/*.json"]
+extend-exclude = ["src/lib/chatBridge/constants/*.json", "package.json"]
 
 [default.extend-identifiers]
 # hypixel API typo
