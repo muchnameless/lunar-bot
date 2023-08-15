@@ -85,14 +85,18 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 		return {
 			ign,
 			profile,
-			reply: `${this._formatNumber(totalWeight, totalWeight > 1_000 ? 2 : 1)} (${this._formatNumber(
-				overflow,
-				totalWeight > 1_000 ? 2 : 1,
-			)} Overflow) | Skill: ${this._formatNumber(skill)} (${formatPercent(skill / totalWeight)})${
-				skillAPIEnabled ? '' : ` ${UnicodeEmoji.X} API disabled`
-			} | Dungeons: ${this._formatNumber(dungeons)} (${formatPercent(
-				dungeons / totalWeight,
-			)}) | Slayer: ${this._formatNumber(slayer)} (${formatPercent(slayer / totalWeight)}) | ${this.weightType}`,
+			reply: [
+				`${this._formatNumber(totalWeight, totalWeight > 1_000 ? 2 : 1)} (${this._formatNumber(
+					overflow,
+					totalWeight > 1_000 ? 2 : 1,
+				)} Overflow)`,
+				`Skill: ${this._formatNumber(skill)} (${formatPercent(skill / totalWeight)})${
+					skillAPIEnabled ? '' : ` ${UnicodeEmoji.X} API disabled`
+				}`,
+				`Dungeons: ${this._formatNumber(dungeons)} (${formatPercent(dungeons / totalWeight)})`,
+				`Slayer: ${this._formatNumber(slayer)} (${formatPercent(slayer / totalWeight)})`,
+				`${this.weightType}`,
+			],
 		};
 	}
 }
