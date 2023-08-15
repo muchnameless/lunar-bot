@@ -95,7 +95,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 				}`,
 				`Dungeons: ${this._formatNumber(dungeons)} (${formatPercent(dungeons / totalWeight)})`,
 				`Slayer: ${this._formatNumber(slayer)} (${formatPercent(slayer / totalWeight)})`,
-				`${this.weightType}`,
+				this.weightType,
 			],
 		};
 	}
