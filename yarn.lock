@@ -1177,7 +1177,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:^3.3.1":
+"@types/luxon@npm:^3.3.1, @types/luxon@npm:~3.3.0":
   version: 3.3.1
   resolution: "@types/luxon@npm:3.3.1"
   checksum: da8f6158edacae1430f3eca5f4ab4891200ffb34aa521ef6bae407a3c50b3854907098bc4535fb2a66a2779738f3c6c48fdfd86f01117a6f4844b18536cdb7c0
@@ -2598,12 +2598,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cron@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "cron@npm:2.4.1"
+"cron@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "cron@npm:2.4.3"
   dependencies:
-    luxon: ^3.2.1
-  checksum: a421a837f99cf18da2f51e3608610f71817c38e6f756b4c85a26f64521dac327ac79861ae3dcf991076f72f3be0daadfffd413b4be0c3b4b029509b89e86b6d4
+    "@types/luxon": ~3.3.0
+    luxon: ~3.3.0
+  checksum: cb0ad49653b37ba125f8670ca92150ce515493512b1b8a5e08086d22bec9c54dc6d8926fcdb49ea5783f6699862ca5fdc532a440ce33c3228f9b3d565010db2f
   languageName: node
   linkType: hard
 
@@ -5623,7 +5624,7 @@ __metadata:
     bufferutil: ^4.0.7
     chart.js: ^4.4.0
     common-tags: ^1.8.2
-    cron: ^2.4.1
+    cron: ^2.4.3
     discord.js: 14.14.0-dev.1693008530-485dd718c.0
     env-cmd: ^10.1.0
     eslint: ^8.48.0
@@ -5658,10 +5659,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"luxon@npm:^3.2.1, luxon@npm:^3.4.1":
+"luxon@npm:^3.4.1":
   version: 3.4.1
   resolution: "luxon@npm:3.4.1"
   checksum: cd5e2a407cdc55a10548f6e0c1ca83590574fa3cba4d03da37113cd7dc118e6ce46b2d71ddc32cfd35a0413c15ac9a3cfdef3a2702e6862814b691048ffe0be8
+  languageName: node
+  linkType: hard
+
+"luxon@npm:~3.3.0":
+  version: 3.3.0
+  resolution: "luxon@npm:3.3.0"
+  checksum: 50cf17a0dc155c3dcacbeae8c0b7e80db425e0ba97b9cbdf12a7fc142d841ff1ab1560919f033af46240ed44e2f70c49f76e3422524c7fc8bb8d81ca47c66187
   languageName: node
   linkType: hard
 
