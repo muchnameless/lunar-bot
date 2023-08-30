@@ -983,12 +983,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/discord-utilities@npm:3.1.2-next.08908f25.0":
-  version: 3.1.2-next.08908f25.0
-  resolution: "@sapphire/discord-utilities@npm:3.1.2-next.08908f25.0"
+"@sapphire/discord-utilities@npm:3.1.2-next.dd0cff8e.0":
+  version: 3.1.2-next.dd0cff8e.0
+  resolution: "@sapphire/discord-utilities@npm:3.1.2-next.dd0cff8e.0"
   dependencies:
     discord-api-types: ^0.37.55
-  checksum: d61263f13492fabdea610511beb703e080633deb5ab1bdca634f74b7d709c629ffb1bdabef41243f7f91d5f2bbff5de874a4713e25cf93a2fa7849e9c7e0835e
+  checksum: 10f1e36c5c5faa692ef6fefd9aeb90dadd178baf52cd05107eb389e84f5b7cae071eb3f1cc98987782a4bfdb1d0220d883b14c42b281c3dd53419196ac7505ce
   languageName: node
   linkType: hard
 
@@ -5608,7 +5608,7 @@ __metadata:
     "@discordjs/ws": 1.0.2-dev.1693137833-8325fa654.0
     "@napi-rs/canvas": ^0.1.44
     "@sapphire/async-queue": 1.5.1-next.e57a4fdd.0
-    "@sapphire/discord-utilities": 3.1.2-next.08908f25.0
+    "@sapphire/discord-utilities": 3.1.2-next.dd0cff8e.0
     "@sapphire/node-utilities": 1.0.1-next.e57a4fdd.0
     "@sapphire/ratelimits": 2.4.7-next.e57a4fdd.0
     "@sapphire/stopwatch": 1.5.1-next.e57a4fdd.0
