@@ -1,29 +1,30 @@
-#!/bin/tcsh -f
+#!/bin/zsh
 
 cd ~/lunar-bot
 
 echo "pulling from git"
-set current = `git rev-parse --short HEAD`
+current=$(git rev-parse --short HEAD)
 git pull
+new=$(git rev-parse --short HEAD)
 
-@ outdated = `git rev-parse --short HEAD` != $current
-
-if ($outdated) then
+if [[ $current != $new ]]; then
 	echo ""
 	./scripts/bot.sh status
 
 	echo ""
 	echo "updating local dependencies"
-	yarn install
+	pnpm install
 
 	echo ""
 	echo "compiling to js"
-	\time -f 'Done in %E, CPU Usage %P' yarn build
-endif
+	time pnpm build
+fi
 
 echo ""
 echo "done"
 
 cd $OLDPWD
 
-if ($outdated == 0) exit 1
+if [[ $current != $new ]]; then
+	exit 1
+fi

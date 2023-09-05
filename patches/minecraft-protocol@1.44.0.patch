@@ -1,8 +1,8 @@
 diff --git a/src/client.js b/src/client.js
-index 03e2c9bf1300fddad0d627942e60c14e5ad438ad..633f2cbca6b90edabcb4c389b599fe4351a8ec1f 100644
+index 6f1182337db80b241aee9b195cd522e788d252e8..8ceac8e0bef51a59af686f1a9617cb69128efec9 100644
 --- a/src/client.js
 +++ b/src/client.js
-@@ -15,7 +15,7 @@ const closeTimeout = 30 * 1000
+@@ -14,7 +14,7 @@ const closeTimeout = 30 * 1000
  
  class Client extends EventEmitter {
    constructor (isServer, version, customPackets, hideErrors = false) {

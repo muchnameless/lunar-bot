@@ -1,0 +1,2158 @@
+diff --git a/dist/index.d.mts b/dist/index.d.mts
+index f8523afd4ca227f3be34f0c356498027b00ddd00..2bd7c4065df586ff9cf8c28218752a68b0fd8153 100644
+--- a/dist/index.d.mts
++++ b/dist/index.d.mts
+@@ -54,12 +54,6 @@ declare const OverwrittenMimeTypes: {
+     readonly 'image/apng': "image/png";
+ };
+ declare const BurstHandlerMajorIdKey = "burst";
+-/**
+- * Prefix for deprecation warnings.
+- *
+- * @internal
+- */
+-declare const DEPRECATION_WARNING_PREFIX: "DeprecationWarning";
+ 
+ /**
+  * The options used for image URLs
+@@ -175,19 +169,11 @@ declare class CDN {
+      * @param options - Optional options for the splash
+      */
+     discoverySplash(guildId: string, splashHash: string, options?: Readonly<BaseImageURLOptions>): string;
+-    /**
+-     * Generates an emoji's URL for an emoji.
+-     *
+-     * @param emojiId - The emoji id
+-     * @param options - Optional options for the emoji
+-     */
+-    emoji(emojiId: string, options?: Readonly<BaseImageURLOptions>): string;
+     /**
+      * Generates an emoji's URL for an emoji.
+      *
+      * @param emojiId - The emoji id
+      * @param extension - The extension of the emoji
+-     * @deprecated This overload is deprecated. Pass an object containing the extension instead.
+      */
+     emoji(emojiId: string, extension?: ImageExtension): string;
+     /**
+@@ -400,6 +386,7 @@ declare class REST extends AsyncEventEmitter<RestEventsMap> {
+     private hashTimer;
+     private handlerTimer;
+     readonly options: RESTOptions;
++    private readonly userAgent;
+     constructor(options?: Partial<RESTOptions>);
+     private setupSweepers;
+     /**
+@@ -521,4 +508,4 @@ declare function calculateUserDefaultAvatarIndex(userId: Snowflake): number;
+  */
+ declare const version: string;
+ 
+-export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DEPRECATION_WARNING_PREFIX, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RawFile, RequestBody, RequestData, ResponseLike, RestEventsMap, RouteLike, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RawFile, RequestBody, RequestData, ResponseLike, RestEventsMap, RouteLike, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index f8523afd4ca227f3be34f0c356498027b00ddd00..2bd7c4065df586ff9cf8c28218752a68b0fd8153 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -54,12 +54,6 @@ declare const OverwrittenMimeTypes: {
+     readonly 'image/apng': "image/png";
+ };
+ declare const BurstHandlerMajorIdKey = "burst";
+-/**
+- * Prefix for deprecation warnings.
+- *
+- * @internal
+- */
+-declare const DEPRECATION_WARNING_PREFIX: "DeprecationWarning";
+ 
+ /**
+  * The options used for image URLs
+@@ -175,19 +169,11 @@ declare class CDN {
+      * @param options - Optional options for the splash
+      */
+     discoverySplash(guildId: string, splashHash: string, options?: Readonly<BaseImageURLOptions>): string;
+-    /**
+-     * Generates an emoji's URL for an emoji.
+-     *
+-     * @param emojiId - The emoji id
+-     * @param options - Optional options for the emoji
+-     */
+-    emoji(emojiId: string, options?: Readonly<BaseImageURLOptions>): string;
+     /**
+      * Generates an emoji's URL for an emoji.
+      *
+      * @param emojiId - The emoji id
+      * @param extension - The extension of the emoji
+-     * @deprecated This overload is deprecated. Pass an object containing the extension instead.
+      */
+     emoji(emojiId: string, extension?: ImageExtension): string;
+     /**
+@@ -400,6 +386,7 @@ declare class REST extends AsyncEventEmitter<RestEventsMap> {
+     private hashTimer;
+     private handlerTimer;
+     readonly options: RESTOptions;
++    private readonly userAgent;
+     constructor(options?: Partial<RESTOptions>);
+     private setupSweepers;
+     /**
+@@ -521,4 +508,4 @@ declare function calculateUserDefaultAvatarIndex(userId: Snowflake): number;
+  */
+ declare const version: string;
+ 
+-export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DEPRECATION_WARNING_PREFIX, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RawFile, RequestBody, RequestData, ResponseLike, RestEventsMap, RouteLike, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, HashData, ImageExtension, ImageSize, ImageURLOptions, InternalRequest, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RESTOptions, RateLimitData, RateLimitError, RawFile, RequestBody, RequestData, ResponseLike, RestEventsMap, RouteLike, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version };
+diff --git a/dist/index.js b/dist/index.js
+index 22499e2a5f01204534bfe9e8e64e6909ec08163f..09c7685ec87ef07d99b12c003c438db250f317e8 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -26,7 +26,6 @@ __export(src_exports, {
+   ALLOWED_STICKER_EXTENSIONS: () => ALLOWED_STICKER_EXTENSIONS,
+   BurstHandlerMajorIdKey: () => BurstHandlerMajorIdKey,
+   CDN: () => CDN,
+-  DEPRECATION_WARNING_PREFIX: () => DEPRECATION_WARNING_PREFIX,
+   DefaultRestOptions: () => DefaultRestOptions,
+   DefaultUserAgent: () => DefaultUserAgent,
+   DefaultUserAgentAppendix: () => DefaultUserAgentAppendix,
+@@ -167,145 +166,8 @@ var OverwrittenMimeTypes = {
+   "image/apng": "image/png"
+ };
+ var BurstHandlerMajorIdKey = "burst";
+-var DEPRECATION_WARNING_PREFIX = "DeprecationWarning";
+-
+-// src/lib/errors/RateLimitError.ts
+-var RateLimitError = class _RateLimitError extends Error {
+-  static {
+-    __name(this, "RateLimitError");
+-  }
+-  timeToReset;
+-  limit;
+-  method;
+-  hash;
+-  url;
+-  route;
+-  majorParameter;
+-  global;
+-  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
+-    super();
+-    this.timeToReset = timeToReset;
+-    this.limit = limit;
+-    this.method = method;
+-    this.hash = hash;
+-    this.url = url;
+-    this.route = route;
+-    this.majorParameter = majorParameter;
+-    this.global = global;
+-  }
+-  /**
+-   * The name of the error
+-   */
+-  get name() {
+-    return `${_RateLimitError.name}[${this.route}]`;
+-  }
+-};
+-
+-// src/lib/utils/types.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-
+-// src/lib/utils/utils.ts
+-function serializeSearchParam(value) {
+-  switch (typeof value) {
+-    case "string":
+-      return value;
+-    case "number":
+-    case "bigint":
+-    case "boolean":
+-      return value.toString();
+-    case "object":
+-      if (value === null)
+-        return null;
+-      if (value instanceof Date) {
+-        return Number.isNaN(value.getTime()) ? null : value.toISOString();
+-      }
+-      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
+-        return value.toString();
+-      return null;
+-    default:
+-      return null;
+-  }
+-}
+-__name(serializeSearchParam, "serializeSearchParam");
+-function makeURLSearchParams(options) {
+-  const params = new URLSearchParams();
+-  if (!options)
+-    return params;
+-  for (const [key, value] of Object.entries(options)) {
+-    const serialized = serializeSearchParam(value);
+-    if (serialized !== null)
+-      params.append(key, serialized);
+-  }
+-  return params;
+-}
+-__name(makeURLSearchParams, "makeURLSearchParams");
+-async function parseResponse(res) {
+-  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
+-    return res.json();
+-  }
+-  return res.arrayBuffer();
+-}
+-__name(parseResponse, "parseResponse");
+-function hasSublimit(bucketRoute, body, method) {
+-  if (bucketRoute === "/channels/:id") {
+-    if (typeof body !== "object" || body === null)
+-      return false;
+-    if (method !== "PATCH" /* Patch */)
+-      return false;
+-    const castedBody = body;
+-    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
+-  }
+-  return true;
+-}
+-__name(hasSublimit, "hasSublimit");
+-function shouldRetry(error) {
+-  if (error.name === "AbortError")
+-    return true;
+-  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
+-}
+-__name(shouldRetry, "shouldRetry");
+-async function onRateLimit(manager, rateLimitData) {
+-  const { options } = manager;
+-  if (!options.rejectOnRateLimit)
+-    return;
+-  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
+-  if (shouldThrow) {
+-    throw new RateLimitError(rateLimitData);
+-  }
+-}
+-__name(onRateLimit, "onRateLimit");
+-function calculateUserDefaultAvatarIndex(userId) {
+-  return Number(BigInt(userId) >> 22n) % 6;
+-}
+-__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
+-async function sleep(ms) {
+-  return new Promise((resolve) => {
+-    setTimeout(() => resolve(), ms);
+-  });
+-}
+-__name(sleep, "sleep");
+-function isBufferLike(value) {
+-  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
+-}
+-__name(isBufferLike, "isBufferLike");
+-function deprecationWarning(message) {
+-  if (typeof globalThis.process === "undefined") {
+-    console.warn(`${DEPRECATION_WARNING_PREFIX}: ${message}`);
+-  } else {
+-    process.emitWarning(message, DEPRECATION_WARNING_PREFIX);
+-  }
+-}
+-__name(deprecationWarning, "deprecationWarning");
+ 
+ // src/lib/CDN.ts
+-var deprecationEmittedForEmoji = false;
+ var CDN = class {
+   constructor(base = DefaultRestOptions.cdn) {
+     this.base = base;
+@@ -394,20 +256,14 @@ var CDN = class {
+   discoverySplash(guildId, splashHash, options) {
+     return this.makeURL(`/discovery-splashes/${guildId}/${splashHash}`, options);
+   }
+-  emoji(emojiId, options) {
+-    let resolvedOptions;
+-    if (typeof options === "string") {
+-      if (!deprecationEmittedForEmoji) {
+-        deprecationWarning(
+-          "Passing a string for the second parameter of CDN#emoji() is deprecated. Use an object instead."
+-        );
+-        deprecationEmittedForEmoji = true;
+-      }
+-      resolvedOptions = { extension: options };
+-    } else {
+-      resolvedOptions = options;
+-    }
+-    return this.makeURL(`/emojis/${emojiId}`, resolvedOptions);
++  /**
++   * Generates an emoji's URL for an emoji.
++   *
++   * @param emojiId - The emoji id
++   * @param extension - The extension of the emoji
++   */
++  emoji(emojiId, extension) {
++    return this.makeURL(`/emojis/${emojiId}`, { extension });
+   }
+   /**
+    * Generates a guild member avatar URL.
+@@ -625,12 +481,140 @@ var HTTPError = class _HTTPError extends Error {
+   name = _HTTPError.name;
+ };
+ 
++// src/lib/errors/RateLimitError.ts
++var RateLimitError = class _RateLimitError extends Error {
++  static {
++    __name(this, "RateLimitError");
++  }
++  timeToReset;
++  limit;
++  method;
++  hash;
++  url;
++  route;
++  majorParameter;
++  global;
++  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
++    super();
++    this.timeToReset = timeToReset;
++    this.limit = limit;
++    this.method = method;
++    this.hash = hash;
++    this.url = url;
++    this.route = route;
++    this.majorParameter = majorParameter;
++    this.global = global;
++  }
++  /**
++   * The name of the error
++   */
++  get name() {
++    return `${_RateLimitError.name}[${this.route}]`;
++  }
++};
++
+ // src/lib/REST.ts
+ var import_collection = require("@discordjs/collection");
+ var import_snowflake = require("@sapphire/snowflake");
+ var import_async_event_emitter = require("@vladfrangu/async_event_emitter");
+ var import_magic_bytes = require("magic-bytes.js");
+ 
++// src/lib/utils/types.ts
++var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
++  RequestMethod2["Delete"] = "DELETE";
++  RequestMethod2["Get"] = "GET";
++  RequestMethod2["Head"] = "HEAD";
++  RequestMethod2["Patch"] = "PATCH";
++  RequestMethod2["Post"] = "POST";
++  RequestMethod2["Put"] = "PUT";
++  return RequestMethod2;
++})(RequestMethod || {});
++
++// src/lib/utils/utils.ts
++function serializeSearchParam(value) {
++  switch (typeof value) {
++    case "string":
++      return value;
++    case "number":
++    case "bigint":
++    case "boolean":
++      return value.toString();
++    case "object":
++      if (value === null)
++        return null;
++      if (value instanceof Date) {
++        return Number.isNaN(value.getTime()) ? null : value.toISOString();
++      }
++      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
++        return value.toString();
++      return null;
++    default:
++      return null;
++  }
++}
++__name(serializeSearchParam, "serializeSearchParam");
++function makeURLSearchParams(options) {
++  const params = new URLSearchParams();
++  if (!options)
++    return params;
++  for (const [key, value] of Object.entries(options)) {
++    const serialized = serializeSearchParam(value);
++    if (serialized !== null)
++      params.append(key, serialized);
++  }
++  return params;
++}
++__name(makeURLSearchParams, "makeURLSearchParams");
++async function parseResponse(res) {
++  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
++    return res.json();
++  }
++  return res.arrayBuffer();
++}
++__name(parseResponse, "parseResponse");
++function hasSublimit(bucketRoute, body, method) {
++  if (bucketRoute === "/channels/:id") {
++    if (typeof body !== "object" || body === null)
++      return false;
++    if (method !== "PATCH" /* Patch */)
++      return false;
++    const castedBody = body;
++    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
++  }
++  return true;
++}
++__name(hasSublimit, "hasSublimit");
++function shouldRetry(error) {
++  if (error.name === "AbortError")
++    return true;
++  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
++}
++__name(shouldRetry, "shouldRetry");
++async function onRateLimit(manager, rateLimitData) {
++  const { options } = manager;
++  if (!options.rejectOnRateLimit)
++    return;
++  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
++  if (shouldThrow) {
++    throw new RateLimitError(rateLimitData);
++  }
++}
++__name(onRateLimit, "onRateLimit");
++function calculateUserDefaultAvatarIndex(userId) {
++  return Number(BigInt(userId) >> 22n) % 6;
++}
++__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
++async function sleep(ms) {
++  return new Promise((resolve) => {
++    setTimeout(() => resolve(), ms);
++  });
++}
++__name(sleep, "sleep");
++function isBufferLike(value) {
++  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
++}
++__name(isBufferLike, "isBufferLike");
++
+ // src/lib/handlers/Shared.ts
+ var invalidCount = 0;
+ var invalidCountResetTime = null;
+@@ -675,7 +659,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -756,10 +740,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -802,7 +786,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -970,7 +954,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -991,10 +975,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1088,7 +1072,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1130,6 +1114,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
++  userAgent;
+   constructor(options = {}) {
+     super();
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+@@ -1137,6 +1122,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1162,7 +1148,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1178,7 +1163,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1187,7 +1171,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1196,7 +1180,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1205,7 +1189,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1214,7 +1198,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1223,7 +1207,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+@@ -1301,21 +1285,21 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+       }
+     }
+     const headers = {
+-      ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      ...options.headers,
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+         throw new Error("Expected token to be set for this request, but none was present");
+       }
+-      headers.Authorization = `${request2.authPrefix ?? this.options.authPrefix} ${this.#token}`;
++      headers.Authorization = `${request2.authPrefix ?? options.authPrefix} ${this.#token}`;
+     }
+     if (request2.reason?.length) {
+       headers["X-Audit-Log-Reason"] = encodeURIComponent(request2.reason);
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request2.files.entries()) {
+@@ -1354,7 +1338,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+     const method = request2.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request2.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1422,7 +1406,6 @@ setDefaultStrategy((0, import_util2.shouldUseGlobalFetchAndWebSocket)() ? fetch
+   ALLOWED_STICKER_EXTENSIONS,
+   BurstHandlerMajorIdKey,
+   CDN,
+-  DEPRECATION_WARNING_PREFIX,
+   DefaultRestOptions,
+   DefaultUserAgent,
+   DefaultUserAgentAppendix,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 62a3b0e0dcb9575561422aef03c312173a8161a0..c4b50c1d6b70ac1d8f8b246685ce8418aec0b818 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -126,145 +126,8 @@ var OverwrittenMimeTypes = {
+   "image/apng": "image/png"
+ };
+ var BurstHandlerMajorIdKey = "burst";
+-var DEPRECATION_WARNING_PREFIX = "DeprecationWarning";
+-
+-// src/lib/errors/RateLimitError.ts
+-var RateLimitError = class _RateLimitError extends Error {
+-  static {
+-    __name(this, "RateLimitError");
+-  }
+-  timeToReset;
+-  limit;
+-  method;
+-  hash;
+-  url;
+-  route;
+-  majorParameter;
+-  global;
+-  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
+-    super();
+-    this.timeToReset = timeToReset;
+-    this.limit = limit;
+-    this.method = method;
+-    this.hash = hash;
+-    this.url = url;
+-    this.route = route;
+-    this.majorParameter = majorParameter;
+-    this.global = global;
+-  }
+-  /**
+-   * The name of the error
+-   */
+-  get name() {
+-    return `${_RateLimitError.name}[${this.route}]`;
+-  }
+-};
+-
+-// src/lib/utils/types.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-
+-// src/lib/utils/utils.ts
+-function serializeSearchParam(value) {
+-  switch (typeof value) {
+-    case "string":
+-      return value;
+-    case "number":
+-    case "bigint":
+-    case "boolean":
+-      return value.toString();
+-    case "object":
+-      if (value === null)
+-        return null;
+-      if (value instanceof Date) {
+-        return Number.isNaN(value.getTime()) ? null : value.toISOString();
+-      }
+-      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
+-        return value.toString();
+-      return null;
+-    default:
+-      return null;
+-  }
+-}
+-__name(serializeSearchParam, "serializeSearchParam");
+-function makeURLSearchParams(options) {
+-  const params = new URLSearchParams();
+-  if (!options)
+-    return params;
+-  for (const [key, value] of Object.entries(options)) {
+-    const serialized = serializeSearchParam(value);
+-    if (serialized !== null)
+-      params.append(key, serialized);
+-  }
+-  return params;
+-}
+-__name(makeURLSearchParams, "makeURLSearchParams");
+-async function parseResponse(res) {
+-  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
+-    return res.json();
+-  }
+-  return res.arrayBuffer();
+-}
+-__name(parseResponse, "parseResponse");
+-function hasSublimit(bucketRoute, body, method) {
+-  if (bucketRoute === "/channels/:id") {
+-    if (typeof body !== "object" || body === null)
+-      return false;
+-    if (method !== "PATCH" /* Patch */)
+-      return false;
+-    const castedBody = body;
+-    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
+-  }
+-  return true;
+-}
+-__name(hasSublimit, "hasSublimit");
+-function shouldRetry(error) {
+-  if (error.name === "AbortError")
+-    return true;
+-  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
+-}
+-__name(shouldRetry, "shouldRetry");
+-async function onRateLimit(manager, rateLimitData) {
+-  const { options } = manager;
+-  if (!options.rejectOnRateLimit)
+-    return;
+-  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
+-  if (shouldThrow) {
+-    throw new RateLimitError(rateLimitData);
+-  }
+-}
+-__name(onRateLimit, "onRateLimit");
+-function calculateUserDefaultAvatarIndex(userId) {
+-  return Number(BigInt(userId) >> 22n) % 6;
+-}
+-__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
+-async function sleep(ms) {
+-  return new Promise((resolve) => {
+-    setTimeout(() => resolve(), ms);
+-  });
+-}
+-__name(sleep, "sleep");
+-function isBufferLike(value) {
+-  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
+-}
+-__name(isBufferLike, "isBufferLike");
+-function deprecationWarning(message) {
+-  if (typeof globalThis.process === "undefined") {
+-    console.warn(`${DEPRECATION_WARNING_PREFIX}: ${message}`);
+-  } else {
+-    process.emitWarning(message, DEPRECATION_WARNING_PREFIX);
+-  }
+-}
+-__name(deprecationWarning, "deprecationWarning");
+ 
+ // src/lib/CDN.ts
+-var deprecationEmittedForEmoji = false;
+ var CDN = class {
+   constructor(base = DefaultRestOptions.cdn) {
+     this.base = base;
+@@ -353,20 +216,14 @@ var CDN = class {
+   discoverySplash(guildId, splashHash, options) {
+     return this.makeURL(`/discovery-splashes/${guildId}/${splashHash}`, options);
+   }
+-  emoji(emojiId, options) {
+-    let resolvedOptions;
+-    if (typeof options === "string") {
+-      if (!deprecationEmittedForEmoji) {
+-        deprecationWarning(
+-          "Passing a string for the second parameter of CDN#emoji() is deprecated. Use an object instead."
+-        );
+-        deprecationEmittedForEmoji = true;
+-      }
+-      resolvedOptions = { extension: options };
+-    } else {
+-      resolvedOptions = options;
+-    }
+-    return this.makeURL(`/emojis/${emojiId}`, resolvedOptions);
++  /**
++   * Generates an emoji's URL for an emoji.
++   *
++   * @param emojiId - The emoji id
++   * @param extension - The extension of the emoji
++   */
++  emoji(emojiId, extension) {
++    return this.makeURL(`/emojis/${emojiId}`, { extension });
+   }
+   /**
+    * Generates a guild member avatar URL.
+@@ -584,12 +441,140 @@ var HTTPError = class _HTTPError extends Error {
+   name = _HTTPError.name;
+ };
+ 
++// src/lib/errors/RateLimitError.ts
++var RateLimitError = class _RateLimitError extends Error {
++  static {
++    __name(this, "RateLimitError");
++  }
++  timeToReset;
++  limit;
++  method;
++  hash;
++  url;
++  route;
++  majorParameter;
++  global;
++  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
++    super();
++    this.timeToReset = timeToReset;
++    this.limit = limit;
++    this.method = method;
++    this.hash = hash;
++    this.url = url;
++    this.route = route;
++    this.majorParameter = majorParameter;
++    this.global = global;
++  }
++  /**
++   * The name of the error
++   */
++  get name() {
++    return `${_RateLimitError.name}[${this.route}]`;
++  }
++};
++
+ // src/lib/REST.ts
+ import { Collection } from "@discordjs/collection";
+ import { DiscordSnowflake } from "@sapphire/snowflake";
+ import { AsyncEventEmitter } from "@vladfrangu/async_event_emitter";
+ import { filetypeinfo } from "magic-bytes.js";
+ 
++// src/lib/utils/types.ts
++var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
++  RequestMethod2["Delete"] = "DELETE";
++  RequestMethod2["Get"] = "GET";
++  RequestMethod2["Head"] = "HEAD";
++  RequestMethod2["Patch"] = "PATCH";
++  RequestMethod2["Post"] = "POST";
++  RequestMethod2["Put"] = "PUT";
++  return RequestMethod2;
++})(RequestMethod || {});
++
++// src/lib/utils/utils.ts
++function serializeSearchParam(value) {
++  switch (typeof value) {
++    case "string":
++      return value;
++    case "number":
++    case "bigint":
++    case "boolean":
++      return value.toString();
++    case "object":
++      if (value === null)
++        return null;
++      if (value instanceof Date) {
++        return Number.isNaN(value.getTime()) ? null : value.toISOString();
++      }
++      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
++        return value.toString();
++      return null;
++    default:
++      return null;
++  }
++}
++__name(serializeSearchParam, "serializeSearchParam");
++function makeURLSearchParams(options) {
++  const params = new URLSearchParams();
++  if (!options)
++    return params;
++  for (const [key, value] of Object.entries(options)) {
++    const serialized = serializeSearchParam(value);
++    if (serialized !== null)
++      params.append(key, serialized);
++  }
++  return params;
++}
++__name(makeURLSearchParams, "makeURLSearchParams");
++async function parseResponse(res) {
++  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
++    return res.json();
++  }
++  return res.arrayBuffer();
++}
++__name(parseResponse, "parseResponse");
++function hasSublimit(bucketRoute, body, method) {
++  if (bucketRoute === "/channels/:id") {
++    if (typeof body !== "object" || body === null)
++      return false;
++    if (method !== "PATCH" /* Patch */)
++      return false;
++    const castedBody = body;
++    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
++  }
++  return true;
++}
++__name(hasSublimit, "hasSublimit");
++function shouldRetry(error) {
++  if (error.name === "AbortError")
++    return true;
++  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
++}
++__name(shouldRetry, "shouldRetry");
++async function onRateLimit(manager, rateLimitData) {
++  const { options } = manager;
++  if (!options.rejectOnRateLimit)
++    return;
++  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
++  if (shouldThrow) {
++    throw new RateLimitError(rateLimitData);
++  }
++}
++__name(onRateLimit, "onRateLimit");
++function calculateUserDefaultAvatarIndex(userId) {
++  return Number(BigInt(userId) >> 22n) % 6;
++}
++__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
++async function sleep(ms) {
++  return new Promise((resolve) => {
++    setTimeout(() => resolve(), ms);
++  });
++}
++__name(sleep, "sleep");
++function isBufferLike(value) {
++  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
++}
++__name(isBufferLike, "isBufferLike");
++
+ // src/lib/handlers/Shared.ts
+ var invalidCount = 0;
+ var invalidCountResetTime = null;
+@@ -634,7 +619,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -715,10 +700,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -761,7 +746,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -929,7 +914,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -950,10 +935,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1047,7 +1032,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1089,6 +1074,7 @@ var REST = class _REST extends AsyncEventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
++  userAgent;
+   constructor(options = {}) {
+     super();
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+@@ -1096,6 +1082,7 @@ var REST = class _REST extends AsyncEventEmitter {
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1121,7 +1108,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1137,7 +1123,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1146,7 +1131,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1155,7 +1140,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1164,7 +1149,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1173,7 +1158,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1182,7 +1167,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+@@ -1260,21 +1245,21 @@ var REST = class _REST extends AsyncEventEmitter {
+       }
+     }
+     const headers = {
+-      ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      ...options.headers,
++      "User-Agent": this.userAgent
+     };
+     if (request2.auth !== false) {
+       if (!this.#token) {
+         throw new Error("Expected token to be set for this request, but none was present");
+       }
+-      headers.Authorization = `${request2.authPrefix ?? this.options.authPrefix} ${this.#token}`;
++      headers.Authorization = `${request2.authPrefix ?? options.authPrefix} ${this.#token}`;
+     }
+     if (request2.reason?.length) {
+       headers["X-Audit-Log-Reason"] = encodeURIComponent(request2.reason);
+     }
+     const url = `${options.api}${request2.versioned === false ? "" : `/v${options.version}`}${request2.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request2.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request2.files.entries()) {
+@@ -1313,7 +1298,7 @@ var REST = class _REST extends AsyncEventEmitter {
+     const method = request2.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request2.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1380,7 +1365,6 @@ export {
+   ALLOWED_STICKER_EXTENSIONS,
+   BurstHandlerMajorIdKey,
+   CDN,
+-  DEPRECATION_WARNING_PREFIX,
+   DefaultRestOptions,
+   DefaultUserAgent,
+   DefaultUserAgentAppendix,
+diff --git a/dist/types-65527f29.d.ts b/dist/types-65527f29.d.ts
+index 16c9e8b606d5ceeabe931d62f4809f077a8ce146..e3d968a0a0c49e3083ac2807c1ac054755bfbffe 100644
+--- a/dist/types-65527f29.d.ts
++++ b/dist/types-65527f29.d.ts
+@@ -325,6 +325,7 @@ interface RequestHeaders {
+ declare enum RequestMethod {
+     Delete = "DELETE",
+     Get = "GET",
++    Head = "HEAD",
+     Patch = "PATCH",
+     Post = "POST",
+     Put = "PUT"
+diff --git a/dist/web.d.mts b/dist/web.d.mts
+index 8a406e42cd869643876a58d84eb51b55fa50a211..4a4ce8ab11920e604cc5cf6b55b8f712a3de015e 100644
+--- a/dist/web.d.mts
++++ b/dist/web.d.mts
+@@ -1,4 +1,4 @@
+-export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DEPRECATION_WARNING_PREFIX, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, ImageExtension, ImageSize, ImageURLOptions, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RateLimitError, RequestBody, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.mjs';
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, ImageExtension, ImageSize, ImageURLOptions, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RateLimitError, RequestBody, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.mjs';
+ export { A as APIRequest, m as HandlerRequestData, H as HashData, I as InternalRequest, j as InvalidRequestWarningData, e as RESTOptions, b as RateLimitData, i as RateLimitQueueFilter, a as RawFile, g as RequestData, k as RequestHeaders, l as RequestMethod, R as ResponseLike, h as RestEvents, c as RestEventsMap, n as RouteData, f as RouteLike } from './types-65527f29.js';
+ import 'url';
+ import 'discord-api-types/v10';
+diff --git a/dist/web.d.ts b/dist/web.d.ts
+index f2ccec5eb1585f7c38b0c9fbbf114692104b0de0..98e05e948e1b436554b5aa23cf18462a68fff8e7 100644
+--- a/dist/web.d.ts
++++ b/dist/web.d.ts
+@@ -1,4 +1,4 @@
+-export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DEPRECATION_WARNING_PREFIX, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, ImageExtension, ImageSize, ImageURLOptions, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RateLimitError, RequestBody, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.js';
++export { ALLOWED_EXTENSIONS, ALLOWED_SIZES, ALLOWED_STICKER_EXTENSIONS, BaseImageURLOptions, BurstHandlerMajorIdKey, CDN, DefaultRestOptions, DefaultUserAgent, DefaultUserAgentAppendix, DiscordAPIError, DiscordErrorData, HTTPError, ImageExtension, ImageSize, ImageURLOptions, MakeURLOptions, OAuthErrorData, OverwrittenMimeTypes, REST, RESTEvents, RateLimitError, RequestBody, StickerExtension, calculateUserDefaultAvatarIndex, makeURLSearchParams, parseResponse, version } from './index.js';
+ export { A as APIRequest, m as HandlerRequestData, H as HashData, I as InternalRequest, j as InvalidRequestWarningData, e as RESTOptions, b as RateLimitData, i as RateLimitQueueFilter, a as RawFile, g as RequestData, k as RequestHeaders, l as RequestMethod, R as ResponseLike, h as RestEvents, c as RestEventsMap, n as RouteData, f as RouteLike } from './types-65527f29.js';
+ import 'url';
+ import 'discord-api-types/v10';
+diff --git a/dist/web.js b/dist/web.js
+index 83ededde6aec7a2fc582494b063ecf2eaddabd6c..5836412f2ebfd9133359468ca031d82d63aa0e33 100644
+--- a/dist/web.js
++++ b/dist/web.js
+@@ -26,7 +26,6 @@ __export(web_exports, {
+   ALLOWED_STICKER_EXTENSIONS: () => ALLOWED_STICKER_EXTENSIONS,
+   BurstHandlerMajorIdKey: () => BurstHandlerMajorIdKey,
+   CDN: () => CDN,
+-  DEPRECATION_WARNING_PREFIX: () => DEPRECATION_WARNING_PREFIX,
+   DefaultRestOptions: () => DefaultRestOptions,
+   DefaultUserAgent: () => DefaultUserAgent,
+   DefaultUserAgentAppendix: () => DefaultUserAgentAppendix,
+@@ -101,145 +100,8 @@ var OverwrittenMimeTypes = {
+   "image/apng": "image/png"
+ };
+ var BurstHandlerMajorIdKey = "burst";
+-var DEPRECATION_WARNING_PREFIX = "DeprecationWarning";
+-
+-// src/lib/errors/RateLimitError.ts
+-var RateLimitError = class _RateLimitError extends Error {
+-  static {
+-    __name(this, "RateLimitError");
+-  }
+-  timeToReset;
+-  limit;
+-  method;
+-  hash;
+-  url;
+-  route;
+-  majorParameter;
+-  global;
+-  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
+-    super();
+-    this.timeToReset = timeToReset;
+-    this.limit = limit;
+-    this.method = method;
+-    this.hash = hash;
+-    this.url = url;
+-    this.route = route;
+-    this.majorParameter = majorParameter;
+-    this.global = global;
+-  }
+-  /**
+-   * The name of the error
+-   */
+-  get name() {
+-    return `${_RateLimitError.name}[${this.route}]`;
+-  }
+-};
+-
+-// src/lib/utils/types.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-
+-// src/lib/utils/utils.ts
+-function serializeSearchParam(value) {
+-  switch (typeof value) {
+-    case "string":
+-      return value;
+-    case "number":
+-    case "bigint":
+-    case "boolean":
+-      return value.toString();
+-    case "object":
+-      if (value === null)
+-        return null;
+-      if (value instanceof Date) {
+-        return Number.isNaN(value.getTime()) ? null : value.toISOString();
+-      }
+-      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
+-        return value.toString();
+-      return null;
+-    default:
+-      return null;
+-  }
+-}
+-__name(serializeSearchParam, "serializeSearchParam");
+-function makeURLSearchParams(options) {
+-  const params = new URLSearchParams();
+-  if (!options)
+-    return params;
+-  for (const [key, value] of Object.entries(options)) {
+-    const serialized = serializeSearchParam(value);
+-    if (serialized !== null)
+-      params.append(key, serialized);
+-  }
+-  return params;
+-}
+-__name(makeURLSearchParams, "makeURLSearchParams");
+-async function parseResponse(res) {
+-  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
+-    return res.json();
+-  }
+-  return res.arrayBuffer();
+-}
+-__name(parseResponse, "parseResponse");
+-function hasSublimit(bucketRoute, body, method) {
+-  if (bucketRoute === "/channels/:id") {
+-    if (typeof body !== "object" || body === null)
+-      return false;
+-    if (method !== "PATCH" /* Patch */)
+-      return false;
+-    const castedBody = body;
+-    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
+-  }
+-  return true;
+-}
+-__name(hasSublimit, "hasSublimit");
+-function shouldRetry(error) {
+-  if (error.name === "AbortError")
+-    return true;
+-  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
+-}
+-__name(shouldRetry, "shouldRetry");
+-async function onRateLimit(manager, rateLimitData) {
+-  const { options } = manager;
+-  if (!options.rejectOnRateLimit)
+-    return;
+-  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
+-  if (shouldThrow) {
+-    throw new RateLimitError(rateLimitData);
+-  }
+-}
+-__name(onRateLimit, "onRateLimit");
+-function calculateUserDefaultAvatarIndex(userId) {
+-  return Number(BigInt(userId) >> 22n) % 6;
+-}
+-__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
+-async function sleep(ms) {
+-  return new Promise((resolve) => {
+-    setTimeout(() => resolve(), ms);
+-  });
+-}
+-__name(sleep, "sleep");
+-function isBufferLike(value) {
+-  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
+-}
+-__name(isBufferLike, "isBufferLike");
+-function deprecationWarning(message) {
+-  if (typeof globalThis.process === "undefined") {
+-    console.warn(`${DEPRECATION_WARNING_PREFIX}: ${message}`);
+-  } else {
+-    process.emitWarning(message, DEPRECATION_WARNING_PREFIX);
+-  }
+-}
+-__name(deprecationWarning, "deprecationWarning");
+ 
+ // src/lib/CDN.ts
+-var deprecationEmittedForEmoji = false;
+ var CDN = class {
+   constructor(base = DefaultRestOptions.cdn) {
+     this.base = base;
+@@ -328,20 +190,14 @@ var CDN = class {
+   discoverySplash(guildId, splashHash, options) {
+     return this.makeURL(`/discovery-splashes/${guildId}/${splashHash}`, options);
+   }
+-  emoji(emojiId, options) {
+-    let resolvedOptions;
+-    if (typeof options === "string") {
+-      if (!deprecationEmittedForEmoji) {
+-        deprecationWarning(
+-          "Passing a string for the second parameter of CDN#emoji() is deprecated. Use an object instead."
+-        );
+-        deprecationEmittedForEmoji = true;
+-      }
+-      resolvedOptions = { extension: options };
+-    } else {
+-      resolvedOptions = options;
+-    }
+-    return this.makeURL(`/emojis/${emojiId}`, resolvedOptions);
++  /**
++   * Generates an emoji's URL for an emoji.
++   *
++   * @param emojiId - The emoji id
++   * @param extension - The extension of the emoji
++   */
++  emoji(emojiId, extension) {
++    return this.makeURL(`/emojis/${emojiId}`, { extension });
+   }
+   /**
+    * Generates a guild member avatar URL.
+@@ -559,12 +415,140 @@ var HTTPError = class _HTTPError extends Error {
+   name = _HTTPError.name;
+ };
+ 
++// src/lib/errors/RateLimitError.ts
++var RateLimitError = class _RateLimitError extends Error {
++  static {
++    __name(this, "RateLimitError");
++  }
++  timeToReset;
++  limit;
++  method;
++  hash;
++  url;
++  route;
++  majorParameter;
++  global;
++  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
++    super();
++    this.timeToReset = timeToReset;
++    this.limit = limit;
++    this.method = method;
++    this.hash = hash;
++    this.url = url;
++    this.route = route;
++    this.majorParameter = majorParameter;
++    this.global = global;
++  }
++  /**
++   * The name of the error
++   */
++  get name() {
++    return `${_RateLimitError.name}[${this.route}]`;
++  }
++};
++
+ // src/lib/REST.ts
+ var import_collection = require("@discordjs/collection");
+ var import_snowflake = require("@sapphire/snowflake");
+ var import_async_event_emitter = require("@vladfrangu/async_event_emitter");
+ var import_magic_bytes = require("magic-bytes.js");
+ 
++// src/lib/utils/types.ts
++var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
++  RequestMethod2["Delete"] = "DELETE";
++  RequestMethod2["Get"] = "GET";
++  RequestMethod2["Head"] = "HEAD";
++  RequestMethod2["Patch"] = "PATCH";
++  RequestMethod2["Post"] = "POST";
++  RequestMethod2["Put"] = "PUT";
++  return RequestMethod2;
++})(RequestMethod || {});
++
++// src/lib/utils/utils.ts
++function serializeSearchParam(value) {
++  switch (typeof value) {
++    case "string":
++      return value;
++    case "number":
++    case "bigint":
++    case "boolean":
++      return value.toString();
++    case "object":
++      if (value === null)
++        return null;
++      if (value instanceof Date) {
++        return Number.isNaN(value.getTime()) ? null : value.toISOString();
++      }
++      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
++        return value.toString();
++      return null;
++    default:
++      return null;
++  }
++}
++__name(serializeSearchParam, "serializeSearchParam");
++function makeURLSearchParams(options) {
++  const params = new URLSearchParams();
++  if (!options)
++    return params;
++  for (const [key, value] of Object.entries(options)) {
++    const serialized = serializeSearchParam(value);
++    if (serialized !== null)
++      params.append(key, serialized);
++  }
++  return params;
++}
++__name(makeURLSearchParams, "makeURLSearchParams");
++async function parseResponse(res) {
++  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
++    return res.json();
++  }
++  return res.arrayBuffer();
++}
++__name(parseResponse, "parseResponse");
++function hasSublimit(bucketRoute, body, method) {
++  if (bucketRoute === "/channels/:id") {
++    if (typeof body !== "object" || body === null)
++      return false;
++    if (method !== "PATCH" /* Patch */)
++      return false;
++    const castedBody = body;
++    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
++  }
++  return true;
++}
++__name(hasSublimit, "hasSublimit");
++function shouldRetry(error) {
++  if (error.name === "AbortError")
++    return true;
++  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
++}
++__name(shouldRetry, "shouldRetry");
++async function onRateLimit(manager, rateLimitData) {
++  const { options } = manager;
++  if (!options.rejectOnRateLimit)
++    return;
++  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
++  if (shouldThrow) {
++    throw new RateLimitError(rateLimitData);
++  }
++}
++__name(onRateLimit, "onRateLimit");
++function calculateUserDefaultAvatarIndex(userId) {
++  return Number(BigInt(userId) >> 22n) % 6;
++}
++__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
++async function sleep(ms) {
++  return new Promise((resolve) => {
++    setTimeout(() => resolve(), ms);
++  });
++}
++__name(sleep, "sleep");
++function isBufferLike(value) {
++  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
++}
++__name(isBufferLike, "isBufferLike");
++
+ // src/lib/handlers/Shared.ts
+ var invalidCount = 0;
+ var invalidCountResetTime = null;
+@@ -609,7 +593,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -690,10 +674,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -736,7 +720,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -904,7 +888,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -925,10 +909,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -1022,7 +1006,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1064,6 +1048,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
++  userAgent;
+   constructor(options = {}) {
+     super();
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+@@ -1071,6 +1056,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1096,7 +1082,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1112,7 +1097,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1121,7 +1105,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1130,7 +1114,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1139,7 +1123,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1148,7 +1132,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1157,7 +1141,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+@@ -1235,21 +1219,21 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+       }
+     }
+     const headers = {
+-      ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      ...options.headers,
++      "User-Agent": this.userAgent
+     };
+     if (request.auth !== false) {
+       if (!this.#token) {
+         throw new Error("Expected token to be set for this request, but none was present");
+       }
+-      headers.Authorization = `${request.authPrefix ?? this.options.authPrefix} ${this.#token}`;
++      headers.Authorization = `${request.authPrefix ?? options.authPrefix} ${this.#token}`;
+     }
+     if (request.reason?.length) {
+       headers["X-Audit-Log-Reason"] = encodeURIComponent(request.reason);
+     }
+     const url = `${options.api}${request.versioned === false ? "" : `/v${options.version}`}${request.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request.files.entries()) {
+@@ -1288,7 +1272,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+     const method = request.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1354,7 +1338,6 @@ setDefaultStrategy(fetch);
+   ALLOWED_STICKER_EXTENSIONS,
+   BurstHandlerMajorIdKey,
+   CDN,
+-  DEPRECATION_WARNING_PREFIX,
+   DefaultRestOptions,
+   DefaultUserAgent,
+   DefaultUserAgentAppendix,
+diff --git a/dist/web.mjs b/dist/web.mjs
+index 59736fcd3b8d6a939cb7be5386fe254d56cafb49..f66513bdae5358ceea60d1f8ebc32213a791b837 100644
+--- a/dist/web.mjs
++++ b/dist/web.mjs
+@@ -58,145 +58,8 @@ var OverwrittenMimeTypes = {
+   "image/apng": "image/png"
+ };
+ var BurstHandlerMajorIdKey = "burst";
+-var DEPRECATION_WARNING_PREFIX = "DeprecationWarning";
+-
+-// src/lib/errors/RateLimitError.ts
+-var RateLimitError = class _RateLimitError extends Error {
+-  static {
+-    __name(this, "RateLimitError");
+-  }
+-  timeToReset;
+-  limit;
+-  method;
+-  hash;
+-  url;
+-  route;
+-  majorParameter;
+-  global;
+-  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
+-    super();
+-    this.timeToReset = timeToReset;
+-    this.limit = limit;
+-    this.method = method;
+-    this.hash = hash;
+-    this.url = url;
+-    this.route = route;
+-    this.majorParameter = majorParameter;
+-    this.global = global;
+-  }
+-  /**
+-   * The name of the error
+-   */
+-  get name() {
+-    return `${_RateLimitError.name}[${this.route}]`;
+-  }
+-};
+-
+-// src/lib/utils/types.ts
+-var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
+-  RequestMethod2["Delete"] = "DELETE";
+-  RequestMethod2["Get"] = "GET";
+-  RequestMethod2["Patch"] = "PATCH";
+-  RequestMethod2["Post"] = "POST";
+-  RequestMethod2["Put"] = "PUT";
+-  return RequestMethod2;
+-})(RequestMethod || {});
+-
+-// src/lib/utils/utils.ts
+-function serializeSearchParam(value) {
+-  switch (typeof value) {
+-    case "string":
+-      return value;
+-    case "number":
+-    case "bigint":
+-    case "boolean":
+-      return value.toString();
+-    case "object":
+-      if (value === null)
+-        return null;
+-      if (value instanceof Date) {
+-        return Number.isNaN(value.getTime()) ? null : value.toISOString();
+-      }
+-      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
+-        return value.toString();
+-      return null;
+-    default:
+-      return null;
+-  }
+-}
+-__name(serializeSearchParam, "serializeSearchParam");
+-function makeURLSearchParams(options) {
+-  const params = new URLSearchParams();
+-  if (!options)
+-    return params;
+-  for (const [key, value] of Object.entries(options)) {
+-    const serialized = serializeSearchParam(value);
+-    if (serialized !== null)
+-      params.append(key, serialized);
+-  }
+-  return params;
+-}
+-__name(makeURLSearchParams, "makeURLSearchParams");
+-async function parseResponse(res) {
+-  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
+-    return res.json();
+-  }
+-  return res.arrayBuffer();
+-}
+-__name(parseResponse, "parseResponse");
+-function hasSublimit(bucketRoute, body, method) {
+-  if (bucketRoute === "/channels/:id") {
+-    if (typeof body !== "object" || body === null)
+-      return false;
+-    if (method !== "PATCH" /* Patch */)
+-      return false;
+-    const castedBody = body;
+-    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
+-  }
+-  return true;
+-}
+-__name(hasSublimit, "hasSublimit");
+-function shouldRetry(error) {
+-  if (error.name === "AbortError")
+-    return true;
+-  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
+-}
+-__name(shouldRetry, "shouldRetry");
+-async function onRateLimit(manager, rateLimitData) {
+-  const { options } = manager;
+-  if (!options.rejectOnRateLimit)
+-    return;
+-  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
+-  if (shouldThrow) {
+-    throw new RateLimitError(rateLimitData);
+-  }
+-}
+-__name(onRateLimit, "onRateLimit");
+-function calculateUserDefaultAvatarIndex(userId) {
+-  return Number(BigInt(userId) >> 22n) % 6;
+-}
+-__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
+-async function sleep(ms) {
+-  return new Promise((resolve) => {
+-    setTimeout(() => resolve(), ms);
+-  });
+-}
+-__name(sleep, "sleep");
+-function isBufferLike(value) {
+-  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
+-}
+-__name(isBufferLike, "isBufferLike");
+-function deprecationWarning(message) {
+-  if (typeof globalThis.process === "undefined") {
+-    console.warn(`${DEPRECATION_WARNING_PREFIX}: ${message}`);
+-  } else {
+-    process.emitWarning(message, DEPRECATION_WARNING_PREFIX);
+-  }
+-}
+-__name(deprecationWarning, "deprecationWarning");
+ 
+ // src/lib/CDN.ts
+-var deprecationEmittedForEmoji = false;
+ var CDN = class {
+   constructor(base = DefaultRestOptions.cdn) {
+     this.base = base;
+@@ -285,20 +148,14 @@ var CDN = class {
+   discoverySplash(guildId, splashHash, options) {
+     return this.makeURL(`/discovery-splashes/${guildId}/${splashHash}`, options);
+   }
+-  emoji(emojiId, options) {
+-    let resolvedOptions;
+-    if (typeof options === "string") {
+-      if (!deprecationEmittedForEmoji) {
+-        deprecationWarning(
+-          "Passing a string for the second parameter of CDN#emoji() is deprecated. Use an object instead."
+-        );
+-        deprecationEmittedForEmoji = true;
+-      }
+-      resolvedOptions = { extension: options };
+-    } else {
+-      resolvedOptions = options;
+-    }
+-    return this.makeURL(`/emojis/${emojiId}`, resolvedOptions);
++  /**
++   * Generates an emoji's URL for an emoji.
++   *
++   * @param emojiId - The emoji id
++   * @param extension - The extension of the emoji
++   */
++  emoji(emojiId, extension) {
++    return this.makeURL(`/emojis/${emojiId}`, { extension });
+   }
+   /**
+    * Generates a guild member avatar URL.
+@@ -516,12 +373,140 @@ var HTTPError = class _HTTPError extends Error {
+   name = _HTTPError.name;
+ };
+ 
++// src/lib/errors/RateLimitError.ts
++var RateLimitError = class _RateLimitError extends Error {
++  static {
++    __name(this, "RateLimitError");
++  }
++  timeToReset;
++  limit;
++  method;
++  hash;
++  url;
++  route;
++  majorParameter;
++  global;
++  constructor({ timeToReset, limit, method, hash, url, route, majorParameter, global }) {
++    super();
++    this.timeToReset = timeToReset;
++    this.limit = limit;
++    this.method = method;
++    this.hash = hash;
++    this.url = url;
++    this.route = route;
++    this.majorParameter = majorParameter;
++    this.global = global;
++  }
++  /**
++   * The name of the error
++   */
++  get name() {
++    return `${_RateLimitError.name}[${this.route}]`;
++  }
++};
++
+ // src/lib/REST.ts
+ import { Collection } from "@discordjs/collection";
+ import { DiscordSnowflake } from "@sapphire/snowflake";
+ import { AsyncEventEmitter } from "@vladfrangu/async_event_emitter";
+ import { filetypeinfo } from "magic-bytes.js";
+ 
++// src/lib/utils/types.ts
++var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
++  RequestMethod2["Delete"] = "DELETE";
++  RequestMethod2["Get"] = "GET";
++  RequestMethod2["Head"] = "HEAD";
++  RequestMethod2["Patch"] = "PATCH";
++  RequestMethod2["Post"] = "POST";
++  RequestMethod2["Put"] = "PUT";
++  return RequestMethod2;
++})(RequestMethod || {});
++
++// src/lib/utils/utils.ts
++function serializeSearchParam(value) {
++  switch (typeof value) {
++    case "string":
++      return value;
++    case "number":
++    case "bigint":
++    case "boolean":
++      return value.toString();
++    case "object":
++      if (value === null)
++        return null;
++      if (value instanceof Date) {
++        return Number.isNaN(value.getTime()) ? null : value.toISOString();
++      }
++      if (typeof value.toString === "function" && value.toString !== Object.prototype.toString)
++        return value.toString();
++      return null;
++    default:
++      return null;
++  }
++}
++__name(serializeSearchParam, "serializeSearchParam");
++function makeURLSearchParams(options) {
++  const params = new URLSearchParams();
++  if (!options)
++    return params;
++  for (const [key, value] of Object.entries(options)) {
++    const serialized = serializeSearchParam(value);
++    if (serialized !== null)
++      params.append(key, serialized);
++  }
++  return params;
++}
++__name(makeURLSearchParams, "makeURLSearchParams");
++async function parseResponse(res) {
++  if (res.headers.get("Content-Type")?.startsWith("application/json")) {
++    return res.json();
++  }
++  return res.arrayBuffer();
++}
++__name(parseResponse, "parseResponse");
++function hasSublimit(bucketRoute, body, method) {
++  if (bucketRoute === "/channels/:id") {
++    if (typeof body !== "object" || body === null)
++      return false;
++    if (method !== "PATCH" /* Patch */)
++      return false;
++    const castedBody = body;
++    return ["name", "topic"].some((key) => Reflect.has(castedBody, key));
++  }
++  return true;
++}
++__name(hasSublimit, "hasSublimit");
++function shouldRetry(error) {
++  if (error.name === "AbortError")
++    return true;
++  return "code" in error && error.code === "ECONNRESET" || error.message.includes("ECONNRESET");
++}
++__name(shouldRetry, "shouldRetry");
++async function onRateLimit(manager, rateLimitData) {
++  const { options } = manager;
++  if (!options.rejectOnRateLimit)
++    return;
++  const shouldThrow = typeof options.rejectOnRateLimit === "function" ? await options.rejectOnRateLimit(rateLimitData) : options.rejectOnRateLimit.some((route) => rateLimitData.route.startsWith(route.toLowerCase()));
++  if (shouldThrow) {
++    throw new RateLimitError(rateLimitData);
++  }
++}
++__name(onRateLimit, "onRateLimit");
++function calculateUserDefaultAvatarIndex(userId) {
++  return Number(BigInt(userId) >> 22n) % 6;
++}
++__name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
++async function sleep(ms) {
++  return new Promise((resolve) => {
++    setTimeout(() => resolve(), ms);
++  });
++}
++__name(sleep, "sleep");
++function isBufferLike(value) {
++  return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
++}
++__name(isBufferLike, "isBufferLike");
++
+ // src/lib/handlers/Shared.ts
+ var invalidCount = 0;
+ var invalidCountResetTime = null;
+@@ -566,7 +551,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+     manager.emit(
+       "response" /* Response */,
+       {
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         path: routeId.original,
+         route: routeId.bucketRoute,
+         options,
+@@ -647,10 +632,10 @@ var BurstHandler = class {
+    * @param retries - The number of retries this request has already attempted (recursion)
+    */
+   async runRequest(routeId, url, options, requestData, retries = 0) {
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -693,7 +678,7 @@ var BurstHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -861,7 +846,7 @@ var SequentialHandler = class {
+       const rateLimitData = {
+         timeToReset: timeout,
+         limit: limit2,
+-        method: options.method ?? "get",
++        method: options.method ?? "GET" /* Get */,
+         hash: this.hash,
+         url,
+         route: routeId.bucketRoute,
+@@ -882,10 +867,10 @@ var SequentialHandler = class {
+       this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
+     }
+     this.manager.globalRemaining--;
+-    const method = options.method ?? "get";
++    const method = options.method ?? "GET" /* Get */;
+     const res = await makeNetworkRequest(this.manager, routeId, url, options, requestData, retries);
+     if (res === null) {
+-      return this.runRequest(routeId, url, options, requestData, ++retries);
++      return this.runRequest(routeId, url, options, requestData, retries + 1);
+     }
+     const status = res.status;
+     let retryAfter = 0;
+@@ -979,7 +964,7 @@ var SequentialHandler = class {
+     } else {
+       const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
+       if (handled === null) {
+-        return this.runRequest(routeId, url, options, requestData, ++retries);
++        return this.runRequest(routeId, url, options, requestData, retries + 1);
+       }
+       return handled;
+     }
+@@ -1021,6 +1006,7 @@ var REST = class _REST extends AsyncEventEmitter {
+   hashTimer;
+   handlerTimer;
+   options;
++  userAgent;
+   constructor(options = {}) {
+     super();
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+@@ -1028,6 +1014,7 @@ var REST = class _REST extends AsyncEventEmitter {
+     this.options.offset = Math.max(0, this.options.offset);
+     this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
+     this.agent = options.agent ?? null;
++    this.userAgent = `${DefaultUserAgent} ${options.userAgentAppendix}`.trimEnd();
+     this.setupSweepers();
+   }
+   setupSweepers() {
+@@ -1053,7 +1040,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("hashSweep" /* HashSweep */, sweptHashes);
+       }, this.options.hashSweepInterval);
+-      this.hashTimer.unref?.();
+     }
+     if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
+       validateMaxInterval(this.options.handlerSweepInterval);
+@@ -1069,7 +1055,6 @@ var REST = class _REST extends AsyncEventEmitter {
+         });
+         this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
+       }, this.options.handlerSweepInterval);
+-      this.handlerTimer.unref?.();
+     }
+   }
+   /**
+@@ -1078,7 +1063,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async get(fullRoute, options = {}) {
++  async get(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
+   }
+   /**
+@@ -1087,7 +1072,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async delete(fullRoute, options = {}) {
++  async delete(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
+   }
+   /**
+@@ -1096,7 +1081,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async post(fullRoute, options = {}) {
++  async post(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
+   }
+   /**
+@@ -1105,7 +1090,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async put(fullRoute, options = {}) {
++  async put(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
+   }
+   /**
+@@ -1114,7 +1099,7 @@ var REST = class _REST extends AsyncEventEmitter {
+    * @param fullRoute - The full route to query
+    * @param options - Optional request options
+    */
+-  async patch(fullRoute, options = {}) {
++  async patch(fullRoute, options) {
+     return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
+   }
+   /**
+@@ -1192,21 +1177,21 @@ var REST = class _REST extends AsyncEventEmitter {
+       }
+     }
+     const headers = {
+-      ...this.options.headers,
+-      "User-Agent": `${DefaultUserAgent} ${options.userAgentAppendix}`.trim()
++      ...options.headers,
++      "User-Agent": this.userAgent
+     };
+     if (request.auth !== false) {
+       if (!this.#token) {
+         throw new Error("Expected token to be set for this request, but none was present");
+       }
+-      headers.Authorization = `${request.authPrefix ?? this.options.authPrefix} ${this.#token}`;
++      headers.Authorization = `${request.authPrefix ?? options.authPrefix} ${this.#token}`;
+     }
+     if (request.reason?.length) {
+       headers["X-Audit-Log-Reason"] = encodeURIComponent(request.reason);
+     }
+     const url = `${options.api}${request.versioned === false ? "" : `/v${options.version}`}${request.fullRoute}${query}`;
+     let finalBody;
+-    let additionalHeaders = {};
++    let additionalHeaders;
+     if (request.files?.length) {
+       const formData = new FormData();
+       for (const [index, file] of request.files.entries()) {
+@@ -1245,7 +1230,7 @@ var REST = class _REST extends AsyncEventEmitter {
+     const method = request.method.toUpperCase();
+     const fetchOptions = {
+       // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
+-      body: ["GET", "HEAD"].includes(method) ? null : finalBody,
++      body: ["GET" /* Get */, "HEAD" /* Head */].includes(method) ? null : finalBody,
+       headers: { ...request.headers, ...additionalHeaders, ...headers },
+       method,
+       // Prioritize setting an agent per request, use the agent for this instance otherwise.
+@@ -1310,7 +1295,6 @@ export {
+   ALLOWED_STICKER_EXTENSIONS,
+   BurstHandlerMajorIdKey,
+   CDN,
+-  DEPRECATION_WARNING_PREFIX,
+   DefaultRestOptions,
+   DefaultUserAgent,
+   DefaultUserAgentAppendix,

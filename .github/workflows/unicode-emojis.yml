@@ -34,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
-        uses: ./.github/actions/yarn-install
+        uses: ./.github/actions/pnpm-install
 
       - name: Restore build output
         id: restore-build-output
@@ -45,7 +45,7 @@ jobs:
 
       - name: Build
         if: steps.restore-build-output.outputs.cache-hit != 'true'
-        run: yarn build
+        run: pnpm build
 
       - name: Run script
         run: node dist/scripts/generateEmojiParser.js

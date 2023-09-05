@@ -1,4 +1,4 @@
-name: Cleanup yarn caches
+name: Cleanup pnpm caches
 
 on:
   schedule:
@@ -20,4 +20,4 @@ jobs:
         uses: ./.github/actions/delete-actions-cache
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          filter: 'yarn- ${{ runner.os }}-yarn-'
+          filter: 'pnpm- ${{ runner.os }}-pnpm-'
