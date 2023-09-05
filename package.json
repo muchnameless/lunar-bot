@@ -30,15 +30,15 @@
 	"scripts": {
 		"build": "yarn clean && tsc -b src",
 		"clean": "rm -rf dist",
-		"db": "env-cmd node dist/scripts/dbInit.js --alter | pino-pretty",
-		"deploy:commands": "env-cmd node dist/scripts/deploy.js | pino-pretty",
+		"db": "node --env-file=.env dist/scripts/dbInit.js --alter | pino-pretty",
+		"deploy:commands": "node --env-file=.env dist/scripts/deploy.js | pino-pretty",
 		"dev": "yarn build; yarn start:dev",
 		"format": "prettier --cache --write . && eslint src --ext ts --cache --fix",
 		"lint": "eslint src --ext ts --cache",
-		"migrate": "env-cmd ley",
+		"migrate": "ley",
 		"prepare": "husky install",
 		"prune": "ts-prune -p src/tsconfig.json | grep --invert-match ' - default$'",
-		"start": "scripts/pre_start.sh && env-cmd node . | tee -a logs/lunar-bot-out.log",
+		"start": "scripts/pre_start.sh && node --env-file=.env . | tee -a logs/lunar-bot-out.log",
 		"start:dev": "NODE_ENV=development yarn start | pino-pretty",
 		"test": "tsc -b src",
 		"update": "yarn upgrade-interactive"
@@ -106,7 +106,6 @@
 		"@types/node": "^20.5.9",
 		"@types/pg": "^8.10.2",
 		"@types/prettier": "^2.7.3",
-		"env-cmd": "^10.1.0",
 		"eslint": "^8.48.0",
 		"eslint-config-neon": "^0.1.54",
 		"husky": "^8.0.3",
@@ -119,7 +118,7 @@
 	},
 	"packageManager": "yarn@3.6.3",
 	"volta": {
-		"node": "20.5.1",
+		"node": "20.6.0",
 		"yarn": "3.6.3"
 	}
 }
