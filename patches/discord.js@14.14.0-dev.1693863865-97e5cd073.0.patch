@@ -552,7 +552,7 @@ index 6eb2dc65d0e2ea20eae7947d0f7997d1554417a6..2d1eda589838605022acbd6b42c77b2d
  }
 
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481ce928eda 100644
+index 8119271dec5c69f05d057bf6fe19c1178631e4cd..82d95a9584612be8facc2ce868edae88f031e697 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -1,6 +1,3 @@
@@ -562,7 +562,7 @@ index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481
  import {
    ActionRowBuilder as BuilderActionRow,
    MessageActionRowComponentBuilder,
-@@ -321,7 +318,13 @@ export type MessageActionRowComponent =
+@@ -322,7 +319,13 @@ export type MessageActionRowComponent =
    | RoleSelectMenuComponent
    | MentionableSelectMenuComponent
    | ChannelSelectMenuComponent;
@@ -577,7 +577,7 @@ index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481
 
  export class ActionRow<T extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -702,6 +705,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
+@@ -703,6 +706,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
      ButtonComponent,
      APIButtonComponent,
      ButtonComponent | APIButtonComponent,
@@ -585,7 +585,7 @@ index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481
      ButtonComponent | APIButtonComponent
    >;
    public inGuild(): this is ButtonInteraction<'raw' | 'cached'>;
-@@ -870,7 +874,7 @@ export class EmbedBuilder extends BuildersEmbed {
+@@ -871,7 +875,7 @@ export class EmbedBuilder extends BuildersEmbed {
  export class Embed {
    private constructor(data: APIEmbed);
    public readonly data: Readonly<APIEmbed>;
@@ -594,7 +594,7 @@ index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1761,7 +1765,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1765,7 +1769,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
 
@@ -603,7 +603,7 @@ index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481
 
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1769,12 +1773,18 @@ export type CacheTypeReducer<
+@@ -1773,12 +1777,18 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -622,7 +622,7 @@ index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481
    : Fallback;
 
  export type Interaction<Cached extends CacheType = CacheType> =
-@@ -1801,7 +1811,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1805,7 +1815,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -748,7 +748,7 @@ index 169aa439c25a447c15d4267aa80c98510e5e594c..3212c915c974a9327047ea326fcd1481
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
 
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -5922,14 +5942,7 @@ export interface BaseMessageOptions {
+@@ -5928,14 +5948,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;

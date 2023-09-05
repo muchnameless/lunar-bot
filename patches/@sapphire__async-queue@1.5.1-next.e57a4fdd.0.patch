@@ -1,9 +1,8 @@
-diff --git a/dist/.tsbuildinfo b/dist/.tsbuildinfo
-new file mode 100644
-index 0000000000000000000000000000000000000000..8ca850e178ec59d513cdb51116fc5496b8043453
---- /dev/null
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+deleted file mode 100644
+index f2d02e0f230e0fb6dd02c466b7161a41db4d1daf..0000000000000000000000000000000000000000
 diff --git a/dist/index.global.js b/dist/index.global.js
-index 4d4c4aa78559ec623f20ecfacfa6337c857eb34d..dc5e014c7c6ddf74843507eee270492f9febdb25 100644
+index 155bc618b206db5dce44eed172c1d8b60cc0b217..465296d3e2fe6ced703bf367527cc3815c00fcf7 100644
 --- a/dist/index.global.js
 +++ b/dist/index.global.js
 @@ -25,14 +25,12 @@ var SapphireAsyncQueue = (function (exports) {
@@ -22,7 +21,7 @@ index 4d4c4aa78559ec623f20ecfacfa6337c857eb34d..dc5e014c7c6ddf74843507eee270492f
        };
        this.signal.addEventListener("abort", this.signalListener);
        return this;
-@@ -101,6 +99,9 @@ var SapphireAsyncQueue = (function (exports) {
+@@ -102,6 +100,9 @@ var SapphireAsyncQueue = (function (exports) {
       * ```
       */
      wait(options) {
@@ -33,10 +32,10 @@ index 4d4c4aa78559ec623f20ecfacfa6337c857eb34d..dc5e014c7c6ddf74843507eee270492f
        if (this.promises.length === 0) {
          this.promises.push(entry);
 diff --git a/dist/index.js b/dist/index.js
-index 2b62b78df63ad5cf8b71ca546fdcd1c379b9dbd2..c0ec6950c62ebbbd87cc4210ee01018520d8af4b 100644
+index 2e8dd4fcaa020f2afe6c9ccb821eb26c9bdf3d8f..7efd38764ce17f1030831691bdbf38719c978aa4 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -24,14 +24,12 @@ var AsyncQueueEntry = class {
+@@ -24,14 +24,12 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
      });
    }
    setSignal(signal) {
@@ -52,7 +51,7 @@ index 2b62b78df63ad5cf8b71ca546fdcd1c379b9dbd2..c0ec6950c62ebbbd87cc4210ee010185
      };
      this.signal.addEventListener("abort", this.signalListener);
      return this;
-@@ -100,6 +98,9 @@ var AsyncQueue = class {
+@@ -101,6 +99,9 @@ var _AsyncQueue = class _AsyncQueue {
     * ```
     */
    wait(options) {
@@ -63,10 +62,10 @@ index 2b62b78df63ad5cf8b71ca546fdcd1c379b9dbd2..c0ec6950c62ebbbd87cc4210ee010185
      if (this.promises.length === 0) {
        this.promises.push(entry);
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 9ad93ef9c05b2b9e6916bfda9edc9bc83d52bd61..815a6968d713b1081af29ae927a01ba19eeb0eb8 100644
+index ba9ea01894067e747dd138773cce8b792ebadabd..5adcdec748e4bf55b3b9e3739c569b610c3f4b72 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -22,14 +22,12 @@ var AsyncQueueEntry = class {
+@@ -22,14 +22,12 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
      });
    }
    setSignal(signal) {
@@ -82,7 +81,7 @@ index 9ad93ef9c05b2b9e6916bfda9edc9bc83d52bd61..815a6968d713b1081af29ae927a01ba1
      };
      this.signal.addEventListener("abort", this.signalListener);
      return this;
-@@ -98,6 +96,9 @@ var AsyncQueue = class {
+@@ -99,6 +97,9 @@ var _AsyncQueue = class _AsyncQueue {
     * ```
     */
    wait(options) {

@@ -29,7 +29,7 @@ jobs:
         uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
       - name: Install dependencies
-        uses: ./.github/actions/yarn-install
+        uses: ./.github/actions/pnpm-install
 
       - name: Cache dependencies
         uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
@@ -53,6 +53,11 @@ jobs:
       - name: Install Volta
         uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
+      - name: Install pnpm
+        run: |
+          volta install node
+          volta install pnpm
+
       - name: Restore dependencies
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
         id: restore-dependencies
@@ -65,7 +70,7 @@ jobs:
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
 
       - name: Run ESLint
-        run: yarn lint
+        run: pnpm lint
 
   Building:
     name: TypeScript
@@ -83,6 +88,11 @@ jobs:
       - name: Install Volta
         uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
+      - name: Install pnpm
+        run: |
+          volta install node
+          volta install pnpm
+
       - name: Restore dependencies
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
         id: restore-dependencies
@@ -95,7 +105,7 @@ jobs:
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
 
       - name: Run TypeScript compiler
-        run: yarn build
+        run: pnpm build
 
       - name: Cache build output
         if: github.ref_name == 'main'
