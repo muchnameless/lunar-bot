@@ -5,12 +5,6 @@ runs:
   using: 'composite'
 
   steps:
-    - name: Install pnpm
-      shell: bash
-      run: |
-        volta install node
-        volta install pnpm
-
     - name: Expose pnpm config(s) as "$GITHUB_OUTPUT"
       id: pnpm-config
       shell: bash

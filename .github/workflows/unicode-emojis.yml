@@ -12,6 +12,7 @@ on:
 
 env:
   NODE_ENV: production
+  VOLTA_FEATURE_PNPM: 1
 
 jobs:
   unicode-emojis:

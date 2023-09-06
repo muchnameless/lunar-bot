@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  VOLTA_FEATURE_PNPM: 1
+
 jobs:
   Dependencies:
     name: Install dependencies
@@ -53,11 +56,6 @@ jobs:
       - name: Install Volta
         uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
-      - name: Install pnpm
-        run: |
-          volta install node
-          volta install pnpm
-
       - name: Restore dependencies
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
         id: restore-dependencies
@@ -87,11 +85,6 @@ jobs:
 
       - name: Install Volta
         uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
-
-      - name: Install pnpm
-        run: |
-          volta install node
-          volta install pnpm
 
       - name: Restore dependencies
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
