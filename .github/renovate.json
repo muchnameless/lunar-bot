@@ -3,7 +3,7 @@
 	"extends": ["config:base", ":disableRateLimiting", ":semanticCommitTypeAll(chore)", "default:automergeDigest"],
 	"postUpdateOptions": ["pnpmDedupe"],
 	"postUpgradeTasks": {
-		"commands": ["pnpx nolyfill install"]
+		"commands": ["npx nolyfill install"]
 	},
 	"labels": ["dependencies"],
 	"npm": {

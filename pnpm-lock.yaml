@@ -126,8 +126,8 @@ dependencies:
     specifier: ^1.1.0
     version: 1.1.0
   '@zikeji/hypixel':
-    specifier: github:muchnameless/node-hypixel#375c9c2a661858a03bf54f038d6d52daeb1c5806
-    version: github.com/muchnameless/node-hypixel/375c9c2a661858a03bf54f038d6d52daeb1c5806
+    specifier: github:muchnameless/node-hypixel#6133816c583557c9579908b7fcb8d5297d8a2da1
+    version: github.com/muchnameless/node-hypixel/6133816c583557c9579908b7fcb8d5297d8a2da1
   bufferutil:
     specifier: ^4.0.7
     version: 4.0.7
@@ -2897,11 +2897,11 @@ packages:
       '@typescript-eslint/parser': 6.6.0(eslint@8.48.0)(typescript@5.2.2)
       astro-eslint-parser: 0.15.0
       eslint-config-prettier: 9.0.0(eslint@8.48.0)
-      eslint-import-resolver-typescript: 3.6.0(@typescript-eslint/parser@6.6.0)(eslint-plugin-i@2.28.0-2)(eslint@8.48.0)
+      eslint-import-resolver-typescript: 3.6.0(@typescript-eslint/parser@6.6.0)(eslint-plugin-i@2.28.1)(eslint@8.48.0)
       eslint-mdx: 2.2.0(eslint@8.48.0)
       eslint-plugin-astro: 0.28.0(eslint@8.48.0)
       eslint-plugin-cypress: 2.14.0(eslint@8.48.0)
-      eslint-plugin-import: /eslint-plugin-i@2.28.0-2(@typescript-eslint/parser@6.6.0)(eslint-import-resolver-typescript@3.6.0)(eslint@8.48.0)
+      eslint-plugin-import: /eslint-plugin-i@2.28.1(@typescript-eslint/parser@6.6.0)(eslint-import-resolver-typescript@3.6.0)(eslint@8.48.0)
       eslint-plugin-jsdoc: 46.5.1(eslint@8.48.0)
       eslint-plugin-jsx-a11y: 6.7.1(eslint@8.48.0)
       eslint-plugin-mdx: 2.2.0(eslint@8.48.0)
@@ -2965,7 +2965,7 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@6.6.0)(eslint-plugin-i@2.28.0-2)(eslint@8.48.0):
+  /eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@6.6.0)(eslint-plugin-i@2.28.1)(eslint@8.48.0):
     resolution:
       { integrity: sha512-QTHR9ddNnn35RTxlaEnx2gCxqFlF2SEN0SE2d17SqwyM7YOSI2GHWRYp5BiRkObTUNYPupC/3Fq2a0PpT+EKpg== }
     engines: { node: ^14.18.0 || >=16.0.0 }
@@ -2977,7 +2977,7 @@ packages:
       enhanced-resolve: 5.15.0
       eslint: 8.48.0
       eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.6.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.0)(eslint@8.48.0)
-      eslint-plugin-import: /eslint-plugin-i@2.28.0-2(@typescript-eslint/parser@6.6.0)(eslint-import-resolver-typescript@3.6.0)(eslint@8.48.0)
+      eslint-plugin-import: /eslint-plugin-i@2.28.1(@typescript-eslint/parser@6.6.0)(eslint-import-resolver-typescript@3.6.0)(eslint@8.48.0)
       fast-glob: 3.3.1
       get-tsconfig: 4.7.0
       is-core-module: 2.13.0
@@ -3041,7 +3041,7 @@ packages:
       debug: 3.2.7
       eslint: 8.48.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.0(@typescript-eslint/parser@6.6.0)(eslint-plugin-i@2.28.0-2)(eslint@8.48.0)
+      eslint-import-resolver-typescript: 3.6.0(@typescript-eslint/parser@6.6.0)(eslint-plugin-i@2.28.1)(eslint@8.48.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3086,9 +3086,9 @@ packages:
       eslint: 8.48.0
     dev: true
 
-  /eslint-plugin-i@2.28.0-2(@typescript-eslint/parser@6.6.0)(eslint-import-resolver-typescript@3.6.0)(eslint@8.48.0):
+  /eslint-plugin-i@2.28.1(@typescript-eslint/parser@6.6.0)(eslint-import-resolver-typescript@3.6.0)(eslint@8.48.0):
     resolution:
-      { integrity: sha512-z48kG4qmE4TmiLcxbmvxMT5ycwvPkXaWW0XpU1L768uZaTbiDbxsHMEdV24JHlOR1xDsPpKW39BfP/pRdYIwFA== }
+      { integrity: sha512-a4oVt0j3ixNhGhvV4XF6NS7OWRFK2rrJ0Q5C4S2dSRb8FxZi31J0uUd5WJLL58wnVJ/OiQ1BxiXnFA4dWQO1Cg== }
     engines: { node: '>=12' }
     peerDependencies:
       eslint: ^7.2.0 || ^8
@@ -7779,12 +7779,14 @@ packages:
       { integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A== }
     dev: true
 
-  github.com/muchnameless/node-hypixel/375c9c2a661858a03bf54f038d6d52daeb1c5806:
+  github.com/muchnameless/node-hypixel/6133816c583557c9579908b7fcb8d5297d8a2da1:
     resolution:
-      { tarball: https://codeload.github.com/muchnameless/node-hypixel/tar.gz/375c9c2a661858a03bf54f038d6d52daeb1c5806 }
+      { tarball: https://codeload.github.com/muchnameless/node-hypixel/tar.gz/6133816c583557c9579908b7fcb8d5297d8a2da1 }
     name: '@zikeji/hypixel'
     version: 3.1.1
     engines: { node: '>=16' }
+    prepare: true
+    requiresBuild: true
     dependencies:
       '@sapphire/async-queue': 1.5.1-next.e57a4fdd.0(patch_hash=c5pp6f7jfdzsr2h2pee7cwemsa)
       '@sapphire/ratelimits': 2.4.7-next.e57a4fdd.0
