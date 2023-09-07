@@ -37,7 +37,7 @@
 		"lint": "eslint src --ext ts --cache",
 		"migrate": "ley",
 		"patch": "./scripts/patch.sh",
-		"prepare": "husky install",
+		"prepare": "[ -z \"${GITHUB_ACTIONS}\" ] && husky install || true",
 		"prune": "ts-prune -p src/tsconfig.json | grep --invert-match ' - default$'",
 		"start": "scripts/pre_start.sh && node --env-file=.env . | tee -a logs/lunar-bot-out.log",
 		"start:dev": "NODE_ENV=development pnpm start | pino-pretty",
