@@ -198,8 +198,8 @@ dependencies:
     specifier: ^2.6.2
     version: 2.6.2
   undici:
-    specifier: ^5.23.0
-    version: 5.23.0
+    specifier: ^5.24.0
+    version: 5.24.0
   zlib-sync:
     specifier: ^0.1.8
     version: 0.1.8
@@ -6490,6 +6490,13 @@ packages:
       busboy: 1.6.0
     dev: false
 
+  /undici@5.24.0:
+    resolution: {integrity: sha512-OKlckxBjFl0oXxcj9FU6oB8fDAaiRUq+D8jrFWGmOfI/gIyjk/IeS75LMzgYKUaeHzLUcYvf9bbJGSrUwTfwwQ==}
+    engines: {node: '>=14.0'}
+    dependencies:
+      busboy: 1.6.0
+    dev: false
+
   /unified-engine@10.1.0:
     resolution: {integrity: sha512-5+JDIs4hqKfHnJcVCxTid1yBoI/++FfF/1PFdSMpaftZZZY+qg2JFruRbf7PaIwa9KgLotXQV3gSjtY0IdcFGQ==}
     dependencies:
@@ -6878,5 +6885,5 @@ packages:
     dependencies:
       '@sapphire/async-queue': 1.5.1-next.e57a4fdd.0(patch_hash=c5pp6f7jfdzsr2h2pee7cwemsa)
       '@sapphire/ratelimits': 2.4.7-next.e57a4fdd.0
-      undici: 5.23.0
+      undici: 5.24.0
     dev: false
