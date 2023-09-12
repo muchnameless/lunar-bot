@@ -643,6 +643,7 @@ packages:
   /@discordjs/builders@1.6.6-dev.1693863539-97e5cd073.0:
     resolution: {integrity: sha512-GBRr4q2wGSNvCOcfxQwjZGVm1DhrdOAojQIe8FCv9v6DR6+8ULsdn6Xy8FKXogsSHd3F+ZtLfPvdAudMk2GWBg==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       '@discordjs/formatters': 0.4.0-dev.1693863541-97e5cd073.0
       '@discordjs/util': 1.0.2-dev.1693864043-97e5cd073.0
@@ -656,11 +657,13 @@ packages:
   /@discordjs/collection@1.5.4-dev.1693863548-97e5cd073.0:
     resolution: {integrity: sha512-L4THhcwXqEFb1fVKwZi2VvFKBfufAITovcIXd4lxYu4fJheZO8tH1RM26rTxP+RfyIv1OzSbQaqD7MGE3TzmOQ==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@discordjs/formatters@0.4.0-dev.1693863541-97e5cd073.0:
     resolution: {integrity: sha512-yCH4zmYHspuYrMvwR+QTg2Dv4H9cJ9OfQ2kX6XMzGW53ufXEWrGzRBQEH73ApUb7Qw58rG5A0nWIYRSpbLD+kg==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       discord-api-types: 0.37.36-next.0d47c69.1677334692
     dev: false
@@ -686,6 +689,7 @@ packages:
   /@discordjs/rest@2.1.0-dev.1693864011-97e5cd073.0(patch_hash=yr67iuquwdgoqp6nspduflyirm):
     resolution: {integrity: sha512-7Ul/iGigkKm3q/HGuuj7fYHc7xWNHw2H9/Ao2BO/bLm5OYj5rdb69q38jxLiqCPpCQ8NKE6VQq64oGXjbmYqsQ==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       '@discordjs/collection': 1.5.4-dev.1693863548-97e5cd073.0
       '@discordjs/util': 1.0.2-dev.1693864043-97e5cd073.0
@@ -702,11 +706,13 @@ packages:
   /@discordjs/util@1.0.2-dev.1693864043-97e5cd073.0:
     resolution: {integrity: sha512-Oks+usERiVRl/aYAxMJPw4fGhVCBdWebRb3X3XEf2ZAIEs6mUvSKjLvIF7UjHrNwXcP5mw2xA3QURbMxtj3Rvg==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@discordjs/ws@1.0.2-dev.1693863545-97e5cd073.0(patch_hash=lbnyu4whkc3thwkjojtza32dgy)(bufferutil@4.0.7):
     resolution: {integrity: sha512-4cspY/QFR6cMHiBhbpO2g5Vu2vN2EFlM/+CMVFDYApdW3WCd8mvmLZRNlY4xeIE1gjITUenac4gPqBMryNLP9Q==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       '@discordjs/collection': 1.5.4-dev.1693863548-97e5cd073.0
       '@discordjs/rest': 2.1.0-dev.1693864011-97e5cd073.0(patch_hash=yr67iuquwdgoqp6nspduflyirm)
@@ -2447,6 +2453,7 @@ packages:
   /discord.js@14.14.0-dev.1693863865-97e5cd073.0(patch_hash=4k5spudaimv5qzzrjktglcjosi)(bufferutil@4.0.7):
     resolution: {integrity: sha512-8hJHZnT0qT5G0TS6hgwkoB+XS8EncclfhsX4hFGFqveaUgZokjJsXzNut9WvemHSVzuF0eginjxT3xwukCA/RA==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       '@discordjs/builders': 1.6.6-dev.1693863539-97e5cd073.0
       '@discordjs/collection': 1.5.4-dev.1693863548-97e5cd073.0
