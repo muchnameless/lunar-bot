@@ -12,11 +12,10 @@ overrides:
   '@discordjs/util': 1.0.2-dev.1693864043-97e5cd073.0
   '@discordjs/ws': 1.0.2-dev.1693863545-97e5cd073.0
   '@sapphire/async-queue': 1.5.1-next.e57a4fdd.0
-  '@sapphire/ratelimits': 2.4.7-next.e57a4fdd.0
+  '@sapphire/ratelimits': 2.4.8-next.934406a1.0
   '@sapphire/shapeshift': 3.9.3-next.f8e4e0c.0
   '@sapphire/snowflake': 3.5.2-next.e57a4fdd.0
   '@sapphire/timer-manager': 1.0.1-next.e57a4fdd.0
-  discord-api-types: 0.37.36-next.0d47c69.1677334692
   array-buffer-byte-length: npm:@nolyfill/array-buffer-byte-length@latest
   array-includes: npm:@nolyfill/array-includes@latest
   array.prototype.flat: npm:@nolyfill/array.prototype.flat@latest
@@ -27,6 +26,7 @@ overrides:
   available-typed-arrays: npm:@nolyfill/available-typed-arrays@latest
   deep-equal: npm:@nolyfill/deep-equal@latest
   define-properties: npm:@nolyfill/define-properties@latest
+  discord-api-types: 0.37.36-next.0d47c69.1677334692
   es-iterator-helpers: npm:@nolyfill/es-iterator-helpers@latest
   es-set-tostringtag: npm:@nolyfill/es-set-tostringtag@latest
   function-bind: npm:@nolyfill/function-bind@latest
@@ -111,8 +111,8 @@ dependencies:
     specifier: 1.0.1-next.e57a4fdd.0
     version: 1.0.1-next.e57a4fdd.0
   '@sapphire/ratelimits':
-    specifier: 2.4.7-next.e57a4fdd.0
-    version: 2.4.7-next.e57a4fdd.0
+    specifier: 2.4.8-next.934406a1.0
+    version: 2.4.8-next.934406a1.0
   '@sapphire/stopwatch':
     specifier: 1.5.1-next.e57a4fdd.0
     version: 1.5.1-next.e57a4fdd.0
@@ -1161,10 +1161,9 @@ packages:
     deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
-  /@sapphire/ratelimits@2.4.7-next.e57a4fdd.0:
-    resolution: {integrity: sha512-a4ePY1OTrLCQ7G0/nbLZCMzAtOPtALIOoritOUCDwpNyf6Mj5Gj9CBcf+TlS2RwPPMuXeQD80wWxFz/ldrDDtA==}
+  /@sapphire/ratelimits@2.4.8-next.934406a1.0:
+    resolution: {integrity: sha512-V4Kln/uoGisj1F6OyGLoRUF0fFNxBeSjY6n82mTMmclkbnGLuEUyD6m1AhWeYGBrwJCa4qup4auRKAVWsHF3yA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@sapphire/shapeshift@3.9.3-next.f8e4e0c.0:
@@ -6891,6 +6890,6 @@ packages:
     requiresBuild: true
     dependencies:
       '@sapphire/async-queue': 1.5.1-next.e57a4fdd.0(patch_hash=c5pp6f7jfdzsr2h2pee7cwemsa)
-      '@sapphire/ratelimits': 2.4.7-next.e57a4fdd.0
+      '@sapphire/ratelimits': 2.4.8-next.934406a1.0
       undici: 5.24.0
     dev: false
