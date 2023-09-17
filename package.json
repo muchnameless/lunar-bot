@@ -171,10 +171,10 @@
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.2.2"
 	},
-	"packageManager": "pnpm@8.7.5",
+	"packageManager": "pnpm@8.7.6",
 	"volta": {
 		"node": "20.6.1",
-		"pnpm": "8.7.5"
+		"pnpm": "8.7.6"
 	},
 	"pnpm": {
 		"patchedDependencies": {
