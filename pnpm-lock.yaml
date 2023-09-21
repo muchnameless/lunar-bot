@@ -159,8 +159,8 @@ dependencies:
     specifier: ^3.4.3
     version: 3.4.3
   minecraft-data:
-    specifier: ^3.46.0
-    version: 3.46.0
+    specifier: ^3.46.1
+    version: 3.46.1
   minecraft-protocol:
     specifier: 1.44.0
     version: 1.44.0(patch_hash=g64omj3ra2vdhmuylvlkfadwqa)
@@ -4751,8 +4751,8 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /minecraft-data@3.46.0:
-    resolution: {integrity: sha512-xuzECLjFrtCmg1X43u3/i6YfudsbZlEQQwCFRVYFvPvQU1bFpcY+HddylMhtTwXV0/gkxHUq5fKLSiauuKHVFA==}
+  /minecraft-data@3.46.1:
+    resolution: {integrity: sha512-asIlURpAfAN1k7H9Ffkas8SrPhwYrQqp52ZECZPgnChcksjeWcDnRz6HLehns1O5TyPo2SBGvjIYztanKQpy7g==}
     dev: false
 
   /minecraft-folder-path@1.2.0:
@@ -4770,7 +4770,7 @@ packages:
       endian-toggle: 0.0.0
       lodash.get: 4.4.2
       lodash.merge: 4.6.2
-      minecraft-data: 3.46.0
+      minecraft-data: 3.46.1
       minecraft-folder-path: 1.2.0
       node-fetch: 2.7.0
       node-rsa: 0.4.2
@@ -5559,7 +5559,7 @@ packages:
   /prismarine-registry@1.7.0:
     resolution: {integrity: sha512-yyva0FpWI078nNeMhx8ekVza5uUTYhEv+C+ADu3wUQXiG8qhXkvrf0uzsnhTgZL8BLdsi2axgCEiKw9qSKIuxQ==}
     dependencies:
-      minecraft-data: 3.46.0
+      minecraft-data: 3.46.1
       prismarine-nbt: 2.2.1
     dev: false
 
