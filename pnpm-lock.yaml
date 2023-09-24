@@ -144,8 +144,8 @@ dependencies:
     specifier: 14.14.0-dev.1693863865-97e5cd073.0
     version: 14.14.0-dev.1693863865-97e5cd073.0(patch_hash=4k5spudaimv5qzzrjktglcjosi)(bufferutil@4.0.7)
   fast-xml-parser:
-    specifier: ^4.2.7
-    version: 4.2.7
+    specifier: ^4.3.1
+    version: 4.3.1
   ioredis:
     specifier: ^5.3.2
     version: 5.3.2
@@ -3245,8 +3245,8 @@ packages:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
     dev: true
 
-  /fast-xml-parser@4.2.7:
-    resolution: {integrity: sha512-J8r6BriSLO1uj2miOk1NW0YVm8AGOOu3Si2HQp/cSmo6EA4m3fcwu2WKjJ4RK9wMLBtg69y1kS8baDiQBR41Ig==}
+  /fast-xml-parser@4.3.1:
+    resolution: {integrity: sha512-viVv3xb8D+SiS1W4cv4tva3bni08kAkx0gQnWrykMM8nXPc1FxqZPU00dCEVjkiCg4HoXd2jC4x29Nzg/l2DAA==}
     hasBin: true
     dependencies:
       strnum: 1.0.5
