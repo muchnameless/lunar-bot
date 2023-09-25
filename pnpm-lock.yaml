@@ -138,8 +138,8 @@ dependencies:
     specifier: ^1.8.2
     version: 1.8.2
   cron:
-    specifier: ^2.4.3
-    version: 2.4.3
+    specifier: ^2.4.4
+    version: 2.4.4
   discord.js:
     specifier: 14.14.0-dev.1693863865-97e5cd073.0
     version: 14.14.0-dev.1693863865-97e5cd073.0(patch_hash=4k5spudaimv5qzzrjktglcjosi)(bufferutil@4.0.7)
@@ -1164,6 +1164,7 @@ packages:
   /@sapphire/ratelimits@2.4.8-next.934406a1.0:
     resolution: {integrity: sha512-V4Kln/uoGisj1F6OyGLoRUF0fFNxBeSjY6n82mTMmclkbnGLuEUyD6m1AhWeYGBrwJCa4qup4auRKAVWsHF3yA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@sapphire/shapeshift@3.9.3-next.f8e4e0c.0:
@@ -2288,8 +2289,8 @@ packages:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
     dev: true
 
-  /cron@2.4.3:
-    resolution: {integrity: sha512-YBvExkQYF7w0PxyeFLRyr817YVDhGxaCi5/uRRMqa4aWD3IFKRd+uNbpW1VWMdqQy8PZ7CElc+accXJcauPKzQ==}
+  /cron@2.4.4:
+    resolution: {integrity: sha512-MHlPImXJj3K7x7lyUHjtKEOl69CSlTOWxS89jiFgNkzXfvhVjhMz/nc7/EIfN9vgooZp8XTtXJ1FREdmbyXOiQ==}
     dependencies:
       '@types/luxon': 3.3.2
       luxon: 3.3.0
