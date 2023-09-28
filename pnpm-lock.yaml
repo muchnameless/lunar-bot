@@ -231,7 +231,7 @@ devDependencies:
     version: 8.50.0
   eslint-config-neon:
     specifier: ^0.1.54
-    version: 0.1.54(eslint@8.50.0)(typescript@5.2.2)
+    version: 0.1.56(eslint@8.50.0)(typescript@5.2.2)
   husky:
     specifier: ^8.0.3
     version: 8.0.3
@@ -2571,8 +2571,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /eslint-config-neon@0.1.54(eslint@8.50.0)(typescript@5.2.2):
-    resolution: {integrity: sha512-X/0BC85UpwpUR5rktziXEEmN4wmusBL4pagd+Al6+7/lNBOBk6Q4wTNfTbW63IAOmy1gOB5NNc/sFSRKLpHhPA==}
+  /eslint-config-neon@0.1.56(eslint@8.50.0)(typescript@5.2.2):
+    resolution: {integrity: sha512-5aHP/jRnhbIwesl7y0JoRyoIDh/dad+hK8ZHT9wtYW8oEKZN7s3F+cCApxPO6oc6HWv85g22bnuDVKmN4r5xYA==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@angular-eslint/eslint-plugin': 16.1.2(eslint@8.50.0)(typescript@5.2.2)
