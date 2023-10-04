@@ -162,7 +162,7 @@
 		"@types/pg": "^8.10.3",
 		"@types/prettier": "^2.7.3",
 		"eslint": "^8.50.0",
-		"eslint-config-neon": "^0.1.54",
+		"eslint-config-neon": "^0.1.57",
 		"husky": "^8.0.3",
 		"ley": "^0.8.1",
 		"lint-staged": "^14.0.1",
