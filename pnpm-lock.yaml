@@ -174,8 +174,8 @@ dependencies:
     specifier: ^2.3.4
     version: 2.3.4
   pino:
-    specifier: ^8.15.5
-    version: 8.15.5
+    specifier: ^8.15.6
+    version: 8.15.6
   postgres:
     specifier: 3.3.5
     version: 3.3.5
@@ -5371,8 +5371,8 @@ packages:
     resolution: {integrity: sha512-cHjPPsE+vhj/tnhCy/wiMh3M3z3h/j15zHQX+S9GkTBgqJuTuJzYJ4gUyACLhDaJ7kk9ba9iRDmbH2tJU03OiA==}
     dev: false
 
-  /pino@8.15.5:
-    resolution: {integrity: sha512-KoTDSVRLiCWIJXTeAHNaflEXqsqCmyZkxfL09y+wT+NRo7j2Ieq30jBEC+GpE4HTQCQQyt3pDRhmwvCKjqzxfQ==}
+  /pino@8.15.6:
+    resolution: {integrity: sha512-GuxHr61R0ZFD1npu58tB3a3FSVjuy21OwN/haw4OuKiZBL63Pg11Y51WWeD52RENS2mjwPZOwt+2OQOSkck6kQ==}
     hasBin: true
     dependencies:
       atomic-sleep: 1.0.0
