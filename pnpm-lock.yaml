@@ -174,8 +174,8 @@ dependencies:
     specifier: ^2.3.4
     version: 2.3.4
   pino:
-    specifier: ^8.15.6
-    version: 8.15.6
+    specifier: ^8.15.7
+    version: 8.15.7
   postgres:
     specifier: 3.3.5
     version: 3.3.5
@@ -1144,6 +1144,7 @@ packages:
   /@sapphire/discord-utilities@3.1.2-next.e33b5b94.0:
     resolution: {integrity: sha512-2GFvJN7sNVR3Xljzrty91cuyLy76bbRQgeADZ+mmT8lbQiOD918rvRViwM6zAd8j+XkFqso3jO81cBe3NLExqg==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       discord-api-types: 0.37.36-next.0d47c69.1677334692
     dev: false
@@ -1157,6 +1158,7 @@ packages:
   /@sapphire/ratelimits@2.4.8-next.e33b5b94.0:
     resolution: {integrity: sha512-gxQCELcArzzhCpgFg2FSBjA0TJ4YkwqzSz53tsPJDIL1z0wqOoOMgpGLWvAh1JxylTNvZZOTeZ79ydGo3g9EjA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@sapphire/shapeshift@3.9.3-next.f8e4e0c.0:
@@ -5369,8 +5371,8 @@ packages:
     resolution: {integrity: sha512-cHjPPsE+vhj/tnhCy/wiMh3M3z3h/j15zHQX+S9GkTBgqJuTuJzYJ4gUyACLhDaJ7kk9ba9iRDmbH2tJU03OiA==}
     dev: false
 
-  /pino@8.15.6:
-    resolution: {integrity: sha512-GuxHr61R0ZFD1npu58tB3a3FSVjuy21OwN/haw4OuKiZBL63Pg11Y51WWeD52RENS2mjwPZOwt+2OQOSkck6kQ==}
+  /pino@8.15.7:
+    resolution: {integrity: sha512-B0GTwUzUCXmGILPqL5MzeLWfq2KhdRArFNrtSKIIeZoES1zPDD72EGOgGvtdLSYyyEQZqE7fThRRNjNGx8nVZg==}
     hasBin: true
     dependencies:
       atomic-sleep: 1.0.0
