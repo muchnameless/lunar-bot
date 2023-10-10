@@ -177,8 +177,8 @@ dependencies:
     specifier: ^8.16.0
     version: 8.16.0
   postgres:
-    specifier: 3.3.5
-    version: 3.3.5
+    specifier: 3.4.0
+    version: 3.4.0
   prettier:
     specifier: ^3.0.3
     version: 3.0.3
@@ -5460,8 +5460,8 @@ packages:
     resolution: {integrity: sha512-VdlZoocy5lCP0c/t66xAfclglEapXPCIVhqqJRncYpvbCgImF0w67aPKfbqUMr72tO2k5q0TdTZwCLjPTI6C9g==}
     dev: true
 
-  /postgres@3.3.5:
-    resolution: {integrity: sha512-+JD93VELV9gHkqpV5gdL5/70HdGtEw4/XE1S4BC8f1mcPmdib3K5XsKVbnR1XcAyC41zOnifJ+9YRKxdIsXiUw==}
+  /postgres@3.4.0:
+    resolution: {integrity: sha512-d7UtSoCg4hUtzxM9aRi3J8BrM6t0h4bQmgAHG96cDCNpP9CnnWQRdRl7WWNvKs0oOaQU2InGoOi1jETmdZK02g==}
     dev: false
 
   /prelude-ls@1.2.1:
