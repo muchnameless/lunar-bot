@@ -828,4 +828,4 @@ async function runJobs() {
 	ac = null;
 }
 
-new CronJob('* * * * *', runJobs).start();
+CronJob.from({ cronTime: '* * * * *', onTick: runJobs }).start();

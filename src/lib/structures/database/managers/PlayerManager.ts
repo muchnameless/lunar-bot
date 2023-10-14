@@ -531,7 +531,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// updateIGNs
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:updateIGNs`,
-			new CronJob({
+			CronJob.from({
 				cronTime: `0 0/${MOJANG_UPDATE_INTERVAL} * * * *`,
 				onTick: () => config.get('IGN_UPDATE_ENABLED') && this.updateIgns(),
 			}),
@@ -540,7 +540,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// updateMainProfiles
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:updateMainProfiles`,
-			new CronJob({
+			CronJob.from({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => void this.updateMainProfiles(),
@@ -554,7 +554,7 @@ export class PlayerManager extends ModelManager<Player> {
 			if (COMPETITION_START - seconds(10) > Date.now()) {
 				this.client.cronJobs.schedule(
 					`${this.constructor.name}:competitionStart`,
-					new CronJob({
+					CronJob.from({
 						cronTime: new Date(COMPETITION_START),
 						onTick: () => void this._startCompetition(),
 					}),
@@ -570,7 +570,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (COMPETITION_END - seconds(10) > Date.now()) {
 			this.client.cronJobs.schedule(
 				`${this.constructor.name}:competitionEnd`,
-				new CronJob({
+				CronJob.from({
 					cronTime: new Date(COMPETITION_END),
 					onTick: () => void this._endCompetition(),
 				}),
@@ -585,7 +585,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (NEXT_MAYOR_TIME - seconds(10) > Date.now()) {
 			this.client.cronJobs.schedule(
 				`${this.constructor.name}:mayorXpReset`,
-				new CronJob({
+				CronJob.from({
 					cronTime: new Date(NEXT_MAYOR_TIME),
 					onTick: () => void this._performMayorXpReset(),
 				}),
@@ -604,7 +604,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:dailyXpReset`,
-			new CronJob({
+			CronJob.from({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => void this._performDailyXpReset(),
@@ -619,7 +619,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// each monday at 00:00:00
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:weeklyXpReset`,
-			new CronJob({
+			CronJob.from({
 				cronTime: '0 0 0 * * MON',
 				timeZone: 'GMT',
 				onTick: () => void this._performWeeklyXpReset(),
@@ -634,7 +634,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// the first of each month at 00:00:00
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:monthlyXpReset`,
-			new CronJob({
+			CronJob.from({
 				cronTime: '0 0 0 1 * *',
 				timeZone: 'GMT',
 				onTick: () => void this._performMonthlyXpReset(),
@@ -699,7 +699,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:mayorXpReset`,
-			new CronJob({
+			CronJob.from({
 				cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
 				onTick: () => void this._performMayorXpReset(),
 			}),

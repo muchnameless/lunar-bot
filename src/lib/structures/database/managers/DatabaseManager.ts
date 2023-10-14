@@ -107,7 +107,7 @@ export class DatabaseManager {
 
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:updatePlayerDatabase`,
-			new CronJobConstructor({
+			CronJobConstructor.from({
 				cronTime: `0 0/${HYPIXEL_UPDATE_INTERVAL} * * * *`,
 				onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
 			}),
