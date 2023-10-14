@@ -66,7 +66,7 @@
 		"available-typed-arrays": "npm:@nolyfill/available-typed-arrays@latest",
 		"deep-equal": "npm:@nolyfill/deep-equal@latest",
 		"define-properties": "npm:@nolyfill/define-properties@latest",
-		"discord-api-types": "0.37.36-next.0d47c69.1677334692",
+		"discord-api-types": "0.37.60",
 		"es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@latest",
 		"es-set-tostringtag": "npm:@nolyfill/es-set-tostringtag@latest",
 		"function-bind": "npm:@nolyfill/function-bind@latest",
@@ -178,11 +178,11 @@
 	},
 	"pnpm": {
 		"patchedDependencies": {
-			"minecraft-protocol@1.44.0": "patches/minecraft-protocol@1.44.0.patch",
-			"discord.js@14.14.0-dev.1693863865-97e5cd073.0": "patches/discord.js@14.14.0-dev.1693863865-97e5cd073.0.patch",
-			"@discordjs/ws@1.0.2-dev.1693863545-97e5cd073.0": "patches/@discordjs__ws@1.0.2-dev.1693863545-97e5cd073.0.patch",
-			"@discordjs/rest@2.1.0-dev.1693864011-97e5cd073.0": "patches/@discordjs__rest@2.1.0-dev.1693864011-97e5cd073.0.patch",
-			"@sapphire/async-queue@1.5.1-next.e57a4fdd.0": "patches/@sapphire__async-queue@1.5.1-next.e57a4fdd.0.patch"
+			"@discordjs/rest@2.1.0-dev.1696982935-7276e7c4b": "patches/@discordjs__rest@2.1.0-dev.1693864011-97e5cd073.0.patch",
+			"@discordjs/ws@1.0.2-dev.1696982935-7276e7c4b": "patches/@discordjs__ws@1.0.2-dev.1693863545-97e5cd073.0.patch",
+			"@sapphire/async-queue@1.5.1-next.e57a4fdd.0": "patches/@sapphire__async-queue@1.5.1-next.e57a4fdd.0.patch",
+			"discord.js@14.14.0-dev.1696982935-7276e7c4b": "patches/discord.js@14.14.0-dev.1696982935-7276e7c4b.patch",
+			"minecraft-protocol@1.44.0": "patches/minecraft-protocol@1.44.0.patch"
 		}
 	}
 }
