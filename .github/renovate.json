@@ -20,7 +20,6 @@
 			},
 			{
 				"matchPackagePatterns": ["^@sapphire"],
-				"matchPackageNames": ["discord-api-types"],
 				"followTag": "next",
 				"groupName": "sapphire",
 				"automerge": true
