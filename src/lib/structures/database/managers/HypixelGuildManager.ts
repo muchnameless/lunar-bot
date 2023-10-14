@@ -136,7 +136,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:saveDailyStats`,
-			new CronJob({
+			CronJob.from({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => this.performDailyStatsSave(),
@@ -146,7 +146,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 		// remove expired mutes
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:removeExpiredMutes`,
-			new CronJob({
+			CronJob.from({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => this.removeExpiredMutes(),
@@ -156,7 +156,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 		// schedule guild stats channel update
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:updateStatDiscordChannels`,
-			new CronJob({
+			CronJob.from({
 				cronTime: '0 0 * * * *',
 				onTick: () =>
 					this.client.config.get('STAT_DISCORD_CHANNELS_UPDATE_ENABLED') && this.updateStatDiscordChannels(),
