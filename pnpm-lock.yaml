@@ -138,8 +138,8 @@ dependencies:
     specifier: ^1.8.2
     version: 1.8.2
   cron:
-    specifier: ^2.4.4
-    version: 2.4.4
+    specifier: ^3.1.1
+    version: 3.1.1
   discord.js:
     specifier: 14.14.0-dev.1693863865-97e5cd073.0
     version: 14.14.0-dev.1693863865-97e5cd073.0(patch_hash=4k5spudaimv5qzzrjktglcjosi)(bufferutil@4.0.7)
@@ -2258,8 +2258,8 @@ packages:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
     dev: true
 
-  /cron@2.4.4:
-    resolution: {integrity: sha512-MHlPImXJj3K7x7lyUHjtKEOl69CSlTOWxS89jiFgNkzXfvhVjhMz/nc7/EIfN9vgooZp8XTtXJ1FREdmbyXOiQ==}
+  /cron@3.1.1:
+    resolution: {integrity: sha512-P8rDShXt2IZa16KwuYpbd1w7NjU4BnXeUEfkesBXT36JXhUsQ1P6i6ctsi5H82FQmR4tn/MOz05aB/3vn6dSkA==}
     dependencies:
       '@types/luxon': 3.3.2
       luxon: 3.3.0
