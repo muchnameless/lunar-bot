@@ -653,6 +653,7 @@ packages:
   /@discordjs/collection@1.5.4-dev.1696982943-7276e7c4b:
     resolution: {integrity: sha512-zr1Lb6yf/A47Qr+P+w04Lhlo0mB826U8Fci+fuUmd+hdlafU7IPnzf1qDYJu++PQGWuH9Fa7AzNN2wkLiDVYrg==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version is deprecated. Please use a newer version.
     dev: false
 
   /@discordjs/formatters@0.4.0-dev.1696982935-7276e7c4b:
@@ -707,6 +708,7 @@ packages:
   /@discordjs/ws@1.0.2-dev.1696982935-7276e7c4b(patch_hash=lbnyu4whkc3thwkjojtza32dgy)(bufferutil@4.0.8):
     resolution: {integrity: sha512-Liqt+6xICNUbOeaJDKhIhhPJMeY3M57JrtakrApSvULRy8ni0b9TxvOKF3LwkL32trT+ty0EgfEu2PFB3S8gTA==}
     engines: {node: '>=16.11.0'}
+    deprecated: This version is deprecated. Please use a newer version.
     dependencies:
       '@discordjs/collection': 1.5.4-dev.1696982943-7276e7c4b
       '@discordjs/rest': 2.1.0-dev.1696982935-7276e7c4b(patch_hash=yr67iuquwdgoqp6nspduflyirm)
