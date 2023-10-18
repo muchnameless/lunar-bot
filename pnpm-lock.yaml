@@ -215,8 +215,8 @@ devDependencies:
     specifier: ^1.8.3
     version: 1.8.3
   '@types/luxon':
-    specifier: ^3.3.2
-    version: 3.3.2
+    specifier: ^3.3.3
+    version: 3.3.3
   '@types/node':
     specifier: ^20.8.6
     version: 20.8.6
@@ -1283,8 +1283,8 @@ packages:
     resolution: {integrity: sha512-RbSSoHliUbnXj3ny0CNFOoxrIDV6SUGyStHsvDqosw6CkdPV8TtWGlfecuK4ToyMEAql6pzNxgCFKanovUzlgQ==}
     dev: true
 
-  /@types/luxon@3.3.2:
-    resolution: {integrity: sha512-l5cpE57br4BIjK+9BSkFBOsWtwv6J9bJpC7gdXIzZyI0vuKvNTk0wZZrkQxMGsUAuGW9+WMNWF2IJMD7br2yeQ==}
+  /@types/luxon@3.3.3:
+    resolution: {integrity: sha512-/BJF3NT0pRMuxrenr42emRUF67sXwcZCd+S1ksG/Fcf9O7C3kKCY4uJSbKBE4KDUIYr3WMsvfmWD8hRjXExBJQ==}
 
   /@types/mdast@3.0.13:
     resolution: {integrity: sha512-HjiGiWedR0DVFkeNljpa6Lv4/IZU1+30VY5d747K7lBudFc3R0Ibr6yJ9lN3BE28VnZyDfLF/VB1Ql1ZIbKrmg==}
@@ -2262,7 +2262,7 @@ packages:
   /cron@3.1.1:
     resolution: {integrity: sha512-P8rDShXt2IZa16KwuYpbd1w7NjU4BnXeUEfkesBXT36JXhUsQ1P6i6ctsi5H82FQmR4tn/MOz05aB/3vn6dSkA==}
     dependencies:
-      '@types/luxon': 3.3.2
+      '@types/luxon': 3.3.3
       luxon: 3.3.0
     dev: false
 
