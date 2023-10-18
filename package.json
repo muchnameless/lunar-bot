@@ -159,7 +159,7 @@
 		"@types/common-tags": "^1.8.3",
 		"@types/luxon": "^3.3.3",
 		"@types/node": "^20.8.7",
-		"@types/pg": "^8.10.5",
+		"@types/pg": "^8.10.7",
 		"@types/prettier": "^2.7.3",
 		"eslint": "^8.51.0",
 		"eslint-config-neon": "^0.1.57",
