@@ -173,7 +173,7 @@
 	},
 	"packageManager": "pnpm@8.9.2",
 	"volta": {
-		"node": "20.8.1",
+		"node": "21.0.0",
 		"pnpm": "8.9.2"
 	},
 	"pnpm": {
