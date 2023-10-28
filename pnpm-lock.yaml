@@ -201,7 +201,7 @@ dependencies:
     specifier: ^5.27.0
     version: 5.27.0
   zlib-sync:
-    specifier: ^0.1.8
+    specifier: ^0.1.9
     version: 0.1.9
 
 devDependencies:

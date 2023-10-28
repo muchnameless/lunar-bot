@@ -151,7 +151,7 @@
 		"sequelize": "^6.33.0",
 		"tslib": "^2.6.2",
 		"undici": "^5.27.0",
-		"zlib-sync": "^0.1.8"
+		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^18.2.0",
