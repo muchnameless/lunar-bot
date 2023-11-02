@@ -177,8 +177,8 @@ dependencies:
     specifier: ^8.16.1
     version: 8.16.1
   postgres:
-    specifier: 3.4.2
-    version: 3.4.2
+    specifier: 3.4.3
+    version: 3.4.3
   prettier:
     specifier: ^3.0.3
     version: 3.0.3
@@ -5440,8 +5440,8 @@ packages:
     resolution: {integrity: sha512-VdlZoocy5lCP0c/t66xAfclglEapXPCIVhqqJRncYpvbCgImF0w67aPKfbqUMr72tO2k5q0TdTZwCLjPTI6C9g==}
     dev: true
 
-  /postgres@3.4.2:
-    resolution: {integrity: sha512-0UcCGvDBSaAzLeWwiq+QVmiGfOPTosFb+sxJUUtd+7Pi/ByFPuz6Gq05LbS0sM1ghMWC5atuks3pfl34g0qmFw==}
+  /postgres@3.4.3:
+    resolution: {integrity: sha512-iHJn4+M9vbTdHSdDzNkC0crHq+1CUdFhx+YqCE+SqWxPjm+Zu63jq7yZborOBF64c8pc58O5uMudyL1FQcHacA==}
     engines: {node: '>=12'}
     dev: false
 
