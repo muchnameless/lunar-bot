@@ -221,8 +221,8 @@ devDependencies:
     specifier: ^20.8.10
     version: 20.8.10
   '@types/pg':
-    specifier: ^8.10.7
-    version: 8.10.7
+    specifier: ^8.10.8
+    version: 8.10.8
   '@types/prettier':
     specifier: ^2.7.3
     version: 2.7.3
@@ -1282,8 +1282,8 @@ packages:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
     dev: true
 
-  /@types/pg@8.10.7:
-    resolution: {integrity: sha512-ksJqHipwYaSEHz9e1fr6H6erjoEdNNaOxwyJgPx9bNeaqOW3iWBQgVHfpwiSAoqGzchfc+ZyRLwEfeCcyYD3uQ==}
+  /@types/pg@8.10.8:
+    resolution: {integrity: sha512-EqSUgXvnbEnMkIdffX1cDsmbvNt5Fzoim17JRwdaHaCpeTz440FocCxcStU9GgJvA+1aqtHEjHgFlH0d8ZCjAg==}
     dependencies:
       '@types/node': 20.8.10
       pg-protocol: 1.6.0
