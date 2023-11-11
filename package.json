@@ -165,7 +165,7 @@
 		"eslint-config-neon": "^0.1.57",
 		"husky": "^8.0.3",
 		"ley": "^0.8.1",
-		"lint-staged": "^15.0.2",
+		"lint-staged": "^15.1.0",
 		"pino-pretty": "^10.2.3",
 		"sort-package-json": "^2.6.0",
 		"ts-prune": "^0.10.3",
