@@ -1005,11 +1005,9 @@ packages:
       '@nolyfill/shared': 1.0.21
     dev: true
 
-  /@nolyfill/has@1.0.24:
-    resolution: {integrity: sha512-K4lhz7hkFuqZZ008F9xOy3zVywGN+YPVmNAxnaIkvoj3Z0z9FFVLk2awZv/RERdY3OqxDLpxFdVLl2AogMe1jg==}
+  /@nolyfill/has@1.0.25:
+    resolution: {integrity: sha512-hCBNzNlKW7317HwAFq+J4kMpm89bukHsTK6BOM379ORxZPY44WVGZALerlgJ4gyyECqjVj2hI9xuTMabYjK3DA==}
     engines: {node: '>=12.4.0'}
-    dependencies:
-      '@nolyfill/shared': 1.0.24
     dev: true
 
   /@nolyfill/object.assign@1.0.24:
@@ -2743,7 +2741,7 @@ packages:
       damerau-levenshtein: 1.0.8
       emoji-regex: 9.2.2
       eslint: 8.53.0
-      has: /@nolyfill/has@1.0.24
+      has: /@nolyfill/has@1.0.25
       jsx-ast-utils: 3.3.5
       language-tags: 1.0.5
       minimatch: 3.1.2
@@ -3688,7 +3686,7 @@ packages:
   /is-core-module@2.13.0:
     resolution: {integrity: sha512-Z7dk6Qo8pOCp3l4tsX2C5ZVas4V+UxwQodwZhLopL91TX8UyyHEXafPcyoeeWuLrwzHcr3igO78wNLwHJHsMCQ==}
     dependencies:
-      has: /@nolyfill/has@1.0.24
+      has: /@nolyfill/has@1.0.25
     dev: true
 
   /is-decimal@1.0.4:
