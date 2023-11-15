@@ -1141,6 +1141,7 @@ packages:
   /@sapphire/discord-utilities@3.2.0-next.9bbf9114.0:
     resolution: {integrity: sha512-v3CdC8rPJ2zmFmg7RsfVcD5EY5l9fZZyyxrJNJqL3i5InA0qsCGosH2SALWdZ+tuAEeLDSQ3aym+f7rqubCMuw==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       discord-api-types: 0.37.62
     dev: false
