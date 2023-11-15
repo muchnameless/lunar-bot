@@ -105,8 +105,8 @@ dependencies:
     specifier: 1.5.1-next.e57a4fdd.0
     version: 1.5.1-next.e57a4fdd.0(patch_hash=c5pp6f7jfdzsr2h2pee7cwemsa)
   '@sapphire/discord-utilities':
-    specifier: 3.2.0-next.9bbf9114.0
-    version: 3.2.0-next.9bbf9114.0
+    specifier: 3.2.1-next.a259c01a.0
+    version: 3.2.1-next.a259c01a.0
   '@sapphire/node-utilities':
     specifier: 1.0.1-next.e57a4fdd.0
     version: 1.0.1-next.e57a4fdd.0
@@ -1138,10 +1138,9 @@ packages:
     dev: false
     patched: true
 
-  /@sapphire/discord-utilities@3.2.0-next.9bbf9114.0:
-    resolution: {integrity: sha512-v3CdC8rPJ2zmFmg7RsfVcD5EY5l9fZZyyxrJNJqL3i5InA0qsCGosH2SALWdZ+tuAEeLDSQ3aym+f7rqubCMuw==}
+  /@sapphire/discord-utilities@3.2.1-next.a259c01a.0:
+    resolution: {integrity: sha512-ZWYhICDEhc99MJDhCF7yGg3667YxoLnT/vo8YgGC326QksGK7Su/vfZDPPby1x1eyT+aoBp+kcpPq+AhT1xeXw==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       discord-api-types: 0.37.62
     dev: false
