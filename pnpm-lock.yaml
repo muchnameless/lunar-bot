@@ -120,8 +120,8 @@ dependencies:
     specifier: ^2.4.0
     version: 2.4.0
   '@sapphire/utilities':
-    specifier: 3.13.1-next.e57a4fdd.0
-    version: 3.13.1-next.e57a4fdd.0
+    specifier: 3.14.0-next.4cf0978e.0
+    version: 3.14.0-next.4cf0978e.0
   '@skyra/jaro-winkler':
     specifier: ^1.1.0
     version: 1.1.0
@@ -1194,10 +1194,9 @@ packages:
       - supports-color
     dev: false
 
-  /@sapphire/utilities@3.13.1-next.e57a4fdd.0:
-    resolution: {integrity: sha512-90Y8V8Le2Da76EpnOLsHr6aaLQFmX3eixytsFkdRcL7B1nqlbrBHMUkyI9GRdqW7e6QCCW0mZsyYejwvjogl+w==}
+  /@sapphire/utilities@3.14.0-next.4cf0978e.0:
+    resolution: {integrity: sha512-KZorwj2PvHZaaE/o2Oi5j/87ikmZrEDqEi/LBYAXBBRe8VfYyN9bPHwxU1ySHbXL3mp37xBzV81VITwZ2QZyvg==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@skyra/jaro-winkler@1.1.0:
