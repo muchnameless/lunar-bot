@@ -161,7 +161,7 @@
 		"@types/node": "^20.9.1",
 		"@types/pg": "^8.10.9",
 		"@types/prettier": "^2.7.3",
-		"eslint": "^8.53.0",
+		"eslint": "^8.54.0",
 		"eslint-config-neon": "^0.1.57",
 		"husky": "^8.0.3",
 		"ley": "^0.8.1",
