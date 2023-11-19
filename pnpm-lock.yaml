@@ -105,8 +105,8 @@ dependencies:
     specifier: 1.5.1-next.e57a4fdd.0
     version: 1.5.1-next.e57a4fdd.0(patch_hash=c5pp6f7jfdzsr2h2pee7cwemsa)
   '@sapphire/discord-utilities':
-    specifier: 3.2.1-next.a259c01a.0
-    version: 3.2.1-next.a259c01a.0
+    specifier: 3.2.1-next.aaca6ae0.0
+    version: 3.2.1-next.aaca6ae0.0
   '@sapphire/node-utilities':
     specifier: 1.0.1-next.e57a4fdd.0
     version: 1.0.1-next.e57a4fdd.0
@@ -120,8 +120,8 @@ dependencies:
     specifier: ^2.4.0
     version: 2.4.0
   '@sapphire/utilities':
-    specifier: 3.14.0-next.4cf0978e.0
-    version: 3.14.0-next.4cf0978e.0
+    specifier: 3.14.0-next.aaca6ae0.0
+    version: 3.14.0-next.aaca6ae0.0
   '@skyra/jaro-winkler':
     specifier: ^1.1.0
     version: 1.1.0
@@ -1138,10 +1138,9 @@ packages:
     dev: false
     patched: true
 
-  /@sapphire/discord-utilities@3.2.1-next.a259c01a.0:
-    resolution: {integrity: sha512-ZWYhICDEhc99MJDhCF7yGg3667YxoLnT/vo8YgGC326QksGK7Su/vfZDPPby1x1eyT+aoBp+kcpPq+AhT1xeXw==}
+  /@sapphire/discord-utilities@3.2.1-next.aaca6ae0.0:
+    resolution: {integrity: sha512-qCo11dVKdkUmIlySQdmh4mAs1yedsVh9NCGi6+zPFA+P0t1iYKcqcn9bhOsUb77AotRrzZPR4SIvRnKkqULgGQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       discord-api-types: 0.37.63
     dev: false
@@ -1194,8 +1193,8 @@ packages:
       - supports-color
     dev: false
 
-  /@sapphire/utilities@3.14.0-next.4cf0978e.0:
-    resolution: {integrity: sha512-KZorwj2PvHZaaE/o2Oi5j/87ikmZrEDqEi/LBYAXBBRe8VfYyN9bPHwxU1ySHbXL3mp37xBzV81VITwZ2QZyvg==}
+  /@sapphire/utilities@3.14.0-next.aaca6ae0.0:
+    resolution: {integrity: sha512-ASFlt1cbnuuZ2xEpoP/mnmO/+HqUA9pysLWcbX5uM3KP3Trf1qznzsqwLw4qlYY+rMI40J7oWzBMcwWew1pL1A==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
     dev: false
 
