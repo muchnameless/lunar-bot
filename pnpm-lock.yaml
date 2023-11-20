@@ -1141,6 +1141,7 @@ packages:
   /@sapphire/discord-utilities@3.2.1-next.aaca6ae0.0:
     resolution: {integrity: sha512-qCo11dVKdkUmIlySQdmh4mAs1yedsVh9NCGi6+zPFA+P0t1iYKcqcn9bhOsUb77AotRrzZPR4SIvRnKkqULgGQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dependencies:
       discord-api-types: 0.37.63
     dev: false
@@ -1196,6 +1197,7 @@ packages:
   /@sapphire/utilities@3.14.0-next.aaca6ae0.0:
     resolution: {integrity: sha512-ASFlt1cbnuuZ2xEpoP/mnmO/+HqUA9pysLWcbX5uM3KP3Trf1qznzsqwLw4qlYY+rMI40J7oWzBMcwWew1pL1A==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@skyra/jaro-winkler@1.1.0:
