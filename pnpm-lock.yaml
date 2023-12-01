@@ -218,8 +218,8 @@ devDependencies:
     specifier: ^3.3.6
     version: 3.3.6
   '@types/node':
-    specifier: ^20.10.1
-    version: 20.10.1
+    specifier: ^20.10.2
+    version: 20.10.2
   '@types/pg':
     specifier: ^8.10.9
     version: 8.10.9
@@ -1227,7 +1227,7 @@ packages:
   /@types/concat-stream@2.0.0:
     resolution: {integrity: sha512-t3YCerNM7NTVjLuICZo5gYAXYoDvpuuTceCcFQWcDQz26kxUR5uIWolxbIR5jRNIXpMqhOpW/b8imCR1LEmuJw==}
     dependencies:
-      '@types/node': 20.10.1
+      '@types/node': 20.10.2
     dev: true
 
   /@types/debug@4.1.9:
@@ -1279,8 +1279,8 @@ packages:
     resolution: {integrity: sha512-4slmbtwV59ZxitY4ixUZdy1uRLf9eSIvBWPQxNjhHYWEtn0FryfKpyS2cvADYXTayWdKEIsJengncrVvkI4I6A==}
     dev: true
 
-  /@types/node@20.10.1:
-    resolution: {integrity: sha512-T2qwhjWwGH81vUEx4EXmBKsTJRXFXNZTL4v0gi01+zyBmCwzE6TyHszqX01m+QHTEq+EZNo13NeJIdEqf+Myrg==}
+  /@types/node@20.10.2:
+    resolution: {integrity: sha512-37MXfxkb0vuIlRKHNxwCkb60PNBpR94u4efQuN4JgIAm66zfCDXGSAFCef9XUWFovX2R1ok6Z7MHhtdVXXkkIw==}
     dependencies:
       undici-types: 5.26.5
 
@@ -1295,7 +1295,7 @@ packages:
   /@types/pg@8.10.9:
     resolution: {integrity: sha512-UksbANNE/f8w0wOMxVKKIrLCbEMV+oM1uKejmwXr39olg4xqcfBDbXxObJAt6XxHbDa4XTKOlUEcEltXDX+XLQ==}
     dependencies:
-      '@types/node': 20.10.1
+      '@types/node': 20.10.2
       pg-protocol: 1.6.0
       pg-types: 4.0.1
     dev: true
@@ -1307,7 +1307,7 @@ packages:
   /@types/readable-stream@4.0.3:
     resolution: {integrity: sha512-Z8BOzyIj3UPpn3j5DmDNKIw4wPN9N8a1d1oyteiprWq+wxdgQNC0UfFAQwWjmjyA7uoj7mvoWgxWWH66zYtm4Q==}
     dependencies:
-      '@types/node': 20.10.1
+      '@types/node': 20.10.2
       safe-buffer: 5.1.2
     dev: false
 
@@ -1330,13 +1330,13 @@ packages:
   /@types/ws@8.5.5:
     resolution: {integrity: sha512-lwhs8hktwxSjf9UaZ9tG5M03PGogvFaH8gUgLNbN9HKIg0dvv6q+gkSuJ8HN4/VbyxkuLzCjlN7GquQ0gUJfIg==}
     dependencies:
-      '@types/node': 20.10.1
+      '@types/node': 20.10.2
     dev: false
 
   /@types/ws@8.5.7:
     resolution: {integrity: sha512-6UrLjiDUvn40CMrAubXuIVtj2PEfKDffJS7ychvnPU44j+KVeXmdHHTgqcM/dxLUTHxlXHiFM8Skmb8ozGdTnQ==}
     dependencies:
-      '@types/node': 20.10.1
+      '@types/node': 20.10.2
     dev: false
 
   /@types/yargs-parser@21.0.1:
@@ -6648,7 +6648,7 @@ packages:
   /wkx@0.5.0:
     resolution: {integrity: sha512-Xng/d4Ichh8uN4l0FToV/258EjMGU9MGcA0HV2d9B/ZpZB3lqQm7nkOdZdm5GhKtLLhAE7PiVQwN4eN+2YJJUg==}
     dependencies:
-      '@types/node': 20.10.1
+      '@types/node': 20.10.2
     dev: false
 
   /wrap-ansi@7.0.0:
