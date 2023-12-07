@@ -159,8 +159,8 @@ dependencies:
     specifier: ^3.4.4
     version: 3.4.4
   minecraft-data:
-    specifier: ^3.49.1
-    version: 3.49.1
+    specifier: ^3.50.0
+    version: 3.50.0
   minecraft-protocol:
     specifier: 1.44.0
     version: 1.44.0(patch_hash=g64omj3ra2vdhmuylvlkfadwqa)
@@ -1197,6 +1197,7 @@ packages:
   /@sapphire/utilities@3.14.0-next.bbf93693.0:
     resolution: {integrity: sha512-sB2hT3Xyw1GYEMIBM6yePJYISFM2kw6A77WBREr1gC/lWRKchJstz0Wy1gLs3HAYOvY9BiQ2qeBaTRCgMOPpEg==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@skyra/jaro-winkler@1.1.0:
@@ -4699,8 +4700,8 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /minecraft-data@3.49.1:
-    resolution: {integrity: sha512-d6Off8xi/aLpAnzGsKKYxmStq9rPaR0HRHawUSvdpQ0WXDr02yGhJzTm9r2eAInayIzshxt624w1r5Z9NAGReQ==}
+  /minecraft-data@3.50.0:
+    resolution: {integrity: sha512-wPnZdIeqaL9FUg3exZ68PZnkrVl60fVSNFbypYckOJz5kmjYUnU0BCYt3/e2TICpo9LmaKUZ0mCOJeg3qup6Lg==}
     dev: false
 
   /minecraft-folder-path@1.2.0:
@@ -4718,7 +4719,7 @@ packages:
       endian-toggle: 0.0.0
       lodash.get: 4.4.2
       lodash.merge: 4.6.2
-      minecraft-data: 3.49.1
+      minecraft-data: 3.50.0
       minecraft-folder-path: 1.2.0
       node-fetch: 2.7.0
       node-rsa: 0.4.2
@@ -5489,7 +5490,7 @@ packages:
   /prismarine-registry@1.7.0:
     resolution: {integrity: sha512-yyva0FpWI078nNeMhx8ekVza5uUTYhEv+C+ADu3wUQXiG8qhXkvrf0uzsnhTgZL8BLdsi2axgCEiKw9qSKIuxQ==}
     dependencies:
-      minecraft-data: 3.49.1
+      minecraft-data: 3.50.0
       prismarine-nbt: 2.2.1
     dev: false
 
