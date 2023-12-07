@@ -1197,6 +1197,7 @@ packages:
   /@sapphire/utilities@3.14.0-next.bbf93693.0:
     resolution: {integrity: sha512-sB2hT3Xyw1GYEMIBM6yePJYISFM2kw6A77WBREr1gC/lWRKchJstz0Wy1gLs3HAYOvY9BiQ2qeBaTRCgMOPpEg==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
   /@skyra/jaro-winkler@1.1.0:
