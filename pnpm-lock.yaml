@@ -242,8 +242,8 @@ devDependencies:
     specifier: ^15.2.0
     version: 15.2.0
   pino-pretty:
-    specifier: ^10.2.3
-    version: 10.2.3
+    specifier: ^10.3.0
+    version: 10.3.0
   sort-package-json:
     specifier: ^2.6.0
     version: 2.6.0
@@ -3486,11 +3486,8 @@ packages:
     resolution: {integrity: sha512-8Rf9Y83NBReMnx0gFzA8JImQACstCYWUplepDa9xprwwtmgEZUF0h/i5xSA625zB/I37EtrswSST6OXxwaaIJQ==}
     dev: false
 
-  /help-me@4.2.0:
-    resolution: {integrity: sha512-TAOnTB8Tz5Dw8penUuzHVrKNKlCIbwwbHnXraNJxPwf8LRtE2HlM84RYuezMFcwOJmoYOCWVDyJ8TQGxn9PgxA==}
-    dependencies:
-      glob: 8.1.0
-      readable-stream: 3.6.2
+  /help-me@5.0.0:
+    resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
     dev: true
 
   /hosted-git-info@2.8.9:
@@ -5313,15 +5310,15 @@ packages:
       readable-stream: 4.4.2
       split2: 4.2.0
 
-  /pino-pretty@10.2.3:
-    resolution: {integrity: sha512-4jfIUc8TC1GPUfDyMSlW1STeORqkoxec71yhxIpLDQapUu8WOuoz2TTCoidrIssyz78LZC69whBMPIKCMbi3cw==}
+  /pino-pretty@10.3.0:
+    resolution: {integrity: sha512-JthvQW289q3454mhM3/38wFYGWPiBMR28T3CpDNABzoTQOje9UKS7XCJQSnjWF9LQGQkGd8D7h0oq+qwiM3jFA==}
     hasBin: true
     dependencies:
       colorette: 2.0.20
       dateformat: 4.6.3
       fast-copy: 3.0.1
       fast-safe-stringify: 2.1.1
-      help-me: 4.2.0
+      help-me: 5.0.0
       joycon: 3.1.1
       minimist: 1.2.8
       on-exit-leak-free: 2.1.2
