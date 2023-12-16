@@ -123,8 +123,8 @@ dependencies:
     specifier: 3.14.0-next.bbf93693.0
     version: 3.14.0-next.bbf93693.0
   '@skyra/jaro-winkler':
-    specifier: ^1.1.0
-    version: 1.1.0
+    specifier: ^1.1.1
+    version: 1.1.1
   '@zikeji/hypixel':
     specifier: github:muchnameless/node-hypixel#6133816c583557c9579908b7fcb8d5297d8a2da1
     version: github.com/muchnameless/node-hypixel/6133816c583557c9579908b7fcb8d5297d8a2da1
@@ -1200,9 +1200,9 @@ packages:
     deprecated: This version has been automatically deprecated by @favware/npm-deprecate. Please use a newer version.
     dev: false
 
-  /@skyra/jaro-winkler@1.1.0:
-    resolution: {integrity: sha512-cfamfsSmi6dqc8yAABKg5YC76FGwZq0ui+T4/N8R8oi52HS9GGXgq0ZbcBhaGT6CHoNtd9bRALcQRUJx1NH0Ig==}
-    engines: {node: '>=v14.18.0', npm: '>=7.24.2'}
+  /@skyra/jaro-winkler@1.1.1:
+    resolution: {integrity: sha512-jT2OWwpajtXTb6opnaIwmBTMpQtKUwl2Ro1zApxIIrpZJon71kZIv6GZSc08LzKO2lpTqUjvD+i7Z2hGuG42KQ==}
+    engines: {node: '>=v18'}
     dev: false
 
   /@ts-morph/common@0.12.3:
