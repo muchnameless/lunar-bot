@@ -186,8 +186,8 @@ dependencies:
     specifier: ^1.9.1
     version: 1.9.1
   prismarine-nbt:
-    specifier: ^2.2.1
-    version: 2.2.1
+    specifier: ^2.3.0
+    version: 2.3.0
   re2:
     specifier: ^1.20.9
     version: 1.20.9
@@ -4721,7 +4721,7 @@ packages:
       node-fetch: 2.7.0
       node-rsa: 0.4.2
       prismarine-auth: 2.3.0
-      prismarine-nbt: 2.2.1
+      prismarine-nbt: 2.3.0
       prismarine-realms: 1.3.2
       protodef: 1.15.0
       readable-stream: 4.4.2
@@ -5457,19 +5457,19 @@ packages:
     dependencies:
       mojangson: 2.0.4
       prismarine-item: 1.14.0
-      prismarine-nbt: 2.2.1
+      prismarine-nbt: 2.3.0
       prismarine-registry: 1.7.0
     dev: false
 
   /prismarine-item@1.14.0:
     resolution: {integrity: sha512-udQHYGJ05klFe8Kkc0TOmwoXj5Xl1ZPgHVoMbGUAFB9exN4TFxEa1A39vkSYhxP5Et9PNufQQvFBFVom0nXikA==}
     dependencies:
-      prismarine-nbt: 2.2.1
+      prismarine-nbt: 2.3.0
       prismarine-registry: 1.7.0
     dev: false
 
-  /prismarine-nbt@2.2.1:
-    resolution: {integrity: sha512-Mb50c58CPnuZ+qvM31DBa08tf9UumlTq1LkvpMoUpKfCuN05GZHTqCUwER3lxTSHLL0GZKghIPbYR/JQkINijQ==}
+  /prismarine-nbt@2.3.0:
+    resolution: {integrity: sha512-awxt0iQsad2X0sVr0frDLfjggLwJuIm+p4cZQc9/Xx466rLlgF6y1CVJkVEH9qTVo8zUb70VJLq984z2YYuntg==}
     dependencies:
       protodef: 1.15.0
     dev: false
@@ -5488,7 +5488,7 @@ packages:
     resolution: {integrity: sha512-yyva0FpWI078nNeMhx8ekVza5uUTYhEv+C+ADu3wUQXiG8qhXkvrf0uzsnhTgZL8BLdsi2axgCEiKw9qSKIuxQ==}
     dependencies:
       minecraft-data: 3.50.0
-      prismarine-nbt: 2.2.1
+      prismarine-nbt: 2.3.0
     dev: false
 
   /proc-log@3.0.0:
