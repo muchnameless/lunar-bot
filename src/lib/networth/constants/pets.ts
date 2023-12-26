@@ -1,6 +1,6 @@
+import { toTotal } from '#functions/array.js';
 import { ItemId } from './itemId.js';
 import { ItemRarity } from './itemRarity.js';
-import { toTotal } from '#functions/array.js';
 
 /**
  * @see https://github.com/Altpapier/SkyHelper-Networth/blob/master/constants/pets.js#L17

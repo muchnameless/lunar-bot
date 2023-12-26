@@ -1,11 +1,11 @@
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
-import type GuildCommand from '../guild/guild.js';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { minutes } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { DualCommand } from '#structures/commands/DualCommand.js';
 import { hypixelGuildOption, targetOption } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
+import type GuildCommand from '../guild/guild.js';
 
 export default class SmiteCommand extends DualCommand {
 	public constructor(context: CommandContext) {

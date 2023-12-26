@@ -118,19 +118,19 @@ export default class AhCommand extends ApplicationCommand {
 					item_name.startsWith('[Lvl ')
 						? ` - ${upperCaseFirstChar(tier)}`
 						: item_name === 'Enchanted Book'
-						? (() => {
-								const matched = item_lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
-								if (matched) return ` - ${matched}`;
-								return '';
-						  })()
-						: ''
+							? (() => {
+									const matched = item_lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
+									if (matched) return ` - ${matched}`;
+									return '';
+								})()
+							: ''
 				}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
 				value: `${
 					bin
 						? `BIN: ${shortenNumber(starting_bid)}`
 						: bids.length
-						? ((totalCoins += highest_bid_amount), `Highest Bid: ${shortenNumber(highest_bid_amount)}`)
-						: `Starting Bid: ${shortenNumber(starting_bid)}`
+							? ((totalCoins += highest_bid_amount), `Highest Bid: ${shortenNumber(highest_bid_amount)}`)
+							: `Starting Bid: ${shortenNumber(starting_bid)}`
 				} • ${
 					end < Date.now()
 						? highest_bid_amount

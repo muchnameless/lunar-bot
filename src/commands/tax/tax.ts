@@ -258,7 +258,7 @@ export default class TaxCommand extends ApplicationCommand {
 									EXCLUDED_INPUT.split(/\W/)
 										.map((x) => x.toLowerCase())
 										.filter(Boolean),
-							  )
+								)
 							: null;
 						const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild).filter(
 							({ paid, ign }) => !paid && !excluded?.has(ign.toLowerCase()),

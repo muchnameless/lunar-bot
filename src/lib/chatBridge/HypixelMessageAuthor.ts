@@ -1,9 +1,9 @@
 import type { GuildMember } from 'discord.js';
-import type { ChatBridge } from './ChatBridge.js';
-import type { MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 import { mojang } from '#api';
 import type { Player } from '#db/models/Player.js';
 import { logger } from '#logger';
+import type { ChatBridge } from './ChatBridge.js';
+import type { MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 
 type AuthorData = {
 	guildRank?: string | null;
@@ -39,8 +39,8 @@ export class HypixelMessageAuthor {
 		this.guildRank = guildRank ?? null;
 		this.player = uuid
 			? this.client.players.cache.get(uuid) ??
-			  logger.error({ ign, uuid }, '[HYPIXEL AUTHOR CTOR]: unknown uuid') ??
-			  this.client.players.findByIgn(ign)
+				logger.error({ ign, uuid }, '[HYPIXEL AUTHOR CTOR]: unknown uuid') ??
+				this.client.players.findByIgn(ign)
 			: this.client.players.findByIgn(ign);
 	}
 

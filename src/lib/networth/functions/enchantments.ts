@@ -1,5 +1,5 @@
-import { Enchantment } from '../constants/index.js';
 import { Warnings } from '#structures/Warnings.js';
+import { Enchantment } from '../constants/index.js';
 
 const warnings = new Warnings<string>();
 

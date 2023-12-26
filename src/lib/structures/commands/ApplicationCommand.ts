@@ -37,13 +37,13 @@ import {
 	type UserContextMenuCommandInteraction,
 	type UserSelectMenuInteraction,
 } from 'discord.js';
-import { BaseCommand, type CommandContext, type CommandData } from './BaseCommand.js';
-import { ephemeralOption } from './commonOptions.js';
 import { CustomIdKey } from '#constants';
 import type { HypixelGuild } from '#db/models/HypixelGuild.js';
 import { logger } from '#logger';
 import { missingPermissionsError } from '#structures/errors/MissingPermissionsError.js';
 import { InteractionUtil } from '#utils';
+import { BaseCommand, type CommandContext, type CommandData } from './BaseCommand.js';
+import { ephemeralOption } from './commonOptions.js';
 
 type Slash =
 	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>

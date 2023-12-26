@@ -1,6 +1,6 @@
+import { logger } from '#logger';
 import { ChatBridgeEvents, type ChatBridge } from '../ChatBridge.js';
 import { DEFAULT_SETTINGS } from '../constants/index.js';
-import { logger } from '#logger';
 
 export default async function run(this: ChatBridge) {
 	// uuid can be undefined (despite not being typed as such) in case of network issues

@@ -1,10 +1,10 @@
 import type { Components } from '@zikeji/hypixel';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import BaseSkyBlockCommand from './~base-skyblock-command.js';
 import { getSkyBlockProfiles } from '#api';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, UnicodeEmoji } from '#constants';
 import { formatDecimalNumber, formatPercent, getUuidAndIgn, type WeightData } from '#functions';
+import BaseSkyBlockCommand from './~base-skyblock-command.js';
 
 export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	/**
@@ -66,10 +66,10 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 			weightData: profileName
 				? this._transformProfileToWeightData(this._findProfileByName(profiles, profileName, ign), uuid)
 				: findProfileStrategy === FindProfileStrategy.LastActive
-				? this._transformProfileToWeightData(profiles.find(({ selected }) => selected)!, uuid)
-				: profiles
-						.map((profile) => this._transformProfileToWeightData(profile, uuid))
-						.sort(({ totalWeight: a }, { totalWeight: b }) => b - a)[0]!,
+					? this._transformProfileToWeightData(profiles.find(({ selected }) => selected)!, uuid)
+					: profiles
+							.map((profile) => this._transformProfileToWeightData(profile, uuid))
+							.sort(({ totalWeight: a }, { totalWeight: b }) => b - a)[0]!,
 		};
 	}
 

@@ -4,16 +4,16 @@ import { setInterval } from 'node:timers';
 import type { URL } from 'node:url';
 import { stripIndents } from 'common-tags';
 import { InteractionType, MessageFlags, type Message, type Snowflake } from 'discord.js';
-import { ChatBridge, ChatBridgeEvents } from './ChatBridge.js';
-import { AbortControllerCache, OtherBotInteractionCache, OwnInteractionCache } from './caches/index.js';
-import { DELETED_MESSAGE_REASON } from './constants/index.js';
-import { DiscordChatManager } from './managers/DiscordChatManager.js';
 import { UnicodeEmoji } from '#constants';
 import { minutes } from '#functions';
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
 import { BridgeCommandCollection } from '#structures/commands/BridgeCommandCollection.js';
 import { type RepliableInteraction, MessageUtil } from '#utils';
+import { ChatBridge, ChatBridgeEvents } from './ChatBridge.js';
+import { AbortControllerCache, OtherBotInteractionCache, OwnInteractionCache } from './caches/index.js';
+import { DELETED_MESSAGE_REASON } from './constants/index.js';
+import { DiscordChatManager } from './managers/DiscordChatManager.js';
 
 export class ChatBridgeManager {
 	/**

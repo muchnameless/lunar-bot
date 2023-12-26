@@ -1,9 +1,4 @@
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
-import BaseSkyBlockCommand, {
-	type baseParseArgsOptions,
-	type BaseSkyBlockSlashData,
-	type FetchedData,
-} from './~base-skyblock-command.js';
 import type { HypixelUserMessage, ParseArgsConfigOptions } from '#chatBridge/HypixelMessage.js';
 import { FindProfileStrategy, NON_LETTER_REGEXP, PROFILE_NAMES, UnicodeEmoji } from '#constants';
 import { autocorrect, seconds, shortenNumber, upperCaseFirstChar } from '#functions';
@@ -17,6 +12,11 @@ import {
 	skyblockFindProfileOptionName,
 } from '#structures/commands/commonOptions.js';
 import { InteractionUtil } from '#utils';
+import BaseSkyBlockCommand, {
+	type baseParseArgsOptions,
+	type BaseSkyBlockSlashData,
+	type FetchedData,
+} from './~base-skyblock-command.js';
 
 const parseArgsOptions = {
 	auctions: {

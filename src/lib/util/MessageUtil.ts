@@ -295,8 +295,8 @@ export class MessageUtil extends null {
 					content: _options.content?.startsWith(mention)
 						? _options.content
 						: _options.content
-						? `${mention}, ${_options.content}`
-						: mention,
+							? `${mention}, ${_options.content}`
+							: mention,
 				});
 			}
 

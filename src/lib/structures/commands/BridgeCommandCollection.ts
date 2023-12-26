@@ -1,8 +1,8 @@
 import { Collection } from 'discord.js';
+import { compareAlphabetically } from '#functions';
 import { BaseCommandCollection } from './BaseCommandCollection.js';
 import type { BridgeCommand } from './BridgeCommand.js';
 import type { DualCommand } from './DualCommand.js';
-import { compareAlphabetically } from '#functions';
 
 type BridgeCommandType = BridgeCommand | DualCommand;
 

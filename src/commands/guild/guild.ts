@@ -319,8 +319,8 @@ export default class GuildCommand extends ApplicationCommand {
 							},
 						],
 						cache: false,
-				  })) ??
-				  (async () => {
+					})) ??
+					(async () => {
 						// check if input is a discord id or @mention, find or create player db object if so
 						const ID = getIdFromString(targetInput);
 
@@ -343,7 +343,7 @@ export default class GuildCommand extends ApplicationCommand {
 						} catch (error) {
 							return logger.error(error, '[GUILD CMD]');
 						}
-				  })())
+					})())
 		);
 	}
 
@@ -542,7 +542,7 @@ export default class GuildCommand extends ApplicationCommand {
 									.replaceAll('§c ●', ' 🔴') // coloured emojis
 									.replaceAll('§a ●', ' 🟢')
 									.trim(),
-						  )
+							)
 						: msg.content;
 
 		return InteractionUtil.reply(interaction, {

@@ -633,7 +633,7 @@ export default class extends ChatBridgeEvent {
 							requiredRoles
 								? `(${commaListOr(
 										requiredRoles.map((roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId),
-								  )}) `
+									)}) `
 								: ''
 						}from the ${discordGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`,
 					);

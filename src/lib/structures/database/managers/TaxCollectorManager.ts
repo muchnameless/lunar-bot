@@ -1,9 +1,9 @@
 import { stripIndents } from 'common-tags';
 import { bold } from 'discord.js';
+import { escapeIgn, formatNumber } from '#functions';
 import type { Player } from '../models/Player.js';
 import type { TaxCollector } from '../models/TaxCollector.js';
 import { ModelManager, type ModelResolvable } from './ModelManager.js';
-import { escapeIgn, formatNumber } from '#functions';
 
 export type TaxCollectorResolvable = ModelResolvable<TaxCollector>;
 

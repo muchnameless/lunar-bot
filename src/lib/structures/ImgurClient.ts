@@ -4,8 +4,8 @@ import { URL } from 'node:url';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { RateLimitManager, type RateLimit } from '@sapphire/ratelimits';
 import { fetch, type Headers, type RequestInit, type Response } from 'undici';
-import { FetchError } from './errors/FetchError.js';
 import { consumeBody, days, hours, isAbortError, seconds } from '#functions';
+import { FetchError } from './errors/FetchError.js';
 
 export interface ImageData {
 	account_id: number;
@@ -277,9 +277,9 @@ export class ImgurClient {
 				const reset =
 					resetKey === 'x-post-rate-limit-reset'
 						? // time left in seconds
-						  seconds(Number.parseInt(resetHeader, 10)) + serverTime
+							seconds(Number.parseInt(resetHeader, 10)) + serverTime
 						: // timestamp in seconds
-						  seconds(Number.parseInt(resetHeader, 10));
+							seconds(Number.parseInt(resetHeader, 10));
 
 				if (reset > now) {
 					rateLimit.expires = reset;

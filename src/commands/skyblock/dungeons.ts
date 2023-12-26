@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
-import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command.js';
 import { hypixel } from '#api';
 import { DUNGEON_CLASSES, DUNGEON_XP_TOTAL, LEVEL_CAP } from '#constants';
 import { formatDecimalNumber, formatNumber, getSkillLevel, seconds, shortenNumber } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
+import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command.js';
 
 export default class DungeonsCommand extends BaseSkyBlockCommand {
 	public constructor(context: CommandContext) {

@@ -2,13 +2,6 @@ import { parseArgs, type ParseArgsConfig } from 'node:util';
 import { regExpEsc } from '@sapphire/utilities';
 import type { GuildMember, Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
-import type { BroadcastOptions, BroadcastResult, ChatBridge } from './ChatBridge.js';
-import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
-import { PrismarineMessage } from './PrismarineMessage.js';
-import type { ChatPacket } from './botEvents/system_chat.js';
-import { HypixelMessageType, spamMessages, type MessagePosition } from './constants/index.js';
-import type { DiscordChatManager } from './managers/DiscordChatManager.js';
-import type { MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 import { mojang } from '#api';
 import { AnsiColour, AnsiFormat, NEVER_MATCHING_REGEXP, UnicodeEmoji, UNKNOWN_IGN } from '#constants';
 import type { Player } from '#db/models/Player.js';
@@ -17,6 +10,13 @@ import { logger } from '#logger';
 import type { BridgeCommand } from '#structures/commands/BridgeCommand.js';
 import type { DualCommand } from '#structures/commands/DualCommand.js';
 import { MessageUtil } from '#utils';
+import type { BroadcastOptions, BroadcastResult, ChatBridge } from './ChatBridge.js';
+import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
+import { PrismarineMessage } from './PrismarineMessage.js';
+import type { ChatPacket } from './botEvents/system_chat.js';
+import { HypixelMessageType, spamMessages, type MessagePosition } from './constants/index.js';
+import type { DiscordChatManager } from './managers/DiscordChatManager.js';
+import type { MinecraftChatOptions } from './managers/MinecraftChatManager.js';
 
 export type ParseArgsConfigOptions = NonNullable<ParseArgsConfig['options']>;
 
@@ -146,18 +146,18 @@ export class HypixelMessage {
 							ign: this.chatBridge.minecraft.botUsername ?? UNKNOWN_IGN,
 							guildRank: null,
 							uuid: this.chatBridge.minecraft.botUuid,
-					  }
+						}
 					: {
 							ign: matched.groups!.ign!,
 							guildRank: matched.groups!.guildRank,
 							uuid: matched.groups!.type
 								? // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
-								  // @ts-expect-error prismarineMessage typings
-								  (this.prismarineMessage.extra?.[0]?.clickEvent?.value as string)
+									// @ts-expect-error prismarineMessage typings
+									(this.prismarineMessage.extra?.[0]?.clickEvent?.value as string)
 										.slice('/viewprofile '.length)
 										.replaceAll('-', '')
 								: null,
-					  },
+						},
 			);
 			this.content = this.rawContent.slice(matched[0]!.length).trimStart();
 			this.spam = false;
