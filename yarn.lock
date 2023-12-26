@@ -2462,7 +2462,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cron@npm:^3.1.1":
+"cron@npm:^3.1.6":
   version: 3.1.6
   resolution: "cron@npm:3.1.6"
   dependencies:
@@ -5109,7 +5109,7 @@ __metadata:
     bufferutil: ^4.0.8
     chart.js: ^4.4.1
     common-tags: ^1.8.2
-    cron: ^3.1.1
+    cron: ^3.1.6
     discord.js: 14.15.0-dev.1703462984-0f1e02b3d
     eslint: ^8.56.0
     eslint-config-neon: ^0.1.57
