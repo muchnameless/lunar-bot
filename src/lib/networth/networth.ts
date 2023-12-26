@@ -91,7 +91,7 @@ const getShensAuctionPrice = (extraAttributes: NBTExtraAttributes) => {
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
 	const extraAttributes = item.tag!.ExtraAttributes!;
-	const itemId = extraAttributes.id;
+	let itemId = extraAttributes.id;
 	const skyblockItem = skyblockItems.get(itemId);
 
 	// items that are always soulbound
@@ -111,6 +111,20 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 			price = getPrice(`${ItemId.AbiCase}_${extraAttributes.model}`);
 			break;
 
+		case ItemId.CreativeMind:
+			if (!('edition' in extraAttributes)) {
+				itemId = ItemId.CreativeMindUneditioned;
+			}
+
+			break;
+
+		case ItemId.DctrSpaceHelm:
+			if ('edition' in extraAttributes) {
+				itemId = ItemId.DctrSpaceHelmEditioned;
+			}
+
+			break;
+
 		case ItemId.NewYearCake:
 			price = getPrice(`${ItemId.NewYearCake}_${extraAttributes.new_years_cake}`);
 			break;
@@ -127,20 +141,19 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				logger.error({ error, item }, '[CALCULATE ITEM PRICE]: petInfo parse error');
 				return 0;
 			}
-
-		default:
-			price =
-				item.Count *
-				(prices.get(itemId) ??
-					// non auctionable craftable items
-					CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + count * getPrice(id), 0) ??
-					// shen's auction items
-					getShensAuctionPrice(extraAttributes) ??
-					// npc sell price
-					skyblockItem?.npc_sell_price ??
-					// unknown item
-					(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 	}
+
+	price ??=
+		item.Count *
+		(prices.get(itemId) ??
+			// non auctionable craftable items
+			CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + count * getPrice(id), 0) ??
+			// shen's auction items
+			getShensAuctionPrice(extraAttributes) ??
+			// npc sell price
+			skyblockItem?.npc_sell_price ??
+			// unknown item
+			(unknownItemIdWarnings.emit(itemId, { itemId }, '[GET PRICE]: unknown item'), 0));
 
 	// dark auction items
 	if (extraAttributes.winning_bid) {
@@ -200,7 +213,10 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// runes
 	if (extraAttributes.runes) {
 		for (const [rune, level] of Object.entries(extraAttributes.runes)) {
-			price += getPrice(`${ItemId.Rune}_${rune}_${level}`) * PriceModifier.Rune;
+			price +=
+				// TODO: check api response
+				(getPrice(`${ItemId.Rune}_${rune}_${level}`) || getPrice(`${ItemId.UniqueRune}_${rune}_${level}`)) *
+				PriceModifier.Rune;
 		}
 	}
 
@@ -661,9 +677,10 @@ export async function getNetworth(
 	}
 
 	// essence
-	for (const key of Object.keys(member)) {
-		if (key.startsWith('essence_')) {
-			networth += ((member[key as keyof typeof member] as number | undefined) ?? 0) * getPrice(key.toUpperCase());
+	if (member.currencies?.essence) {
+		for (const [id, { current }] of Object.entries(member.currencies.essence)) {
+			if (!current) continue;
+			networth += current * getPrice(`ESSENCE_${id}`);
 		}
 	}
 

@@ -55,6 +55,7 @@ export async function populateCaches() {
 			ItemId.Pet,
 			ItemId.Potion,
 			ItemId.Rune,
+			ItemId.UniqueRune,
 		]) {
 			prices.set(itemId, 0);
 		}

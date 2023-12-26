@@ -102,6 +102,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.Lure:
 		case Enchantment.Magnet:
 		case Enchantment.Overload:
+		case Enchantment.Pesterminator:
 		case Enchantment.Piscary:
 		case Enchantment.Power:
 		case Enchantment.Pristine:
@@ -185,6 +186,7 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.UltimateLegion:
 		case Enchantment.UltimateNoPainNoGain:
 		case Enchantment.UltimateOneForAll:
+		case Enchantment.UltimateRefrigerate:
 		case Enchantment.UltimateRend:
 		case Enchantment.UltimateSoulEater:
 		case Enchantment.UltimateSwarm:

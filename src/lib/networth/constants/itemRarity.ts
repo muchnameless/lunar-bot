@@ -9,6 +9,7 @@ export const enum ItemRarity {
 	Divine = 'DIVINE',
 	Special = 'SPECIAL',
 	VerySpecial = 'VERY SPECIAL',
+	Ultimate = 'ULTIMATE',
 }
 
 export const enum ItemRarityColourCode {
@@ -21,6 +22,7 @@ export const enum ItemRarityColourCode {
 	Divine = 'b',
 	Special = 'c',
 	VerySpecial = 'c',
+	Ultimate = '4',
 }
 /* eslint-enable @typescript-eslint/no-duplicate-enum-values, typescript-sort-keys/string-enum */
 
@@ -34,4 +36,5 @@ export const colourCodeToRarity = {
 	[ItemRarityColourCode.Divine]: ItemRarity.Divine,
 	[ItemRarityColourCode.Special]: ItemRarity.Special,
 	// [ItemRarityColourCode.VerySpecial]: ItemRarity.VerySpecial,
+	[ItemRarityColourCode.Ultimate]: ItemRarity.Ultimate,
 } as const satisfies Record<ItemRarityColourCode, ItemRarity>;

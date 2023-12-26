@@ -324,6 +324,28 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, si
 				break;
 			}
 
+			case ItemId.CreativeMind: {
+				const { attributes } = item.tag!.ExtraAttributes!;
+				if (!attributes) return;
+
+				if (!('edition' in attributes)) {
+					itemId = ItemId.CreativeMindUneditioned;
+				}
+
+				break;
+			}
+
+			case ItemId.DctrSpaceHelm: {
+				const { attributes } = item.tag!.ExtraAttributes!;
+				if (!attributes) return;
+
+				if ('edition' in attributes) {
+					itemId = ItemId.DctrSpaceHelmEditioned;
+				}
+
+				break;
+			}
+
 			case ItemId.EnchantedBook:
 				return;
 
@@ -394,7 +416,8 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, si
 
 				break;
 
-			case ItemId.Rune: {
+			case ItemId.Rune:
+			case ItemId.UniqueRune: {
 				const { runes } = item.tag!.ExtraAttributes!;
 				if (!runes) return;
 
@@ -403,7 +426,7 @@ async function updateAuctionPrices(binAuctions: Collection<string, number[]>, si
 
 				const [RUNE, LEVEL] = entries[0]!;
 
-				itemId = `${ItemId.Rune}_${RUNE}_${LEVEL}`;
+				itemId = `${itemId}_${RUNE}_${LEVEL}`;
 				break;
 			}
 
