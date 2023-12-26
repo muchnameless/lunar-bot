@@ -1,6 +1,6 @@
 import type { Components } from '@zikeji/hypixel';
-import { logger } from '#logger';
 import { PET_XP_TOTAL } from '../constants/pets.js';
+import { logger } from '#logger';
 
 /**
  * @param pet

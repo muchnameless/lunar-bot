@@ -1,7 +1,7 @@
 import type { Awaitable, Events } from 'discord.js';
+import { BaseEvent } from './BaseEvent.js';
 import { nonEnumerable } from '#decorators';
 import type { LunarClient } from '#structures/LunarClient.js';
-import { BaseEvent } from './BaseEvent.js';
 
 export abstract class DiscordJSEvent extends BaseEvent {
 	public abstract override readonly name: Events;

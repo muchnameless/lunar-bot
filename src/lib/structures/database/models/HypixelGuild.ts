@@ -24,6 +24,7 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
+import type { Player } from './Player.js';
 import { hypixel, mojang } from '#api';
 import type { ChatBridge, MinecraftReadyChatBridge } from '#chatBridge/ChatBridge.js';
 import { mute, setRank, unmute, type HypixelMessageType } from '#chatBridge/constants/index.js';
@@ -46,7 +47,6 @@ import {
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
 import { ChannelUtil, GuildUtil } from '#utils';
-import type { Player } from './Player.js';
 
 export type GuildRank =
 	| AutomatedGuildRank

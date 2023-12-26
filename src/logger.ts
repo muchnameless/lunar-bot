@@ -9,7 +9,7 @@ export const logger = isMainThread
 	? pino({
 			level: 'trace',
 			base: undefined,
-		})
+	  })
 	: {
 			silent: (() => {}) as pino.LogFn,
 			trace: ((...args: LogArguments) =>
@@ -30,4 +30,4 @@ export const logger = isMainThread
 					op: JobType.LogMessage,
 					d: { lvl: 'fatal', args: args.map((x) => stdSerializers.err(x)) },
 				})) as pino.LogFn,
-		};
+	  };

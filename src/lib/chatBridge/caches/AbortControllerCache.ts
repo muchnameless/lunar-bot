@@ -1,7 +1,7 @@
 import { setInterval } from 'node:timers';
 import { SnowflakeUtil, type Message, type Snowflake } from 'discord.js';
-import { minutes } from '#functions';
 import { BaseCache } from './BaseCache.js';
+import { minutes } from '#functions';
 
 export class AbortControllerCache extends BaseCache<AbortController> {
 	protected static override readonly _maxAge = minutes(5);

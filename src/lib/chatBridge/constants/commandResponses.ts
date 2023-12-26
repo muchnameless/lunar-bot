@@ -219,7 +219,7 @@ export const topErrors = (ign = IGN_DEFAULT) =>
 			.map((x) =>
 				typeof x === 'function'
 					? // @ts-expect-error future proofing
-						x(ign)
+					  x(ign)
 					: x,
 			)
 			.join('|'),

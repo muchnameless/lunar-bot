@@ -1,12 +1,12 @@
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { SlashCommandBuilder, time, type ChatInputCommandInteraction } from 'discord.js';
+import BaseStatsCommand from './~base-stats-command.js';
 import { hypixel } from '#api';
 import type { HypixelUserMessage } from '#chatBridge/HypixelMessage.js';
 import { formatNumber, getUuidAndIgn, parseSecondsFromObjectId, seconds } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalIgnOption } from '#structures/commands/commonOptions.js';
 import type { Awaited } from '#types';
-import BaseStatsCommand from './~base-stats-command.js';
 
 export type FetchedData = Awaited<ReturnType<PlayerStatsCommand['_fetchData']>>;
 

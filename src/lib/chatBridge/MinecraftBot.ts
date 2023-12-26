@@ -3,10 +3,10 @@ import { URL } from 'node:url';
 import { findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { lazy } from 'discord.js';
 import { createClient, type ClientOptions } from 'minecraft-protocol';
-import { JS_FILE_REGEXP } from '#constants';
-import { logger } from '#logger';
 import type { ChatBridge } from './ChatBridge.js';
 import { SPAWN_EVENTS } from './constants/index.js';
+import { JS_FILE_REGEXP } from '#constants';
+import { logger } from '#logger';
 
 type MinecraftBotEvent = {
 	callback(chatBridge: ChatBridge): void;

@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
+import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
 import { seconds } from '#functions';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { optionalIgnOption } from '#structures/commands/commonOptions.js';
-import BaseStatsCommand, { type FetchedData } from './~base-stats-command.js';
 
 export default class BedWarsFkdrCommand extends BaseStatsCommand {
 	protected readonly statsType = 'BedWars';

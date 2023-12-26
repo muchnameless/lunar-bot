@@ -1,6 +1,6 @@
 import type { CommandInteraction, Snowflake } from 'discord.js';
-import { minutes } from '#functions';
 import { BaseCache } from './BaseCache.js';
+import { minutes } from '#functions';
 
 export class OwnInteractionCache extends BaseCache<CommandInteraction<'cachedOrDM'>> {
 	protected static override readonly _maxAge = minutes(15);

@@ -124,7 +124,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 							)
 							.join('\n'),
 						{ char: '\n', maxLength: 1_024 },
-					)
+				  )
 				: ['none'],
 		});
 
@@ -136,7 +136,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 							.map(({ discordId, ign }) => `${userMention(discordId!)} | ${escapeIgn(ign)}`)
 							.join('\n'),
 						{ char: '\n', maxLength: 1_024 },
-					)
+				  )
 				: ['none'],
 		});
 

@@ -156,7 +156,7 @@ export class GuildMemberUtil extends null {
 						}
 
 						return resolvedRoles;
-					})()
+				  })()
 				: roles
 		).difference(member.roles.cache);
 		if (!difference.size) {

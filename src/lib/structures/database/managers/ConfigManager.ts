@@ -1,7 +1,7 @@
-import type { ConfigValues } from '#constants';
-import { Warnings } from '#structures/Warnings.js';
 import type { Config } from '../models/Config.js';
 import { ModelManager } from './ModelManager.js';
+import type { ConfigValues } from '#constants';
+import { Warnings } from '#structures/Warnings.js';
 
 export class ConfigManager extends ModelManager<Config> {
 	public readonly invalidKeyWarnings = new Warnings<string | null | undefined>();

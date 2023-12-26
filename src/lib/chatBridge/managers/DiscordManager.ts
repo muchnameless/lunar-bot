@@ -11,15 +11,6 @@ import {
 } from 'discord.js';
 import ms, { type StringValue } from 'ms';
 import { Op } from 'sequelize';
-import { NON_LETTER_REGEXP } from '#constants';
-import {
-	asyncReplace,
-	autocorrect,
-	escapeMarkdown,
-	replaceSmallLatinCapitalLetters,
-	validateDiscordId,
-} from '#functions';
-import { logger } from '#logger';
 import type { ChatBridge } from '../ChatBridge.js';
 import {
 	EMOJI_NAME_REGEXP,
@@ -33,6 +24,15 @@ import {
 	type HypixelMessageType,
 } from '../constants/index.js';
 import { DiscordChatManager, type ReadyDiscordChatManager } from './DiscordChatManager.js';
+import { NON_LETTER_REGEXP } from '#constants';
+import {
+	asyncReplace,
+	autocorrect,
+	escapeMarkdown,
+	replaceSmallLatinCapitalLetters,
+	validateDiscordId,
+} from '#functions';
+import { logger } from '#logger';
 
 export type DiscordChatManagerResolvable = DiscordChatManager | HypixelMessageType | Snowflake;
 

@@ -1,8 +1,8 @@
+import type { HypixelUserMessage } from '../../HypixelMessage.js';
 import { seconds } from '#functions';
 import type GuildCommand from '#root/commands/guild/guild.js';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { BridgeCommand } from '#structures/commands/BridgeCommand.js';
-import type { HypixelUserMessage } from '../../HypixelMessage.js';
 
 export default class KickBridgeCommand extends BridgeCommand {
 	public constructor(context: CommandContext) {

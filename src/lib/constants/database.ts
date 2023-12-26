@@ -92,16 +92,16 @@ type Loosen<T> = {
 	[P in keyof T]: T[P] extends Offset
 		? Offset.Week
 		: T[P] extends string
-			? string
-			: T[P] extends number
-				? number
-				: T[P] extends boolean
-					? boolean
-					: T[P] extends null
-						? Snowflake // Ids default to null
-						: T[P] extends [...infer E]
-							? ArrayElementType<Loosen<E>>[]
-							: T[P];
+		? string
+		: T[P] extends number
+		? number
+		: T[P] extends boolean
+		? boolean
+		: T[P] extends null
+		? Snowflake // Ids default to null
+		: T[P] extends [...infer E]
+		? ArrayElementType<Loosen<E>>[]
+		: T[P];
 };
 
 export type ConfigValues = Loosen<Mutable<typeof DEFAULT_CONFIG>>;

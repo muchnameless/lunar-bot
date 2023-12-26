@@ -2,9 +2,9 @@ import type { EventEmitter } from 'node:events';
 import type { URL } from 'node:url';
 import { findFilesRecursivelyRegex } from '@sapphire/node-utilities';
 import { Collection } from 'discord.js';
+import type { BaseEvent } from './BaseEvent.js';
 import { JS_FILE_REGEXP } from '#constants';
 import { logger } from '#logger';
-import type { BaseEvent } from './BaseEvent.js';
 
 interface EventLoadOptions {
 	/**

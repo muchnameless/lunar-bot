@@ -14,10 +14,10 @@ import {
 	type ModalSubmitInteraction,
 	type JSONEncodable,
 } from 'discord.js';
+import BaseOwnerCommand from './~base.js';
 import { logger } from '#logger';
 import type { CommandContext } from '#structures/commands/BaseCommand.js';
 import { type RepliableInteraction, InteractionUtil } from '#utils';
-import BaseOwnerCommand from './~base.js';
 
 const pExec = promisify(exec);
 

@@ -1,9 +1,9 @@
 import { URL } from 'node:url';
 import { findFilesRecursivelyStringEndsWith } from '@sapphire/node-utilities';
 import type { Model } from 'sequelize';
-import { logger } from '#logger';
 import type { Models } from './managers/DatabaseManager.js';
 import { sequelize } from './sequelize.js';
+import { logger } from '#logger';
 
 const models = {};
 

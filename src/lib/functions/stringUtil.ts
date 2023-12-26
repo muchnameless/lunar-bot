@@ -267,8 +267,8 @@ export function makeContent(text = '', options: MakeContentOptions = {}) {
 		options.split === true
 			? {}
 			: options.split !== undefined && options.split !== false
-				? { ...options.split }
-				: undefined;
+			? { ...options.split }
+			: undefined;
 
 	let content = text;
 

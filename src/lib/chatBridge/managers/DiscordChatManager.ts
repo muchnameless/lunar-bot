@@ -21,6 +21,11 @@ import {
 } from 'discord.js';
 import ms from 'ms';
 import { fetch } from 'undici';
+import type { ChatBridge } from '../ChatBridge.js';
+import type { HypixelMessage } from '../HypixelMessage.js';
+import { InteractionUserCache } from '../caches/index.js';
+import { PREFIX_BY_TYPE, URL_REGEXP, type HypixelMessageType } from '../constants/index.js';
+import { ChatManager } from './ChatManager.js';
 import { imgur, redis } from '#api';
 import {
 	ALLOWED_EXTENSIONS_REGEX,
@@ -38,11 +43,6 @@ import { logger } from '#logger';
 import type { DualCommand } from '#structures/commands/DualCommand.js';
 import { WebhookError } from '#structures/errors/WebhookError.js';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '#utils';
-import type { ChatBridge } from '../ChatBridge.js';
-import type { HypixelMessage } from '../HypixelMessage.js';
-import { InteractionUserCache } from '../caches/index.js';
-import { PREFIX_BY_TYPE, URL_REGEXP, type HypixelMessageType } from '../constants/index.js';
-import { ChatManager } from './ChatManager.js';
 
 interface SendViaBotOptions extends MessageCreateOptions {
 	content: string;
@@ -585,7 +585,7 @@ export class DiscordChatManager extends ChatManager {
 			reply: discordMessage
 				? {
 						messageReference: discordMessage,
-					}
+				  }
 				: undefined,
 			allowedMentions: { parse: [] },
 			...options,
@@ -610,9 +610,9 @@ export class DiscordChatManager extends ChatManager {
 	public async forwardToMinecraft(message: Message, signal: AbortSignal) {
 		const messageInteraction = message.author.bot
 			? // reply to an interaction
-				message.interaction ??
-				// followUp to an interaction
-				(MessageUtil.isFollowUp(message)
+			  message.interaction ??
+			  // followUp to an interaction
+			  (MessageUtil.isFollowUp(message)
 					? message.channel.messages.cache.get(message.reference.messageId)?.interaction ?? null
 					: null)
 			: null;
@@ -801,16 +801,16 @@ export class DiscordChatManager extends ChatManager {
 			prefix: message.author.bot
 				? message.author.id === message.client.user.id
 					? // this bot
-						this.prefix
+					  this.prefix
 					: // other bot
-						`${this.prefix}${DiscordChatManager._replaceBlockedName(
+					  `${this.prefix}${DiscordChatManager._replaceBlockedName(
 							message.member?.displayName ?? message.author.username,
-						)}: `
+					  )}: `
 				: // user
-					`${this.prefix}${
+				  `${this.prefix}${
 						DiscordChatManager._getCheckedIgn(player) ??
 						DiscordChatManager._replaceBlockedName(message.member?.displayName ?? message.author.username)
-					}: `,
+				  }: `,
 			discordMessage: message,
 			signal,
 		});

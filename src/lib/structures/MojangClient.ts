@@ -3,8 +3,8 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { RateLimitManager } from '@sapphire/ratelimits';
 import { fetch, type Response } from 'undici';
-import { consumeBody, isAbortError, minutes, seconds, validateMinecraftIgn, validateMinecraftUuid } from '#functions';
 import { MojangAPIError } from './errors/MojangAPIError.js';
+import { consumeBody, isAbortError, minutes, seconds, validateMinecraftIgn, validateMinecraftUuid } from '#functions';
 
 export interface MojangResult {
 	ign: string;

@@ -8,6 +8,7 @@ import { CronJob } from 'cron';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
 import { Agent, fetch, setGlobalDispatcher } from 'undici';
+import { JobType } from './index.js';
 import { sql } from '#db/sql.js';
 import { consumeBody } from '#functions/fetch.js';
 import { logger } from '#logger';
@@ -18,7 +19,6 @@ import { getEnchantment } from '#networth/functions/enchantments.js'; // separat
 import { transformItemData } from '#networth/functions/nbt.js';
 import { calculatePetSkillLevel } from '#networth/functions/pets.js';
 import { FetchError } from '#structures/errors/FetchError.js';
-import { JobType } from './index.js';
 
 setGlobalDispatcher(new Agent({ connect: { timeout: 30_000 } }));
 
