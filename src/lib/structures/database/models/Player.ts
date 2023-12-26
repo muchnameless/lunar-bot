@@ -31,6 +31,10 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
+import type { ModelResolvable } from '../managers/ModelManager.js';
+import type { AutomatedGuildRank, GuildRank, HypixelGuild } from './HypixelGuild.js';
+import type { TaxCollector } from './TaxCollector.js';
+import { TransactionType, type Transaction } from './Transaction.js';
 import { getSkyBlockProfiles, hypixel, mojang } from '#api';
 import {
 	CATACOMBS_ROLES,
@@ -88,10 +92,6 @@ import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
 import { toUpperCase } from '#types';
 import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil, type RoleResolvables } from '#utils';
-import type { ModelResolvable } from '../managers/ModelManager.js';
-import type { AutomatedGuildRank, GuildRank, HypixelGuild } from './HypixelGuild.js';
-import type { TaxCollector } from './TaxCollector.js';
-import { TransactionType, type Transaction } from './Transaction.js';
 
 type PlayerFindOptions = FindOptions<Attributes<Player>>;
 
