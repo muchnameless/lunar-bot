@@ -61,5 +61,8 @@ export const DUNGEON_EXPONENTS = {
  * https://github.com/Antonio32A/lilyweight
  */
 
-export const LILY_SKILL_NAMES_API = objectKeys(lilyConstants.skillNames);
+// TODO: remove map once package is updated
+export const LILY_SKILL_NAMES_API = objectKeys(lilyConstants.skillNames).map((x) =>
+	x.slice('experience_'.length).toUpperCase(),
+);
 export const LILY_SKILL_NAMES = objectKeys(lilyConstants.skillRatioWeight);

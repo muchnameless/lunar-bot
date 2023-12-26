@@ -32,7 +32,6 @@ import Discord, {
 import ms from 'ms';
 import { format, type Options as PrettierFormatOptions } from 'prettier';
 import { fetch } from 'undici';
-import BaseOwnerCommand from './~base.js';
 import { redis, hypixel, imgur, mojang } from '#api';
 import * as constants from '#constants';
 import { sequelize, sql } from '#db';
@@ -55,6 +54,7 @@ import {
 	type InteractionUtilReplyOptions,
 	type RepliableInteraction,
 } from '#utils';
+import BaseOwnerCommand from './~base.js';
 
 // unused imports are 'used' so that tsc doesn't remove them
 /* eslint-disable @typescript-eslint/no-unused-expressions */
@@ -192,13 +192,14 @@ export default class EvalCommand extends BaseOwnerCommand {
 				typeof options === 'string'
 					? { content: options, ephemeral: false, rejectOnError: true, fetchReply: true }
 					: options instanceof EmbedBuilder
-					? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
-					: options instanceof ButtonBuilder || options instanceof BaseSelectMenuBuilder
-					? {
-							components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(options)],
-							fetchReply: true,
-					  }
-					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
+						? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
+						: options instanceof ButtonBuilder || options instanceof BaseSelectMenuBuilder
+							? {
+									// @ts-expect-error TODO
+									components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(options)],
+									fetchReply: true,
+								}
+							: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
 		const inspect = (x: unknown) => util.inspect(x, { depth: inspectDepth, getters: true, showHidden: true });
 		const saveHeapdump = async () => {

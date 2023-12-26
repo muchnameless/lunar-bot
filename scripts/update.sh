@@ -13,11 +13,11 @@ if [[ $current != $new ]]; then
 
 	echo ""
 	echo "updating local dependencies"
-	pnpm install
+	yarn install
 
 	echo ""
 	echo "compiling to js"
-	time pnpm build
+	time yarn build
 fi
 
 echo ""

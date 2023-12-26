@@ -12,7 +12,6 @@ on:
 
 env:
   NODE_ENV: production
-  VOLTA_FEATURE_PNPM: 1
 
 jobs:
   unicode-emojis:
@@ -35,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
-        uses: ./.github/actions/pnpm-install
+        uses: ./.github/actions/yarn-install
 
       - name: Restore build output
         id: restore-build-output
@@ -46,7 +45,7 @@ jobs:
 
       - name: Build
         if: steps.restore-build-output.outputs.cache-hit != 'true'
-        run: pnpm build
+        run: yarn build
 
       - name: Run script
         run: node dist/scripts/generateEmojiParser.js

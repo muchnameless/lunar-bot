@@ -1,6 +1,9 @@
 import { Buffer } from 'node:buffer';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 import { parse, simplify } from 'prismarine-nbt';
+import { hypixel } from '#api';
+import { logger } from '#logger';
+import { Warnings } from '#structures/Warnings.js';
 import {
 	ALLOWED_RECOMB_CATEGORIES,
 	ALLOWED_RECOMB_ITEMS,
@@ -15,14 +18,13 @@ import {
 	NON_REDUCED_PETS,
 	PriceModifier,
 	REFORGE_TO_STONE,
+	SKYBLOCK_BAG_INVENTORIES,
 	SKYBLOCK_INVENTORIES,
+	SKYBLOCK_SHARED_INVENTORIES,
 	THUNDER_CHARGES,
 } from './constants/index.js';
 import { calculatePetSkillLevel, getEnchantment, isCommonItem, transformItemData } from './functions/index.js';
 import { getPrice, prices, skyblockItems, unknownItemIdWarnings, type SkyBlockItem } from './prices.js';
-import { hypixel } from '#api';
-import { logger } from '#logger';
-import { Warnings } from '#structures/Warnings.js';
 
 const unknownStarredItemWarnings = new Warnings<string>();
 const unknownReforgeModifierWarnings = new Warnings<string>();
@@ -598,9 +600,9 @@ export async function getNetworth(
 		// co-op bank
 		(addBanking ? banking?.balance ?? ((bankingAPIEnabled = false), 0) : 0) +
 		// purse
-		(member.coin_purse ?? 0) +
+		(member.currencies?.coin_purse ?? 0) +
 		// personal bank (for co-op members)
-		(Object.keys(members).length > 1 ? member.bank_account ?? 0 : 0);
+		(Object.keys(members).length > 1 ? member.profile?.bank_account ?? 0 : 0);
 
 	const promises: Promise<number>[] = [];
 
@@ -613,32 +615,47 @@ export async function getNetworth(
 	let inventoryAPIEnabled = true;
 
 	for (const inventory of SKYBLOCK_INVENTORIES) {
-		const data = member[inventory]?.data;
+		const data = member.inventory?.[inventory]?.data;
 
-		if (!data) {
-			if (inventory === 'inv_contents') inventoryAPIEnabled = false;
-			continue;
+		if (data) {
+			promises.push(parseItems(data));
+		} else if (inventory === 'inv_contents') {
+			inventoryAPIEnabled = false;
 		}
+	}
 
-		promises.push(parseItems(data));
+	for (const inventory of SKYBLOCK_BAG_INVENTORIES) {
+		const data = member.inventory?.bag_contents?.[inventory]?.data;
+
+		if (data) {
+			promises.push(parseItems(data));
+		}
+	}
+
+	for (const inventory of SKYBLOCK_SHARED_INVENTORIES) {
+		const data = member.shared_inventory?.[inventory]?.data;
+
+		if (data) {
+			promises.push(parseItems(data));
+		}
 	}
 
 	// backpacks
-	if (member.backpack_contents) {
-		for (const backpack of Object.values(member.backpack_contents)) {
+	if (member.inventory?.backpack_contents) {
+		for (const backpack of Object.values(member.inventory.backpack_contents)) {
 			promises.push(parseItems(backpack.data));
 		}
 	}
 
-	if (member.backpack_icons) {
-		for (const backpack of Object.values(member.backpack_icons)) {
+	if (member.inventory?.backpack_icons) {
+		for (const backpack of Object.values(member.inventory.backpack_icons)) {
 			promises.push(parseItems(backpack.data));
 		}
 	}
 
 	// sacks
-	if (member.sacks_counts) {
-		for (const [index, count] of Object.entries(member.sacks_counts)) {
+	if (member.inventory?.sacks_counts) {
+		for (const [index, count] of Object.entries(member.inventory.sacks_counts)) {
 			networth += (count ?? 0) * getPrice(index);
 		}
 	}
@@ -651,8 +668,8 @@ export async function getNetworth(
 	}
 
 	// pets
-	if (member.pets) {
-		for (const pet of member.pets) {
+	if (member.pets_data?.pets) {
+		for (const pet of member.pets_data.pets) {
 			networth += getPetPrice(pet);
 		}
 	}

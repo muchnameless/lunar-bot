@@ -1,40 +1,7 @@
-diff --git a/CHANGELOG.md b/CHANGELOG.md
-deleted file mode 100644
-index f2d02e0f230e0fb6dd02c466b7161a41db4d1daf..0000000000000000000000000000000000000000
-diff --git a/dist/index.global.js b/dist/index.global.js
-index 155bc618b206db5dce44eed172c1d8b60cc0b217..465296d3e2fe6ced703bf367527cc3815c00fcf7 100644
---- a/dist/index.global.js
-+++ b/dist/index.global.js
-@@ -25,14 +25,12 @@ var SapphireAsyncQueue = (function (exports) {
-       });
-     }
-     setSignal(signal) {
--      if (signal.aborted)
--        return this;
-       this.signal = signal;
-       this.signalListener = () => {
-         const index = this.queue["promises"].indexOf(this);
-         if (index !== -1)
-           this.queue["promises"].splice(index, 1);
--        this.reject(new Error("Request aborted manually"));
-+        this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
-       };
-       this.signal.addEventListener("abort", this.signalListener);
-       return this;
-@@ -102,6 +100,9 @@ var SapphireAsyncQueue = (function (exports) {
-      * ```
-      */
-     wait(options) {
-+      if (options?.signal?.aborted) {
-+        return Promise.reject(new Error("Request aborted manually", { cause: options.signal.reason }));
-+      }
-       const entry = new AsyncQueueEntry(this);
-       if (this.promises.length === 0) {
-         this.promises.push(entry);
-diff --git a/dist/index.js b/dist/index.js
-index 2e8dd4fcaa020f2afe6c9ccb821eb26c9bdf3d8f..7efd38764ce17f1030831691bdbf38719c978aa4 100644
---- a/dist/index.js
-+++ b/dist/index.js
+diff --git a/dist/cjs/index.cjs b/dist/cjs/index.cjs
+index fd9334d66fb65b643584dfcf927fddd88a0bc014..3ced0e190c855f04c03be49c8b6891bebc4628a7 100644
+--- a/dist/cjs/index.cjs
++++ b/dist/cjs/index.cjs
 @@ -24,14 +24,12 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
      });
    }
@@ -61,10 +28,10 @@ index 2e8dd4fcaa020f2afe6c9ccb821eb26c9bdf3d8f..7efd38764ce17f1030831691bdbf3871
      const entry = new AsyncQueueEntry(this);
      if (this.promises.length === 0) {
        this.promises.push(entry);
-diff --git a/dist/index.mjs b/dist/index.mjs
+diff --git a/dist/esm/index.mjs b/dist/esm/index.mjs
 index ba9ea01894067e747dd138773cce8b792ebadabd..5adcdec748e4bf55b3b9e3739c569b610c3f4b72 100644
---- a/dist/index.mjs
-+++ b/dist/index.mjs
+--- a/dist/esm/index.mjs
++++ b/dist/esm/index.mjs
 @@ -22,14 +22,12 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
      });
    }
@@ -91,3 +58,33 @@ index ba9ea01894067e747dd138773cce8b792ebadabd..5adcdec748e4bf55b3b9e3739c569b61
      const entry = new AsyncQueueEntry(this);
      if (this.promises.length === 0) {
        this.promises.push(entry);
+diff --git a/dist/iife/index.global.js b/dist/iife/index.global.js
+index 155bc618b206db5dce44eed172c1d8b60cc0b217..465296d3e2fe6ced703bf367527cc3815c00fcf7 100644
+--- a/dist/iife/index.global.js
++++ b/dist/iife/index.global.js
+@@ -25,14 +25,12 @@ var SapphireAsyncQueue = (function (exports) {
+       });
+     }
+     setSignal(signal) {
+-      if (signal.aborted)
+-        return this;
+       this.signal = signal;
+       this.signalListener = () => {
+         const index = this.queue["promises"].indexOf(this);
+         if (index !== -1)
+           this.queue["promises"].splice(index, 1);
+-        this.reject(new Error("Request aborted manually"));
++        this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
+       };
+       this.signal.addEventListener("abort", this.signalListener);
+       return this;
+@@ -102,6 +100,9 @@ var SapphireAsyncQueue = (function (exports) {
+      * ```
+      */
+     wait(options) {
++      if (options?.signal?.aborted) {
++        return Promise.reject(new Error("Request aborted manually", { cause: options.signal.reason }));
++      }
+       const entry = new AsyncQueueEntry(this);
+       if (this.promises.length === 0) {
+         this.promises.push(entry);

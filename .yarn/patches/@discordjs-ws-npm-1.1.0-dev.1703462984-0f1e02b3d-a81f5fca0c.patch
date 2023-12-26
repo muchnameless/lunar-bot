@@ -1,5 +1,5 @@
 diff --git a/dist/defaultWorker.js b/dist/defaultWorker.js
-index 50089a19e9e2764a7b33d61bf8621e9e503d0e95..8725804db56b1831898bbeb1600c15392fd842bc 100644
+index b4171ca65e66a112e5cb3e037e2e27a5621ec648..19a9fc08520cff47733db834362daf49d3785a24 100644
 --- a/dist/defaultWorker.js
 +++ b/dist/defaultWorker.js
 @@ -523,7 +523,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
@@ -12,7 +12,7 @@ index 50089a19e9e2764a7b33d61bf8621e9e503d0e95..8725804db56b1831898bbeb1600c1539
      const closeController = new AbortController();
      try {
 diff --git a/dist/defaultWorker.mjs b/dist/defaultWorker.mjs
-index e26944071e858bae4e39cffb8806316ce022cf8f..53caebf5a18248b0e81a74bed25ca1aec0d4f368 100644
+index c1f8ee104ac28e868f7ea250adb458a077ed119e..21343d41699be35fe5cee3016228fd96c73f033b 100644
 --- a/dist/defaultWorker.mjs
 +++ b/dist/defaultWorker.mjs
 @@ -505,7 +505,7 @@ var WebSocketShard = class extends AsyncEventEmitter {
@@ -25,7 +25,7 @@ index e26944071e858bae4e39cffb8806316ce022cf8f..53caebf5a18248b0e81a74bed25ca1ae
      const closeController = new AbortController();
      try {
 diff --git a/dist/index.js b/dist/index.js
-index 9093415c37ff664fc8543c5560e364fe8bb93e3b..20de5819f27c0c7df7b7bfd3c99a2b09cd1473fc 100644
+index a1de2bf7b359c3aff8b5310028e393fa9d7a58fc..ee90b0357cd0fecd188d9cec8acc7add24a3d918 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -751,7 +751,7 @@ var WebSocketShard = class extends import_async_event_emitter.AsyncEventEmitter
@@ -38,7 +38,7 @@ index 9093415c37ff664fc8543c5560e364fe8bb93e3b..20de5819f27c0c7df7b7bfd3c99a2b09
      const closeController = new AbortController();
      try {
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 9f8ad43cc454c615d929d1c917b621f4c171ca35..4587b73daf1381b9affc9818475c306e2b25387b 100644
+index 57c56d8a7d57870b549e763b99d9fbdbe3cf2f0a..3bb90474a66975dee226283df610b326a3646600 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -714,7 +714,7 @@ var WebSocketShard = class extends AsyncEventEmitter {

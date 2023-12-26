@@ -12,9 +12,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-env:
-  VOLTA_FEATURE_PNPM: 1
-
 jobs:
   Dependencies:
     name: Install dependencies
@@ -32,7 +29,7 @@ jobs:
         uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
       - name: Install dependencies
-        uses: ./.github/actions/pnpm-install
+        uses: ./.github/actions/yarn-install
 
       - name: Cache dependencies
         uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3
@@ -68,7 +65,7 @@ jobs:
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
 
       - name: Run ESLint
-        run: pnpm lint
+        run: yarn lint
 
   Building:
     name: TypeScript
@@ -98,7 +95,7 @@ jobs:
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
 
       - name: Run TypeScript compiler
-        run: pnpm build
+        run: yarn build
 
       - name: Cache build output
         if: github.ref_name == 'main'

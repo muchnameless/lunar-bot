@@ -1,7 +1,7 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"extends": ["config:base", ":disableRateLimiting", ":semanticCommitTypeAll(chore)", "default:automergeDigest"],
-	"postUpdateOptions": ["pnpmDedupe"],
+	"postUpdateOptions": ["yarnDedupeHighest"],
 	"labels": ["dependencies"],
 	"npm": {
 		"rangeStrategy": "bump",

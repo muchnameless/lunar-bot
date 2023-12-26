@@ -13,6 +13,13 @@ import {
 	type Message,
 } from 'discord.js';
 import { Model, type Sequelize, type ModelStatic } from 'sequelize';
+import { hypixel } from '#api';
+import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, UnicodeEmoji } from '#constants';
+import { noConcurrency } from '#decorators';
+import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber, isFirstMinutesOfHour } from '#functions';
+import { logger } from '#logger';
+import type { LunarClient } from '#structures/LunarClient.js';
+import { ChannelUtil } from '#utils';
 import type { db as DbType } from '../index.js';
 import type { ChatTrigger } from '../models/ChatTrigger.js';
 import type { Config } from '../models/Config.js';
@@ -28,13 +35,6 @@ import { HypixelGuildManager } from './HypixelGuildManager.js';
 import { ModelManager } from './ModelManager.js';
 import { PlayerManager } from './PlayerManager.js';
 import { TaxCollectorManager } from './TaxCollectorManager.js';
-import { hypixel } from '#api';
-import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, UnicodeEmoji } from '#constants';
-import { noConcurrency } from '#decorators';
-import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber, isFirstMinutesOfHour } from '#functions';
-import { logger } from '#logger';
-import type { LunarClient } from '#structures/LunarClient.js';
-import { ChannelUtil } from '#utils';
 
 export interface Models {
 	ChatTrigger: ModelStatic<ChatTrigger>;
@@ -109,7 +109,11 @@ export class DatabaseManager {
 			`${this.constructor.name}:updatePlayerDatabase`,
 			CronJobConstructor.from({
 				cronTime: `0 0/${HYPIXEL_UPDATE_INTERVAL} * * * *`,
-				onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
+				onTick: () => {
+					if (config.get('PLAYER_DB_UPDATE_ENABLED')) {
+						void this.updateData();
+					}
+				},
 			}),
 		);
 

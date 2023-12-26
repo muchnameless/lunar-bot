@@ -10,6 +10,7 @@ export const { getWeightRaw: getLilyWeightRaw } = LilyWeight;
  * @param skyblockMember
  */
 export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember): WeightData {
+	// @ts-expect-error TODO
 	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map((skill) => skyblockMember[skill] ?? 0);
 	const {
 		total,
@@ -25,7 +26,7 @@ export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfile
 			typeof getLilyWeightRaw
 		>[3]) ?? {}, // master catacombs completions
 		skyblockMember.dungeons?.dungeon_types?.catacombs?.experience ?? 0, // catacombs xp
-		SLAYERS.map((_slayer) => skyblockMember.slayer_bosses?.[_slayer]?.xp ?? 0), // slayer xp
+		SLAYERS.map((_slayer) => skyblockMember.slayer?.slayer_bosses?.[_slayer]?.xp ?? 0), // slayer xp
 	);
 
 	return {

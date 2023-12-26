@@ -16,6 +16,7 @@ import {
 	type DungeonTypes,
 } from '#constants';
 import { getSkillLevel } from '#functions/skyblock.js';
+import { toUpperCase } from '#lib/types/util.js';
 
 export type WeightData = ReturnType<typeof getSenitherWeight>;
 
@@ -31,7 +32,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const skill of SKILLS) {
 		const { skillWeight, skillOverflow } = getSenitherSkillWeight(
 			skill,
-			skyblockMember[`experience_skill_${skill}`] ?? 0,
+			skyblockMember.player_data?.experience?.[`SKILL_${toUpperCase(skill)}`] ?? 0,
 		);
 
 		totalSkillWeight += skillWeight + skillOverflow;
@@ -44,7 +45,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	for (const slayer of SLAYERS) {
 		const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(
 			slayer,
-			skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0,
+			skyblockMember.slayer?.slayer_bosses?.[slayer]?.xp ?? 0,
 		);
 
 		totalSlayerWeight += slayerWeight + slayerOverflow;

@@ -31,10 +31,6 @@ import {
 	type NonAttribute,
 	type Sequelize,
 } from 'sequelize';
-import type { ModelResolvable } from '../managers/ModelManager.js';
-import type { AutomatedGuildRank, GuildRank, HypixelGuild } from './HypixelGuild.js';
-import type { TaxCollector } from './TaxCollector.js';
-import { TransactionType, type Transaction } from './Transaction.js';
 import { getSkyBlockProfiles, hypixel, mojang } from '#api';
 import {
 	CATACOMBS_ROLES,
@@ -91,6 +87,10 @@ import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
 import { toUpperCase } from '#types';
 import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil, type RoleResolvables } from '#utils';
+import type { ModelResolvable } from '../managers/ModelManager.js';
+import type { AutomatedGuildRank, GuildRank, HypixelGuild } from './HypixelGuild.js';
+import type { TaxCollector } from './TaxCollector.js';
+import { TransactionType, type Transaction } from './Transaction.js';
 
 type PlayerFindOptions = FindOptions<Attributes<Player>>;
 
@@ -1085,8 +1085,14 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			 * SKILLS
 			 */
 			if ('experience_skill_mining' in playerData) {
-				for (const skill of SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
-				for (const skill of COSMETIC_SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
+				for (const skill of SKILLS) {
+					this[`${skill}Xp`] = playerData.player_data?.experience?.[`SKILL_${toUpperCase(skill)}`] ?? 0;
+				}
+
+				for (const skill of COSMETIC_SKILLS) {
+					this[`${skill}Xp`] =
+						playerData.player_data?.experience?.[`SKILL_${toUpperCase(skill === 'social2' ? 'social' : skill)}`] ?? 0;
+				}
 
 				// reset skill xp if no taming xp offset
 				if (this.tamingXp !== 0) {
@@ -1117,12 +1123,12 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				}
 			}
 
-			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
+			this.farmingLvlCap = 50 + (playerData.jacobs_contest?.perks?.farming_level_cap ?? 0);
 
 			/**
 			 * slayer
 			 */
-			for (const slayer of SLAYERS) this[`${slayer}Xp`] = playerData.slayer_bosses?.[slayer]?.xp ?? 0;
+			for (const slayer of SLAYERS) this[`${slayer}Xp`] = playerData.slayer?.slayer_bosses?.[slayer]?.xp ?? 0;
 
 			// reset slayer xp if no zombie xp offset
 			if (this.zombieXp !== 0) {
@@ -1136,7 +1142,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			// no slayer data found logging
 			if (
-				playerData.slayer_bosses?.zombie?.xp !== undefined &&
+				playerData.slayer?.slayer_bosses?.zombie?.xp !== undefined &&
 				new Date().getHours() === 0 &&
 				isFirstMinutesOfHour(HYPIXEL_UPDATE_INTERVAL)
 			) {
@@ -1716,11 +1722,11 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 						? {
 								name: error.name,
 								value: error.message,
-						  }
+							}
 						: {
 								name: 'Error',
 								value: `${error}`,
-						  },
+							},
 				);
 
 			if (NAMES_TO_ADD) {
@@ -1833,7 +1839,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				? `${trim(member.nickname, GuildMemberLimits.MaximumDisplayNameLength - this.ign.length - ' ()'.length).replace(
 						/ +(?:\([^ )]*?)?\.{3}$/,
 						'',
-				  )} (${this.ign})`
+					)} (${this.ign})`
 				: this.ign;
 
 		// 'nick (ign)' already exists

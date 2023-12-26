@@ -1,11 +1,11 @@
 import { CronJob } from 'cron';
 import type { GuildResolvable } from 'discord.js';
 import type { FindOptions } from 'sequelize';
-import type { UpdateOptions, HypixelGuild } from '../models/HypixelGuild.js';
-import { type ModelResolvable, ModelManager } from './ModelManager.js';
 import { noConcurrency } from '#decorators';
 import { autocorrect, compareAlphabetically } from '#functions';
 import { logger } from '#logger';
+import type { UpdateOptions, HypixelGuild } from '../models/HypixelGuild.js';
+import { type ModelResolvable, ModelManager } from './ModelManager.js';
 
 export type HypixelGuildResolvable = ModelResolvable<HypixelGuild>;
 
@@ -139,7 +139,9 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			CronJob.from({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
-				onTick: () => this.performDailyStatsSave(),
+				onTick: () => {
+					this.performDailyStatsSave();
+				},
 			}),
 		);
 
@@ -149,7 +151,9 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			CronJob.from({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
-				onTick: () => this.removeExpiredMutes(),
+				onTick: () => {
+					this.removeExpiredMutes();
+				},
 			}),
 		);
 
@@ -158,8 +162,11 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			`${this.constructor.name}:updateStatDiscordChannels`,
 			CronJob.from({
 				cronTime: '0 0 * * * *',
-				onTick: () =>
-					this.client.config.get('STAT_DISCORD_CHANNELS_UPDATE_ENABLED') && this.updateStatDiscordChannels(),
+				onTick: () => {
+					if (this.client.config.get('STAT_DISCORD_CHANNELS_UPDATE_ENABLED')) {
+						void this.updateStatDiscordChannels();
+					}
+				},
 			}),
 		);
 
