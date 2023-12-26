@@ -126,8 +126,8 @@ dependencies:
     specifier: ^1.1.1
     version: 1.1.1
   '@zikeji/hypixel':
-    specifier: github:muchnameless/node-hypixel#6133816c583557c9579908b7fcb8d5297d8a2da1
-    version: github.com/muchnameless/node-hypixel/6133816c583557c9579908b7fcb8d5297d8a2da1
+    specifier: github:muchnameless/node-hypixel#06d41b9aaff1e64da376daf87f96af9c007e68bb
+    version: github.com/muchnameless/node-hypixel/06d41b9aaff1e64da376daf87f96af9c007e68bb
   bufferutil:
     specifier: ^4.0.8
     version: 4.0.8
@@ -6418,6 +6418,13 @@ packages:
       '@fastify/busboy': 2.0.0
     dev: false
 
+  /undici@6.2.1:
+    resolution: {integrity: sha512-7Wa9thEM6/LMnnKtxJHlc8SrTlDmxqJecgz1iy8KlsN0/iskQXOQCuPkrZLXbElPaSw5slFFyKIKXyJ3UtbApw==}
+    engines: {node: '>=18.0'}
+    dependencies:
+      '@fastify/busboy': 2.0.0
+    dev: false
+
   /unified-engine@10.1.0:
     resolution: {integrity: sha512-5+JDIs4hqKfHnJcVCxTid1yBoI/++FfF/1PFdSMpaftZZZY+qg2JFruRbf7PaIwa9KgLotXQV3gSjtY0IdcFGQ==}
     dependencies:
@@ -6814,14 +6821,13 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
     dev: true
 
-  github.com/muchnameless/node-hypixel/6133816c583557c9579908b7fcb8d5297d8a2da1:
-    resolution: {tarball: https://codeload.github.com/muchnameless/node-hypixel/tar.gz/6133816c583557c9579908b7fcb8d5297d8a2da1}
+  github.com/muchnameless/node-hypixel/06d41b9aaff1e64da376daf87f96af9c007e68bb:
+    resolution: {tarball: https://codeload.github.com/muchnameless/node-hypixel/tar.gz/06d41b9aaff1e64da376daf87f96af9c007e68bb}
     name: '@zikeji/hypixel'
     version: 3.1.1
     engines: {node: '>=16'}
-    requiresBuild: true
     dependencies:
       '@sapphire/async-queue': 1.5.1-next.e57a4fdd.0(patch_hash=c5pp6f7jfdzsr2h2pee7cwemsa)
       '@sapphire/ratelimits': 2.4.8-next.e33b5b94.0
-      undici: 5.28.2
+      undici: 6.2.1
     dev: false
