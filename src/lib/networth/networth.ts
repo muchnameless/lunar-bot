@@ -1,9 +1,6 @@
 import { Buffer } from 'node:buffer';
 import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 import { parse, simplify } from 'prismarine-nbt';
-import { hypixel } from '#api';
-import { logger } from '#logger';
-import { Warnings } from '#structures/Warnings.js';
 import {
 	ALLOWED_RECOMB_CATEGORIES,
 	ALLOWED_RECOMB_ITEMS,
@@ -25,6 +22,9 @@ import {
 } from './constants/index.js';
 import { calculatePetSkillLevel, getEnchantment, isCommonItem, transformItemData } from './functions/index.js';
 import { getPrice, prices, skyblockItems, unknownItemIdWarnings, type SkyBlockItem } from './prices.js';
+import { hypixel } from '#api';
+import { logger } from '#logger';
+import { Warnings } from '#structures/Warnings.js';
 
 const unknownStarredItemWarnings = new Warnings<string>();
 const unknownReforgeModifierWarnings = new Warnings<string>();

@@ -9,20 +9,6 @@ import { TimestampStyles, type GuildChannel, type Message, type Snowflake } from
 import minecraftData from 'minecraft-data';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
 import ms from 'ms';
-import { MC_CLIENT_VERSION } from '#constants';
-import type { Player } from '#db/models/Player.js';
-import { noConcurrency } from '#decorators';
-import {
-	asyncReplace,
-	cleanFormattedNumber,
-	minutes,
-	replaceSmallLatinCapitalLetters,
-	seconds,
-	splitMessage,
-	trim,
-} from '#functions';
-import { logger } from '#logger';
-import { UserUtil } from '#utils';
 import type { HypixelMessage } from '../HypixelMessage.js';
 import {
 	HypixelMessageCollector,
@@ -51,6 +37,20 @@ import {
 } from '../constants/index.js';
 import { ChatManager } from './ChatManager.js';
 import { ForwardRejectionType } from './DiscordChatManager.js';
+import { MC_CLIENT_VERSION } from '#constants';
+import type { Player } from '#db/models/Player.js';
+import { noConcurrency } from '#decorators';
+import {
+	asyncReplace,
+	cleanFormattedNumber,
+	minutes,
+	replaceSmallLatinCapitalLetters,
+	seconds,
+	splitMessage,
+	trim,
+} from '#functions';
+import { logger } from '#logger';
+import { UserUtil } from '#utils';
 
 export interface MinecraftChatOptions {
 	content: string;

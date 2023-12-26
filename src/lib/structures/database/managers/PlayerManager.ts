@@ -3,6 +3,16 @@ import { EmbedLimits } from '@sapphire/discord-utilities';
 import { CronJob } from 'cron';
 import { codeBlock, Collection, EmbedBuilder, type APIEmbed, type JSONEncodable } from 'discord.js';
 import { Op, type Attributes, type CreationAttributes, type FindOptions } from 'sequelize';
+import type { HypixelGuild } from '../models/HypixelGuild.js';
+import type {
+	PlayerUpdateOptions,
+	Player,
+	PlayerInGuild,
+	ResetXpOptions,
+	TransferXpOptions,
+} from '../models/Player.js';
+import { sql } from '../sql.js';
+import { ModelManager, type ModelResolvable } from './ModelManager.js';
 import { hypixel } from '#api';
 import {
 	HYPIXEL_UPDATE_INTERVAL,
@@ -23,16 +33,6 @@ import {
 	upperCaseFirstChar,
 } from '#functions';
 import { logger } from '#logger';
-import type { HypixelGuild } from '../models/HypixelGuild.js';
-import type {
-	PlayerUpdateOptions,
-	Player,
-	PlayerInGuild,
-	ResetXpOptions,
-	TransferXpOptions,
-} from '../models/Player.js';
-import { sql } from '../sql.js';
-import { ModelManager, type ModelResolvable } from './ModelManager.js';
 
 export class PlayerManager extends ModelManager<Player> {
 	/**

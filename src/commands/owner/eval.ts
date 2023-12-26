@@ -32,6 +32,7 @@ import Discord, {
 import ms from 'ms';
 import { format, type Options as PrettierFormatOptions } from 'prettier';
 import { fetch } from 'undici';
+import BaseOwnerCommand from './~base.js';
 import { redis, hypixel, imgur, mojang } from '#api';
 import * as constants from '#constants';
 import { sequelize, sql } from '#db';
@@ -54,7 +55,6 @@ import {
 	type InteractionUtilReplyOptions,
 	type RepliableInteraction,
 } from '#utils';
-import BaseOwnerCommand from './~base.js';
 
 // unused imports are 'used' so that tsc doesn't remove them
 /* eslint-disable @typescript-eslint/no-unused-expressions */
