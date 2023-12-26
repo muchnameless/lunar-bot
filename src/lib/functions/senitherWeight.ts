@@ -15,7 +15,7 @@ import {
 	SLAYERS,
 	type DungeonTypes,
 } from '#constants';
-import { getSkillLevel } from '#functions/skyblock.js';
+import { getSkillLevel, isSkillAPIEnabled } from '#functions/skyblock.js';
 import { toUpperCase } from '#lib/types/util.js';
 
 export type WeightData = ReturnType<typeof getSenitherWeight>;
@@ -78,7 +78,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	}
 
 	return {
-		skillAPIEnabled: 'experience_skill_mining' in skyblockMember,
+		skillAPIEnabled: isSkillAPIEnabled(skyblockMember),
 		skill: totalSkillWeight,
 		slayer: totalSlayerWeight,
 		dungeons: totalDungeonWeight,

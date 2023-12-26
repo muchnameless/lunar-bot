@@ -137,3 +137,9 @@ export const formatSkyBlockProfileName = ({
 	game_mode !== undefined && game_mode in GAME_MODE_EMOJIS
 		? `${cute_name} ${GAME_MODE_EMOJIS[game_mode as keyof typeof GAME_MODE_EMOJIS]}`
 		: cute_name;
+
+/**
+ * @param skyblockMember
+ */
+export const isSkillAPIEnabled = (skyblockMember: Components.Schemas.SkyBlockProfileMember) =>
+	'SKILL_MINING' in (skyblockMember.player_data?.experience ?? {});

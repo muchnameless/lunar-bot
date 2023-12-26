@@ -1,3 +1,24 @@
+diff --git a/src/client/BaseClient.js b/src/client/BaseClient.js
+index 8df5e549de3c6bd2b8de13576d0ec0d25586b503..13aadd019f763bb923e56473162ee9c633ce5b84 100644
+--- a/src/client/BaseClient.js
++++ b/src/client/BaseClient.js
+@@ -42,12 +42,13 @@ class BaseClient extends EventEmitter {
+       rest: {
+         ...defaultOptions.rest,
+         ...options.rest,
+-        userAgentAppendix: options.rest?.userAgentAppendix
+-          ? `${Options.userAgentAppendix} ${options.rest.userAgentAppendix}`
+-          : undefined,
+       },
+     };
+
++    if (options.rest?.userAgentAppendix) {
++      this.options.rest.userAgentAppendix = `${Options.userAgentAppendix} ${options.rest.userAgentAppendix}`;
++    }
++
+     /**
+      * The REST manager of the client
+      * @type {REST}
 diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
 index 9b3dff3633ae30d5f3849f83f58f17a27b24560f..1d3e190ffdb8e3cde1ab1ab6454b500c1b0db591 100644
 --- a/src/client/websocket/WebSocketManager.js

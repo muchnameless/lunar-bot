@@ -2697,9 +2697,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord.js@patch:discord.js@npm%3A14.15.0-dev.1703462984-0f1e02b3d#./.yarn/patches/discord.js-npm-14.15.0-dev.1703462984-0f1e02b3d-295691962d.patch::locator=lunar-bot%40workspace%3A.":
+"discord.js@patch:discord.js@npm%3A14.15.0-dev.1703462984-0f1e02b3d#~/.yarn/patches/discord.js-npm-14.15.0-dev.1703462984-0f1e02b3d-295691962d.patch":
   version: 14.15.0-dev.1703462984-0f1e02b3d
-  resolution: "discord.js@patch:discord.js@npm%3A14.15.0-dev.1703462984-0f1e02b3d#./.yarn/patches/discord.js-npm-14.15.0-dev.1703462984-0f1e02b3d-295691962d.patch::version=14.15.0-dev.1703462984-0f1e02b3d&hash=4df0c6&locator=lunar-bot%40workspace%3A."
+  resolution: "discord.js@patch:discord.js@npm%3A14.15.0-dev.1703462984-0f1e02b3d#~/.yarn/patches/discord.js-npm-14.15.0-dev.1703462984-0f1e02b3d-295691962d.patch::version=14.15.0-dev.1703462984-0f1e02b3d&hash=c49776"
   dependencies:
     "@discordjs/builders": "npm:^1.7.0"
     "@discordjs/collection": "npm:1.5.3"
@@ -2715,7 +2715,7 @@ __metadata:
     tslib: "npm:2.6.2"
     undici: "npm:5.27.2"
     ws: "npm:8.14.2"
-  checksum: b3e82e7ce488edcedbd1c0d4ccc33039d51fa208158877a13701ad2a6573f3d8a60df5b2d92f368a72639c5af857f1a29b2471ed46774b64bdc3181116ffaba6
+  checksum: 48192c51578de7cb682f4bf05d0e06479e773809aa88eba5553adc77de34c3849f9f58c7864211ffff2097c4c48dcfacfdf5273970d54e92aebfb71df615ec06
   languageName: node
   linkType: hard
 

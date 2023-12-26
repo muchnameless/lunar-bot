@@ -2,7 +2,7 @@ import type { Components } from '@zikeji/hypixel';
 import LilyWeight from 'lilyweight';
 import { LILY_SKILL_NAMES, LILY_SKILL_NAMES_API, SLAYERS } from '#constants';
 import type { WeightData } from '#functions/senitherWeight.js';
-import { getSkillLevel } from '#functions/skyblock.js';
+import { getSkillLevel, isSkillAPIEnabled } from '#functions/skyblock.js';
 
 export const { getWeightRaw: getLilyWeightRaw } = LilyWeight;
 
@@ -11,7 +11,7 @@ export const { getWeightRaw: getLilyWeightRaw } = LilyWeight;
  */
 export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember): WeightData {
 	// @ts-expect-error TODO
-	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map((skill) => skyblockMember[skill] ?? 0);
+	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map((skill) => skyblockMember.player_data?.experience?.[skill] ?? 0);
 	const {
 		total,
 		skill: { base: skill, overflow },
@@ -30,7 +30,7 @@ export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfile
 	);
 
 	return {
-		skillAPIEnabled: 'experience_skill_mining' in skyblockMember,
+		skillAPIEnabled: isSkillAPIEnabled(skyblockMember),
 		skill,
 		slayer,
 		dungeons: catacombs.experience + catacombs.completion.base + catacombs.completion.master,
