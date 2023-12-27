@@ -5131,7 +5131,7 @@ __metadata:
     postgres: "npm:3.4.3"
     prettier: "npm:^3.1.1"
     prismarine-chat: "npm:^1.9.1"
-    prismarine-nbt: "npm:^2.4.0"
+    prismarine-nbt: "npm:^2.5.0"
     re2: "npm:^1.20.9"
     sequelize: "npm:^6.35.2"
     sort-package-json: "npm:^2.6.0"
@@ -6892,12 +6892,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-nbt@npm:^2.0.0, prismarine-nbt@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "prismarine-nbt@npm:2.4.0"
+"prismarine-nbt@npm:^2.0.0, prismarine-nbt@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "prismarine-nbt@npm:2.5.0"
   dependencies:
     protodef: "npm:^1.9.0"
-  checksum: 64d2d54619c068c5d2b1c54b8f7d5ab615fa977182e9671963aadb0beeb7704b7b402d67c9168356db0e42fe7583287c70db339bc36d4110d9a4acbcfe837c11
+  checksum: aec4d530cd664305ca91f8b8d5cbab121a94bf5b22096f2c7a22bfd09dea069624ee9f82954c1deb8e98eddae3ad6d98e88ff2cf0f5922da0d02012aa3c7aaa9
   languageName: node
   linkType: hard
 
