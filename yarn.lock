@@ -1049,10 +1049,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/utilities@npm:3.14.1-next.e1c7c753.0":
-  version: 3.14.1-next.e1c7c753.0
-  resolution: "@sapphire/utilities@npm:3.14.1-next.e1c7c753.0"
-  checksum: 7dc71c7c2c5dd971a75c1355dea98486032390f24dc2b0497a186adc56931039c8c3e9b25dbfa7a02e1e1ade185b8e0ffdec22383bc35f30007102033f8bda2f
+"@sapphire/utilities@npm:3.15.2-next.1efb1422.0":
+  version: 3.15.2-next.1efb1422.0
+  resolution: "@sapphire/utilities@npm:3.15.2-next.1efb1422.0"
+  checksum: da6ef72b85b91ab2cbd1ccb0aed57d65d2503a7964d03dedf4b6906a9e88179cef2dcaa5679d7c4996088d65006bf11fd1869c7b4ffea69dd38d850b70e59f1d
   languageName: node
   linkType: hard
 
@@ -5098,7 +5098,7 @@ __metadata:
     "@sapphire/ratelimits": "npm:2.4.9-next.e1c7c753.0"
     "@sapphire/stopwatch": "npm:1.5.2-next.e1c7c753.0"
     "@sapphire/type": "npm:^2.4.0"
-    "@sapphire/utilities": "npm:3.14.1-next.e1c7c753.0"
+    "@sapphire/utilities": "npm:3.15.2-next.1efb1422.0"
     "@skyra/jaro-winkler": "npm:^1.1.1"
     "@types/common-tags": "npm:^1.8.4"
     "@types/luxon": "npm:^3.3.7"
