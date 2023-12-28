@@ -142,7 +142,7 @@
 		"lilyweight": "^2.7.2",
 		"luxon": "^3.4.4",
 		"minecraft-data": "^3.53.0",
-		"minecraft-protocol": "1.44.0",
+		"minecraft-protocol": "1.45.0",
 		"ms": "3.0.0-canary.1",
 		"pg": "^8.11.3",
 		"pg-hstore": "^2.3.4",
