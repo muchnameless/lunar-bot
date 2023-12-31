@@ -128,7 +128,7 @@
 		"@sapphire/ratelimits": "2.4.9-next.e1c7c753.0",
 		"@sapphire/stopwatch": "1.5.2-next.e1c7c753.0",
 		"@sapphire/type": "^2.4.0",
-		"@sapphire/utilities": "3.15.2-next.1efb1422.0",
+		"@sapphire/utilities": "3.15.2-next.5a77c184.0",
 		"@skyra/jaro-winkler": "^1.1.1",
 		"@zikeji/hypixel": "github:muchnameless/node-hypixel#ca3c445bd4266c60bd4798479d2f544891d9bf07",
 		"bufferutil": "^4.0.8",
