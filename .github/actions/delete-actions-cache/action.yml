@@ -32,9 +32,9 @@ runs:
       run: |
         gh extension install actions/gh-actions-cache
 
-        if [[ -n "$KEY" ]]; then
+        if [[ -n $KEY ]]; then
           keys="$KEY"
-        elif [[ -n "$FILTER" ]]; then
+        elif [[ -n $FILTER ]]; then
           for filter in $FILTER; do
             echo "Fetching list of cache keys filtered by '$filter'"
             keys+=$'\n'
@@ -45,7 +45,7 @@ runs:
           keys=$(gh actions-cache list -L 100 -R $REPO -B $BRANCH | cut -f 1)
         fi
           
-        if [[ -n "$EXCLUDE" ]]; then
+        if [[ -n $EXCLUDE ]]; then
           keys=$(echo "$keys" | grep -v "$EXCLUDE")
         fi
 
