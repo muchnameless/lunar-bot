@@ -3,8 +3,8 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { RateLimitManager } from '@sapphire/ratelimits';
 import { fetch, type Response } from 'undici';
-import { MojangAPIError } from './errors/MojangAPIError.js';
 import { consumeBody, isAbortError, minutes, seconds, validateMinecraftIgn, validateMinecraftUuid } from '#functions';
+import { MojangAPIError } from './errors/MojangAPIError.js';
 
 export interface MojangResult {
 	ign: string;
@@ -138,7 +138,7 @@ export class MojangClient {
 	public async uuid(uuid: string, options?: MojangFetchOptions) {
 		if (validateMinecraftUuid(uuid)) {
 			return this.request({
-				path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+				path: 'https://api.mojang.com/user/profile/',
 				query: uuid.toLowerCase().replaceAll('-', ''),
 				queryType: 'uuid',
 				...options,
@@ -166,7 +166,7 @@ export class MojangClient {
 
 		if (validateMinecraftUuid(ignOrUuid)) {
 			return this.request({
-				path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+				path: 'https://api.mojang.com/user/profile/',
 				query: ignOrUuid.toLowerCase().replaceAll('-', ''),
 				queryType: 'uuid',
 				...options,

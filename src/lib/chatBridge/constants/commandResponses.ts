@@ -1,5 +1,5 @@
 export const HYPIXEL_RANK = '(?:\\[.+?\\] )?';
-export const IGN_DEFAULT = '\\w{1,16}';
+export const IGN_DEFAULT = '\\w{1,25}';
 export const GUILD_RANK_DEFAULT = '[a-zA-Z0-9 -]+';
 
 const _genericErrors = {
@@ -219,7 +219,7 @@ export const topErrors = (ign = IGN_DEFAULT) =>
 			.map((x) =>
 				typeof x === 'function'
 					? // @ts-expect-error future proofing
-					  x(ign)
+						x(ign)
 					: x,
 			)
 			.join('|'),
