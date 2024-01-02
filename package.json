@@ -46,7 +46,7 @@
 	},
 	"resolutions": {
 		"@discordjs/builders": "1.7.1-dev.1703981435-136c66c21",
-		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
+		"@discordjs/collection": "2.0.1-dev.1703981431-136c66c21",
 		"@discordjs/formatters": "0.3.4-dev.1703981459-136c66c21",
 		"@discordjs/rest": "patch:@discordjs/rest@2.2.1-dev.1703981438-136c66c21#./.yarn/patches/@discordjs-rest-npm-2.2.1-dev.1703462991-0f1e02b3d-1c6c1c4070.patch",
 		"@discordjs/util": "1.0.3-dev.1703981439-136c66c21",
