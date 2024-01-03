@@ -1,6 +1,6 @@
 export const SKYBLOCK_INVENTORIES = [
 	'ender_chest_contents',
-	'equippment_contents',
+	'equipment_contents',
 	'inv_armor',
 	'inv_contents',
 	'personal_vault_contents',
