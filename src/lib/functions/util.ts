@@ -80,8 +80,9 @@ export function autocorrect<T>(
 			if (
 				similarity < currentBestSimilarity ||
 				((element as string).length === 1 && !query.startsWith(element as string))
-			)
+			) {
 				continue;
+			}
 
 			currentBestElement = element;
 			currentBestSimilarity = similarity;
