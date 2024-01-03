@@ -41,6 +41,10 @@ export function autocorrect<T>(
 	if (attributeToQuery) {
 		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
 			const attribute = element[attributeToQuery] as string;
+
+			// 'bw' would match 'w' instead of 'bwstats'
+			if (attribute.length === 1 && !query.startsWith(attribute)) continue;
+
 			const similarity = jaroWinklerSimilarity(query, attribute);
 
 			if (similarity === 1) {
@@ -50,8 +54,7 @@ export function autocorrect<T>(
 				};
 			}
 
-			// second condition because 'bw' would match 'w' instead of 'bwstats'
-			if (similarity < currentBestSimilarity || (attribute.length === 1 && !query.startsWith(attribute))) continue;
+			if (similarity < currentBestSimilarity) continue;
 
 			currentBestElement = element;
 			currentBestSimilarity = similarity;
@@ -67,6 +70,9 @@ export function autocorrect<T>(
 		);
 	} else {
 		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
+			// 'bw' would match 'w' instead of 'bwstats'
+			if ((element as string).length === 1 && !query.startsWith(element as string)) continue;
+
 			const similarity = jaroWinklerSimilarity(query, element as string);
 
 			if (similarity === 1) {
@@ -76,13 +82,7 @@ export function autocorrect<T>(
 				};
 			}
 
-			// second condition because 'bw' would match 'w' instead of 'bwstats'
-			if (
-				similarity < currentBestSimilarity ||
-				((element as string).length === 1 && !query.startsWith(element as string))
-			) {
-				continue;
-			}
+			if (similarity < currentBestSimilarity) continue;
 
 			currentBestElement = element;
 			currentBestSimilarity = similarity;
