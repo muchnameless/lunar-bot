@@ -1,6 +1,6 @@
-import { URL } from 'node:url';
 import { opendir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { URL } from 'node:url';
 
 const paths: string[] = [];
 
