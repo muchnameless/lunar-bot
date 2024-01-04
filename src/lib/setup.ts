@@ -1,10 +1,11 @@
 import { URL } from 'node:url';
-import { findFilesRecursivelyStringEndsWith } from '@sapphire/node-utilities';
+import { opendir } from 'node:fs/promises';
+import { join } from 'node:path';
 
 const paths: string[] = [];
 
-for await (const path of findFilesRecursivelyStringEndsWith(new URL('setup.d', import.meta.url), '.js')) {
-	paths.push(path);
+for await (const { name, path } of await opendir(new URL('setup.d', import.meta.url))) {
+	if (name.endsWith('.js')) paths.push(join(path, name));
 }
 
 // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
