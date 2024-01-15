@@ -161,7 +161,7 @@
 		"@commitlint/config-angular": "^18.4.4",
 		"@types/common-tags": "^1.8.4",
 		"@types/luxon": "^3.4.1",
-		"@types/node": "^20.11.0",
+		"@types/node": "^20.11.1",
 		"@types/pg": "^8.10.9",
 		"@types/prettier": "^2.7.3",
 		"eslint": "^8.56.0",
