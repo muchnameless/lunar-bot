@@ -160,7 +160,7 @@
 		"@commitlint/cli": "^18.4.4",
 		"@commitlint/config-angular": "^18.4.4",
 		"@types/common-tags": "^1.8.4",
-		"@types/luxon": "^3.4.1",
+		"@types/luxon": "^3.4.2",
 		"@types/node": "^20.11.5",
 		"@types/pg": "^8.10.9",
 		"@types/prettier": "^2.7.3",
