@@ -1,24 +1,3 @@
-diff --git a/src/client/BaseClient.js b/src/client/BaseClient.js
-index 8df5e549de3c6bd2b8de13576d0ec0d25586b503..13aadd019f763bb923e56473162ee9c633ce5b84 100644
---- a/src/client/BaseClient.js
-+++ b/src/client/BaseClient.js
-@@ -42,12 +42,13 @@ class BaseClient extends EventEmitter {
-       rest: {
-         ...defaultOptions.rest,
-         ...options.rest,
--        userAgentAppendix: options.rest?.userAgentAppendix
--          ? `${Options.userAgentAppendix} ${options.rest.userAgentAppendix}`
--          : undefined,
-       },
-     };
-
-+    if (options.rest?.userAgentAppendix) {
-+      this.options.rest.userAgentAppendix = `${Options.userAgentAppendix} ${options.rest.userAgentAppendix}`;
-+    }
-+
-     /**
-      * The REST manager of the client
-      * @type {REST}
 diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
 index 9b3dff3633ae30d5f3849f83f58f17a27b24560f..1d3e190ffdb8e3cde1ab1ab6454b500c1b0db591 100644
 --- a/src/client/websocket/WebSocketManager.js
@@ -467,7 +446,7 @@ index adb5ed541979d45468508a4278cfda5f274db585..18e193cf716fb53e1f343eb49cbe4617
 
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index 38e8957b8ed1c510f7d447446aac2fc453797f8e..9cb03853bdaa81eecd6c2ec3abe9e73b123f41e9 100644
+index e42d483780a7143d4607a184d3be46c26e29e0c9..962037e816501eeaca315d7a824ba72c9555da7e 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
 @@ -3,7 +3,6 @@
@@ -487,7 +466,7 @@ index 38e8957b8ed1c510f7d447446aac2fc453797f8e..9cb03853bdaa81eecd6c2ec3abe9e73b
      );
 
      let username;
-@@ -220,9 +219,9 @@ class MessagePayload {
+@@ -223,9 +222,9 @@ class MessagePayload {
     * @returns {Promise<MessagePayload>}
     */
    async resolveFiles() {
@@ -558,10 +537,10 @@ index 68bccc433462e666aaf4ab1a64bc454ffe3b5be6..46b3381903419359c4dc40f796c9a8ef
    }
 
 diff --git a/src/util/Sweepers.js b/src/util/Sweepers.js
-index 3ff81814d57e5df314b488f5a2eeaddddfa08941..8be02f0a3e6ffe918493f1ae2f09c621a7f56c3e 100644
+index edc328749f4a12bb77d91a06bbd9a7a9a91c8614..2edfb07cca9c56a87db51379cf29806979574948 100644
 --- a/src/util/Sweepers.js
 +++ b/src/util/Sweepers.js
-@@ -477,7 +477,7 @@ class Sweepers {
+@@ -480,7 +480,7 @@ class Sweepers {
        if (sweepFn === null) return;
        if (typeof sweepFn !== 'function') throw new DiscordjsTypeError(ErrorCodes.SweepFilterReturn);
        this[sweepKey](sweepFn);
@@ -571,7 +550,7 @@ index 3ff81814d57e5df314b488f5a2eeaddddfa08941..8be02f0a3e6ffe918493f1ae2f09c621
  }
 
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d960e8b0f00 100644
+index 2fc9d76f714c8f7a18dd511fe890749de233cf92..c071610e458ad6e4f10557e4ea820e65511032a5 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -331,7 +331,13 @@ export type MessageActionRowComponent =
@@ -606,18 +585,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -963,8 +970,8 @@ export abstract class BaseChannel extends Base {
- export type If<Value extends boolean, TrueResult, FalseResult = null> = Value extends true
-   ? TrueResult
-   : Value extends false
--    ? FalseResult
--    : TrueResult | FalseResult;
-+  ? FalseResult
-+  : TrueResult | FalseResult;
-
- export class Client<Ready extends boolean = boolean> extends BaseClient {
-   public constructor(options: ClientOptions);
-@@ -1806,7 +1813,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1812,7 +1819,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
 
@@ -626,7 +594,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
 
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1814,13 +1821,19 @@ export type CacheTypeReducer<
+@@ -1820,13 +1827,19 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -650,7 +618,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
 
  export type Interaction<Cached extends CacheType = CacheType> =
    | ChatInputCommandInteraction<Cached>
-@@ -1846,7 +1859,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1852,7 +1865,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -660,7 +628,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -2111,16 +2125,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+@@ -2117,16 +2131,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
  }
 
  export class AttachmentBuilder {
@@ -680,7 +648,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
 
-@@ -2172,6 +2186,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -2178,6 +2192,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent,
      Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
@@ -688,7 +656,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
    public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
-@@ -2356,11 +2371,18 @@ export interface TextInputModalData extends BaseModalData {
+@@ -2362,11 +2377,18 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
 
@@ -707,7 +675,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
  export class ModalSubmitFields {
    constructor(components: ModalActionRowComponent[][]);
    public components: ActionRowModalData[];
-@@ -2368,6 +2390,7 @@ export class ModalSubmitFields {
+@@ -2374,6 +2396,7 @@ export class ModalSubmitFields {
    public getField<Type extends ComponentType>(customId: string, type: Type): { type: Type } & TextInputModalData;
    public getField(customId: string, type?: ComponentType): TextInputModalData;
    public getTextInputValue(customId: string): string;
@@ -715,7 +683,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
  }
 
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -2662,6 +2685,7 @@ export class StringSelectMenuInteraction<
+@@ -2668,6 +2691,7 @@ export class StringSelectMenuInteraction<
      StringSelectMenuComponent,
      APIStringSelectComponent,
      StringSelectMenuComponent | APIStringSelectComponent,
@@ -723,7 +691,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
      StringSelectMenuComponent | APIStringSelectComponent
    >;
    public componentType: ComponentType.StringSelect;
-@@ -2685,6 +2709,7 @@ export class UserSelectMenuInteraction<
+@@ -2691,6 +2715,7 @@ export class UserSelectMenuInteraction<
      UserSelectMenuComponent,
      APIUserSelectComponent,
      UserSelectMenuComponent | APIUserSelectComponent,
@@ -731,7 +699,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
      UserSelectMenuComponent | APIUserSelectComponent
    >;
    public componentType: ComponentType.UserSelect;
-@@ -2708,6 +2733,7 @@ export class RoleSelectMenuInteraction<
+@@ -2714,6 +2739,7 @@ export class RoleSelectMenuInteraction<
      RoleSelectMenuComponent,
      APIRoleSelectComponent,
      RoleSelectMenuComponent | APIRoleSelectComponent,
@@ -739,7 +707,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
      RoleSelectMenuComponent | APIRoleSelectComponent
    >;
    public componentType: ComponentType.RoleSelect;
-@@ -2727,6 +2753,7 @@ export class MentionableSelectMenuInteraction<
+@@ -2733,6 +2759,7 @@ export class MentionableSelectMenuInteraction<
      MentionableSelectMenuComponent,
      APIMentionableSelectComponent,
      MentionableSelectMenuComponent | APIMentionableSelectComponent,
@@ -747,7 +715,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
      MentionableSelectMenuComponent | APIMentionableSelectComponent
    >;
    public componentType: ComponentType.MentionableSelect;
-@@ -2751,6 +2778,7 @@ export class ChannelSelectMenuInteraction<
+@@ -2757,6 +2784,7 @@ export class ChannelSelectMenuInteraction<
      ChannelSelectMenuComponent,
      APIChannelSelectComponent,
      ChannelSelectMenuComponent | APIChannelSelectComponent,
@@ -755,7 +723,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
      ChannelSelectMenuComponent | APIChannelSelectComponent
    >;
    public componentType: ComponentType.ChannelSelect;
-@@ -3996,7 +4024,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -4002,7 +4030,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -764,7 +732,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -4588,11 +4616,6 @@ export interface BaseApplicationCommandData {
+@@ -4594,11 +4622,6 @@ export interface BaseApplicationCommandData {
    nsfw?: boolean;
  }
 
@@ -776,7 +744,7 @@ index 2a8141de532bc6cfa58c0d896e331e930233a5e0..834e545babea304c1ad0a02f30ec4d96
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
 
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -6191,14 +6214,7 @@ export interface BaseMessageOptions {
+@@ -6197,14 +6220,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
