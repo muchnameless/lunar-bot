@@ -18,6 +18,7 @@ export const enum ItemCategory {
 	FishingWeapon = 'FISHING_WEAPON',
 	Gauntlet = 'GAUNTLET',
 	Gloves = 'GLOVES',
+	Hatcessory = 'HATCESSORY',
 	Helmet = 'HELMET',
 	Hoe = 'HOE',
 	Leggings = 'LEGGINGS',
