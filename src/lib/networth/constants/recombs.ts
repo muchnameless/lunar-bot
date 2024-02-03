@@ -7,6 +7,7 @@ export const ALLOWED_RECOMB_CATEGORIES = new Set([
 	ItemCategory.Bracelet,
 	ItemCategory.Cloak,
 	ItemCategory.Gloves,
+	ItemCategory.Hatcessory,
 	ItemCategory.Necklace,
 ] as const satisfies readonly ItemCategory[]);
 
