@@ -18,13 +18,13 @@ export default class UnnickCommand extends ApplicationCommand {
 			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription("resets a user's nickname")
+				.setDMPermission(false)
 				.addUserOption((option) =>
 					option //
 						.setName('user')
 						.setDescription('the user to unnick')
 						.setRequired(true),
-				)
-				.setDMPermission(false),
+				),
 			user: new ContextMenuCommandBuilder() //
 				.setName('Reset nickname')
 				.setDMPermission(false),
