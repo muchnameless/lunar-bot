@@ -226,7 +226,7 @@ index 19014ff6954351e79f7a2905c00e6023ff9a2f15..dcba2015c5cb3626c10b075b35cf4448
    }
 
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index adb5ed541979d45468508a4278cfda5f274db585..18e193cf716fb53e1f343eb49cbe461715699b62 100644
+index 86e898a8d56f0cf160d8c1c1ede846f33c6d35a9..cbee219cc2613714625109a001a0807819e27544 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
 @@ -333,10 +333,13 @@ class Message extends Base {
@@ -279,7 +279,7 @@ index adb5ed541979d45468508a4278cfda5f274db585..18e193cf716fb53e1f343eb49cbe4617
    /**
 @@ -637,15 +644,19 @@ class Message extends Base {
    get deletable() {
-     if (!DeletableMessageTypes.includes(this.type)) return false;
+     if (UndeletableMessageTypes.includes(this.type)) return false;
 
 -    if (!this.guild) {
 +    if (this.flags.has(MessageFlags.Ephemeral)) {
@@ -550,7 +550,7 @@ index edc328749f4a12bb77d91a06bbd9a7a9a91c8614..2edfb07cca9c56a87db51379cf298069
  }
 
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index 2fc9d76f714c8f7a18dd511fe890749de233cf92..c071610e458ad6e4f10557e4ea820e65511032a5 100644
+index d69be3f982cdd5858924a5ac85d5ea992f3bf2b0..b3151a3ce2e39892a7307f9b99b34862421fd551 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
 @@ -331,7 +331,13 @@ export type MessageActionRowComponent =
@@ -723,7 +723,7 @@ index 2fc9d76f714c8f7a18dd511fe890749de233cf92..c071610e458ad6e4f10557e4ea820e65
      ChannelSelectMenuComponent | APIChannelSelectComponent
    >;
    public componentType: ComponentType.ChannelSelect;
-@@ -4002,7 +4030,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -4013,7 +4041,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -732,7 +732,7 @@ index 2fc9d76f714c8f7a18dd511fe890749de233cf92..c071610e458ad6e4f10557e4ea820e65
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -4594,11 +4622,6 @@ export interface BaseApplicationCommandData {
+@@ -4605,11 +4633,6 @@ export interface BaseApplicationCommandData {
    nsfw?: boolean;
  }
 
@@ -744,7 +744,7 @@ index 2fc9d76f714c8f7a18dd511fe890749de233cf92..c071610e458ad6e4f10557e4ea820e65
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
 
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -6197,14 +6220,7 @@ export interface BaseMessageOptions {
+@@ -6208,14 +6231,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
