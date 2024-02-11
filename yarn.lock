@@ -4977,7 +4977,7 @@ __metadata:
     lint-staged: "npm:^15.2.2"
     luxon: "npm:^3.4.4"
     minecraft-data: "npm:^3.61.0"
-    minecraft-protocol: "npm:1.45.0"
+    minecraft-protocol: "npm:1.46.0"
     ms: "npm:3.0.0-canary.1"
     pg: "npm:^8.11.3"
     pg-hstore: "npm:^2.3.4"
@@ -5634,9 +5634,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:1.45.0":
-  version: 1.45.0
-  resolution: "minecraft-protocol@npm:1.45.0"
+"minecraft-protocol@npm:1.46.0":
+  version: 1.46.0
+  resolution: "minecraft-protocol@npm:1.46.0"
   dependencies:
     "@types/readable-stream": "npm:^4.0.0"
     aes-js: "npm:^3.1.2"
@@ -5656,13 +5656,13 @@ __metadata:
     readable-stream: "npm:^4.1.0"
     uuid-1345: "npm:^1.0.1"
     yggdrasil: "npm:^1.4.0"
-  checksum: 10/9c5322ed9b7de4759567f7ecebedf9d60a18cac081f6f36faf5ed02e5bfe8852c61b7133d842fa6256c2bb0440bd6a384c8d3a325df99c2a7afea0e7fd3afbc7
+  checksum: 10/11cc16bd988ab2f79bd5a4dc567699f5b96ba9fd7a4417c797037e00ae1a5b7b47b141fec927fc64afa3c220494a720090a245ca09e421fd631780a617708661
   languageName: node
   linkType: hard
 
-"minecraft-protocol@patch:minecraft-protocol@npm%3A1.45.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch::locator=lunar-bot%40workspace%3A.":
-  version: 1.45.0
-  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.45.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch::version=1.45.0&hash=a93bb2&locator=lunar-bot%40workspace%3A."
+"minecraft-protocol@patch:minecraft-protocol@1.46.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.46.0
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.46.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch::version=1.46.0&hash=a93bb2&locator=lunar-bot%40workspace%3A."
   dependencies:
     "@types/readable-stream": "npm:^4.0.0"
     aes-js: "npm:^3.1.2"
@@ -5682,7 +5682,7 @@ __metadata:
     readable-stream: "npm:^4.1.0"
     uuid-1345: "npm:^1.0.1"
     yggdrasil: "npm:^1.4.0"
-  checksum: 10/be27dc294e209ef64f0ad5b0a754e4512868abeeecde9deed737b62ecfc94a62d21f29093bbb08697cf0f423f4bb4e90754888f4f32bcd18aca086f014e28347
+  checksum: 10/c7d680a0755e73993a47ec949ada81ea788355057d496baee6707a35cbc0768fde28d12f90941082dd431833ee010f348b1d59117792b3b88675da1bc5b3b355
   languageName: node
   linkType: hard
 
