@@ -1,7 +1,8 @@
-import { MessageCreateOptions, SnowflakeUtil } from 'discord.js';
+import { SnowflakeUtil, type MessageCreateOptions } from 'discord.js';
 
 /**
  * adds a random nonce which dedupes messages
+ *
  * @param options
  */
 export const addEnforcedNonce = <const T extends MessageCreateOptions>(options: T) =>
