@@ -277,9 +277,9 @@ export class ImgurClient {
 				const reset =
 					resetKey === 'x-post-rate-limit-reset'
 						? // time left in seconds
-						  seconds(Number.parseInt(resetHeader, 10)) + serverTime
+							seconds(Number.parseInt(resetHeader, 10)) + serverTime
 						: // timestamp in seconds
-						  seconds(Number.parseInt(resetHeader, 10));
+							seconds(Number.parseInt(resetHeader, 10));
 
 				if (reset > now) {
 					rateLimit.expires = reset;

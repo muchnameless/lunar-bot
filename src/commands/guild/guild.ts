@@ -319,8 +319,8 @@ export default class GuildCommand extends ApplicationCommand {
 							},
 						],
 						cache: false,
-				  })) ??
-				  (async () => {
+					})) ??
+					(async () => {
 						// check if input is a discord id or @mention, find or create player db object if so
 						const ID = getIdFromString(targetInput);
 
@@ -334,7 +334,7 @@ export default class GuildCommand extends ApplicationCommand {
 								await this.client.players.model.findCreateFind({
 									where: { discordId: ID },
 									defaults: {
-										minecraftUuid: SnowflakeUtil.generate().toString(),
+										minecraftUuid: `DUMMY-UUID-${SnowflakeUtil.generate()}`,
 										ign: UNKNOWN_IGN,
 										inDiscord: true,
 									},
@@ -343,7 +343,7 @@ export default class GuildCommand extends ApplicationCommand {
 						} catch (error) {
 							return logger.error(error, '[GUILD CMD]');
 						}
-				  })())
+					})())
 		);
 	}
 
@@ -542,7 +542,7 @@ export default class GuildCommand extends ApplicationCommand {
 									.replaceAll('§c ●', ' 🔴') // coloured emojis
 									.replaceAll('§a ●', ' 🟢')
 									.trim(),
-						  )
+							)
 						: msg.content;
 
 		return InteractionUtil.reply(interaction, {
@@ -694,7 +694,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 		await this._assertRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
 
-		const PAGE = PAGE_INPUT === Number.NaN.toString() ? null : Number(PAGE_INPUT);
+		const PAGE = PAGE_INPUT === String(Number.NaN) ? null : Number(PAGE_INPUT);
 
 		// check only the part before the first space
 		switch (SUBCOMMAND) {

@@ -14,7 +14,7 @@ import {
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
-import { commaListAnd } from '#functions';
+import { addEnforcedNonce, commaListAnd } from '#functions';
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
 import { ChannelUtil } from '#utils';
@@ -196,7 +196,7 @@ export class LogHandler {
 		// API call
 		try {
 			// eslint-disable-next-line @typescript-eslint/return-await
-			return await channel.send({ embeds });
+			return await channel.send(addEnforcedNonce({ embeds }));
 		} catch (error) {
 			logger.error(error, '[CLIENT LOG]');
 

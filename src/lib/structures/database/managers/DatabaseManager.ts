@@ -31,7 +31,15 @@ import { TaxCollectorManager } from './TaxCollectorManager.js';
 import { hypixel } from '#api';
 import { AnsiColour, AnsiFormat, DEFAULT_CONFIG, HYPIXEL_UPDATE_INTERVAL, UnicodeEmoji } from '#constants';
 import { noConcurrency } from '#decorators';
-import { ansi, asyncFilter, commaListOr, compareAlphabetically, formatNumber, isFirstMinutesOfHour } from '#functions';
+import {
+	addEnforcedNonce,
+	ansi,
+	asyncFilter,
+	commaListOr,
+	compareAlphabetically,
+	formatNumber,
+	isFirstMinutesOfHour,
+} from '#functions';
 import { logger } from '#logger';
 import type { LunarClient } from '#structures/LunarClient.js';
 import { ChannelUtil } from '#utils';
@@ -484,9 +492,11 @@ export class DatabaseManager {
 
 			if (!taxMessage?.editable) {
 				// taxMessage deleted -> send a new one
-				const { id } = await taxChannel.send({
-					embeds: [this.createTaxEmbed(this._createTaxEmbedDescription(availableAuctionsLog))],
-				});
+				const { id } = await taxChannel.send(
+					addEnforcedNonce({
+						embeds: [this.createTaxEmbed(this._createTaxEmbedDescription(availableAuctionsLog))],
+					}),
+				);
 
 				void config.set('TAX_MESSAGE_ID', id);
 				logger.info(

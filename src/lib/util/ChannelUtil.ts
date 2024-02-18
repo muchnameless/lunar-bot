@@ -11,7 +11,7 @@ import {
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
-import { commaListAnd } from '#functions';
+import { addEnforcedNonce, commaListAnd } from '#functions';
 import { logger } from '#logger';
 import { EmbedUtil } from '#utils/EmbedUtil.js';
 import { GuildUtil } from '#utils/GuildUtil.js';
@@ -254,7 +254,7 @@ export class ChannelUtil extends null {
 		}
 
 		try {
-			return await channel.send(_options);
+			return await channel.send(addEnforcedNonce(_options));
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
 			logger.error({ channel: this.logInfo(channel), err: error, data: _options }, '[CHANNEL SEND]');

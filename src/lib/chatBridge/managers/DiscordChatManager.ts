@@ -389,7 +389,7 @@ export class DiscordChatManager extends ChatManager {
 						await this.client.players.model.findCreateFind({
 							where: { discordId: message.author.id },
 							defaults: {
-								minecraftUuid: SnowflakeUtil.generate().toString(),
+								minecraftUuid: `DUMMY-UUID-${SnowflakeUtil.generate()}`,
 								ign: UNKNOWN_IGN,
 								inDiscord: true,
 							},
@@ -585,7 +585,7 @@ export class DiscordChatManager extends ChatManager {
 			reply: discordMessage
 				? {
 						messageReference: discordMessage,
-				  }
+					}
 				: undefined,
 			allowedMentions: { parse: [] },
 			...options,
@@ -610,9 +610,9 @@ export class DiscordChatManager extends ChatManager {
 	public async forwardToMinecraft(message: Message, signal: AbortSignal) {
 		const messageInteraction = message.author.bot
 			? // reply to an interaction
-			  message.interaction ??
-			  // followUp to an interaction
-			  (MessageUtil.isFollowUp(message)
+				message.interaction ??
+				// followUp to an interaction
+				(MessageUtil.isFollowUp(message)
 					? message.channel.messages.cache.get(message.reference.messageId)?.interaction ?? null
 					: null)
 			: null;
@@ -801,16 +801,16 @@ export class DiscordChatManager extends ChatManager {
 			prefix: message.author.bot
 				? message.author.id === message.client.user.id
 					? // this bot
-					  this.prefix
+						this.prefix
 					: // other bot
-					  `${this.prefix}${DiscordChatManager._replaceBlockedName(
+						`${this.prefix}${DiscordChatManager._replaceBlockedName(
 							message.member?.displayName ?? message.author.username,
-					  )}: `
+						)}: `
 				: // user
-				  `${this.prefix}${
+					`${this.prefix}${
 						DiscordChatManager._getCheckedIgn(player) ??
 						DiscordChatManager._replaceBlockedName(message.member?.displayName ?? message.author.username)
-				  }: `,
+					}: `,
 			discordMessage: message,
 			signal,
 		});

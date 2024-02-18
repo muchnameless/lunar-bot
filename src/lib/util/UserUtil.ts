@@ -2,7 +2,7 @@ import { EmbedLimits, MessageLimits } from '@sapphire/discord-utilities';
 import { DiscordAPIError, RESTJSONErrorCodes, type Message, type MessageCreateOptions, type User } from 'discord.js';
 import { redis } from '#api';
 import type { Player } from '#db/models/Player.js';
-import { hours } from '#functions';
+import { addEnforcedNonce, hours } from '#functions';
 import { logger } from '#logger';
 import { EmbedUtil } from '#utils/EmbedUtil.js';
 
@@ -120,7 +120,7 @@ export class UserUtil extends null {
 		}
 
 		try {
-			return await user.send(_options);
+			return await user.send(addEnforcedNonce(_options));
 		} catch (error) {
 			if (error instanceof DiscordAPIError) {
 				switch (error.code) {

@@ -1,5 +1,6 @@
 export * from './array.js';
 export * from './components.js';
+export * from './discord.js';
 export * from './error.js';
 export * from './fetch.js';
 export * from './hypixel.js';
