@@ -2964,7 +2964,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-neon@npm:^0.1.57":
+"eslint-config-neon@npm:^0.1.58":
   version: 0.1.58
   resolution: "eslint-config-neon@npm:0.1.58"
   dependencies:
@@ -5067,7 +5067,7 @@ __metadata:
     cron: "npm:^3.1.6"
     discord.js: "npm:14.15.0-dev.1707869366-543d61737"
     eslint: "npm:^8.56.0"
-    eslint-config-neon: "npm:^0.1.57"
+    eslint-config-neon: "npm:^0.1.58"
     fast-xml-parser: "npm:^4.3.4"
     ioredis: "npm:^5.3.2"
     js-big-decimal: "npm:^1.4.1"
