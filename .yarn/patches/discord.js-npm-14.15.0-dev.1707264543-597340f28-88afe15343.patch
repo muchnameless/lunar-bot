@@ -454,7 +454,7 @@ index e42d483780a7143d4607a184d3be46c26e29e0c9..962037e816501eeaca315d7a824ba72c
  const { lazy, isJSONEncodable } = require('@discordjs/util');
  const { MessageFlags } = require('discord-api-types/v10');
 -const ActionRowBuilder = require('./ActionRowBuilder');
- const { DiscordjsRangeError, ErrorCodes } = require('../errors');
+ const { DiscordjsError, DiscordjsRangeError, ErrorCodes } = require('../errors');
  const { resolveFile } = require('../util/DataResolver');
  const MessageFlagsBitField = require('../util/MessageFlagsBitField');
 @@ -134,7 +133,7 @@ class MessagePayload {
