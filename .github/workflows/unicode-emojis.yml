@@ -26,7 +26,7 @@ jobs:
         uses: volta-cli/action@d253558a6e356722728a10e9a469190de21a83ef # v4
 
       - name: Restore dependencies
-        uses: actions/cache/restore@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4
+        uses: actions/cache/restore@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4
         id: restore-dependencies
         with:
           path: node_modules/
@@ -38,7 +38,7 @@ jobs:
 
       - name: Restore build output
         id: restore-build-output
-        uses: actions/cache/restore@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4
+        uses: actions/cache/restore@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4
         with:
           path: dist/
           key: ${{ runner.os }}-build-output-${{ github.sha }}
