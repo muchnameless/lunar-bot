@@ -5000,7 +5000,7 @@ __metadata:
     ts-prune: "npm:^0.10.3"
     tslib: "npm:^2.6.2"
     typescript: "npm:^5.3.3"
-    undici: "npm:^6.6.2"
+    undici: "npm:^6.7.0"
     zlib-sync: "npm:^0.1.9"
   languageName: unknown
   linkType: soft
@@ -8000,12 +8000,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.2.1, undici@npm:^6.6.2":
-  version: 6.6.2
-  resolution: "undici@npm:6.6.2"
+"undici@npm:^6.2.1, undici@npm:^6.7.0":
+  version: 6.7.0
+  resolution: "undici@npm:6.7.0"
   dependencies:
     "@fastify/busboy": "npm:^2.0.0"
-  checksum: 10/e08ac9c279d4e4ee1249d30e6e0671f008e156d8ef224bbe3329ef5c5e10197a9e9dbf87c14e44deaffe2802c10bee66c8687d60ff07179b2e18cd5ef454b5c6
+  checksum: 10/e133a27f89075329a337ab4220839ba6a48bdb62ee7dd824ed72415aabe705522fdbb1b0016fb5a4d74ee2ca3ca2854ae9d085aae970e4519678bdc8c96fdf0b
   languageName: node
   linkType: hard
 
