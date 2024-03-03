@@ -150,7 +150,7 @@
 		"prettier": "^3.2.5",
 		"prismarine-chat": "^1.10.0",
 		"prismarine-nbt": "^2.5.0",
-		"re2": "^1.20.9",
+		"re2": "^1.20.10",
 		"sequelize": "^6.37.1",
 		"tslib": "^2.6.2",
 		"undici": "^6.6.2",
