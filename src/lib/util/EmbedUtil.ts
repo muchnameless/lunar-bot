@@ -7,7 +7,7 @@ export class EmbedUtil extends null {
 	 *
 	 * @param embeds
 	 */
-	public static totalLength(embeds: (APIEmbed | JSONEncodable<APIEmbed>)[]) {
+	public static totalLength(embeds: readonly (APIEmbed | JSONEncodable<APIEmbed>)[]) {
 		return embeds.reduce((acc, cur) => acc + embedLength((cur as Embed | EmbedBuilder).data ?? cur), 0);
 	}
 
