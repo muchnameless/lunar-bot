@@ -171,7 +171,7 @@
 		"pino-pretty": "^10.3.1",
 		"sort-package-json": "^2.8.0",
 		"ts-prune": "^0.10.3",
-		"typescript": "^5.3.3"
+		"typescript": "^5.4.2"
 	},
 	"packageManager": "yarn@4.1.1",
 	"volta": {
