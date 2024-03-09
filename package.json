@@ -65,7 +65,7 @@
 		"available-typed-arrays": "npm:@nolyfill/available-typed-arrays@latest",
 		"deep-equal": "npm:@nolyfill/deep-equal@latest",
 		"define-properties": "npm:@nolyfill/define-properties@latest",
-		"discord-api-types": "0.37.71",
+		"discord-api-types": "0.37.73",
 		"discord.js": "patch:discord.js@14.15.0-dev.1709597360-a66fc6574#~/.yarn/patches/discord.js-npm-14.15.0-dev.1709554107-a1010c61f-1972321b65.patch",
 		"es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@latest",
 		"es-set-tostringtag": "npm:@nolyfill/es-set-tostringtag@latest",
