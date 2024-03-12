@@ -92,6 +92,7 @@
 		"is-weakref": "npm:@nolyfill/is-weakref@latest",
 		"isarray": "npm:@nolyfill/isarray@latest",
 		"iterator.prototype": "npm:@nolyfill/iterator.prototype@latest",
+		"minecraft-protocol": "patch:minecraft-protocol@1.47.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch",
 		"object-keys": "npm:@nolyfill/object-keys@latest",
 		"object.assign": "npm:@nolyfill/object.assign@latest",
 		"object.entries": "npm:@nolyfill/object.entries@latest",

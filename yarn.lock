@@ -5672,6 +5672,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"minecraft-protocol@patch:minecraft-protocol@1.47.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch::locator=lunar-bot%40workspace%3A.":
+  version: 1.47.0
+  resolution: "minecraft-protocol@patch:minecraft-protocol@npm%3A1.47.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch::version=1.47.0&hash=a93bb2&locator=lunar-bot%40workspace%3A."
+  dependencies:
+    "@types/readable-stream": "npm:^4.0.0"
+    aes-js: "npm:^3.1.2"
+    buffer-equal: "npm:^1.0.0"
+    debug: "npm:^4.3.2"
+    endian-toggle: "npm:^0.0.0"
+    lodash.get: "npm:^4.1.2"
+    lodash.merge: "npm:^4.3.0"
+    minecraft-data: "npm:^3.55.0"
+    minecraft-folder-path: "npm:^1.2.0"
+    node-fetch: "npm:^2.6.1"
+    node-rsa: "npm:^0.4.2"
+    prismarine-auth: "npm:^2.2.0"
+    prismarine-chat: "npm:^1.10.0"
+    prismarine-nbt: "npm:^2.5.0"
+    prismarine-realms: "npm:^1.2.0"
+    protodef: "npm:^1.8.0"
+    readable-stream: "npm:^4.1.0"
+    uuid-1345: "npm:^1.0.1"
+    yggdrasil: "npm:^1.4.0"
+  checksum: 10/ab457aba77ba7083cd3dabcfc4111298417ba3845de4b9042042c491c03f54afe9d7c1e352113f189464f3d34ebf68e55d05c73eb793f10a02d1dcce72bc45cd
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:9.0.3, minimatch@npm:^9.0.0, minimatch@npm:^9.0.1":
   version: 9.0.3
   resolution: "minimatch@npm:9.0.3"
