@@ -158,7 +158,7 @@
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
-		"@commitlint/cli": "^19.1.0",
+		"@commitlint/cli": "^19.2.0",
 		"@commitlint/config-angular": "^19.1.0",
 		"@types/common-tags": "^1.8.4",
 		"@types/luxon": "^3.4.2",
