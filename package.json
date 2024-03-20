@@ -164,7 +164,7 @@
 		"@types/luxon": "^3.4.2",
 		"@types/node": "^20.11.30",
 		"@types/pg": "^8.11.3",
-		"@types/prettier": "^2.7.3",
+		"@types/prettier": "^3.0.0",
 		"eslint": "^8.57.0",
 		"eslint-config-neon": "^0.1.59",
 		"ley": "^0.8.1",
