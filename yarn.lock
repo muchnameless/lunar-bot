@@ -2688,10 +2688,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:0.37.75":
-  version: 0.37.75
-  resolution: "discord-api-types@npm:0.37.75"
-  checksum: 10/555597e4e95c58b7d3d296a690351c51456d80e6b53bcb3f88d1640e20799a27ea2017ae9763a991a161a2eaafbba863d066a8e364d701135b67a2983c7f117a
+"discord-api-types@npm:0.37.76":
+  version: 0.37.76
+  resolution: "discord-api-types@npm:0.37.76"
+  checksum: 10/519c242a35c39fb29c895debf8485ba45aade65e079fc5f6e4969ac11593dded7e3435a0007e8f12911277ce5d61bd41a8d6bba0c72fdffda3e4e28dcf77ea33
   languageName: node
   linkType: hard
 
