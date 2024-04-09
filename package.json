@@ -163,7 +163,7 @@
 		"@types/common-tags": "^1.8.4",
 		"@types/luxon": "^3.4.2",
 		"@types/node": "^20.12.6",
-		"@types/pg": "^8.11.4",
+		"@types/pg": "^8.11.5",
 		"eslint": "^8.57.0",
 		"eslint-config-neon": "^0.1.60",
 		"ley": "^0.8.1",
