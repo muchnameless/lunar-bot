@@ -5009,7 +5009,7 @@ __metadata:
     ts-prune: "npm:^0.10.3"
     tslib: "npm:^2.6.2"
     typescript: "npm:^5.4.5"
-    undici: "npm:^6.14.0"
+    undici: "npm:^6.14.1"
     zlib-sync: "npm:^0.1.9"
   languageName: unknown
   linkType: soft
@@ -8016,10 +8016,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.14.0, undici@npm:^6.2.1":
-  version: 6.14.0
-  resolution: "undici@npm:6.14.0"
-  checksum: 10/048aeaadd8e3b5fe3f88dcdcf2fa0dfd5d71abf8c028c0207ae7ac5e8bc165b656d9fe6c7e2b9de45edde5f0a763eb9a35c49ac19aad80bf34e0d0e4ec6cac59
+"undici@npm:^6.14.1, undici@npm:^6.2.1":
+  version: 6.14.1
+  resolution: "undici@npm:6.14.1"
+  checksum: 10/cb39b097b5093a3fdeb74bf86375d8164e49a5753fcee70d2240e74e257a1c79dcbb08b971785b70a5d665a630b4dbc9f8c460cbe3a8a833c085895feb9bdaa7
   languageName: node
   linkType: hard
 
