@@ -448,10 +448,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/collection@npm:1.6.0-dev.1699315767-344a3f934":
-  version: 1.6.0-dev.1699315767-344a3f934
-  resolution: "@discordjs/collection@npm:1.6.0-dev.1699315767-344a3f934"
-  checksum: 10/bfdec37f1a54ec6b6ebed0eb6889ae17611a5f4d1956cb0767fcf08abb0d35d057a96a28591e55999dec8b605f31e5197319cda52033ef6588a92d2f88a57eb3
+"@discordjs/collection@npm:2.1.1-dev.1715861068-92c1a511d":
+  version: 2.1.1-dev.1715861068-92c1a511d
+  resolution: "@discordjs/collection@npm:2.1.1-dev.1715861068-92c1a511d"
+  checksum: 10/fda06cdd1114f565cfcfb4d2529cad57ea02d4ac8ff2070120c06cbec3ecd53b693c3ac114c0113c97b264717524e78d5c46e12552897a8108508ac68ba28c13
   languageName: node
   linkType: hard
 
