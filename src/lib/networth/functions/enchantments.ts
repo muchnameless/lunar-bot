@@ -13,7 +13,7 @@ interface EnchantmentData {
  *
  * @see https://hypixel-skyblock.fandom.com/wiki/Enchantments
  * @see https://wiki.hypixel.net/Enchantments
- * @see https://wiki.hypixel.net/Ice_Cold_Enchantment invidivual enchantments
+ * @see https://wiki.hypixel.net/Ice_Cold_Enchantment individual enchantments
  * @param enchantment
  * @param level
  */
