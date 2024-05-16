@@ -66,7 +66,7 @@
 		"asynciterator.prototype": "npm:@nolyfill/asynciterator.prototype@latest",
 		"available-typed-arrays": "npm:@nolyfill/available-typed-arrays@latest",
 		"define-properties": "npm:@nolyfill/define-properties@latest",
-		"discord-api-types": "0.37.82",
+		"discord-api-types": "0.37.84",
 		"discord.js": "patch:discord.js@npm%3A14.15.3-dev.1715861068-92c1a511d#~/.yarn/patches/discord.js-npm-14.15.3-dev.1715861068-92c1a511d-a7be948999.patch",
 		"es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@latest",
 		"es-set-tostringtag": "npm:@nolyfill/es-set-tostringtag@latest",
