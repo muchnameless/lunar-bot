@@ -1,7 +1,16 @@
 diff --git a/src/client/websocket/WebSocketManager.js b/src/client/websocket/WebSocketManager.js
-index 9b3dff3633ae30d5f3849f83f58f17a27b24560f..1d3e190ffdb8e3cde1ab1ab6454b500c1b0db591 100644
+index 9b3dff3633ae30d5f3849f83f58f17a27b24560f..6501262a9b81779991e02226f2c5c58e0018af39 100644
 --- a/src/client/websocket/WebSocketManager.js
 +++ b/src/client/websocket/WebSocketManager.js
+@@ -153,7 +153,7 @@ class WebSocketManager extends EventEmitter {
+         updateSessionInfo: (shardId, sessionInfo) => {
+           this.shards.get(shardId).sessionInfo = sessionInfo;
+         },
+-        compression: zlib ? CompressionMethod.ZlibStream : null,
++        compression: zlib ? CompressionMethod.ZlibSync : null,
+       };
+       if (ws.buildIdentifyThrottler) wsOptions.buildIdentifyThrottler = ws.buildIdentifyThrottler;
+       if (ws.buildStrategy) wsOptions.buildStrategy = ws.buildStrategy;
 @@ -348,7 +348,7 @@ class WebSocketManager extends EventEmitter {
        const item = this.packetQueue.shift();
        setImmediate(() => {
