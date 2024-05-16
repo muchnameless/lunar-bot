@@ -177,6 +177,7 @@ export const enum ItemId {
 	Pet = 'PET',
 	PetrifiedStarfall = 'PETRIFIED_STARFALL',
 	PitchinKoi = 'PITCHIN_KOI',
+	PocketSackInASack = 'POCKET_SACK_IN_A_SACK',
 	Potato = 'POTATO_ITEM', // POTATO is not the bazaar variant
 	Potion = 'POTION',
 	PowerArtifact = 'POWER_ARTIFACT',

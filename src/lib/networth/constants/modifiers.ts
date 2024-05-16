@@ -31,6 +31,7 @@ export const enum PriceModifier {
 	PetSkinNoCandy = 0.9,
 	PetSkinWithCandy = 0.5,
 	PetWithCandy = 0.65,
+	PocketSackInASack = 0.7,
 	PrestigeItem = 1,
 	Recomb = 0.8,
 	RecombBonemerang = 0.4,

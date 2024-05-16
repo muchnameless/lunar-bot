@@ -416,6 +416,11 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		}
 	}
 
+	// pocket sack-in-a-sack
+	if (extraAttributes.sack_pss) {
+		price += extraAttributes.sack_pss * getPrice(ItemId.PocketSackInASack) * PriceModifier.PocketSackInASack;
+	}
+
 	// wood singularity
 	if (extraAttributes.wood_singularity_count) {
 		price += extraAttributes.wood_singularity_count * getPrice(ItemId.WoodSingularity) * PriceModifier.WoodSingularity;

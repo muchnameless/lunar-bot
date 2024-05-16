@@ -130,7 +130,7 @@
 		"@sapphire/type": "^2.4.0",
 		"@sapphire/utilities": "3.15.4-next.f929edc5.0",
 		"@skyra/jaro-winkler": "^1.1.1",
-		"@zikeji/hypixel": "github:muchnameless/node-hypixel#a43bd8d9261db3650e6669d8561fa64d8d2b338f",
+		"@zikeji/hypixel": "github:muchnameless/node-hypixel#2364750d838186ec37de1b883bc0dd805f87ae35",
 		"bufferutil": "^4.0.8",
 		"chart.js": "^4.4.2",
 		"common-tags": "^1.8.2",

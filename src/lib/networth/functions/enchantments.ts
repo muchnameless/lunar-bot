@@ -13,6 +13,7 @@ interface EnchantmentData {
  *
  * @see https://hypixel-skyblock.fandom.com/wiki/Enchantments
  * @see https://wiki.hypixel.net/Enchantments
+ * @see https://wiki.hypixel.net/Ice_Cold_Enchantment invidivual enchantments
  * @param enchantment
  * @param level
  */
@@ -96,12 +97,14 @@ export const getEnchantment = (enchantment: Enchantment, level: number): Enchant
 		case Enchantment.GreenThumb:
 		case Enchantment.Growth:
 		case Enchantment.Harvesting:
+		case Enchantment.IceCold:
 		case Enchantment.Lethality:
 		case Enchantment.Luck:
 		case Enchantment.LuckOfTheSea:
 		case Enchantment.Lure:
 		case Enchantment.Magnet:
 		case Enchantment.Overload:
+		case Enchantment.Paleontologist:
 		case Enchantment.Pesterminator:
 		case Enchantment.Piscary:
 		case Enchantment.Power:

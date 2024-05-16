@@ -70,7 +70,6 @@ export class ImgurClient {
 	private readonly baseURL = 'https://api.imgur.com/3/';
 
 	/**
-	 * https://api.imgur.com/
 	 * https://apidocs.imgur.com/
 	 */
 	public readonly rateLimitManagers = [

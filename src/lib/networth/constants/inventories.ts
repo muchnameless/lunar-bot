@@ -11,6 +11,7 @@ export const SKYBLOCK_BAG_INVENTORIES = [
 	'fishing_bag',
 	'potion_bag',
 	'quiver',
+	'sacks_bag',
 	'talisman_bag',
 ] as const satisfies readonly string[];
 
