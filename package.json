@@ -136,7 +136,7 @@
 		"common-tags": "^1.8.2",
 		"cron": "^3.1.7",
 		"discord.js": "14.15.3-dev.1715991021-555961b3b",
-		"fast-xml-parser": "^4.3.6",
+		"fast-xml-parser": "^4.4.0",
 		"ioredis": "^5.4.1",
 		"js-big-decimal": "^1.4.1",
 		"lilyweight": "^2.7.2",

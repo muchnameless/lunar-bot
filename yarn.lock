@@ -3546,14 +3546,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:^4.3.6":
-  version: 4.3.6
-  resolution: "fast-xml-parser@npm:4.3.6"
+"fast-xml-parser@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "fast-xml-parser@npm:4.4.0"
   dependencies:
     strnum: "npm:^1.0.5"
   bin:
     fxparser: src/cli/cli.js
-  checksum: 10/3e431e594960f04996e60a01fb51d8f4346138a7ba60d97244bf7866a3072eaf2f6dc73008d7b07871b98b606a8d7db955efdeae787992f685dd0e5bcc67c36a
+  checksum: 10/f1592fa810d3923c46c7037d5adf1c309580d1d14780312019f33e4967f6ffcb5632168a5e889fe9d30794f6a087a0a095bb21cdf62320a96c6b304395212658
   languageName: node
   linkType: hard
 
@@ -4903,7 +4903,7 @@ __metadata:
     discord.js: "npm:14.15.3-dev.1715991021-555961b3b"
     eslint: "npm:^8.57.0"
     eslint-config-neon: "npm:^0.1.62"
-    fast-xml-parser: "npm:^4.3.6"
+    fast-xml-parser: "npm:^4.4.0"
     ioredis: "npm:^5.4.1"
     js-big-decimal: "npm:^1.4.1"
     ley: "npm:^0.8.1"
