@@ -118,6 +118,7 @@
 		"which-typed-array": "npm:@nolyfill/which-typed-array@latest"
 	},
 	"dependencies": {
+		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
 		"@discordjs/rest": "2.3.1-dev.1716552246-27d0659a4",
 		"@discordjs/ws": "2.0.0-dev.1716552252-27d0659a4",
 		"@napi-rs/canvas": "^0.1.52",

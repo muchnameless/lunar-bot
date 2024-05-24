@@ -4880,6 +4880,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": "npm:^19.3.0"
     "@commitlint/config-angular": "npm:^19.3.0"
+    "@discordjs/collection": "npm:1.6.0-dev.1699315767-344a3f934"
     "@discordjs/rest": "npm:2.3.1-dev.1716552246-27d0659a4"
     "@discordjs/ws": "npm:2.0.0-dev.1716552252-27d0659a4"
     "@napi-rs/canvas": "npm:^0.1.52"

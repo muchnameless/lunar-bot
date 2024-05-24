@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises';
-import { Collection } from 'discord.js';
+import { Collection } from '@discordjs/collection';
 import { fetch } from 'undici';
 
 /**
@@ -250,9 +250,9 @@ await Promise.all([
 			const name = skippedEmojis.has(primaryName)
 				? primaryName.startsWith('regional_indicator_')
 					? // regional_indicator_a -> A
-					  primaryName.at(-1)!.toUpperCase()
+						primaryName.at(-1)!.toUpperCase()
 					: // replace with first unicode character
-					  [...surrogates][0]!
+						[...surrogates][0]!
 				: primaryNameWithColons;
 
 			lines.push(`"${surrogates}": "${name}"`);
