@@ -1,8 +1,8 @@
 diff --git a/dist/index.d.mts b/dist/index.d.mts
-index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f1152d0db 100644
+index 58c88f069899432098a66fffa5efae46071f2d8f..e71c895b6c75c54ebdcfc7fb89738b39bb473124 100644
 --- a/dist/index.d.mts
 +++ b/dist/index.d.mts
-@@ -351,6 +351,7 @@ interface RequestHeaders {
+@@ -357,6 +357,7 @@ interface RequestHeaders {
  declare enum RequestMethod {
      Delete = "DELETE",
      Get = "GET",
@@ -10,7 +10,7 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      Patch = "PATCH",
      Post = "POST",
      Put = "PUT"
-@@ -780,6 +781,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
+@@ -802,6 +803,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
      private hashTimer;
      private handlerTimer;
      readonly options: RESTOptions;
@@ -19,10 +19,10 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      private setupSweepers;
      /**
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f1152d0db 100644
+index 58c88f069899432098a66fffa5efae46071f2d8f..e71c895b6c75c54ebdcfc7fb89738b39bb473124 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
-@@ -351,6 +351,7 @@ interface RequestHeaders {
+@@ -357,6 +357,7 @@ interface RequestHeaders {
  declare enum RequestMethod {
      Delete = "DELETE",
      Get = "GET",
@@ -30,7 +30,7 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      Patch = "PATCH",
      Post = "POST",
      Put = "PUT"
-@@ -780,6 +781,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
+@@ -802,6 +803,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
      private hashTimer;
      private handlerTimer;
      readonly options: RESTOptions;
@@ -39,10 +39,10 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      private setupSweepers;
      /**
 diff --git a/dist/index.js b/dist/index.js
-index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598807410c7 100644
+index b05f1827a4a4a4586b4f66eef44df5411a9c1f9c..ca12410f78ce6cfc40f25052662d7457d127e7d2 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -223,6 +223,7 @@ var RateLimitError = class _RateLimitError extends Error {
+@@ -224,6 +224,7 @@ var RateLimitError = class _RateLimitError extends Error {
  var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Delete"] = "DELETE";
    RequestMethod2["Get"] = "GET";
@@ -50,7 +50,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
    RequestMethod2["Patch"] = "PATCH";
    RequestMethod2["Post"] = "POST";
    RequestMethod2["Put"] = "PUT";
-@@ -701,7 +702,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+@@ -698,7 +699,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
      manager.emit(
        "response" /* Response */,
        {
@@ -59,7 +59,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
          path: routeId.original,
          route: routeId.bucketRoute,
          options,
-@@ -782,10 +783,10 @@ var BurstHandler = class {
+@@ -779,10 +780,10 @@ var BurstHandler = class {
     * @param retries - The number of retries this request has already attempted (recursion)
     */
    async runRequest(routeId, url, options, requestData, retries = 0) {
@@ -72,7 +72,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -834,7 +835,7 @@ var BurstHandler = class {
+@@ -830,7 +831,7 @@ var BurstHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -81,7 +81,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
        }
        return handled;
      }
-@@ -1003,7 +1004,7 @@ var SequentialHandler = class {
+@@ -999,7 +1000,7 @@ var SequentialHandler = class {
        }
        const rateLimitData = {
          global: isGlobal,
@@ -90,7 +90,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
          url,
          route: routeId.bucketRoute,
          majorParameter: this.majorParameter,
-@@ -1028,10 +1029,10 @@ var SequentialHandler = class {
+@@ -1024,10 +1025,10 @@ var SequentialHandler = class {
        this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
      }
      this.manager.globalRemaining--;
@@ -103,7 +103,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -1132,7 +1133,7 @@ var SequentialHandler = class {
+@@ -1127,7 +1128,7 @@ var SequentialHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -112,14 +112,14 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
        }
        return handled;
      }
-@@ -1174,12 +1175,14 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1169,12 +1170,14 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
    hashTimer;
    handlerTimer;
    options;
 +  userAgent;
    constructor(options = {}) {
      super();
-     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn, options.mediaProxy ?? DefaultRestOptions.mediaProxy);
      this.options = { ...DefaultRestOptions, ...options };
      this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
      this.agent = options.agent ?? null;
@@ -127,7 +127,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -1205,7 +1208,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1199,7 +1202,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
        }, this.options.hashSweepInterval);
@@ -135,7 +135,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -1221,7 +1223,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1215,7 +1217,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
        }, this.options.handlerSweepInterval);
@@ -143,7 +143,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      }
    }
    /**
-@@ -1230,7 +1231,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1224,7 +1225,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -152,7 +152,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1239,7 +1240,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1233,7 +1234,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -161,7 +161,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1248,7 +1249,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1242,7 +1243,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -170,7 +170,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1257,7 +1258,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1251,7 +1252,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -179,7 +179,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1266,7 +1267,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1260,7 +1261,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -188,7 +188,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1344,21 +1345,21 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1338,21 +1339,21 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
        }
      }
      const headers = {
@@ -214,7 +214,7 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
      if (request2.files?.length) {
        const formData = new FormData();
        for (const [index, file] of request2.files.entries()) {
-@@ -1397,7 +1398,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1391,7 +1392,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
      const method = request2.method.toUpperCase();
      const fetchOptions = {
        // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
@@ -224,10 +224,10 @@ index 6b863e67f203bb84e68464badc042f52ae07a237..d3e7a1c7886bcffe9c74620d525ed598
        method,
        // Prioritize setting an agent per request, use the agent for this instance otherwise.
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34d7d245f8 100644
+index 9d87fc333c6271f76ae8200c2ca2e488636fdbfe..77ec279e3584aeadd7ca6c25661996de5a5cd31e 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -182,6 +182,7 @@ var RateLimitError = class _RateLimitError extends Error {
+@@ -183,6 +183,7 @@ var RateLimitError = class _RateLimitError extends Error {
  var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Delete"] = "DELETE";
    RequestMethod2["Get"] = "GET";
@@ -235,7 +235,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
    RequestMethod2["Patch"] = "PATCH";
    RequestMethod2["Post"] = "POST";
    RequestMethod2["Put"] = "PUT";
-@@ -660,7 +661,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+@@ -657,7 +658,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
      manager.emit(
        "response" /* Response */,
        {
@@ -244,7 +244,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
          path: routeId.original,
          route: routeId.bucketRoute,
          options,
-@@ -741,10 +742,10 @@ var BurstHandler = class {
+@@ -738,10 +739,10 @@ var BurstHandler = class {
     * @param retries - The number of retries this request has already attempted (recursion)
     */
    async runRequest(routeId, url, options, requestData, retries = 0) {
@@ -257,7 +257,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -793,7 +794,7 @@ var BurstHandler = class {
+@@ -789,7 +790,7 @@ var BurstHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -266,7 +266,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
        }
        return handled;
      }
-@@ -962,7 +963,7 @@ var SequentialHandler = class {
+@@ -958,7 +959,7 @@ var SequentialHandler = class {
        }
        const rateLimitData = {
          global: isGlobal,
@@ -275,7 +275,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
          url,
          route: routeId.bucketRoute,
          majorParameter: this.majorParameter,
-@@ -987,10 +988,10 @@ var SequentialHandler = class {
+@@ -983,10 +984,10 @@ var SequentialHandler = class {
        this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
      }
      this.manager.globalRemaining--;
@@ -288,7 +288,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -1091,7 +1092,7 @@ var SequentialHandler = class {
+@@ -1086,7 +1087,7 @@ var SequentialHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -297,14 +297,14 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
        }
        return handled;
      }
-@@ -1133,12 +1134,14 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1128,12 +1129,14 @@ var REST = class _REST extends AsyncEventEmitter {
    hashTimer;
    handlerTimer;
    options;
 +  userAgent;
    constructor(options = {}) {
      super();
-     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn, options.mediaProxy ?? DefaultRestOptions.mediaProxy);
      this.options = { ...DefaultRestOptions, ...options };
      this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
      this.agent = options.agent ?? null;
@@ -312,7 +312,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -1164,7 +1167,6 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1158,7 +1161,6 @@ var REST = class _REST extends AsyncEventEmitter {
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
        }, this.options.hashSweepInterval);
@@ -320,7 +320,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -1180,7 +1182,6 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1174,7 +1176,6 @@ var REST = class _REST extends AsyncEventEmitter {
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
        }, this.options.handlerSweepInterval);
@@ -328,7 +328,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      }
    }
    /**
-@@ -1189,7 +1190,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1183,7 +1184,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -337,7 +337,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1198,7 +1199,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1192,7 +1193,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -346,7 +346,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1207,7 +1208,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1201,7 +1202,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -355,7 +355,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1216,7 +1217,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1210,7 +1211,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -364,7 +364,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1225,7 +1226,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1219,7 +1220,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -373,7 +373,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1303,21 +1304,21 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1297,21 +1298,21 @@ var REST = class _REST extends AsyncEventEmitter {
        }
      }
      const headers = {
@@ -399,7 +399,7 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
      if (request2.files?.length) {
        const formData = new FormData();
        for (const [index, file] of request2.files.entries()) {
-@@ -1356,7 +1357,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1350,7 +1351,7 @@ var REST = class _REST extends AsyncEventEmitter {
      const method = request2.method.toUpperCase();
      const fetchOptions = {
        // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
@@ -409,10 +409,10 @@ index 00f78a9f4351300d24252ebbe6a5eece226685c7..602025ca39e7bbbd18115a3f47c02c34
        method,
        // Prioritize setting an agent per request, use the agent for this instance otherwise.
 diff --git a/dist/web.d.mts b/dist/web.d.mts
-index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f1152d0db 100644
+index 58c88f069899432098a66fffa5efae46071f2d8f..e71c895b6c75c54ebdcfc7fb89738b39bb473124 100644
 --- a/dist/web.d.mts
 +++ b/dist/web.d.mts
-@@ -351,6 +351,7 @@ interface RequestHeaders {
+@@ -357,6 +357,7 @@ interface RequestHeaders {
  declare enum RequestMethod {
      Delete = "DELETE",
      Get = "GET",
@@ -420,7 +420,7 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      Patch = "PATCH",
      Post = "POST",
      Put = "PUT"
-@@ -780,6 +781,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
+@@ -802,6 +803,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
      private hashTimer;
      private handlerTimer;
      readonly options: RESTOptions;
@@ -429,10 +429,10 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      private setupSweepers;
      /**
 diff --git a/dist/web.d.ts b/dist/web.d.ts
-index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f1152d0db 100644
+index 58c88f069899432098a66fffa5efae46071f2d8f..e71c895b6c75c54ebdcfc7fb89738b39bb473124 100644
 --- a/dist/web.d.ts
 +++ b/dist/web.d.ts
-@@ -351,6 +351,7 @@ interface RequestHeaders {
+@@ -357,6 +357,7 @@ interface RequestHeaders {
  declare enum RequestMethod {
      Delete = "DELETE",
      Get = "GET",
@@ -440,7 +440,7 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      Patch = "PATCH",
      Post = "POST",
      Put = "PUT"
-@@ -780,6 +781,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
+@@ -802,6 +803,7 @@ declare class REST extends AsyncEventEmitter<RestEvents> {
      private hashTimer;
      private handlerTimer;
      readonly options: RESTOptions;
@@ -449,10 +449,10 @@ index afcc98547e3dd056599a958029f951e43d19f323..4f123c7afa380d19a67095c1b610f92f
      private setupSweepers;
      /**
 diff --git a/dist/web.js b/dist/web.js
-index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f19cfdb11c 100644
+index 7d13f07820fa0d109d22e7e1104fdeb6bf3036a1..923e79b8d873423848351efa094c01aa8ef33c4c 100644
 --- a/dist/web.js
 +++ b/dist/web.js
-@@ -157,6 +157,7 @@ var RateLimitError = class _RateLimitError extends Error {
+@@ -158,6 +158,7 @@ var RateLimitError = class _RateLimitError extends Error {
  var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Delete"] = "DELETE";
    RequestMethod2["Get"] = "GET";
@@ -460,7 +460,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
    RequestMethod2["Patch"] = "PATCH";
    RequestMethod2["Post"] = "POST";
    RequestMethod2["Put"] = "PUT";
-@@ -635,7 +636,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+@@ -632,7 +633,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
      manager.emit(
        "response" /* Response */,
        {
@@ -469,7 +469,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
          path: routeId.original,
          route: routeId.bucketRoute,
          options,
-@@ -716,10 +717,10 @@ var BurstHandler = class {
+@@ -713,10 +714,10 @@ var BurstHandler = class {
     * @param retries - The number of retries this request has already attempted (recursion)
     */
    async runRequest(routeId, url, options, requestData, retries = 0) {
@@ -482,7 +482,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -768,7 +769,7 @@ var BurstHandler = class {
+@@ -764,7 +765,7 @@ var BurstHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -491,7 +491,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
        }
        return handled;
      }
-@@ -937,7 +938,7 @@ var SequentialHandler = class {
+@@ -933,7 +934,7 @@ var SequentialHandler = class {
        }
        const rateLimitData = {
          global: isGlobal,
@@ -500,7 +500,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
          url,
          route: routeId.bucketRoute,
          majorParameter: this.majorParameter,
-@@ -962,10 +963,10 @@ var SequentialHandler = class {
+@@ -958,10 +959,10 @@ var SequentialHandler = class {
        this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
      }
      this.manager.globalRemaining--;
@@ -513,7 +513,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -1066,7 +1067,7 @@ var SequentialHandler = class {
+@@ -1061,7 +1062,7 @@ var SequentialHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -522,14 +522,14 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
        }
        return handled;
      }
-@@ -1108,12 +1109,14 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1103,12 +1104,14 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
    hashTimer;
    handlerTimer;
    options;
 +  userAgent;
    constructor(options = {}) {
      super();
-     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn, options.mediaProxy ?? DefaultRestOptions.mediaProxy);
      this.options = { ...DefaultRestOptions, ...options };
      this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
      this.agent = options.agent ?? null;
@@ -537,7 +537,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -1139,7 +1142,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1133,7 +1136,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
        }, this.options.hashSweepInterval);
@@ -545,7 +545,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -1155,7 +1157,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1149,7 +1151,6 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
        }, this.options.handlerSweepInterval);
@@ -553,7 +553,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      }
    }
    /**
-@@ -1164,7 +1165,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1158,7 +1159,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -562,7 +562,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1173,7 +1174,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1167,7 +1168,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -571,7 +571,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1182,7 +1183,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1176,7 +1177,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -580,7 +580,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1191,7 +1192,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1185,7 +1186,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -589,7 +589,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1200,7 +1201,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1194,7 +1195,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -598,7 +598,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1278,21 +1279,21 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1272,21 +1273,21 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
        }
      }
      const headers = {
@@ -624,7 +624,7 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
      if (request.files?.length) {
        const formData = new FormData();
        for (const [index, file] of request.files.entries()) {
-@@ -1331,7 +1332,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
+@@ -1325,7 +1326,7 @@ var REST = class _REST extends import_async_event_emitter.AsyncEventEmitter {
      const method = request.method.toUpperCase();
      const fetchOptions = {
        // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
@@ -634,10 +634,10 @@ index f2d438ca5a8699a07de3bc960045c28cae873454..5b09043b45db5911bdf97c013397b2f1
        method,
        // Prioritize setting an agent per request, use the agent for this instance otherwise.
 diff --git a/dist/web.mjs b/dist/web.mjs
-index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba1615229476 100644
+index 489c24b837a20955669f0bcba3c63bce6028e65d..a3de35a33201616c356c936c9540159558413e06 100644
 --- a/dist/web.mjs
 +++ b/dist/web.mjs
-@@ -114,6 +114,7 @@ var RateLimitError = class _RateLimitError extends Error {
+@@ -115,6 +115,7 @@ var RateLimitError = class _RateLimitError extends Error {
  var RequestMethod = /* @__PURE__ */ ((RequestMethod2) => {
    RequestMethod2["Delete"] = "DELETE";
    RequestMethod2["Get"] = "GET";
@@ -645,7 +645,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
    RequestMethod2["Patch"] = "PATCH";
    RequestMethod2["Post"] = "POST";
    RequestMethod2["Put"] = "PUT";
-@@ -592,7 +593,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
+@@ -589,7 +590,7 @@ async function makeNetworkRequest(manager, routeId, url, options, requestData, r
      manager.emit(
        "response" /* Response */,
        {
@@ -654,7 +654,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
          path: routeId.original,
          route: routeId.bucketRoute,
          options,
-@@ -673,10 +674,10 @@ var BurstHandler = class {
+@@ -670,10 +671,10 @@ var BurstHandler = class {
     * @param retries - The number of retries this request has already attempted (recursion)
     */
    async runRequest(routeId, url, options, requestData, retries = 0) {
@@ -667,7 +667,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -725,7 +726,7 @@ var BurstHandler = class {
+@@ -721,7 +722,7 @@ var BurstHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -676,7 +676,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
        }
        return handled;
      }
-@@ -894,7 +895,7 @@ var SequentialHandler = class {
+@@ -890,7 +891,7 @@ var SequentialHandler = class {
        }
        const rateLimitData = {
          global: isGlobal,
@@ -685,7 +685,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
          url,
          route: routeId.bucketRoute,
          majorParameter: this.majorParameter,
-@@ -919,10 +920,10 @@ var SequentialHandler = class {
+@@ -915,10 +916,10 @@ var SequentialHandler = class {
        this.manager.globalRemaining = this.manager.options.globalRequestsPerSecond;
      }
      this.manager.globalRemaining--;
@@ -698,7 +698,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      }
      const status = res.status;
      let retryAfter = 0;
-@@ -1023,7 +1024,7 @@ var SequentialHandler = class {
+@@ -1018,7 +1019,7 @@ var SequentialHandler = class {
      } else {
        const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
        if (handled === null) {
@@ -707,14 +707,14 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
        }
        return handled;
      }
-@@ -1065,12 +1066,14 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1060,12 +1061,14 @@ var REST = class _REST extends AsyncEventEmitter {
    hashTimer;
    handlerTimer;
    options;
 +  userAgent;
    constructor(options = {}) {
      super();
-     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn);
+     this.cdn = new CDN(options.cdn ?? DefaultRestOptions.cdn, options.mediaProxy ?? DefaultRestOptions.mediaProxy);
      this.options = { ...DefaultRestOptions, ...options };
      this.globalRemaining = Math.max(1, this.options.globalRequestsPerSecond);
      this.agent = options.agent ?? null;
@@ -722,7 +722,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      this.setupSweepers();
    }
    setupSweepers() {
-@@ -1096,7 +1099,6 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1090,7 +1093,6 @@ var REST = class _REST extends AsyncEventEmitter {
          });
          this.emit("hashSweep" /* HashSweep */, sweptHashes);
        }, this.options.hashSweepInterval);
@@ -730,7 +730,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      }
      if (this.options.handlerSweepInterval !== 0 && this.options.handlerSweepInterval !== Number.POSITIVE_INFINITY) {
        validateMaxInterval(this.options.handlerSweepInterval);
-@@ -1112,7 +1114,6 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1106,7 +1108,6 @@ var REST = class _REST extends AsyncEventEmitter {
          });
          this.emit("handlerSweep" /* HandlerSweep */, sweptHandlers);
        }, this.options.handlerSweepInterval);
@@ -738,7 +738,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      }
    }
    /**
-@@ -1121,7 +1122,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1115,7 +1116,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -747,7 +747,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      return this.request({ ...options, fullRoute, method: "GET" /* Get */ });
    }
    /**
-@@ -1130,7 +1131,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1124,7 +1125,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -756,7 +756,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      return this.request({ ...options, fullRoute, method: "DELETE" /* Delete */ });
    }
    /**
-@@ -1139,7 +1140,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1133,7 +1134,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -765,7 +765,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      return this.request({ ...options, fullRoute, method: "POST" /* Post */ });
    }
    /**
-@@ -1148,7 +1149,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1142,7 +1143,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -774,7 +774,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      return this.request({ ...options, fullRoute, method: "PUT" /* Put */ });
    }
    /**
-@@ -1157,7 +1158,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1151,7 +1152,7 @@ var REST = class _REST extends AsyncEventEmitter {
     * @param fullRoute - The full route to query
     * @param options - Optional request options
     */
@@ -783,7 +783,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      return this.request({ ...options, fullRoute, method: "PATCH" /* Patch */ });
    }
    /**
-@@ -1235,21 +1236,21 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1229,21 +1230,21 @@ var REST = class _REST extends AsyncEventEmitter {
        }
      }
      const headers = {
@@ -809,7 +809,7 @@ index 3f5a0c104bfa126980e62ed7c624a87621b56af7..904e83e8d108d172852bb1a0b7c2ba16
      if (request.files?.length) {
        const formData = new FormData();
        for (const [index, file] of request.files.entries()) {
-@@ -1288,7 +1289,7 @@ var REST = class _REST extends AsyncEventEmitter {
+@@ -1282,7 +1283,7 @@ var REST = class _REST extends AsyncEventEmitter {
      const method = request.method.toUpperCase();
      const fetchOptions = {
        // Set body to null on get / head requests. This does not follow fetch spec (likely because it causes subtle bugs) but is aligned with what request was doing
