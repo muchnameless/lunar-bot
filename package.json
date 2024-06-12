@@ -175,7 +175,7 @@
 	},
 	"packageManager": "yarn@4.3.0",
 	"volta": {
-		"node": "22.2.0",
+		"node": "22.3.0",
 		"yarn": "4.3.0"
 	}
 }
