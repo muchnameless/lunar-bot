@@ -5003,7 +5003,7 @@ __metadata:
     pg: "npm:^8.12.0"
     pg-hstore: "npm:^2.3.4"
     pino: "npm:^9.2.0"
-    pino-pretty: "npm:^11.2.0"
+    pino-pretty: "npm:^11.2.1"
     postgres: "npm:3.4.4"
     prettier: "npm:^3.3.2"
     prismarine-chat: "npm:^1.10.1"
@@ -6505,9 +6505,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^11.2.0":
-  version: 11.2.0
-  resolution: "pino-pretty@npm:11.2.0"
+"pino-pretty@npm:^11.2.1":
+  version: 11.2.1
+  resolution: "pino-pretty@npm:11.2.1"
   dependencies:
     colorette: "npm:^2.0.7"
     dateformat: "npm:^4.6.3"
@@ -6525,7 +6525,7 @@ __metadata:
     strip-json-comments: "npm:^3.1.1"
   bin:
     pino-pretty: bin.js
-  checksum: 10/a1cb100a145f39dd53ce873bbf98309b9cadc1582d99fd4d39b14298f164ea328d2473cac0c417162f69ad58fb7cf80889d37f0333e8d0d8a04987c3baaeedaa
+  checksum: 10/e53bc52e73512f8add5a6f58f4e7be6ae06e2ba71f4e1bf694ee5307b97ff8f9586b554464b3dc684f088282cfd646642836816c4b3238b7d14ae3de1e903d8a
   languageName: node
   linkType: hard
 
