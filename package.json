@@ -173,9 +173,9 @@
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.4.5"
 	},
-	"packageManager": "yarn@4.3.0",
+	"packageManager": "yarn@4.3.1",
 	"volta": {
 		"node": "22.3.0",
-		"yarn": "4.3.0"
+		"yarn": "4.3.1"
 	}
 }
