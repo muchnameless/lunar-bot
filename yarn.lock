@@ -985,12 +985,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/discord-utilities@npm:3.3.1-next.e7fdc5db.0":
-  version: 3.3.1-next.e7fdc5db.0
-  resolution: "@sapphire/discord-utilities@npm:3.3.1-next.e7fdc5db.0"
+"@sapphire/discord-utilities@npm:3.3.1-next.ec73e32c":
+  version: 3.3.1-next.ec73e32c
+  resolution: "@sapphire/discord-utilities@npm:3.3.1-next.ec73e32c"
   dependencies:
-    discord-api-types: "npm:^0.37.85"
-  checksum: 10/1511503458e43db83c86d60e74d19c89182b3df93ef3c6a2bd06489d5c6af8ee2521d37293138aed36a8722b54d61f15eb21889b402efe73b28deec0c3068d08
+    discord-api-types: "npm:^0.37.90"
+  checksum: 10/e4d4ef8dd5a633fb772bd50f9c0ca96a0856077ce16e4e2a4be5a95e07253b1aee13c22c98ce8f15b668425ef3d6d2839e0139d8c876d707217bbd0212a52f62
   languageName: node
   linkType: hard
 
@@ -1045,10 +1045,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/utilities@npm:3.16.3-next.e7fdc5db.0":
-  version: 3.16.3-next.e7fdc5db.0
-  resolution: "@sapphire/utilities@npm:3.16.3-next.e7fdc5db.0"
-  checksum: 10/128f413dc6cc263d06cfb325dd9e0724ccef031f59a623fe746dd179c15a21aefa5952f9d5ff1c842e06cd5417be9fe87057fb4052dcb362b61e38d14c516903
+"@sapphire/utilities@npm:3.16.3-next.ec73e32c":
+  version: 3.16.3-next.ec73e32c
+  resolution: "@sapphire/utilities@npm:3.16.3-next.ec73e32c"
+  checksum: 10/ab8ccd386ea9ae8cc52019d8a87814e724296dd7f5575d9a45d191f860ed8fa69d63543cdb79ef81d0acf7aab824b1c57d112312a318be82803dfb64f5659b2e
   languageName: node
   linkType: hard
 
@@ -4971,12 +4971,12 @@ __metadata:
     "@discordjs/ws": "npm:2.0.0-dev.1717114184-29a50bb47"
     "@napi-rs/canvas": "npm:^0.1.53"
     "@sapphire/async-queue": "npm:1.5.3-next.f929edc5.0"
-    "@sapphire/discord-utilities": "npm:3.3.1-next.e7fdc5db.0"
+    "@sapphire/discord-utilities": "npm:3.3.1-next.ec73e32c"
     "@sapphire/node-utilities": "npm:1.0.3-next.f929edc5.0"
     "@sapphire/ratelimits": "npm:2.4.10-next.f929edc5.0"
     "@sapphire/stopwatch": "npm:1.5.3-next.f929edc5.0"
     "@sapphire/type": "npm:^2.4.5-next.57c7584"
-    "@sapphire/utilities": "npm:3.16.3-next.e7fdc5db.0"
+    "@sapphire/utilities": "npm:3.16.3-next.ec73e32c"
     "@skyra/jaro-winkler": "npm:^1.1.1"
     "@types/common-tags": "npm:^1.8.4"
     "@types/luxon": "npm:^3.4.2"
