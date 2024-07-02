@@ -146,18 +146,18 @@ export class HypixelMessage {
 							ign: this.chatBridge.minecraft.botUsername ?? UNKNOWN_IGN,
 							guildRank: null,
 							uuid: this.chatBridge.minecraft.botUuid,
-					  }
+						}
 					: {
 							ign: matched.groups!.ign!,
 							guildRank: matched.groups!.guildRank,
 							uuid: matched.groups!.type
 								? // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
-								  // @ts-expect-error prismarineMessage typings
-								  (this.prismarineMessage.extra?.[0]?.clickEvent?.value as string)
+									// @ts-expect-error prismarineMessage typings
+									(this.prismarineMessage.extra?.[0]?.clickEvent?.value as string)
 										.slice('/viewprofile '.length)
 										.replaceAll('-', '')
 								: null,
-					  },
+						},
 			);
 			this.content = this.rawContent.slice(matched[0]!.length).trimStart();
 			this.spam = false;
@@ -205,8 +205,9 @@ export class HypixelMessage {
 						parseArgs({
 							args,
 							options: command?.parseArgsOptions,
-							strict: true,
-							allowPositionals: true,
+							strict: true, // no unknown options
+							allowPositionals: true, // args not starting with --
+							allowNegative: true, // --bool -> --no-bool
 						}) as any,
 					prefix: prefixMatched,
 				};
