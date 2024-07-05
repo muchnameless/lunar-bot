@@ -23,8 +23,4 @@ fi
 echo ""
 echo "done"
 
-cd $OLDPWD
-
-if [[ $current != $new ]]; then
-	exit 1
-fi
+[[ $current != $new ]] && exit 1
