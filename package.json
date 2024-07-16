@@ -162,7 +162,7 @@
 		"@commitlint/config-angular": "^19.3.0",
 		"@types/common-tags": "^1.8.4",
 		"@types/luxon": "^3.4.2",
-		"@types/node": "^20.14.10",
+		"@types/node": "^20.14.11",
 		"@types/pg": "^8.11.6",
 		"eslint": "^8.57.0",
 		"eslint-config-neon": "^0.1.62",
