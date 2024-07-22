@@ -22,7 +22,7 @@ import { assertNever } from '#functions/types.js';
  * @param individualCap individual level cap for the player
  */
 export function getSkillLevel(type: DungeonTypes | SkillTypes, xp = 0, individualCap: number | null = null) {
-	let totalXp: Readonly<number[]>;
+	let totalXp: readonly number[];
 
 	switch (type) {
 		case 'catacombs':

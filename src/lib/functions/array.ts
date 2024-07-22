@@ -3,9 +3,9 @@
  *
  * @param array
  */
-export function toTotal(array: Readonly<number[]>): Readonly<number[]>;
+export function toTotal(array: readonly number[]): readonly number[];
 export function toTotal(array: number[]): number[];
-export function toTotal(array: Readonly<number[]>) {
+export function toTotal(array: readonly number[]) {
 	const total = [...array];
 
 	for (let index = 1; index < array.length; ++index) {
