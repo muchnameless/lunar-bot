@@ -54,7 +54,7 @@
 		"@sapphire/ratelimits": "2.4.10-next.f929edc5.0",
 		"@sapphire/snowflake": "3.5.4-next.f929edc5.0",
 		"@sapphire/timer-manager": "1.0.3-next.f929edc5.0",
-		"array-buffer-byte-length": "npm:@nolyfill/array-buffer-byte-length@^1",
+		"array-buffer-byte-length": "npm:@nolyfill/array-buffer-byte-length@^1.0.29",
 		"array-includes": "npm:@nolyfill/array-includes@^1",
 		"array.prototype.findlast": "npm:@nolyfill/array.prototype.findlast@^1",
 		"array.prototype.flat": "npm:@nolyfill/array.prototype.flat@^1",
