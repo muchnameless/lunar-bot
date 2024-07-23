@@ -107,7 +107,7 @@
 		"side-channel": "npm:@nolyfill/side-channel@^1",
 		"string.prototype.includes": "npm:@nolyfill/string.prototype.includes@^1",
 		"string.prototype.matchall": "npm:@nolyfill/string.prototype.matchall@^1",
-		"string.prototype.repeat": "npm:@nolyfill/string.prototype.repeat@^1",
+		"string.prototype.repeat": "npm:@nolyfill/string.prototype.repeat@^1.0.28",
 		"string.prototype.trim": "npm:@nolyfill/string.prototype.trim@^1",
 		"string.prototype.trimend": "npm:@nolyfill/string.prototype.trimend@^1",
 		"string.prototype.trimstart": "npm:@nolyfill/string.prototype.trimstart@^1",
