@@ -66,7 +66,7 @@
 		"define-properties": "npm:@nolyfill/define-properties@^1",
 		"discord-api-types": "0.37.92",
 		"discord.js": "patch:discord.js@npm%3A14.16.0-dev.1721607097-b2970bb2d#~/.yarn/patches/discord.js-npm-14.16.0-dev.1721607097-b2970bb2d-de2b537737.patch",
-		"es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@^1",
+		"es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@^1.0.21",
 		"es-set-tostringtag": "npm:@nolyfill/es-set-tostringtag@^1",
 		"function-bind": "npm:@nolyfill/function-bind@^1",
 		"function.prototype.name": "npm:@nolyfill/function.prototype.name@^1",
