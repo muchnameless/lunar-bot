@@ -58,7 +58,7 @@
 		"array-includes": "npm:@nolyfill/array-includes@^1",
 		"array.prototype.findlast": "npm:@nolyfill/array.prototype.findlast@^1",
 		"array.prototype.flat": "npm:@nolyfill/array.prototype.flat@^1",
-		"array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@^1",
+		"array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@^1.0.28",
 		"array.prototype.tosorted": "npm:@nolyfill/array.prototype.tosorted@^1",
 		"arraybuffer.prototype.slice": "npm:@nolyfill/arraybuffer.prototype.slice@^1",
 		"available-typed-arrays": "npm:@nolyfill/available-typed-arrays@^1",
