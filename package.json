@@ -109,7 +109,7 @@
 		"string.prototype.matchall": "npm:@nolyfill/string.prototype.matchall@^1",
 		"string.prototype.repeat": "npm:@nolyfill/string.prototype.repeat@^1",
 		"string.prototype.trim": "npm:@nolyfill/string.prototype.trim@^1",
-		"string.prototype.trimend": "npm:@nolyfill/string.prototype.trimend@^1",
+		"string.prototype.trimend": "npm:@nolyfill/string.prototype.trimend@^1.0.28",
 		"string.prototype.trimstart": "npm:@nolyfill/string.prototype.trimstart@^1",
 		"typed-array-buffer": "npm:@nolyfill/typed-array-buffer@^1",
 		"typed-array-byte-length": "npm:@nolyfill/typed-array-byte-length@^1",
