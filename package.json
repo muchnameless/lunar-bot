@@ -78,7 +78,7 @@
 		"has-symbols": "npm:@nolyfill/has-symbols@^1",
 		"has-tostringtag": "npm:@nolyfill/has-tostringtag@^1",
 		"hasown": "npm:@nolyfill/hasown@^1",
-		"internal-slot": "npm:@nolyfill/internal-slot@^1",
+		"internal-slot": "npm:@nolyfill/internal-slot@^1.0.29",
 		"is-arguments": "npm:@nolyfill/is-arguments@^1",
 		"is-array-buffer": "npm:@nolyfill/is-array-buffer@^1",
 		"is-core-module": "npm:@nolyfill/is-core-module@^1",
