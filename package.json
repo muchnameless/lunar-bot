@@ -56,7 +56,7 @@
 		"@sapphire/timer-manager": "1.0.3-next.f929edc5.0",
 		"array-buffer-byte-length": "npm:@nolyfill/array-buffer-byte-length@^1",
 		"array-includes": "npm:@nolyfill/array-includes@^1",
-		"array.prototype.findlast": "npm:@nolyfill/array.prototype.findlast@^1",
+		"array.prototype.findlast": "npm:@nolyfill/array.prototype.findlast@^1.0.24",
 		"array.prototype.flat": "npm:@nolyfill/array.prototype.flat@^1",
 		"array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@^1",
 		"array.prototype.tosorted": "npm:@nolyfill/array.prototype.tosorted@^1",
