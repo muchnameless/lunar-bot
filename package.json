@@ -68,7 +68,7 @@
 		"discord.js": "patch:discord.js@npm%3A14.16.0-dev.1721607097-b2970bb2d#~/.yarn/patches/discord.js-npm-14.16.0-dev.1721607097-b2970bb2d-de2b537737.patch",
 		"es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@^1",
 		"es-set-tostringtag": "npm:@nolyfill/es-set-tostringtag@^1",
-		"function-bind": "npm:@nolyfill/function-bind@^1",
+		"function-bind": "npm:@nolyfill/function-bind@^1.0.21",
 		"function.prototype.name": "npm:@nolyfill/function.prototype.name@^1",
 		"get-symbol-description": "npm:@nolyfill/get-symbol-description@^1",
 		"globalthis": "npm:@nolyfill/globalthis@^1",
