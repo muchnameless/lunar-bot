@@ -76,7 +76,7 @@
 		"has-property-descriptors": "npm:@nolyfill/has-property-descriptors@^1",
 		"has-proto": "npm:@nolyfill/has-proto@^1",
 		"has-symbols": "npm:@nolyfill/has-symbols@^1",
-		"has-tostringtag": "npm:@nolyfill/has-tostringtag@^1",
+		"has-tostringtag": "npm:@nolyfill/has-tostringtag@^1.0.21",
 		"hasown": "npm:@nolyfill/hasown@^1",
 		"internal-slot": "npm:@nolyfill/internal-slot@^1",
 		"is-arguments": "npm:@nolyfill/is-arguments@^1",
