@@ -1836,7 +1836,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array-includes@npm:@nolyfill/array-includes@^1":
+"array-includes@npm:@nolyfill/array-includes@latest":
   version: 1.0.28
   resolution: "@nolyfill/array-includes@npm:1.0.28"
   dependencies:
@@ -1852,7 +1852,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array.prototype.findlast@npm:@nolyfill/array.prototype.findlast@^1":
+"array.prototype.findlast@npm:@nolyfill/array.prototype.findlast@latest":
   version: 1.0.24
   resolution: "@nolyfill/array.prototype.findlast@npm:1.0.24"
   dependencies:
@@ -1861,7 +1861,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array.prototype.flat@npm:@nolyfill/array.prototype.flat@^1":
+"array.prototype.flat@npm:@nolyfill/array.prototype.flat@latest":
   version: 1.0.28
   resolution: "@nolyfill/array.prototype.flat@npm:1.0.28"
   dependencies:
@@ -1870,7 +1870,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array.prototype.flatmap@npm:@nolyfill/array.prototype.flatmap@^1":
+"array.prototype.flatmap@npm:@nolyfill/array.prototype.flatmap@latest":
   version: 1.0.28
   resolution: "@nolyfill/array.prototype.flatmap@npm:1.0.28"
   dependencies:
@@ -1879,7 +1879,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array.prototype.tosorted@npm:@nolyfill/array.prototype.tosorted@^1":
+"array.prototype.tosorted@npm:@nolyfill/array.prototype.tosorted@latest":
   version: 1.0.24
   resolution: "@nolyfill/array.prototype.tosorted@npm:1.0.24"
   dependencies:
@@ -2606,7 +2606,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal@npm:@nolyfill/deep-equal@^1":
+"deep-equal@npm:@nolyfill/deep-equal@latest":
   version: 1.0.29
   resolution: "@nolyfill/deep-equal@npm:1.0.29"
   dependencies:
@@ -2886,7 +2886,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-iterator-helpers@npm:@nolyfill/es-iterator-helpers@^1":
+"es-iterator-helpers@npm:@nolyfill/es-iterator-helpers@latest":
   version: 1.0.21
   resolution: "@nolyfill/es-iterator-helpers@npm:1.0.21"
   dependencies:
@@ -4019,7 +4019,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hasown@npm:@nolyfill/hasown@^1":
+"hasown@npm:@nolyfill/hasown@latest":
   version: 1.0.29
   resolution: "@nolyfill/hasown@npm:1.0.29"
   checksum: 10/18ea3fe3983f108ed91db981852d6b4b51f27ecadc415e710641869f9327b0cfa72512747a1ac461eb183aeb812cbb1e30bc0122c3d3024904447bb88506e53f
@@ -4272,7 +4272,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-core-module@npm:@nolyfill/is-core-module@^1":
+"is-core-module@npm:@nolyfill/is-core-module@latest":
   version: 1.0.39
   resolution: "@nolyfill/is-core-module@npm:1.0.39"
   checksum: 10/0d6e098b871eca71d875651288e1f0fa770a63478b0b50479c99dc760c64175a56b5b04f58d5581bbcc6b552b8191ab415eada093d8df9597ab3423c8cac1815
@@ -6149,7 +6149,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.assign@npm:@nolyfill/object.assign@^1":
+"object.assign@npm:@nolyfill/object.assign@latest":
   version: 1.0.28
   resolution: "@nolyfill/object.assign@npm:1.0.28"
   dependencies:
@@ -6158,7 +6158,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.entries@npm:@nolyfill/object.entries@^1":
+"object.entries@npm:@nolyfill/object.entries@latest":
   version: 1.0.28
   resolution: "@nolyfill/object.entries@npm:1.0.28"
   dependencies:
@@ -6167,7 +6167,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.fromentries@npm:@nolyfill/object.fromentries@^1":
+"object.fromentries@npm:@nolyfill/object.fromentries@latest":
   version: 1.0.28
   resolution: "@nolyfill/object.fromentries@npm:1.0.28"
   dependencies:
@@ -6176,7 +6176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.values@npm:@nolyfill/object.values@^1":
+"object.values@npm:@nolyfill/object.values@latest":
   version: 1.0.28
   resolution: "@nolyfill/object.values@npm:1.0.28"
   dependencies:
@@ -7327,7 +7327,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-regex-test@npm:@nolyfill/safe-regex-test@^1":
+"safe-regex-test@npm:@nolyfill/safe-regex-test@latest":
   version: 1.0.29
   resolution: "@nolyfill/safe-regex-test@npm:1.0.29"
   checksum: 10/a05df887facdde98bfcc24290b2c094a11277555d07e4e567e730377c5629ad74c0d9f0f473f94a37bbf307588690962449cd7f9ea9c68721c5fe6a49abce054
@@ -7711,7 +7711,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string.prototype.includes@npm:@nolyfill/string.prototype.includes@^1":
+"string.prototype.includes@npm:@nolyfill/string.prototype.includes@latest":
   version: 1.0.28
   resolution: "@nolyfill/string.prototype.includes@npm:1.0.28"
   dependencies:
@@ -7720,7 +7720,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string.prototype.matchall@npm:@nolyfill/string.prototype.matchall@^1":
+"string.prototype.matchall@npm:@nolyfill/string.prototype.matchall@latest":
   version: 1.0.28
   resolution: "@nolyfill/string.prototype.matchall@npm:1.0.28"
   dependencies:
@@ -7729,7 +7729,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string.prototype.repeat@npm:@nolyfill/string.prototype.repeat@^1":
+"string.prototype.repeat@npm:@nolyfill/string.prototype.repeat@latest":
   version: 1.0.28
   resolution: "@nolyfill/string.prototype.repeat@npm:1.0.28"
   dependencies:
@@ -8076,7 +8076,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedarray@npm:@nolyfill/typedarray@^1":
+"typedarray@npm:@nolyfill/typedarray@latest":
   version: 1.0.29
   resolution: "@nolyfill/typedarray@npm:1.0.29"
   checksum: 10/a371e4f0eef9f1fac5404fe6b0b3ebba1b0b9b3a83d1fe4c161651442457717b05a2faf1de2c94a59580ce940d20ef1f78aaab17138de7288acc3959f8b8a0e7
