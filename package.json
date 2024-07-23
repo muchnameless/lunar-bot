@@ -91,7 +91,7 @@
 		"is-typed-array": "npm:@nolyfill/is-typed-array@^1",
 		"is-weakref": "npm:@nolyfill/is-weakref@^1",
 		"isarray": "npm:@nolyfill/isarray@^1",
-		"iterator.prototype": "npm:@nolyfill/iterator.prototype@^1",
+		"iterator.prototype": "npm:@nolyfill/iterator.prototype@^1.0.29",
 		"minecraft-protocol": "patch:minecraft-protocol@1.47.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch",
 		"object-is": "npm:@nolyfill/object-is@^1",
 		"object-keys": "npm:@nolyfill/object-keys@^1",
