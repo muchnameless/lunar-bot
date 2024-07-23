@@ -34,7 +34,7 @@ export default class DonationsCommand extends ApplicationCommand {
 
 		// fill said object
 		for (const { from, amount, notes } of donations) {
-			reducedAmount[from] += amount;
+			reducedAmount[from]! += amount;
 			if (notes) reducedNotes[from]!.push(notes);
 		}
 
