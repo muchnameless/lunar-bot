@@ -111,7 +111,7 @@
 		"string.prototype.trim": "npm:@nolyfill/string.prototype.trim@^1",
 		"string.prototype.trimend": "npm:@nolyfill/string.prototype.trimend@^1",
 		"string.prototype.trimstart": "npm:@nolyfill/string.prototype.trimstart@^1",
-		"typed-array-buffer": "npm:@nolyfill/typed-array-buffer@^1",
+		"typed-array-buffer": "npm:@nolyfill/typed-array-buffer@^1.0.29",
 		"typed-array-byte-length": "npm:@nolyfill/typed-array-byte-length@^1",
 		"typed-array-byte-offset": "npm:@nolyfill/typed-array-byte-offset@^1",
 		"typed-array-length": "npm:@nolyfill/typed-array-length@^1",
