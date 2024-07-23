@@ -104,7 +104,7 @@
 		"safe-array-concat": "npm:@nolyfill/safe-array-concat@^1",
 		"safe-regex-test": "npm:@nolyfill/safe-regex-test@^1",
 		"set-function-length": "npm:@nolyfill/set-function-length@^1",
-		"side-channel": "npm:@nolyfill/side-channel@^1",
+		"side-channel": "npm:@nolyfill/side-channel@^1.0.29",
 		"string.prototype.includes": "npm:@nolyfill/string.prototype.includes@^1",
 		"string.prototype.matchall": "npm:@nolyfill/string.prototype.matchall@^1",
 		"string.prototype.repeat": "npm:@nolyfill/string.prototype.repeat@^1",
