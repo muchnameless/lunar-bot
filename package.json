@@ -70,7 +70,7 @@
 		"es-set-tostringtag": "npm:@nolyfill/es-set-tostringtag@^1",
 		"function-bind": "npm:@nolyfill/function-bind@^1",
 		"function.prototype.name": "npm:@nolyfill/function.prototype.name@^1",
-		"get-symbol-description": "npm:@nolyfill/get-symbol-description@^1",
+		"get-symbol-description": "npm:@nolyfill/get-symbol-description@^1.0.29",
 		"globalthis": "npm:@nolyfill/globalthis@^1",
 		"gopd": "npm:@nolyfill/gopd@^1",
 		"has-property-descriptors": "npm:@nolyfill/has-property-descriptors@^1",
