@@ -118,7 +118,7 @@
 		"typedarray": "npm:@nolyfill/typedarray@^1",
 		"unbox-primitive": "npm:@nolyfill/unbox-primitive@^1",
 		"which-boxed-primitive": "npm:@nolyfill/which-boxed-primitive@^1",
-		"which-typed-array": "npm:@nolyfill/which-typed-array@^1"
+		"which-typed-array": "npm:@nolyfill/which-typed-array@^1.0.29"
 	},
 	"dependencies": {
 		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
