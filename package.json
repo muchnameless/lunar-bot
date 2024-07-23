@@ -73,7 +73,7 @@
 		"get-symbol-description": "npm:@nolyfill/get-symbol-description@^1",
 		"globalthis": "npm:@nolyfill/globalthis@^1",
 		"gopd": "npm:@nolyfill/gopd@^1",
-		"has-property-descriptors": "npm:@nolyfill/has-property-descriptors@^1",
+		"has-property-descriptors": "npm:@nolyfill/has-property-descriptors@^1.0.29",
 		"has-proto": "npm:@nolyfill/has-proto@^1",
 		"has-symbols": "npm:@nolyfill/has-symbols@^1",
 		"has-tostringtag": "npm:@nolyfill/has-tostringtag@^1",
