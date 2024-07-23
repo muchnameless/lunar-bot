@@ -69,7 +69,7 @@
 		"es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@^1",
 		"es-set-tostringtag": "npm:@nolyfill/es-set-tostringtag@^1",
 		"function-bind": "npm:@nolyfill/function-bind@^1",
-		"function.prototype.name": "npm:@nolyfill/function.prototype.name@^1",
+		"function.prototype.name": "npm:@nolyfill/function.prototype.name@^1.0.28",
 		"get-symbol-description": "npm:@nolyfill/get-symbol-description@^1",
 		"globalthis": "npm:@nolyfill/globalthis@^1",
 		"gopd": "npm:@nolyfill/gopd@^1",
