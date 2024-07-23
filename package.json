@@ -117,7 +117,7 @@
 		"typed-array-length": "npm:@nolyfill/typed-array-length@^1",
 		"typedarray": "npm:@nolyfill/typedarray@^1",
 		"unbox-primitive": "npm:@nolyfill/unbox-primitive@^1",
-		"which-boxed-primitive": "npm:@nolyfill/which-boxed-primitive@^1",
+		"which-boxed-primitive": "npm:@nolyfill/which-boxed-primitive@^1.0.29",
 		"which-typed-array": "npm:@nolyfill/which-typed-array@^1"
 	},
 	"dependencies": {
