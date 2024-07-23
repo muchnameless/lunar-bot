@@ -87,7 +87,7 @@
 		"is-regex": "npm:@nolyfill/is-regex@^1",
 		"is-shared-array-buffer": "npm:@nolyfill/is-shared-array-buffer@^1",
 		"is-string": "npm:@nolyfill/is-string@^1",
-		"is-symbol": "npm:@nolyfill/is-symbol@^1",
+		"is-symbol": "npm:@nolyfill/is-symbol@^1.0.29",
 		"is-typed-array": "npm:@nolyfill/is-typed-array@^1",
 		"is-weakref": "npm:@nolyfill/is-weakref@^1",
 		"isarray": "npm:@nolyfill/isarray@^1",
