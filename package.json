@@ -83,7 +83,7 @@
 		"is-array-buffer": "npm:@nolyfill/is-array-buffer@^1",
 		"is-core-module": "npm:@nolyfill/is-core-module@^1",
 		"is-date-object": "npm:@nolyfill/is-date-object@^1",
-		"is-generator-function": "npm:@nolyfill/is-generator-function@^1",
+		"is-generator-function": "npm:@nolyfill/is-generator-function@^1.0.29",
 		"is-regex": "npm:@nolyfill/is-regex@^1",
 		"is-shared-array-buffer": "npm:@nolyfill/is-shared-array-buffer@^1",
 		"is-string": "npm:@nolyfill/is-string@^1",
