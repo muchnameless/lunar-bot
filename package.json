@@ -114,7 +114,7 @@
 		"typed-array-buffer": "npm:@nolyfill/typed-array-buffer@^1",
 		"typed-array-byte-length": "npm:@nolyfill/typed-array-byte-length@^1",
 		"typed-array-byte-offset": "npm:@nolyfill/typed-array-byte-offset@^1",
-		"typed-array-length": "npm:@nolyfill/typed-array-length@^1",
+		"typed-array-length": "npm:@nolyfill/typed-array-length@^1.0.29",
 		"typedarray": "npm:@nolyfill/typedarray@^1",
 		"unbox-primitive": "npm:@nolyfill/unbox-primitive@^1",
 		"which-boxed-primitive": "npm:@nolyfill/which-boxed-primitive@^1",
