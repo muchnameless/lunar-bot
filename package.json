@@ -171,7 +171,7 @@
 		"eslint-config-neon": "^0.1.62",
 		"ley": "^0.8.1",
 		"lint-staged": "^15.2.7",
-		"pino-pretty": "^11.2.1",
+		"pino-pretty": "^11.2.2",
 		"sort-package-json": "^2.10.0",
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.5.4"
