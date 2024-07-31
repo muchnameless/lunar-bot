@@ -117,4 +117,4 @@ jobs:
           persist-credentials: false
 
       - name: Run Typos CI
-        uses: crate-ci/typos@c7af4712eda24dd1ef54bd8212973888489eb0ce # v1.23.5
+        uses: crate-ci/typos@935271f0204ebdf61717cf6caac31d8d115f1c14 # v1.23.6
