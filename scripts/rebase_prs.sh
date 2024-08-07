@@ -1,10 +1,10 @@
-#!/bin/tcsh -f
+#!/bin/zsh
 
 git checkout main
 git pull
 
-foreach b (`gh pr list --json headRefName --jq '.[].headRefName' | awk '! /renovate/ {print}'`)
-    git checkout $b && git rebase main && git push -f
-end
+for branch in $(gh pr list --json headRefName --jq '.[].headRefName' | awk '!/^renovate/'); do
+    git checkout $branch && git rebase main && git push --force
+done
 
 git checkout main

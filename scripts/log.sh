@@ -1,30 +1,30 @@
-#!/bin/tcsh -f
+#!/bin/zsh
 
-set log_file = ~/lunar-bot/logs/lunar-bot-out.log
-set pino_options = '--config ~/lunar-bot/.pino-prettyrc'
+readonly BOT_ROOT=${0:a:h:h}
+readonly LOG_FILE="$BOT_ROOT/logs/lunar-bot-out.log"
+readonly PINO_OPTIONS="--config '$BOT_ROOT/.pino-prettyrc'"
+readonly GREP_OPTIONS='--line-buffered --max-count=50'
 
-if ($#argv == 0) then
-	tail -F $log_file -n 50 \
-	| pino-pretty $pino_options
-else
-	set grep_options = '--line-buffered'
-
-	switch($argv[1])
-		case 'error':
-			tail -F $log_file -n 10000 \
-			| grep $grep_options '"level":50' \
-			| pino-pretty $pino_options
-
-			breaksw
-		case 'warn':
-			tail -F $log_file -n 10000 \
-			| grep $grep_options '"level":40' \
-			| pino-pretty $pino_options
-
-			breaksw
-		default:
-			cat $log_file \
-			| grep $grep_options -i "$argv" \
-			| pino-pretty $pino_options
-	endsw
-endif
+case $1 in
+	('')
+		tail -F "$LOG_FILE" -n 50 \
+		| pino-pretty $PINO_OPTIONS
+		;;
+	('error')
+		tac "$LOG_FILE" \
+		| grep $GREP_OPTIONS '"level":50' \
+		| tac \
+		| pino-pretty $PINO_OPTIONS
+		;;
+	('warn')
+		tac "$LOG_FILE" \
+		| grep $GREP_OPTIONS '"level":40' \
+		| tac \
+		| pino-pretty $PINO_OPTIONS
+		;;
+	(*)
+		tac "$LOG_FILE" \
+		| grep $GREP_OPTIONS -i "$*" \
+		| tac \
+		| pino-pretty $PINO_OPTIONS
+esac

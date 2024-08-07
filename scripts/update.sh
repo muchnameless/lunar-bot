@@ -1,15 +1,16 @@
 #!/bin/zsh
 
-cd ~/lunar-bot
+readonly BOT_ROOT=${0:a:h:h}
+cd "$BOT_ROOT"
 
 echo "pulling from git"
-current=$(git rev-parse --short HEAD)
+readonly CURRENT=$(git rev-parse --short HEAD)
 git pull
-new=$(git rev-parse --short HEAD)
+readonly NEW=$(git rev-parse --short HEAD)
 
-if [[ $current != $new ]]; then
+if [[ $CURRENT != $NEW ]]; then
 	echo ""
-	./scripts/bot.sh status
+	"$BOT_ROOT/scripts/bot.sh" status
 
 	echo ""
 	echo "updating local dependencies"
@@ -23,4 +24,4 @@ fi
 echo ""
 echo "done"
 
-[[ $current != $new ]] && exit 1
+[[ $CURRENT != $NEW ]] && exit 1
