@@ -10,7 +10,7 @@ readonly NEW=$(git rev-parse --short HEAD)
 
 if [[ $CURRENT != $NEW ]]; then
 	echo ""
-	"$BOT_ROOT/scripts/bot.sh" status
+	./scripts/bot.sh status
 
 	echo ""
 	echo "updating local dependencies"

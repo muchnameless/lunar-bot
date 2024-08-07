@@ -16,7 +16,8 @@ case $1 in
 		sudo systemctl restart lunar-bot
 		;;
 	('status')
-		readonly RUNNING=$(<"$BOT_ROOT/running.log")
+		cd "$BOT_ROOT"
+		readonly RUNNING=$(<'running.log')
 		readonly CURRENT=$(git rev-parse --short HEAD)
 
 		echo " --- latest"
