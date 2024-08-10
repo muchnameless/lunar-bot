@@ -56,11 +56,11 @@
 		"@sapphire/timer-manager": "1.0.3-next.f929edc5.0",
 		"discord-api-types": "0.37.93",
 		"discord.js": "patch:discord.js@14.16.0-dev.1723162257-432e9b842#~/.yarn/patches/discord.js-npm-14.16.0-dev.1722989457-5c90b7f71-57a697fc42.patch",
+		"is-core-module": "npm:@nolyfill/is-core-module@^1.0.39",
 		"minecraft-protocol": "patch:minecraft-protocol@1.47.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch",
-		"is-core-module": "npm:@nolyfill/is-core-module@^1",
-		"object.assign": "npm:@nolyfill/object.assign@^1",
-		"object.values": "npm:@nolyfill/object.values@^1",
-		"typedarray": "npm:@nolyfill/typedarray@^1"
+		"object.assign": "npm:@nolyfill/object.assign@^1.0.28",
+		"object.values": "npm:@nolyfill/object.values@^1.0.28",
+		"typedarray": "npm:@nolyfill/typedarray@^1.0.29"
 	},
 	"dependencies": {
 		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
