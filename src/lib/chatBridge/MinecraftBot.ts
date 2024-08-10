@@ -42,6 +42,7 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 	 * load bot events
 	 */
 	const events = await getEvents();
+	// eslint-disable-next-line @typescript-eslint/unbound-method
 	for (const { name, callback } of events) {
 		bot[SPAWN_EVENTS.has(name) ? 'once' : 'on'](name, callback.bind(chatBridge));
 	}
