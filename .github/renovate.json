@@ -25,6 +25,11 @@
 				"automerge": true
 			},
 			{
+				"matchPackagePatterns": ["^@nolyfill"],
+				"groupName": "nolyfill",
+				"automerge": true
+			},
+			{
 				"matchPackageNames": ["node"],
 				"ignoreUnstable": false
 			}
