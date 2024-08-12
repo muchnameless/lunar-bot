@@ -1019,13 +1019,13 @@ __metadata:
   linkType: hard
 
 "@sapphire/type@npm:^2.5.2-next.48b714b":
-  version: 2.5.2-next.ccf409d
-  resolution: "@sapphire/type@npm:2.5.2-next.ccf409d"
+  version: 2.5.2-next.85f6207
+  resolution: "@sapphire/type@npm:2.5.2-next.85f6207"
   dependencies:
     "@discordjs/node-pre-gyp": "npm:^0.4.5"
     nan: "npm:^2.20.0"
     tslib: "npm:^2.6.3"
-  checksum: 10/f3272a570f3e2bdfa13e55e245c8af9b7f006e246e750dad7d40fd10cbfb59138f0830973a272a8fdf5cfa2e40ee796592d4c384bd361556ddc5b4feb4ec6eee
+  checksum: 10/66f9786ab5984e09fa41a57f49585f7da0f2dcb7d0e00d20c377863a87cc247a15e28fefd0fb2b3be9404a37ee8ac270dd3b655c8408925961604306fb9bd135
   languageName: node
   linkType: hard
 
