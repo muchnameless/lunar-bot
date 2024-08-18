@@ -5041,7 +5041,7 @@ __metadata:
     lilyweight: "npm:^2.7.2"
     lint-staged: "npm:^15.2.9"
     luxon: "npm:^3.5.0"
-    minecraft-data: "npm:^3.67.0"
+    minecraft-data: "npm:^3.68.0"
     minecraft-protocol: "npm:1.47.0"
     ms: "npm:3.0.0-canary.1"
     pg: "npm:^8.12.0"
@@ -5663,10 +5663,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^3.0.0, minecraft-data@npm:^3.55.0, minecraft-data@npm:^3.67.0":
-  version: 3.67.0
-  resolution: "minecraft-data@npm:3.67.0"
-  checksum: 10/8e8403670401817ff88882ca0fced613fc1843c2e6c6d8c57b391bf337a3d6480b4b6bdc9beedea618436cf94024ea51d2321c63297adeed7840b02e70f70d5e
+"minecraft-data@npm:^3.0.0, minecraft-data@npm:^3.55.0, minecraft-data@npm:^3.68.0":
+  version: 3.68.0
+  resolution: "minecraft-data@npm:3.68.0"
+  checksum: 10/ccdf6806a0cf4a3b1da69a272d0b1018bd1988f56dc35b0b21f2670a7b553fcef1a01f503efd1477778a1af10fc601e38d694f9115391d260af000782dd469ff
   languageName: node
   linkType: hard
 
