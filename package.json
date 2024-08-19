@@ -99,7 +99,7 @@
 		"re2": "^1.21.3",
 		"sequelize": "^6.37.3",
 		"tslib": "^2.6.3",
-		"undici": "^6.19.7",
+		"undici": "^6.19.8",
 		"zlib-sync": "^0.1.9"
 	},
 	"devDependencies": {
