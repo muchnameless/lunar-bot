@@ -127,7 +127,7 @@
 		"@types/common-tags": "^1.8.4",
 		"@types/luxon": "^3.4.2",
 		"@types/node": "^20.16.2",
-		"@types/pg": "^8.11.7",
+		"@types/pg": "^8.11.8",
 		"eslint": "^8.57.0",
 		"eslint-config-neon": "^0.1.62",
 		"ley": "^0.8.1",
