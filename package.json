@@ -131,7 +131,7 @@
 		"eslint": "^8.57.0",
 		"eslint-config-neon": "^0.1.62",
 		"ley": "^0.8.1",
-		"lint-staged": "^15.2.9",
+		"lint-staged": "^15.2.10",
 		"pino-pretty": "^11.2.2",
 		"sort-package-json": "^2.10.1",
 		"ts-prune": "^0.10.3",
