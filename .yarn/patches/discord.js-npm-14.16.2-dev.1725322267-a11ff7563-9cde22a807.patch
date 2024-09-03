@@ -189,7 +189,7 @@ index 7072345248719a0c8165332d660bae70d6f425b9..5dcda05b8afe856a4c9ebbbb34ce8b54
  }
  
 diff --git a/src/structures/Embed.js b/src/structures/Embed.js
-index 8c5f20bb7ef3522bcb5be130ca06be37716d108a..9da3feae62e5280e09d5135de93ee4ca53b42379 100644
+index c1534ec679c438493d0df5db0108bbdd54c6db0d..af366ab584613312adc6d328ce736076def11a7d 100644
 --- a/src/structures/Embed.js
 +++ b/src/structures/Embed.js
 @@ -18,11 +18,11 @@ class Embed {
@@ -295,10 +295,10 @@ index 4f597d20063b2d64000fdb53909bf506edb4f032..48c33891cfad63e3f493de07ce8eebe0
    }
  
 diff --git a/src/structures/Message.js b/src/structures/Message.js
-index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28fd62a66c 100644
+index 0fe2f762e3ac83ee0a140cca1499d02742a2e093..c08b2dde16f592710580667cc5f7858bdc38d669 100644
 --- a/src/structures/Message.js
 +++ b/src/structures/Message.js
-@@ -334,10 +334,13 @@ class Message extends Base {
+@@ -335,10 +335,13 @@ class Message extends Base {
        this.client.channels._add(data.thread, this.guild);
      }
  
@@ -316,7 +316,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
      }
  
      if ('flags' in data) {
-@@ -649,19 +652,23 @@ class Message extends Base {
+@@ -678,19 +681,23 @@ class Message extends Base {
     * @readonly
     */
    get editable() {
@@ -346,7 +346,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
    }
  
    /**
-@@ -672,15 +679,19 @@ class Message extends Base {
+@@ -701,15 +708,19 @@ class Message extends Base {
    get deletable() {
      if (UndeletableMessageTypes.includes(this.type)) return false;
  
@@ -369,7 +369,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
      if (!permissions) return false;
      // This flag allows deleting even if timed out
      if (permissions.has(PermissionFlagsBits.Administrator, false)) return true;
-@@ -719,7 +730,8 @@ class Message extends Base {
+@@ -748,7 +759,8 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        !this.system &&
@@ -379,7 +379,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
            (channel?.viewable &&
              channel?.permissionsFor(this.client.user)?.has(PermissionFlagsBits.ManageMessages, false))),
      );
-@@ -751,7 +763,7 @@ class Message extends Base {
+@@ -780,7 +792,7 @@ class Message extends Base {
      const { channel } = this;
      return Boolean(
        channel?.type === ChannelType.GuildAnnouncement &&
@@ -388,7 +388,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
          this.type === MessageType.Default &&
          !this.poll &&
          channel.viewable &&
-@@ -770,8 +782,9 @@ class Message extends Base {
+@@ -799,8 +811,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    edit(options) {
@@ -400,7 +400,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
    }
  
    /**
-@@ -786,8 +799,9 @@ class Message extends Base {
+@@ -815,8 +828,9 @@ class Message extends Base {
     * }
     */
    crosspost() {
@@ -412,7 +412,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
    }
  
    /**
-@@ -801,8 +815,9 @@ class Message extends Base {
+@@ -830,8 +844,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async pin(reason) {
@@ -424,7 +424,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
      return this;
    }
  
-@@ -817,8 +832,9 @@ class Message extends Base {
+@@ -846,8 +861,9 @@ class Message extends Base {
     *   .catch(console.error)
     */
    async unpin(reason) {
@@ -436,7 +436,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
      return this;
    }
  
-@@ -838,13 +854,14 @@ class Message extends Base {
+@@ -867,13 +883,14 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async react(emoji) {
@@ -454,7 +454,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
          [this.client.actions.injectedMessage]: this,
          emoji: resolvePartialEmoji(emoji),
        },
-@@ -862,8 +879,9 @@ class Message extends Base {
+@@ -891,8 +908,9 @@ class Message extends Base {
     *   .catch(console.error);
     */
    async delete() {
@@ -466,7 +466,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
      return this;
    }
  
-@@ -885,7 +903,8 @@ class Message extends Base {
+@@ -914,7 +932,8 @@ class Message extends Base {
     *   .catch(console.error);
     */
    reply(options) {
@@ -476,7 +476,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
      let data;
  
      if (options instanceof MessagePayload) {
-@@ -898,7 +917,7 @@ class Message extends Base {
+@@ -927,7 +946,7 @@ class Message extends Base {
          },
        });
      }
@@ -485,7 +485,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
    }
  
    /**
-@@ -918,12 +937,13 @@ class Message extends Base {
+@@ -947,12 +966,13 @@ class Message extends Base {
     * @returns {Promise<ThreadChannel>}
     */
    startThread(options = {}) {
@@ -502,7 +502,7 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
    }
  
    /**
-@@ -932,8 +952,9 @@ class Message extends Base {
+@@ -961,8 +981,9 @@ class Message extends Base {
     * @returns {Promise<Message>}
     */
    fetch(force = true) {
@@ -515,18 +515,18 @@ index 54c279591716447a460be8182f86b31b89125928..1d022ca87f28ddf4556bed30aaee5f28
  
    /**
 diff --git a/src/structures/MessagePayload.js b/src/structures/MessagePayload.js
-index b8058d0f7aae4617fba0157c8c1dfa813a5010e0..15744de8c2476081b6b9096b4ba0bb9f7cc4bd73 100644
+index dad8ffedb026ec03387389b3a052a5b20b2a1f70..74d6776ad28fcbd867aaf0bcb0ae3fbdc1f978c1 100644
 --- a/src/structures/MessagePayload.js
 +++ b/src/structures/MessagePayload.js
-@@ -3,7 +3,6 @@
- const { Buffer } = require('node:buffer');
+@@ -4,7 +4,6 @@ const { Buffer } = require('node:buffer');
  const { lazy, isJSONEncodable } = require('@discordjs/util');
+ const { DiscordSnowflake } = require('@sapphire/snowflake');
  const { MessageFlags } = require('discord-api-types/v10');
 -const ActionRowBuilder = require('./ActionRowBuilder');
  const { DiscordjsError, DiscordjsRangeError, ErrorCodes } = require('../errors');
  const { resolveFile } = require('../util/DataResolver');
  const MessageFlagsBitField = require('../util/MessageFlagsBitField');
-@@ -139,7 +138,7 @@ class MessagePayload {
+@@ -148,7 +147,7 @@ class MessagePayload {
      }
  
      const components = this.options.components?.map(component =>
@@ -535,7 +535,7 @@ index b8058d0f7aae4617fba0157c8c1dfa813a5010e0..15744de8c2476081b6b9096b4ba0bb9f
      );
  
      let username;
-@@ -245,9 +244,9 @@ class MessagePayload {
+@@ -254,9 +253,9 @@ class MessagePayload {
     * @returns {Promise<MessagePayload>}
     */
    async resolveFiles() {
@@ -619,43 +619,10 @@ index edc328749f4a12bb77d91a06bbd9a7a9a91c8614..2edfb07cca9c56a87db51379cf298069
  }
  
 diff --git a/typings/index.d.ts b/typings/index.d.ts
-index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e329b892c8 100644
+index 1dc3d97ea94ad5d707d01cb4c587568bf08b82af..2af7ac6d7d8bfd8c0ced5c4bb595c78b57bc7e3f 100644
 --- a/typings/index.d.ts
 +++ b/typings/index.d.ts
-@@ -243,19 +243,19 @@ import {
-   RawWidgetMemberData,
- } from './rawDataTypes.js';
- 
--declare module 'node:events' {
--  class EventEmitter {
--    // Add type overloads for client events.
--    public static once<Emitter extends EventEmitter, Event extends keyof ClientEvents>(
--      eventEmitter: Emitter,
--      eventName: Emitter extends Client ? Event : string,
--    ): Promise<Emitter extends Client ? ClientEvents[Event] : any[]>;
--    public static on<Emitter extends EventEmitter, Events extends keyof ClientEvents>(
--      eventEmitter: Emitter,
--      eventName: Emitter extends Client ? Events : string,
--    ): AsyncIterableIterator<Emitter extends Client ? ClientEvents[Events] : any>;
--  }
--}
-+//declare module 'node:events' {
-+//  class EventEmitter {
-+//    // Add type overloads for client events.
-+//    public static once<Emitter extends EventEmitter, Event extends keyof ClientEvents>(
-+//      eventEmitter: Emitter,
-+//      eventName: Emitter extends Client ? Event : string,
-+//    ): Promise<Emitter extends Client ? ClientEvents[Event] : any[]>;
-+//    public static on<Emitter extends EventEmitter, Events extends keyof ClientEvents>(
-+//      eventEmitter: Emitter,
-+//      eventName: Emitter extends Client ? Events : string,
-+//    ): AsyncIterableIterator<Emitter extends Client ? ClientEvents[Events] : any>;
-+//  }
-+//}
- 
- //#region Classes
- 
-@@ -336,7 +336,13 @@ export type MessageActionRowComponent =
+@@ -327,7 +327,13 @@ export type MessageActionRowComponent =
    | RoleSelectMenuComponent
    | MentionableSelectMenuComponent
    | ChannelSelectMenuComponent;
@@ -670,7 +637,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
  
  export class ActionRow<ComponentType extends MessageActionRowComponent | ModalActionRowComponent> extends Component<
    APIActionRowComponent<APIMessageActionRowComponent | APIModalActionRowComponent>
-@@ -733,6 +739,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
+@@ -729,6 +735,7 @@ export class ButtonInteraction<Cached extends CacheType = CacheType> extends Mes
      ButtonComponent,
      APIButtonComponent,
      ButtonComponent | APIButtonComponent,
@@ -678,7 +645,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      ButtonComponent | APIButtonComponent
    >;
    public inGuild(): this is ButtonInteraction<'raw' | 'cached'>;
-@@ -907,7 +914,7 @@ export class EmbedBuilder extends BuildersEmbed {
+@@ -903,7 +910,7 @@ export class EmbedBuilder extends BuildersEmbed {
  export class Embed {
    private constructor(data: APIEmbed);
    public readonly data: Readonly<APIEmbed>;
@@ -687,7 +654,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
    public get footer(): EmbedFooterData | null;
    public get title(): string | null;
    public get description(): string | null;
-@@ -1838,7 +1845,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
+@@ -1889,7 +1896,7 @@ export class IntentsBitField extends BitField<GatewayIntentsString> {
    public static resolve(bit?: BitFieldResolvable<GatewayIntentsString, number>): number;
  }
  
@@ -696,7 +663,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
  
  export type CacheTypeReducer<
    State extends CacheType,
-@@ -1846,13 +1853,19 @@ export type CacheTypeReducer<
+@@ -1897,13 +1904,19 @@ export type CacheTypeReducer<
    RawType = CachedType,
    PresentType = CachedType | RawType,
    Fallback = PresentType | null,
@@ -717,7 +684,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
  
  export type Interaction<Cached extends CacheType = CacheType> =
    | ChatInputCommandInteraction<Cached>
-@@ -1878,7 +1891,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
+@@ -1929,7 +1942,8 @@ export class BaseInteraction<Cached extends CacheType = CacheType> extends Base
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
      GuildTextBasedChannel | null,
@@ -727,7 +694,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
    >;
    public channelId: Snowflake | null;
    public get createdAt(): Date;
-@@ -2160,16 +2174,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
+@@ -2217,16 +2231,16 @@ export class Message<InGuild extends boolean = boolean> extends Base {
  }
  
  export class AttachmentBuilder {
@@ -747,7 +714,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
    public static from(other: JSONEncodable<AttachmentPayload>): AttachmentBuilder;
  }
  
-@@ -2221,6 +2235,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
+@@ -2279,6 +2293,7 @@ export class MessageComponentInteraction<Cached extends CacheType = CacheType> e
      MessageActionRowComponent,
      Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>,
@@ -755,7 +722,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      MessageActionRowComponent | Exclude<APIMessageComponent, APIActionRowComponent<APIMessageActionRowComponent>>
    >;
    public componentType: Exclude<ComponentType, ComponentType.ActionRow | ComponentType.TextInput>;
-@@ -2406,11 +2421,18 @@ export interface TextInputModalData extends BaseModalData {
+@@ -2471,11 +2486,18 @@ export interface TextInputModalData extends BaseModalData {
    value: string;
  }
  
@@ -774,7 +741,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
  export class ModalSubmitFields {
    private constructor(components: readonly (readonly ModalActionRowComponent[])[]);
    public components: ActionRowModalData[];
-@@ -2418,6 +2440,7 @@ export class ModalSubmitFields {
+@@ -2483,6 +2505,7 @@ export class ModalSubmitFields {
    public getField<Type extends ComponentType>(customId: string, type: Type): { type: Type } & TextInputModalData;
    public getField(customId: string, type?: ComponentType): TextInputModalData;
    public getTextInputValue(customId: string): string;
@@ -782,7 +749,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
  }
  
  export interface ModalMessageModalSubmitInteraction<Cached extends CacheType = CacheType>
-@@ -2754,6 +2777,7 @@ export class StringSelectMenuInteraction<
+@@ -2820,6 +2843,7 @@ export class StringSelectMenuInteraction<
      StringSelectMenuComponent,
      APIStringSelectComponent,
      StringSelectMenuComponent | APIStringSelectComponent,
@@ -790,7 +757,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      StringSelectMenuComponent | APIStringSelectComponent
    >;
    public componentType: ComponentType.StringSelect;
-@@ -2777,6 +2801,7 @@ export class UserSelectMenuInteraction<
+@@ -2843,6 +2867,7 @@ export class UserSelectMenuInteraction<
      UserSelectMenuComponent,
      APIUserSelectComponent,
      UserSelectMenuComponent | APIUserSelectComponent,
@@ -798,7 +765,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      UserSelectMenuComponent | APIUserSelectComponent
    >;
    public componentType: ComponentType.UserSelect;
-@@ -2800,6 +2825,7 @@ export class RoleSelectMenuInteraction<
+@@ -2866,6 +2891,7 @@ export class RoleSelectMenuInteraction<
      RoleSelectMenuComponent,
      APIRoleSelectComponent,
      RoleSelectMenuComponent | APIRoleSelectComponent,
@@ -806,7 +773,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      RoleSelectMenuComponent | APIRoleSelectComponent
    >;
    public componentType: ComponentType.RoleSelect;
-@@ -2819,6 +2845,7 @@ export class MentionableSelectMenuInteraction<
+@@ -2885,6 +2911,7 @@ export class MentionableSelectMenuInteraction<
      MentionableSelectMenuComponent,
      APIMentionableSelectComponent,
      MentionableSelectMenuComponent | APIMentionableSelectComponent,
@@ -814,7 +781,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      MentionableSelectMenuComponent | APIMentionableSelectComponent
    >;
    public componentType: ComponentType.MentionableSelect;
-@@ -2843,6 +2870,7 @@ export class ChannelSelectMenuInteraction<
+@@ -2909,6 +2936,7 @@ export class ChannelSelectMenuInteraction<
      ChannelSelectMenuComponent,
      APIChannelSelectComponent,
      ChannelSelectMenuComponent | APIChannelSelectComponent,
@@ -822,7 +789,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      ChannelSelectMenuComponent | APIChannelSelectComponent
    >;
    public componentType: ComponentType.ChannelSelect;
-@@ -4110,7 +4138,7 @@ export class ApplicationCommandPermissionsManager<
+@@ -4176,7 +4204,7 @@ export class ApplicationCommandPermissionsManager<
      },
    ): Promise<boolean>;
    public fetch(options: FetchSingleOptions): Promise<ApplicationCommandPermissions[]>;
@@ -831,8 +798,8 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
    public remove(
      options:
        | (FetchSingleOptions & {
-@@ -4702,11 +4730,6 @@ export interface BaseApplicationCommandData {
-   nsfw?: boolean;
+@@ -4780,11 +4808,6 @@ export interface BaseApplicationCommandData {
+   integrationTypes?: readonly ApplicationIntegrationType[];
  }
  
 -export interface AttachmentData {
@@ -843,7 +810,7 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
  export type CommandOptionDataTypeResolvable = ApplicationCommandOptionType;
  
  export type CommandOptionChannelResolvableType = ApplicationCommandOptionType.Channel;
-@@ -6329,14 +6352,7 @@ export interface BaseMessageOptions {
+@@ -6443,14 +6466,7 @@ export interface BaseMessageOptions {
    content?: string;
    embeds?: readonly (JSONEncodable<APIEmbed> | APIEmbed)[];
    allowedMentions?: MessageMentionOptions;
@@ -860,10 +827,10 @@ index b1071e1d355883fbb3027da9b6be066ee33cbe05..f2b94d1a15eb3f973de8cbb86aeb23e3
      | JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>
      | ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
 diff --git a/typings/index.test-d.ts b/typings/index.test-d.ts
-index 407f6023e8d266fb713302fa609f803d63a2f24d..3b3eadff075e003f87cd52ece17aea03c2512a5f 100644
+index 02011850550aa344c7409ae508eb6fa19fa11912..6a918f22a7d823b4b297c7b8df4499785d72b23b 100644
 --- a/typings/index.test-d.ts
 +++ b/typings/index.test-d.ts
-@@ -415,7 +415,7 @@ client.on('messageCreate', async message => {
+@@ -423,7 +423,7 @@ client.on('messageCreate', async message => {
    assertIsMessage(channel.send({}));
    assertIsMessage(channel.send({ embeds: [] }));
  

@@ -6,6 +6,7 @@ import {
 	type Channel,
 	type Message,
 	type MessageCreateOptions,
+	type PartialGroupDMChannel,
 	type Snowflake,
 	type TextBasedChannel,
 	type TextChannel,
@@ -121,6 +122,7 @@ export class ChannelUtil extends null {
 		try {
 			switch (channel.type) {
 				case ChannelType.DM:
+				case ChannelType.GroupDM:
 					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map(async (id) => channel.messages.delete(id)));
 
 					await channel.messages.delete(IdOrIds);
@@ -254,7 +256,7 @@ export class ChannelUtil extends null {
 		}
 
 		try {
-			return await channel.send(addEnforcedNonce(_options));
+			return await (channel as Exclude<typeof channel, PartialGroupDMChannel>).send(addEnforcedNonce(_options));
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
 			logger.error({ channel: this.logInfo(channel), err: error, data: _options }, '[CHANNEL SEND]');
