@@ -33,6 +33,7 @@ import {
 	type InteractionUpdateOptions,
 	type MessageResolvable,
 	type ModalBuilder,
+	type PartialGroupDMChannel,
 	type TextBasedChannel,
 } from 'discord.js';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '#constants';
@@ -238,7 +239,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -255,7 +256,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -276,7 +277,7 @@ export class InteractionUtil extends null {
 						: interaction.user.tag,
 					userId: interaction.user.id,
 					channel: interaction.guildId
-						? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+						? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 						: 'DM',
 					channelId: interaction.channelId,
 					guild: interaction.guild?.name ?? null,
@@ -294,7 +295,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -311,7 +312,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -328,7 +329,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -345,7 +346,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -365,7 +366,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -382,7 +383,7 @@ export class InteractionUtil extends null {
 								: interaction.user.tag,
 							userId: interaction.user.id,
 							channel: interaction.guildId
-								? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+								? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 								: 'DM',
 							channelId: interaction.channelId,
 							guild: interaction.guild?.name ?? null,
@@ -402,7 +403,7 @@ export class InteractionUtil extends null {
 						: interaction.user.tag,
 					userId: interaction.user.id,
 					channel: interaction.guildId
-						? (interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId
+						? ((interaction.channel as BaseGuildTextChannel | null)?.name ?? interaction.channelId)
 						: 'DM',
 					channelId: interaction.channelId,
 					guild: interaction.guild?.name ?? null,
@@ -915,7 +916,7 @@ export class InteractionUtil extends null {
 				..._options,
 			});
 
-			const collected = await channel.awaitMessages({
+			const collected = await (channel as Exclude<typeof channel, PartialGroupDMChannel>).awaitMessages({
 				filter: (msg) => msg.author.id === interaction.user.id,
 				max: 1,
 				time,
@@ -1168,7 +1169,7 @@ export class InteractionUtil extends null {
 		if (this.checkForce(interaction)) {
 			const IGN =
 				(interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase() ??
-				(options?.fallbackToCurrentUser ? UserUtil.getPlayer(interaction.user)?.ign ?? null : null);
+				(options?.fallbackToCurrentUser ? (UserUtil.getPlayer(interaction.user)?.ign ?? null) : null);
 			if (options?.throwIfNotFound && !IGN) throw 'no IGN specified';
 			return IGN;
 		}

@@ -11,6 +11,7 @@ import {
 	type GuildChannel,
 	type JSONEncodable,
 	type Message,
+	type PartialGroupDMChannel,
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
@@ -79,7 +80,7 @@ export class LogHandler {
 			return null;
 		}
 
-		return channel;
+		return channel as Exclude<typeof channel, PartialGroupDMChannel>;
 	}
 
 	/**

@@ -11,6 +11,7 @@ import {
 	type APIEmbedField,
 	type GuildChannel,
 	type Message,
+	type PartialGroupDMChannel,
 } from 'discord.js';
 import { Model, type Sequelize, type ModelStatic } from 'sequelize';
 import type { db as DbType } from '../index.js';
@@ -492,7 +493,7 @@ export class DatabaseManager {
 
 			if (!taxMessage?.editable) {
 				// taxMessage deleted -> send a new one
-				const { id } = await taxChannel.send(
+				const { id } = await (taxChannel as Exclude<typeof taxChannel, PartialGroupDMChannel>).send(
 					addEnforcedNonce({
 						embeds: [this.createTaxEmbed(this._createTaxEmbedDescription(availableAuctionsLog))],
 					}),
