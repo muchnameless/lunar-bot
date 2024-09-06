@@ -1,5 +1,6 @@
 import {
 	ContextMenuCommandBuilder,
+	InteractionContextType,
 	SlashCommandBuilder,
 	type ChatInputCommandInteraction,
 	type GuildMember,
@@ -18,7 +19,7 @@ export default class UnnickCommand extends ApplicationCommand {
 			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription("resets a user's nickname")
-				.setDMPermission(false)
+				.setContexts(InteractionContextType.Guild)
 				.addUserOption((option) =>
 					option //
 						.setName('user')
@@ -27,7 +28,7 @@ export default class UnnickCommand extends ApplicationCommand {
 				),
 			user: new ContextMenuCommandBuilder() //
 				.setName('Reset nickname')
-				.setDMPermission(false),
+				.setContexts(InteractionContextType.Guild),
 			cooldown: 0,
 		});
 	}
