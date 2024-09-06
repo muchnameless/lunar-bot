@@ -1,24 +1,22 @@
 diff --git a/dist/cjs/index.cjs b/dist/cjs/index.cjs
-index fd9334d66fb65b643584dfcf927fddd88a0bc014..3ced0e190c855f04c03be49c8b6891bebc4628a7 100644
+index c017c9cc8bffe364c662f59a1d56b76f1f7f5a0e..7678d9ae15a4b988817d80ee76d4975eda88a8a3 100644
 --- a/dist/cjs/index.cjs
 +++ b/dist/cjs/index.cjs
-@@ -24,14 +24,12 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
+@@ -21,12 +21,11 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
      });
    }
    setSignal(signal) {
--    if (signal.aborted)
--      return this;
+-    if (signal.aborted) return this;
      this.signal = signal;
      this.signalListener = () => {
        const index = this.queue["promises"].indexOf(this);
-       if (index !== -1)
-         this.queue["promises"].splice(index, 1);
+       if (index !== -1) this.queue["promises"].splice(index, 1);
 -      this.reject(new Error("Request aborted manually"));
 +      this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
      };
      this.signal.addEventListener("abort", this.signalListener);
      return this;
-@@ -101,6 +99,9 @@ var _AsyncQueue = class _AsyncQueue {
+@@ -96,6 +95,9 @@ var _AsyncQueue = class _AsyncQueue {
     * ```
     */
    wait(options) {
@@ -29,26 +27,24 @@ index fd9334d66fb65b643584dfcf927fddd88a0bc014..3ced0e190c855f04c03be49c8b6891be
      if (this.promises.length === 0) {
        this.promises.push(entry);
 diff --git a/dist/esm/index.mjs b/dist/esm/index.mjs
-index ba9ea01894067e747dd138773cce8b792ebadabd..5adcdec748e4bf55b3b9e3739c569b610c3f4b72 100644
+index d38c29b37ecfbc069920397bbccfe7c9ba9c5cc8..47adcc7573ab50a99ec7d795e0b9959b3e1176db 100644
 --- a/dist/esm/index.mjs
 +++ b/dist/esm/index.mjs
-@@ -22,14 +22,12 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
+@@ -19,12 +19,11 @@ var _AsyncQueueEntry = class _AsyncQueueEntry {
      });
    }
    setSignal(signal) {
--    if (signal.aborted)
--      return this;
+-    if (signal.aborted) return this;
      this.signal = signal;
      this.signalListener = () => {
        const index = this.queue["promises"].indexOf(this);
-       if (index !== -1)
-         this.queue["promises"].splice(index, 1);
+       if (index !== -1) this.queue["promises"].splice(index, 1);
 -      this.reject(new Error("Request aborted manually"));
 +      this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
      };
      this.signal.addEventListener("abort", this.signalListener);
      return this;
-@@ -99,6 +97,9 @@ var _AsyncQueue = class _AsyncQueue {
+@@ -94,6 +93,9 @@ var _AsyncQueue = class _AsyncQueue {
     * ```
     */
    wait(options) {
@@ -59,26 +55,24 @@ index ba9ea01894067e747dd138773cce8b792ebadabd..5adcdec748e4bf55b3b9e3739c569b61
      if (this.promises.length === 0) {
        this.promises.push(entry);
 diff --git a/dist/iife/index.global.js b/dist/iife/index.global.js
-index 155bc618b206db5dce44eed172c1d8b60cc0b217..465296d3e2fe6ced703bf367527cc3815c00fcf7 100644
+index acc57ed8a7cfbb00907ed093fc1120d4a6f7cd23..a066dc8aca7eeadbd3471b12bde9ba5df27652cb 100644
 --- a/dist/iife/index.global.js
 +++ b/dist/iife/index.global.js
-@@ -25,14 +25,12 @@ var SapphireAsyncQueue = (function (exports) {
+@@ -22,12 +22,11 @@ var SapphireAsyncQueue = (function (exports) {
        });
      }
      setSignal(signal) {
--      if (signal.aborted)
--        return this;
+-      if (signal.aborted) return this;
        this.signal = signal;
        this.signalListener = () => {
          const index = this.queue["promises"].indexOf(this);
-         if (index !== -1)
-           this.queue["promises"].splice(index, 1);
+         if (index !== -1) this.queue["promises"].splice(index, 1);
 -        this.reject(new Error("Request aborted manually"));
 +        this.reject(new Error("Request aborted manually", { cause: this.signal.reason }));
        };
        this.signal.addEventListener("abort", this.signalListener);
        return this;
-@@ -102,6 +100,9 @@ var SapphireAsyncQueue = (function (exports) {
+@@ -97,6 +96,9 @@ var SapphireAsyncQueue = (function (exports) {
       * ```
       */
      wait(options) {
