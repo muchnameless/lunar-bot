@@ -59,7 +59,7 @@
 		"@sapphire/snowflake": "3.5.4-next.f929edc5.0",
 		"@sapphire/timer-manager": "1.0.3-next.f929edc5.0",
 		"astro-eslint-parser": "npm:@favware/skip-dependency@latest",
-		"discord-api-types": "0.37.99",
+		"discord-api-types": "0.37.100",
 		"discord.js": "patch:discord.js@14.16.2-dev.1725495066-c13f18e90#~/.yarn/patches/discord.js-npm-14.16.2-dev.1725322267-a11ff7563-9cde22a807.patch",
 		"eslint-mdx": "npm:@favware/skip-dependency@latest",
 		"eslint-plugin-astro": "npm:@favware/skip-dependency@latest",
