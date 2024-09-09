@@ -57,7 +57,7 @@
 		"@sapphire/async-queue": "patch:@sapphire/async-queue@1.5.4-next.fc35dd86#~/.yarn/patches/@sapphire-async-queue-npm-1.5.4-next.63feeab8-f0e4cc4f76.patch",
 		"@sapphire/ratelimits": "2.4.10-next.fc35dd86",
 		"@sapphire/snowflake": "3.5.4-next.fc35dd86",
-		"@sapphire/timer-manager": "1.0.3-next.f929edc5.0",
+		"@sapphire/timer-manager": "1.0.3-next.fc35dd86",
 		"astro-eslint-parser": "npm:@favware/skip-dependency@latest",
 		"discord-api-types": "0.37.100",
 		"discord.js": "patch:discord.js@14.16.2-dev.1725667851-8a74f144a#~/.yarn/patches/discord.js-npm-14.16.2-dev.1725322267-a11ff7563-9cde22a807.patch",
