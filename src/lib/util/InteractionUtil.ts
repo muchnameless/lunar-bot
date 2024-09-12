@@ -211,10 +211,11 @@ export class InteractionUtil extends null {
 		if (!(error instanceof DiscordAPIError)) return false;
 
 		switch (error.code) {
-			case RESTJSONErrorCodes.UnknownWebhook:
-			case RESTJSONErrorCodes.UnknownInteraction:
 			case RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged:
 			case RESTJSONErrorCodes.InvalidWebhookToken:
+			case RESTJSONErrorCodes.ThisInteractionHasHitTheMaximumNumberOfFollowUpMessages:
+			case RESTJSONErrorCodes.UnknownInteraction:
+			case RESTJSONErrorCodes.UnknownWebhook:
 				return true;
 
 			default:
