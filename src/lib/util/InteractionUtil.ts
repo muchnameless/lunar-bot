@@ -33,7 +33,6 @@ import {
 	type InteractionUpdateOptions,
 	type MessageResolvable,
 	type ModalBuilder,
-	type PartialGroupDMChannel,
 	type TextBasedChannel,
 } from 'discord.js';
 import { CustomIdKey, GUILD_ID_ALL, UnicodeEmoji } from '#constants';
@@ -908,7 +907,7 @@ export class InteractionUtil extends null {
 					? null
 					: ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel));
 
-			if (!channel) throw `no channel with the id '${interaction.channelId}'`;
+			if (!channel?.isSendable()) throw `no sendable channel with the id '${interaction.channelId}'`;
 
 			await this.reply(interaction, {
 				content: question,
@@ -916,7 +915,7 @@ export class InteractionUtil extends null {
 				..._options,
 			});
 
-			const collected = await (channel as Exclude<typeof channel, PartialGroupDMChannel>).awaitMessages({
+			const collected = await channel.awaitMessages({
 				filter: (msg) => msg.author.id === interaction.user.id,
 				max: 1,
 				time,

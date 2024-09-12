@@ -12,7 +12,7 @@ import {
 	type MessageCreateOptions,
 	type MessageEditOptions,
 	type MessageReaction,
-	type PartialGroupDMChannel,
+	type SendableChannels,
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
@@ -232,7 +232,7 @@ export class MessageUtil extends null {
 				..._options,
 			});
 
-			const collected = await (channel as Exclude<typeof channel, PartialGroupDMChannel>).awaitMessages({
+			const collected = await (channel as SendableChannels).awaitMessages({
 				filter: (msg) => msg.author.id === message.author.id,
 				max: 1,
 				time,

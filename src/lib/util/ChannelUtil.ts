@@ -6,7 +6,6 @@ import {
 	type Channel,
 	type Message,
 	type MessageCreateOptions,
-	type PartialGroupDMChannel,
 	type Snowflake,
 	type TextBasedChannel,
 	type TextChannel,
@@ -244,9 +243,17 @@ export class ChannelUtil extends null {
 			return null;
 		}
 
-		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
-			const MESSAGE = `bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
-				(channel as TextChannel).guild.members.me!.communicationDisabledUntilTimestamp! - Date.now(),
+		if (!channel.isSendable()) {
+			const MESSAGE = `cannot send messages in ${channel.name} (${channel.id})`;
+
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn({ channel: this.logInfo(channel), data: _options }, `[CHANNEL SEND]: ${MESSAGE}`);
+			return null;
+		}
+
+		if (!channel.isDMBased() && channel.guild?.members.me?.isCommunicationDisabled()) {
+			const MESSAGE = `bot timed out in '${channel.guild.name}' for ${ms(
+				channel.guild.members.me.communicationDisabledUntilTimestamp - Date.now(),
 				{ long: true },
 			)}`;
 
@@ -256,7 +263,7 @@ export class ChannelUtil extends null {
 		}
 
 		try {
-			return await (channel as Exclude<typeof channel, PartialGroupDMChannel>).send(addEnforcedNonce(_options));
+			return await channel.send(addEnforcedNonce(_options));
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
 			logger.error({ channel: this.logInfo(channel), err: error, data: _options }, '[CHANNEL SEND]');

@@ -11,7 +11,6 @@ import {
 	type GuildChannel,
 	type JSONEncodable,
 	type Message,
-	type PartialGroupDMChannel,
 	type TextChannel,
 } from 'discord.js';
 import ms from 'ms';
@@ -46,7 +45,7 @@ export class LogHandler {
 	public get channel() {
 		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID'));
 
-		if (!channel?.isTextBased()) {
+		if (!channel?.isSendable()) {
 			logger.error(
 				`[LOG HANDLER]: ${
 					channel ? `#${(channel as GuildChannel).name ?? channel.id}` : this.client.config.get('LOGGING_CHANNEL_ID')
@@ -67,20 +66,19 @@ export class LogHandler {
 			return null;
 		}
 
-		if ((channel as TextChannel).guild?.members.me!.isCommunicationDisabled()) {
-			const {
-				members: { me },
-				name,
-			} = (channel as TextChannel).guild;
+		if (!channel.isDMBased() && channel.guild?.members.me?.isCommunicationDisabled()) {
 			logger.error(
-				`[LOG HANDLER]: bot timed out in '${name}' for ${ms(me!.communicationDisabledUntilTimestamp! - Date.now(), {
-					long: true,
-				})}`,
+				`[LOG HANDLER]: bot timed out in '${channel.guild.name}' for ${ms(
+					channel.guild.members.me.communicationDisabledUntilTimestamp - Date.now(),
+					{
+						long: true,
+					},
+				)}`,
 			);
 			return null;
 		}
 
-		return channel as Exclude<typeof channel, PartialGroupDMChannel>;
+		return channel;
 	}
 
 	/**
