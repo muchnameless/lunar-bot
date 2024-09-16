@@ -14,7 +14,7 @@ export class OtherBotInteractionCache {
 	 * @param interaction
 	 */
 	public add(interaction: MessageInteraction) {
-		if (this._cache.size >= OtherBotInteractionCache._maxSize) this._cache.delete(this._cache.values().next().value);
+		if (this._cache.size >= OtherBotInteractionCache._maxSize) this._cache.delete(this._cache.values().next().value!);
 
 		this._cache.add(interaction.id);
 	}
