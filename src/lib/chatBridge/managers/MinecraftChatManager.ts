@@ -422,20 +422,9 @@ export class MinecraftChatManager extends ChatManager {
 	 * forcibly sends the bot to limbo by sending a forbidden character in chat
 	 * rejects if the bot is not in limbo after the default command response timeout
 	 */
-	public async sendToLimbo() {
-		// this special string is forbidden and cannot be send as a command, has to be a normal message (not even /ac works)
-		const message = '§';
-		const timestamp = Date.now();
-
-		this.bot?.write('chat_message', {
-			message,
-			timestamp,
-			salt: 0,
-			signature: this.bot.signMessage(message, BigInt(timestamp)),
-		});
-
+	public sendToLimbo() {
 		return this.command({
-			command: 'locraw',
+			command: 'limbo',
 			responseRegExp: LIMBO_REGEXP,
 			rejectOnTimeout: true,
 			max: 1,
