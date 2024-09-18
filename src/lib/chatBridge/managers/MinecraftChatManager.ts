@@ -422,7 +422,7 @@ export class MinecraftChatManager extends ChatManager {
 	 * forcibly sends the bot to limbo by sending a forbidden character in chat
 	 * rejects if the bot is not in limbo after the default command response timeout
 	 */
-	public sendToLimbo() {
+	public async sendToLimbo() {
 		return this.command({
 			command: 'limbo',
 			responseRegExp: LIMBO_REGEXP,
