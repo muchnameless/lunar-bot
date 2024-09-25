@@ -837,12 +837,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.16.6":
-  version: 20.16.6
-  resolution: "@types/node@npm:20.16.6"
+"@types/node@npm:^20.16.7":
+  version: 20.16.7
+  resolution: "@types/node@npm:20.16.7"
   dependencies:
     undici-types: "npm:~6.19.2"
-  checksum: 10/f8a07b113901fa2b5bfbea8dedd15321126238023586f047576805cb1a53abd7f717f9e490d8e71d4c7b627885659f862584fa844fa71aab9c86295d1f006771
+  checksum: 10/931d6689af8d02b578a1490475df025063ca1f1c7c064ce891f7ac4da38f28bfda949e79569ac49cb5cf492b2caf91d31aecda6a4efc099e4af4be42ae7315e5
   languageName: node
   linkType: hard
 
@@ -3775,7 +3775,7 @@ __metadata:
     "@skyra/jaro-winkler": "npm:^1.1.1"
     "@types/common-tags": "npm:^1.8.4"
     "@types/luxon": "npm:^3.4.2"
-    "@types/node": "npm:^20.16.6"
+    "@types/node": "npm:^20.16.7"
     "@types/pg": "npm:^8.11.10"
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#2364750d838186ec37de1b883bc0dd805f87ae35"
     bufferutil: "npm:^4.0.8"
