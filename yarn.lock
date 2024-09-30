@@ -569,7 +569,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas@npm:^0.1.55":
+"@napi-rs/canvas@npm:^0.1.56":
   version: 0.1.56
   resolution: "@napi-rs/canvas@npm:0.1.56"
   dependencies:
@@ -3764,7 +3764,7 @@ __metadata:
     "@discordjs/collection": "npm:1.6.0-dev.1699315767-344a3f934"
     "@discordjs/rest": "npm:2.4.1-dev.1727655143-9aa3b635e"
     "@discordjs/ws": "npm:2.0.1-dev.1727655145-9aa3b635e"
-    "@napi-rs/canvas": "npm:^0.1.55"
+    "@napi-rs/canvas": "npm:^0.1.56"
     "@sapphire/async-queue": "npm:1.5.4-next.fc35dd86"
     "@sapphire/discord-utilities": "npm:3.4.2-next.fc35dd86"
     "@sapphire/node-utilities": "npm:1.0.3-next.fc35dd86"
