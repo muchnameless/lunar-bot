@@ -116,7 +116,7 @@
 		"prismarine-chat": "^1.10.1",
 		"prismarine-nbt": "^2.5.0",
 		"re2": "^1.21.4",
-		"sequelize": "^6.37.3",
+		"sequelize": "^6.37.4",
 		"tslib": "^2.7.0",
 		"undici": "^6.19.8",
 		"zlib-sync": "^0.1.9"
