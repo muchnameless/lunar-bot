@@ -20,42 +20,42 @@ __metadata:
   linkType: hard
 
 "@azure/msal-node@npm:^2.0.2":
-  version: 2.14.0
-  resolution: "@azure/msal-node@npm:2.14.0"
+  version: 2.15.0
+  resolution: "@azure/msal-node@npm:2.15.0"
   dependencies:
     "@azure/msal-common": "npm:14.15.0"
     jsonwebtoken: "npm:^9.0.0"
     uuid: "npm:^8.3.0"
-  checksum: 10/4ce735c44c7de88ba31baf03a0852b72592ea1334d3b76ad524126956983db25a19db5d8cb583bcd49bc2ef4d5722b859079b49787defd5cf3b70a629ed0d190
+  checksum: 10/30754beefb02652fa366e5fdc30da398bf95e05abb1c13dd9093bc277fb09bf58c360a03c6e81df06e31557fe675e420a7079fcd292833847f94a647b2b27ab2
   languageName: node
   linkType: hard
 
 "@babel/code-frame@npm:^7.0.0":
-  version: 7.24.7
-  resolution: "@babel/code-frame@npm:7.24.7"
+  version: 7.25.7
+  resolution: "@babel/code-frame@npm:7.25.7"
   dependencies:
-    "@babel/highlight": "npm:^7.24.7"
+    "@babel/highlight": "npm:^7.25.7"
     picocolors: "npm:^1.0.0"
-  checksum: 10/4812e94885ba7e3213d49583a155fdffb05292330f0a9b2c41b49288da70cf3c746a3fda0bf1074041a6d741c33f8d7be24be5e96f41ef77395eeddc5c9ff624
+  checksum: 10/000fb8299fb35b6217d4f6c6580dcc1fa2f6c0f82d0a54b8a029966f633a8b19b490a7a906b56a94e9d8bee91c3bc44c74c44c33fb0abaa588202f6280186291
   languageName: node
   linkType: hard
 
-"@babel/helper-validator-identifier@npm:^7.22.20, @babel/helper-validator-identifier@npm:^7.24.7":
-  version: 7.24.7
-  resolution: "@babel/helper-validator-identifier@npm:7.24.7"
-  checksum: 10/86875063f57361471b531dbc2ea10bbf5406e12b06d249b03827d361db4cad2388c6f00936bcd9dc86479f7e2c69ea21412c2228d4b3672588b754b70a449d4b
+"@babel/helper-validator-identifier@npm:^7.22.20, @babel/helper-validator-identifier@npm:^7.25.7":
+  version: 7.25.7
+  resolution: "@babel/helper-validator-identifier@npm:7.25.7"
+  checksum: 10/ec6934cc47fc35baaeb968414a372b064f14f7b130cf6489a014c9486b0fd2549b3c6c682cc1fc35080075e8e38d96aeb40342d63d09fc1a62510c8ce25cde1e
   languageName: node
   linkType: hard
 
-"@babel/highlight@npm:^7.24.7":
-  version: 7.24.7
-  resolution: "@babel/highlight@npm:7.24.7"
+"@babel/highlight@npm:^7.25.7":
+  version: 7.25.7
+  resolution: "@babel/highlight@npm:7.25.7"
   dependencies:
-    "@babel/helper-validator-identifier": "npm:^7.24.7"
+    "@babel/helper-validator-identifier": "npm:^7.25.7"
     chalk: "npm:^2.4.2"
     js-tokens: "npm:^4.0.0"
     picocolors: "npm:^1.0.0"
-  checksum: 10/69b73f38cdd4f881b09b939a711e76646da34f4834f4ce141d7a49a6bb1926eab1c594148970a8aa9360398dff800f63aade4e81fafdd7c8d8a8489ea93bfec1
+  checksum: 10/823be2523d246dbf80aab3cc81c2a36c6111b16ac2949ef06789da54387824c2bfaa88c6627cdeb4ba7151d047a5d6765e49ebd0b478aba09759250111e65e08
   languageName: node
   linkType: hard
 
@@ -1500,9 +1500,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001663":
-  version: 1.0.30001664
-  resolution: "caniuse-lite@npm:1.0.30001664"
-  checksum: 10/ff237f6bbb59564d2a7219fe9a799a59692403115500f7548a77f1f6b82e33fd136375003f80c8df88a64048f699f9f917292ca4cac0dd8a789d2d35fba6269b
+  version: 1.0.30001667
+  resolution: "caniuse-lite@npm:1.0.30001667"
+  checksum: 10/5f0c48abb806737c422f05d0d9dda72facc25ee8adbae2c2ea9c57b87d9c2fa9ad8c3f6d54f21aca4e31ee1742cb5dd1543bf6b9133e3f77f79a645876322414
   languageName: node
   linkType: hard
 
@@ -2002,9 +2002,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.28":
-  version: 1.5.29
-  resolution: "electron-to-chromium@npm:1.5.29"
-  checksum: 10/a87354db605ffdb89618c328ecc492846f8685f5ba040b9c8b511ef7a1a8e0c8999eb1ce2ea7bac30624637200f31dd1da5dc0cb3b2841ea828790f894a9ec37
+  version: 1.5.32
+  resolution: "electron-to-chromium@npm:1.5.32"
+  checksum: 10/906b852f67e9de0a5f643085570f7383c5bb28b28b1dd0916bdc55d24d8a2238eb61c26db51a766630993e4c55fb7bbf6551b0ae570751fec2503eb592611c89
   languageName: node
   linkType: hard
 
@@ -2334,17 +2334,17 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-typescript-sort-keys@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "eslint-plugin-typescript-sort-keys@npm:3.2.0"
+  version: 3.3.0
+  resolution: "eslint-plugin-typescript-sort-keys@npm:3.3.0"
   dependencies:
     "@typescript-eslint/experimental-utils": "npm:^5.0.0"
     json-schema: "npm:^0.4.0"
     natural-compare-lite: "npm:^1.4.0"
   peerDependencies:
-    "@typescript-eslint/parser": ^6 || ^7
+    "@typescript-eslint/parser": ">=6"
     eslint: ^7 || ^8
     typescript: ^3 || ^4 || ^5
-  checksum: 10/6ef3273ed1a0a1c60dd6750b4c9884f6c43668f552021d622492c26f2f2d8f7d86ca7f9fbfff23e3b756854bf1014e5f8e690eddccfb6ad569987b88650a9d55
+  checksum: 10/876788aa0898f8348756202d61d8e37a5f6f82a1149924e4cd3c205fd215c94b1068a29591fcdc5d0932bdf99c27574a6f46776d42280f635916e3bc8f100eb7
   languageName: node
   linkType: hard
 
@@ -2897,9 +2897,9 @@ __metadata:
   linkType: hard
 
 "globals@npm:^15.0.0":
-  version: 15.9.0
-  resolution: "globals@npm:15.9.0"
-  checksum: 10/19bca70131c5d3e0d4171deed0f8ae16adda19f18d39b67421056f1eaa160b4433c3ffc8eb69b8b19adebbbdad4834d8a0494c5fe1ae295f0f769a5c0331d794
+  version: 15.10.0
+  resolution: "globals@npm:15.10.0"
+  checksum: 10/d649208c62406fa71f131be643cb6d18703be5e612f8fa4da8a35bda56ce5a6a8caeb13a2f5a927e4d3324d73872e897067eb6f92ddd46a29876ffa5c4910cb8
   languageName: node
   linkType: hard
 
@@ -3555,8 +3555,8 @@ __metadata:
   linkType: hard
 
 "listr2@npm:~8.2.4":
-  version: 8.2.4
-  resolution: "listr2@npm:8.2.4"
+  version: 8.2.5
+  resolution: "listr2@npm:8.2.5"
   dependencies:
     cli-truncate: "npm:^4.0.0"
     colorette: "npm:^2.0.20"
@@ -3564,7 +3564,7 @@ __metadata:
     log-update: "npm:^6.1.0"
     rfdc: "npm:^1.4.1"
     wrap-ansi: "npm:^9.0.0"
-  checksum: 10/344d2397e127bf802935925e95b54468eef745fbbaf9326eb33a1634ae2d6e86cdb527ef48cb83a19a50671955d39b3e2608c74db85530df07b5674f5de115e1
+  checksum: 10/c76542f18306195e464fe10203ee679a7beafa9bf0dc679ebacb416387cca8f5307c1d8ba35483d26ba611dc2fac5a1529733dce28f2660556082fb7eebb79f9
   languageName: node
   linkType: hard
 
@@ -4126,11 +4126,11 @@ __metadata:
   linkType: hard
 
 "moment-timezone@npm:^0.5.43":
-  version: 0.5.45
-  resolution: "moment-timezone@npm:0.5.45"
+  version: 0.5.46
+  resolution: "moment-timezone@npm:0.5.46"
   dependencies:
     moment: "npm:^2.29.4"
-  checksum: 10/45e3793d44bea8e826c934a335ebf0b92c6d6dae562fdb59d8c45a16d5c11de4d6692b5fa7eebca969881f06b81b55f8535883bfbc727b597d601709fa5a2bb2
+  checksum: 10/7613ba388fa6004af62675fb9945cb0d37758b559d07470a5e188419ffe1ac03eb2ed16fe80aa34d1e7dd39fc5bd67dc02cd59e8dcdab95504cface2c78e4b3d
   languageName: node
   linkType: hard
 
