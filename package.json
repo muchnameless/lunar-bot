@@ -129,7 +129,7 @@
 		"@types/node": "^20.16.11",
 		"@types/pg": "^8.11.10",
 		"eslint": "^8.57.1",
-		"eslint-config-neon": "^0.1.62",
+		"eslint-config-neon": "^0.2.0",
 		"ley": "^0.8.1",
 		"lint-staged": "^15.2.10",
 		"pino-pretty": "^11.2.2",
