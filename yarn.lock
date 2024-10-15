@@ -1534,12 +1534,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:^4.4.4":
-  version: 4.4.4
-  resolution: "chart.js@npm:4.4.4"
+"chart.js@npm:^4.4.5":
+  version: 4.4.5
+  resolution: "chart.js@npm:4.4.5"
   dependencies:
     "@kurkle/color": "npm:^0.3.0"
-  checksum: 10/77221dce07606c67686b31b14c3e8c56d71fadc93a5d754ef1f0abc870160253c31751edd9962a0f5bd929824ca69458b914b6c90c8a0c1e9a547d276e9ca9b0
+  checksum: 10/def643ed3ae898f3f37a0a59b5f1a36ffaf68c8a4f4392dcfebb6e5872534065d04b5b437b25c2b3065c20799403b4436a356bdd1700727267b3b468fec49f84
   languageName: node
   linkType: hard
 
@@ -3779,7 +3779,7 @@ __metadata:
     "@types/pg": "npm:^8.11.10"
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#2364750d838186ec37de1b883bc0dd805f87ae35"
     bufferutil: "npm:^4.0.8"
-    chart.js: "npm:^4.4.4"
+    chart.js: "npm:^4.4.5"
     common-tags: "npm:^1.8.2"
     cron: "npm:^3.1.7"
     discord.js: "npm:14.17.0-dev.1727655153-9aa3b635e"
