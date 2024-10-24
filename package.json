@@ -85,7 +85,7 @@
 		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
 		"@discordjs/rest": "2.4.1-dev.1729598709-48a9c665d",
 		"@discordjs/ws": "2.0.1-dev.1729598716-48a9c665d",
-		"@napi-rs/canvas": "^0.1.56",
+		"@napi-rs/canvas": "^0.1.58",
 		"@sapphire/async-queue": "1.5.4-next.fc35dd86",
 		"@sapphire/discord-utilities": "3.4.2-next.fc35dd86",
 		"@sapphire/node-utilities": "1.0.3-next.fc35dd86",
