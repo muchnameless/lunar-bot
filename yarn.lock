@@ -12,21 +12,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:14.15.0":
-  version: 14.15.0
-  resolution: "@azure/msal-common@npm:14.15.0"
-  checksum: 10/b49a4e6c4524ebec8eb2a5256f2d051e1ee335b049fc56d0e773435dfe7b22480fefffd5f90ede79f28a20fe99277c1196963685204390a436e846e70459c376
+"@azure/msal-common@npm:14.16.0":
+  version: 14.16.0
+  resolution: "@azure/msal-common@npm:14.16.0"
+  checksum: 10/1f650b00636cd657b93601a12f495cbc9c35b4ed06197468e24e86ed7a0227f9be8003186d8b00abe12532f26b8002811f553ade76fe2cb57a8e62b827b0152c
   languageName: node
   linkType: hard
 
 "@azure/msal-node@npm:^2.0.2":
-  version: 2.15.0
-  resolution: "@azure/msal-node@npm:2.15.0"
+  version: 2.16.0
+  resolution: "@azure/msal-node@npm:2.16.0"
   dependencies:
-    "@azure/msal-common": "npm:14.15.0"
+    "@azure/msal-common": "npm:14.16.0"
     jsonwebtoken: "npm:^9.0.0"
     uuid: "npm:^8.3.0"
-  checksum: 10/30754beefb02652fa366e5fdc30da398bf95e05abb1c13dd9093bc277fb09bf58c360a03c6e81df06e31557fe675e420a7079fcd292833847f94a647b2b27ab2
+  checksum: 10/4ccedacc69beebc78d996aa7085506df96be6fa93112cfffdec7869f19f7391ea360e40a2389d1eaf48d188f14d61396cf05d7cd8d5f9201f17c580d42a5e0a7
   languageName: node
   linkType: hard
 
@@ -735,13 +735,13 @@ __metadata:
   linkType: hard
 
 "@sapphire/type@npm:^2.5.2-next.b6d5d48":
-  version: 2.5.2-next.fb158af
-  resolution: "@sapphire/type@npm:2.5.2-next.fb158af"
+  version: 2.5.2-next.d078c9c
+  resolution: "@sapphire/type@npm:2.5.2-next.d078c9c"
   dependencies:
     "@discordjs/node-pre-gyp": "npm:^0.4.5"
-    nan: "npm:^2.20.0"
-    tslib: "npm:^2.6.3"
-  checksum: 10/13d63007555753adef49d0a43202ceef272308510fd39ac0788c53bcbb6679397da36bdb4f02048e682536627407aff72833aa29aee6fa1a5fc80c4e70065627
+    nan: "npm:^2.22.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/1a5ed93ec62e3b23cceee1c9c2f89977ac47bb28318996af68d2ea7299304429abcc59c9f278d38fa92ca9cd10422df03433801cb2c6f3c71437d573897396b4
   languageName: node
   linkType: hard
 
@@ -1471,9 +1471,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001669":
-  version: 1.0.30001677
-  resolution: "caniuse-lite@npm:1.0.30001677"
-  checksum: 10/e07439bdeade5ffdd974691f44f8549ae0730fcf510acaa32d0b657c10370cd5aad09eeca37248966205fb37fce5f464dbce73ce177b4a1fdc3a34adbcfd7192
+  version: 1.0.30001680
+  resolution: "caniuse-lite@npm:1.0.30001680"
+  checksum: 10/38ec7e06e18ef1040740f93dff65dc4c9a7593376a783a96370f3845c586ed1d464e26b992d97919938fb07b68a4f2fb1609f66c586c3f1e7310e6511b81793f
   languageName: node
   linkType: hard
 
@@ -1754,13 +1754,13 @@ __metadata:
   linkType: hard
 
 "cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
-  version: 7.0.3
-  resolution: "cross-spawn@npm:7.0.3"
+  version: 7.0.5
+  resolution: "cross-spawn@npm:7.0.5"
   dependencies:
     path-key: "npm:^3.1.0"
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
-  checksum: 10/e1a13869d2f57d974de0d9ef7acbf69dc6937db20b918525a01dacb5032129bd552d290d886d981e99f1b624cb03657084cc87bd40f115c07ecf376821c729ce
+  checksum: 10/c95062469d4bdbc1f099454d01c0e77177a3733012d41bf907a71eb8d22d2add43b5adf6a0a14ef4e7feaf804082714d6c262ef4557a1c480b86786c120d18e2
   languageName: node
   linkType: hard
 
@@ -1946,9 +1946,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.41":
-  version: 1.5.50
-  resolution: "electron-to-chromium@npm:1.5.50"
-  checksum: 10/635ca4b593e64697fbebc9fe7f557abcb030e5f6edcefb596ae3f8c9313221a754b513b70f2ba12595a9ee5733442b2b58db9eed7a2fa63e9f7539d581dd4ac0
+  version: 1.5.55
+  resolution: "electron-to-chromium@npm:1.5.55"
+  checksum: 10/0e1dabaf7056a886902c5fd4b681b98e633575183c213cd912a9f8e55c100458e2fa399864f93bc82a696679c6b05f5781e4ded787644e44e3f3fce7e3e23cdb
   languageName: node
   linkType: hard
 
@@ -2841,9 +2841,9 @@ __metadata:
   linkType: hard
 
 "globals@npm:^15.0.0":
-  version: 15.11.0
-  resolution: "globals@npm:15.11.0"
-  checksum: 10/14009ef1906ac929d930ed1c896a47159e7d11b4d201901ca5f3827766519191a3f5fb45124de43c4511fee04018704e7ed5a097fb37d23abf39523d1d41c85f
+  version: 15.12.0
+  resolution: "globals@npm:15.12.0"
+  checksum: 10/07cac4ee7cc9befa7894be9b4d1a57f46eeedf9065939f39ffb875009394908eb7bac84147712cfd4bbabab5abc7ab98fc3a6d0fd881f9548fffa10ba2e4bf67
   languageName: node
   linkType: hard
 
@@ -4099,7 +4099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.18.0, nan@npm:^2.20.0":
+"nan@npm:^2.18.0, nan@npm:^2.20.0, nan@npm:^2.22.0":
   version: 2.22.0
   resolution: "nan@npm:2.22.0"
   dependencies:
