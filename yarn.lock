@@ -3735,7 +3735,7 @@ __metadata:
     pg: "npm:^8.13.1"
     pg-hstore: "npm:^2.3.4"
     pino: "npm:^9.5.0"
-    pino-pretty: "npm:^12.1.0"
+    pino-pretty: "npm:^13.0.0"
     postgres: "npm:3.4.5"
     prettier: "npm:^3.3.3"
     prismarine-chat: "npm:^1.10.1"
@@ -4642,9 +4642,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^12.1.0":
-  version: 12.1.0
-  resolution: "pino-pretty@npm:12.1.0"
+"pino-pretty@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "pino-pretty@npm:13.0.0"
   dependencies:
     colorette: "npm:^2.0.7"
     dateformat: "npm:^4.6.3"
@@ -4656,13 +4656,12 @@ __metadata:
     on-exit-leak-free: "npm:^2.1.0"
     pino-abstract-transport: "npm:^2.0.0"
     pump: "npm:^3.0.0"
-    readable-stream: "npm:^4.0.0"
     secure-json-parse: "npm:^2.4.0"
     sonic-boom: "npm:^4.0.1"
     strip-json-comments: "npm:^3.1.1"
   bin:
     pino-pretty: bin.js
-  checksum: 10/d49298f0693edb238fa78f7d43a30bd7a0f3f8a2c863b90d26bd9b35d7a16473557eb307da448959c2fd3dc32e00a5eda6e7c75da0f423ced71644b4112bc8ca
+  checksum: 10/9861fdbe88db000e3b0fe959f0fb7b5913e8d16af70373155d48854c5d509629e7e1ba09ed3fac24a9bd2729451567a698938b9741d84de63eb549843450e71c
   languageName: node
   linkType: hard
 
@@ -4993,7 +4992,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^4.0.0, readable-stream@npm:^4.1.0, readable-stream@npm:^4.4.0":
+"readable-stream@npm:^4.1.0, readable-stream@npm:^4.4.0":
   version: 4.5.2
   resolution: "readable-stream@npm:4.5.2"
   dependencies:
