@@ -1857,10 +1857,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:0.37.104":
-  version: 0.37.104
-  resolution: "discord-api-types@npm:0.37.104"
-  checksum: 10/bc7ecc3c9944f82a418b28bd704a06e93fd11364478a875b9612bec9e3fb32a3f59ea690080e4e82868bd69ff1467c602ecc339f6fb8c2e09e4d77b55830bf37
+"discord-api-types@npm:0.37.107":
+  version: 0.37.107
+  resolution: "discord-api-types@npm:0.37.107"
+  checksum: 10/8106f40dd73c00cce0440cf9e7a48c2f55beae0745e51b08b1a5a2462543941b6832c0eb35b892e5271679757d58c1dcfd049d5001298bc4cd943b137c49eb31
   languageName: node
   linkType: hard
 
