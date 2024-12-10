@@ -3825,7 +3825,7 @@ __metadata:
     postgres: "npm:3.4.5"
     prettier: "npm:^3.4.2"
     prismarine-chat: "npm:^1.10.1"
-    prismarine-nbt: "npm:^2.6.0"
+    prismarine-nbt: "npm:^2.7.0"
     re2: "npm:^1.21.4"
     sequelize: "npm:^6.37.5"
     sort-package-json: "npm:^2.12.0"
@@ -5009,12 +5009,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-nbt@npm:^2.0.0, prismarine-nbt@npm:^2.5.0, prismarine-nbt@npm:^2.6.0":
-  version: 2.6.0
-  resolution: "prismarine-nbt@npm:2.6.0"
+"prismarine-nbt@npm:^2.0.0, prismarine-nbt@npm:^2.5.0, prismarine-nbt@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "prismarine-nbt@npm:2.7.0"
   dependencies:
-    protodef: "npm:^1.9.0"
-  checksum: 10/dd6d37e07aaa4ac3011da5e8bfbf9eba15b5d1831306e301dc7b866b084c60bcb19afbc01fb8240220451b72d4c4c349b493d717be723bbfcb5fe1b7180f156e
+    protodef: "npm:^1.18.0"
+  checksum: 10/3d8e9b4bb468f2f2916e71f1c761ae1ea4888813806e437d200519e497dfa9e791cdcda74b044f3b959bdca8e86427af2b9cd4b252b35c04da91f235746dc145
   languageName: node
   linkType: hard
 
@@ -5087,15 +5087,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protodef@npm:^1.17.0, protodef@npm:^1.9.0":
-  version: 1.17.0
-  resolution: "protodef@npm:1.17.0"
+"protodef@npm:^1.17.0, protodef@npm:^1.18.0":
+  version: 1.18.0
+  resolution: "protodef@npm:1.18.0"
   dependencies:
     lodash.get: "npm:^4.4.2"
     lodash.reduce: "npm:^4.6.0"
     protodef-validator: "npm:^1.3.0"
     readable-stream: "npm:^4.4.0"
-  checksum: 10/6d5afcea240e7fd0f073c39c084094e5f6027fff9da66c8846fdab04a7779d0b57574077b20913625d78139b398695df3ce45e35b089a47e0233d5b46bbc1328
+  checksum: 10/6af2f6e02b9e048b7a2fc8228960fe59fd9847aaf45386bf67b7e3f48c55bd12a645102cc0b041368af21117cc572b2cee3560c0b525816a34e5daae506d707b
   languageName: node
   linkType: hard
 
