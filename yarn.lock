@@ -1818,13 +1818,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cron@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "cron@npm:3.3.0"
+"cron@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "cron@npm:3.3.1"
   dependencies:
     "@types/luxon": "npm:~3.4.0"
     luxon: "npm:~3.5.0"
-  checksum: 10/55bd6541d254806250b0e50bb2bac44782053afcde49f939db51086d0d25cc0e3007fd096ad5bebe0be3fe6d4f4a84d1d782cbc1fb98034926dff7bf94df47b6
+  checksum: 10/6878fe4ccdc2f3aacb9223672cd18d477fba811752be8cc88e18988a258eecbb4ff0e63c564d2b41af7051bbfc61e7234c7ad69d0f073c1179e8ab9d406fc543
   languageName: node
   linkType: hard
 
@@ -3792,7 +3792,7 @@ __metadata:
     bufferutil: "npm:^4.0.8"
     chart.js: "npm:^4.4.7"
     common-tags: "npm:^1.8.2"
-    cron: "npm:^3.3.0"
+    cron: "npm:^3.3.1"
     discord.js: "npm:14.17.0-dev.1727655153-9aa3b635e"
     eslint: "npm:^8.57.1"
     eslint-config-neon: "npm:^0.1.62"
