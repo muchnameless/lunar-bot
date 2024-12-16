@@ -3820,7 +3820,7 @@ __metadata:
     ts-prune: "npm:^0.10.3"
     tslib: "npm:^2.8.1"
     typescript: "npm:^5.7.2"
-    undici: "npm:^7.1.0"
+    undici: "npm:^7.1.1"
     zlib-sync: "npm:^0.1.9"
   languageName: unknown
   linkType: soft
@@ -6133,10 +6133,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "undici@npm:7.1.0"
-  checksum: 10/2197a002cac6ac5720c7b16d0264f838308331908cde60817269fff808f57f746b74578ae56879f62ec8491b6c8001dd8560e746275636efdd6889791d63a321
+"undici@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "undici@npm:7.1.1"
+  checksum: 10/66024e35710a4f37d3929c33aba4ce6d49c1e1813838ee30dcecb3a223282081a2d6b23ce96f052881fb93cab6f2d3763c8b880cc79a5ce5cedc1126f623f438
   languageName: node
   linkType: hard
 
