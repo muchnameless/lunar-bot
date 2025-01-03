@@ -128,7 +128,7 @@
 		"@types/luxon": "^3.4.2",
 		"@types/node": "^22.10.5",
 		"@types/pg": "^8.11.10",
-		"eslint": "^8.57.1",
+		"eslint": "^9.17.0",
 		"eslint-config-neon": "^0.1.62",
 		"ley": "^0.8.1",
 		"lint-staged": "^15.3.0",
