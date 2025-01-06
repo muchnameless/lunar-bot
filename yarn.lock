@@ -2596,15 +2596,15 @@ __metadata:
   linkType: hard
 
 "fast-glob@npm:^3.2.7, fast-glob@npm:^3.2.9, fast-glob@npm:^3.3.2":
-  version: 3.3.2
-  resolution: "fast-glob@npm:3.3.2"
+  version: 3.3.3
+  resolution: "fast-glob@npm:3.3.3"
   dependencies:
     "@nodelib/fs.stat": "npm:^2.0.2"
     "@nodelib/fs.walk": "npm:^1.2.3"
     glob-parent: "npm:^5.1.2"
     merge2: "npm:^1.3.0"
-    micromatch: "npm:^4.0.4"
-  checksum: 10/222512e9315a0efca1276af9adb2127f02105d7288fa746145bf45e2716383fb79eb983c89601a72a399a56b7c18d38ce70457c5466218c5f13fad957cee16df
+    micromatch: "npm:^4.0.8"
+  checksum: 10/dcc6432b269762dd47381d8b8358bf964d8f4f60286ac6aa41c01ade70bda459ff2001b516690b96d5365f68a49242966112b5d5cc9cd82395fa8f9d017c90ad
   languageName: node
   linkType: hard
 
@@ -2637,9 +2637,9 @@ __metadata:
   linkType: hard
 
 "fast-uri@npm:^3.0.1":
-  version: 3.0.3
-  resolution: "fast-uri@npm:3.0.3"
-  checksum: 10/92487c75848b03edc45517fca0148287d342c30818ce43d556391db774d8e01644fb6964315a3336eec5a90f301b218b21f71fb9b2528ba25757435a20392c95
+  version: 3.0.4
+  resolution: "fast-uri@npm:3.0.4"
+  checksum: 10/48c6332a9e6f23713632898aa8522d364dbe635aba6557aa670cd6aa8e47214f57e0b384350dcafd20b4923419439d47275a4c0dc5e2fff460e33cc0cb48e30e
   languageName: node
   linkType: hard
 
@@ -3908,7 +3908,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"micromatch@npm:^4.0.4, micromatch@npm:~4.0.8":
+"micromatch@npm:^4.0.8, micromatch@npm:~4.0.8":
   version: 4.0.8
   resolution: "micromatch@npm:4.0.8"
   dependencies:
@@ -3939,7 +3939,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^3.70.0, minecraft-data@npm:^3.78.0, minecraft-data@npm:^3.81.1":
+"minecraft-data@npm:^3.38.0, minecraft-data@npm:^3.70.0, minecraft-data@npm:^3.78.0, minecraft-data@npm:^3.81.1":
   version: 3.81.1
   resolution: "minecraft-data@npm:3.81.1"
   checksum: 10/6e1396c8470b53f35956364b7b05df95d16f328230bbb1b79c1a879ee134110cbfbc25f2388065b5d23d8e463b7c70a5d40ed4f3a5fb4fabbba27ca328abef00
@@ -4978,7 +4978,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-chat@npm:^1.10.0, prismarine-chat@npm:^1.10.1":
+"prismarine-biome@npm:^1.1.0":
+  version: 1.3.0
+  resolution: "prismarine-biome@npm:1.3.0"
+  peerDependencies:
+    minecraft-data: ^3.0.0
+    prismarine-registry: ^1.1.0
+  checksum: 10/4e0efb9891583a2e822518ad6d3eeeb8120280acd07c6b04fac844d91d5a955ae3ba8cfe3025dd9490ea6b4ef8787fa9bf29c408017922932207ecba28c93e82
+  languageName: node
+  linkType: hard
+
+"prismarine-block@npm:^1.17.1":
+  version: 1.20.0
+  resolution: "prismarine-block@npm:1.20.0"
+  dependencies:
+    minecraft-data: "npm:^3.38.0"
+    prismarine-biome: "npm:^1.1.0"
+    prismarine-chat: "npm:^1.5.0"
+    prismarine-item: "npm:^1.10.1"
+    prismarine-nbt: "npm:^2.0.0"
+    prismarine-registry: "npm:^1.1.0"
+  checksum: 10/19ddc1bb6a918623f8063bf606090b582109334cfb8c075e7fe1e6c9fa79307bfb7c39d5d7dc52e67367df0ad7bba439742640fc84bbc1557e080248d42f5cf5
+  languageName: node
+  linkType: hard
+
+"prismarine-chat@npm:^1.10.0, prismarine-chat@npm:^1.10.1, prismarine-chat@npm:^1.5.0":
   version: 1.10.1
   resolution: "prismarine-chat@npm:1.10.1"
   dependencies:
@@ -4986,6 +5010,16 @@ __metadata:
     prismarine-nbt: "npm:^2.0.0"
     prismarine-registry: "npm:^1.4.0"
   checksum: 10/9cee1e2b80e096960282e93626e55ca71f86a86f2a26087b611890fc5e34336e4fb79e62d88fa2053aa3f1c66804fbbb2afc090b78ccb4c1c4eb2ce4f17b3099
+  languageName: node
+  linkType: hard
+
+"prismarine-item@npm:^1.10.1":
+  version: 1.15.0
+  resolution: "prismarine-item@npm:1.15.0"
+  dependencies:
+    prismarine-nbt: "npm:^2.0.0"
+    prismarine-registry: "npm:^1.4.0"
+  checksum: 10/7f08bbf0a6d6d8a7c7e1b61c2f31363047fef1ef0aab893d1b5a9d21b9a47cbd08fce03d8272037c680175c9c68a569d141dcfd13df25f2b8b0d670c4d70e206
   languageName: node
   linkType: hard
 
@@ -5008,13 +5042,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-registry@npm:^1.4.0":
-  version: 1.10.0
-  resolution: "prismarine-registry@npm:1.10.0"
+"prismarine-registry@npm:^1.1.0, prismarine-registry@npm:^1.4.0":
+  version: 1.11.0
+  resolution: "prismarine-registry@npm:1.11.0"
   dependencies:
     minecraft-data: "npm:^3.70.0"
+    prismarine-block: "npm:^1.17.1"
     prismarine-nbt: "npm:^2.0.0"
-  checksum: 10/277ce0f98ff376b2d4cf4ced220bdec1afb8ac67d0196054ccff0e2fa410d067c346aa6630d0b180616e85acf35b5229709614fb002d73357570a5dbcc05db16
+  checksum: 10/dd93cf7675afb546628d62a25a1f33b7ab9811b535826aa5921f2311fb0494f8433be48889d3d8788610c93912130a535720a7cdfb9eeece277047412b2c7f77
   languageName: node
   linkType: hard
 
@@ -5033,9 +5068,9 @@ __metadata:
   linkType: hard
 
 "process-warning@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "process-warning@npm:4.0.0"
-  checksum: 10/0d6ec069f3a6fe1d3379c0247329a297f1f3b9ea7e1d828db0a8f61e0e8337a98b7eb201547350924bc4a101ddcf2fa5cf5563ffe2c54c27651f7996d328483e
+  version: 4.0.1
+  resolution: "process-warning@npm:4.0.1"
+  checksum: 10/8b0ec9129845215c1e4a72f3a66082e3aa76f81e265374de6c70f2213f4516856316ed88338b8520e9274dab947d6b3750684b448f45148f57757f365e96793f
   languageName: node
   linkType: hard
 
