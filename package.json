@@ -113,7 +113,7 @@
 		"pino": "^9.6.0",
 		"postgres": "3.4.5",
 		"prettier": "^3.4.2",
-		"prismarine-chat": "^1.10.1",
+		"prismarine-chat": "^1.11.0",
 		"prismarine-nbt": "^2.7.0",
 		"re2": "^1.21.4",
 		"sequelize": "^6.37.5",
