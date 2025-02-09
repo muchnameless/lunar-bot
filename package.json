@@ -112,7 +112,7 @@
 		"pg-hstore": "^2.3.4",
 		"pino": "^9.6.0",
 		"postgres": "3.4.5",
-		"prettier": "^3.4.2",
+		"prettier": "^3.5.0",
 		"prismarine-chat": "^1.11.0",
 		"prismarine-nbt": "^2.7.0",
 		"re2": "^1.21.4",
