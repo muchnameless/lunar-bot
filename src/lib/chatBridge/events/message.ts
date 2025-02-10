@@ -1,5 +1,6 @@
 import { setTimeout } from 'node:timers';
 import { GenericHTTPError } from '@zikeji/hypixel';
+import { MessageFlags } from 'discord.js';
 import ms from 'ms';
 import { getSkyBlockProfiles, mojang } from '#api';
 import { ChatBridgeEvents } from '#chatBridge/ChatBridge.js';
@@ -84,7 +85,10 @@ export default class extends ChatBridgeEvent {
 			}
 
 			// DM owner to add the blocked content to the filter
-			void this.client.dmOwner(`blocked message: ${hypixelMessage.rawContent}`);
+			void this.client.dmOwner({
+				content: `blocked message: ${hypixelMessage.rawContent}`,
+				flags: MessageFlags.SuppressEmbeds,
+			});
 
 			return logger.error(
 				{ ...this.chatBridge.logInfo, content: hypixelMessage.content },
@@ -633,7 +637,7 @@ export default class extends ChatBridgeEvent {
 							requiredRoles
 								? `(${commaListOr(
 										requiredRoles.map((roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId),
-								  )}) `
+									)}) `
 								: ''
 						}from the ${discordGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`,
 					);
