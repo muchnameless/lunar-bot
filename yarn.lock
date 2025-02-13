@@ -3806,7 +3806,7 @@ __metadata:
     minecraft-data: "npm:^3.84.0"
     minecraft-protocol: "npm:1.54.0"
     ms: "npm:3.0.0-canary.1"
-    pg: "npm:^8.13.2"
+    pg: "npm:^8.13.3"
     pg-hstore: "npm:^2.3.4"
     pino: "npm:^9.6.0"
     pino-pretty: "npm:^13.0.0"
@@ -4753,9 +4753,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg@npm:^8.13.2":
-  version: 8.13.2
-  resolution: "pg@npm:8.13.2"
+"pg@npm:^8.13.3":
+  version: 8.13.3
+  resolution: "pg@npm:8.13.3"
   dependencies:
     pg-cloudflare: "npm:^1.1.1"
     pg-connection-string: "npm:^2.7.0"
@@ -4771,7 +4771,7 @@ __metadata:
   peerDependenciesMeta:
     pg-native:
       optional: true
-  checksum: 10/0fe0dd40d925cc7ffb365e991a3f3bedf202939c586909483e3b753e83f21ecffdef36de48afaf1403f79b90353495612d7b684ac5caeb70cf0c334c1f98fe54
+  checksum: 10/be1be61fa46f7ccc3441794e390c41fc548f1bbee9744e3e7fae00b3d91e3974c4c51e25c1013075ec3a289d9290cd01ee926357e68ba20fcbb15308dbdef87c
   languageName: node
   linkType: hard
 
