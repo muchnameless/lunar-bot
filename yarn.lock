@@ -1434,7 +1434,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserslist@npm:^4.24.3":
+"browserslist@npm:^4.24.4":
   version: 4.24.4
   resolution: "browserslist@npm:4.24.4"
   dependencies:
@@ -1546,9 +1546,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001688":
-  version: 1.0.30001700
-  resolution: "caniuse-lite@npm:1.0.30001700"
-  checksum: 10/9203ed502fd1b74c47f315a001e1d91abe2abecb951f8e15dd1556cfc23a29fa7a7b2cc654380604bb6f58bcfa0c65b78055b9d99a7489c13baa0d4158a6e25e
+  version: 1.0.30001701
+  resolution: "caniuse-lite@npm:1.0.30001701"
+  checksum: 10/d121607a96f9165128203a317d6aee6a4c7808d52a1f3b46ef5fb918abe9e9d4463e57b0bd5ffe2f4316292bd5b8d85a832b4456b7ca6f024f377b498911bfec
   languageName: node
   linkType: hard
 
@@ -1774,11 +1774,11 @@ __metadata:
   linkType: hard
 
 "core-js-compat@npm:^3.34.0":
-  version: 3.40.0
-  resolution: "core-js-compat@npm:3.40.0"
+  version: 3.41.0
+  resolution: "core-js-compat@npm:3.41.0"
   dependencies:
-    browserslist: "npm:^4.24.3"
-  checksum: 10/3dd3d717b3d4ae0d9c2930d39c0f2a21ca6f195fcdd5711bda833557996c4d9f90277eab576423478e95689257e2de8d1a2623d6618084416bd224d10d5df9a4
+    browserslist: "npm:^4.24.4"
+  checksum: 10/a59da111fc437cc7ed1a1448dae6883617cabebd7731433d27ad75e0ff77df5f411204979bd8eb5668d2600f99db46eedf6f87e123109b6de728bef489d4229a
   languageName: node
   linkType: hard
 
@@ -1835,7 +1835,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
+"cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3, cross-spawn@npm:^7.0.6":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
   dependencies:
@@ -2028,9 +2028,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.73":
-  version: 1.5.103
-  resolution: "electron-to-chromium@npm:1.5.103"
-  checksum: 10/ffcbc1addc01bd420b12b886c1e05b8fdf0bc2e0e2d99f4f1dc4737008c2bcb0aceb3117dff7c4aa4d31cf25cda809116d5de9289263ab537a86a250a9b518a3
+  version: 1.5.109
+  resolution: "electron-to-chromium@npm:1.5.109"
+  checksum: 10/4f6bd5963a2a55cbff97b2374cb0dbd6141f85e5cf8cb07267d91b0e56f3a4c8df72a7be905ddb1770b9277deef207567e97f94b9385c7cba3775620af17a932
   languageName: node
   linkType: hard
 
@@ -2661,11 +2661,11 @@ __metadata:
   linkType: hard
 
 "fastq@npm:^1.6.0":
-  version: 1.19.0
-  resolution: "fastq@npm:1.19.0"
+  version: 1.19.1
+  resolution: "fastq@npm:1.19.1"
   dependencies:
     reusify: "npm:^1.0.4"
-  checksum: 10/20457acfb15946f8ea80496da296a0d4930919638315627f093269d302f46fa97eaac3ad180746910edcd6f7163b8125620c30a41427267ffacd10ab67b1c806
+  checksum: 10/75679dc226316341c4f2a6b618571f51eac96779906faecd8921b984e844d6ae42fabb2df69b1071327d398d5716693ea9c9c8941f64ac9e89ec2032ce59d730
   languageName: node
   linkType: hard
 
@@ -2759,12 +2759,12 @@ __metadata:
   linkType: hard
 
 "foreground-child@npm:^3.1.0":
-  version: 3.3.0
-  resolution: "foreground-child@npm:3.3.0"
+  version: 3.3.1
+  resolution: "foreground-child@npm:3.3.1"
   dependencies:
-    cross-spawn: "npm:^7.0.0"
+    cross-spawn: "npm:^7.0.6"
     signal-exit: "npm:^4.0.1"
-  checksum: 10/e3a60480f3a09b12273ce2c5fcb9514d98dd0e528f58656a1b04680225f918d60a2f81f6a368f2f3b937fcee9cfc0cbf16f1ad9a0bc6a3a6e103a84c9a90087e
+  checksum: 10/427b33f997a98073c0424e5c07169264a62cda806d8d2ded159b5b903fdfc8f0a1457e06b5fc35506497acb3f1e353f025edee796300209ac6231e80edece835
   languageName: node
   linkType: hard
 
@@ -4065,8 +4065,8 @@ __metadata:
   linkType: hard
 
 "minipass-fetch@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "minipass-fetch@npm:4.0.0"
+  version: 4.0.1
+  resolution: "minipass-fetch@npm:4.0.1"
   dependencies:
     encoding: "npm:^0.1.13"
     minipass: "npm:^7.0.3"
@@ -4075,7 +4075,7 @@ __metadata:
   dependenciesMeta:
     encoding:
       optional: true
-  checksum: 10/4b0772dbee77727b469dc5bfc371541d9aba1e243fbb46ddc1b9ff7efa4de4a4cf5ff3a359d6a3b3a460ca26df9ae67a9c93be26ab6417c225e49d63b52b2801
+  checksum: 10/7ddfebdbb87d9866e7b5f7eead5a9e3d9d507992af932a11d275551f60006cf7d9178e66d586dbb910894f3e3458d27c0ddf93c76e94d49d0a54a541ddc1263d
   languageName: node
   linkType: hard
 
@@ -4228,11 +4228,11 @@ __metadata:
   linkType: hard
 
 "nan@npm:^2.18.0, nan@npm:^2.20.0, nan@npm:^2.22.0":
-  version: 2.22.1
-  resolution: "nan@npm:2.22.1"
+  version: 2.22.2
+  resolution: "nan@npm:2.22.2"
   dependencies:
     node-gyp: "npm:latest"
-  checksum: 10/3459e7e0b0d1dca4876f549c159ae469b9292e9b3a4580bf34ae57e4deedf0d44ca4920b943047aea08a1e44ca54f93aed148df30cfd7ab2bac8940a4f23bd51
+  checksum: 10/bee49de633650213970596ffbdf036bfe2109ff283a40f7742c3aa6d1fc15b9836f62bfee82192b879f56ab5f9fa9a1e5c58a908a50e5c87d91fb2118ef70827
   languageName: node
   linkType: hard
 
@@ -4971,15 +4971,15 @@ __metadata:
   linkType: hard
 
 "prismarine-auth@npm:^2.2.0":
-  version: 2.6.0
-  resolution: "prismarine-auth@npm:2.6.0"
+  version: 2.7.0
+  resolution: "prismarine-auth@npm:2.7.0"
   dependencies:
     "@azure/msal-node": "npm:^2.0.2"
     "@xboxreplay/xboxlive-auth": "npm:^3.3.3"
     debug: "npm:^4.3.3"
     smart-buffer: "npm:^4.1.0"
     uuid-1345: "npm:^1.0.2"
-  checksum: 10/f70ce0c67d82485297d0b2f8959e4192617d0f9ad1e8e0c36a74b86b1a1cc6cdbfd9d7aa1797fcc880f0dce7d3403dc8d18bcfc38b61fcc30522da06cb6f4f17
+  checksum: 10/7f479ce7075ca3260b3fb80c85cb971adce6450b56a211cfb491f30db67f83cba7117430a0d8c201238cf28f62f09e49cece2bd12e26f89b525a4bb5e32bf9cc
   languageName: node
   linkType: hard
 
@@ -5367,9 +5367,9 @@ __metadata:
   linkType: hard
 
 "retry-as-promised@npm:^7.0.4":
-  version: 7.0.4
-  resolution: "retry-as-promised@npm:7.0.4"
-  checksum: 10/cd9fd20e990c6980a2979348fbc198aa4a065f03242c1cd7782372da7054253927e0803291c843db07255a38d255936cc0f9da55bf826c9f75443a9dedb8bf4b
+  version: 7.1.1
+  resolution: "retry-as-promised@npm:7.1.1"
+  checksum: 10/95c5e29602704d2615849bf2fb80ec53474d40d3597269afa112c79be851f2935507379a253bebbb7996ef84a1d2464893b7a8dab5b80c4592e2b000fdeb2013
   languageName: node
   linkType: hard
 
@@ -5381,9 +5381,9 @@ __metadata:
   linkType: hard
 
 "reusify@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "reusify@npm:1.0.4"
-  checksum: 10/14222c9e1d3f9ae01480c50d96057228a8524706db79cdeb5a2ce5bb7070dd9f409a6f84a02cbef8cdc80d39aef86f2dd03d155188a1300c599b05437dcd2ffb
+  version: 1.1.0
+  resolution: "reusify@npm:1.1.0"
+  checksum: 10/af47851b547e8a8dc89af144fceee17b80d5beaf5e6f57ed086432d79943434ff67ca526e92275be6f54b6189f6920a24eace75c2657eed32d02c400312b21ec
   languageName: node
   linkType: hard
 
@@ -5853,9 +5853,9 @@ __metadata:
   linkType: hard
 
 "strnum@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "strnum@npm:1.1.1"
-  checksum: 10/5542ef16fd3ee8dd248f307a873b53c111533dffbc27b0d67c76b1b9ae6b7862d86f65996dd553eed4a35358f60d4a6c546856b52cff1ef8d406987c4f2d0cd3
+  version: 1.1.2
+  resolution: "strnum@npm:1.1.2"
+  checksum: 10/ccd6297a1fdaf0fc8ea0ea904acdae76878d49a4b0d98a70155df4bc081fd88eac5ec99fb150f3d1d1af065c1898d38420705259ba6c39aa850c671bcd54e35d
   languageName: node
   linkType: hard
 
@@ -6223,8 +6223,8 @@ __metadata:
   linkType: hard
 
 "update-browserslist-db@npm:^1.1.1":
-  version: 1.1.2
-  resolution: "update-browserslist-db@npm:1.1.2"
+  version: 1.1.3
+  resolution: "update-browserslist-db@npm:1.1.3"
   dependencies:
     escalade: "npm:^3.2.0"
     picocolors: "npm:^1.1.1"
@@ -6232,7 +6232,7 @@ __metadata:
     browserslist: ">= 4.21.0"
   bin:
     update-browserslist-db: cli.js
-  checksum: 10/e7bf8221dfb21eba4a770cd803df94625bb04f65a706aa94c567de9600fe4eb6133fda016ec471dad43b9e7959c1bffb6580b5e20a87808d2e8a13e3892699a9
+  checksum: 10/87af2776054ffb9194cf95e0201547d041f72ee44ce54b144da110e65ea7ca01379367407ba21de5c9edd52c74d95395366790de67f3eb4cc4afa0fe4424e76f
   languageName: node
   linkType: hard
 
