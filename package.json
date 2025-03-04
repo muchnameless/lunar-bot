@@ -76,9 +76,9 @@
 		"eslint-plugin-vue": "npm:@favware/skip-dependency@latest",
 		"is-core-module": "npm:@nolyfill/is-core-module@^1.0.39",
 		"minecraft-protocol": "patch:minecraft-protocol@1.54.0#./.yarn/patches/minecraft-protocol-npm-1.44.0-5f1ada9362.patch",
-		"object.assign": "npm:@nolyfill/object.assign@^1.0.28",
-		"object.values": "npm:@nolyfill/object.values@^1.0.28",
-		"typedarray": "npm:@nolyfill/typedarray@^1.0.29",
+		"object.assign": "npm:@nolyfill/object.assign@^1.0.44",
+		"object.values": "npm:@nolyfill/object.values@^1.0.44",
+		"typedarray": "npm:@nolyfill/typedarray@^1.0.44",
 		"vue-eslint-parser": "npm:@favware/skip-dependency@latest"
 	},
 	"dependencies": {
