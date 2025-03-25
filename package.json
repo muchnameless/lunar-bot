@@ -104,7 +104,7 @@
 		"ioredis": "^5.6.0",
 		"js-big-decimal": "^1.4.1",
 		"lilyweight": "^2.7.2",
-		"luxon": "^3.5.0",
+		"luxon": "^3.6.0",
 		"minecraft-data": "^3.84.1",
 		"minecraft-protocol": "1.55.0",
 		"ms": "3.0.0-canary.1",
