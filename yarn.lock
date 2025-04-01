@@ -892,7 +892,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:^3.4.2, @types/luxon@npm:~3.4.0":
+"@types/luxon@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "@types/luxon@npm:3.6.0"
+  checksum: 10/d7009815ce8784b83a69ec67e9c4ec7ba2fdf28ec28b93628733a2b6267b955f641055d4c10fdb9c5ca6e09a0b8a20f5e6815ae1c37ebd28e15db0ef9c5346ac
+  languageName: node
+  linkType: hard
+
+"@types/luxon@npm:~3.4.0":
   version: 3.4.2
   resolution: "@types/luxon@npm:3.4.2"
   checksum: 10/fd89566e3026559f2bc4ddcc1e70a2c16161905ed50be9473ec0cfbbbe919165041408c4f6e06c4bcf095445535052e2c099087c76b1b38e368127e618fc968d
@@ -3929,7 +3936,7 @@ __metadata:
     "@sapphire/utilities": "npm:3.18.3-next.a6e68f30"
     "@skyra/jaro-winkler": "npm:^1.1.1"
     "@types/common-tags": "npm:^1.8.4"
-    "@types/luxon": "npm:^3.4.2"
+    "@types/luxon": "npm:^3.6.0"
     "@types/node": "npm:^22.13.14"
     "@types/pg": "npm:^8.11.11"
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#2364750d838186ec37de1b883bc0dd805f87ae35"
