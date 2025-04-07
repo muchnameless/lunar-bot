@@ -370,7 +370,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emnapi/core@npm:^1.3.1":
+"@emnapi/core@npm:^1.4.0":
   version: 1.4.0
   resolution: "@emnapi/core@npm:1.4.0"
   dependencies:
@@ -380,7 +380,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emnapi/runtime@npm:^1.3.1":
+"@emnapi/runtime@npm:^1.4.0":
   version: 1.4.0
   resolution: "@emnapi/runtime@npm:1.4.0"
   dependencies:
@@ -532,90 +532,90 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-android-arm64@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-android-arm64@npm:0.1.68"
+"@napi-rs/canvas-android-arm64@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-android-arm64@npm:0.1.69"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-darwin-arm64@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-darwin-arm64@npm:0.1.68"
+"@napi-rs/canvas-darwin-arm64@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-darwin-arm64@npm:0.1.69"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-darwin-x64@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-darwin-x64@npm:0.1.68"
+"@napi-rs/canvas-darwin-x64@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-darwin-x64@npm:0.1.69"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-linux-arm-gnueabihf@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-linux-arm-gnueabihf@npm:0.1.68"
+"@napi-rs/canvas-linux-arm-gnueabihf@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-linux-arm-gnueabihf@npm:0.1.69"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-linux-arm64-gnu@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-linux-arm64-gnu@npm:0.1.68"
+"@napi-rs/canvas-linux-arm64-gnu@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-linux-arm64-gnu@npm:0.1.69"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-linux-arm64-musl@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-linux-arm64-musl@npm:0.1.68"
+"@napi-rs/canvas-linux-arm64-musl@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-linux-arm64-musl@npm:0.1.69"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-linux-riscv64-gnu@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-linux-riscv64-gnu@npm:0.1.68"
+"@napi-rs/canvas-linux-riscv64-gnu@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-linux-riscv64-gnu@npm:0.1.69"
   conditions: os=linux & cpu=riscv64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-linux-x64-gnu@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-linux-x64-gnu@npm:0.1.68"
+"@napi-rs/canvas-linux-x64-gnu@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-linux-x64-gnu@npm:0.1.69"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-linux-x64-musl@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-linux-x64-musl@npm:0.1.68"
+"@napi-rs/canvas-linux-x64-musl@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-linux-x64-musl@npm:0.1.69"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas-win32-x64-msvc@npm:0.1.68":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas-win32-x64-msvc@npm:0.1.68"
+"@napi-rs/canvas-win32-x64-msvc@npm:0.1.69":
+  version: 0.1.69
+  resolution: "@napi-rs/canvas-win32-x64-msvc@npm:0.1.69"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
 "@napi-rs/canvas@npm:^0.1.67":
-  version: 0.1.68
-  resolution: "@napi-rs/canvas@npm:0.1.68"
+  version: 0.1.69
+  resolution: "@napi-rs/canvas@npm:0.1.69"
   dependencies:
-    "@napi-rs/canvas-android-arm64": "npm:0.1.68"
-    "@napi-rs/canvas-darwin-arm64": "npm:0.1.68"
-    "@napi-rs/canvas-darwin-x64": "npm:0.1.68"
-    "@napi-rs/canvas-linux-arm-gnueabihf": "npm:0.1.68"
-    "@napi-rs/canvas-linux-arm64-gnu": "npm:0.1.68"
-    "@napi-rs/canvas-linux-arm64-musl": "npm:0.1.68"
-    "@napi-rs/canvas-linux-riscv64-gnu": "npm:0.1.68"
-    "@napi-rs/canvas-linux-x64-gnu": "npm:0.1.68"
-    "@napi-rs/canvas-linux-x64-musl": "npm:0.1.68"
-    "@napi-rs/canvas-win32-x64-msvc": "npm:0.1.68"
+    "@napi-rs/canvas-android-arm64": "npm:0.1.69"
+    "@napi-rs/canvas-darwin-arm64": "npm:0.1.69"
+    "@napi-rs/canvas-darwin-x64": "npm:0.1.69"
+    "@napi-rs/canvas-linux-arm-gnueabihf": "npm:0.1.69"
+    "@napi-rs/canvas-linux-arm64-gnu": "npm:0.1.69"
+    "@napi-rs/canvas-linux-arm64-musl": "npm:0.1.69"
+    "@napi-rs/canvas-linux-riscv64-gnu": "npm:0.1.69"
+    "@napi-rs/canvas-linux-x64-gnu": "npm:0.1.69"
+    "@napi-rs/canvas-linux-x64-musl": "npm:0.1.69"
+    "@napi-rs/canvas-win32-x64-msvc": "npm:0.1.69"
   dependenciesMeta:
     "@napi-rs/canvas-android-arm64":
       optional: true
@@ -637,18 +637,18 @@ __metadata:
       optional: true
     "@napi-rs/canvas-win32-x64-msvc":
       optional: true
-  checksum: 10/b03fdf0ba679ca6a2f89894984f7f80fbc42a4e8070a834799c47120ffdb2625b00859b719985149393560d6be4412d7f8a7ffe697542aceda30b6982b24f612
+  checksum: 10/1d049793963a4448c34325c07ae42fb50fb5b1f2f2cf9b6c9d73c32473083df971eed3a5c3a08ed6b45e4e50263a5250912b0908ba62474985ce46bb30fe8c5a
   languageName: node
   linkType: hard
 
-"@napi-rs/wasm-runtime@npm:^0.2.7":
-  version: 0.2.7
-  resolution: "@napi-rs/wasm-runtime@npm:0.2.7"
+"@napi-rs/wasm-runtime@npm:^0.2.8":
+  version: 0.2.8
+  resolution: "@napi-rs/wasm-runtime@npm:0.2.8"
   dependencies:
-    "@emnapi/core": "npm:^1.3.1"
-    "@emnapi/runtime": "npm:^1.3.1"
+    "@emnapi/core": "npm:^1.4.0"
+    "@emnapi/runtime": "npm:^1.4.0"
     "@tybys/wasm-util": "npm:^0.9.0"
-  checksum: 10/91c3f6eaf7e73fc598b69308b780c3b3818e15bbc9c92c9f065280928fd6c3fffe8c6ca0363e87baff751d1acaccf392a78feb85db58d00f0bf9bda56d45747c
+  checksum: 10/c9f9bf0f7cd20d16f5673086310f97fd4efa2475ec91813c250be27172d0cbacc4ee16686d0dab34a6553f85615db9c0cb8c9aaeeec7e092a254396505e9e771
   languageName: node
   linkType: hard
 
@@ -815,13 +815,13 @@ __metadata:
   linkType: hard
 
 "@sapphire/type@npm:^2.6.1-next.bb54585":
-  version: 2.6.1-next.e9565a5
-  resolution: "@sapphire/type@npm:2.6.1-next.e9565a5"
+  version: 2.6.1-next.fae2841
+  resolution: "@sapphire/type@npm:2.6.1-next.fae2841"
   dependencies:
     "@discordjs/node-pre-gyp": "npm:^0.4.5"
-    nan: "npm:^2.22.2"
+    nan: "npm:^2.22.0"
     tslib: "npm:^2.8.1"
-  checksum: 10/6c0459b3e748a4fff076204b4ba7bac8faaff783cb555d4925c726f77826091a18332a8f28cc6f48211c77756928ddf4a635022711a83308450a2bf72ba32eeb
+  checksum: 10/01e2148255b6ff07058a4f0829ea773bdcdd4c855d32445eb853986a410a3d78c7d8dca44d438e747b5362256dcd2d7adcb3e727f2f0eb50aeed357e2a71a349
   languageName: node
   linkType: hard
 
@@ -974,11 +974,11 @@ __metadata:
   linkType: hard
 
 "@types/ws@npm:^8.5.13":
-  version: 8.18.0
-  resolution: "@types/ws@npm:8.18.0"
+  version: 8.18.1
+  resolution: "@types/ws@npm:8.18.1"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/2a3bbf27690532627bfde8a215c0cf3a56680f339f972785b30d0b4665528275b9270c0a0839244610b0a3f2da4218c6dd741ceba1d173fde5c5091f2034b823
+  checksum: 10/1ce05e3174dcacf28dae0e9b854ef1c9a12da44c7ed73617ab6897c5cbe4fccbb155a20be5508ae9a7dde2f83bd80f5cf3baa386b934fc4b40889ec963e94f3a
   languageName: node
   linkType: hard
 
@@ -1181,109 +1181,109 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-darwin-arm64@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-darwin-arm64@npm:1.3.3"
+"@unrs/resolver-binding-darwin-arm64@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-darwin-arm64@npm:1.4.0"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-darwin-x64@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-darwin-x64@npm:1.3.3"
+"@unrs/resolver-binding-darwin-x64@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-darwin-x64@npm:1.4.0"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-freebsd-x64@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-freebsd-x64@npm:1.3.3"
+"@unrs/resolver-binding-freebsd-x64@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-freebsd-x64@npm:1.4.0"
   conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-arm-gnueabihf@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-arm-gnueabihf@npm:1.3.3"
+"@unrs/resolver-binding-linux-arm-gnueabihf@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-arm-gnueabihf@npm:1.4.0"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-arm-musleabihf@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-arm-musleabihf@npm:1.3.3"
+"@unrs/resolver-binding-linux-arm-musleabihf@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-arm-musleabihf@npm:1.4.0"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-arm64-gnu@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-arm64-gnu@npm:1.3.3"
+"@unrs/resolver-binding-linux-arm64-gnu@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-arm64-gnu@npm:1.4.0"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-arm64-musl@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-arm64-musl@npm:1.3.3"
+"@unrs/resolver-binding-linux-arm64-musl@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-arm64-musl@npm:1.4.0"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-ppc64-gnu@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-ppc64-gnu@npm:1.3.3"
+"@unrs/resolver-binding-linux-ppc64-gnu@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-ppc64-gnu@npm:1.4.0"
   conditions: os=linux & cpu=ppc64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-s390x-gnu@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-s390x-gnu@npm:1.3.3"
+"@unrs/resolver-binding-linux-s390x-gnu@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-s390x-gnu@npm:1.4.0"
   conditions: os=linux & cpu=s390x & libc=glibc
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-x64-gnu@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-x64-gnu@npm:1.3.3"
+"@unrs/resolver-binding-linux-x64-gnu@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-x64-gnu@npm:1.4.0"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-linux-x64-musl@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-linux-x64-musl@npm:1.3.3"
+"@unrs/resolver-binding-linux-x64-musl@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-linux-x64-musl@npm:1.4.0"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-wasm32-wasi@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-wasm32-wasi@npm:1.3.3"
+"@unrs/resolver-binding-wasm32-wasi@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-wasm32-wasi@npm:1.4.0"
   dependencies:
-    "@napi-rs/wasm-runtime": "npm:^0.2.7"
+    "@napi-rs/wasm-runtime": "npm:^0.2.8"
   conditions: cpu=wasm32
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-win32-arm64-msvc@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-win32-arm64-msvc@npm:1.3.3"
+"@unrs/resolver-binding-win32-arm64-msvc@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-win32-arm64-msvc@npm:1.4.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-win32-ia32-msvc@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-win32-ia32-msvc@npm:1.3.3"
+"@unrs/resolver-binding-win32-ia32-msvc@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-win32-ia32-msvc@npm:1.4.0"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@unrs/resolver-binding-win32-x64-msvc@npm:1.3.3":
-  version: 1.3.3
-  resolution: "@unrs/resolver-binding-win32-x64-msvc@npm:1.3.3"
+"@unrs/resolver-binding-win32-x64-msvc@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@unrs/resolver-binding-win32-x64-msvc@npm:1.4.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -1701,9 +1701,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001688":
-  version: 1.0.30001707
-  resolution: "caniuse-lite@npm:1.0.30001707"
-  checksum: 10/5c5f9aad651f4d957cc59c8b4ac22bb7ac3a1c86c26ee7d5c59b00062bdc1c421980513179da1f5e20cade2da8d7f3c41d482ce7d4a8d9f411e4a827fe092d29
+  version: 1.0.30001712
+  resolution: "caniuse-lite@npm:1.0.30001712"
+  checksum: 10/1831ac3260b9657c5a0236d21c02bea6a6b88fd67a451a0ff166d27da17c95ab398c5721e08aeb24f766bced1d38f562f07c8de84e91a10a065808e83835e89e
   languageName: node
   linkType: hard
 
@@ -2183,9 +2183,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.73":
-  version: 1.5.128
-  resolution: "electron-to-chromium@npm:1.5.128"
-  checksum: 10/29e441eb3976e23c3635ec1fd04c31c7cddc24ceb33ee93fadcccd1ad4c37c6fa565860368be4d680d5828967abf58036fd5160051d0ee8a2a4bccc7ba698721
+  version: 1.5.132
+  resolution: "electron-to-chromium@npm:1.5.132"
+  checksum: 10/ff50f38e26c5acdce1010703197a1cd1b9d9d789160ee1d4a2fc9f5dff6a030632ab36893156147d7360e891dd7151e156c6003ca271d4acbb4e501788ff22bd
   languageName: node
   linkType: hard
 
@@ -3030,7 +3030,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^10.2.2, glob@npm:^10.3.10, glob@npm:^10.3.7":
+"glob@npm:^10.2.2, glob@npm:^10.3.10":
   version: 10.4.5
   resolution: "glob@npm:10.4.5"
   dependencies:
@@ -3764,13 +3764,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.get@npm:^4.4.2":
-  version: 4.4.2
-  resolution: "lodash.get@npm:4.4.2"
-  checksum: 10/2a4925f6e89bc2c010a77a802d1ba357e17ed1ea03c2ddf6a146429f2856a216663e694a6aa3549a318cbbba3fd8b7decb392db457e6ac0b83dc745ed0a17380
-  languageName: node
-  linkType: hard
-
 "lodash.includes@npm:^4.3.0":
   version: 4.3.0
   resolution: "lodash.includes@npm:4.3.0"
@@ -4283,12 +4276,11 @@ __metadata:
   linkType: hard
 
 "minizlib@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "minizlib@npm:3.0.1"
+  version: 3.0.2
+  resolution: "minizlib@npm:3.0.2"
   dependencies:
-    minipass: "npm:^7.0.4"
-    rimraf: "npm:^5.0.5"
-  checksum: 10/622cb85f51e5c206a080a62d20db0d7b4066f308cb6ce82a9644da112367c3416ae7062017e631eb7ac8588191cfa4a9a279b8651c399265202b298e98c4acef
+    minipass: "npm:^7.1.2"
+  checksum: 10/c075bed1594f68dcc8c35122333520112daefd4d070e5d0a228bd4cf5580e9eed3981b96c0ae1d62488e204e80fd27b2b9d0068ca9a5ef3993e9565faf63ca41
   languageName: node
   linkType: hard
 
@@ -4370,7 +4362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.18.0, nan@npm:^2.20.0, nan@npm:^2.22.2":
+"nan@npm:^2.18.0, nan@npm:^2.20.0, nan@npm:^2.22.0":
   version: 2.22.2
   resolution: "nan@npm:2.22.2"
   dependencies:
@@ -4470,22 +4462,22 @@ __metadata:
   linkType: hard
 
 "node-gyp@npm:latest":
-  version: 11.1.0
-  resolution: "node-gyp@npm:11.1.0"
+  version: 11.2.0
+  resolution: "node-gyp@npm:11.2.0"
   dependencies:
     env-paths: "npm:^2.2.0"
     exponential-backoff: "npm:^3.1.1"
-    glob: "npm:^10.3.10"
     graceful-fs: "npm:^4.2.6"
     make-fetch-happen: "npm:^14.0.3"
     nopt: "npm:^8.0.0"
     proc-log: "npm:^5.0.0"
     semver: "npm:^7.3.5"
     tar: "npm:^7.4.3"
+    tinyglobby: "npm:^0.2.12"
     which: "npm:^5.0.0"
   bin:
     node-gyp: bin/node-gyp.js
-  checksum: 10/3314ebfeb99dbcdf9e8c810df1ee52294045399873d4ab1e6740608c4fbe63adaf6580c0610b23c6eda125e298536553f5bb6fb0df714016a5c721ed31095e42
+  checksum: 10/806fd8e3adc9157e17bf0d4a2c899cf6b98a0bbe9f453f630094ce791866271f6cddcaf2133e6513715d934fcba2014d287c7053d5d7934937b3a34d5a3d84ad
   languageName: node
   linkType: hard
 
@@ -5251,14 +5243,13 @@ __metadata:
   linkType: hard
 
 "protodef@npm:^1.17.0, protodef@npm:^1.18.0":
-  version: 1.18.0
-  resolution: "protodef@npm:1.18.0"
+  version: 1.19.0
+  resolution: "protodef@npm:1.19.0"
   dependencies:
-    lodash.get: "npm:^4.4.2"
     lodash.reduce: "npm:^4.6.0"
     protodef-validator: "npm:^1.3.0"
     readable-stream: "npm:^4.4.0"
-  checksum: 10/6af2f6e02b9e048b7a2fc8228960fe59fd9847aaf45386bf67b7e3f48c55bd12a645102cc0b041368af21117cc572b2cee3560c0b525816a34e5daae506d707b
+  checksum: 10/0cda02081137683fedd98d40d8444048ff3c86b7090407db09a21f235a3d5b60dbb59570f202a69b2e67f033a470978d06c9358576ed0a0dcaef540f637f9d3b
   languageName: node
   linkType: hard
 
@@ -5545,17 +5536,6 @@ __metadata:
   bin:
     rimraf: bin.js
   checksum: 10/063ffaccaaaca2cfd0ef3beafb12d6a03dd7ff1260d752d62a6077b5dfff6ae81bea571f655bb6b589d366930ec1bdd285d40d560c0dae9b12f125e54eb743d5
-  languageName: node
-  linkType: hard
-
-"rimraf@npm:^5.0.5":
-  version: 5.0.10
-  resolution: "rimraf@npm:5.0.10"
-  dependencies:
-    glob: "npm:^10.3.7"
-  bin:
-    rimraf: dist/esm/bin.mjs
-  checksum: 10/f3b8ce81eecbde4628b07bdf9e2fa8b684e0caea4999acb1e3b0402c695cd41f28cd075609a808e61ce2672f528ca079f675ab1d8e8d5f86d56643a03e0b8d2e
   languageName: node
   linkType: hard
 
@@ -6359,24 +6339,24 @@ __metadata:
   linkType: hard
 
 "unrs-resolver@npm:^1.3.2":
-  version: 1.3.3
-  resolution: "unrs-resolver@npm:1.3.3"
+  version: 1.4.0
+  resolution: "unrs-resolver@npm:1.4.0"
   dependencies:
-    "@unrs/resolver-binding-darwin-arm64": "npm:1.3.3"
-    "@unrs/resolver-binding-darwin-x64": "npm:1.3.3"
-    "@unrs/resolver-binding-freebsd-x64": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-arm-gnueabihf": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-arm-musleabihf": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-arm64-gnu": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-arm64-musl": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-ppc64-gnu": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-s390x-gnu": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-x64-gnu": "npm:1.3.3"
-    "@unrs/resolver-binding-linux-x64-musl": "npm:1.3.3"
-    "@unrs/resolver-binding-wasm32-wasi": "npm:1.3.3"
-    "@unrs/resolver-binding-win32-arm64-msvc": "npm:1.3.3"
-    "@unrs/resolver-binding-win32-ia32-msvc": "npm:1.3.3"
-    "@unrs/resolver-binding-win32-x64-msvc": "npm:1.3.3"
+    "@unrs/resolver-binding-darwin-arm64": "npm:1.4.0"
+    "@unrs/resolver-binding-darwin-x64": "npm:1.4.0"
+    "@unrs/resolver-binding-freebsd-x64": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-arm-gnueabihf": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-arm-musleabihf": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-arm64-gnu": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-arm64-musl": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-ppc64-gnu": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-s390x-gnu": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-x64-gnu": "npm:1.4.0"
+    "@unrs/resolver-binding-linux-x64-musl": "npm:1.4.0"
+    "@unrs/resolver-binding-wasm32-wasi": "npm:1.4.0"
+    "@unrs/resolver-binding-win32-arm64-msvc": "npm:1.4.0"
+    "@unrs/resolver-binding-win32-ia32-msvc": "npm:1.4.0"
+    "@unrs/resolver-binding-win32-x64-msvc": "npm:1.4.0"
   dependenciesMeta:
     "@unrs/resolver-binding-darwin-arm64":
       optional: true
@@ -6408,7 +6388,7 @@ __metadata:
       optional: true
     "@unrs/resolver-binding-win32-x64-msvc":
       optional: true
-  checksum: 10/01d8462f03af5444b1b874b9fb8f1e218970d152cc4df5c6e56171680c5e2fc777f39b82304222bd9bac7395cb206985211d19b615a7e2121191e4c1d39b970d
+  checksum: 10/32be4c66d35bbf12ed15aa86f830415975f9eb0b266a920544e4695e8fa8e597a574d6a24b050a952430a4acce0da2e0b048d8dcfc23bdffbb5c93c46796a8f0
   languageName: node
   linkType: hard
 
