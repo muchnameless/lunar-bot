@@ -3950,7 +3950,7 @@ __metadata:
     minecraft-data: "npm:^3.85.0"
     minecraft-protocol: "npm:1.57.0"
     ms: "npm:3.0.0-canary.1"
-    pg: "npm:^8.15.5"
+    pg: "npm:^8.15.6"
     pg-hstore: "npm:^2.3.4"
     pino: "npm:^9.6.0"
     pino-pretty: "npm:^13.0.0"
@@ -4850,12 +4850,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-pool@npm:^3.9.5":
-  version: 3.9.5
-  resolution: "pg-pool@npm:3.9.5"
+"pg-pool@npm:^3.9.6":
+  version: 3.9.6
+  resolution: "pg-pool@npm:3.9.6"
   peerDependencies:
     pg: ">=8.0"
-  checksum: 10/065166c1dabd18db8974850ffe84aeb6a0a35cb074c550e11b1681ac6d800e04b79131f1ffc31952f7cedc07cfc0deb96dd39e9069340fe5298ef4b05bf565a4
+  checksum: 10/245c04fa8e29fb2737cfe8ca6d8526b4b996932801aa9f5c2d95fc67a646a8ab770a5368fb2ed3513fc615c3e2843a5ab7670d2f8bb4dd33d8d122c0f98e64ed
   languageName: node
   linkType: hard
 
@@ -4894,13 +4894,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg@npm:^8.15.5":
-  version: 8.15.5
-  resolution: "pg@npm:8.15.5"
+"pg@npm:^8.15.6":
+  version: 8.15.6
+  resolution: "pg@npm:8.15.6"
   dependencies:
     pg-cloudflare: "npm:^1.2.5"
     pg-connection-string: "npm:^2.8.5"
-    pg-pool: "npm:^3.9.5"
+    pg-pool: "npm:^3.9.6"
     pg-protocol: "npm:^1.9.5"
     pg-types: "npm:^2.1.0"
     pgpass: "npm:1.x"
@@ -4912,7 +4912,7 @@ __metadata:
   peerDependenciesMeta:
     pg-native:
       optional: true
-  checksum: 10/993d2b395d175770e944ed4859013c122a6676e8f3886aecd15aa11febf6213cbb0cb7225cbc1f0519a909935044c82c1ac2f412992949dbbdcc2eb10bc799a0
+  checksum: 10/f465bc7cfbaee64f97e3a51be6a9c883d6ff29b0a825d4f8c3e0b24d1530a51c80f0a736d189c8db051cf18e9e60f20ddde4227adea8ca55700ab154c1abe21d
   languageName: node
   linkType: hard
 
