@@ -133,7 +133,7 @@
 		"ley": "^0.8.1",
 		"lint-staged": "^15.5.1",
 		"pino-pretty": "^13.0.0",
-		"sort-package-json": "^3.1.0",
+		"sort-package-json": "^3.2.0",
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.8.3"
 	},
