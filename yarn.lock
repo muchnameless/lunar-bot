@@ -938,14 +938,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pg@npm:^8.11.14":
-  version: 8.11.14
-  resolution: "@types/pg@npm:8.11.14"
+"@types/pg@npm:^8.12.0":
+  version: 8.12.0
+  resolution: "@types/pg@npm:8.12.0"
   dependencies:
     "@types/node": "npm:*"
     pg-protocol: "npm:*"
     pg-types: "npm:^4.0.1"
-  checksum: 10/4761b6bf8e4352b5e8a9304208fb526e793ab5689e0995a85431b908dadf8c5d29e4ae60f586ddb5876d38ad6c1bcae073e36d60ff6497a0148a904f3a104be7
+  checksum: 10/630f8a020114bef85de27887b0be96ff52239a831e93ccafc76863f525efe1ada4ab164404a1f2cc7f91c87435629a38016966dd1833ef16e65404d66f5400c7
   languageName: node
   linkType: hard
 
@@ -3924,7 +3924,7 @@ __metadata:
     "@types/common-tags": "npm:^1.8.4"
     "@types/luxon": "npm:^3.6.2"
     "@types/node": "npm:^22.15.3"
-    "@types/pg": "npm:^8.11.14"
+    "@types/pg": "npm:^8.12.0"
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#2364750d838186ec37de1b883bc0dd805f87ae35"
     bufferutil: "npm:^4.0.9"
     chart.js: "npm:^4.4.9"
