@@ -765,12 +765,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/discord-utilities@npm:3.5.1-next.893fe544":
-  version: 3.5.1-next.893fe544
-  resolution: "@sapphire/discord-utilities@npm:3.5.1-next.893fe544"
+"@sapphire/discord-utilities@npm:3.5.1-next.fb5ad246":
+  version: 3.5.1-next.fb5ad246
+  resolution: "@sapphire/discord-utilities@npm:3.5.1-next.fb5ad246"
   dependencies:
-    discord-api-types: "npm:^0.37.119"
-  checksum: 10/ced45189b73439de4d9f64559f74b6b8e268dec8a6461e968c19d70c0232e25e7aeea0f29b6ea3421b13e2c8d528b0b4c26a3aee6784d58bf0200d1304a00a42
+    discord-api-types: "npm:^0.38.1"
+  checksum: 10/04dced4cdd716afa1339d3b6d9cae5df39fc00b027e9d2fd349421df6e8993279b79fb6619a0c700daed176dca2b94e69bf68d0125f8a5c13668289bdbdc42d3
   languageName: node
   linkType: hard
 
@@ -814,14 +814,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/type@npm:^2.6.1-next.bb54585":
-  version: 2.6.1-next.fae2841
-  resolution: "@sapphire/type@npm:2.6.1-next.fae2841"
+"@sapphire/type@npm:^2.6.1-next.c99eed9":
+  version: 2.6.1-next.c99eed9
+  resolution: "@sapphire/type@npm:2.6.1-next.c99eed9"
   dependencies:
     "@discordjs/node-pre-gyp": "npm:^0.4.5"
-    nan: "npm:^2.22.0"
+    nan: "npm:^2.22.2"
     tslib: "npm:^2.8.1"
-  checksum: 10/01e2148255b6ff07058a4f0829ea773bdcdd4c855d32445eb853986a410a3d78c7d8dca44d438e747b5362256dcd2d7adcb3e727f2f0eb50aeed357e2a71a349
+  checksum: 10/bf0678db37f238f7f8cec15e9b9cf8a0d967205053a41fc37bb3cc092cebe4507d86bbe879ec10b03eb699e31bf17deb8c0c0bbf755d68829bf308475cb444e7
   languageName: node
   linkType: hard
 
@@ -3914,11 +3914,11 @@ __metadata:
     "@discordjs/ws": "npm:2.0.1-dev.1732709137-97ffa201a"
     "@napi-rs/canvas": "npm:^0.1.69"
     "@sapphire/async-queue": "npm:1.5.6-next.ff2c792d"
-    "@sapphire/discord-utilities": "npm:3.5.1-next.893fe544"
+    "@sapphire/discord-utilities": "npm:3.5.1-next.fb5ad246"
     "@sapphire/node-utilities": "npm:1.0.3-next.ff2c792d"
     "@sapphire/ratelimits": "npm:2.4.12-next.ff2c792d"
     "@sapphire/stopwatch": "npm:1.5.5-next.ff2c792d"
-    "@sapphire/type": "npm:^2.6.1-next.bb54585"
+    "@sapphire/type": "npm:^2.6.1-next.c99eed9"
     "@sapphire/utilities": "npm:3.18.3-next.e79994f1"
     "@skyra/jaro-winkler": "npm:^1.1.1"
     "@types/common-tags": "npm:^1.8.4"
@@ -4362,7 +4362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.18.0, nan@npm:^2.20.0, nan@npm:^2.22.0":
+"nan@npm:^2.18.0, nan@npm:^2.20.0, nan@npm:^2.22.2":
   version: 2.22.2
   resolution: "nan@npm:2.22.2"
   dependencies:
