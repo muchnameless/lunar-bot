@@ -4,8 +4,8 @@ import { URL } from 'node:url';
 
 const paths: string[] = [];
 
-for await (const { name, path } of await opendir(new URL('setup.d', import.meta.url))) {
-	if (name.endsWith('.js')) paths.push(join(path, name));
+for await (const { name, parentPath } of await opendir(new URL('setup.d', import.meta.url))) {
+	if (name.endsWith('.js')) paths.push(join(parentPath, name));
 }
 
 // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
