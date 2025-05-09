@@ -3958,7 +3958,7 @@ __metadata:
     tslib: "npm:^2.8.1"
     typescript: "npm:^5.8.3"
     undici: "npm:^7.8.0"
-    zlib-sync: "npm:^0.1.9"
+    zlib-sync: "npm:^0.1.10"
   languageName: unknown
   linkType: soft
 
@@ -6679,12 +6679,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zlib-sync@npm:^0.1.9":
-  version: 0.1.9
-  resolution: "zlib-sync@npm:0.1.9"
+"zlib-sync@npm:^0.1.10":
+  version: 0.1.10
+  resolution: "zlib-sync@npm:0.1.10"
   dependencies:
     nan: "npm:^2.18.0"
     node-gyp: "npm:latest"
-  checksum: 10/b65cf31af2c960a826fa5d9820f5d46715ba4d46e1960605009518ca2074f48633c36262496d4098c884baec2fb37775fe5329183ca83562752967ab605eed74
+  checksum: 10/76c4a1f3608dc806c6cea83605a8e3d05e751425f04b336c8cd6cdbe8d549962a23fb7bbd7dea20dbfd000e8bf1dd20f426454899c4fbbb36eff811839841673
   languageName: node
   linkType: hard
