@@ -108,7 +108,7 @@
 		"minecraft-data": "^3.86.0",
 		"minecraft-protocol": "1.57.0",
 		"ms": "3.0.0-canary.1",
-		"pg": "^8.15.6",
+		"pg": "^8.16.0",
 		"pg-hstore": "^2.3.4",
 		"pino": "^9.6.0",
 		"postgres": "3.4.5",
