@@ -3870,7 +3870,7 @@ __metadata:
     minecraft-data: "npm:^3.90.0"
     minecraft-protocol: "npm:1.57.0"
     ms: "npm:3.0.0-canary.1"
-    pg: "npm:^8.16.2"
+    pg: "npm:^8.16.3"
     pg-hstore: "npm:^2.3.4"
     pino: "npm:^9.7.0"
     pino-pretty: "npm:^13.0.0"
@@ -4644,10 +4644,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-cloudflare@npm:^1.2.6":
-  version: 1.2.6
-  resolution: "pg-cloudflare@npm:1.2.6"
-  checksum: 10/8b9bede2db8ada18b3edcd6d920e41def65117038fbef303de2c3c203744d7ad7cfc6b5177e4e2a75975334545e3e395bfaeb3bd7ec154d6a74faf503d0384ad
+"pg-cloudflare@npm:^1.2.7":
+  version: 1.2.7
+  resolution: "pg-cloudflare@npm:1.2.7"
+  checksum: 10/3d171407cbce36436c461200666ba6bd884bfe98016972760a797cec850199b8024a40055d80322c5fc02909e1533a144e9b108a99f7d7e21d0c42612f9821fb
   languageName: node
   linkType: hard
 
@@ -4683,10 +4683,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-protocol@npm:*, pg-protocol@npm:^1.10.2":
-  version: 1.10.2
-  resolution: "pg-protocol@npm:1.10.2"
-  checksum: 10/4c14668ae1ec1515d421ead8eb2ce3227a4286082b55330e45eb9d512ef900650425af2a3e9672c4b43d0bc121ce920229598593c5a76127f37ca9910d0194e6
+"pg-protocol@npm:*, pg-protocol@npm:^1.10.3":
+  version: 1.10.3
+  resolution: "pg-protocol@npm:1.10.3"
+  checksum: 10/31da85319084c03f403efee7accce9786964df82a7feb60e6bd77b71f1e622c74a2a644a2bc434389d0ab92e5abdeedea69ebdb53b1897d9f01d2a1f51a8a2fe
   languageName: node
   linkType: hard
 
@@ -4703,14 +4703,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg@npm:^8.16.2":
-  version: 8.16.2
-  resolution: "pg@npm:8.16.2"
+"pg@npm:^8.16.3":
+  version: 8.16.3
+  resolution: "pg@npm:8.16.3"
   dependencies:
-    pg-cloudflare: "npm:^1.2.6"
+    pg-cloudflare: "npm:^1.2.7"
     pg-connection-string: "npm:^2.9.1"
     pg-pool: "npm:^3.10.1"
-    pg-protocol: "npm:^1.10.2"
+    pg-protocol: "npm:^1.10.3"
     pg-types: "npm:2.2.0"
     pgpass: "npm:1.0.5"
   peerDependencies:
@@ -4721,7 +4721,7 @@ __metadata:
   peerDependenciesMeta:
     pg-native:
       optional: true
-  checksum: 10/e34056b3758e996cf24635412e62c4d44ac2fd41f1e389a0dc0346b9965d0dc763e4f72d30d4de497d2b3495ee0ec44c39e930ec464aa4622db257895955e184
+  checksum: 10/6a2885a3f581d6c6dddddf5a4bb2790ee84f402ed7d73ece8b6bc102c58c17e4c5f17894c241633aa2f1d4fedd8f2401a80a9a02ef18bb57d05cbbfd8a53ca4d
   languageName: node
   linkType: hard
 
