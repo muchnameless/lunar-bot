@@ -893,12 +893,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.16.0":
-  version: 22.16.0
-  resolution: "@types/node@npm:22.16.0"
+"@types/node@npm:*, @types/node@npm:^22.16.2":
+  version: 22.16.2
+  resolution: "@types/node@npm:22.16.2"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/26ebbbd24749caa4a692664290c53cdca63ec717ca250cd2babf3d3da796e9d3d0b6b9814d160693261b5e881796bf0f3c1887fef355b19e9a78fe27cd5e2ce2
+  checksum: 10/ff15825a699863e54c9669e888b6d12848180f4f0b88cb9dc84c3dc6f91ca2d1d09df38f4f02ba594e70ade6c53d840f090c4817d8df5968df653921095d77b7
   languageName: node
   linkType: hard
 
@@ -3850,7 +3850,7 @@ __metadata:
     "@skyra/jaro-winkler": "npm:^1.1.1"
     "@types/common-tags": "npm:^1.8.4"
     "@types/luxon": "npm:^3.6.2"
-    "@types/node": "npm:^22.16.0"
+    "@types/node": "npm:^22.16.2"
     "@types/pg": "npm:^8.15.4"
     "@zikeji/hypixel": "github:muchnameless/node-hypixel#2364750d838186ec37de1b883bc0dd805f87ae35"
     bufferutil: "npm:^4.0.9"
