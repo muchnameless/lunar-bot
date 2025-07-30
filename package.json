@@ -132,7 +132,7 @@
 		"eslint-config-neon": "^0.1.62",
 		"ley": "^0.8.1",
 		"lint-staged": "^15.5.2",
-		"pino-pretty": "^13.0.0",
+		"pino-pretty": "^13.1.1",
 		"sort-package-json": "^3.4.0",
 		"ts-prune": "^0.10.3",
 		"typescript": "^5.8.3"
