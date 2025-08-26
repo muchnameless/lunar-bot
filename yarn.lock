@@ -3876,7 +3876,7 @@ __metadata:
     luxon: "npm:^3.7.1"
     minecraft-data: "npm:^3.97.0"
     minecraft-protocol: "npm:1.61.0"
-    ms: "npm:3.0.0-canary.1"
+    ms: "npm:3.0.0-canary.202508261828"
     pg: "npm:^8.16.3"
     pg-hstore: "npm:^2.3.4"
     pino: "npm:^9.7.0"
@@ -4254,10 +4254,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ms@npm:3.0.0-canary.1":
-  version: 3.0.0-canary.1
-  resolution: "ms@npm:3.0.0-canary.1"
-  checksum: 10/5ec76c0932cf83ac3e7f70f1a4c0d4db4dbc91de6ea5f7d336c67b48f513c8cb4c0fce3a07e3d84ee931dbdc9a48f33ed1c485e834279fff8906d385e86684ae
+"ms@npm:3.0.0-canary.202508261828":
+  version: 3.0.0-canary.202508261828
+  resolution: "ms@npm:3.0.0-canary.202508261828"
+  checksum: 10/ec7f5ef45b8b2f6aae25ebd0b78518454a8d9009ea090158e9766b7de42e9cc89b4a4d52fa6ea2cb918f61a0f74775093a8ca95c40a380129e49ddb864d63d0a
   languageName: node
   linkType: hard
 
