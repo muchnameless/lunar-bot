@@ -3873,7 +3873,7 @@ __metadata:
     ley: "npm:^0.8.1"
     lilyweight: "npm:^2.7.2"
     lint-staged: "npm:^15.5.2"
-    luxon: "npm:^3.7.1"
+    luxon: "npm:^3.7.2"
     minecraft-data: "npm:^3.97.0"
     minecraft-protocol: "npm:1.61.0"
     ms: "npm:3.0.0-canary.202508261828"
@@ -3896,10 +3896,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"luxon@npm:^3.7.1":
-  version: 3.7.1
-  resolution: "luxon@npm:3.7.1"
-  checksum: 10/3582460c0e2d4a88f6f0c11df30cac70c7e09a3d595b66b1d04543759a38afe6e5be28c601c4d81ee73d2e8602c65f825e2c8a8542392cc564624f2bf7d6301f
+"luxon@npm:^3.7.2":
+  version: 3.7.2
+  resolution: "luxon@npm:3.7.2"
+  checksum: 10/b24cd205ed306ce7415991687897dcc4027921ae413c9116590bc33a95f93b86ce52cf74ba72b4f5c5ab1c10090517f54ac8edfb127c049e0bf55b90dc2260be
   languageName: node
   linkType: hard
 
