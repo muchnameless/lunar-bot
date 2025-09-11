@@ -3879,7 +3879,7 @@ __metadata:
     ms: "npm:3.0.0-canary.202508261828"
     pg: "npm:^8.16.3"
     pg-hstore: "npm:^2.3.4"
-    pino: "npm:^9.7.0"
+    pino: "npm:^9.9.5"
     pino-pretty: "npm:^13.1.1"
     postgres: "npm:3.4.7"
     prettier: "npm:^3.6.2"
@@ -4817,9 +4817,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:^9.7.0":
-  version: 9.7.0
-  resolution: "pino@npm:9.7.0"
+"pino@npm:^9.9.5":
+  version: 9.9.5
+  resolution: "pino@npm:9.9.5"
   dependencies:
     atomic-sleep: "npm:^1.0.0"
     fast-redact: "npm:^3.1.1"
@@ -4834,7 +4834,7 @@ __metadata:
     thread-stream: "npm:^3.0.0"
   bin:
     pino: bin.js
-  checksum: 10/01f489e01457ceeb46aa73189922381a6e6c7e0b8599a49d2d18e4d765e7898e36534b7bfd389aca9702c57d680f14dc87d66ab4e80792266f928b051ba8872a
+  checksum: 10/b6cb65bdc92328966561002284cd3902bbfe51b91d72d3b90d1fa85008caa5c4ef35848f2c080962e4688f50c753f06b0cf4ba5e0bd17f33954ae039725d49ed
   languageName: node
   linkType: hard
 
