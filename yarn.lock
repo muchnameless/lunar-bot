@@ -3885,7 +3885,7 @@ __metadata:
     prettier: "npm:^3.6.2"
     prismarine-chat: "npm:^1.12.0"
     prismarine-nbt: "npm:^2.7.0"
-    re2: "npm:^1.22.1"
+    re2: "npm:^1.22.3"
     sequelize: "npm:^6.37.7"
     sort-package-json: "npm:^3.4.0"
     ts-prune: "npm:^0.10.3"
@@ -4268,12 +4268,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.18.0, nan@npm:^2.22.2":
-  version: 2.22.2
-  resolution: "nan@npm:2.22.2"
+"nan@npm:^2.18.0, nan@npm:^2.22.2, nan@npm:^2.23.1":
+  version: 2.23.1
+  resolution: "nan@npm:2.23.1"
   dependencies:
     node-gyp: "npm:latest"
-  checksum: 10/bee49de633650213970596ffbdf036bfe2109ff283a40f7742c3aa6d1fc15b9836f62bfee82192b879f56ab5f9fa9a1e5c58a908a50e5c87d91fb2118ef70827
+  checksum: 10/4a1f2948c5d4f59633d7fa4b90a9c2bce6c3feb556a0de598cd20c0b836922c970353d3634fc1678f2643038c7c343e43a9b891238d812ec8222d42e4fde09ae
   languageName: node
   linkType: hard
 
@@ -4340,7 +4340,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:^11.2.0, node-gyp@npm:latest":
+"node-gyp@npm:^11.5.0":
+  version: 11.5.0
+  resolution: "node-gyp@npm:11.5.0"
+  dependencies:
+    env-paths: "npm:^2.2.0"
+    exponential-backoff: "npm:^3.1.1"
+    graceful-fs: "npm:^4.2.6"
+    make-fetch-happen: "npm:^14.0.3"
+    nopt: "npm:^8.0.0"
+    proc-log: "npm:^5.0.0"
+    semver: "npm:^7.3.5"
+    tar: "npm:^7.4.3"
+    tinyglobby: "npm:^0.2.12"
+    which: "npm:^5.0.0"
+  bin:
+    node-gyp: bin/node-gyp.js
+  checksum: 10/15a600b626116e1e528c49f73027c5ff84dbf6986df77b0fb61d6eb079ab4230c39f245295cb67f0590e6541a848cbd267e00c5769e8fb8bf88a5cca3701b551
+  languageName: node
+  linkType: hard
+
+"node-gyp@npm:latest":
   version: 11.2.0
   resolution: "node-gyp@npm:11.2.0"
   dependencies:
@@ -5087,14 +5107,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"re2@npm:^1.22.1":
-  version: 1.22.1
-  resolution: "re2@npm:1.22.1"
+"re2@npm:^1.22.3":
+  version: 1.22.3
+  resolution: "re2@npm:1.22.3"
   dependencies:
     install-artifact-from-github: "npm:^1.4.0"
-    nan: "npm:^2.22.2"
-    node-gyp: "npm:^11.2.0"
-  checksum: 10/d969d7b1306ce273c0437c336ed310e5c2eccd079136eb98387c4c7fe1bd63446809b0623334418e5ff695ec7f6b9d57394b9e48f8a9a0d48ac77638d5318d31
+    nan: "npm:^2.23.1"
+    node-gyp: "npm:^11.5.0"
+  checksum: 10/c054a800d8a08bfcc217381546771bc48a35bf1eeb76420540cf6efe2029fb60aea4641212a7279ae49b0edf19d878db6770b0ea2266eefafa7892baeb7687c7
   languageName: node
   linkType: hard
 
