@@ -100,7 +100,7 @@
 		"common-tags": "^1.8.2",
 		"cron": "^4.1.4",
 		"discord.js": "14.17.0-dev.1727655153-9aa3b635e",
-		"fast-xml-parser": "^5.3.0",
+		"fast-xml-parser": "^5.3.2",
 		"ioredis": "^5.8.2",
 		"js-big-decimal": "^1.4.1",
 		"lilyweight": "^2.7.2",
