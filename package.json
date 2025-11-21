@@ -87,7 +87,7 @@
 		"@discordjs/ws": "2.0.1-dev.1732709137-97ffa201a",
 		"@napi-rs/canvas": "^0.1.70",
 		"@sapphire/async-queue": "1.5.6-next.ff2c792d",
-		"@sapphire/discord-utilities": "3.5.1-next.fb5ad246",
+		"@sapphire/discord-utilities": "4.1.0-next.11799975",
 		"@sapphire/node-utilities": "1.0.3-next.ff2c792d",
 		"@sapphire/ratelimits": "2.4.12-next.ff2c792d",
 		"@sapphire/stopwatch": "1.5.5-next.ff2c792d",
