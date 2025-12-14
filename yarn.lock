@@ -3887,7 +3887,7 @@ __metadata:
     prismarine-nbt: "npm:^2.7.0"
     re2: "npm:^1.22.3"
     sequelize: "npm:^6.37.7"
-    sort-package-json: "npm:^3.5.1"
+    sort-package-json: "npm:^3.6.0"
     ts-prune: "npm:^0.10.3"
     tslib: "npm:^2.8.1"
     typescript: "npm:^5.9.3"
@@ -5592,9 +5592,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sort-package-json@npm:^3.5.1":
-  version: 3.5.1
-  resolution: "sort-package-json@npm:3.5.1"
+"sort-package-json@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "sort-package-json@npm:3.6.0"
   dependencies:
     detect-indent: "npm:^7.0.2"
     detect-newline: "npm:^4.0.1"
@@ -5605,7 +5605,7 @@ __metadata:
     tinyglobby: "npm:^0.2.15"
   bin:
     sort-package-json: cli.js
-  checksum: 10/ddb0675fdb423188543c87f02370f4adc313d51e5a6b0594989549dcf68de492efccf9b15ae96ca471e414e883f81407635602c791721d2f4841196f59ebb9d9
+  checksum: 10/1489edd177dc325c1e5fbfa55e9583dfea8caa950363b43f797d99986f00b722644275f4dfd5491265519365d6394a5fec9fe5d360ed83b74317fdc9fc071ba1
   languageName: node
   linkType: hard
 
