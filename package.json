@@ -105,7 +105,7 @@
 		"js-big-decimal": "^1.4.1",
 		"lilyweight": "^2.7.2",
 		"luxon": "^3.7.2",
-		"minecraft-data": "^3.101.0",
+		"minecraft-data": "^3.102.0",
 		"minecraft-protocol": "1.62.0",
 		"ms": "3.0.0-canary.202508261828",
 		"pg": "^8.16.3",
