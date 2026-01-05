@@ -118,7 +118,7 @@
 		"re2": "^1.23.0",
 		"sequelize": "^6.37.7",
 		"tslib": "^2.8.1",
-		"undici": "^7.16.0",
+		"undici": "^7.18.0",
 		"zlib-sync": "^0.1.10"
 	},
 	"devDependencies": {
