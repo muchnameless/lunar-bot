@@ -101,7 +101,7 @@
 		"cron": "^4.1.4",
 		"discord.js": "14.17.0-dev.1727655153-9aa3b635e",
 		"fast-xml-parser": "^5.3.3",
-		"ioredis": "^5.9.0",
+		"ioredis": "^5.9.1",
 		"js-big-decimal": "^1.4.1",
 		"lilyweight": "^2.7.2",
 		"luxon": "^3.7.2",
