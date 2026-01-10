@@ -126,7 +126,7 @@
 		"@commitlint/config-angular": "^19.8.1",
 		"@types/common-tags": "^1.8.4",
 		"@types/luxon": "^3.7.1",
-		"@types/node": "^22.19.3",
+		"@types/node": "^22.19.5",
 		"@types/pg": "^8.16.0",
 		"eslint": "^8.57.1",
 		"eslint-config-neon": "^0.1.62",
